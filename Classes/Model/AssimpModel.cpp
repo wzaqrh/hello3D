@@ -186,6 +186,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	std::vector<SimpleVertex> vertices;
 	std::vector<UINT> indices;
 	std::vector<TextureInfo> textures;
+	textures.resize(4);
 
 	if (mesh->mMaterialIndex >= 0)
 	{
@@ -246,14 +247,23 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<TextureInfo> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		std::vector<TextureInfo> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, scene);
+		if (diffuseMaps.size() > 0) 
+			textures[E_TEXTURE_DIFFUSE] = diffuseMaps[0];
+
+		std::vector<TextureInfo> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, scene);
+		if (specularMaps.size() > 0) 
+			textures[E_TEXTURE_SPECULAR] = specularMaps[0];
+
+		std::vector<TextureInfo> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, scene);
+		if (normalMaps.size() > 0) 
+			textures[E_TEXTURE_NORMAL] = normalMaps[0];
 	}
 
 	return std::make_shared<TMesh>(mesh, vertices, indices, textures, mRenderSys);
 }
 
-std::vector<TextureInfo> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene)
+std::vector<TextureInfo> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
 {
 	std::vector<TextureInfo> textures;
 	for (UINT i = 0; i < mat->GetTextureCount(type); i++)

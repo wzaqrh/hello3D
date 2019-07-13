@@ -39,7 +39,7 @@ private:
 	void LoadMaterial(const char* vsName, const char* psName);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
-	std::vector<TextureInfo> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene);
+	std::vector<TextureInfo> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 public:
 	TMaterialPtr mMaterial;
 	cbWeightedSkin mWeightedSkin;

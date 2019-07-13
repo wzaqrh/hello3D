@@ -379,6 +379,7 @@
     <ClCompile Include="Classes\Framework\TRenderSystem.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson1.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson2.cpp" />
+    <ClCompile Include="Classes\Lessons\Lesson3.cpp" />
     <ClCompile Include="Classes\Main.cpp" />
     <ClCompile Include="Classes\Model\AssimpModel.cpp" />
     <ClCompile Include="Classes\Model\TMesh.cpp" />
@@ -391,6 +392,7 @@
     <ClInclude Include="Classes\Framework\TRenderSystem.h" />
     <ClInclude Include="Classes\Lessons\Lesson1.h" />
     <ClInclude Include="Classes\Lessons\Lesson2.h" />
+    <ClInclude Include="Classes\Lessons\Lesson3.h" />
     <ClInclude Include="Classes\Model\AssimpModel.h" />
     <ClInclude Include="Classes\Model\TMesh.h" />
     <ClInclude Include="Classes\Utility.h" />

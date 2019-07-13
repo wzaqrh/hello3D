@@ -5,7 +5,7 @@ TRenderSystem* gRenderSys;
 
 TRenderSystem::TRenderSystem()
 {
-	mDefLight = std::make_shared<TLight>(0,0,1000);
+	mDefLight = std::make_shared<TLight>();
 }
 
 TRenderSystem::~TRenderSystem()
@@ -96,6 +96,7 @@ HRESULT TRenderSystem::Initialize()
 	if (CheckHR(hr))
 		return hr;
 
+
 	// Create the depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 	ZeroMemory(&descDSV, sizeof(descDSV));
@@ -105,7 +106,6 @@ HRESULT TRenderSystem::Initialize()
 	hr = mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mDepthStencilView);
 	if (CheckHR(hr))
 		return hr;
-
 	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
 
 
@@ -126,6 +126,14 @@ HRESULT TRenderSystem::Initialize()
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	mDeviceContext->RSSetViewports(1, &vp);
+
+	D3D11_RASTERIZER_DESC wfdesc;
+	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
+	wfdesc.FillMode = D3D11_FILL_SOLID;
+	wfdesc.CullMode = D3D11_CULL_BACK;
+	ID3D11RasterizerState* pRasterizerState = nullptr;
+	hr = mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState);
+	mDeviceContext->RSSetState(pRasterizerState);
 
 	mScreenWidth = width;
 	mScreenHeight = height;

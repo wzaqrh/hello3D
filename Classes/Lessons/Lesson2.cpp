@@ -2,7 +2,7 @@
 
 void TAppLesson2::OnPostInitDevice()
 {
-	mRenderSys->mDefLight->SetColor(1, 0, 0, 1);
+	mRenderSys->mDefLight->SetDiffuseColor(1, 0, 0, 1);
 	mRenderSys->mDefLight->SetPosition(0, 0, -200);
 
 	mModel = new AssimpModel(mRenderSys, "shader\\Lesson2.fx", "shader\\Lesson2.fx");
@@ -18,4 +18,4 @@ void TAppLesson2::OnRender()
 	mModel->Draw();
 }
 
-auto reg = AppRegister<TAppLesson2>("TAppLesson2: Diffuse Light");
+//auto reg = AppRegister<TAppLesson2>("TAppLesson2: Diffuse Light");

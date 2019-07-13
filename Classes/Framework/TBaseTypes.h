@@ -24,12 +24,15 @@ typedef std::shared_ptr<TCamera> TCameraPtr;
 
 struct TLight {
 	XMFLOAT4 mPosition;//world space
-	XMFLOAT4 mColor;
+	XMFLOAT4 mDiffuseColor;
+	XMFLOAT4 mSpecularColor;
+	float mSpecularPower;
 public:
 	TLight();
-	TLight(float x, float y, float z);
 	void SetPosition(float x, float y, float z);
-	void SetColor(float r, float g, float b, float a);
+	void SetDiffuseColor(float r, float g, float b, float a);
+	void SetSpecularColor(float r, float g, float b, float a);
+	void SetSpecularPower(float power);
 };
 typedef std::shared_ptr<TLight> TLightPtr;
 

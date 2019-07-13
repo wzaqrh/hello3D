@@ -2,7 +2,7 @@
 #include "TApp.h"
 #include "AssimpModel.h"
 
-class TAppLesson2 : public TApp
+class Lesson3 : public TApp
 {
 protected:
 	virtual void OnRender() override;

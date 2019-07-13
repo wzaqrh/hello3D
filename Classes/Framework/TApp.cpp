@@ -62,9 +62,9 @@ XMMATRIX TApp::GetWorldTransform()
 	float angy = 3.14 * -mx / mRenderSys->mScreenWidth, angx = 3.14 * -my / mRenderSys->mScreenHeight;
 	XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
-	return euler
-		* XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z)
-		* XMMatrixScaling(mScale, mScale, mScale);
+	return XMMatrixScaling(mScale, mScale, mScale)
+		* euler
+		* XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
 }
 
 std::map<std::string, std::function<TApp*()>> gRegAppClasses;

@@ -14,16 +14,12 @@ TCamera::TCamera(int width, int height)
 }
 
 /********** TLight **********/
-TLight::TLight(float x, float y, float z)
-{
-	SetPosition(x, y, z);
-	SetColor(1, 1, 1, 1);
-}
-
 TLight::TLight()
 {
 	SetPosition(0, 0, 0);
-	SetColor(1,1,1,1);
+	SetDiffuseColor(1,1,1,1);
+	SetSpecularColor(1, 1, 1, 1);
+	mSpecularPower = 32;
 }
 
 void TLight::SetPosition(float x, float y, float z)
@@ -31,11 +27,22 @@ void TLight::SetPosition(float x, float y, float z)
 	mPosition = XMFLOAT4(x, y, z, 1);
 }
 
-void TLight::SetColor(float r, float g, float b, float a)
+void TLight::SetDiffuseColor(float r, float g, float b, float a)
 {
-	mColor = XMFLOAT4(r, g, b, a);
+	mDiffuseColor = XMFLOAT4(r, g, b, a);
 }
 
+void TLight::SetSpecularColor(float r, float g, float b, float a)
+{
+	mSpecularColor = XMFLOAT4(r, g, b, a);
+}
+
+void TLight::SetSpecularPower(float power)
+{
+	mSpecularPower = power;
+}
+
+/********** cbGlobalParam **********/
 cbGlobalParam::cbGlobalParam()
 {
 	auto Ident = XMMatrixIdentity();

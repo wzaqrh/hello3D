@@ -11,6 +11,12 @@ struct SimpleVertex
 	unsigned int  BlendIndices[4];
 };
 
+enum enTextureType {
+	E_TEXTURE_DIFFUSE,
+	E_TEXTURE_SPECULAR,
+	E_TEXTURE_NORMAL,
+	E_TEXTURE_BUMP
+};
 struct TextureInfo {
 	std::string path;
 	ID3D11ShaderResourceView *texture;
