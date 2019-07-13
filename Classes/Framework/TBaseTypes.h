@@ -16,25 +16,29 @@ public:
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 
-struct TPointLight {
+struct TDirectLight {
 	XMFLOAT4 mPosition;//world space
 	XMFLOAT4 mDiffuseColor;
 	XMFLOAT4 mSpecularColorPower;
 public:
-	TPointLight();
-	void SetPosition(float x, float y, float z);
+	TDirectLight();
+	void SetDirection(float x, float y, float z);
 	void SetDiffuseColor(float r, float g, float b, float a);
 	void SetSpecularColor(float r, float g, float b, float a);
 	void SetSpecularPower(float power);
 };
+typedef std::shared_ptr<TDirectLight> TDirectLightPtr;
+
+struct TPointLight : public TDirectLight {
+	XMFLOAT4 mAttenuation;
+public:
+	TPointLight();
+	void SetPosition(float x, float y, float z);
+	void SetAttenuation(float a, float b, float c);
+};
 typedef std::shared_ptr<TPointLight> TPointLightPtr;
 
-struct TDirectLight : public TPointLight {
-public:
-	void SetDirection(float x, float y, float z);
-};
-typedef std::shared_ptr<TDirectLight> TDirectLightPtr;
-static_assert(sizeof(TDirectLight) == sizeof(TPointLight), "");
+
 
 struct TMaterial {
 	ID3D11VertexShader* mVertexShader = nullptr;

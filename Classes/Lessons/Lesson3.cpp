@@ -6,7 +6,8 @@ void Lesson3::OnPostInitDevice()
 	light1->SetSpecularPower(60);
 	light1->SetSpecularColor(1, 1, 1, 1);
 	light1->SetDiffuseColor(1, 1, 1, 0);
-	light1->SetPosition(200, 0, -200);
+	light1->SetPosition(20, 0, -20);
+	light1->SetAttenuation(1.0, 0.1, 0);
 
 	/*auto light2 = mRenderSys->AddDirectLight();
 	light2->SetDiffuseColor(0, 0, 0, 0);

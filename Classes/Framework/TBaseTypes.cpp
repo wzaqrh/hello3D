@@ -18,13 +18,40 @@ TCamera::TCamera(int width, int height)
 	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
 }
 
+/********** TDirectLight **********/
+TDirectLight::TDirectLight()
+{
+	SetDirection(0, 0, 1);
+	SetDiffuseColor(1, 1, 1, 1);
+	SetSpecularColor(1, 1, 1, 1);
+	SetSpecularPower(32);
+}
+
+void TDirectLight::SetDirection(float x, float y, float z)
+{
+	mPosition = XMFLOAT4(x, y, z, 0);
+}
+
+void TDirectLight::SetDiffuseColor(float r, float g, float b, float a)
+{
+	mDiffuseColor = XMFLOAT4(r, g, b, a);
+}
+
+void TDirectLight::SetSpecularColor(float r, float g, float b, float a)
+{
+	mSpecularColorPower = XMFLOAT4(r, g, b, mSpecularColorPower.w);
+}
+
+void TDirectLight::SetSpecularPower(float power)
+{
+	mSpecularColorPower.w = power;
+}
+
 /********** TLight **********/
 TPointLight::TPointLight()
 {
 	SetPosition(0, 0, 0);
-	SetDiffuseColor(1,1,1,1);
-	SetSpecularColor(1, 1, 1, 1);
-	SetSpecularPower(32);
+	SetAttenuation(1.0, 0.01, 0.0);
 }
 
 void TPointLight::SetPosition(float x, float y, float z)
@@ -32,25 +59,9 @@ void TPointLight::SetPosition(float x, float y, float z)
 	mPosition = XMFLOAT4(x, y, z, 1);
 }
 
-void TPointLight::SetDiffuseColor(float r, float g, float b, float a)
+void TPointLight::SetAttenuation(float a, float b, float c)
 {
-	mDiffuseColor = XMFLOAT4(r, g, b, a);
-}
-
-void TPointLight::SetSpecularColor(float r, float g, float b, float a)
-{
-	mSpecularColorPower = XMFLOAT4(r, g, b, mSpecularColorPower.w);
-}
-
-void TPointLight::SetSpecularPower(float power)
-{
-	mSpecularColorPower.w = power;
-}
-
-/********** TDirectLight **********/
-void TDirectLight::SetDirection(float x, float y, float z)
-{
-	mPosition = XMFLOAT4(x, y, z, 0);
+	mAttenuation = XMFLOAT4(a, b, c, 0);
 }
 
 /********** cbGlobalParam **********/

@@ -4,11 +4,17 @@ Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
 
-struct LIGHT_POINT
+struct LIGHT_DIRECT
 {
 	float4 LightPos;//world space
 	float4 DiffuseColor;
 	float4 SpecularColorPower;
+};
+
+struct LIGHT_POINT
+{
+	LIGHT_DIRECT L;
+	float4 Attenuation;
 };
 
 static const int MAX_LIGHTS = 1;
@@ -18,8 +24,8 @@ cbuffer cbGlobalParam : register(b0)
 	matrix View;
 	matrix Projection;
 	matrix ViewInv;
-	LIGHT_POINT PointLights[MAX_LIGHTS];// = {{0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0}, {1.0,1.0,1.0,1.0}, 32.0};
-	LIGHT_POINT DirectLights[MAX_LIGHTS];
+	LIGHT_POINT  PointLights[MAX_LIGHTS];// = {{0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0}, {1.0,1.0,1.0,1.0}, 32.0};
+	LIGHT_DIRECT DirectLights[MAX_LIGHTS];
 	int4 LightNum;
 }
 
@@ -80,7 +86,7 @@ PS_INPUT VS(VS_INPUT i)
 		output.DirectLights[j] = normalize(mul(View, float4(-DirectLights[j].LightPos.xyz,0.0)));	
 	}
 	for (int j = 0; j < LightNum.y; ++j) {
-		output.PointLights[j] = normalize(mul(View,float4(PointLights[j].LightPos.xyz,1.0)).xyz - output.Pos.xyz);	
+		output.PointLights[j] = mul(View,float4(PointLights[j].L.LightPos.xyz,1.0)).xyz - output.Pos.xyz;
 	}
 	
 	output.Eye = -output.Pos;
@@ -108,15 +114,23 @@ float3 GetSpecularBySampler(float3 normal, float3 light, float3 eye, float4 Spec
 	return GetSpecularByDef(normal, light, eye, SpecColorPower) * specularMat;
 }
 
-float3 CalPointLight(float3 normal, float3 light, float3 eye, float2 texcoord, float4 DiffuseColor, float4 SpecularColorPower) {
+float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 light, float3 eye, float2 texcoord) {
 	float3 color = 0.0;
 	if (dot(normal, light) > 0.0) 
 	{
-		float3 diffuse = GetDiffuseBySampler(normal, light, DiffuseColor.xyz, texcoord);
-		float3 specular = GetSpecularBySampler(normal, light, eye, SpecularColorPower, texcoord);
+		float3 diffuse = GetDiffuseBySampler(normal, light, directLight.DiffuseColor.xyz, texcoord);
+		float3 specular = GetSpecularBySampler(normal, light, eye, directLight.SpecularColorPower, texcoord);
 		color = diffuse + specular;	
 	}
 	return color;
+}
+
+float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance) {
+	float3 color = CalDirectLight(pointLight.L, normal, light, eye, texcoord);
+	float Attenuation = pointLight.Attenuation.x 
+	+ pointLight.Attenuation.y * Distance 
+	+ pointLight.Attenuation.z * Distance * Distance;
+	return color / Attenuation;
 }
 
 float4 PS(PS_INPUT input) : SV_Target
@@ -127,11 +141,12 @@ float4 PS(PS_INPUT input) : SV_Target
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
 	for (int i = 0; i < LightNum.x; ++i) {
 		float3 light = normalize(input.DirectLights[i]);
-		finalColor.xyz += CalPointLight(normal, light, eye, input.Tex, DirectLights[i].DiffuseColor, DirectLights[i].SpecularColorPower);
+		finalColor.xyz += CalDirectLight(DirectLights[i], normal, light, eye, input.Tex);
 	}
 	for (int i = 0; i < LightNum.y; ++i) {
+		float Distance = length(input.PointLights[i]);
 		float3 light = normalize(input.PointLights[i]);
-		finalColor.xyz += CalPointLight(normal, light, eye, input.Tex, PointLights[i].DiffuseColor, PointLights[i].SpecularColorPower);
+		finalColor.xyz += CalPointLight(PointLights[i], normal, light, eye, input.Tex, Distance);
 	}
 	
 	//float dir = -eye.z;
