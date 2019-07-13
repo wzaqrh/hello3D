@@ -38,7 +38,15 @@ public:
 };
 typedef std::shared_ptr<TPointLight> TPointLightPtr;
 
-
+struct TSpotLight : public TPointLight {
+	XMFLOAT4 mDirCutOff;
+public:
+	TSpotLight();
+	void SetDirection(float x, float y, float z);
+	void SetCutOff(float cutoff);
+	void SetAngle(float radian);
+};
+typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
 struct TMaterial {
 	ID3D11VertexShader* mVertexShader = nullptr;
@@ -60,9 +68,10 @@ struct cbGlobalParam
 	XMMATRIX mProjection;
 	XMMATRIX mViewInv;
 
-	TPointLight mPointLights[MAX_LIGHTS];
-	TDirectLight mDirectLights[MAX_LIGHTS];
 	XMINT4 mLightNum;//directional,point,spot
+	TDirectLight mDirectLights[MAX_LIGHTS];
+	TPointLight mPointLights[MAX_LIGHTS];
+	TSpotLight mSpotLights[MAX_LIGHTS];
 public:
 	cbGlobalParam();
 };

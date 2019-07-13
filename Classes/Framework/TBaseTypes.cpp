@@ -64,6 +64,28 @@ void TPointLight::SetAttenuation(float a, float b, float c)
 	mAttenuation = XMFLOAT4(a, b, c, 0);
 }
 
+/********** TSpotLight **********/
+TSpotLight::TSpotLight()
+{
+	SetDirection(0, 0, 1);
+	SetAngle(3.14 * 30 / 180);
+}
+
+void TSpotLight::SetDirection(float x, float y, float z)
+{
+	mDirCutOff = XMFLOAT4(x, y, z, mDirCutOff.w);
+}
+
+void TSpotLight::SetCutOff(float cutoff)
+{
+	mDirCutOff.w = cutoff;
+}
+
+void TSpotLight::SetAngle(float radian)
+{
+	SetCutOff(cos(radian));
+}
+
 /********** cbGlobalParam **********/
 cbGlobalParam::cbGlobalParam()
 {

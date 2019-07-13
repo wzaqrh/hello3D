@@ -164,6 +164,10 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	globalParam.mLightNum.y = min(MAX_LIGHTS, mPointLights.size());
 	for (int i = 0; i < globalParam.mLightNum.y; ++i)
 		globalParam.mPointLights[i] = *mPointLights[i];
+
+	globalParam.mLightNum.z = min(MAX_LIGHTS, mSpotLights.size());
+	for (int i = 0; i < globalParam.mLightNum.z; ++i)
+		globalParam.mSpotLights[i] = *mSpotLights[i];
 	
 	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
 
@@ -177,6 +181,13 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	mDeviceContext->IASetPrimitiveTopology(material->mTopoLogy);
 
 	if (material->mSampler) mDeviceContext->PSSetSamplers(0, 1, &material->mSampler);
+}
+
+TSpotLightPtr TRenderSystem::AddSpotLight()
+{
+	TSpotLightPtr light = std::make_shared<TSpotLight>();
+	mSpotLights.push_back(light);
+	return light;
 }
 
 TPointLightPtr TRenderSystem::AddPointLight()

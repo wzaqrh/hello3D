@@ -17,6 +17,13 @@ struct LIGHT_POINT
 	float4 Attenuation;
 };
 
+struct LIGHT_SPOT
+{
+	LIGHT_POINT Base;
+	float3 Direction;
+    float Cutoff;
+};
+
 static const int MAX_LIGHTS = 1;
 cbuffer cbGlobalParam : register(b0)
 {
@@ -27,7 +34,8 @@ cbuffer cbGlobalParam : register(b0)
 	
 	int4 LightNum;
 	LIGHT_DIRECT DirectLights[MAX_LIGHTS];
-	LIGHT_POINT  PointLights[MAX_LIGHTS];
+	LIGHT_POINT PointLights[MAX_LIGHTS];
+	LIGHT_SPOT SpotLights[MAX_LIGHTS];
 }
 
 static const int MAX_MATRICES = 256;
@@ -52,8 +60,7 @@ struct PS_INPUT
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL;//eye space
 	float3 Eye : POSITION0;//eye space
-	float3 PointLights[MAX_LIGHTS] : POSITION1;//eye space
-	float3 DirectLights[MAX_LIGHTS] : POSITION5;//eye space
+	float3 SurfacePos : POSITION1;//eye space
 };
 
 float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
@@ -83,12 +90,7 @@ PS_INPUT VS(VS_INPUT i)
 	
 	output.Normal = normalize(mul(MWV, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0))).xyz);
 	output.Pos = mul(MWV, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0)));	
-	for (int j = 0; j < LightNum.x; ++j) {
-		output.DirectLights[j] = normalize(mul(View, float4(-DirectLights[j].LightPos.xyz,0.0)));	
-	}
-	for (int j = 0; j < LightNum.y; ++j) {
-		output.PointLights[j] = mul(View,float4(PointLights[j].L.LightPos.xyz,1.0)).xyz - output.Pos.xyz;
-	}
+	output.SurfacePos = output.Pos.xyz / output.Pos.w;
 	
 	output.Eye = -output.Pos;
 	
@@ -134,6 +136,16 @@ float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 light, float3
 	return color / Attenuation;
 }
 
+float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance, float3 spotDirection) {
+	float3 color = 0.0;
+	float spotFactor = dot(light, spotDirection);
+	if (spotFactor > spotLight.Cutoff) {
+		color = CalPointLight(spotLight.Base, normal, light, eye, texcoord, Distance);
+        color = color * ((spotFactor - spotLight.Cutoff) / (1.0 - spotLight.Cutoff));
+	}
+	return color;
+}
+
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float3 normal = normalize(input.Normal);
@@ -141,15 +153,23 @@ float4 PS(PS_INPUT input) : SV_Target
 	
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
 	for (int i = 0; i < LightNum.x; ++i) {
-		float3 light = normalize(input.DirectLights[i]);
+		float3 light = normalize(mul(View, float4(-DirectLights[i].LightPos.xyz,0.0)).xyz);
 		finalColor.xyz += CalDirectLight(DirectLights[i], normal, light, eye, input.Tex);
 	}
 	for (int i = 0; i < LightNum.y; ++i) {
-		float Distance = length(input.PointLights[i]);
-		float3 light = normalize(input.PointLights[i]);
+		float3 light = mul(View, float4(PointLights[i].L.LightPos.xyz,1.0)).xyz - input.SurfacePos.xyz;
+		float Distance = length(light);
+		light = normalize(light);
 		finalColor.xyz += CalPointLight(PointLights[i], normal, light, eye, input.Tex, Distance);
 	}
-	
+	for (int i = 0; i < LightNum.z; ++i) {
+		float3 light = mul(View, float4(SpotLights[i].Base.L.LightPos.xyz,1.0)).xyz - input.SurfacePos.xyz;
+		float Distance = length(light);
+		light = normalize(light);
+		
+		float3 spotDirection = normalize(mul(View, float4(-SpotLights[i].Direction,0.0)).xyz);
+		finalColor.xyz += CalSpotLight(SpotLights[i], normal, light, eye, input.Tex, Distance, spotDirection);
+	}
 	//float dir = -eye.z;
 	//float dir = -normal.z;
 	//float dir = -input.PointLights[0].z;

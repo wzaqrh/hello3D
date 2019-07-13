@@ -23,6 +23,7 @@ public:
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
 	std::vector<TDirectLightPtr> mDirectLights;
+	std::vector<TSpotLightPtr> mSpotLights;
 public:
 	TRenderSystem();
 	~TRenderSystem();
@@ -32,6 +33,7 @@ public:
 public:
 	void ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform);
 public:
+	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();
 	TDirectLightPtr AddDirectLight();
 public:

@@ -4,11 +4,19 @@ Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
 
+struct LIGHT_DIRECT
+{
+	float4 LightPos;//world space
+	float4 DiffuseColor;
+	float4 SpecularColorPower;
+};
+
 struct LIGHT_POINT
 {
 	float4 LightPos;//world space
 	float4 DiffuseColor;
 	float4 SpecularColorPower;
+	float4 Attenuation;
 };
 
 static const int MAX_LIGHTS = 1;
@@ -18,9 +26,9 @@ cbuffer cbGlobalParam : register(b0)
 	matrix View;
 	matrix Projection;
 	matrix ViewInv;
-	LIGHT_POINT PointLights[MAX_LIGHTS];// = {{0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0}, {1.0,1.0,1.0,1.0}, 32.0};
-	LIGHT_POINT DirectLights[MAX_LIGHTS];
 	int4 LightNum;
+	LIGHT_DIRECT DirectLights[MAX_LIGHTS];
+	LIGHT_POINT PointLights[MAX_LIGHTS];
 }
 
 static const int MAX_MATRICES = 256;
