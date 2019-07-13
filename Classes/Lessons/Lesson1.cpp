@@ -10,12 +10,9 @@
 #include "AssimpModel.h"
 #include "TRenderSystem.h"
 
-ConstantBuffer::ConstantBuffer()
+cbWeightedSkin::cbWeightedSkin()
 {
 	auto Ident = XMMatrixIdentity();
-	mWorld = Ident;
-	mView = Ident;
-	mProjection = Ident;
 	mModel = Ident;
 	for (int i = 0; i < MAX_MATRICES; ++i)
 		Models[i] = Ident;
@@ -31,8 +28,8 @@ void TAppLesson1::OnPostInitDevice()
 		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 8 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 12 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mMaterial = mRenderSys->CreateMaterial("shader\\Model.fx", "shader\\Model.fx", layout, ARRAYSIZE(layout));
-	mMaterial->mConstantBuffer = mRenderSys->CreateConstBuffer(sizeof(ConstantBuffer));
+	mMaterial = mRenderSys->CreateMaterial("shader\\Lesson1.fx", "shader\\Lesson1.fx", layout, ARRAYSIZE(layout));
+	mMaterial->mConstantBuffers.push_back(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
 
 	mModel = new AssimpModel(mRenderSys);
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx"));
@@ -56,8 +53,8 @@ void TAppLesson1::DrawNode(aiNode* node)
 {
 	auto& meshes = mModel->mNodeInfos[node];
 	if (meshes.size() > 0) {
-		mConstBuf.mModel = ToXM(mModel->mNodeInfos[node].mGlobalTransform);
-		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffer, 0, NULL, &mConstBuf, 0, 0);
+		mWeightedSkin.mModel = ToXM(mModel->mNodeInfos[node].mGlobalTransform);
+		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &mWeightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
@@ -66,11 +63,11 @@ void TAppLesson1::DrawNode(aiNode* node)
 				const auto& boneMats = mModel->GetBoneMatrices(node, i);
 				size_t boneSize = boneMats.size(); assert(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
-					mConstBuf.Models[j] = ToXM(boneMats[j]);
-				mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffer, 0, NULL, &mConstBuf, 0, 0);
+					mWeightedSkin.Models[j] = ToXM(boneMats[j]);
+				mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &mWeightedSkin, 0, 0);
 			}
 			else {
-				mConstBuf.Models[0] = XMMatrixIdentity();
+				mWeightedSkin.Models[0] = XMMatrixIdentity();
 			}
 			DrawMesh(*mesh);
 		}
@@ -83,24 +80,7 @@ void TAppLesson1::DrawNode(aiNode* node)
 void TAppLesson1::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
-
-	{
-		mConstBuf.mWorld = GetWorldTransform();
-		mConstBuf.mView = mRenderSys->mDefCamera->mView;
-		mConstBuf.mProjection = mRenderSys->mDefCamera->mProjection;
-
-		mRenderSys->mDeviceContext->VSSetShader(mMaterial->mVertexShader, NULL, 0);
-		mRenderSys->mDeviceContext->VSSetConstantBuffers(0, 1, &mMaterial->mConstantBuffer);
-
-		mRenderSys->mDeviceContext->PSSetShader(mMaterial->mPixelShader, NULL, 0);
-		mRenderSys->mDeviceContext->PSSetConstantBuffers(0, 1, &mMaterial->mConstantBuffer);
-		mRenderSys->mDeviceContext->IASetInputLayout(mMaterial->mInputLayout);
-
-		mRenderSys->mDeviceContext->IASetPrimitiveTopology(mMaterial->mTopoLogy);
-
-		if (mMaterial->mSampler) mRenderSys->mDeviceContext->PSSetSamplers(0, 1, &mMaterial->mSampler);
-	}
-
+	mRenderSys->ApplyMaterial(mMaterial, GetWorldTransform());
 	DrawNode(mModel->mRootNode);
 }
 

@@ -26,6 +26,8 @@ public:
 
 	HRESULT Initialize();
 	void CleanUp();
+
+	void ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform);
 public:
 	TMaterialPtr CreateMaterial(const char* vsPath, 
 		const char* psPath, 

@@ -154,6 +154,27 @@ void TRenderSystem::CleanUp()
 	//if (mPixelShader) mPixelShader->Release();
 }
 
+void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform)
+{
+	cbGlobalParam globalParam;
+	globalParam.mWorld = worldTransform;
+	globalParam.mView = mDefCamera->mView;
+	globalParam.mProjection = mDefCamera->mProjection;
+	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
+
+
+	mDeviceContext->VSSetShader(material->mVertexShader, NULL, 0);
+	mDeviceContext->VSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
+
+	mDeviceContext->PSSetShader(material->mPixelShader, NULL, 0);
+	mDeviceContext->PSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
+	mDeviceContext->IASetInputLayout(material->mInputLayout);
+
+	mDeviceContext->IASetPrimitiveTopology(material->mTopoLogy);
+
+	if (material->mSampler) mDeviceContext->PSSetSamplers(0, 1, &material->mSampler);
+}
+
 TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	TMaterialPtr material = std::make_shared<TMaterial>();
@@ -164,6 +185,8 @@ TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPat
 	
 	material->mTopoLogy = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	material->mSampler = CreateSampler();
+
+	material->mConstantBuffers.push_back(CreateConstBuffer(sizeof(cbGlobalParam)));
 	return material;
 }
 

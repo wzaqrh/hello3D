@@ -11,3 +11,11 @@ TCamera::TCamera(int width, int height)
 	// Initialize the projection matrix
 	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
 }
+
+cbGlobalParam::cbGlobalParam()
+{
+	auto Ident = XMMatrixIdentity();
+	mWorld = Ident;
+	mView = Ident;
+	mProjection = Ident;
+}

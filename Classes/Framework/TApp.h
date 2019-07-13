@@ -29,6 +29,7 @@ protected:
 	SDTimer mTimer;
 	TMaterialPtr mMaterial;
 	TRenderSystem* mRenderSys;
+	cbGlobalParam mGlobalParam;
 public:
 	std::string mName;
 };

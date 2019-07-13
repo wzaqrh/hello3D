@@ -33,6 +33,15 @@ struct TMaterial {
 	//std::vector<ID3D11ShaderResourceView*> mTextures;
 	//ID3D11Buffer* mVertexBuffer = nullptr;
 	//ID3D11Buffer* mIndexBuffer = nullptr;
-	ID3D11Buffer* mConstantBuffer = nullptr;
+	std::vector<ID3D11Buffer*> mConstantBuffers;
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
+
+struct cbGlobalParam
+{
+	XMMATRIX mWorld;
+	XMMATRIX mView;
+	XMMATRIX mProjection;
+public:
+	cbGlobalParam();
+};

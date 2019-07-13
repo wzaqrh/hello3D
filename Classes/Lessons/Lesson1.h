@@ -4,15 +4,12 @@
 #include "TApp.h"
 
 const int MAX_MATRICES = 256;
-struct ConstantBuffer
+struct cbWeightedSkin
 {
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
 	XMMATRIX mModel;
 	XMMATRIX Models[MAX_MATRICES];
 public:
-	ConstantBuffer();
+	cbWeightedSkin();
 };
 
 class AssimpModel;
@@ -29,5 +26,5 @@ private:
 private:
 	int mDrawFlag = 0;
 	AssimpModel* mModel = nullptr;
-	ConstantBuffer mConstBuf;
+	cbWeightedSkin mWeightedSkin;
 };
