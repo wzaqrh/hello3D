@@ -1,14 +1,18 @@
 Texture2D txDiffuse : register( t0 );
 SamplerState samLinear : register( s0 );
 
-static const int MAX_MATRICES = 256;
-cbuffer ConstantBuffer : register( b0 )
+cbuffer cbGlobalParam : register(b0)
 {
 	matrix World;
 	matrix View;
 	matrix Projection;
+}
+
+static const int MAX_MATRICES = 256;
+cbuffer cbWeightedSkin : register(b1)
+{
 	matrix Model;
-	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;
+	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	
 }
 
 struct VS_INPUT
@@ -50,8 +54,8 @@ PS_INPUT VS( VS_INPUT i )
     }
 	output.Pos = Pos;
 	
-	output.Pos = iPos;
-	//output.Pos = mul(output.Pos, Model);
+	//output.Pos = iPos;
+	output.Pos = mul(output.Pos, Model);
 	output.Pos = mul(World, output.Pos);
     output.Pos = mul(View, output.Pos);
     output.Pos = mul(Projection, output.Pos);
