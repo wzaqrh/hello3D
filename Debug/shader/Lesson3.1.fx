@@ -1,4 +1,4 @@
-/********** Multi Light (world space) **********/
+/********** Multi Light (eye space) **********/
 SamplerState samLinear : register(s0);
 Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
@@ -43,10 +43,10 @@ struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
-	float3 Normal : NORMAL;//world space
-	float3 Eye : POSITION0;//world space
-	float3 PointLights[MAX_LIGHTS] : POSITION1;//world space
-	float3 DirectLights[MAX_LIGHTS] : POSITION5;//world space
+	float3 Normal : NORMAL;//eye space
+	float3 Eye : POSITION0;//eye space
+	float3 PointLights[MAX_LIGHTS] : POSITION1;//eye space
+	float3 DirectLights[MAX_LIGHTS] : POSITION5;//eye space
 };
 
 float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
@@ -74,17 +74,16 @@ PS_INPUT VS(VS_INPUT i)
 	matrix MW = mul(World, transpose(Model));
 	matrix MWV = mul(View, MW);
 	
-	output.Normal = normalize(mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0))).xyz);
-	output.Pos = mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0)));	
+	output.Normal = normalize(mul(MWV, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0))).xyz);
+	output.Pos = mul(MWV, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0)));	
 	for (int j = 0; j < LightNum.x; ++j) {
-		output.DirectLights[j] = normalize(-DirectLights[j].LightPos.xyz);	
+		output.DirectLights[j] = normalize(mul(View, float4(-DirectLights[j].LightPos.xyz,0.0)));	
 	}
 	for (int j = 0; j < LightNum.y; ++j) {
-		output.PointLights[j] = normalize(PointLights[j].LightPos.xyz - output.Pos.xyz);
+		output.PointLights[j] = normalize(mul(View,float4(PointLights[j].LightPos.xyz,1.0)).xyz - output.Pos.xyz);	
 	}
 	
-	output.Pos = mul(View, output.Pos);
-	output.Eye = mul(ViewInv, float4(0.0,0.0,0.0,1.0)) - output.Pos;
+	output.Eye = -output.Pos;
 	
     output.Pos = mul(Projection, output.Pos);
     
