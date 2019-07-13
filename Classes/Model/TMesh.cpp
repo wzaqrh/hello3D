@@ -59,6 +59,18 @@ void TMesh::Close()
 	mIndexBuffer->Release();
 }
 
+void TMesh::Draw(TRenderSystem* renderSys)
+{
+	UINT stride = sizeof(SimpleVertex);
+	UINT offset = 0;
+	renderSys->mDeviceContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
+	renderSys->mDeviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	if (textures.size() > 0)
+		renderSys->mDeviceContext->PSSetShaderResources(0, 1, &textures[0].texture);
+
+	renderSys->mDeviceContext->DrawIndexed(indices.size(), 0, 0);
+}
+
 TextureInfo::TextureInfo(std::string __path, ID3D11ShaderResourceView* __texture)
 {
 	path = __path;

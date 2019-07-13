@@ -1,27 +1,13 @@
 #pragma once
-#include <assimp/cimport.h>
-#include <assimp/Importer.hpp>
-#include <assimp/ai_assert.h>
-#include <assimp/cfileio.h>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
-#include <assimp/mesh.h>
-#include <assimp/IOSystem.hpp>
-#include <assimp/IOStream.hpp>
-#include <assimp/LogStream.hpp>
-#include <assimp/DefaultLogger.hpp>
-
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include <map>
-#include <queue>
-#include <assert.h>
-
+#include "std.h"
 #include "TMesh.h"
 
-XMMATRIX ToXM(const aiMatrix4x4& m);
-aiMatrix4x4 FromXM(const XMMATRIX& m);
+const int MAX_MATRICES = 256;
+struct cbWeightedSkin
+{
+	XMMATRIX mModel;
+	XMMATRIX Models[MAX_MATRICES];
+};
 
 struct AiNodeInfo {
 	aiMatrix4x4 mLocalTransform;
@@ -39,19 +25,25 @@ class TRenderSystem;
 class AssimpModel
 {
 public:
-	AssimpModel(TRenderSystem* RenderSys);
+	AssimpModel(TRenderSystem* RenderSys, const char* vsName, const char* psName);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
 	void Update(float dt);
 	void PlayAnim(int Index);
+	void Draw();
+
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 private:
+	void DoDraw(aiNode* node);
+	void LoadMaterial(const char* vsName, const char* psName);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
-	std::vector<TextureInfo> loadMaterialTextures(aiMaterial* mat, 
-		aiTextureType type, std::string typeName, const aiScene* scene);
+	std::vector<TextureInfo> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene);
 public:
+	TMaterialPtr mMaterial;
+	cbWeightedSkin mWeightedSkin;
+
 	TMeshSharedPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
 	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
@@ -66,3 +58,12 @@ private:
 	TRenderSystem* mRenderSys;
 };
 
+struct Evaluator
+{
+public:
+	std::vector<aiMatrix4x4> mTransforms;
+	const aiAnimation* mAnim;
+public:
+	Evaluator(const aiAnimation* Anim) :mAnim(Anim) {}
+	void Eval(float pTime);
+};

@@ -192,3 +192,40 @@ double SDTimer::Update()
 	mLastTime = time;
 	return mDeltaTime;
 }
+
+void OutPutMatrix(FILE* fd, const aiMatrix4x4& m) {
+	if (fd == nullptr) return;
+
+	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.a1, m.a2, m.a3, m.a4);
+	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.b1, m.b2, m.b3, m.b4);
+	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.c1, m.c2, m.c3, m.c4);
+	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.d1, m.d2, m.d3, m.d4);
+
+	fprintf(fd, "\n\n");
+	fflush(fd);
+}
+
+void OutPutMatrix(FILE* fd, const XMMATRIX& m) {
+	if (fd == nullptr) return;
+
+	for (int i = 0; i < 4; ++i)
+		fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.m[i][0], m.m[i][1], m.m[i][2], m.m[i][3]);
+	fprintf(fd, "\n\n");
+	fflush(fd);
+}
+
+XMMATRIX ToXM(const aiMatrix4x4& m) {
+	XMMATRIX r;
+	static_assert(sizeof(r) == sizeof(m), "");
+	aiMatrix4x4 mm = m;
+	memcpy(&r, &mm, sizeof(mm));
+	return r;
+}
+
+aiMatrix4x4 FromXM(const XMMATRIX& m) {
+	aiMatrix4x4 r;
+	static_assert(sizeof(r) == sizeof(m), "");
+	memcpy(&r, &m, sizeof(m));
+	r.Transpose();
+	return r;
+}

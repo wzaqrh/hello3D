@@ -5,9 +5,12 @@
 #include <d3dcompiler.h>
 #include <xnamath.h>
 #include <dinput.h>
-#include "Utility.h"
 #include <functional>
+#include "Utility.h"
+#include "TBaseTypes.h"
 
+class AssimpModel;
+struct aiNode;
 class TApp
 {
 public:
@@ -20,16 +23,17 @@ public:
 	void Render();
 	std::string GetName();
 protected:
-	virtual void OnPreInitDevice() = 0;
-	virtual void OnPostInitDevice() = 0;
+	virtual void OnPreInitDevice() {};
+	virtual void OnPostInitDevice() {};
 	virtual void OnRender() = 0;
 protected:
 	XMMATRIX GetWorldTransform();
 protected:
 	SDTimer mTimer;
-	TMaterialPtr mMaterial;
 	TRenderSystem* mRenderSys;
-	cbGlobalParam mGlobalParam;
+	//TMaterialPtr mMaterial;
+	float mScale;
+	XMFLOAT3 mPosition;
 public:
 	std::string mName;
 };

@@ -339,11 +339,16 @@ ID3D11Buffer* TRenderSystem::CreateConstBuffer(int bufferSize)
 
 ID3D11ShaderResourceView* TRenderSystem::CreateTexture(const char* pSrcFile)
 {
-	HRESULT hr = S_OK;
 	ID3D11ShaderResourceView* pTextureRV = nullptr;
-	hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, (GetModelPath() + pSrcFile).c_str(), NULL, NULL, &pTextureRV, NULL);
-	if (CheckHR(hr))
-		return nullptr;
+	WIN32_FIND_DATAA wfd;
+	HANDLE hFind = FindFirstFileA(pSrcFile, &wfd);
+	if (INVALID_HANDLE_VALUE != hFind)
+	{
+		HRESULT hr = S_OK;
+		hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, (GetModelPath() + pSrcFile).c_str(), NULL, NULL, &pTextureRV, NULL);
+		if (CheckHR(hr))
+			return nullptr;
+	}
 	return pTextureRV;
 }
 

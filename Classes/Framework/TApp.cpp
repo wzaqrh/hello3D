@@ -5,6 +5,9 @@
 TApp::TApp()
 {
 	mRenderSys = new TRenderSystem;
+	
+	mScale = 1;
+	mPosition = XMFLOAT3(0, 0, 0);
 }
 
 TApp::~TApp()
@@ -54,18 +57,14 @@ std::string TApp::GetName()
 
 XMMATRIX TApp::GetWorldTransform()
 {
-	float rY = (90) / 180.0 * 3.14;
-	XMFLOAT3 t = XMFLOAT3(0, 0, 0);
-	float scale = 1.0;
-
 	int mx, my;
 	InputGetMouseLocation(&mx, &my);
 	float angy = 3.14 * -mx / mRenderSys->mScreenWidth, angx = 3.14 * -my / mRenderSys->mScreenHeight;
-
 	XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
+
 	return euler
-		* XMMatrixTranslation(t.x, t.y, t.z)
-		* XMMatrixScaling(scale, scale, scale);
+		* XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z)
+		* XMMatrixScaling(mScale, mScale, mScale);
 }
 
 std::map<std::string, std::function<TApp*()>> gRegAppClasses;

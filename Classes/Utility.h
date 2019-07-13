@@ -23,3 +23,9 @@ public:
 public:
 	double Update();
 };
+
+aiMatrix4x4 FromXM(const XMMATRIX& m);
+XMMATRIX ToXM(const aiMatrix4x4& m);
+
+void OutPutMatrix(FILE* fd, const aiMatrix4x4& m);
+void OutPutMatrix(FILE* fd, const XMMATRIX& m);
