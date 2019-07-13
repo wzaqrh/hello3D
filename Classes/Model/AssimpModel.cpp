@@ -198,15 +198,17 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 		SimpleVertex vertex;
 		memset(&vertex, 0, sizeof(vertex));
 
-		vertex.Pos.x = mesh->mVertices[vertexId].x;
-		vertex.Pos.y = mesh->mVertices[vertexId].y;
-		vertex.Pos.z = mesh->mVertices[vertexId].z;
+		vertex.Pos = ToXM(mesh->mVertices[vertexId]);
 
-		if (mesh->mTextureCoords[0])
-		{
+		if (mesh->mTextureCoords[0]) {
 			vertex.Tex.x = (float)mesh->mTextureCoords[0][vertexId].x;
 			vertex.Tex.y = (float)mesh->mTextureCoords[0][vertexId].y;
 		}
+
+		if (mesh->mNormals) {
+			vertex.Normal = ToXM(mesh->mNormals[vertexId]);
+		}
+
 		vertices.push_back(vertex);
 	}
 
@@ -384,7 +386,6 @@ void AssimpModel::DoDraw(aiNode* node)
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
-
 			if (mesh->data->HasBones()) {
 				const auto& boneMats = GetBoneMatrices(node, i);
 				size_t boneSize = boneMats.size(); assert(boneSize <= MAX_MATRICES);

@@ -22,6 +22,17 @@ public:
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 
+struct TLight {
+	XMFLOAT4 mPosition;//world space
+	XMFLOAT4 mColor;
+public:
+	TLight();
+	TLight(float x, float y, float z);
+	void SetPosition(float x, float y, float z);
+	void SetColor(float r, float g, float b, float a);
+};
+typedef std::shared_ptr<TLight> TLightPtr;
+
 struct TMaterial {
 	ID3D11VertexShader* mVertexShader = nullptr;
 	ID3D11PixelShader* mPixelShader = nullptr;
@@ -42,6 +53,7 @@ struct cbGlobalParam
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
+	TLight mLight;
 public:
 	cbGlobalParam();
 };

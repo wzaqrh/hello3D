@@ -19,7 +19,9 @@ public:
 	IDirectInputDevice* mMouse = NULL;
 	int mScreenWidth;
 	int mScreenHeight;
+public:
 	TCameraPtr mDefCamera;
+	TLightPtr mDefLight;
 public:
 	TRenderSystem();
 	~TRenderSystem();

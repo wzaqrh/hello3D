@@ -5,6 +5,7 @@ TRenderSystem* gRenderSys;
 
 TRenderSystem::TRenderSystem()
 {
+	mDefLight = std::make_shared<TLight>(0,0,1000);
 }
 
 TRenderSystem::~TRenderSystem()
@@ -137,21 +138,6 @@ HRESULT TRenderSystem::Initialize()
 
 void TRenderSystem::CleanUp()
 {
-	if (mDeviceContext) mDeviceContext->ClearState();
-
-	if (mDepthStencil) mDepthStencil->Release();
-	if (mDepthStencilView) mDepthStencilView->Release();
-	if (mRenderTargetView) mRenderTargetView->Release();
-	if (mSwapChain) mSwapChain->Release();
-	if (mDeviceContext) mDeviceContext->Release();
-	if (mDevice) mDevice->Release();
-
-	//if (mConstantBuffer) mConstantBuffer->Release();
-	//if (mVertexBuffer) mVertexBuffer->Release();
-	//if (mIndexBuffer) mIndexBuffer->Release();
-	//if (mVertexLayout) mVertexLayout->Release();
-	//if (mVertexShader) mVertexShader->Release();
-	//if (mPixelShader) mPixelShader->Release();
 }
 
 void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform)
@@ -160,6 +146,7 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	globalParam.mWorld = worldTransform;
 	globalParam.mView = mDefCamera->mView;
 	globalParam.mProjection = mDefCamera->mProjection;
+	globalParam.mLight = *mDefLight;
 	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
 
 
@@ -339,13 +326,16 @@ ID3D11Buffer* TRenderSystem::CreateConstBuffer(int bufferSize)
 
 ID3D11ShaderResourceView* TRenderSystem::CreateTexture(const char* pSrcFile)
 {
+	std::string imgPath = GetModelPath() + pSrcFile;
+	pSrcFile = imgPath.c_str();
+
 	ID3D11ShaderResourceView* pTextureRV = nullptr;
 	WIN32_FIND_DATAA wfd;
 	HANDLE hFind = FindFirstFileA(pSrcFile, &wfd);
 	if (INVALID_HANDLE_VALUE != hFind)
 	{
 		HRESULT hr = S_OK;
-		hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, (GetModelPath() + pSrcFile).c_str(), NULL, NULL, &pTextureRV, NULL);
+		hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, NULL, NULL, &pTextureRV, NULL);
 		if (CheckHR(hr))
 			return nullptr;
 	}

@@ -222,6 +222,12 @@ XMMATRIX ToXM(const aiMatrix4x4& m) {
 	return r;
 }
 
+XMFLOAT3 ToXM(const aiVector3D& v)
+{
+	XMFLOAT3 r = XMFLOAT3(v.x, v.y, v.z);
+	return r;
+}
+
 aiMatrix4x4 FromXM(const XMMATRIX& m) {
 	aiMatrix4x4 r;
 	static_assert(sizeof(r) == sizeof(m), "");
