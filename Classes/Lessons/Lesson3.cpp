@@ -2,11 +2,16 @@
 
 void Lesson3::OnPostInitDevice()
 {
-	mRenderSys->mDefLight->SetSpecularPower(60);
-	mRenderSys->mDefLight->SetSpecularColor(1, 1, 1, 1);
-	mRenderSys->mDefLight->SetDiffuseColor(1, 1, 1, 1);
-	//mRenderSys->mDefLight->SetPosition(mRenderSys->mScreenWidth/2, mRenderSys->mScreenHeight/2, -1500);
-	mRenderSys->mDefLight->SetPosition(-2000, 0, 0);
+	auto light1 = mRenderSys->mPointLights[0];
+	light1->SetSpecularPower(60);
+	light1->SetSpecularColor(1, 1, 1, 1);
+	light1->SetDiffuseColor(1, 1, 1, 0);
+	light1->SetPosition(200, 0, -200);
+
+	auto light2 = mRenderSys->AddDirectLight();
+	light2->SetDiffuseColor(0, 0, 0, 0);
+	light2->SetSpecularColor(1, 0, 0, 1);
+	light2->SetDirection(0, 0, 1);
 
 	mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.fx", "shader\\Lesson3.fx");
 	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mScale = 0.03;

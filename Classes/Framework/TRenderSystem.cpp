@@ -5,7 +5,7 @@ TRenderSystem* gRenderSys;
 
 TRenderSystem::TRenderSystem()
 {
-	mDefLight = std::make_shared<TLight>();
+	mPointLights.push_back(std::make_shared<TPointLight>());
 }
 
 TRenderSystem::~TRenderSystem()
@@ -154,9 +154,18 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	globalParam.mWorld = worldTransform;
 	globalParam.mView = mDefCamera->mView;
 	globalParam.mProjection = mDefCamera->mProjection;
-	globalParam.mLight = *mDefLight;
-	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
+	XMVECTOR det = XMMatrixDeterminant(globalParam.mView);
+	globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
 
+	globalParam.mLightNum.x = min(MAX_LIGHTS, mDirectLights.size());
+	for (int i = 0; i < globalParam.mLightNum.x; ++i)
+		globalParam.mDirectLights[i] = *mDirectLights[i];
+
+	globalParam.mLightNum.y = min(MAX_LIGHTS, mPointLights.size());
+	for (int i = 0; i < globalParam.mLightNum.y; ++i)
+		globalParam.mPointLights[i] = *mPointLights[i];
+	
+	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
 
 	mDeviceContext->VSSetShader(material->mVertexShader, NULL, 0);
 	mDeviceContext->VSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
@@ -168,6 +177,20 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	mDeviceContext->IASetPrimitiveTopology(material->mTopoLogy);
 
 	if (material->mSampler) mDeviceContext->PSSetSamplers(0, 1, &material->mSampler);
+}
+
+TPointLightPtr TRenderSystem::AddPointLight()
+{
+	TPointLightPtr light = std::make_shared<TPointLight>();
+	mPointLights.push_back(light);
+	return light;
+}
+
+TDirectLightPtr TRenderSystem::AddDirectLight()
+{
+	TDirectLightPtr light = std::make_shared<TDirectLight>();
+	mDirectLights.push_back(light);
+	return light;
 }
 
 TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
@@ -323,7 +346,7 @@ ID3D11Buffer* TRenderSystem::CreateConstBuffer(int bufferSize)
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = bufferSize % sizeof(XMMATRIX) == 0 ? bufferSize : (bufferSize / sizeof(XMMATRIX) + 1) * sizeof(XMMATRIX);
+	bd.ByteWidth = bufferSize % sizeof(XMFLOAT4) == 0 ? bufferSize : (bufferSize / sizeof(XMFLOAT4) + 1) * sizeof(XMFLOAT4);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);

@@ -6,13 +6,7 @@
 #include <xnamath.h>
 #include <dinput.h>
 #include <dxerr.h>
-
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include <map>
-#include <memory>
-#include <assert.h>
+#include "std.h"
 
 struct TCamera {
 	XMMATRIX mView;
@@ -22,19 +16,25 @@ public:
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 
-struct TLight {
+struct TPointLight {
 	XMFLOAT4 mPosition;//world space
 	XMFLOAT4 mDiffuseColor;
-	XMFLOAT4 mSpecularColor;
-	float mSpecularPower;
+	XMFLOAT4 mSpecularColorPower;
 public:
-	TLight();
+	TPointLight();
 	void SetPosition(float x, float y, float z);
 	void SetDiffuseColor(float r, float g, float b, float a);
 	void SetSpecularColor(float r, float g, float b, float a);
 	void SetSpecularPower(float power);
 };
-typedef std::shared_ptr<TLight> TLightPtr;
+typedef std::shared_ptr<TPointLight> TPointLightPtr;
+
+struct TDirectLight : public TPointLight {
+public:
+	void SetDirection(float x, float y, float z);
+};
+typedef std::shared_ptr<TDirectLight> TDirectLightPtr;
+static_assert(sizeof(TDirectLight) == sizeof(TPointLight), "");
 
 struct TMaterial {
 	ID3D11VertexShader* mVertexShader = nullptr;
@@ -44,19 +44,21 @@ struct TMaterial {
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
 	ID3D11SamplerState*	mSampler = nullptr;
 
-	//std::vector<ID3D11ShaderResourceView*> mTextures;
-	//ID3D11Buffer* mVertexBuffer = nullptr;
-	//ID3D11Buffer* mIndexBuffer = nullptr;
 	std::vector<ID3D11Buffer*> mConstantBuffers;
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
 
+#define MAX_LIGHTS 1
 struct cbGlobalParam
 {
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
-	TLight mLight;
+	XMMATRIX mViewInv;
+
+	TPointLight mPointLights[MAX_LIGHTS];
+	TDirectLight mDirectLights[MAX_LIGHTS];
+	XMINT4 mLightNum;//directional,point,spot
 public:
 	cbGlobalParam();
 };

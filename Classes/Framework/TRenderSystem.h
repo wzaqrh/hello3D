@@ -21,15 +21,19 @@ public:
 	int mScreenHeight;
 public:
 	TCameraPtr mDefCamera;
-	TLightPtr mDefLight;
+	std::vector<TPointLightPtr> mPointLights;
+	std::vector<TDirectLightPtr> mDirectLights;
 public:
 	TRenderSystem();
 	~TRenderSystem();
 
 	HRESULT Initialize();
 	void CleanUp();
-
+public:
 	void ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform);
+public:
+	TPointLightPtr AddPointLight();
+	TDirectLightPtr AddDirectLight();
 public:
 	TMaterialPtr CreateMaterial(const char* vsPath, 
 		const char* psPath, 

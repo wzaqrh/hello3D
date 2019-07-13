@@ -2,8 +2,8 @@
 
 void TAppLesson2::OnPostInitDevice()
 {
-	mRenderSys->mDefLight->SetDiffuseColor(1, 0, 0, 1);
-	mRenderSys->mDefLight->SetPosition(0, 0, -200);
+	mRenderSys->mPointLights[0]->SetDiffuseColor(1, 0, 0, 1);
+	mRenderSys->mPointLights[0]->SetPosition(0, 0, -200);
 
 	mModel = new AssimpModel(mRenderSys, "shader\\Lesson2.fx", "shader\\Lesson2.fx");
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mScale = 0.01;

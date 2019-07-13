@@ -15,5 +15,10 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include <queue>
 #include <assert.h>
+
+typedef struct _XMINT4 {
+	int x, y, z, w;
+} XMINT4;

@@ -5,41 +5,52 @@ TCamera::TCamera(int width, int height)
 {
 	// Initialize the view matrix
 	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -10.0f, 0.0f);
-	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mView = XMMatrixLookAtLH(Eye, At, Up);
+
+	/*XMVECTOR res = XMVector4Transform(Eye, mView);
+	float x = XMVectorGetX(res);
+	float y = XMVectorGetY(res);
+	float z = XMVectorGetZ(res);*/
 
 	// Initialize the projection matrix
 	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
 }
 
 /********** TLight **********/
-TLight::TLight()
+TPointLight::TPointLight()
 {
 	SetPosition(0, 0, 0);
 	SetDiffuseColor(1,1,1,1);
 	SetSpecularColor(1, 1, 1, 1);
-	mSpecularPower = 32;
+	SetSpecularPower(32);
 }
 
-void TLight::SetPosition(float x, float y, float z)
+void TPointLight::SetPosition(float x, float y, float z)
 {
 	mPosition = XMFLOAT4(x, y, z, 1);
 }
 
-void TLight::SetDiffuseColor(float r, float g, float b, float a)
+void TPointLight::SetDiffuseColor(float r, float g, float b, float a)
 {
 	mDiffuseColor = XMFLOAT4(r, g, b, a);
 }
 
-void TLight::SetSpecularColor(float r, float g, float b, float a)
+void TPointLight::SetSpecularColor(float r, float g, float b, float a)
 {
-	mSpecularColor = XMFLOAT4(r, g, b, a);
+	mSpecularColorPower = XMFLOAT4(r, g, b, mSpecularColorPower.w);
 }
 
-void TLight::SetSpecularPower(float power)
+void TPointLight::SetSpecularPower(float power)
 {
-	mSpecularPower = power;
+	mSpecularColorPower.w = power;
+}
+
+/********** TDirectLight **********/
+void TDirectLight::SetDirection(float x, float y, float z)
+{
+	mPosition = XMFLOAT4(x, y, z, 0);
 }
 
 /********** cbGlobalParam **********/
