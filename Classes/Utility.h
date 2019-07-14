@@ -28,5 +28,10 @@ aiMatrix4x4 FromXM(const XMMATRIX& m);
 XMMATRIX ToXM(const aiMatrix4x4& m);
 XMFLOAT3 ToXM(const aiVector3D& v);
 
+XMFLOAT3 operator-(XMFLOAT3 lhs, XMFLOAT3 rht);
+XMFLOAT3 operator+(XMFLOAT3 lhs, XMFLOAT3 rht);
+XMFLOAT3 operator*(XMFLOAT3 lhs, float d);
+XMFLOAT2 operator-(XMFLOAT2 lhs, XMFLOAT2 rht);
+
 void OutPutMatrix(FILE* fd, const aiMatrix4x4& m);
 void OutPutMatrix(FILE* fd, const XMMATRIX& m);

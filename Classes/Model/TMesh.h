@@ -6,6 +6,7 @@ struct SimpleVertex
 {
 	XMFLOAT3 Pos;
 	XMFLOAT3 Normal;
+	XMFLOAT3 Tangent;
 	XMFLOAT2 Tex;
 	XMFLOAT4 BlendWeights;
 	unsigned int  BlendIndices[4];

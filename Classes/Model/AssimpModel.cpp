@@ -180,6 +180,36 @@ void AssimpModel::processNode(aiNode* node, const aiScene* scene)
 	}
 }
 
+void ReCalculateTangents(std::vector<SimpleVertex>& vertices, const std::vector<UINT>& indices) {
+	for (int i = 0; i < indices.size(); i += 3) {
+		// Shortcuts for vertices
+		SimpleVertex& v0 = vertices[indices[i+0]];
+		SimpleVertex& v1 = vertices[indices[i+1]];
+		SimpleVertex& v2 = vertices[indices[i+2]];
+
+		// Shortcuts for UVs
+		XMFLOAT2& uv0 = v0.Tex;
+		XMFLOAT2& uv1 = v1.Tex;
+		XMFLOAT2& uv2 = v2.Tex;
+
+		// Edges of the triangle : postion delta
+		XMFLOAT3 deltaPos1 = v1.Pos - v0.Pos;
+		XMFLOAT3 deltaPos2 = v2.Pos - v0.Pos;
+
+		// UV delta
+		XMFLOAT2 deltaUV1 = uv1 - uv0;
+		XMFLOAT2 deltaUV2 = uv2 - uv0;
+
+		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+		XMFLOAT3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+		XMFLOAT3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+		v0.Tangent = v0.Tangent + tangent;
+		v1.Tangent = v1.Tangent + tangent;
+		v2.Tangent = v2.Tangent + tangent;
+	}
+}
+
 TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	// Data to fill
@@ -208,6 +238,9 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 		if (mesh->mNormals) {
 			vertex.Normal = ToXM(mesh->mNormals[vertexId]);
+		}
+		if (mesh->mTangents) {
+			vertex.Tangent = ToXM(mesh->mTangents[vertexId]);
 		}
 
 		vertices.push_back(vertex);
@@ -238,9 +271,12 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	for (UINT i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
-
 		for (UINT j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
+	}
+
+	if (mesh->mNormals && mesh->mTangents == nullptr) {
+		ReCalculateTangents(vertices, indices);
 	}
 
 	if (mesh->mMaterialIndex >= 0)
@@ -379,9 +415,10 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName)
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 8 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 12 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
 	mMaterial->mConstantBuffers.push_back(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));

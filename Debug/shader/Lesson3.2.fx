@@ -1,4 +1,4 @@
-/********** Multi Light (eye space) **********/
+/********** Multi Light(Direct Point Spot) (eye space) (SpecularMap) **********/
 SamplerState samLinear : register(s0);
 Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
@@ -49,6 +49,7 @@ struct VS_INPUT
 {
     float4 Pos : POSITION;
     float3 Normal : NORMAL;
+	float3 Tangent : NORMAL1;
 	float2 Tex  : TEXCOORD0;
     float4 BlendWeights : BLENDWEIGHT;
     uint4  BlendIndices : BLENDINDICES;

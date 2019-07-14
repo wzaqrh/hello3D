@@ -235,3 +235,31 @@ aiMatrix4x4 FromXM(const XMMATRIX& m) {
 	r.Transpose();
 	return r;
 }
+
+XMFLOAT3 operator-(XMFLOAT3 lhs, XMFLOAT3 rht) {
+	XMFLOAT3 ret;
+	ret.x = lhs.x - rht.x;
+	ret.y = lhs.y - rht.y;
+	ret.z = lhs.z - rht.z;
+	return ret;
+}
+XMFLOAT3 operator+(XMFLOAT3 lhs, XMFLOAT3 rht) {
+	XMFLOAT3 ret;
+	ret.x = lhs.x + rht.x;
+	ret.y = lhs.y + rht.y;
+	ret.z = lhs.z + rht.z;
+	return ret;
+}
+XMFLOAT3 operator*(XMFLOAT3 lhs, float d) {
+	XMFLOAT3 ret;
+	ret.x = lhs.x * d;
+	ret.y = lhs.y * d;
+	ret.z = lhs.z * d;
+	return ret;
+}
+XMFLOAT2 operator-(XMFLOAT2 lhs, XMFLOAT2 rht) {
+	XMFLOAT2 ret;
+	ret.x = lhs.x - rht.x;
+	ret.y = lhs.y - rht.y;
+	return ret;
+}
