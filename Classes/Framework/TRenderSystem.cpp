@@ -204,6 +204,11 @@ TDirectLightPtr TRenderSystem::AddDirectLight()
 	return light;
 }
 
+TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height)
+{
+	return std::make_shared<TRenderTexture>(mDevice, width, height);
+}
+
 TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	TMaterialPtr material = std::make_shared<TMaterial>();
@@ -240,6 +245,11 @@ bool TRenderSystem::UpdateBuffer(ID3D11Buffer* buffer, void* data, int dataSize)
 	memcpy(MappedResource.pData, data, dataSize);
 	mDeviceContext->Unmap(buffer, 0);
 	return true;
+}
+
+void TRenderSystem::UpdateConstBuffer(ID3D11Buffer* buffer, void* data)
+{
+	mDeviceContext->UpdateSubresource(buffer, 0, NULL, data, 0, 0);
 }
 
 ID3D11SamplerState* TRenderSystem::CreateSampler()

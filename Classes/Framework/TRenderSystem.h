@@ -37,6 +37,7 @@ public:
 	TPointLightPtr AddPointLight();
 	TDirectLightPtr AddDirectLight();
 public:
+	TRenderTexturePtr CreateRenderTexture(int width, int height);
 	TMaterialPtr CreateMaterial(const char* vsPath, 
 		const char* psPath, 
 		D3D11_INPUT_ELEMENT_DESC* descArray, 
@@ -46,6 +47,7 @@ public:
 	ID3D11Buffer* CreateIndexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* CreateVertexBuffer(int bufferSize, void* buffer);
 	bool UpdateBuffer(ID3D11Buffer* buffer, void* data, int dataSize);
+	void UpdateConstBuffer(ID3D11Buffer* buffer, void* data);
 
 	ID3D11VertexShader* CreateVS(const char* filename, ID3DBlob*& pVSBlob);
 	ID3D11PixelShader* CreatePS(const char* filename);

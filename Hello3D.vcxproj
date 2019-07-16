@@ -380,10 +380,12 @@
     <ClCompile Include="Classes\Lessons\Lesson1.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson2.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson3.cpp" />
+    <ClCompile Include="Classes\Lessons\Lesson4.cpp" />
     <ClCompile Include="Classes\Main.cpp" />
     <ClCompile Include="Classes\Model\AssimpModel.cpp" />
     <ClCompile Include="Classes\Model\TMesh.cpp" />
     <ClCompile Include="Classes\Utility.cpp" />
+    <ClCompile Include="Lesson5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\std.h" />
@@ -393,9 +395,11 @@
     <ClInclude Include="Classes\Lessons\Lesson1.h" />
     <ClInclude Include="Classes\Lessons\Lesson2.h" />
     <ClInclude Include="Classes\Lessons\Lesson3.h" />
+    <ClInclude Include="Classes\Lessons\Lesson4.h" />
     <ClInclude Include="Classes\Model\AssimpModel.h" />
     <ClInclude Include="Classes\Model\TMesh.h" />
     <ClInclude Include="Classes\Utility.h" />
+    <ClInclude Include="Lesson5.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assimp-master\lib\Debug\assimp-vc140-mtd.exp" />

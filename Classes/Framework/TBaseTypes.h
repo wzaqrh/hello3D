@@ -57,6 +57,8 @@ struct TMaterial {
 	ID3D11SamplerState*	mSampler = nullptr;
 
 	std::vector<ID3D11Buffer*> mConstantBuffers;
+public:
+	ID3D11Buffer* AddConstBuffer(ID3D11Buffer* buffer);
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
 
@@ -75,3 +77,17 @@ struct cbGlobalParam
 public:
 	cbGlobalParam();
 };
+
+class TRenderTexture {
+private:
+	ID3D11Texture2D* mRenderTargetTexture;
+	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11ShaderResourceView* mShaderResourceView;
+public:
+	TRenderTexture(ID3D11Device* pDevice, int width, int height);
+private:
+	bool InitTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitRenderTargetView(ID3D11Device* pDevice);
+	bool InitResourceView(ID3D11Device* pDevice);
+};
+typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;

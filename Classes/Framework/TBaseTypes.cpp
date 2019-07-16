@@ -94,3 +94,72 @@ cbGlobalParam::cbGlobalParam()
 	mView = Ident;
 	mProjection = Ident;
 }
+
+/********** TMaterial **********/
+ID3D11Buffer* TMaterial::AddConstBuffer(ID3D11Buffer* buffer)
+{
+	mConstantBuffers.push_back(buffer);
+	return buffer;
+}
+
+/********** TRenderTexture **********/
+TRenderTexture::TRenderTexture(ID3D11Device* pDevice, int width, int height)
+{
+	InitTexture(pDevice, width, height);
+	InitRenderTargetView(pDevice);
+}
+
+const DXGI_FORMAT CTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
+bool TRenderTexture::InitTexture(ID3D11Device* pDevice, int width, int height)
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	textureDesc.Width = width;
+	textureDesc.Height = height;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = CTargetFormat;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	HRESULT result = pDevice->CreateTexture2D(&textureDesc, NULL, &mRenderTargetTexture);
+	if (FAILED(result)) {
+		return false;
+	}
+	return true;
+}
+
+bool TRenderTexture::InitRenderTargetView(ID3D11Device* pDevice)
+{
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
+	renderTargetViewDesc.Format = CTargetFormat;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the render target view.
+	HRESULT result = pDevice->CreateRenderTargetView(mRenderTargetTexture, &renderTargetViewDesc, &mRenderTargetView);
+	if (FAILED(result)) {
+		return false;
+	}
+	return true;
+}
+
+bool TRenderTexture::InitResourceView(ID3D11Device* pDevice)
+{
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
+	shaderResourceViewDesc.Format = CTargetFormat;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	HRESULT result = pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mShaderResourceView);
+	if (FAILED(result)) {
+		return false;
+	}
+	return true;
+}
