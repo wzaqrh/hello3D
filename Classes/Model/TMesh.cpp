@@ -2,7 +2,7 @@
 #include "TRenderSystem.h"
 
 TMesh::TMesh(const aiMesh* __data,
-	const std::vector<SimpleVertex>& vertices,
+	const std::vector<MeshVertex>& vertices,
 	const std::vector<UINT>& indices,
 	const std::vector<TextureInfo>& textures,
 	TRenderSystem *renderSys)
@@ -17,7 +17,7 @@ TMesh::TMesh(const aiMesh* __data,
 
 bool TMesh::setupMesh(TRenderSystem *renderSys)
 {
-	mVertexBuffer = renderSys->CreateVertexBuffer(sizeof(SimpleVertex) * vertices.size(), &vertices[0]);
+	mVertexBuffer = renderSys->CreateVertexBuffer(sizeof(MeshVertex) * vertices.size(), &vertices[0]);
 	mIndexBuffer = renderSys->CreateIndexBuffer(sizeof(UINT) * indices.size(), &indices[0]);
 	return true;
 }
@@ -30,7 +30,7 @@ void TMesh::Close()
 
 void TMesh::Draw(TRenderSystem* renderSys)
 {
-	UINT stride = sizeof(SimpleVertex);
+	UINT stride = sizeof(MeshVertex);
 	UINT offset = 0;
 	renderSys->mDeviceContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 	renderSys->mDeviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);

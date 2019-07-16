@@ -79,7 +79,7 @@ public:
 };
 
 class TRenderTexture {
-private:
+public:
 	ID3D11Texture2D* mRenderTargetTexture;
 	ID3D11RenderTargetView* mRenderTargetView;
 	ID3D11ShaderResourceView* mShaderResourceView;

@@ -209,6 +209,22 @@ TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height)
 	return std::make_shared<TRenderTexture>(mDevice, width, height);
 }
 
+void TRenderSystem::ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color)
+{
+	mDeviceContext->ClearRenderTargetView(rendTarget->mRenderTargetView, (const float*)&color);
+}
+
+void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
+{
+	ID3D11ShaderResourceView* TextureNull = nullptr;
+	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
+
+	//ID3D11RenderTargetView* renderTargetView = mRenderTargetView;
+	ID3D11RenderTargetView* renderTargetView = rendTarget != nullptr ? rendTarget->mRenderTargetView : mRenderTargetView;
+	ID3D11DepthStencilView* depthStencilView = rendTarget != nullptr ? nullptr : mDepthStencilView;
+	mDeviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+}
+
 TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	TMaterialPtr material = std::make_shared<TMaterial>();
@@ -237,6 +253,7 @@ ID3D11InputLayout* TRenderSystem::CreateLayout(ID3DBlob* pVSBlob, D3D11_INPUT_EL
 
 bool TRenderSystem::UpdateBuffer(ID3D11Buffer* buffer, void* data, int dataSize)
 {
+	assert(buffer);
 	HRESULT hr = S_OK;
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
 	hr = (mDeviceContext->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
@@ -331,6 +348,24 @@ ID3D11Buffer* TRenderSystem::CreateVertexBuffer(int bufferSize, void* buffer)
 
 	ID3D11Buffer* pVertexBuffer = nullptr;
 	hr = mDevice->CreateBuffer(&bd, &InitData, &pVertexBuffer);
+	if (CheckHR(hr))
+		return nullptr;
+	return pVertexBuffer;
+}
+
+ID3D11Buffer* TRenderSystem::CreateVertexBuffer(int bufferSize)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = bufferSize;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	ID3D11Buffer* pVertexBuffer = nullptr;
+	hr = mDevice->CreateBuffer(&bd, nullptr, &pVertexBuffer);
 	if (CheckHR(hr))
 		return nullptr;
 	return pVertexBuffer;

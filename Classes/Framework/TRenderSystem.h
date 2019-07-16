@@ -38,6 +38,9 @@ public:
 	TDirectLightPtr AddDirectLight();
 public:
 	TRenderTexturePtr CreateRenderTexture(int width, int height);
+	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
+	void SetRenderTarget(TRenderTexturePtr rendTarget);
+
 	TMaterialPtr CreateMaterial(const char* vsPath, 
 		const char* psPath, 
 		D3D11_INPUT_ELEMENT_DESC* descArray, 
@@ -46,6 +49,7 @@ public:
 	ID3D11Buffer* CreateConstBuffer(int bufferSize);
 	ID3D11Buffer* CreateIndexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* CreateVertexBuffer(int bufferSize, void* buffer);
+	ID3D11Buffer* CreateVertexBuffer(int bufferSize);
 	bool UpdateBuffer(ID3D11Buffer* buffer, void* data, int dataSize);
 	void UpdateConstBuffer(ID3D11Buffer* buffer, void* data);
 

@@ -2,7 +2,7 @@
 #include "TBaseTypes.h"
 #include "std.h"
 
-struct SimpleVertex
+struct MeshVertex
 {
 	XMFLOAT3 Pos;
 	XMFLOAT3 Normal;
@@ -28,13 +28,13 @@ struct TextureInfo {
 class TRenderSystem;
 class TMesh {
 public:
-	std::vector<SimpleVertex> vertices;
+	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
 	std::vector<TextureInfo> textures;
 	const aiMesh* data = nullptr;
 public:
 	TMesh(const aiMesh* __data, 
-		const std::vector<SimpleVertex>& vertices, 
+		const std::vector<MeshVertex>& vertices, 
 		const std::vector<UINT>& indices,
 		const std::vector<TextureInfo>& textures,
 		TRenderSystem *renderSys);

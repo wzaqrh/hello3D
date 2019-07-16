@@ -180,12 +180,12 @@ void AssimpModel::processNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-void ReCalculateTangents(std::vector<SimpleVertex>& vertices, const std::vector<UINT>& indices) {
+void ReCalculateTangents(std::vector<MeshVertex>& vertices, const std::vector<UINT>& indices) {
 	for (int i = 0; i < indices.size(); i += 3) {
 		// Shortcuts for vertices
-		SimpleVertex& v0 = vertices[indices[i+0]];
-		SimpleVertex& v1 = vertices[indices[i+1]];
-		SimpleVertex& v2 = vertices[indices[i+2]];
+		MeshVertex& v0 = vertices[indices[i+0]];
+		MeshVertex& v1 = vertices[indices[i+1]];
+		MeshVertex& v2 = vertices[indices[i+2]];
 
 		// Shortcuts for UVs
 		XMFLOAT2& uv0 = v0.Tex;
@@ -213,7 +213,7 @@ void ReCalculateTangents(std::vector<SimpleVertex>& vertices, const std::vector<
 TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	// Data to fill
-	std::vector<SimpleVertex> vertices;
+	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
 	std::vector<TextureInfo> textures;
 	textures.resize(4);
@@ -226,7 +226,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 	for (UINT vertexId = 0; vertexId < mesh->mNumVertices; vertexId++)
 	{
-		SimpleVertex vertex;
+		MeshVertex vertex;
 		memset(&vertex, 0, sizeof(vertex));
 
 		vertex.Pos = ToXM(mesh->mVertices[vertexId]);

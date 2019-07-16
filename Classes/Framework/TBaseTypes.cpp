@@ -107,6 +107,7 @@ TRenderTexture::TRenderTexture(ID3D11Device* pDevice, int width, int height)
 {
 	InitTexture(pDevice, width, height);
 	InitRenderTargetView(pDevice);
+	InitResourceView(pDevice);
 }
 
 const DXGI_FORMAT CTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
