@@ -11,6 +11,6 @@ protected:
 private:
 	AssimpModel* mModel = nullptr;
 	TRenderTexturePtr mRendTexture = nullptr;
-	TSpritePtr mSprite;
+	TSpritePtr mSprite,mLayerColor;
 };
 

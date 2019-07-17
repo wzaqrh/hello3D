@@ -28,9 +28,9 @@ private:
 	XMFLOAT2 mPosition;
 	XMFLOAT2 mSize;
 	TMaterialPtr mMaterial;
-	ID3D11ShaderResourceView* mTexture;
-	ID3D11Buffer *mVertexBuffer, *mIndexBuffer;
-	TRenderSystem* mRenderSys;
+	ID3D11ShaderResourceView* mTexture = nullptr;
+	ID3D11Buffer *mVertexBuffer = nullptr, *mIndexBuffer = nullptr;
+	TRenderSystem* mRenderSys = nullptr;
 public:
 	TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName);
 	~TSprite();

@@ -23,7 +23,9 @@ void Lesson5::OnPostInitDevice()
 	mSprite->SetSize(5,5);
 
 
-
+	mLayerColor = std::make_shared<TSprite>(mRenderSys, "shader\\LayerColor.fx", "shader\\LayerColor.fx");
+	mLayerColor->SetPosition(-5, -5);
+	mLayerColor->SetSize(5, 5);
 }
 
 void Lesson5::OnRender()
@@ -38,6 +40,8 @@ void Lesson5::OnRender()
 	mRenderSys->SetRenderTarget(nullptr);
 	
 	mSprite->Draw();
+
+	mLayerColor->Draw();
 }
 
 auto reg = AppRegister<Lesson5>("TAppLesson5: RenderTarget");
