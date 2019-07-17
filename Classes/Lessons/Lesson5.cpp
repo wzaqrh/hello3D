@@ -21,6 +21,9 @@ void Lesson5::OnPostInitDevice()
 	mSprite->SetTexture(mRendTexture->mShaderResourceView);
 	mSprite->SetPosition(0, 0);
 	mSprite->SetSize(5,5);
+
+
+
 }
 
 void Lesson5::OnRender()
