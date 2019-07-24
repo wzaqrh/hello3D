@@ -147,12 +147,12 @@ void TRenderSystem::CleanUp()
 {
 }
 
-void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform)
+void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform, TCameraBase* pCam, TProgramPtr program)
 {
 	cbGlobalParam globalParam = {};
 	globalParam.mWorld = worldTransform;
-	globalParam.mView = mDefCamera->mView;
-	globalParam.mProjection = mDefCamera->mProjection;
+	globalParam.mView = pCam ? pCam->mView : mDefCamera->mView;
+	globalParam.mProjection = pCam ? pCam->mProjection : mDefCamera->mProjection;
 	XMVECTOR det = XMMatrixDeterminant(globalParam.mView);
 	globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
 
@@ -170,10 +170,11 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	
 	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
 
-	mDeviceContext->VSSetShader(material->mVertexShader, NULL, 0);
-	mDeviceContext->VSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
+	program = program ? program : material->mProgram;
+	mDeviceContext->VSSetShader(program->mVertexShader, NULL, 0);
+	mDeviceContext->PSSetShader(program->mPixelShader, NULL, 0);
 
-	mDeviceContext->PSSetShader(material->mPixelShader, NULL, 0);
+	mDeviceContext->VSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
 	mDeviceContext->PSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
 	mDeviceContext->IASetInputLayout(material->mInputLayout);
 
@@ -234,10 +235,8 @@ void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
 TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	TMaterialPtr material = std::make_shared<TMaterial>();
-	ID3DBlob* pVSBlob = nullptr;
-	material->mVertexShader = CreateVS(vsPath, pVSBlob);
-	material->mPixelShader = CreatePS(psPath);
-	material->mInputLayout = CreateLayout(pVSBlob, descArray, descCount);
+	material->mProgram = CreateProgram(vsPath, psPath);
+	material->mInputLayout = CreateLayout(material->mProgram->mVSBlob, descArray, descCount);
 	
 	material->mTopoLogy = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	material->mSampler = CreateSampler();
@@ -314,6 +313,14 @@ ID3D11PixelShader* TRenderSystem::CreatePS(const char* filename)
 	if (CheckHR(hr))
 		return nullptr;
 	return PixelShader;
+}
+
+TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath)
+{
+	TProgramPtr program = std::make_shared<TProgram>();
+	program->mVertexShader = CreateVS(vsPath, program->mVSBlob);
+	program->mPixelShader = CreatePS(psPath);
+	return program;
 }
 
 ID3D11VertexShader* TRenderSystem::CreateVS(const char* filename, ID3DBlob*& pVSBlob)

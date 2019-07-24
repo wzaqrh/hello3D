@@ -3,11 +3,7 @@
 /********** Quad **********/
 Quad::Quad(float x, float y, float w, float h)
 {
-	lb.Tex = XMFLOAT2(0, 0);
-	lt.Tex = XMFLOAT2(0, 1);
-	rt.Tex = XMFLOAT2(1, 1);
-	rb.Tex = XMFLOAT2(1, 0);
-
+	SetFlipY(false);
 	SetRect(x, y, w, h);
 	SetColor(1, 1, 1, 1);
 }
@@ -34,6 +30,21 @@ void Quad::SetZ(float z)
 	lt.Pos.z = z;
 	rt.Pos.z = z;
 	rb.Pos.z = z;
+}
+
+void Quad::SetFlipY(bool flipY)
+{
+	int pl = 0;
+	int pr = 1;
+	int pt = 1;
+	int pb = 0;
+	
+	if (flipY) std::swap(pt, pb);
+	
+	lb.Tex = XMFLOAT2(pl, pb);
+	lt.Tex = XMFLOAT2(pl, pt);
+	rt.Tex = XMFLOAT2(pr, pt);
+	rb.Tex = XMFLOAT2(pr, pb);
 }
 
 /********** TSprite **********/
@@ -82,6 +93,11 @@ void TSprite::SetSize(float w, float h)
 void TSprite::SetTexture(ID3D11ShaderResourceView* Texture)
 {
 	mTexture = Texture;
+}
+
+void TSprite::SetFlipY(bool flipY)
+{
+	mQuad.SetFlipY(flipY);
 }
 
 void TSprite::Draw()

@@ -31,7 +31,7 @@ public:
 	HRESULT Initialize();
 	void CleanUp();
 public:
-	void ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform);
+	void ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform, TCameraBase* pCam=nullptr, TProgramPtr program=nullptr);
 public:
 	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();
@@ -56,6 +56,8 @@ public:
 
 	ID3D11VertexShader* CreateVS(const char* filename, ID3DBlob*& pVSBlob);
 	ID3D11PixelShader* CreatePS(const char* filename);
+	TProgramPtr CreateProgram(const char* vsPath, const char* psPath);
+
 	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR);
 	ID3D11InputLayout* CreateLayout(ID3DBlob* pVSBlob, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 

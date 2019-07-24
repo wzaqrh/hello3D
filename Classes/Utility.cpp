@@ -49,9 +49,8 @@ bool TD3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screen
 #if 1
 		if (!CheckHR(m_directInput->CreateDevice(GUID_SysMouse, &m_mouse, NULL))
 			&& !CheckHR(m_mouse->SetDataFormat(&c_dfDIMouse))
-			&& !CheckHR(m_mouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE))
-			&& !CheckHR(m_mouse->Acquire())) {
-			
+			&& !CheckHR(m_mouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE))) {
+			m_mouse->Acquire();
 		}
 		else {
 			result = false;

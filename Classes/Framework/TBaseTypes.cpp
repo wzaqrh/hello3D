@@ -1,21 +1,42 @@
 #include "TBaseTypes.h"
 
 /********** TCamera **********/
+TCamera::TCamera(const TCamera& other)
+{
+	mEye = other.mEye;
+	mAt = other.mAt;
+	mUp = other.mUp;
+	mWidth = other.mWidth;
+	mHeight = other.mHeight;
+	mFOV = other.mFOV;
+	mFar = other.mFar;
+	mView = other.mView;
+	mProjection = other.mProjection;
+}
+
 TCamera::TCamera(int width, int height, double fov, int eyeDistance, double far1)
 {
-	// Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -eyeDistance, 0.0f);
-	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	SetLookAt(XMFLOAT3(0.0f, 0.0f, -eyeDistance), XMFLOAT3(0,0,0));
+	SetProjection(width, height, fov, far1);
+}
+
+void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
+{
+	mEye = eye;
+	mAt = at;
+	XMVECTOR Eye = XMVectorSet(mEye.x, mEye.y, mEye.z, 0.0f);
+	XMVECTOR At = XMVectorSet(mAt.x, mAt.y, mAt.z, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mView = XMMatrixLookAtLH(Eye, At, Up);
+}
 
-	/*XMVECTOR res = XMVector4Transform(Eye, mView);
-	float x = XMVectorGetX(res);
-	float y = XMVectorGetY(res);
-	float z = XMVectorGetZ(res);*/
-
-	// Initialize the projection matrix
-	mProjection = XMMatrixPerspectiveFovLH(fov / 180.0 * XM_PI, width / (FLOAT)height, 0.01f, far1);
+void TCamera::SetProjection(int width, int height, double fov, double far1)
+{
+	mWidth = width;
+	mHeight = height;
+	mFOV = fov / 180.0 * XM_PI;
+	mFar = far1;
+	mProjection = XMMatrixPerspectiveFovLH(mFOV, mWidth / mHeight, 0.01f, mFar);
 }
 
 /********** TDirectLight **********/
@@ -47,6 +68,13 @@ void TDirectLight::SetSpecularPower(float power)
 	mSpecularColorPower.w = power;
 }
 
+TCameraBase TDirectLight::GetLightCamera(TCamera& otherCam)
+{
+	TCamera ret(otherCam);
+	ret.SetLookAt(XMFLOAT3(ret.mAt.x-mPosition.x, ret.mAt.y-mPosition.y, ret.mAt.z-mPosition.z), ret.mAt);
+	return ret;
+}
+
 /********** TLight **********/
 TPointLight::TPointLight()
 {
@@ -62,6 +90,13 @@ void TPointLight::SetPosition(float x, float y, float z)
 void TPointLight::SetAttenuation(float a, float b, float c)
 {
 	mAttenuation = XMFLOAT4(a, b, c, 0);
+}
+
+TCameraBase TPointLight::GetLightCamera(TCamera& otherCam)
+{
+	TCamera ret(otherCam);
+	ret.SetLookAt(XMFLOAT3(mPosition.x, mPosition.y, mPosition.z), ret.mAt);
+	return ret;
 }
 
 /********** TSpotLight **********/

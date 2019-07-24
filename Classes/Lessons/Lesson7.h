@@ -3,6 +3,12 @@
 #include "AssimpModel.h"
 #include "TSprite.h"
 
+struct cbShadowMap
+{
+	XMMATRIX LightView;
+	XMMATRIX LightProjection;
+};
+
 class Lesson7 : public TApp
 {
 protected:
@@ -10,8 +16,10 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModel* mModel = nullptr;
-	TRenderTexturePtr mRendTexture = nullptr;
-	TSpritePtr mSprite, mLayerColor;
+	AssimpModel *mModel1, *mModel2 = nullptr;
+	TRenderTexturePtr mPass1RT = nullptr;
+	TSpritePtr mSecondPass, mLayerColor;
+	TPointLightPtr mLight;
+	TProgramPtr mProgShadowMap;
 };
 

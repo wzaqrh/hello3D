@@ -17,11 +17,22 @@ struct TINT4 {
 	int x, y, z, w;
 };
 
-struct TCamera {
+struct TCameraBase {
 	XMMATRIX mView;
 	XMMATRIX mProjection;
+};
+
+struct TCamera : public TCameraBase {
 public:
+	XMFLOAT3 mEye, mAt, mUp;
+	int mWidth, mHeight;
+	double mFOV, mFar;
+public:
+	TCamera() {}
 	TCamera(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1=100);
+	TCamera(const TCamera& other);
+	void SetProjection(int width, int height, double fov, double far1);
+	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at);
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 
@@ -35,6 +46,8 @@ public:
 	void SetDiffuseColor(float r, float g, float b, float a);
 	void SetSpecularColor(float r, float g, float b, float a);
 	void SetSpecularPower(float power);
+public:
+	TCameraBase GetLightCamera(TCamera& otherCam);
 };
 typedef std::shared_ptr<TDirectLight> TDirectLightPtr;
 
@@ -44,6 +57,7 @@ public:
 	TPointLight();
 	void SetPosition(float x, float y, float z);
 	void SetAttenuation(float a, float b, float c);
+	TCameraBase GetLightCamera(TCamera& otherCam);
 };
 typedef std::shared_ptr<TPointLight> TPointLightPtr;
 
@@ -57,9 +71,15 @@ public:
 };
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
-struct TMaterial {
+struct TProgram {
 	ID3D11VertexShader* mVertexShader = nullptr;
 	ID3D11PixelShader* mPixelShader = nullptr;
+	ID3DBlob* mVSBlob = nullptr;
+};
+typedef std::shared_ptr<TProgram> TProgramPtr;
+
+struct TMaterial {
+	TProgramPtr mProgram;
 	ID3D11InputLayout* mInputLayout = nullptr;
 	
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
