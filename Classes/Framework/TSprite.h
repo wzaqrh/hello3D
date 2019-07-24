@@ -19,6 +19,7 @@ struct Quad
 	Quad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
 	void SetColor(float r, float g, float b, float a);
+	void SetZ(float z);
 };
 
 class TSprite
@@ -34,7 +35,7 @@ private:
 public:
 	TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName);
 	~TSprite();
-	void SetPosition(float x, float y);
+	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);
 	void SetTexture(ID3D11ShaderResourceView* Texture);
 

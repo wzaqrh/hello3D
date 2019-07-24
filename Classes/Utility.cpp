@@ -9,129 +9,98 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-IDirectInput8* m_directInput;
-IDirectInputDevice8* m_keyboard;
-IDirectInputDevice8* m_mouse;
-
-unsigned char m_keyboardState[256];
-DIMOUSESTATE m_mouseState;
-
-int m_screenWidth, m_screenHeight;
-int m_mouseX, m_mouseY;
-
-HRESULT InputInit(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+/********** TD3DInput **********/
+TD3DInput::TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
-	HRESULT result;
+	memset(m_keyboardState, 0, sizeof(m_keyboardState));
+	memset(&m_mouseState, 0, sizeof(m_mouseState));
+	memset(&mMouseL,0,sizeof(mMouseL));
+	memset(&mMouseR, 0, sizeof(mMouseR));
+	Init(hinstance, hwnd, screenWidth, screenHeight);
+}
+TD3DInput::~TD3DInput()
+{
 
+}
+
+bool TD3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
 
-	// Initialize the main direct input interface.
-	result = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_directInput, NULL);
-	if (CheckHR(result))
-		return result;
+	if (CheckHR(DirectInput8Create(hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_directInput, NULL)))
+		return false;
 
-	if (0)
-	{
-		// Initialize the direct input interface for the keyboard.
-		result = m_directInput->CreateDevice(GUID_SysKeyboard, &m_keyboard, NULL);
-		if (CheckHR(result))
-			return result;
+	bool result = true;
+	//键盘事件
+#if 0
+		if (!CheckHR(m_directInput->CreateDevice(GUID_SysKeyboard, &m_keyboard, NULL))
+			&& !CheckHR(m_keyboard->SetDataFormat(&c_dfDIKeyboard))
+			&& !CheckHR(m_keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE))
+			&& !CheckHR(m_keyboard->Acquire())) {
 
-		// Set the data format.  In this case since it is a keyboard we can use the predefined data format.
-		result = m_keyboard->SetDataFormat(&c_dfDIKeyboard);
-		if (CheckHR(result))
-			return result;
+		}
+		else {
+			result = false;
+		}
+#endif
 
-		// Set the cooperative level of the keyboard to not share with other programs.
-		result = m_keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
-		if (CheckHR(result))
-			return false;
-		//Once they keyboard is setup we then call Acquire to finally get access to the keyboard for use from this point forward.
-
-		// Now acquire the keyboard.
-		result = m_keyboard->Acquire();
-		if (CheckHR(result))
-			return false;
-	}
-
-	{
-		// Initialize the direct input interface for the mouse.
-		result = m_directInput->CreateDevice(GUID_SysMouse, &m_mouse, NULL);
-		if (CheckHR(result))
-			return result;
-
-		// Set the data format for the mouse using the pre-defined mouse data format.
-		result = m_mouse->SetDataFormat(&c_dfDIMouse);
-		if (CheckHR(result))
-			return result;
-		//We use non - exclusive cooperative settings for the mouse.We will have to check for when it goes in and out of focus and re - acquire it each time.
-
-		// Set the cooperative level of the mouse to share with other programs.
-		result = m_mouse->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);// DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-		if (CheckHR(result))
-			return result;
-		//Once the mouse is setup we acquire it so that we can begin using it.
-
-		// Acquire the mouse.
-		result = m_mouse->Acquire();
-		if (CheckHR(result))
-			return result;
-	}
+	//鼠标事件
+#if 1
+		if (!CheckHR(m_directInput->CreateDevice(GUID_SysMouse, &m_mouse, NULL))
+			&& !CheckHR(m_mouse->SetDataFormat(&c_dfDIMouse))
+			&& !CheckHR(m_mouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE))
+			&& !CheckHR(m_mouse->Acquire())) {
+			
+		}
+		else {
+			result = false;
+		}
+#endif
 	return result;
 }
 
-HRESULT InputReadMouse()
+bool TD3DInput::ReadMouse()
 {
-	HRESULT result;
-	// Read the mouse device.
-	result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
-	if (CheckHR(result))
-	{
-		// If the mouse lost focus or was not acquired then try to get control back.
-		if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
-		{
+	HRESULT result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
+	if (FAILED(result)) {
+		if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED)) {
 			m_mouse->Acquire();
 		}
-		else
-		{
-			return result;
-		}
 	}
-
-	return S_OK;
+	return result == S_OK;
 }
 
-void InputProcess()
+void TD3DInput::Process()
 {
-	// Update the location of the mouse cursor based on the change of the mouse location during the frame.
-	if (m_mouseState.rgbButtons[0] & 0x80) {
-		m_mouseX += m_mouseState.lX;
-		m_mouseY += m_mouseState.lY;
-
-		m_mouseX = min(m_screenWidth,max(-m_screenWidth, m_mouseX));
-		m_mouseY = min(m_screenHeight, max(-m_screenHeight, m_mouseY));
+	if (m_mouseState.rgbButtons[0] & 0x80) {//鼠标左键
+		mMouseL.x = clamp(-m_screenWidth, m_screenWidth, mMouseL.x + m_mouseState.lX);
+		mMouseL.y = clamp(-m_screenHeight, m_screenHeight, mMouseL.y + m_mouseState.lY);
+		mMouseL.z += m_mouseState.lZ;
+	}
+	else if (m_mouseState.rgbButtons[1] & 0x80) {//鼠标右键
+		mMouseR.x = clamp(-m_screenWidth, m_screenWidth, mMouseR.x + m_mouseState.lX);
+		mMouseR.y = clamp(-m_screenHeight, m_screenHeight, mMouseR.y + m_mouseState.lY);
 	}
 	else {
-		/*m_mouseX = 0;
-		m_mouseY = 0;*/
+
 	}
 }
 
-void InputFrame()
+void TD3DInput::Frame()
 {
-	if (S_OK == InputReadMouse()) {
-		InputProcess();
+	if (ReadMouse()) {
+		Process();
 	}
 }
 
-void InputGetMouseLocation(int* px, int* py)
+TINT4 TD3DInput::GetMouseLocation(bool left)
 {
-	*px = m_mouseX;
-	*py = m_mouseY;
+	TINT4 ret = left ? mMouseL : mMouseR;
+	return ret;
 }
 
-
+/********** Functions **********/
 bool CheckHR(HRESULT result)
 {
 	if (FAILED(result)) {

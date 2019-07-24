@@ -44,7 +44,7 @@ void TApp::Render()
 	mRenderSys->mDeviceContext->ClearDepthStencilView(mRenderSys->mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	mTimer.Update();
-	InputFrame();
+	mRenderSys->mInput->Frame();
 	OnRender();
 
 	mRenderSys->mSwapChain->Present(0, 0);
@@ -57,12 +57,12 @@ std::string TApp::GetName()
 
 XMMATRIX TApp::GetWorldTransform()
 {
-	int mx, my;
-	InputGetMouseLocation(&mx, &my);
-	float angy = 3.14 * -mx / mRenderSys->mScreenWidth, angx = 3.14 * -my / mRenderSys->mScreenHeight;
+	TINT4 m = mRenderSys->mInput->GetMouseLocation(true);
+	float scalez = clamp(0.01f, 10.0f, mScale * (1000 + m.z) / 1000.0f);
+	float angy = 3.14 * -m.x / mRenderSys->mScreenWidth, angx = 3.14 * -m.y / mRenderSys->mScreenHeight;
 	XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
-	return XMMatrixScaling(mScale, mScale, mScale)
+	return XMMatrixScaling(scalez, scalez, scalez)
 		* euler
 		* XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
 }

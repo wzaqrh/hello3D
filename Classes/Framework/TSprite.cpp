@@ -28,6 +28,14 @@ void Quad::SetColor(float r, float g, float b, float a)
 	rb.Color = XMFLOAT4(r, g, b, a);
 }
 
+void Quad::SetZ(float z)
+{
+	lb.Pos.z = z;
+	lt.Pos.z = z;
+	rt.Pos.z = z;
+	rb.Pos.z = z;
+}
+
 /********** TSprite **********/
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
@@ -54,10 +62,11 @@ TSprite::~TSprite()
 {
 }
 
-void TSprite::SetPosition(float x, float y)
+void TSprite::SetPosition(float x, float y, float z)
 {
 	mPosition = XMFLOAT2(x, y);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
+	mQuad.SetZ(z);
 
 	mRenderSys->UpdateBuffer(mVertexBuffer, &mQuad, sizeof(mQuad));
 }

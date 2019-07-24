@@ -29,9 +29,8 @@ protected:
 protected:
 	XMMATRIX GetWorldTransform();
 protected:
+	TRenderSystem* mRenderSys = nullptr;
 	SDTimer mTimer;
-	TRenderSystem* mRenderSys;
-	//TMaterialPtr mMaterial;
 	float mScale;
 	XMFLOAT3 mPosition;
 public:
