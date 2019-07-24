@@ -8,11 +8,20 @@
 #include <dxerr.h>
 #include "std.h"
 
+template<class T>
+T clamp(T minVal, T maxVal, T v) {
+	return min(max(v, minVal),maxVal);
+}
+
+struct TINT4 {
+	int x, y, z, w;
+};
+
 struct TCamera {
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 public:
-	TCamera(int width, int height);
+	TCamera(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1=100);
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 
@@ -62,7 +71,7 @@ public:
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
 
-#define MAX_LIGHTS 1
+#define MAX_LIGHTS 4
 struct cbGlobalParam
 {
 	XMMATRIX mWorld;

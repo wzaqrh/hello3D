@@ -1,10 +1,10 @@
 #include "TBaseTypes.h"
 
 /********** TCamera **********/
-TCamera::TCamera(int width, int height)
+TCamera::TCamera(int width, int height, double fov, int eyeDistance, double far1)
 {
 	// Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -10.0f, 0.0f);
+	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -eyeDistance, 0.0f);
 	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mView = XMMatrixLookAtLH(Eye, At, Up);
@@ -15,7 +15,7 @@ TCamera::TCamera(int width, int height)
 	float z = XMVectorGetZ(res);*/
 
 	// Initialize the projection matrix
-	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
+	mProjection = XMMatrixPerspectiveFovLH(fov / 180.0 * XM_PI, width / (FLOAT)height, 0.01f, far1);
 }
 
 /********** TDirectLight **********/

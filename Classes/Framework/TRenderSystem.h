@@ -1,6 +1,7 @@
 #pragma once
 #include "TBaseTypes.h"
 
+class TD3DInput;
 class TRenderSystem
 {
 public:
@@ -15,10 +16,9 @@ public:
 	ID3D11Texture2D* mDepthStencil = NULL;
 	ID3D11DepthStencilView* mDepthStencilView = NULL;
 	ID3D11DepthStencilState* mDepthStencilState = NULL;
-	IDirectInput* mInput = NULL;
-	IDirectInputDevice* mMouse = NULL;
 	int mScreenWidth;
 	int mScreenHeight;
+	TD3DInput* mInput = nullptr;
 public:
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
@@ -36,6 +36,7 @@ public:
 	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();
 	TDirectLightPtr AddDirectLight();
+	TCameraPtr SetCamera(double fov, int eyeDistance, double far1);
 public:
 	TRenderTexturePtr CreateRenderTexture(int width, int height);
 	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
@@ -55,7 +56,7 @@ public:
 
 	ID3D11VertexShader* CreateVS(const char* filename, ID3DBlob*& pVSBlob);
 	ID3D11PixelShader* CreatePS(const char* filename);
-	ID3D11SamplerState* CreateSampler();
+	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR);
 	ID3D11InputLayout* CreateLayout(ID3DBlob* pVSBlob, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
 	ID3D11ShaderResourceView* CreateTexture(const char* pSrcFile);

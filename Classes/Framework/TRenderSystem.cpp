@@ -137,10 +137,9 @@ HRESULT TRenderSystem::Initialize()
 
 	mScreenWidth = width;
 	mScreenHeight = height;
-	mDefCamera = std::make_shared<TCamera>(width, height);
+	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight);
 
-	InputInit(mHInst, mHWnd, width, height);
-
+	mInput = new TD3DInput(mHInst, mHWnd, width, height);
 	return S_OK;
 }
 
@@ -150,7 +149,7 @@ void TRenderSystem::CleanUp()
 
 void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform)
 {
-	cbGlobalParam globalParam;
+	cbGlobalParam globalParam = {};
 	globalParam.mWorld = worldTransform;
 	globalParam.mView = mDefCamera->mView;
 	globalParam.mProjection = mDefCamera->mProjection;
@@ -202,6 +201,12 @@ TDirectLightPtr TRenderSystem::AddDirectLight()
 	TDirectLightPtr light = std::make_shared<TDirectLight>();
 	mDirectLights.push_back(light);
 	return light;
+}
+
+TCameraPtr TRenderSystem::SetCamera(double fov, int eyeDistance, double far1)
+{
+	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
+	return mDefCamera;
 }
 
 TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height)
@@ -269,17 +274,18 @@ void TRenderSystem::UpdateConstBuffer(ID3D11Buffer* buffer, void* data)
 	mDeviceContext->UpdateSubresource(buffer, 0, NULL, data, 0, 0);
 }
 
-ID3D11SamplerState* TRenderSystem::CreateSampler()
+ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter)
 {
 	HRESULT hr = S_OK;
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.Filter = filter;
+	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
@@ -426,6 +432,9 @@ ID3D11ShaderResourceView* TRenderSystem::CreateTexture(const char* pSrcFile)
 		if (CheckHR(hr))
 			return nullptr;
 	}
+
+	mDeviceContext->GenerateMips(pTextureRV);
+
 	return pTextureRV;
 }
 
@@ -436,6 +445,14 @@ ID3D11ShaderResourceView* TRenderSystem::GetTexByPath(const std::string& __imgPa
 	if (pos != std::string::npos) {
 		imgPath = __imgPath.substr(pos + 1, std::string::npos);
 	}
+
+#ifdef USE_ONLY_PNG
+	pos = imgPath.find_last_of(".");
+	if (pos != std::string::npos) {
+		imgPath = imgPath.substr(0, pos);
+		imgPath += ".png";
+	}
+#endif
 
 	ID3D11ShaderResourceView* texView = nullptr;
 	if (TexByPath.find(imgPath) == TexByPath.end()) {
