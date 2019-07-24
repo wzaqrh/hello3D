@@ -90,13 +90,21 @@ public:
 class TRenderTexture {
 public:
 	ID3D11Texture2D* mRenderTargetTexture;
+	ID3D11ShaderResourceView* mRenderTargetSRV;
 	ID3D11RenderTargetView* mRenderTargetView;
-	ID3D11ShaderResourceView* mShaderResourceView;
+
+	ID3D11Texture2D* mDepthStencilTexture;
+	ID3D11DepthStencilView* mDepthStencilView;
+
+	DXGI_FORMAT mFormat;
 public:
-	TRenderTexture(ID3D11Device* pDevice, int width, int height);
+	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT);
 private:
-	bool InitTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitRenderTextureView(ID3D11Device* pDevice);
 	bool InitRenderTargetView(ID3D11Device* pDevice);
-	bool InitResourceView(ID3D11Device* pDevice);
+	
+	bool InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitDepthStencilView(ID3D11Device* pDevice);
 };
 typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;

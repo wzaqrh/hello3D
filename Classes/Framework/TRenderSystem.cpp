@@ -5,7 +5,7 @@ TRenderSystem* gRenderSys;
 
 TRenderSystem::TRenderSystem()
 {
-	mPointLights.push_back(std::make_shared<TPointLight>());
+	//mPointLights.push_back(std::make_shared<TPointLight>());
 }
 
 TRenderSystem::~TRenderSystem()
@@ -209,14 +209,15 @@ TCameraPtr TRenderSystem::SetCamera(double fov, int eyeDistance, double far1)
 	return mDefCamera;
 }
 
-TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height)
+TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
 {
-	return std::make_shared<TRenderTexture>(mDevice, width, height);
+	return std::make_shared<TRenderTexture>(mDevice, width, height, format);
 }
 
 void TRenderSystem::ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color)
 {
 	mDeviceContext->ClearRenderTargetView(rendTarget->mRenderTargetView, (const float*)&color);
+	mDeviceContext->ClearDepthStencilView(rendTarget->mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
@@ -226,7 +227,7 @@ void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
 
 	//ID3D11RenderTargetView* renderTargetView = mRenderTargetView;
 	ID3D11RenderTargetView* renderTargetView = rendTarget != nullptr ? rendTarget->mRenderTargetView : mRenderTargetView;
-	ID3D11DepthStencilView* depthStencilView = rendTarget != nullptr ? nullptr : mDepthStencilView;
+	ID3D11DepthStencilView* depthStencilView = rendTarget != nullptr ? rendTarget->mDepthStencilView : mDepthStencilView;
 	mDeviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 }
 
@@ -433,7 +434,7 @@ ID3D11ShaderResourceView* TRenderSystem::CreateTexture(const char* pSrcFile)
 			return nullptr;
 	}
 
-	mDeviceContext->GenerateMips(pTextureRV);
+	//mDeviceContext->GenerateMips(pTextureRV);
 
 	return pTextureRV;
 }

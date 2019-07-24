@@ -38,7 +38,7 @@ public:
 	TDirectLightPtr AddDirectLight();
 	TCameraPtr SetCamera(double fov, int eyeDistance, double far1);
 public:
-	TRenderTexturePtr CreateRenderTexture(int width, int height);
+	TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT);
 	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
 	void SetRenderTarget(TRenderTexturePtr rendTarget);
 

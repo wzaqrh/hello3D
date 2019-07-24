@@ -100,7 +100,7 @@ PS_INPUT VS(VS_INPUT i)
 	
     output.Pos = mul(Projection, output.Pos);
     
-	output.Tex = i.Tex;
+	output.Tex = i.Tex;//float2(i.Tex.x, 1.0 - i.Tex.y);
     return output;
 }
 

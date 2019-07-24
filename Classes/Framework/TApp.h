@@ -26,6 +26,7 @@ protected:
 	virtual void OnPreInitDevice() {};
 	virtual void OnPostInitDevice() {};
 	virtual void OnRender() = 0;
+	virtual void OnInitLight();
 protected:
 	XMMATRIX GetWorldTransform();
 protected:

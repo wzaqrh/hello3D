@@ -103,15 +103,19 @@ ID3D11Buffer* TMaterial::AddConstBuffer(ID3D11Buffer* buffer)
 }
 
 /********** TRenderTexture **********/
-TRenderTexture::TRenderTexture(ID3D11Device* pDevice, int width, int height)
+TRenderTexture::TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format)
 {
-	InitTexture(pDevice, width, height);
+	mFormat = format;
+	InitRenderTexture(pDevice, width, height);
 	InitRenderTargetView(pDevice);
-	InitResourceView(pDevice);
+	InitRenderTextureView(pDevice);
+
+	InitDepthStencilTexture(pDevice, width, height);
+	InitDepthStencilView(pDevice);
 }
 
-const DXGI_FORMAT CTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
-bool TRenderTexture::InitTexture(ID3D11Device* pDevice, int width, int height)
+//const DXGI_FORMAT CTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
+bool TRenderTexture::InitRenderTexture(ID3D11Device* pDevice, int width, int height)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -119,7 +123,7 @@ bool TRenderTexture::InitTexture(ID3D11Device* pDevice, int width, int height)
 	textureDesc.Height = height;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = CTargetFormat;
+	textureDesc.Format = mFormat;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -137,7 +141,7 @@ bool TRenderTexture::InitRenderTargetView(ID3D11Device* pDevice)
 {
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
-	renderTargetViewDesc.Format = CTargetFormat;
+	renderTargetViewDesc.Format = mFormat;
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
@@ -149,16 +153,58 @@ bool TRenderTexture::InitRenderTargetView(ID3D11Device* pDevice)
 	return true;
 }
 
-bool TRenderTexture::InitResourceView(ID3D11Device* pDevice)
+bool TRenderTexture::InitRenderTextureView(ID3D11Device* pDevice)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
-	shaderResourceViewDesc.Format = CTargetFormat;
+	shaderResourceViewDesc.Format = mFormat;
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	HRESULT result = pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mShaderResourceView);
+	HRESULT result = pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mRenderTargetSRV);
+	if (FAILED(result)) {
+		return false;
+	}
+	return true;
+}
+
+bool TRenderTexture::InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height)
+{
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+
+	// Set up the description of the depth buffer.
+	depthBufferDesc.Width = width;
+	depthBufferDesc.Height = height;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	HRESULT result = pDevice->CreateTexture2D(&depthBufferDesc, NULL, &mDepthStencilTexture);
+	if (FAILED(result)) {
+		return false;
+	}
+	return true;
+}
+
+bool TRenderTexture::InitDepthStencilView(ID3D11Device* pDevice)
+{
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	HRESULT result = pDevice->CreateDepthStencilView(mDepthStencilTexture, &depthStencilViewDesc, &mDepthStencilView);
 	if (FAILED(result)) {
 		return false;
 	}

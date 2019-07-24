@@ -28,6 +28,9 @@ bool TApp::Initialize()
 		mRenderSys->CleanUp();
 		return false;
 	}
+
+	OnInitLight();
+
 	OnPostInitDevice();
 	return true;
 }
@@ -53,6 +56,11 @@ void TApp::Render()
 std::string TApp::GetName()
 {
 	return mName;
+}
+
+void TApp::OnInitLight()
+{
+	mRenderSys->AddPointLight();
 }
 
 XMMATRIX TApp::GetWorldTransform()
