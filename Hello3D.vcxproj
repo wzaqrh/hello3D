@@ -383,6 +383,8 @@
     <ClCompile Include="Classes\Lessons\Lesson3.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson4.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson5.cpp" />
+    <ClCompile Include="Classes\Lessons\Lesson6.cpp" />
+    <ClCompile Include="Classes\Lessons\Lesson7.cpp" />
     <ClCompile Include="Classes\Main.cpp" />
     <ClCompile Include="Classes\Model\AssimpModel.cpp" />
     <ClCompile Include="Classes\Model\TMesh.cpp" />
@@ -399,15 +401,14 @@
     <ClInclude Include="Classes\Lessons\Lesson3.h" />
     <ClInclude Include="Classes\Lessons\Lesson4.h" />
     <ClInclude Include="Classes\Lessons\Lesson5.h" />
+    <ClInclude Include="Classes\Lessons\Lesson6.h" />
+    <ClInclude Include="Classes\Lessons\Lesson7.h" />
     <ClInclude Include="Classes\Model\AssimpModel.h" />
     <ClInclude Include="Classes\Model\TMesh.h" />
     <ClInclude Include="Classes\Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\assimp-master\lib\Debug\assimp-vc140-mtd.exp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\assimp-master\lib\Debug\assimp-vc140-mtd.lib" />
+    <Library Include="lib\assimp-vc140-mt.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
