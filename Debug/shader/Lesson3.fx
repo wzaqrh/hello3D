@@ -19,7 +19,7 @@ struct LIGHT_POINT
 	float4 Attenuation;
 };
 
-static const int MAX_LIGHTS = 1;
+static const int MAX_LIGHTS = 4;
 cbuffer cbGlobalParam : register(b0)
 {
 	matrix World;
@@ -46,6 +46,7 @@ struct VS_INPUT
 	float2 Tex  : TEXCOORD0;
     float4 BlendWeights : BLENDWEIGHT;
     uint4  BlendIndices : BLENDINDICES;
+	float3 BiTangent : NORMAL2;
 };
 
 struct PS_INPUT

@@ -24,6 +24,7 @@ struct VS_INPUT
 	float2 Tex  : TEXCOORD0;
     float4 BlendWeights : BLENDWEIGHT;
     uint4  BlendIndices : BLENDINDICES;
+	float3 BiTangent : NORMAL2;
 };
 
 struct PS_INPUT

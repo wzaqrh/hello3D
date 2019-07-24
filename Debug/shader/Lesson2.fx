@@ -6,6 +6,7 @@ struct LIGHT_STRUCT
 {
 	float4 LightPos;//world space
 	float4 LightColor;
+	float4 SpecularColorPower;
 };
 
 cbuffer cbGlobalParam : register(b0)
@@ -13,7 +14,7 @@ cbuffer cbGlobalParam : register(b0)
 	matrix World;
 	matrix View;
 	matrix Projection;
-	LIGHT_STRUCT DefLight = {{0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0}};
+	LIGHT_STRUCT DefLight = {{0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0}, {1.0,1.0,1.0,1.0}};
 }
 
 static const int MAX_MATRICES = 256;
@@ -31,6 +32,7 @@ struct VS_INPUT
 	float2 Tex  : TEXCOORD0;
     float4 BlendWeights : BLENDWEIGHT;
     uint4  BlendIndices : BLENDINDICES;
+	float3 BiTangent : NORMAL2;
 };
 
 struct PS_INPUT
