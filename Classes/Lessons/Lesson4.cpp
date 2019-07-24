@@ -48,4 +48,4 @@ void Lesson4::OnRender()
 	mModel->Draw();
 }
 
-auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");
+//auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");

@@ -19,12 +19,12 @@ void Lesson5::OnPostInitDevice()
 	mSprite = std::make_shared<TSprite>(mRenderSys, "shader\\Sprite.fx", "shader\\Sprite.fx");
 	//mSprite->SetTexture(mRenderSys->CreateTexture("image\\smile.png"));
 	mSprite->SetTexture(mRendTexture->mShaderResourceView);
-	mSprite->SetPosition(0, 0);
+	mSprite->SetPosition(0, 0, 0);
 	mSprite->SetSize(5,5);
 
 
 	mLayerColor = std::make_shared<TSprite>(mRenderSys, "shader\\LayerColor.fx", "shader\\LayerColor.fx");
-	mLayerColor->SetPosition(-5, -5);
+	mLayerColor->SetPosition(-5, -5, 0);
 	mLayerColor->SetSize(5, 5);
 }
 
@@ -44,4 +44,4 @@ void Lesson5::OnRender()
 	mLayerColor->Draw();
 }
 
-auto reg = AppRegister<Lesson5>("TAppLesson5: RenderTarget");
+//auto reg = AppRegister<Lesson5>("TAppLesson5: RenderTarget");

@@ -140,13 +140,23 @@ AssimpModel::~AssimpModel()
 	delete mImporter;
 }
 
+const unsigned int ImportFlags =
+aiProcess_ConvertToLeftHanded |
+aiProcess_Triangulate |
+aiProcess_CalcTangentSpace;/* |
+aiProcess_SortByPType |
+aiProcess_PreTransformVertices |
+aiProcess_GenNormals |
+aiProcess_GenUVCoords |
+aiProcess_OptimizeMeshes |
+aiProcess_Debone |
+aiProcess_ValidateDataStructure;*/
+
 void AssimpModel::LoadModel(const std::string& imgPath)
 {
 	delete mImporter;
 	mImporter = new Assimp::Importer;
-	mScene = mImporter->ReadFile(imgPath,
-		aiProcess_Triangulate |
-		aiProcess_ConvertToLeftHanded);
+	mScene = mImporter->ReadFile(imgPath, ImportFlags);
 
 	for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
 		const aiMesh* mesh = mScene->mMeshes[i];
@@ -167,6 +177,7 @@ void AssimpModel::LoadModel(const std::string& imgPath)
 void AssimpModel::processNode(aiNode* node, const aiScene* scene)
 {
 	mNodeInfos[node].mLocalTransform = node->mTransformation;
+	mNodeInfos[node].mGlobalTransform = mNodeInfos[node].mLocalTransform;
 	for (int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* meshData = scene->mMeshes[node->mMeshes[i]];
@@ -202,11 +213,14 @@ void ReCalculateTangents(std::vector<MeshVertex>& vertices, const std::vector<UI
 
 		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 		XMFLOAT3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-		XMFLOAT3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
 		v0.Tangent = v0.Tangent + tangent;
 		v1.Tangent = v1.Tangent + tangent;
 		v2.Tangent = v2.Tangent + tangent;
+
+		XMFLOAT3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+		v0.BiTangent = v0.BiTangent + bitangent;
+		v1.BiTangent = v1.BiTangent + bitangent;
+		v2.BiTangent = v2.BiTangent + bitangent;
 	}
 }
 
@@ -242,7 +256,9 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 		if (mesh->mTangents) {
 			vertex.Tangent = ToXM(mesh->mTangents[vertexId]);
 		}
-
+		if (mesh->mBitangents) {
+			vertex.BiTangent = ToXM(mesh->mBitangents[vertexId]);
+		}
 		vertices.push_back(vertex);
 	}
 
@@ -419,6 +435,7 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName)
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
 	mMaterial->mConstantBuffers.push_back(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
@@ -438,11 +455,17 @@ void AssimpModel::DoDraw(aiNode* node)
 				size_t boneSize = boneMats.size(); assert(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
 					mWeightedSkin.Models[j] = ToXM(boneMats[j]);
-				mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &mWeightedSkin, 0, 0);
 			}
 			else {
 				mWeightedSkin.Models[0] = XMMatrixIdentity();
 			}
+
+			mWeightedSkin.hasNormal = mesh->HasTexture(E_TEXTURE_PBR_NORMAL);
+			mWeightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
+			mWeightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
+			mWeightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
+			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &mWeightedSkin, 0, 0);
+
 			mesh->Draw(mRenderSys);
 		}
 	}
@@ -453,5 +476,6 @@ void AssimpModel::DoDraw(aiNode* node)
 
 void AssimpModel::Draw()
 {
+	mDrawCount = 0;
 	DoDraw(mRootNode);
 }

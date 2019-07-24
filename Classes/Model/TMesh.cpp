@@ -1,6 +1,20 @@
 #include "TMesh.h"
 #include "TRenderSystem.h"
 
+/********** TextureInfo **********/
+TextureInfo::TextureInfo(std::string __path, ID3D11ShaderResourceView* __texture)
+{
+	path = __path;
+	texture = __texture;
+}
+
+TextureInfo::TextureInfo()
+	:texture(nullptr)
+{
+
+}
+
+/********** TMesh **********/
 TMesh::TMesh(const aiMesh* __data,
 	const std::vector<MeshVertex>& vertices,
 	const std::vector<UINT>& indices,
@@ -41,18 +55,15 @@ void TMesh::Draw(TRenderSystem* renderSys)
 			texViews[i] = textures[i].texture;
 		renderSys->mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 	}
+	else {
+		ID3D11ShaderResourceView* texViewNull = nullptr;
+		renderSys->mDeviceContext->PSSetShaderResources(0, 1, &texViewNull);
+	}
 
 	renderSys->mDeviceContext->DrawIndexed(indices.size(), 0, 0);
 }
 
-TextureInfo::TextureInfo(std::string __path, ID3D11ShaderResourceView* __texture)
+bool TMesh::HasTexture(int slot)
 {
-	path = __path;
-	texture = __texture;
-}
-
-TextureInfo::TextureInfo()
-	:texture(nullptr)
-{
-
+	return slot < textures.size() && textures[slot].texture != nullptr;
 }

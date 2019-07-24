@@ -7,6 +7,10 @@ struct cbWeightedSkin
 {
 	XMMATRIX mModel;
 	XMMATRIX Models[MAX_MATRICES];
+	int hasNormal;
+	int hasMetalness;
+	int hasRoughness;
+	int hasAO;
 };
 
 struct AiNodeInfo {
@@ -51,6 +55,7 @@ public:
 	aiNode* mRootNode = nullptr;
 	const aiScene* mScene = nullptr;
 	int mCurrentAnimIndex = -1;
+	int mDrawCount;
 private:
 	std::vector<aiMatrix4x4> mTransforms;
 	float mElapse = 0.0f;

@@ -10,6 +10,7 @@ struct MeshVertex
 	XMFLOAT2 Tex;
 	XMFLOAT4 BlendWeights;
 	unsigned int  BlendIndices[4];
+	XMFLOAT3 BiTangent;
 };
 
 enum enTextureType {
@@ -18,7 +19,15 @@ enum enTextureType {
 	E_TEXTURE_NORMAL,
 	E_TEXTURE_BUMP
 };
+enum enTexturePbrType {
+	E_TEXTURE_PBR_ALBEDO,
+	E_TEXTURE_PBR_NORMAL,
+	E_TEXTURE_PBR_METALNESS,
+	E_TEXTURE_PBR_ROUGHNESS,
+	E_TEXTURE_PBR_AO
+};
 struct TextureInfo {
+	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	std::string path;
 	ID3D11ShaderResourceView *texture;
 	TextureInfo();
@@ -40,6 +49,8 @@ public:
 		TRenderSystem *renderSys);
 	void Close();
 	void Draw(TRenderSystem* renderSys);
+
+	bool HasTexture(int slot);
 private:
 	bool setupMesh(TRenderSystem *renderSys);
 public:
