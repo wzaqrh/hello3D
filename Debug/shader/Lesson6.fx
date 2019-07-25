@@ -1,4 +1,4 @@
-/********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
+/********** PBR **********/
 SamplerState samLinear : register(s0);
 
 Texture2D albedoTexture : register(t0);//rgb

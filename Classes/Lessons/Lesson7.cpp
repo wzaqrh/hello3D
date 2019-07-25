@@ -26,9 +26,11 @@ void Lesson7::OnPostInitDevice()
 
 		mModel1 = new AssimpModel(mRenderSys, "shader\\ShadowDepth.fx", "shader\\ShadowDepth.fx");
 		mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
+		mModel1->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbShadowMap)));
 
 		mModel2 = new AssimpModel(mRenderSys, "shader\\ShadowDepth.fx", "shader\\ShadowDepth.fx");
 		mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
+		mModel2->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbShadowMap)));
 
 		mPass1RT = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	}
@@ -42,9 +44,6 @@ void Lesson7::OnPostInitDevice()
 	mSecondPass->SetPosition(-w, -h, 0);
 	mSecondPass->SetSize(w*2, h*2);
 	//mSecondPass->SetFlipY(true);
-
-	auto Pass2Mat = mSecondPass->mMaterial;
-	Pass2Mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbShadowMap)));
 }
 
 void Lesson7::OnRender()
@@ -55,22 +54,20 @@ void Lesson7::OnRender()
 #endif
 	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
 
-	mModel1->Update(mTimer.mDeltaTime);	
-	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(0.1, 0.1, 0.1), &LightCam);
+	mModel1->Update(mTimer.mDeltaTime);	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(0.1, 0.1, 0.1), &LightCam);
 	mModel1->Draw();
 
-	mModel2->Update(mTimer.mDeltaTime);
-	mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
+	mModel2->Update(mTimer.mDeltaTime); mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
 	mModel2->Draw();
 #ifdef USE_RENDER_TEXTURE
 	mRenderSys->SetRenderTarget(nullptr);
 
-	cbShadowMap cb;
-	cb.LightProjection = LightCam.mProjection;
-	cb.LightView = LightCam.mView;
-	mRenderSys->UpdateConstBuffer(mSecondPass->mMaterial->mConstantBuffers[2], &cb);
+	//pass2
+	cbShadowMap cb = { LightCam.mView, LightCam.mProjection };
+	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->mConstantBuffers[2], &cb);
+	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->mConstantBuffers[2], &cb);
+
 	
-	mSecondPass->Draw();
 #endif
 }
 

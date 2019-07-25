@@ -257,16 +257,16 @@ ID3D11InputLayout* TRenderSystem::CreateLayout(ID3DBlob* pVSBlob, D3D11_INPUT_EL
 	return pVertexLayout;
 }
 
-bool TRenderSystem::UpdateBuffer(ID3D11Buffer* buffer, void* data, int dataSize)
+bool TRenderSystem::UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize)
 {
 	assert(buffer);
 	HRESULT hr = S_OK;
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	hr = (mDeviceContext->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+	hr = (mDeviceContext->Map(buffer->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
 	if (CheckHR(hr))
 		return false;
 	memcpy(MappedResource.pData, data, dataSize);
-	mDeviceContext->Unmap(buffer, 0);
+	mDeviceContext->Unmap(buffer->buffer, 0);
 	return true;
 }
 
@@ -297,7 +297,7 @@ ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter)
 	return pSamplerLinear;
 }
 
-ID3D11PixelShader* TRenderSystem::CreatePS(const char* filename)
+ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename)
 {
 	HRESULT hr = S_OK;
 
@@ -319,12 +319,12 @@ ID3D11PixelShader* TRenderSystem::CreatePS(const char* filename)
 TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath)
 {
 	TProgramPtr program = std::make_shared<TProgram>();
-	program->mVertexShader = CreateVS(vsPath, program->mVSBlob);
-	program->mPixelShader = CreatePS(psPath);
+	program->mVertexShader = _CreateVS(vsPath, program->mVSBlob);
+	program->mPixelShader = _CreatePS(psPath);
 	return program;
 }
 
-ID3D11VertexShader* TRenderSystem::CreateVS(const char* filename, ID3DBlob*& pVSBlob)
+ID3D11VertexShader* TRenderSystem::_CreateVS(const char* filename, ID3DBlob*& pVSBlob)
 {
 	HRESULT hr = S_OK;
 
@@ -346,7 +346,7 @@ ID3D11VertexShader* TRenderSystem::CreateVS(const char* filename, ID3DBlob*& pVS
 	return pVertexShader;
 }
 
-ID3D11Buffer* TRenderSystem::CreateVertexBuffer(int bufferSize, void* buffer)
+ID3D11Buffer* TRenderSystem::_CreateVertexBuffer(int bufferSize, void* buffer)
 {
 	HRESULT hr = S_OK;
 
@@ -368,7 +368,7 @@ ID3D11Buffer* TRenderSystem::CreateVertexBuffer(int bufferSize, void* buffer)
 	return pVertexBuffer;
 }
 
-ID3D11Buffer* TRenderSystem::CreateVertexBuffer(int bufferSize)
+ID3D11Buffer* TRenderSystem::_CreateVertexBuffer(int bufferSize)
 {
 	HRESULT hr = S_OK;
 
@@ -384,6 +384,25 @@ ID3D11Buffer* TRenderSystem::CreateVertexBuffer(int bufferSize)
 	if (CheckHR(hr))
 		return nullptr;
 	return pVertexBuffer;
+}
+
+TVertexBufferPtr TRenderSystem::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
+{
+	TVertexBufferPtr vertexBuffer;
+	if (buffer) {
+		vertexBuffer = std::make_shared<TVertexBuffer>(_CreateVertexBuffer(bufferSize, buffer), bufferSize, stride, offset);
+	}
+	else {
+		vertexBuffer = std::make_shared<TVertexBuffer>(_CreateVertexBuffer(bufferSize), bufferSize, stride, offset);
+	}
+	return vertexBuffer;
+}
+
+void TRenderSystem::SetVertexBuffer(TVertexBufferPtr vertexBuffer)
+{
+	UINT stride = vertexBuffer->stride;
+	UINT offset = vertexBuffer->offset;
+	mDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer->buffer, &stride, &offset);
 }
 
 ID3D11Buffer* TRenderSystem::CreateIndexBuffer(int bufferSize, void* buffer)
@@ -426,7 +445,7 @@ ID3D11Buffer* TRenderSystem::CreateConstBuffer(int bufferSize)
 	return pConstantBuffer;
 }
 
-ID3D11ShaderResourceView* TRenderSystem::CreateTexture(const char* pSrcFile)
+ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 	pSrcFile = imgPath.c_str();
@@ -448,7 +467,7 @@ ID3D11ShaderResourceView* TRenderSystem::CreateTexture(const char* pSrcFile)
 }
 
 std::map<std::string, ID3D11ShaderResourceView*> TexByPath;
-ID3D11ShaderResourceView* TRenderSystem::GetTexByPath(const std::string& __imgPath) {
+TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
 	std::string imgPath = __imgPath;
 	auto pos = __imgPath.find_last_of("\\");
 	if (pos != std::string::npos) {
@@ -465,11 +484,11 @@ ID3D11ShaderResourceView* TRenderSystem::GetTexByPath(const std::string& __imgPa
 
 	ID3D11ShaderResourceView* texView = nullptr;
 	if (TexByPath.find(imgPath) == TexByPath.end()) {
-		texView = CreateTexture(imgPath.c_str());
+		texView = _CreateTexture(imgPath.c_str());
 		TexByPath.insert(std::make_pair(imgPath, texView));
 	}
 	else {
 		texView = TexByPath[imgPath];
 	}
-	return texView;
+	return TTexture(__imgPath, texView);
 }

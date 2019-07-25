@@ -15,6 +15,8 @@
 #include "TRenderSystem.h"
 #include "TApp.h"
 
+#pragma comment(lib, "legacy_stdio_definitions.lib")
+
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, TApp* app);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 

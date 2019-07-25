@@ -64,9 +64,7 @@ void Lesson6::OnPostInitDevice()
 			if (postfixs[0] == firstPostfix) {
 				iter->textures.clear();
 				for (int i = iter->textures.size(); i < ARRAYSIZE(postfixs); ++i) {
-					TextureInfo texInfo = {};
-					texInfo.path = prefix + "_" + postfixs[i] + ".png";
-					texInfo.texture = mRenderSys->GetTexByPath(texInfo.path);
+					TTexture texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
 					iter->textures.push_back(texInfo);
 					assert(texInfo.texture);
 				}
@@ -76,7 +74,7 @@ void Lesson6::OnPostInitDevice()
 #else
 	gModelPath = "cerberus\\"; mModel->LoadModel(MakeModelPath("cerberus.fbx"));;// mScale = 0.1; mPosition = XMFLOAT3(0, 0, 0);
 
-	std::vector<TextureInfo> textures(4);
+	std::vector<TTexture> textures(4);
 	const char* images[] = {
 		"cerberus_A.png",
 		"cerberus_N.png",
@@ -85,7 +83,7 @@ void Lesson6::OnPostInitDevice()
 	};
 	for (int i = 0; i < 4; ++i) {
 		std::string path = images[i];
-		textures[i].texture = mRenderSys->CreateTexture(path.c_str());
+		textures[i].texture = mRenderSys->_CreateTexture(path.c_str());
 		textures[i].path = images[i];
 		textures[i].texture->GetDesc(&textures[i].desc);
 	}

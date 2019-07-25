@@ -130,3 +130,45 @@ private:
 	bool InitDepthStencilView(ID3D11Device* pDevice);
 };
 typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
+
+enum enTextureType {
+	E_TEXTURE_DIFFUSE,
+	E_TEXTURE_SPECULAR,
+	E_TEXTURE_NORMAL,
+	E_TEXTURE_BUMP
+};
+enum enTexturePbrType {
+	E_TEXTURE_PBR_ALBEDO,
+	E_TEXTURE_PBR_NORMAL,
+	E_TEXTURE_PBR_METALNESS,
+	E_TEXTURE_PBR_ROUGHNESS,
+	E_TEXTURE_PBR_AO
+};
+struct TTexture {
+	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+	std::string path;
+	ID3D11ShaderResourceView *texture;
+public:
+	TTexture();
+	TTexture(std::string __path, ID3D11ShaderResourceView* __texture);
+};
+
+struct THardwareBuffer {
+	ID3D11Buffer* buffer;
+	unsigned int bufferSize;
+public:
+	THardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize):buffer(__buffer), bufferSize(__bufferSize) {};
+	THardwareBuffer() :buffer(nullptr), bufferSize(0) {};
+};
+
+struct TVertexBuffer : public THardwareBuffer {
+	unsigned int stride, offset;
+	TVertexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
+		:THardwareBuffer(__buffer, __bufferSize), stride(__stride), offset(__offset) {};
+	TVertexBuffer() :stride(0), offset(0) {};
+};
+typedef std::shared_ptr<TVertexBuffer> TVertexBufferPtr;
+
+struct TIndexBuffer : public THardwareBuffer {
+	DXGI_FORMAT format;
+};

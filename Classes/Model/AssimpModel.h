@@ -43,7 +43,7 @@ private:
 	void LoadMaterial(const char* vsName, const char* psName);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
-	std::vector<TextureInfo> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
+	std::vector<TTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 public:
 	TMaterialPtr mMaterial;
 	cbWeightedSkin mWeightedSkin;
@@ -51,7 +51,7 @@ public:
 	TMeshSharedPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
 	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
-	std::map<std::string, TextureInfo> mLoadedTexture;
+	std::map<std::string, TTexture> mLoadedTexture;
 	aiNode* mRootNode = nullptr;
 	const aiScene* mScene = nullptr;
 	int mCurrentAnimIndex = -1;

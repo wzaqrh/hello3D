@@ -66,7 +66,7 @@ TSprite::TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psNam
 	mMaterial->mConstantBuffers.push_back(mRenderSys->CreateConstBuffer(sizeof(Pos3Color3Tex2)));
 
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), (void*)&indices[0]);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad));
+	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 }
 
 TSprite::~TSprite()
@@ -79,7 +79,7 @@ void TSprite::SetPosition(float x, float y, float z)
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetZ(z);
 
-	mRenderSys->UpdateBuffer(mVertexBuffer, &mQuad, sizeof(mQuad));
+	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetSize(float w, float h)
@@ -87,7 +87,7 @@ void TSprite::SetSize(float w, float h)
 	mSize = XMFLOAT2(w,h);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 
-	mRenderSys->UpdateBuffer(mVertexBuffer, &mQuad, sizeof(mQuad));
+	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetTexture(ID3D11ShaderResourceView* Texture)
@@ -103,10 +103,7 @@ void TSprite::SetFlipY(bool flipY)
 void TSprite::Draw()
 {
 	mRenderSys->ApplyMaterial(mMaterial, XMMatrixIdentity());
-
-	UINT stride = sizeof(Pos3Color3Tex2);
-	UINT offset = 0;
-	mRenderSys->mDeviceContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
+	mRenderSys->SetVertexBuffer(mVertexBuffer);
 	mRenderSys->mDeviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	if (mTexture != nullptr) {
 		mRenderSys->mDeviceContext->PSSetShaderResources(0, 1, &mTexture);

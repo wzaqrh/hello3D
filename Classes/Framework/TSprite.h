@@ -30,7 +30,8 @@ private:
 	XMFLOAT2 mPosition;
 	XMFLOAT2 mSize;
 	ID3D11ShaderResourceView* mTexture = nullptr;
-	ID3D11Buffer *mVertexBuffer = nullptr, *mIndexBuffer = nullptr;
+	TVertexBufferPtr mVertexBuffer;
+	ID3D11Buffer *mIndexBuffer = nullptr;
 	TRenderSystem* mRenderSys = nullptr;
 public:
 	TMaterialPtr mMaterial;
