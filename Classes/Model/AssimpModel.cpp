@@ -493,5 +493,20 @@ int AssimpModel::GenRenderOperation(TRenderOperationList& opList)
 
 void AssimpModel::Draw()
 {
-	mRenderSys->Draw(this);
+	TRenderOperationList opList;
+	GenRenderOperation(opList);
+	for (int i = 0; i < opList.size(); ++i) {
+		mRenderSys->RenderOperation(opList[i]);
+	}
+}
+
+void AssimpModel::DrawShadow(ID3D11ShaderResourceView* shadowMap)
+{
+	TRenderOperationList opList;
+	GenRenderOperation(opList);
+	for (int i = 0; i < opList.size(); ++i) {
+		TRenderOperation& op = opList[i];
+		op.mTextures[3] = TTexture("", shadowMap);
+		mRenderSys->RenderOperation(op);
+	}
 }

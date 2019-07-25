@@ -48,6 +48,18 @@ void TApp::Render()
 
 	mTimer.Update();
 	mRenderSys->mInput->Frame();
+
+	//rotate camera
+	{
+		TINT4 m = mRenderSys->mInput->GetMouseLocation(false);
+		float angy = 3.14 * m.x / mRenderSys->mScreenWidth, angx = 3.14 * m.y / mRenderSys->mScreenHeight;
+		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
+
+		auto eye = mRenderSys->mDefCamera->mEye;
+		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -mRenderSys->mDefCamera->mEyeDistance, 1), euler);
+		mRenderSys->mDefCamera->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), mRenderSys->mDefCamera->mAt);
+	}
+
 	OnRender();
 
 	mRenderSys->mSwapChain->Present(0, 0);
@@ -66,7 +78,7 @@ void TApp::OnInitLight()
 XMMATRIX TApp::GetWorldTransform()
 {
 	TINT4 m = mRenderSys->mInput->GetMouseLocation(true);
-	float scalez = clamp(0.01f, 10.0f, mScale * (1000 + m.z) / 1000.0f);
+	float scalez = clamp(0.00001f, 10.0f, mScale * (1000 + m.z) / 1000.0f);
 	float angy = 3.14 * -m.x / mRenderSys->mScreenWidth, angx = 3.14 * -m.y / mRenderSys->mScreenHeight;
 	XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 

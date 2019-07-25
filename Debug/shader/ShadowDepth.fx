@@ -63,6 +63,7 @@ SHADOW_PS_INPUT VS( SHADOW_VS_INPUT i)
 float4 PS(SHADOW_PS_INPUT i) : SV_Target
 {
 	float depthValue = i.Depth.z / i.Depth.w;
-	float4 finalColor = float4(depthValue/2.0+0.5,0.0,0.0,1.0);
+	float4 finalColor = depthValue;
+	//float4 finalColor = pow(depthValue,64);
 	return finalColor;
 }

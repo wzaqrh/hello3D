@@ -1,5 +1,13 @@
 /********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
 SamplerState samLinear : register(s0);
+SamplerState samShadow : register(s1) {
+    MinFilter = Point;
+    MagFilter = Point;
+    MipFilter = Point;
+    AddressU = Clamp;
+    AddressV = Clamp;	
+};
+
 Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
@@ -105,7 +113,7 @@ PS_INPUT VS(VS_INPUT i)
 	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
 	output.Pos = mul(MWV, skinPos);	
 	output.SurfacePos = output.Pos.xyz / output.Pos.w;
-	output.Eye = -output.Pos;
+	output.Eye = -output.Pos.xyz;
 	
     output.Pos = mul(Projection, output.Pos);
 	
@@ -173,6 +181,8 @@ float3 GetBumpBySampler(float3x3 tbn, float2 texcoord) {
 	return bump;
 }
 
+#define SHADOW_EPSILON 0.00005f
+#define SMAP_SIZE 512
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float3 eye = normalize(input.Eye);
@@ -202,18 +212,46 @@ float4 PS(PS_INPUT input) : SV_Target
 	}
 	
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	vec4 posInLight = input.PosInLight;
-	float2 projPosInLight = float2(posInLight.x/posInLight.w/2.0 + 0.5, -posInLight.y/posInLight.w/2.0 + 0.5);
-	if((saturate(projPosInLight.x) == projPosInLight.x) && (saturate(projPosInLight.y) == projPosInLight.y))
+	
+	float4 posInLight = input.PosInLight;
+    float2 projPosInLight = 0.5 * posInLight.xy / posInLight.w + float2( 0.5, 0.5 );
+    projPosInLight.y = 1.0f - projPosInLight.y;
+#if 0
 	{
-		float depthInLight = posInLight.z / posInLight.w - bias;
-		float depthMap = txDepthMap.Sample(samLinear, projPosInLight).r;
+		float depthInLight = posInLight.z / posInLight.w - SHADOW_EPSILON;
+		float depthMap = txDepthMap.Sample(samShadow, projPosInLight).r;
 		if (depthInLight < depthMap) {
 			finalColor.rgb = color.rgb;
 		}
 	}
+#else
+	{//developed by microsoft
+		float depthInLight = posInLight.z / posInLight.w - SHADOW_EPSILON;
+		
+        float2 texelpos = SMAP_SIZE * projPosInLight;
+        
+        // Determine the lerp amounts           
+        float2 lerps = frac(texelpos);
+
+        //read in bilerp stamp, doing the shadow checks
+        float sourcevals[4];
+        sourcevals[0] = (txDepthMap.Sample(samShadow, projPosInLight) < depthInLight) ? 0.0f : 1.0f;  
+        sourcevals[1] = (txDepthMap.Sample(samShadow, projPosInLight + float2(1.0/SMAP_SIZE, 0) ) < depthInLight) ? 0.0f : 1.0f;  
+        sourcevals[2] = (txDepthMap.Sample(samShadow, projPosInLight + float2(0, 1.0/SMAP_SIZE) ) < depthInLight) ? 0.0f : 1.0f;  
+        sourcevals[3] = (txDepthMap.Sample(samShadow, projPosInLight + float2(1.0/SMAP_SIZE, 1.0/SMAP_SIZE) ) < depthInLight) ? 0.0f : 1.0f;  
+        
+        // lerp between the shadow values to calculate our light amount
+        float LightAmount = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
+                                 lerp(sourcevals[2], sourcevals[3], lerps.x),
+                                 lerps.y);
+		
+		finalColor.rgb = color.rgb * LightAmount;
+	}
+#endif	
+	//finalColor = txDepthMap.Sample(samShadow, projPosInLight).r;
+	//finalColor = 1.0;
 	
-	return color;
+	return finalColor;
 }
 
 

@@ -33,6 +33,7 @@ public:
 
 struct TCamera : public TCameraBase {
 public:
+	float mEyeDistance;
 	XMFLOAT3 mEye, mAt, mUp;
 	int mWidth, mHeight;
 	double mFOV, mFar;

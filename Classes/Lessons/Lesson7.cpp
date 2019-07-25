@@ -3,26 +3,29 @@
 void Lesson7::OnInitLight()
 {
 	mLight = mRenderSys->AddPointLight();//1, -1, 1
-	//mLight->SetPosition(150,150,-150);
-	mLight->SetPosition(0, 0, -150);
+	float ddd = 10;
+	mLight->SetPosition(ddd, ddd, -ddd);
+	mLight->SetAttenuation(1, 0.001, 0);
+	//mLight->SetPosition(0, 0, -150);
 }
 
-//#define USE_RENDER_TEXTURE
+#define USE_RENDER_TEXTURE
+#define SCALE_BASE 0.01
 void Lesson7::OnPostInitDevice()
 {
-	mRenderSys->SetCamera(45, 150, 1000);
-
-#if 1
-	auto pCam = mRenderSys->mDefCamera;
-	XMFLOAT3 p0 = pCam->CalNDC(XMFLOAT3(0, 0, 0));
-	XMFLOAT3 p1 = pCam->CalNDC(XMFLOAT3(0, 0, -145));
-	XMFLOAT3 p2 = pCam->CalNDC(XMFLOAT3(0, 0, -149));
-	XMFLOAT3 p3 = pCam->CalNDC(XMFLOAT3(0, 0, -149.5));
-	XMFLOAT3 p4 = pCam->CalNDC(XMFLOAT3(0, 0, -149.95));
-#endif
+	mRenderSys->SetCamera(45, 30, 300);
 
 	{
-		gModelPath = "Spaceship\\"; mScale = 0.002; mPosition = XMFLOAT3(0, 0, -145);
+		float dd = 9;
+		gModelPath = "Spaceship\\"; mScale = SCALE_BASE * 0.02; mPosition = XMFLOAT3(dd, dd, -dd);
+
+#if 1
+		auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
+		auto pCam = &LightCam;
+		//auto pCam = mRenderSys->mDefCamera;
+		XMFLOAT3 p0 = pCam->CalNDC(XMFLOAT3(0, 0, 0));
+		XMFLOAT3 p1 = pCam->CalNDC(mPosition);
+#endif
 
 		mModel1 = new AssimpModel(mRenderSys, "shader\\ShadowDepth.fx", "shader\\ShadowDepth.fx");
 		mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
@@ -32,42 +35,48 @@ void Lesson7::OnPostInitDevice()
 		mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 		mModel2->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbShadowMap)));
 
-		mPass1RT = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		mPass1RT = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight, DXGI_FORMAT_R32_FLOAT);
 	}
 
-	//mProgShadowMap = mRenderSys->CreateProgram("shader\\ShadowMap.fx", "shader\\ShadowMap.fx");
-	//mSecondPass = std::make_shared<TSprite>(mRenderSys, "shader\\ShadowMap.fx", "shader\\ShadowMap.fx");
+	mProgShadowMap = mRenderSys->CreateProgram("shader\\ShadowMap.fx", "shader\\ShadowMap.fx");
+#if 0
 	mSecondPass = std::make_shared<TSprite>(mRenderSys, "shader\\Sprite.fx", "shader\\Sprite.fx");
 	mSecondPass->SetTexture(mPass1RT->mRenderTargetSRV);
 	int w = 50;
 	int h = 50;
 	mSecondPass->SetPosition(-w, -h, 0);
 	mSecondPass->SetSize(w*2, h*2);
-	//mSecondPass->SetFlipY(true);
+#endif
 }
 
 void Lesson7::OnRender()
 {
 #ifdef USE_RENDER_TEXTURE
-	mRenderSys->ClearRenderTexture(mPass1RT, XMFLOAT4(0.125f, 0.125f, 0.3f, 1.0f));
+	mRenderSys->ClearRenderTexture(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
 	mRenderSys->SetRenderTarget(mPass1RT);
 #endif
 	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
 
-	mModel1->Update(mTimer.mDeltaTime);	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(0.1, 0.1, 0.1), &LightCam);
+	mModel1->Update(mTimer.mDeltaTime);
+	float s = SCALE_BASE;
+	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), &LightCam);
 	mModel1->Draw();
 
-	mModel2->Update(mTimer.mDeltaTime); mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
+	mModel2->Update(mTimer.mDeltaTime);
+	mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
 	mModel2->Draw();
 #ifdef USE_RENDER_TEXTURE
 	mRenderSys->SetRenderTarget(nullptr);
 
 	//pass2
 	cbShadowMap cb = { LightCam.mView, LightCam.mProjection };
-	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->mConstBuffers[2], &cb);
-	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->mConstBuffers[2], &cb);
+	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->mConstantBuffers[2], &cb);
+	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), nullptr, mProgShadowMap);
+	mModel1->DrawShadow(mPass1RT->mRenderTargetSRV);
 
-	
+	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->mConstantBuffers[2], &cb);
+	mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), nullptr, mProgShadowMap);
+	mModel2->DrawShadow(mPass1RT->mRenderTargetSRV);
 #endif
 }
 

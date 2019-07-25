@@ -34,13 +34,14 @@ public:
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
-	void Update(float dt);
 	void PlayAnim(int Index);
-	void Draw();
-	virtual int GenRenderOperation(TRenderOperationList& opList) override;
 
-	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
+	void Update(float dt);
+	void Draw();
+	void DrawShadow(ID3D11ShaderResourceView* shadowMap);
+	virtual int GenRenderOperation(TRenderOperationList& opList) override;
 private:
+	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 	void DoDraw(aiNode* node, TRenderOperationList& opList);
 	void LoadMaterial(const char* vsName, const char* psName);
 	void processNode(aiNode * node, const aiScene * scene);

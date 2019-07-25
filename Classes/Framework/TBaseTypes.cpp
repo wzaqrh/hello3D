@@ -29,7 +29,8 @@ TCamera::TCamera(const TCamera& other)
 
 TCamera::TCamera(int width, int height, double fov, int eyeDistance, double far1)
 {
-	SetLookAt(XMFLOAT3(0.0f, 0.0f, -eyeDistance), XMFLOAT3(0,0,0));
+	mEyeDistance = eyeDistance;
+	SetLookAt(XMFLOAT3(0.0f, 0.0f, -mEyeDistance), XMFLOAT3(0,0,0));
 	SetProjection(width, height, fov, far1);
 }
 
@@ -307,11 +308,12 @@ void TTextureBySlot::resize(size_t size)
 const TTexture& TTextureBySlot::At(size_t pos)  const {
 	return textures[pos];
 }
+TTexture& TTextureBySlot::At(size_t pos) {
+	if (pos >= textures.size()) textures.resize(pos + 1);
+	return textures[pos];
+}
 const TTexture& TTextureBySlot::operator[](size_t pos)  const {
 	return At(pos);
-}
-TTexture& TTextureBySlot::At(size_t pos) {
-	return textures[pos];
 }
 TTexture& TTextureBySlot::operator[](size_t pos) {
 	return At(pos);
