@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Classes\Framework\TApp.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TBaseTypes.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TRenderSystem.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Model\TMesh.cpp">
+      <Filter>Classes\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Model\AssimpModel.cpp">
+      <Filter>Classes\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TSprite.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Main.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Utility.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson1.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson2.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson3.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson4.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson5.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson6.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson7.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Classes\Framework\TApp.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TBaseTypes.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\std.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TRenderSystem.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Model\TMesh.h">
+      <Filter>Classes\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Model\AssimpModel.h">
+      <Filter>Classes\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TSprite.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Utility.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson1.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson2.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson3.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson4.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson5.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson6.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson7.h">
+      <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Classes">
+      <UniqueIdentifier>{39b606e9-d650-42c0-a46b-81fe688ad022}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Framework">
+      <UniqueIdentifier>{b0138fc3-6844-4763-a276-95e364399192}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Model">
+      <UniqueIdentifier>{6f0167b8-ca3d-45eb-9213-ac1c4cffd53e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Lessons">
+      <UniqueIdentifier>{b7aaf79f-0f85-49e7-95c2-1813f91cb617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{43b959a5-9db6-4dcf-9832-11705bedfd9c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\assimp-vc140-mt.lib">
+      <Filter>Lib</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
