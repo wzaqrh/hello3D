@@ -63,9 +63,9 @@ TSprite::TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psNam
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
-	mMaterial->mConstantBuffers.push_back(mRenderSys->CreateConstBuffer(sizeof(Pos3Color3Tex2)));
+	mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(Pos3Color3Tex2)));
 
-	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), (void*)&indices[0]);
+	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 }
 
@@ -104,10 +104,10 @@ void TSprite::Draw()
 {
 	mRenderSys->ApplyMaterial(mMaterial, XMMatrixIdentity());
 	mRenderSys->SetVertexBuffer(mVertexBuffer);
-	mRenderSys->mDeviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	mRenderSys->SetIndexBuffer(mIndexBuffer);
 	if (mTexture != nullptr) {
 		mRenderSys->mDeviceContext->PSSetShaderResources(0, 1, &mTexture);
 	}
-	mRenderSys->mDeviceContext->DrawIndexed(ARRAYSIZE(indices), 0, 0);
+	mRenderSys->DrawIndexed(mIndexBuffer);
 }
 

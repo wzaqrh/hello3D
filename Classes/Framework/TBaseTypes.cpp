@@ -144,9 +144,10 @@ cbGlobalParam::cbGlobalParam()
 }
 
 /********** TMaterial **********/
-ID3D11Buffer* TMaterial::AddConstBuffer(ID3D11Buffer* buffer)
+TContantBufferPtr TMaterial::AddConstBuffer(TContantBufferPtr buffer)
 {
 	mConstantBuffers.push_back(buffer);
+	mConstBuffers.push_back(buffer->buffer);
 	return buffer;
 }
 
@@ -270,4 +271,34 @@ TTexture::TTexture()
 	:texture(nullptr)
 {
 
+}
+
+/********** TIndexBuffer **********/
+int TIndexBuffer::GetWidth()
+{
+	int width = 4;
+	switch (format)
+	{
+	case DXGI_FORMAT_R32_UINT:
+		width = 4;
+		break;
+	case DXGI_FORMAT_R32_SINT:
+		width = 4;
+		break;
+	case DXGI_FORMAT_R16_UINT:
+		width = 2;
+		break;
+	case DXGI_FORMAT_R16_SINT:
+		width = 2;
+		break;
+	case DXGI_FORMAT_R8_UINT:
+		width = 1;
+		break;
+	case DXGI_FORMAT_R8_SINT:
+		width = 1;
+		break;
+	default:
+		break;
+	}
+	return width;
 }

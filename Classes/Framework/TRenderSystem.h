@@ -47,16 +47,18 @@ public:
 		D3D11_INPUT_ELEMENT_DESC* descArray, 
 		size_t descCount);
 
-	ID3D11Buffer* CreateConstBuffer(int bufferSize);
-	ID3D11Buffer* CreateIndexBuffer(int bufferSize, void* buffer);
-	
+	TContantBufferPtr CreateConstBuffer(int bufferSize);
+	TIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
+	void SetIndexBuffer(TIndexBufferPtr indexBuffer);
+	void DrawIndexed(TIndexBufferPtr indexBuffer);
+
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 	TVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr);
 	void SetVertexBuffer(TVertexBufferPtr vertexBuffer);
 
 	bool UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize);
-	void UpdateConstBuffer(ID3D11Buffer* buffer, void* data);
+	void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
 
 	ID3D11VertexShader* _CreateVS(const char* filename, ID3DBlob*& pVSBlob);
 	ID3D11PixelShader* _CreatePS(const char* filename);

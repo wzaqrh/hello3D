@@ -438,7 +438,7 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName)
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
-	mMaterial->mConstantBuffers.push_back(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
+	mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
 }
 
 void AssimpModel::DoDraw(aiNode* node)
@@ -447,7 +447,7 @@ void AssimpModel::DoDraw(aiNode* node)
 	if (meshes.size() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.mModel = ToXM(mNodeInfos[node].mGlobalTransform);
-		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
@@ -465,7 +465,7 @@ void AssimpModel::DoDraw(aiNode* node)
 			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
 			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 			mesh->Draw(mRenderSys);
 		}

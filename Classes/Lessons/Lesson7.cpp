@@ -64,8 +64,8 @@ void Lesson7::OnRender()
 
 	//pass2
 	cbShadowMap cb = { LightCam.mView, LightCam.mProjection };
-	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->mConstantBuffers[2], &cb);
-	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->mConstantBuffers[2], &cb);
+	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->mConstBuffers[2], &cb);
+	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->mConstBuffers[2], &cb);
 
 	
 #endif

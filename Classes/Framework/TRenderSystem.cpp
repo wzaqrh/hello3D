@@ -169,14 +169,14 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	for (int i = 0; i < globalParam.mLightNum.z; ++i)
 		globalParam.mSpotLights[i] = *mSpotLights[i];
 	
-	mDeviceContext->UpdateSubresource(material->mConstantBuffers[0], 0, NULL, &globalParam, 0, 0);
+	mDeviceContext->UpdateSubresource(material->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
 
 	program = program ? program : material->mProgram;
 	mDeviceContext->VSSetShader(program->mVertexShader, NULL, 0);
 	mDeviceContext->PSSetShader(program->mPixelShader, NULL, 0);
 
-	mDeviceContext->VSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
-	mDeviceContext->PSSetConstantBuffers(0, material->mConstantBuffers.size(), &material->mConstantBuffers[0]);
+	mDeviceContext->VSSetConstantBuffers(0, material->mConstBuffers.size(), &material->mConstBuffers[0]);
+	mDeviceContext->PSSetConstantBuffers(0, material->mConstBuffers.size(), &material->mConstBuffers[0]);
 	mDeviceContext->IASetInputLayout(material->mInputLayout);
 
 	mDeviceContext->IASetPrimitiveTopology(material->mTopoLogy);
@@ -242,7 +242,7 @@ TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPat
 	material->mTopoLogy = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	material->mSampler = CreateSampler();
 
-	material->mConstantBuffers.push_back(CreateConstBuffer(sizeof(cbGlobalParam)));
+	material->AddConstBuffer(CreateConstBuffer(sizeof(cbGlobalParam)));
 	return material;
 }
 
@@ -270,9 +270,9 @@ bool TRenderSystem::UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSi
 	return true;
 }
 
-void TRenderSystem::UpdateConstBuffer(ID3D11Buffer* buffer, void* data)
+void TRenderSystem::UpdateConstBuffer(TContantBufferPtr buffer, void* data)
 {
-	mDeviceContext->UpdateSubresource(buffer, 0, NULL, data, 0, 0);
+	mDeviceContext->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
 }
 
 ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter)
@@ -405,7 +405,7 @@ void TRenderSystem::SetVertexBuffer(TVertexBufferPtr vertexBuffer)
 	mDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer->buffer, &stride, &offset);
 }
 
-ID3D11Buffer* TRenderSystem::CreateIndexBuffer(int bufferSize, void* buffer)
+TIndexBufferPtr TRenderSystem::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
 {
 	HRESULT hr = S_OK;
 
@@ -424,10 +424,22 @@ ID3D11Buffer* TRenderSystem::CreateIndexBuffer(int bufferSize, void* buffer)
 	hr = mDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer);
 	if (CheckHR(hr))
 		return nullptr;
-	return pIndexBuffer;
+
+	TIndexBufferPtr indexBuffer = std::make_shared<TIndexBuffer>(pIndexBuffer, bufferSize, format);
+	return indexBuffer;
 }
 
-ID3D11Buffer* TRenderSystem::CreateConstBuffer(int bufferSize)
+void TRenderSystem::SetIndexBuffer(TIndexBufferPtr indexBuffer)
+{
+	mDeviceContext->IASetIndexBuffer(indexBuffer->buffer, indexBuffer->format, 0);
+}
+
+void TRenderSystem::DrawIndexed(TIndexBufferPtr indexBuffer)
+{
+	mDeviceContext->DrawIndexed(indexBuffer->bufferSize / indexBuffer->GetWidth(), 0, 0);
+}
+
+TContantBufferPtr TRenderSystem::CreateConstBuffer(int bufferSize)
 {
 	HRESULT hr = S_OK;
 
@@ -442,7 +454,7 @@ ID3D11Buffer* TRenderSystem::CreateConstBuffer(int bufferSize)
 	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
 	if (CheckHR(hr))
 		return nullptr;
-	return pConstantBuffer;
+	return std::make_shared<TContantBuffer>(pConstantBuffer, bufferSize);
 }
 
 ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile)

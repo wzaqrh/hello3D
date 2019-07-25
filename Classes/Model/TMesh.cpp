@@ -19,19 +19,18 @@ TMesh::TMesh(const aiMesh* __data,
 bool TMesh::setupMesh(TRenderSystem *renderSys)
 {
 	mVertexBuffer = renderSys->CreateVertexBuffer(sizeof(MeshVertex) * vertices.size(), sizeof(MeshVertex), 0, &vertices[0]);
-	mIndexBuffer = renderSys->CreateIndexBuffer(sizeof(UINT) * indices.size(), &indices[0]);
+	mIndexBuffer = renderSys->CreateIndexBuffer(sizeof(UINT) * indices.size(), DXGI_FORMAT_R32_UINT, &indices[0]);
 	return true;
 }
 
 void TMesh::Close()
 {
-	mIndexBuffer->Release();
 }
 
 void TMesh::Draw(TRenderSystem* renderSys)
 {
 	renderSys->SetVertexBuffer(mVertexBuffer);
-	renderSys->mDeviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	renderSys->SetIndexBuffer(mIndexBuffer);
 	if (textures.size() > 0)
 	{
 		std::vector<ID3D11ShaderResourceView*> texViews(textures.size());
@@ -44,7 +43,7 @@ void TMesh::Draw(TRenderSystem* renderSys)
 		renderSys->mDeviceContext->PSSetShaderResources(0, 1, &texViewNull);
 	}
 
-	renderSys->mDeviceContext->DrawIndexed(indices.size(), 0, 0);
+	renderSys->DrawIndexed(mIndexBuffer);
 }
 
 bool TMesh::HasTexture(int slot)

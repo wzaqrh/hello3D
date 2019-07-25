@@ -34,7 +34,7 @@ private:
 	bool setupMesh(TRenderSystem *renderSys);
 public:
 	TVertexBufferPtr mVertexBuffer;
-	ID3D11Buffer *mIndexBuffer;
+	TIndexBufferPtr mIndexBuffer;
 };
 typedef std::shared_ptr<TMesh> TMeshSharedPtr;
 typedef std::vector<TMeshSharedPtr> TMeshSharedPtrVector;

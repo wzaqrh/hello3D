@@ -80,26 +80,6 @@ public:
 };
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
-struct TProgram {
-	ID3D11VertexShader* mVertexShader = nullptr;
-	ID3D11PixelShader* mPixelShader = nullptr;
-	ID3DBlob* mVSBlob = nullptr;
-};
-typedef std::shared_ptr<TProgram> TProgramPtr;
-
-struct TMaterial {
-	TProgramPtr mProgram;
-	ID3D11InputLayout* mInputLayout = nullptr;
-	
-	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
-	ID3D11SamplerState*	mSampler = nullptr;
-
-	std::vector<ID3D11Buffer*> mConstantBuffers;
-public:
-	ID3D11Buffer* AddConstBuffer(ID3D11Buffer* buffer);
-};
-typedef std::shared_ptr<TMaterial> TMaterialPtr;
-
 #define MAX_LIGHTS 4
 struct cbGlobalParam
 {
@@ -160,16 +140,24 @@ public:
 	TTexture(std::string __path, ID3D11ShaderResourceView* __texture);
 };
 
+struct TProgram {
+	ID3D11VertexShader* mVertexShader = nullptr;
+	ID3D11PixelShader* mPixelShader = nullptr;
+	ID3DBlob* mVSBlob = nullptr;
+};
+typedef std::shared_ptr<TProgram> TProgramPtr;
+
 struct THardwareBuffer {
 	ID3D11Buffer* buffer;
 	unsigned int bufferSize;
 public:
-	THardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize):buffer(__buffer), bufferSize(__bufferSize) {};
+	THardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :buffer(__buffer), bufferSize(__bufferSize) {};
 	THardwareBuffer() :buffer(nullptr), bufferSize(0) {};
 };
 
 struct TVertexBuffer : public THardwareBuffer {
 	unsigned int stride, offset;
+public:
 	TVertexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
 		:THardwareBuffer(__buffer, __bufferSize), stride(__stride), offset(__offset) {};
 	TVertexBuffer() :stride(0), offset(0) {};
@@ -178,4 +166,30 @@ typedef std::shared_ptr<TVertexBuffer> TVertexBufferPtr;
 
 struct TIndexBuffer : public THardwareBuffer {
 	DXGI_FORMAT format;
+public:
+	TIndexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, DXGI_FORMAT __format)
+		:THardwareBuffer(__buffer, __bufferSize), format(__format) {};
+	TIndexBuffer() :format(DXGI_FORMAT_UNKNOWN) {};
+	int GetWidth();
 };
+typedef std::shared_ptr<TIndexBuffer> TIndexBufferPtr;
+
+struct TContantBuffer : public THardwareBuffer {
+	TContantBuffer() {}
+	TContantBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :THardwareBuffer(__buffer, __bufferSize) {}
+};
+typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;
+
+struct TMaterial {
+	TProgramPtr mProgram;
+	ID3D11InputLayout* mInputLayout = nullptr;
+
+	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
+	ID3D11SamplerState*	mSampler = nullptr;
+
+	std::vector<ID3D11Buffer*> mConstBuffers;
+	std::vector<TContantBufferPtr> mConstantBuffers;
+public:
+	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
+};
+typedef std::shared_ptr<TMaterial> TMaterialPtr;
