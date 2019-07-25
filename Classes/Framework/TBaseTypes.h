@@ -17,9 +17,16 @@ struct TINT4 {
 	int x, y, z, w;
 };
 
-struct TCameraBase {
+__declspec(align(16)) struct TCameraBase {
 	XMMATRIX mView;
 	XMMATRIX mProjection;
+public:
+	void* operator new(size_t i){
+		return _mm_malloc(i,16);
+	}
+	void operator delete(void* p) {
+		_mm_free(p);
+	}
 public:
 	XMFLOAT3 CalNDC(XMFLOAT3 pos);
 };

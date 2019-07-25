@@ -445,8 +445,9 @@ void AssimpModel::DoDraw(aiNode* node)
 {
 	auto& meshes = mNodeInfos[node];
 	if (meshes.size() > 0) {
-		mWeightedSkin.mModel = ToXM(mNodeInfos[node].mGlobalTransform);
-		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &mWeightedSkin, 0, 0);
+		cbWeightedSkin weightedSkin = {};
+		weightedSkin.mModel = ToXM(mNodeInfos[node].mGlobalTransform);
+		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
@@ -454,17 +455,17 @@ void AssimpModel::DoDraw(aiNode* node)
 				const auto& boneMats = GetBoneMatrices(node, i);
 				size_t boneSize = boneMats.size(); assert(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
-					mWeightedSkin.Models[j] = ToXM(boneMats[j]);
+					weightedSkin.Models[j] = ToXM(boneMats[j]);
 			}
 			else {
-				mWeightedSkin.Models[0] = XMMatrixIdentity();
+				weightedSkin.Models[0] = XMMatrixIdentity();
 			}
 
-			mWeightedSkin.hasNormal = mesh->HasTexture(E_TEXTURE_PBR_NORMAL);
-			mWeightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
-			mWeightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
-			mWeightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &mWeightedSkin, 0, 0);
+			weightedSkin.hasNormal = mesh->HasTexture(E_TEXTURE_PBR_NORMAL);
+			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
+			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
+			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
+			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstantBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 			mesh->Draw(mRenderSys);
 		}

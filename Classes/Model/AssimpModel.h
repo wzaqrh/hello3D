@@ -46,7 +46,6 @@ private:
 	std::vector<TTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 public:
 	TMaterialPtr mMaterial;
-	cbWeightedSkin mWeightedSkin;
 
 	TMeshSharedPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
