@@ -20,6 +20,8 @@ struct TINT4 {
 struct TCameraBase {
 	XMMATRIX mView;
 	XMMATRIX mProjection;
+public:
+	XMFLOAT3 CalNDC(XMFLOAT3 pos);
 };
 
 struct TCamera : public TCameraBase {

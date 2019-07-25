@@ -12,6 +12,15 @@ void Lesson7::OnPostInitDevice()
 {
 	mRenderSys->SetCamera(45, 150, 1000);
 
+#if 1
+	auto pCam = mRenderSys->mDefCamera;
+	XMFLOAT3 p0 = pCam->CalNDC(XMFLOAT3(0, 0, 0));
+	XMFLOAT3 p1 = pCam->CalNDC(XMFLOAT3(0, 0, -145));
+	XMFLOAT3 p2 = pCam->CalNDC(XMFLOAT3(0, 0, -149));
+	XMFLOAT3 p3 = pCam->CalNDC(XMFLOAT3(0, 0, -149.5));
+	XMFLOAT3 p4 = pCam->CalNDC(XMFLOAT3(0, 0, -149.95));
+#endif
+
 	{
 		gModelPath = "Spaceship\\"; mScale = 0.002; mPosition = XMFLOAT3(0, 0, -145);
 
@@ -24,8 +33,7 @@ void Lesson7::OnPostInitDevice()
 		mPass1RT = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	}
 
-	mProgShadowMap = mRenderSys->CreateProgram("shader\\ShadowMap.fx", "shader\\ShadowMap.fx");
-
+	//mProgShadowMap = mRenderSys->CreateProgram("shader\\ShadowMap.fx", "shader\\ShadowMap.fx");
 	//mSecondPass = std::make_shared<TSprite>(mRenderSys, "shader\\ShadowMap.fx", "shader\\ShadowMap.fx");
 	mSecondPass = std::make_shared<TSprite>(mRenderSys, "shader\\Sprite.fx", "shader\\Sprite.fx");
 	mSecondPass->SetTexture(mPass1RT->mRenderTargetSRV);

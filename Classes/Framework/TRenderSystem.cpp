@@ -23,7 +23,7 @@ HRESULT TRenderSystem::Initialize()
 
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
-	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_DRIVER_TYPE driverTypes[] =
@@ -151,8 +151,9 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 {
 	cbGlobalParam globalParam = {};
 	globalParam.mWorld = worldTransform;
-	globalParam.mView = pCam ? pCam->mView : mDefCamera->mView;
-	globalParam.mProjection = pCam ? pCam->mProjection : mDefCamera->mProjection;
+	pCam = pCam ? pCam : mDefCamera.get();
+	globalParam.mView = pCam->mView;
+	globalParam.mProjection = pCam->mProjection;
 	XMVECTOR det = XMMatrixDeterminant(globalParam.mView);
 	globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
 

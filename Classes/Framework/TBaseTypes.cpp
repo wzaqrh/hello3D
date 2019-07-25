@@ -1,5 +1,18 @@
 #include "TBaseTypes.h"
 
+
+XMFLOAT3 TCameraBase::CalNDC(XMFLOAT3 pos)
+{
+	XMFLOAT3 ret = XMFLOAT3(0,0,0);
+	auto vp = mView * mProjection;
+	auto vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, 1), vp);
+	auto w = XMVectorGetW(vec);
+	if (w != 0) {
+		ret = XMFLOAT3(XMVectorGetX(vec) / w, XMVectorGetY(vec) / w, XMVectorGetZ(vec) / w);
+	}
+	return ret;
+}
+
 /********** TCamera **********/
 TCamera::TCamera(const TCamera& other)
 {
