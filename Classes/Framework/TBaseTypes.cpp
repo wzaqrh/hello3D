@@ -260,7 +260,7 @@ bool TRenderTexture::InitDepthStencilView(ID3D11Device* pDevice)
 	return true;
 }
 
-/********** TextureInfo **********/
+/********** TTexture **********/
 TTexture::TTexture(std::string __path, ID3D11ShaderResourceView* __texture)
 {
 	path = __path;
@@ -271,6 +271,58 @@ TTexture::TTexture()
 	:texture(nullptr)
 {
 
+}
+
+/********** TTextureBySlot **********/
+void TTextureBySlot::clear()
+{
+	textures.clear();
+}
+
+void TTextureBySlot::push_back(const TTexture& texture)
+{
+	textures.push_back(texture);
+}
+
+bool TTextureBySlot::empty() const
+{
+	return textures.empty();
+}
+
+size_t TTextureBySlot::size() const
+{
+	return textures.size();
+}
+
+void TTextureBySlot::swap(TTextureBySlot& other)
+{
+	textures.swap(other.textures);
+}
+
+void TTextureBySlot::resize(size_t size)
+{
+	textures.resize(size);
+}
+
+const TTexture& TTextureBySlot::At(size_t pos)  const {
+	return textures[pos];
+}
+const TTexture& TTextureBySlot::operator[](size_t pos)  const {
+	return At(pos);
+}
+TTexture& TTextureBySlot::At(size_t pos) {
+	return textures[pos];
+}
+TTexture& TTextureBySlot::operator[](size_t pos) {
+	return At(pos);
+}
+
+std::vector<ID3D11ShaderResourceView*> TTextureBySlot::GetTextureViews() const
+{
+	std::vector<ID3D11ShaderResourceView*> views(textures.size());
+	for (int i = 0; i < views.size(); ++i)
+		views[i] = textures[i].texture;
+	return views;
 }
 
 /********** TIndexBuffer **********/

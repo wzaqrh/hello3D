@@ -504,3 +504,28 @@ TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
 	}
 	return TTexture(__imgPath, texView);
 }
+
+void TRenderSystem::Draw(IRenderable* renderable)
+{
+	TRenderOperationList opList;
+	renderable->GenRenderOperation(opList);
+	for (int i = 0; i < opList.size(); ++i) {
+		RenderOperation(opList[i]);
+	}
+}
+
+void TRenderSystem::RenderOperation(const TRenderOperation& op)
+{
+	SetVertexBuffer(op.mVertexBuffer);
+	SetIndexBuffer(op.mIndexBuffer);
+	if (op.mTextures.size() > 0) {
+		std::vector<ID3D11ShaderResourceView*> texViews = op.mTextures.GetTextureViews();
+		mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
+	}
+	else {
+		ID3D11ShaderResourceView* texViewNull = nullptr;
+		mDeviceContext->PSSetShaderResources(0, 1, &texViewNull);
+	}
+
+	DrawIndexed(op.mIndexBuffer);
+}

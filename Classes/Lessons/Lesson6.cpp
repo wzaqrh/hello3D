@@ -41,9 +41,9 @@ void Lesson6::OnPostInitDevice()
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male03.FBX")); mScale = 0.3; mPosition = XMFLOAT3(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
-		if (!iter->textures.empty()) {
+		if (!iter->mTextures.empty()) {
 			std::string firstPostfix;
-			auto prefix = iter->textures[0].path;
+			auto prefix = iter->mTextures[0].path;
 			auto pos = prefix.find_last_of("_");
 			if (pos != std::string::npos) {
 				firstPostfix = prefix.substr(pos + 1, std::string::npos);
@@ -62,10 +62,10 @@ void Lesson6::OnPostInitDevice()
 				"AO"
 			};
 			if (postfixs[0] == firstPostfix) {
-				iter->textures.clear();
-				for (int i = iter->textures.size(); i < ARRAYSIZE(postfixs); ++i) {
+				iter->mTextures.clear();
+				for (int i = iter->mTextures.size(); i < ARRAYSIZE(postfixs); ++i) {
 					TTexture texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
-					iter->textures.push_back(texInfo);
+					iter->mTextures.push_back(texInfo);
 					assert(texInfo.texture);
 				}
 			}
@@ -88,7 +88,7 @@ void Lesson6::OnPostInitDevice()
 		textures[i].texture->GetDesc(&textures[i].desc);
 	}
 	for (auto& iter : mModel->mMeshes) {
-		iter->textures = textures;
+		iter->mTextures = textures;
 	}
 #endif
 

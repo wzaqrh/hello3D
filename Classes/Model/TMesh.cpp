@@ -3,17 +3,17 @@
 
 /********** TMesh **********/
 TMesh::TMesh(const aiMesh* __data,
-	const std::vector<MeshVertex>& vertices,
-	const std::vector<UINT>& indices,
-	const std::vector<TTexture>& textures,
+	std::vector<MeshVertex>& __vertices,
+	std::vector<UINT>& __indices,
+	TTextureBySlot& __textures,
 	TRenderSystem *renderSys)
 {
 	data = __data;
-	this->vertices = vertices;
-	this->indices = indices;
-	this->textures = textures;
+	vertices.swap(__vertices); __vertices.clear();
+	indices.swap(__indices); __indices.clear();
+	mTextures.swap(__textures); __textures.clear();
 
-	this->setupMesh(renderSys);
+	setupMesh(renderSys);
 }
 
 bool TMesh::setupMesh(TRenderSystem *renderSys)
@@ -31,11 +31,11 @@ void TMesh::Draw(TRenderSystem* renderSys)
 {
 	renderSys->SetVertexBuffer(mVertexBuffer);
 	renderSys->SetIndexBuffer(mIndexBuffer);
-	if (textures.size() > 0)
+	if (mTextures.size() > 0)
 	{
-		std::vector<ID3D11ShaderResourceView*> texViews(textures.size());
-		for (int i = 0; i < textures.size(); ++i)
-			texViews[i] = textures[i].texture;
+		std::vector<ID3D11ShaderResourceView*> texViews(mTextures.size());
+		for (int i = 0; i < mTextures.size(); ++i)
+			texViews[i] = mTextures[i].texture;
 		renderSys->mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 	}
 	else {
@@ -48,5 +48,5 @@ void TMesh::Draw(TRenderSystem* renderSys)
 
 bool TMesh::HasTexture(int slot)
 {
-	return slot < textures.size() && textures[slot].texture != nullptr;
+	return slot < mTextures.size() && mTextures[slot].texture != nullptr;
 }

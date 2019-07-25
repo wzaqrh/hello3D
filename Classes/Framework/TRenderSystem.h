@@ -69,4 +69,7 @@ public:
 
 	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile);
 	TTexture GetTexByPath(const std::string& __imgPath);
+public:
+	void Draw(IRenderable* renderable);
+	void RenderOperation(const TRenderOperation& op);
 };

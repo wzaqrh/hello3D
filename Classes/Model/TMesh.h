@@ -18,13 +18,13 @@ class TMesh {
 public:
 	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
-	std::vector<TTexture> textures;
+	TTextureBySlot mTextures;
 	const aiMesh* data = nullptr;
 public:
 	TMesh(const aiMesh* __data, 
-		const std::vector<MeshVertex>& vertices, 
-		const std::vector<UINT>& indices,
-		const std::vector<TTexture>& textures,
+		std::vector<MeshVertex>& __vertices, 
+		std::vector<UINT>& __indices,
+		TTextureBySlot& __textures,
 		TRenderSystem *renderSys);
 	void Close();
 	void Draw(TRenderSystem* renderSys);

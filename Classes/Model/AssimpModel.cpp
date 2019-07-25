@@ -229,7 +229,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	// Data to fill
 	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
-	std::vector<TTexture> textures;
+	TTextureBySlot textures;
 	textures.resize(4);
 
 	if (mesh->mMaterialIndex >= 0)
@@ -441,7 +441,7 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName)
 	mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
 }
 
-void AssimpModel::DoDraw(aiNode* node)
+void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 {
 	auto& meshes = mNodeInfos[node];
 	if (meshes.size() > 0) {
@@ -467,16 +467,31 @@ void AssimpModel::DoDraw(aiNode* node)
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
 			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
-			mesh->Draw(mRenderSys);
+			//mesh->Draw(mRenderSys);
+			{
+				TRenderOperation op;
+				op.mMaterial = mMaterial;
+				op.mIndexBuffer = mesh->mIndexBuffer;
+				op.mVertexBuffer = mesh->mVertexBuffer;
+				op.mTextures = mesh->mTextures;
+				opList.push_back(op);
+			}
 		}
 	}
 
 	for (int i = 0; i < node->mNumChildren; i++)
-		DoDraw(node->mChildren[i]);
+		DoDraw(node->mChildren[i], opList);
+}
+
+int AssimpModel::GenRenderOperation(TRenderOperationList& opList)
+{
+	int count = opList.size();
+	mDrawCount = 0;
+	DoDraw(mRootNode, opList);
+	return opList.size() - count;
 }
 
 void AssimpModel::Draw()
 {
-	mDrawCount = 0;
-	DoDraw(mRootNode);
+	mRenderSys->Draw(this);
 }

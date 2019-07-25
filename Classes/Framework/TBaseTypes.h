@@ -121,8 +121,7 @@ typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
 enum enTextureType {
 	E_TEXTURE_DIFFUSE,
 	E_TEXTURE_SPECULAR,
-	E_TEXTURE_NORMAL,
-	E_TEXTURE_BUMP
+	E_TEXTURE_NORMAL
 };
 enum enTexturePbrType {
 	E_TEXTURE_PBR_ALBEDO,
@@ -138,6 +137,22 @@ struct TTexture {
 public:
 	TTexture();
 	TTexture(std::string __path, ID3D11ShaderResourceView* __texture);
+};
+
+struct TTextureBySlot {
+	std::vector<TTexture> textures;
+public:
+	void clear();
+	void push_back(const TTexture& texture);
+	bool empty() const;
+	size_t size() const;
+	void swap(TTextureBySlot& other);
+	void resize(size_t size);
+	const TTexture& At(size_t pos) const;
+	TTexture& At(size_t pos);
+	const TTexture& operator[](size_t pos) const;
+	TTexture& operator[](size_t pos);
+	std::vector<ID3D11ShaderResourceView*> GetTextureViews() const;
 };
 
 struct TProgram {
@@ -193,3 +208,15 @@ public:
 	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
+
+struct TRenderOperation {
+	TMaterialPtr mMaterial;
+	TVertexBufferPtr mVertexBuffer;
+	TIndexBufferPtr mIndexBuffer;
+	TTextureBySlot mTextures;
+};
+typedef std::vector<TRenderOperation> TRenderOperationList;
+
+struct IRenderable {
+	virtual int GenRenderOperation(TRenderOperationList& opList) = 0;
+};

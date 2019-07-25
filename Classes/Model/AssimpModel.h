@@ -26,7 +26,8 @@ public:
 };
 
 class TRenderSystem;
-class AssimpModel
+class AssimpModel 
+	: public IRenderable
 {
 public:
 	AssimpModel(TRenderSystem* RenderSys, const char* vsName, const char* psName);
@@ -36,10 +37,11 @@ public:
 	void Update(float dt);
 	void PlayAnim(int Index);
 	void Draw();
+	virtual int GenRenderOperation(TRenderOperationList& opList) override;
 
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 private:
-	void DoDraw(aiNode* node);
+	void DoDraw(aiNode* node, TRenderOperationList& opList);
 	void LoadMaterial(const char* vsName, const char* psName);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
