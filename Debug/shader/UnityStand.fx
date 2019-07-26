@@ -122,7 +122,7 @@ VertexOutputForwardBase vertBase (VertexInput v) { return vertForwardBase(v); }
 #endif
 
 /********** FRAGMENT_SETUP **********/
-float4 Parallax (float4 texcoords, half3 viewDir)
+float4 Parallax (float4 texcoords, half3 viewDir)//std_do_nothing
 {
 #if !defined(_PARALLAXMAP) || (SHADER_TARGET < 30)
     // Disable parallax on pre-SM3.0 shader target models
@@ -133,8 +133,7 @@ float4 Parallax (float4 texcoords, half3 viewDir)
     return float4(texcoords.xy + offset, texcoords.zw + offset);
 #endif
 }
-
-half Alpha(float2 uv)
+half Alpha(float2 uv)//_Color.a
 {
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return _Color.a;
@@ -143,7 +142,7 @@ half Alpha(float2 uv)
 #endif
 }
 /*UNITY_SETUP_BRDF_INPUT*/
-half4 SpecularGloss(float2 uv)
+half4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * _GlossMapScale)
 {
     half4 sg;
 #ifdef _SPECGLOSSMAP//Shader='Standard(Specular setup)' -> 'Specular'=$texture
@@ -164,7 +163,7 @@ half4 SpecularGloss(float2 uv)
 #endif
     return sg;
 }
-half3 Albedo(float4 texcoords)
+half3 Albedo(float4 texcoords)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 {
     half3 albedo = _Color.rgb * tex2D (_MainTex, texcoords.xy).rgb;
 #if _DETAIL//Shader='Standard' -> 'Second Maps: Detail Albedo'=$texture
@@ -188,7 +187,7 @@ half3 Albedo(float4 texcoords)
 #endif
     return albedo;
 }
-half SpecularStrength(half3 specular)
+half SpecularStrength(half3 specular)//max(specular.rgb)
 {
     #if (SHADER_TARGET < 30)
         // SM2.0: instruction count limitation
@@ -205,12 +204,12 @@ half SpecularStrength(half3 specular)
 #ifndef UNITY_CONSERVE_ENERGY_MONOCHROME
 #define UNITY_CONSERVE_ENERGY_MONOCHROME 1
 #endif
-inline half3 EnergyConservationBetweenDiffuseAndSpecular (half3 albedo, half3 specColor, out half oneMinusReflectivity)
+inline half3 EnergyConservationBetweenDiffuseAndSpecular (half3 albedo, half3 specColor, out half oneMinusReflectivity)//albedo*(1-max(specColor.rgb)),1-max(specColor.rgb)
 {
     oneMinusReflectivity = 1 - SpecularStrength(specColor);
     #if !UNITY_CONSERVE_ENERGY
         return albedo;
-    #elif UNITY_CONSERVE_ENERGY_MONOCHROME
+    #elif UNITY_CONSERVE_ENERGY_MONOCHROME//std_this_branch
         return albedo * oneMinusReflectivity;
     #else
         return albedo * (half3(1,1,1) - specColor);
@@ -235,6 +234,10 @@ struct FragmentCommonData
     half3 tangentSpaceNormal;
 #endif
 };
+/*{	specColor=_SpecColor.rgb,
+	smoothness=tex2D(_MainTex, uv).a * _GlossMapScale,
+	oneMinusReflectivity=1-max(_SpecColor.rgb),
+	diffColor=_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb * (1-max(_SpecColor.rgb))}*/
 inline FragmentCommonData SpecularSetup (float4 i_tex)
 {
     half4 specGloss = SpecularGloss(i_tex.xy);
@@ -281,7 +284,7 @@ float3 PerPixelWorldNormal(float4 i_tex, float4 tangentToWorld[3])
     return normalWorld;
 }
 /*NormalizePerPixelNormal*/
-float3 NormalizePerPixelNormal (float3 n)
+float3 NormalizePerPixelNormal (float3 n)//normalize(n)
 {
     #if (SHADER_TARGET < 30) || UNITY_STANDARD_SIMPLE
         return n;
@@ -290,7 +293,7 @@ float3 NormalizePerPixelNormal (float3 n)
     #endif
 }
 /*PreMultiplyAlpha*/
-inline half3 PreMultiplyAlpha (half3 diffColor, half alpha, half oneMinusReflectivity, out half outModifiedAlpha)
+inline half3 PreMultiplyAlpha (half3 diffColor, half alpha, half oneMinusReflectivity, out half outModifiedAlpha)//diffColor*alpha,1-oneMinusReflectivity + alpha*oneMinusReflectivity
 {
     #if defined(_ALPHAPREMULTIPLY_ON)
         // NOTE: shader relies on pre-multiply alpha-blend (_SrcBlend = One, _DstBlend = OneMinusSrcAlpha)
@@ -315,11 +318,16 @@ inline half3 PreMultiplyAlpha (half3 diffColor, half alpha, half oneMinusReflect
     return diffColor;
 }
 /*FragmentSetup*/
+/*{	specColor=_SpecColor.rgb,
+	smoothness=tex2D(_MainTex, uv).a * _GlossMapScale,
+	oneMinusReflectivity=1-max(_SpecColor.rgb),
+	diffColor=_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb * oneMinusReflectivity * _Color.a,
+	alpha=1-oneMinusReflectivity + _Color.a*oneMinusReflectivity }*/
 inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld)
 {
     i_tex = Parallax(i_tex, i_viewDirForParallax);
 
-    half alpha = Alpha(i_tex.xy);
+    half alpha = Alpha(i_tex.xy);//_Color.a
     #if defined(_ALPHATEST_ON)
         clip (alpha - _Cutoff);
     #endif
@@ -373,7 +381,7 @@ struct UnityLight
     half3 dir;
     half  ndotl; // Deprecated: Ndotl is now calculated on the fly and is no longer stored. Do not used it.
 };
-UnityLight MainLight ()
+UnityLight MainLight()//{color=_LightColor0.rgb,dir=_WorldSpaceLightPos0.xyz}
 {
     UnityLight l;
 
@@ -395,7 +403,7 @@ half LerpOneTo(half b, half t)
 }
 sampler2D   _OcclusionMap;//Shader='Standard' -> 'Occlusion'=$texture
 half        _OcclusionStrength;
-half Occlusion(float2 uv)
+half Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_OcclusionStrength
 {
 #if (SHADER_TARGET < 30)
     // SM20: instruction count limitation
@@ -433,11 +441,11 @@ struct Unity_GlossyEnvironmentData
     half    roughness; // CAUTION: This is perceptualRoughness but because of compatibility this name can't be change :(
     half3   reflUVW;
 };
-float SmoothnessToPerceptualRoughness(float smoothness)
+float SmoothnessToPerceptualRoughness(float smoothness)//1-smoothness
 {
     return (1 - smoothness);
 }
-Unity_GlossyEnvironmentData UnityGlossyEnvironmentSetup(half Smoothness, half3 worldViewDir, half3 Normal, half3 fresnel0)
+Unity_GlossyEnvironmentData UnityGlossyEnvironmentSetup(half Smoothness, half3 worldViewDir, half3 Normal, half3 fresnel0)//{roughness=1.0-Smoothness}
 {
     Unity_GlossyEnvironmentData g;
 
@@ -448,6 +456,11 @@ Unity_GlossyEnvironmentData UnityGlossyEnvironmentSetup(half Smoothness, half3 w
 }
 
 /**UnityGlobalIllumination**/
+struct UnityIndirect
+{
+    half3 diffuse;
+    half3 specular;
+};
 struct UnityGI
 {
     UnityLight light;
@@ -471,6 +484,7 @@ inline void ResetUnityGI(out UnityGI outGI)
 #endif
 //LIGHTPROBE_SH=光照探针
 #define UNITY_SHOULD_SAMPLE_SH (defined(LIGHTPROBE_SH) && !defined(UNITY_PASS_FORWARDADD) && !defined(UNITY_PASS_PREPASSBASE) && !defined(UNITY_PASS_SHADOWCASTER) && !defined(UNITY_PASS_META))
+/*{light={color=data.light.color*data.atten}}*/
 inline UnityGI UnityGI_Base(UnityGIInput data, half occlusion, half3 normalWorld)
 {
     UnityGI o_gi;
@@ -534,7 +548,7 @@ inline UnityGI UnityGI_Base(UnityGIInput data, half occlusion, half3 normalWorld
 }
 
 /*UnityGI_IndirectSpecular*/
-inline half3 UnityGI_IndirectSpecular(UnityGIInput data, half occlusion, Unity_GlossyEnvironmentData glossIn)
+inline half3 UnityGI_IndirectSpecular(UnityGIInput data, half occlusion, Unity_GlossyEnvironmentData glossIn)//unity_IndirectSpecColor.rgb*occlusion
 {
     half3 specular;
 
@@ -578,12 +592,13 @@ inline half3 UnityGI_IndirectSpecular(UnityGIInput data, half occlusion, half3 n
     // normalWorld is not used
     return UnityGI_IndirectSpecular(data, occlusion, glossIn);
 }
-
 inline UnityGI UnityGlobalIllumination (UnityGIInput data, half occlusion, half3 normalWorld)
 {
     return UnityGI_Base(data, occlusion, normalWorld);
 }
-inline UnityGI UnityGlobalIllumination (UnityGIInput data, half occlusion, half3 normalWorld, Unity_GlossyEnvironmentData glossIn)
+/*{	light={color=data.light.color*data.atten},
+	indirect={specular=unity_IndirectSpecColor.rgb*occlusion}}*/
+inline UnityGI UnityGlobalIllumination (UnityGIInput data, half occlusion, half3 normalWorld, Unity_GlossyEnvironmentData glossIn)//std_branch_this
 {
     UnityGI o_gi = UnityGI_Base(data, occlusion, normalWorld);
     o_gi.indirect.specular = UnityGI_IndirectSpecular(data, occlusion, glossIn);
@@ -668,7 +683,7 @@ inline UnityGI FragmentGI (FragmentCommonData s, half occlusion, half4 i_ambient
       d.probePosition[1] = unity_SpecCube1_ProbePosition;
     #endif
 
-    if(reflections)
+    if(reflections)//std_branch_this
     {
         Unity_GlossyEnvironmentData g = UnityGlossyEnvironmentSetup(s.smoothness, -s.eyeVec, s.normalWorld, s.specColor);
         // Replace the reflUVW if it has been compute in Vertex shader. Note: the compiler will optimize the calcul in UnityGlossyEnvironmentSetup itself
@@ -705,7 +720,7 @@ inline UnityGI FragmentGI (FragmentCommonData s, half occlusion, half4 i_ambient
 //  b) GGX
 // * Smith for Visiblity term
 // * Schlick approximation for Fresnel
-inline float3 Unity_SafeNormalize(float3 inVec)
+inline float3 Unity_SafeNormalize(float3 inVec)//normalize(inVec)
 {
     float dp3 = max(0.001f, dot(inVec, inVec));
     return inVec * rsqrt(dp3);
@@ -720,12 +735,12 @@ half DisneyDiffuse(half NdotV, half NdotL, half LdotH, half perceptualRoughness)
 
     return lightScatter * viewScatter;
 }
-float PerceptualRoughnessToRoughness(float perceptualRoughness)
+float PerceptualRoughnessToRoughness(float perceptualRoughness)//perceptualRoughness^2
 {
     return perceptualRoughness * perceptualRoughness;
 }
 // Ref: http://jcgt.org/published/0003/02/03/paper.pdf
-inline float SmithJointGGXVisibilityTerm (float NdotL, float NdotV, float roughness)
+inline float SmithJointGGXVisibilityTerm (float NdotL, float NdotV, float roughness)//function G
 {
 #if 0
     // Original formulation:
@@ -757,7 +772,7 @@ inline float SmithJointGGXVisibilityTerm (float NdotL, float NdotV, float roughn
 
 #endif
 }
-inline float GGXTerm (float NdotH, float roughness)
+inline float GGXTerm (float NdotH, float roughness)//function D
 {
     float a2 = roughness * roughness;
     float d = (NdotH * a2 - NdotH) * NdotH + 1.0f; // 2 mad
@@ -778,8 +793,8 @@ half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivi
     float3 normal, float3 viewDir,
     UnityLight light, UnityIndirect gi)
 {
-    float perceptualRoughness = SmoothnessToPerceptualRoughness (smoothness);
-    float3 halfDir = Unity_SafeNormalize (float3(light.dir) + viewDir);
+    float perceptualRoughness = SmoothnessToPerceptualRoughness (smoothness);//1-smoothness
+    float3 halfDir = Unity_SafeNormalize (float3(light.dir) + viewDir);//H
 
 // NdotV should not be negative for visible pixels, but it can happen due to perspective projection and normal mapping
 // In this case normal should be modified to become valid (i.e facing camera) and not cause weird artifacts.
@@ -818,8 +833,8 @@ half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivi
 #if UNITY_BRDF_GGX
     // GGX with roughtness to 0 would mean no specular at all, using max(roughness, 0.002) here to match HDrenderloop roughtness remapping.
     roughness = max(roughness, 0.002);
-    float V = SmithJointGGXVisibilityTerm (nl, nv, roughness);
-    float D = GGXTerm (nh, roughness);
+    float V = SmithJointGGXVisibilityTerm (nl, nv, roughness);//G
+    float D = GGXTerm (nh, roughness);//D
 #else
     // Legacy
     half V = SmithBeckmannVisibilityTerm (nl, nv, roughness);
@@ -828,7 +843,7 @@ half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivi
 
     float specularTerm = V*D * UNITY_PI; // Torrance-Sparrow model, Fresnel is applied later
 
-#   ifdef UNITY_COLORSPACE_GAMMA
+#   ifdef UNITY_COLORSPACE_GAMMA//Edit -> Project Settings -> Player -> Other Settings //std_enabled
         specularTerm = sqrt(max(1e-4h, specularTerm));
 #   endif
 
