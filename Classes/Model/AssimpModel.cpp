@@ -467,15 +467,16 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
 			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
-			//mesh->Draw(mRenderSys);
-			{
-				TRenderOperation op;
-				op.mMaterial = mMaterial;
-				op.mIndexBuffer = mesh->mIndexBuffer;
-				op.mVertexBuffer = mesh->mVertexBuffer;
-				op.mTextures = mesh->mTextures;
-				opList.push_back(op);
-			}
+#ifdef USE_RENDER_OP
+			TRenderOperation op;
+			op.mMaterial = mMaterial;
+			op.mIndexBuffer = mesh->mIndexBuffer;
+			op.mVertexBuffer = mesh->mVertexBuffer;
+			op.mTextures = mesh->mTextures;
+			opList.push_back(op);
+#else
+			mesh->Draw(mRenderSys);
+#endif
 		}
 	}
 
@@ -493,11 +494,16 @@ int AssimpModel::GenRenderOperation(TRenderOperationList& opList)
 
 void AssimpModel::Draw()
 {
+#ifdef USE_RENDER_OP
 	TRenderOperationList opList;
 	GenRenderOperation(opList);
 	for (int i = 0; i < opList.size(); ++i) {
 		mRenderSys->RenderOperation(opList[i]);
 	}
+#else
+	TRenderOperationList opList;
+	DoDraw(mRootNode, opList);
+#endif
 }
 
 void AssimpModel::DrawShadow(ID3D11ShaderResourceView* shadowMap)

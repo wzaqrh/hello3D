@@ -121,22 +121,64 @@ PS_INPUT VS(VS_INPUT i)
 
 //function D,using Trowbridge-Reitz GGX
 static const float PI = 3.141592;
-float ndfGGX(float NdotHLV, float roughness) {
+float ndfGGX(float NdotH, float roughness) {
 	float alpha   = roughness * roughness;
 	float alphaSq = alpha * alpha;
 
-	float denom = (NdotHLV * NdotHLV) * (alphaSq - 1.0) + 1.0;
+	float denom = (NdotH * NdotH) * (alphaSq - 1.0) + 1.0;
 	return alphaSq / (PI * denom * denom);
 }
 
+//unity's implment
+float GGXTerm (float NdotH, float roughness)
+{
+    float alpha = roughness * roughness;
+    float d = (NdotH * alpha - NdotH) * NdotH + 1.0f; // 2 mad
+    return PI * alpha / (d * d + 1e-7f); // This function is not intended to be running on Mobile,
+                                            // therefore epsilon is smaller than what can be represented by half
+}
+
 //function G, using Smith’s Schlick-GGX
-float gaSchlickG1(float cosTheta, float k) {
-	return cosTheta / (cosTheta * (1.0 - k) + k);
+float gaSchlickG1(float NdotL, float k) {
+	return NdotL / (NdotL * (1.0 - k) + k);
 }
 float gaSchlickGGX(float NdotL, float NdotV, float roughness) {
 	float r = roughness + 1.0;
 	float k = (r * r) / 8.0; // Epic suggests using this roughness remapping for analytic lights.
 	return gaSchlickG1(NdotL, k) * gaSchlickG1(NdotV, k);
+}
+
+//unity's implment
+float SmithJointGGXVisibilityTerm (float NdotL, float NdotV, float roughness)
+{
+#if 0
+    // Original formulation:
+    //  lambda_v    = (-1 + sqrt(a2 * (1 - NdotL2) / NdotL2 + 1)) * 0.5f;
+    //  lambda_l    = (-1 + sqrt(a2 * (1 - NdotV2) / NdotV2 + 1)) * 0.5f;
+    //  G           = 1 / (1 + lambda_v + lambda_l);
+
+    // Reorder code to be more optimal
+    half a          = roughness;
+    half a2         = a * a;
+
+    half lambdaV    = NdotL * sqrt((-NdotV * a2 + NdotV) * NdotV + a2);
+    half lambdaL    = NdotV * sqrt((-NdotL * a2 + NdotL) * NdotL + a2);
+
+    // Simplify visibility term: (2.0f * NdotL * NdotV) /  ((4.0f * NdotL * NdotV) * (lambda_v + lambda_l + 1e-5f));
+    return 0.5f / (lambdaV + lambdaL + 1e-5f);  // This function is not intended to be running on Mobile,
+                                                // therefore epsilon is smaller than can be represented by half
+#else
+    // Approximation of the above formulation (simplify the sqrt, not mathematically correct but close enough)
+    float a = roughness;
+    float lambdaV = NdotL * (NdotV * (1 - a) + a);
+    float lambdaL = NdotV * (NdotL * (1 - a) + a);
+
+#if defined(SHADER_API_SWITCH)
+    return 0.5f / (lambdaV + lambdaL + 1e-4f); // work-around against hlslcc rounding error
+#else
+    return 0.5f / (lambdaV + lambdaL + 1e-5f);
+#endif
+#endif
 }
 
 //function F,using Fresnel-Schlick Approximation
@@ -161,13 +203,13 @@ float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, f
 	
 	float roughness;
 	if (hasRoughness > 0)
-		roughness = roughnessTexture.Sample(samLinear, texcoord).r;
+		roughness = 1.0 - roughnessTexture.Sample(samLinear, texcoord).r;
 	else
 		roughness = 0.01;
 		
 	albedo = pow(albedo, 2.2);
 	metalness = pow(metalness, 2.2);
-	roughness = pow(roughness, 2.2);
+	//roughness = pow(roughness, 2.2);
 	
 	//cos
 	float NdotL = max(0.0, dot(normal, toLight));

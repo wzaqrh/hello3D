@@ -1,6 +1,5 @@
 #include "Lesson6.h"
 
-#if 1
 //#define PBR_DEBUG
 /********** Lesson6 **********/
 void Lesson6::OnPostInitDevice()
@@ -101,18 +100,5 @@ void Lesson6::OnRender()
 	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
 	mModel->Draw();
 }
-#else
-void Lesson6::OnPostInitDevice()
-{
-	mLayerColor = std::make_shared<TSprite>(mRenderSys, "shader\\Pbr.fx", "shader\\Pbr.fx");
-	mLayerColor->SetPosition(-4, -4, -10);
-	mLayerColor->SetSize(8, 8);
-}
 
-void Lesson6::OnRender()
-{
-	mLayerColor->Draw();
-}
-#endif
-
-//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");

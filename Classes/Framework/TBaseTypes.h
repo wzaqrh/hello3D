@@ -8,6 +8,8 @@
 #include <dxerr.h>
 #include "std.h"
 
+#define USE_ONLY_PNG
+
 template<class T>
 T clamp(T minVal, T maxVal, T v) {
 	return min(max(v, minVal),maxVal);
