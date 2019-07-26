@@ -108,7 +108,7 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
 VertexOutputForwardBase vertBase (VertexInput v) { return vertForwardBase(v); }
 
 /********** UNITY_APPLY_DITHER_CROSSFADE **********/
-#ifdef LOD_FADE_CROSSFADE
+#ifdef LOD_FADE_CROSSFADE//addComponent('Lod Group') -> 'Fade Mode'='Cross Fade'
     #define UNITY_APPLY_DITHER_CROSSFADE(vpos)  UnityApplyDitherCrossFade(vpos)
     sampler2D _DitherMaskLOD2D;
     void UnityApplyDitherCrossFade(float2 vpos)
@@ -133,9 +133,131 @@ float4 Parallax (float4 texcoords, half3 viewDir)
     return float4(texcoords.xy + offset, texcoords.zw + offset);
 #endif
 }
+
+half Alpha(float2 uv)
+{
+#if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
+    return _Color.a;
+#else
+    return tex2D(_MainTex, uv).a * _Color.a;
+#endif
+}
+/*UNITY_SETUP_BRDF_INPUT*/
+half4 SpecularGloss(float2 uv)
+{
+    half4 sg;
+#ifdef _SPECGLOSSMAP//Shader='Standard(Specular setup)' -> 'Specular'=$texture
+    #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
+        sg.rgb = tex2D(_SpecGlossMap, uv).rgb;
+        sg.a = tex2D(_MainTex, uv).a;
+    #else
+        sg = tex2D(_SpecGlossMap, uv);
+    #endif
+    sg.a *= _GlossMapScale;//Shader='Standard' -> 'Smoothness Scale'=[0,1]
+#else
+    sg.rgb = _SpecColor.rgb;
+    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A//Shader='Standard(Specular setup)' -> 'Smoothness Source'='Albedo Alpha'
+        sg.a = tex2D(_MainTex, uv).a * _GlossMapScale;
+    #else
+        sg.a = _Glossiness;//Shader='Standard' -> 'Smoothness'=[0,1]
+    #endif
+#endif
+    return sg;
+}
+half3 Albedo(float4 texcoords)
+{
+    half3 albedo = _Color.rgb * tex2D (_MainTex, texcoords.xy).rgb;
+#if _DETAIL//Shader='Standard' -> 'Second Maps: Detail Albedo'=$texture
+    #if (SHADER_TARGET < 30)
+        // SM20: instruction count limitation
+        // SM20: no detail mask
+        half mask = 1;
+    #else
+        half mask = DetailMask(texcoords.xy);
+    #endif
+    half3 detailAlbedo = tex2D (_DetailAlbedoMap, texcoords.zw).rgb;
+    #if _DETAIL_MULX2
+        albedo *= LerpWhiteTo (detailAlbedo * unity_ColorSpaceDouble.rgb, mask);
+    #elif _DETAIL_MUL
+        albedo *= LerpWhiteTo (detailAlbedo, mask);
+    #elif _DETAIL_ADD
+        albedo += detailAlbedo * mask;
+    #elif _DETAIL_LERP
+        albedo = lerp (albedo, detailAlbedo, mask);
+    #endif
+#endif
+    return albedo;
+}
+half SpecularStrength(half3 specular)
+{
+    #if (SHADER_TARGET < 30)
+        // SM2.0: instruction count limitation
+        // SM2.0: simplified SpecularStrength
+        return specular.r; // Red channel - because most metals are either monocrhome or with redish/yellowish tint
+    #else
+        return max (max (specular.r, specular.g), specular.b);
+    #endif
+}
+// Diffuse/Spec Energy conservation
+#ifndef UNITY_CONSERVE_ENERGY
+#define UNITY_CONSERVE_ENERGY 1
+#endif
+#ifndef UNITY_CONSERVE_ENERGY_MONOCHROME
+#define UNITY_CONSERVE_ENERGY_MONOCHROME 1
+#endif
+inline half3 EnergyConservationBetweenDiffuseAndSpecular (half3 albedo, half3 specColor, out half oneMinusReflectivity)
+{
+    oneMinusReflectivity = 1 - SpecularStrength(specColor);
+    #if !UNITY_CONSERVE_ENERGY
+        return albedo;
+    #elif UNITY_CONSERVE_ENERGY_MONOCHROME
+        return albedo * oneMinusReflectivity;
+    #else
+        return albedo * (half3(1,1,1) - specColor);
+    #endif
+}
+struct FragmentCommonData
+{
+    half3 diffColor, specColor;
+    // Note: smoothness & oneMinusReflectivity for optimization purposes, mostly for DX9 SM2.0 level.
+    // Most of the math is being done on these (1-x) values, and that saves a few precious ALU slots.
+    half oneMinusReflectivity, smoothness;
+    float3 normalWorld;
+    float3 eyeVec;
+    half alpha;
+    float3 posWorld;
+
+#if UNITY_STANDARD_SIMPLE
+    half3 reflUVW;
+#endif
+
+#if UNITY_STANDARD_SIMPLE
+    half3 tangentSpaceNormal;
+#endif
+};
+inline FragmentCommonData SpecularSetup (float4 i_tex)
+{
+    half4 specGloss = SpecularGloss(i_tex.xy);
+    half3 specColor = specGloss.rgb;
+    half smoothness = specGloss.a;
+
+    half oneMinusReflectivity;
+    half3 diffColor = EnergyConservationBetweenDiffuseAndSpecular (Albedo(i_tex), specColor, /*out*/ oneMinusReflectivity);//diffuseBRDF
+
+    FragmentCommonData o = (FragmentCommonData)0;
+    o.diffColor = diffColor;
+    o.specColor = specColor;
+    o.oneMinusReflectivity = oneMinusReflectivity;
+    o.smoothness = smoothness;
+    return o;
+}
+#ifndef UNITY_SETUP_BRDF_INPUT
+    #define UNITY_SETUP_BRDF_INPUT SpecularSetup
+#endif
+/*PerPixelWorldNormal*/
 float3 PerPixelWorldNormal(float4 i_tex, float4 tangentToWorld[3])
 {
-#ifdef _NORMALMAP
+#ifdef _NORMALMAP//Shader='Standard' -> 'Normal Map'=$texture
     half3 tangent = tangentToWorld[0].xyz;
     half3 binormal = tangentToWorld[1].xyz;
     half3 normal = tangentToWorld[2].xyz;
@@ -158,6 +280,7 @@ float3 PerPixelWorldNormal(float4 i_tex, float4 tangentToWorld[3])
 #endif
     return normalWorld;
 }
+/*NormalizePerPixelNormal*/
 float3 NormalizePerPixelNormal (float3 n)
 {
     #if (SHADER_TARGET < 30) || UNITY_STANDARD_SIMPLE
@@ -166,6 +289,7 @@ float3 NormalizePerPixelNormal (float3 n)
         return normalize((float3)n); // takes float to avoid overflow
     #endif
 }
+/*PreMultiplyAlpha*/
 inline half3 PreMultiplyAlpha (half3 diffColor, half alpha, half oneMinusReflectivity, out half outModifiedAlpha)
 {
     #if defined(_ALPHAPREMULTIPLY_ON)
@@ -190,90 +314,7 @@ inline half3 PreMultiplyAlpha (half3 diffColor, half alpha, half oneMinusReflect
     #endif
     return diffColor;
 }
-struct FragmentCommonData
-{
-    half3 diffColor, specColor;
-    // Note: smoothness & oneMinusReflectivity for optimization purposes, mostly for DX9 SM2.0 level.
-    // Most of the math is being done on these (1-x) values, and that saves a few precious ALU slots.
-    half oneMinusReflectivity, smoothness;
-    float3 normalWorld;
-    float3 eyeVec;
-    half alpha;
-    float3 posWorld;
-
-#if UNITY_STANDARD_SIMPLE
-    half3 reflUVW;
-#endif
-
-#if UNITY_STANDARD_SIMPLE
-    half3 tangentSpaceNormal;
-#endif
-};
-half SpecularStrength(half3 specular)
-{
-    #if (SHADER_TARGET < 30)
-        // SM2.0: instruction count limitation
-        // SM2.0: simplified SpecularStrength
-        return specular.r; // Red channel - because most metals are either monocrhome or with redish/yellowish tint
-    #else
-        return max (max (specular.r, specular.g), specular.b);
-    #endif
-}
-// Diffuse/Spec Energy conservation
-inline half3 EnergyConservationBetweenDiffuseAndSpecular (half3 albedo, half3 specColor, out half oneMinusReflectivity)
-{
-    oneMinusReflectivity = 1 - SpecularStrength(specColor);
-    #if !UNITY_CONSERVE_ENERGY
-        return albedo;
-    #elif UNITY_CONSERVE_ENERGY_MONOCHROME
-        return albedo * oneMinusReflectivity;
-    #else
-        return albedo * (half3(1,1,1) - specColor);
-    #endif
-}
-half3 Albedo(float4 texcoords)
-{
-    half3 albedo = _Color.rgb * tex2D (_MainTex, texcoords.xy).rgb;
-#if _DETAIL
-    #if (SHADER_TARGET < 30)
-        // SM20: instruction count limitation
-        // SM20: no detail mask
-        half mask = 1;
-    #else
-        half mask = DetailMask(texcoords.xy);
-    #endif
-    half3 detailAlbedo = tex2D (_DetailAlbedoMap, texcoords.zw).rgb;
-    #if _DETAIL_MULX2
-        albedo *= LerpWhiteTo (detailAlbedo * unity_ColorSpaceDouble.rgb, mask);
-    #elif _DETAIL_MUL
-        albedo *= LerpWhiteTo (detailAlbedo, mask);
-    #elif _DETAIL_ADD
-        albedo += detailAlbedo * mask;
-    #elif _DETAIL_LERP
-        albedo = lerp (albedo, detailAlbedo, mask);
-    #endif
-#endif
-    return albedo;
-}
-inline FragmentCommonData SpecularSetup (float4 i_tex)
-{
-    half4 specGloss = SpecularGloss(i_tex.xy);
-    half3 specColor = specGloss.rgb;
-    half smoothness = specGloss.a;
-
-    half oneMinusReflectivity;
-    half3 diffColor = EnergyConservationBetweenDiffuseAndSpecular (Albedo(i_tex), specColor, /*out*/ oneMinusReflectivity);
-
-    FragmentCommonData o = (FragmentCommonData)0;
-    o.diffColor = diffColor;
-    o.specColor = specColor;
-    o.oneMinusReflectivity = oneMinusReflectivity;
-    o.smoothness = smoothness;
-    return o;
-}
-#ifndef UNITY_SETUP_BRDF_INPUT
-    #define UNITY_SETUP_BRDF_INPUT SpecularSetup
-#endif
+/*FragmentSetup*/
 inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld)
 {
     i_tex = Parallax(i_tex, i_viewDirForParallax);
@@ -292,6 +333,35 @@ inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, ha
     o.diffColor = PreMultiplyAlpha (o.diffColor, alpha, o.oneMinusReflectivity, /*out*/ o.alpha);
     return o;
 }
+/*IN_VIEWDIR4PARALLAX*/
+#ifdef _PARALLAXMAP//Shader='Standard' -> 'Height Map'=$texture
+    #define IN_VIEWDIR4PARALLAX(i) NormalizePerPixelNormal(half3(i.tangentToWorldAndPackedData[0].w,i.tangentToWorldAndPackedData[1].w,i.tangentToWorldAndPackedData[2].w))
+    #define IN_VIEWDIR4PARALLAX_FWDADD(i) NormalizePerPixelNormal(i.viewDirForParallax.xyz)
+#else
+    #define IN_VIEWDIR4PARALLAX(i) half3(0,0,0)
+    #define IN_VIEWDIR4PARALLAX_FWDADD(i) half3(0,0,0)
+#endif
+/*IN_WORLDPOS*/
+#ifndef UNITY_STANDARD_SIMPLE
+    #define UNITY_STANDARD_SIMPLE 0
+#endif
+// Setup a new define with meaningful name to know if we require world pos in fragment shader
+#if UNITY_STANDARD_SIMPLE
+    #define UNITY_REQUIRE_FRAG_WORLDPOS 0
+#else
+    #define UNITY_REQUIRE_FRAG_WORLDPOS 1
+#endif
+#if UNITY_REQUIRE_FRAG_WORLDPOS
+    #if UNITY_PACK_WORLDPOS_WITH_TANGENT
+        #define IN_WORLDPOS(i) half3(i.tangentToWorldAndPackedData[0].w,i.tangentToWorldAndPackedData[1].w,i.tangentToWorldAndPackedData[2].w)
+    #else
+        #define IN_WORLDPOS(i) i.posWorld
+    #endif
+    #define IN_WORLDPOS_FWDADD(i) i.posWorld
+#else
+    #define IN_WORLDPOS(i) half3(0,0,0)
+    #define IN_WORLDPOS_FWDADD(i) half3(0,0,0)
+#endif
 
 #define FRAGMENT_SETUP(x) FragmentCommonData x = \
     FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i));
@@ -317,123 +387,13 @@ UnityLight MainLight ()
 #   define UNITY_LIGHT_ATTENUATION(destName, input, worldPos) fixed destName = UNITY_SHADOW_ATTENUATION(input, worldPos);
 #endif
 
-/********** BRDF1_Unity_PBS **********/
-// Note: BRDF entry points use smoothness and oneMinusReflectivity for optimization
-// purposes, mostly for DX9 SM2.0 level. Most of the math is being done on these (1-x) values, and that saves
-// a few precious ALU slots.
-
-
-// Main Physically Based BRDF
-// Derived from Disney work and based on Torrance-Sparrow micro-facet model
-//
-//   BRDF = kD / pi + kS * (D * V * F) / 4
-//   I = BRDF * NdotL
-//
-// * NDF (depending on UNITY_BRDF_GGX):
-//  a) Normalized BlinnPhong
-//  b) GGX
-// * Smith for Visiblity term
-// * Schlick approximation for Fresnel
-half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
-    float3 normal, float3 viewDir,
-    UnityLight light, UnityIndirect gi)
+/********** Occlusion(AO) **********/
+half LerpOneTo(half b, half t)
 {
-    float perceptualRoughness = SmoothnessToPerceptualRoughness (smoothness);
-    float3 halfDir = Unity_SafeNormalize (float3(light.dir) + viewDir);
-
-// NdotV should not be negative for visible pixels, but it can happen due to perspective projection and normal mapping
-// In this case normal should be modified to become valid (i.e facing camera) and not cause weird artifacts.
-// but this operation adds few ALU and users may not want it. Alternative is to simply take the abs of NdotV (less correct but works too).
-// Following define allow to control this. Set it to 0 if ALU is critical on your platform.
-// This correction is interesting for GGX with SmithJoint visibility function because artifacts are more visible in this case due to highlight edge of rough surface
-// Edit: Disable this code by default for now as it is not compatible with two sided lighting used in SpeedTree.
-#define UNITY_HANDLE_CORRECTLY_NEGATIVE_NDOTV 0
-
-#if UNITY_HANDLE_CORRECTLY_NEGATIVE_NDOTV
-    // The amount we shift the normal toward the view vector is defined by the dot product.
-    half shiftAmount = dot(normal, viewDir);
-    normal = shiftAmount < 0.0f ? normal + viewDir * (-shiftAmount + 1e-5f) : normal;
-    // A re-normalization should be applied here but as the shift is small we don't do it to save ALU.
-    //normal = normalize(normal);
-
-    float nv = saturate(dot(normal, viewDir)); // TODO: this saturate should no be necessary here
-#else
-    half nv = abs(dot(normal, viewDir));    // This abs allow to limit artifact
-#endif
-
-    float nl = saturate(dot(normal, light.dir));
-    float nh = saturate(dot(normal, halfDir));
-
-    half lv = saturate(dot(light.dir, viewDir));
-    half lh = saturate(dot(light.dir, halfDir));
-
-    // Diffuse term
-    half diffuseTerm = DisneyDiffuse(nv, nl, lh, perceptualRoughness) * nl;
-
-    // Specular term
-    // HACK: theoretically we should divide diffuseTerm by Pi and not multiply specularTerm!
-    // BUT 1) that will make shader look significantly darker than Legacy ones
-    // and 2) on engine side "Non-important" lights have to be divided by Pi too in cases when they are injected into ambient SH
-    float roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
-#if UNITY_BRDF_GGX
-    // GGX with roughtness to 0 would mean no specular at all, using max(roughness, 0.002) here to match HDrenderloop roughtness remapping.
-    roughness = max(roughness, 0.002);
-    float V = SmithJointGGXVisibilityTerm (nl, nv, roughness);
-    float D = GGXTerm (nh, roughness);
-#else
-    // Legacy
-    half V = SmithBeckmannVisibilityTerm (nl, nv, roughness);
-    half D = NDFBlinnPhongNormalizedTerm (nh, PerceptualRoughnessToSpecPower(perceptualRoughness));
-#endif
-
-    float specularTerm = V*D * UNITY_PI; // Torrance-Sparrow model, Fresnel is applied later
-
-#   ifdef UNITY_COLORSPACE_GAMMA
-        specularTerm = sqrt(max(1e-4h, specularTerm));
-#   endif
-
-    // specularTerm * nl can be NaN on Metal in some cases, use max() to make sure it's a sane value
-    specularTerm = max(0, specularTerm * nl);
-#if defined(_SPECULARHIGHLIGHTS_OFF)
-    specularTerm = 0.0;
-#endif
-
-    // surfaceReduction = Int D(NdotH) * NdotH * Id(NdotL>0) dH = 1/(roughness^2+1)
-    half surfaceReduction;
-#   ifdef UNITY_COLORSPACE_GAMMA
-        surfaceReduction = 1.0-0.28*roughness*perceptualRoughness;      // 1-0.28*x^3 as approximation for (1/(x^4+1))^(1/2.2) on the domain [0;1]
-#   else
-        surfaceReduction = 1.0 / (roughness*roughness + 1.0);           // fade \in [0.5;1]
-#   endif
-
-    // To provide true Lambert lighting, we need to be able to kill specular completely.
-    specularTerm *= any(specColor) ? 1.0 : 0.0;
-
-    half grazingTerm = saturate(smoothness + (1-oneMinusReflectivity));
-    half3 color =   diffColor * (gi.diffuse + light.color * diffuseTerm)
-                    + specularTerm * light.color * FresnelTerm (specColor, lh)
-                    + surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, nv);
-
-    return half4(color, 1);
+    half oneMinusT = 1 - t;
+    return oneMinusT + b * t;
 }
-
-#if !defined (UNITY_BRDF_PBS) // allow to explicitly override BRDF in custom shader
-    // still add safe net for low shader models, otherwise we might end up with shaders failing to compile
-    #if SHADER_TARGET < 30 || defined(SHADER_TARGET_SURFACE_ANALYSIS) // only need "something" for surface shader analysis pass; pick the cheap one
-        #define UNITY_BRDF_PBS BRDF3_Unity_PBS
-    #elif defined(UNITY_PBS_USE_BRDF3)
-        #define UNITY_BRDF_PBS BRDF3_Unity_PBS
-    #elif defined(UNITY_PBS_USE_BRDF2)
-        #define UNITY_BRDF_PBS BRDF2_Unity_PBS
-    #elif defined(UNITY_PBS_USE_BRDF1)
-        #define UNITY_BRDF_PBS BRDF1_Unity_PBS
-    #else
-        #error something broke in auto-choosing BRDF
-    #endif
-#endif
-
-/********** Occlusion **********/
-sampler2D   _OcclusionMap;
+sampler2D   _OcclusionMap;//Shader='Standard' -> 'Occlusion'=$texture
 half        _OcclusionStrength;
 half Occlusion(float2 uv)
 {
@@ -506,6 +466,11 @@ inline void ResetUnityGI(out UnityGI outGI)
     outGI.indirect.diffuse = 0;
     outGI.indirect.specular = 0;
 }
+#if defined( SHADOWS_SCREEN ) && defined( LIGHTMAP_ON )
+    #define HANDLE_SHADOWS_BLENDING_IN_GI 1
+#endif
+//LIGHTPROBE_SH=光照探针
+#define UNITY_SHOULD_SAMPLE_SH (defined(LIGHTPROBE_SH) && !defined(UNITY_PASS_FORWARDADD) && !defined(UNITY_PASS_PREPASSBASE) && !defined(UNITY_PASS_SHADOWCASTER) && !defined(UNITY_PASS_META))
 inline UnityGI UnityGI_Base(UnityGIInput data, half occlusion, half3 normalWorld)
 {
     UnityGI o_gi;
@@ -573,13 +538,13 @@ inline half3 UnityGI_IndirectSpecular(UnityGIInput data, half occlusion, Unity_G
 {
     half3 specular;
 
-    #ifdef UNITY_SPECCUBE_BOX_PROJECTION
+    #ifdef UNITY_SPECCUBE_BOX_PROJECTION// UNITY_SPECCUBE_BOX_PROJECTION: TierSettings.reflectionProbeBoxProjection
         // we will tweak reflUVW in glossIn directly (as we pass it to Unity_GlossyEnvironment twice for probe0 and probe1), so keep original to pass into BoxProjectedCubemapDirection
         half3 originalReflUVW = glossIn.reflUVW;
         glossIn.reflUVW = BoxProjectedCubemapDirection (originalReflUVW, data.worldPos, data.probePosition[0], data.boxMin[0], data.boxMax[0]);
     #endif
 
-    #ifdef _GLOSSYREFLECTIONS_OFF
+    #ifdef _GLOSSYREFLECTIONS_OFF//enabled by 'Standard'
         specular = unity_IndirectSpecColor.rgb;
     #else
         half3 env0 = Unity_GlossyEnvironment (UNITY_PASS_TEXCUBE(unity_SpecCube0), data.probeHDR[0], glossIn);
@@ -722,6 +687,191 @@ inline UnityGI FragmentGI (FragmentCommonData s, half occlusion, half4 i_ambient
 {
     return FragmentGI(s, occlusion, i_ambientOrLightmapUV, atten, light, true);
 }
+
+/********** BRDF1_Unity_PBS **********/
+// Note: BRDF entry points use smoothness and oneMinusReflectivity for optimization
+// purposes, mostly for DX9 SM2.0 level. Most of the math is being done on these (1-x) values, and that saves
+// a few precious ALU slots.
+
+
+// Main Physically Based BRDF
+// Derived from Disney work and based on Torrance-Sparrow micro-facet model
+//
+//   BRDF = kD / pi + kS * (D * V * F) / 4
+//   I = BRDF * NdotL
+//
+// * NDF (depending on UNITY_BRDF_GGX):
+//  a) Normalized BlinnPhong
+//  b) GGX
+// * Smith for Visiblity term
+// * Schlick approximation for Fresnel
+inline float3 Unity_SafeNormalize(float3 inVec)
+{
+    float dp3 = max(0.001f, dot(inVec, inVec));
+    return inVec * rsqrt(dp3);
+}
+// Note: Disney diffuse must be multiply by diffuseAlbedo / PI. This is done outside of this function.
+half DisneyDiffuse(half NdotV, half NdotL, half LdotH, half perceptualRoughness)
+{
+    half fd90 = 0.5 + 2 * LdotH * LdotH * perceptualRoughness;
+    // Two schlick fresnel term
+    half lightScatter   = (1 + (fd90 - 1) * Pow5(1 - NdotL));
+    half viewScatter    = (1 + (fd90 - 1) * Pow5(1 - NdotV));
+
+    return lightScatter * viewScatter;
+}
+float PerceptualRoughnessToRoughness(float perceptualRoughness)
+{
+    return perceptualRoughness * perceptualRoughness;
+}
+// Ref: http://jcgt.org/published/0003/02/03/paper.pdf
+inline float SmithJointGGXVisibilityTerm (float NdotL, float NdotV, float roughness)
+{
+#if 0
+    // Original formulation:
+    //  lambda_v    = (-1 + sqrt(a2 * (1 - NdotL2) / NdotL2 + 1)) * 0.5f;
+    //  lambda_l    = (-1 + sqrt(a2 * (1 - NdotV2) / NdotV2 + 1)) * 0.5f;
+    //  G           = 1 / (1 + lambda_v + lambda_l);
+
+    // Reorder code to be more optimal
+    half a          = roughness;
+    half a2         = a * a;
+
+    half lambdaV    = NdotL * sqrt((-NdotV * a2 + NdotV) * NdotV + a2);
+    half lambdaL    = NdotV * sqrt((-NdotL * a2 + NdotL) * NdotL + a2);
+
+    // Simplify visibility term: (2.0f * NdotL * NdotV) /  ((4.0f * NdotL * NdotV) * (lambda_v + lambda_l + 1e-5f));
+    return 0.5f / (lambdaV + lambdaL + 1e-5f);  // This function is not intended to be running on Mobile,
+                                                // therefore epsilon is smaller than can be represented by half
+#else
+    // Approximation of the above formulation (simplify the sqrt, not mathematically correct but close enough)
+    float a = roughness;
+    float lambdaV = NdotL * (NdotV * (1 - a) + a);
+    float lambdaL = NdotV * (NdotL * (1 - a) + a);
+
+#if defined(SHADER_API_SWITCH)
+    return 0.5f / (lambdaV + lambdaL + 1e-4f); // work-around against hlslcc rounding error
+#else
+    return 0.5f / (lambdaV + lambdaL + 1e-5f);
+#endif
+
+#endif
+}
+inline float GGXTerm (float NdotH, float roughness)
+{
+    float a2 = roughness * roughness;
+    float d = (NdotH * a2 - NdotH) * NdotH + 1.0f; // 2 mad
+    return UNITY_INV_PI * a2 / (d * d + 1e-7f); // This function is not intended to be running on Mobile,
+                                            // therefore epsilon is smaller than what can be represented by half
+}
+inline half3 FresnelTerm (half3 F0, half cosA)
+{
+    half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
+    return F0 + (1-F0) * t;
+}
+inline half3 FresnelLerp (half3 F0, half3 F90, half cosA)
+{
+    half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
+    return lerp (F0, F90, t);
+}
+half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
+    float3 normal, float3 viewDir,
+    UnityLight light, UnityIndirect gi)
+{
+    float perceptualRoughness = SmoothnessToPerceptualRoughness (smoothness);
+    float3 halfDir = Unity_SafeNormalize (float3(light.dir) + viewDir);
+
+// NdotV should not be negative for visible pixels, but it can happen due to perspective projection and normal mapping
+// In this case normal should be modified to become valid (i.e facing camera) and not cause weird artifacts.
+// but this operation adds few ALU and users may not want it. Alternative is to simply take the abs of NdotV (less correct but works too).
+// Following define allow to control this. Set it to 0 if ALU is critical on your platform.
+// This correction is interesting for GGX with SmithJoint visibility function because artifacts are more visible in this case due to highlight edge of rough surface
+// Edit: Disable this code by default for now as it is not compatible with two sided lighting used in SpeedTree.
+#define UNITY_HANDLE_CORRECTLY_NEGATIVE_NDOTV 0
+
+#if UNITY_HANDLE_CORRECTLY_NEGATIVE_NDOTV
+    // The amount we shift the normal toward the view vector is defined by the dot product.
+    half shiftAmount = dot(normal, viewDir);
+    normal = shiftAmount < 0.0f ? normal + viewDir * (-shiftAmount + 1e-5f) : normal;
+    // A re-normalization should be applied here but as the shift is small we don't do it to save ALU.
+    //normal = normalize(normal);
+
+    float nv = saturate(dot(normal, viewDir)); // TODO: this saturate should no be necessary here
+#else
+    half nv = abs(dot(normal, viewDir));    // This abs allow to limit artifact
+#endif
+
+    float nl = saturate(dot(normal, light.dir));
+    float nh = saturate(dot(normal, halfDir));
+
+    half lv = saturate(dot(light.dir, viewDir));
+    half lh = saturate(dot(light.dir, halfDir));
+
+    // Diffuse term
+    half diffuseTerm = DisneyDiffuse(nv, nl, lh, perceptualRoughness) * nl;
+
+    // Specular term
+    // HACK: theoretically we should divide diffuseTerm by Pi and not multiply specularTerm!
+    // BUT 1) that will make shader look significantly darker than Legacy ones
+    // and 2) on engine side "Non-important" lights have to be divided by Pi too in cases when they are injected into ambient SH
+    float roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
+#if UNITY_BRDF_GGX
+    // GGX with roughtness to 0 would mean no specular at all, using max(roughness, 0.002) here to match HDrenderloop roughtness remapping.
+    roughness = max(roughness, 0.002);
+    float V = SmithJointGGXVisibilityTerm (nl, nv, roughness);
+    float D = GGXTerm (nh, roughness);
+#else
+    // Legacy
+    half V = SmithBeckmannVisibilityTerm (nl, nv, roughness);
+    half D = NDFBlinnPhongNormalizedTerm (nh, PerceptualRoughnessToSpecPower(perceptualRoughness));
+#endif
+
+    float specularTerm = V*D * UNITY_PI; // Torrance-Sparrow model, Fresnel is applied later
+
+#   ifdef UNITY_COLORSPACE_GAMMA
+        specularTerm = sqrt(max(1e-4h, specularTerm));
+#   endif
+
+    // specularTerm * nl can be NaN on Metal in some cases, use max() to make sure it's a sane value
+    specularTerm = max(0, specularTerm * nl);
+#if defined(_SPECULARHIGHLIGHTS_OFF)
+    specularTerm = 0.0;
+#endif
+
+    // surfaceReduction = Int D(NdotH) * NdotH * Id(NdotL>0) dH = 1/(roughness^2+1)
+    half surfaceReduction;
+#   ifdef UNITY_COLORSPACE_GAMMA
+        surfaceReduction = 1.0-0.28*roughness*perceptualRoughness;      // 1-0.28*x^3 as approximation for (1/(x^4+1))^(1/2.2) on the domain [0;1]
+#   else
+        surfaceReduction = 1.0 / (roughness*roughness + 1.0);           // fade \in [0.5;1]
+#   endif
+
+    // To provide true Lambert lighting, we need to be able to kill specular completely.
+    specularTerm *= any(specColor) ? 1.0 : 0.0;
+
+    half grazingTerm = saturate(smoothness + (1-oneMinusReflectivity));
+    half3 color =   diffColor * (gi.diffuse + light.color * diffuseTerm)
+                    + specularTerm * light.color * FresnelTerm (specColor, lh)
+                    + surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, nv);
+
+    return half4(color, 1);
+}
+
+#if !defined (UNITY_BRDF_PBS) // allow to explicitly override BRDF in custom shader
+    // still add safe net for low shader models, otherwise we might end up with shaders failing to compile
+    #if SHADER_TARGET < 30 || defined(SHADER_TARGET_SURFACE_ANALYSIS) // only need "something" for surface shader analysis pass; pick the cheap one
+        #define UNITY_BRDF_PBS BRDF3_Unity_PBS
+    #elif defined(UNITY_PBS_USE_BRDF3)
+        #define UNITY_BRDF_PBS BRDF3_Unity_PBS
+    #elif defined(UNITY_PBS_USE_BRDF2)
+        #define UNITY_BRDF_PBS BRDF2_Unity_PBS
+    #elif defined(UNITY_PBS_USE_BRDF1)
+        #define UNITY_BRDF_PBS BRDF1_Unity_PBS
+    #else
+        #error something broke in auto-choosing BRDF
+    #endif
+#endif
+
 
 /********** fragForwardBaseInternal **********/
 half4 fragForwardBaseInternal (VertexOutputForwardBase i)
