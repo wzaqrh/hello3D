@@ -1,5 +1,21 @@
 #include "Lesson6.h"
 
+/********** cbUnityMaterial **********/
+cbUnityMaterial::cbUnityMaterial()
+{
+	_SpecColor = XMFLOAT4(1,1,1,1);
+	_Color = XMFLOAT4(1,1,1,1);
+	_GlossMapScale = 1;
+	_OcclusionStrength = 1;
+}
+
+/********** cbUnityGlobal **********/
+cbUnityGlobal::cbUnityGlobal()
+{
+	_Unity_IndirectSpecColor = XMFLOAT4(0,0,0,0);
+	_AmbientOrLightmapUV = XMFLOAT4(0.01,0.01,0.01,1);
+}
+
 //#define PBR_DEBUG
 /********** Lesson6 **********/
 void Lesson6::OnPostInitDevice()
@@ -20,7 +36,7 @@ void Lesson6::OnPostInitDevice()
 
 	auto dl3 = mRenderSys->AddDirectLight();
 	dl3->SetDirection(1, -1, 1);
-	int intensify = 10;
+	int intensify = 1;
 	dl3->SetDiffuseColor(intensify, intensify, intensify, 1);
 #else
 	auto light1 = mRenderSys->AddDirectLight();
@@ -34,10 +50,20 @@ void Lesson6::OnPostInitDevice()
 	light3->SetDiffuseColor(3,3,3,1);
 #endif
 
-	mModel = new AssimpModel(mRenderSys, "shader\\Lesson6.fx", "shader\\Lesson6.fx");
-	
+	mModel = new AssimpModel(mRenderSys, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx");
+	mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
+	mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
+	{
+		cbUnityMaterial cb;
+		mRenderSys->UpdateConstBuffer(mModel->mMaterial->mConstantBuffers[2], &cb);
+	}
+	{
+		cbUnityGlobal cb;
+		mRenderSys->UpdateConstBuffer(mModel->mMaterial->mConstantBuffers[3], &cb);
+	}
+
 #ifndef PBR_DEBUG
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male03.FBX")); mScale = 0.3; mPosition = XMFLOAT3(0, -5, 0);
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.3; mPosition = XMFLOAT3(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures.empty()) {

@@ -121,11 +121,12 @@ HRESULT CompileShaderFromFile(const char* szFileName, const char* szEntryPoint, 
 	ID3DBlob* pErrorBlob;
 	hr = D3DX11CompileFromFileA(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
 		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
-	if (CheckHR(hr))
+	if (FAILED(hr))
 	{
 		if (pErrorBlob != NULL)
 			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
 		if (pErrorBlob) pErrorBlob->Release();
+		CheckHR(hr);
 		return hr;
 	}
 	if (pErrorBlob) pErrorBlob->Release();

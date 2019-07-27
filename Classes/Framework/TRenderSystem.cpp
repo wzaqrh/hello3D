@@ -303,7 +303,7 @@ ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename)
 
 	ID3DBlob* pBlob = NULL;
 	hr = CompileShaderFromFile(filename, "PS", "ps_4_0", &pBlob);
-	if (CheckHR(hr)) {
+	if (FAILED(hr)) {
 		MessageBox(NULL, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return nullptr;
 	}
@@ -480,6 +480,7 @@ ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile)
 
 std::map<std::string, ID3D11ShaderResourceView*> TexByPath;
 TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
+	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;
 	auto pos = __imgPath.find_last_of("\\");
 	if (pos != std::string::npos) {

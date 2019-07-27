@@ -415,18 +415,6 @@ half Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_Oc
 #endif
 }
 
-/********** Emission **********/
-half4       _EmissionColor;
-sampler2D   _EmissionMap;
-half3 Emission(float2 uv)
-{
-#ifndef _EMISSION
-    return 0;
-#else
-    return tex2D(_EmissionMap, uv).rgb * _EmissionColor.rgb;
-#endif
-}
-
 /********** FragmentGI **********/
 /**UnityGlossyEnvironmentSetup**/
 // ----------------------------------------------------------------------------
@@ -887,6 +875,17 @@ half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivi
     #endif
 #endif
 
+/********** Emission **********/
+half4       _EmissionColor;
+sampler2D   _EmissionMap;
+half3 Emission(float2 uv)
+{
+#ifndef _EMISSION//std_branch_this
+    return 0;
+#else
+    return tex2D(_EmissionMap, uv).rgb * _EmissionColor.rgb;
+#endif
+}
 
 /********** fragForwardBaseInternal **********/
 half4 fragForwardBaseInternal (VertexOutputForwardBase i)

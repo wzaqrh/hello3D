@@ -116,7 +116,4 @@
       <Filter>Lib</Filter>
     </Library>
   </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Debug\shader\UnityStand.fx" />
-  </ItemGroup>
 </Project>

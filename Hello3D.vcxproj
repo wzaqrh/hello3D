@@ -412,9 +412,6 @@
   <ItemGroup>
     <Library Include="lib\assimp-vc140-mt.lib" />
   </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Debug\shader\UnityStand.fx" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
