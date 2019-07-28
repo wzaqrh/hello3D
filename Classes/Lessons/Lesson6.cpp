@@ -35,10 +35,8 @@ void Lesson6::OnPostInitDevice()
 	auto dl2 = mRenderSys->AddDirectLight();
 	dl2->SetDirection(1, 0, 0);*/
 
-	auto dl3 = mRenderSys->AddDirectLight();
-	dl3->SetDirection(1, -1, 1);
-	int intensify = 1;
-	dl3->SetDiffuseColor(intensify, intensify, intensify, 1);
+	mRenderSys->AddDirectLight()->SetDirection(1, -1, 1);
+	mRenderSys->AddDirectLight()->SetDirection(0, 0, 1);
 #else
 	auto light1 = mRenderSys->AddDirectLight();
 	light1->SetDirection(-1, 0, 0);
@@ -56,7 +54,7 @@ void Lesson6::OnPostInitDevice()
 	mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
 	{
 		cbUnityMaterial cb;
-		cb._Color = XMFLOAT4(0,0,0,0);
+		//cb._Color = XMFLOAT4(0,0,0,0);
 		mRenderSys->UpdateConstBuffer(mModel->mMaterial->mConstantBuffers[2], &cb);
 	}
 	{

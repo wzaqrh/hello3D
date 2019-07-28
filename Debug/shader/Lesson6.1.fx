@@ -134,8 +134,9 @@ PS_INPUT VS(VS_INPUT i)
     return output;
 }
 
-#define SHADER_TARGET 25
+#define SHADER_TARGET 30
 #define _ALPHAPREMULTIPLY_ON
+#define UNITY_SETUP_BRDF_INPUT MetallicSetup
 
 /*FragmentSetup*/
 struct FragmentCommonData
@@ -197,6 +198,50 @@ FragmentCommonData SpecularSetup(float2 i_tex)
     o.smoothness = smoothness;
     return o;
 }
+float2 MetallicGloss(float2 uv)
+{
+    float2 mg;
+	//_METALLICGLOSSMAP
+    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+        mg.x = tex2D(_MetallicGlossMap, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
+        mg.y = tex2D(_MainTex, uv).a;
+    #else
+        mg.x = metalnessTexture.Sample(samLinear, uv).r;
+		mg.y = smoothnessTexture.Sample(samLinear, uv).r;
+    #endif
+	mg.y *= _GlossMapScale;
+	//_METALLICGLOSSMAP
+    return mg;
+}
+#define unity_ColorSpaceDielectricSpec half4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
+float OneMinusReflectivityFromMetallic(float metallic)
+{
+    float oneMinusDielectricSpec = unity_ColorSpaceDielectricSpec.a;
+    return oneMinusDielectricSpec - metallic * oneMinusDielectricSpec;
+}
+float3 DiffuseAndSpecularFromMetallic(float3 albedo, float metallic, out float3 specColor, out float oneMinusReflectivity)
+{
+    specColor = lerp(unity_ColorSpaceDielectricSpec.rgb, albedo, metallic);
+    oneMinusReflectivity = OneMinusReflectivityFromMetallic(metallic);
+    return albedo * oneMinusReflectivity;
+}
+FragmentCommonData MetallicSetup(float2 i_tex)
+{
+    float2 metallicGloss = MetallicGloss(i_tex.xy);
+    float metallic = metallicGloss.x;
+    float smoothness = metallicGloss.y; // this is 1 minus the square root of real roughness m.
+
+    float oneMinusReflectivity;
+    float3 specColor;
+    float3 diffColor = DiffuseAndSpecularFromMetallic(Albedo(i_tex), metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
+
+    FragmentCommonData o = (FragmentCommonData)0;
+    o.diffColor = diffColor;
+    o.specColor = specColor;
+    o.oneMinusReflectivity = oneMinusReflectivity;
+    o.smoothness = smoothness;
+    return o;
+}
 float Alpha(float2 uv)//_Color.a
 {
     return _Color.a;
@@ -218,7 +263,7 @@ float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivit
 FragmentCommonData FragmentSetup(float2 i_tex)
 {
     float alpha = Alpha(i_tex.xy);//_Color.a
-    FragmentCommonData o = SpecularSetup(i_tex);
+    FragmentCommonData o = UNITY_SETUP_BRDF_INPUT(i_tex);
     o.diffColor = PreMultiplyAlpha(o.diffColor, alpha, o.oneMinusReflectivity, /*out*/o.alpha);
     return o;
 }
@@ -246,8 +291,8 @@ float Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_O
 #if (SHADER_TARGET < 30)
     return aoTexture.Sample(samLinear, uv).g;
 #else
-    half occ = tex2D(_OcclusionMap, uv).g;
-    return LerpOneTo (occ, _OcclusionStrength);
+    float occ = aoTexture.Sample(samLinear, uv).g;
+    return LerpOneTo(occ, _OcclusionStrength);
 #endif
 }
 
@@ -409,7 +454,7 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
 
     float grazingTerm = saturate(s.smoothness + (1-s.oneMinusReflectivity));
     float3 color = s.diffColor * (gi.indirect.diffuse + gi.light.color * diffuseTerm)
-                 + specularTerm * gi.light.color * FresnelTerm(s.specColor, lh) * 0.1
+                 + specularTerm * gi.light.color * FresnelTerm(s.specColor, lh)
                  + surfaceReduction * gi.indirect.specular * FresnelLerp(s.specColor, grazingTerm, nv);
 	/*
     half grazingTerm = saturate(smoothness + (1-oneMinusReflectivity));
