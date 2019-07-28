@@ -134,6 +134,9 @@ PS_INPUT VS(VS_INPUT i)
     return output;
 }
 
+#define SHADER_TARGET 25
+#define _ALPHAPREMULTIPLY_ON
+
 /*FragmentSetup*/
 struct FragmentCommonData
 {
@@ -165,7 +168,11 @@ float3 Albedo(float2 i_tex)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 }
 float SpecularStrength(float3 specular)//max(specular.rgb)
 {
-    return max(max(specular.r,specular.g),specular.b);
+#if (SHADER_TARGET < 30)
+    return specular.r;
+#else
+    return max (max (specular.r, specular.g), specular.b);
+#endif
 }
 float3 EnergyConservationBetweenDiffuseAndSpecular(float3 albedo, float3 specColor, out float oneMinusReflectivity)//albedo*(1-max(specColor.rgb)),1-max(specColor.rgb)
 {
@@ -196,14 +203,23 @@ float Alpha(float2 uv)//_Color.a
 }
 float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivity, out float outModifiedAlpha)//diffColor*alpha,1-oneMinusReflectivity + alpha*oneMinusReflectivity
 {
-    outModifiedAlpha = 1-oneMinusReflectivity + alpha*oneMinusReflectivity;
+    #if defined(_ALPHAPREMULTIPLY_ON)
+        diffColor *= alpha;
+        #if (SHADER_TARGET < 30)
+            outModifiedAlpha = alpha;
+        #else
+            outModifiedAlpha = 1-oneMinusReflectivity + alpha*oneMinusReflectivity;
+        #endif
+    #else
+        outModifiedAlpha = alpha;
+    #endif
     return diffColor * alpha;
 }
 FragmentCommonData FragmentSetup(float2 i_tex)
 {
     float alpha = Alpha(i_tex.xy);//_Color.a
     FragmentCommonData o = SpecularSetup(i_tex);
-    o.diffColor = PreMultiplyAlpha(o.diffColor, alpha, o.oneMinusReflectivity, /*out*/ o.alpha);
+    o.diffColor = PreMultiplyAlpha(o.diffColor, alpha, o.oneMinusReflectivity, /*out*/o.alpha);
     return o;
 }
 
@@ -227,8 +243,12 @@ float LerpOneTo(float b, float t)
 }
 float Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_OcclusionStrength
 {
-    float occ = aoTexture.Sample(samLinear, uv).g;
-    return LerpOneTo(occ, _OcclusionStrength);
+#if (SHADER_TARGET < 30)
+    return aoTexture.Sample(samLinear, uv).g;
+#else
+    half occ = tex2D(_OcclusionMap, uv).g;
+    return LerpOneTo (occ, _OcclusionStrength);
+#endif
 }
 
 /*FragmentGI*/
@@ -389,7 +409,7 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
 
     float grazingTerm = saturate(s.smoothness + (1-s.oneMinusReflectivity));
     float3 color = s.diffColor * (gi.indirect.diffuse + gi.light.color * diffuseTerm)
-                 + specularTerm * gi.light.color * FresnelTerm(s.specColor, lh)
+                 + specularTerm * gi.light.color * FresnelTerm(s.specColor, lh) * 0.1
                  + surfaceReduction * gi.indirect.specular * FresnelLerp(s.specColor, grazingTerm, nv);
 	/*
     half grazingTerm = saturate(smoothness + (1-oneMinusReflectivity));
