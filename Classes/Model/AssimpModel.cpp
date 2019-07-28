@@ -1,6 +1,7 @@
 #include "AssimpModel.h"
 #include "Utility.h"
 #include "TRenderSystem.h"
+#include "Lesson6.h"
 
 /********** AiNodeInfo **********/
 AiNodeInfo::AiNodeInfo()
@@ -475,6 +476,18 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			op.mTextures = mesh->mTextures;
 			opList.push_back(op);
 #else
+			if (mesh->indices.size() == 18258) {
+				cbUnityMaterial cb;
+				cb._Color = XMFLOAT4(1, 0, 0, 1);
+				cb._SpecLightOff = 0;
+				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
+			}
+			else {
+				cbUnityMaterial cb;
+				cb._Color = XMFLOAT4(0, 0, 0, 0);
+				cb._SpecLightOff = 1;
+				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
+			}
 			mesh->Draw(mRenderSys);
 #endif
 		}

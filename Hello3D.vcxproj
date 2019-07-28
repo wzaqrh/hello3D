@@ -93,7 +93,7 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(DXSDK_DIR)Include;$(ProjectDir)Classes;$(ProjectDir)Classes\Model;$(ProjectDir)Classes\Framework;$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)Include;$(ProjectDir)Classes;$(ProjectDir)Classes\Lessons;$(ProjectDir)Classes\Model;$(ProjectDir)Classes\Framework;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
     <IntDir>$(Configuration)\objs</IntDir>
   </PropertyGroup>

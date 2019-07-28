@@ -58,6 +58,7 @@ cbuffer cbUnityMaterial : register(b2)
 	float4 _Color;
 	float _GlossMapScale;
 	float _OcclusionStrength;
+	int _SpecLightOff;
 }
 
 cbuffer cbUnityGlobal : register(b3)
@@ -158,8 +159,8 @@ float3 Albedo(float2 i_tex)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return _Color.a;
 #else
-    //return _Color.rgb * albedoTexture.Sample(samLinear, i_tex).rgb;
-	return _Color.rgb * pow(albedoTexture.Sample(samLinear, i_tex).rgb, 2.2);
+    return _Color.rgb * albedoTexture.Sample(samLinear, i_tex).rgb;
+	//return _Color.rgb * pow(albedoTexture.Sample(samLinear, i_tex).rgb, 2.2);
 #endif
 }
 float SpecularStrength(float3 specular)//max(specular.rgb)
@@ -371,7 +372,10 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
 
     specularTerm = max(0, specularTerm * nl);
 #if defined(_SPECULARHIGHLIGHTS_OFF)
-    specularTerm = 0.0;
+	specularTerm = 0.0;
+#else
+	if (_SpecLightOff > 0)
+		specularTerm = 0.0;
 #endif
 
     float surfaceReduction;
@@ -387,10 +391,17 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
     float3 color = s.diffColor * (gi.indirect.diffuse + gi.light.color * diffuseTerm)
                  + specularTerm * gi.light.color * FresnelTerm(s.specColor, lh)
                  + surfaceReduction * gi.indirect.specular * FresnelLerp(s.specColor, grazingTerm, nv);
+	/*
+    half grazingTerm = saturate(smoothness + (1-oneMinusReflectivity));
+    half3 color =   diffColor * (gi.diffuse + light.color * diffuseTerm)
+                    + specularTerm * light.color * FresnelTerm (specColor, lh)
+                    + surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, nv);
+	*/
+
 
 	//color = s.diffColor;
 	//color = s.diffColor * (gi.indirect.diffuse + gi.light.color * diffuseTerm);
-	//color = specularTerm * gi.light.color * FresnelTerm(s.specColor, lh);
+	//color = specularTerm * gi.light.color * FresnelTerm(s.specColor, lh) + surfaceReduction * gi.indirect.specular * FresnelLerp(s.specColor, grazingTerm, nv);
     return color;
 }
 

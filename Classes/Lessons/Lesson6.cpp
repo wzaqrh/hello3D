@@ -7,6 +7,7 @@ cbUnityMaterial::cbUnityMaterial()
 	_Color = XMFLOAT4(1,1,1,1);
 	_GlossMapScale = 1;
 	_OcclusionStrength = 1;
+	_SpecLightOff = 0;
 }
 
 /********** cbUnityGlobal **********/
@@ -55,6 +56,7 @@ void Lesson6::OnPostInitDevice()
 	mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
 	{
 		cbUnityMaterial cb;
+		cb._Color = XMFLOAT4(0,0,0,0);
 		mRenderSys->UpdateConstBuffer(mModel->mMaterial->mConstantBuffers[2], &cb);
 	}
 	{

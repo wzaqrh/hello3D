@@ -9,6 +9,7 @@ struct cbUnityMaterial
 	XMFLOAT4 _Color;
 	float _GlossMapScale;
 	float _OcclusionStrength;
+	int _SpecLightOff;
 	cbUnityMaterial();
 };
 
