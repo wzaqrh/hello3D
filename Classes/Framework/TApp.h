@@ -34,6 +34,7 @@ protected:
 	SDTimer mTimer;
 	float mScale;
 	XMFLOAT3 mPosition;
+	XMFLOAT4 mBackgndColor;
 public:
 	std::string mName;
 };

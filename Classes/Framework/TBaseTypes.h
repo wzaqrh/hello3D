@@ -158,6 +158,18 @@ public:
 	std::vector<ID3D11ShaderResourceView*> GetTextureViews() const;
 };
 
+struct TBlendFunc {
+	D3D11_BLEND src,dst;
+	TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst);
+};
+
+struct TDepthState {
+	BOOL depthEnable;
+	D3D11_COMPARISON_FUNC depthFunc;
+	D3D11_DEPTH_WRITE_MASK depthWriteMask;
+	TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
+};
+
 struct TProgram {
 	ID3D11VertexShader* mVertexShader = nullptr;
 	ID3D11PixelShader* mPixelShader = nullptr;
@@ -203,12 +215,13 @@ struct TMaterial {
 	ID3D11InputLayout* mInputLayout = nullptr;
 
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
-	ID3D11SamplerState*	mSampler = nullptr;
+	std::vector<ID3D11SamplerState*> mSamplers;
 
 	std::vector<ID3D11Buffer*> mConstBuffers;
 	std::vector<TContantBufferPtr> mConstantBuffers;
 public:
 	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
+	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
 

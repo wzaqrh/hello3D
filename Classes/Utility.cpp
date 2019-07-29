@@ -33,12 +33,11 @@ bool TD3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screen
 
 	bool result = true;
 	//¼üÅÌÊÂ¼þ
-#if 0
+#if 1
 		if (!CheckHR(m_directInput->CreateDevice(GUID_SysKeyboard, &m_keyboard, NULL))
 			&& !CheckHR(m_keyboard->SetDataFormat(&c_dfDIKeyboard))
-			&& !CheckHR(m_keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE))
-			&& !CheckHR(m_keyboard->Acquire())) {
-
+			&& !CheckHR(m_keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE))) {
+			m_keyboard->Acquire();
 		}
 		else {
 			result = false;
@@ -57,6 +56,17 @@ bool TD3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screen
 		}
 #endif
 	return result;
+}
+
+bool TD3DInput::ReadKeyboard()
+{
+	HRESULT result = m_keyboard->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
+	if (FAILED(result)) {
+		if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED)) {
+			m_keyboard->Acquire();
+		}
+	}
+	return result == S_OK;
 }
 
 bool TD3DInput::ReadMouse()

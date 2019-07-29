@@ -8,6 +8,8 @@ TApp::TApp()
 	
 	mScale = 1;
 	mPosition = XMFLOAT3(0, 0, 0);
+
+	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 }
 
 TApp::~TApp()
@@ -42,7 +44,7 @@ void TApp::CleanUp()
 
 void TApp::Render()
 {
-	float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red, green, blue, alpha
+	float ClearColor[4] = { mBackgndColor.x, mBackgndColor.y, mBackgndColor.z, mBackgndColor.w }; // red, green, blue, alpha
 	mRenderSys->mDeviceContext->ClearRenderTargetView(mRenderSys->mRenderTargetView, ClearColor);
 	mRenderSys->mDeviceContext->ClearDepthStencilView(mRenderSys->mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 

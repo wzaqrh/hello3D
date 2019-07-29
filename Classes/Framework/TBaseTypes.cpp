@@ -152,6 +152,12 @@ TContantBufferPtr TMaterial::AddConstBuffer(TContantBufferPtr buffer)
 	return buffer;
 }
 
+ID3D11SamplerState* TMaterial::AddSampler(ID3D11SamplerState* sampler)
+{
+	mSamplers.push_back(sampler);
+	return sampler;
+}
+
 /********** TRenderTexture **********/
 TRenderTexture::TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format)
 {
@@ -355,4 +361,19 @@ int TIndexBuffer::GetWidth()
 		break;
 	}
 	return width;
+}
+
+/********** TBlendFunc **********/
+TBlendFunc::TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst)
+{
+	src = __src;
+	dst = __dst;
+}
+
+/********** TDepthState **********/
+TDepthState::TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /*= D3D11_COMPARISON_LESS*/, D3D11_DEPTH_WRITE_MASK __depthWriteMask /*= D3D11_DEPTH_WRITE_MASK_ALL*/)
+{
+	depthEnable = __depthEnable;
+	depthFunc = __depthFunc;
+	depthWriteMask = __depthWriteMask;
 }

@@ -16,6 +16,7 @@ public:
 	ID3D11Texture2D* mDepthStencil = NULL;
 	ID3D11DepthStencilView* mDepthStencilView = NULL;
 	ID3D11DepthStencilState* mDepthStencilState = NULL;
+	ID3D11BlendState* mBlendState = NULL;
 	int mScreenWidth;
 	int mScreenHeight;
 	TD3DInput* mInput = nullptr;
@@ -69,6 +70,9 @@ public:
 
 	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile);
 	TTexture GetTexByPath(const std::string& __imgPath);
+
+	void SetBlendFunc(const TBlendFunc& blendFunc);
+	void SetDepthState(const TDepthState& depthState);
 public:
 	void Draw(IRenderable* renderable);
 	void RenderOperation(const TRenderOperation& op);

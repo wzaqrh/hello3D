@@ -19,6 +19,7 @@ public:
 	void Frame();
 	TINT4 GetMouseLocation(bool left);
 private:
+	bool ReadKeyboard();
 	bool ReadMouse();
 	void Process();
 private:

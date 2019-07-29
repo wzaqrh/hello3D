@@ -181,7 +181,9 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 
 	mDeviceContext->IASetPrimitiveTopology(material->mTopoLogy);
 
-	if (material->mSampler) mDeviceContext->PSSetSamplers(0, 1, &material->mSampler);
+	if (! material->mSamplers.empty()) {
+		mDeviceContext->PSSetSamplers(0, material->mSamplers.size(), &material->mSamplers[0]);
+	}
 }
 
 TSpotLightPtr TRenderSystem::AddSpotLight()
@@ -240,7 +242,9 @@ TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPat
 	material->mInputLayout = CreateLayout(material->mProgram->mVSBlob, descArray, descCount);
 	
 	material->mTopoLogy = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	material->mSampler = CreateSampler();
+	material->AddSampler(CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
+	material->AddSampler(CreateSampler(D3D11_FILTER_ANISOTROPIC));
+	material->AddSampler(CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
 
 	material->AddConstBuffer(CreateConstBuffer(sizeof(cbGlobalParam)));
 	return material;
@@ -504,6 +508,38 @@ TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
 		texView = TexByPath[imgPath];
 	}
 	return TTexture(__imgPath, texView);
+}
+
+void TRenderSystem::SetBlendFunc(const TBlendFunc& blendFunc)
+{
+	D3D11_BLEND_DESC blendDesc = { 0 };
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = blendFunc.src;
+	blendDesc.RenderTarget[0].DestBlend = blendFunc.dst;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (CheckHR(mDevice->CreateBlendState(&blendDesc, &mBlendState)))
+		return;
+
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	mDeviceContext->OMSetBlendState(mBlendState, blendFactor, 0xffffffff);
+}
+
+void TRenderSystem::SetDepthState(const TDepthState& depthState)
+{
+	D3D11_DEPTH_STENCIL_DESC DSDesc;
+	ZeroMemory(&DSDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+	DSDesc.DepthEnable = depthState.depthEnable;
+	DSDesc.DepthWriteMask = depthState.depthWriteMask;
+	DSDesc.DepthFunc = depthState.depthFunc;
+	DSDesc.StencilEnable = FALSE;
+	if (CheckHR(mDevice->CreateDepthStencilState(&DSDesc, &mDepthStencilState)))
+		return;
+	mDeviceContext->OMSetDepthStencilState(mDepthStencilState,1);
 }
 
 void TRenderSystem::Draw(IRenderable* renderable)
