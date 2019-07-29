@@ -1,5 +1,7 @@
 /********** PBR **********/
 SamplerState samLinear : register(s0);
+SamplerState samAnsp   : register(s1);
+SamplerState samPoint  : register(s2);
 
 Texture2D albedoTexture : register(t0);//rgb
 Texture2D normalTexture : register(t1);//rgb
@@ -135,8 +137,9 @@ PS_INPUT VS(VS_INPUT i)
 }
 
 #define SHADER_TARGET 30
-#define _ALPHAPREMULTIPLY_ON
+//#define _ALPHAPREMULTIPLY_ON
 #define UNITY_SETUP_BRDF_INPUT MetallicSetup
+#define UNITY_COLORSPACE_GAMMA
 
 /*FragmentSetup*/
 struct FragmentCommonData
@@ -160,12 +163,7 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 }
 float3 Albedo(float2 i_tex)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 {
-#if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
-    return _Color.a;
-#else
-    return _Color.rgb * albedoTexture.Sample(samLinear, i_tex).rgb;
-	//return _Color.rgb * pow(albedoTexture.Sample(samLinear, i_tex).rgb, 2.2);
-#endif
+	return _Color.rgb * albedoTexture.Sample(samLinear, i_tex).rgb;
 }
 float SpecularStrength(float3 specular)//max(specular.rgb)
 {
@@ -198,13 +196,14 @@ FragmentCommonData SpecularSetup(float2 i_tex)
     o.smoothness = smoothness;
     return o;
 }
+
 float2 MetallicGloss(float2 uv)
 {
     float2 mg;
 	//_METALLICGLOSSMAP
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-        mg.x = tex2D(_MetallicGlossMap, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
-        mg.y = tex2D(_MainTex, uv).a;
+        mg.x = metalnessTexture.Sample(samLinear, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
+        mg.y = smoothnessTexture.Sample(samLinear, uv).a;
     #else
         mg.x = metalnessTexture.Sample(samLinear, uv).r;
 		mg.y = smoothnessTexture.Sample(samLinear, uv).r;
@@ -213,9 +212,18 @@ float2 MetallicGloss(float2 uv)
 	//_METALLICGLOSSMAP
     return mg;
 }
-#define unity_ColorSpaceDielectricSpec half4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
+#ifdef UNITY_COLORSPACE_GAMMA
+#define unity_ColorSpaceDielectricSpec float4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
+#else // Linear values
+#define unity_ColorSpaceDielectricSpec float4(0.04, 0.04, 0.04, 1.0 - 0.04) // standard dielectric reflectivity coef at incident angle (= 4%)
+#endif
 float OneMinusReflectivityFromMetallic(float metallic)
 {
+    // We'll need oneMinusReflectivity, so
+    //   1-reflectivity = 1-lerp(dielectricSpec, 1, metallic) = lerp(1-dielectricSpec, 0, metallic)
+    // store (1-dielectricSpec) in unity_ColorSpaceDielectricSpec.a, then
+    //   1-reflectivity = lerp(alpha, 0, metallic) = alpha + metallic*(0 - alpha) =
+    //                  = alpha - metallic * alpha
     float oneMinusDielectricSpec = unity_ColorSpaceDielectricSpec.a;
     return oneMinusDielectricSpec - metallic * oneMinusDielectricSpec;
 }
@@ -244,7 +252,11 @@ FragmentCommonData MetallicSetup(float2 i_tex)
 }
 float Alpha(float2 uv)//_Color.a
 {
+#if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return _Color.a;
+#else
+    return albedoTexture.Sample(samLinear, uv).a * _Color.a;
+#endif
 }
 float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivity, out float outModifiedAlpha)//diffColor*alpha,1-oneMinusReflectivity + alpha*oneMinusReflectivity
 {
@@ -258,7 +270,7 @@ float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivit
     #else
         outModifiedAlpha = alpha;
     #endif
-    return diffColor * alpha;
+    return diffColor;
 }
 FragmentCommonData FragmentSetup(float2 i_tex)
 {
@@ -430,7 +442,6 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
 #endif
     float specularTerm = V * D * UNITY_PI; // Torrance-Sparrow model, Fresnel is applied later
 
-#define UNITY_COLORSPACE_GAMMA
 #ifdef UNITY_COLORSPACE_GAMMA//Edit -> Project Settings -> Player -> Other Settings //std_enabled
     specularTerm = sqrt(max(1e-4h, specularTerm));
 #endif
@@ -567,6 +578,9 @@ float4 PS(PS_INPUT input) : SV_Target
 	}
 #endif
 
+	//float4 c = albedoTexture.Sample(samLinear, input.Tex).rgba;
+	//finalColor.rgb = float4(c.rgb * c.a,c.a);
+	
     //finalColor.xyz = finalColor.xyz / (finalColor.xyz + 1.0); // HDR tonemapping
     //finalColor.xyz = pow(finalColor.xyz, 1.0/2.2); // gamma correct
 	return finalColor;

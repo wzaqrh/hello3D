@@ -35,8 +35,12 @@ void Lesson6::OnPostInitDevice()
 	auto dl2 = mRenderSys->AddDirectLight();
 	dl2->SetDirection(1, 0, 0);*/
 
+	//mBackgndColor = XMFLOAT4(0,0,0,0);
+	//mRenderSys->SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
+	//mRenderSys->SetDepthState(TDepthState(false));
+
 	mRenderSys->AddDirectLight()->SetDirection(1, -1, 1);
-	mRenderSys->AddDirectLight()->SetDirection(0, 0, 1);
+	//mRenderSys->AddDirectLight()->SetDirection(0, 0, 1);
 #else
 	auto light1 = mRenderSys->AddDirectLight();
 	light1->SetDirection(-1, 0, 0);
@@ -115,9 +119,8 @@ void Lesson6::OnPostInitDevice()
 	for (auto& iter : mModel->mMeshes) {
 		iter->mTextures = textures;
 	}
+	//mModel->mMaterial->mSampler = mRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC);
 #endif
-
-	mModel->mMaterial->mSampler = mRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC);
 }
 
 void Lesson6::OnRender()

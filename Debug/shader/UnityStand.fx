@@ -254,6 +254,74 @@ inline FragmentCommonData SpecularSetup (float4 i_tex)
     o.smoothness = smoothness;
     return o;
 }
+
+half2 MetallicGloss(float2 uv)
+{
+    half2 mg;
+
+#ifdef _METALLICGLOSSMAP
+    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+        mg.r = tex2D(_MetallicGlossMap, uv).r;
+        mg.g = tex2D(_MainTex, uv).a;
+    #else
+        mg = tex2D(_MetallicGlossMap, uv).ra;
+    #endif
+    mg.g *= _GlossMapScale;
+#else
+    mg.r = _Metallic;
+    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+        mg.g = tex2D(_MainTex, uv).a * _GlossMapScale;
+    #else
+        mg.g = _Glossiness;
+    #endif
+#endif
+    return mg;
+}
+#ifdef UNITY_COLORSPACE_GAMMA
+#define unity_ColorSpaceGrey fixed4(0.5, 0.5, 0.5, 0.5)
+#define unity_ColorSpaceDouble fixed4(2.0, 2.0, 2.0, 2.0)
+#define unity_ColorSpaceDielectricSpec half4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
+#define unity_ColorSpaceLuminance half4(0.22, 0.707, 0.071, 0.0) // Legacy: alpha is set to 0.0 to specify gamma mode
+#else // Linear values
+#define unity_ColorSpaceGrey fixed4(0.214041144, 0.214041144, 0.214041144, 0.5)
+#define unity_ColorSpaceDouble fixed4(4.59479380, 4.59479380, 4.59479380, 2.0)
+#define unity_ColorSpaceDielectricSpec half4(0.04, 0.04, 0.04, 1.0 - 0.04) // standard dielectric reflectivity coef at incident angle (= 4%)
+#define unity_ColorSpaceLuminance half4(0.0396819152, 0.458021790, 0.00609653955, 1.0) // Legacy: alpha is set to 1.0 to specify linear mode
+#endif
+inline half OneMinusReflectivityFromMetallic(half metallic)
+{
+    // We'll need oneMinusReflectivity, so
+    //   1-reflectivity = 1-lerp(dielectricSpec, 1, metallic) = lerp(1-dielectricSpec, 0, metallic)
+    // store (1-dielectricSpec) in unity_ColorSpaceDielectricSpec.a, then
+    //   1-reflectivity = lerp(alpha, 0, metallic) = alpha + metallic*(0 - alpha) =
+    //                  = alpha - metallic * alpha
+    half oneMinusDielectricSpec = unity_ColorSpaceDielectricSpec.a;
+    return oneMinusDielectricSpec - metallic * oneMinusDielectricSpec;
+}
+inline half3 DiffuseAndSpecularFromMetallic (half3 albedo, half metallic, out half3 specColor, out half oneMinusReflectivity)
+{
+    specColor = lerp (unity_ColorSpaceDielectricSpec.rgb, albedo, metallic);
+    oneMinusReflectivity = OneMinusReflectivityFromMetallic(metallic);
+    return albedo * oneMinusReflectivity;
+}
+inline FragmentCommonData MetallicSetup (float4 i_tex)
+{
+    half2 metallicGloss = MetallicGloss(i_tex.xy);
+    half metallic = metallicGloss.x;
+    half smoothness = metallicGloss.y; // this is 1 minus the square root of real roughness m.
+
+    half oneMinusReflectivity;
+    half3 specColor;
+    half3 diffColor = DiffuseAndSpecularFromMetallic (Albedo(i_tex), metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
+
+    FragmentCommonData o = (FragmentCommonData)0;
+    o.diffColor = diffColor;
+    o.specColor = specColor;
+    o.oneMinusReflectivity = oneMinusReflectivity;
+    o.smoothness = smoothness;
+    return o;
+}
+
 #ifndef UNITY_SETUP_BRDF_INPUT
     #define UNITY_SETUP_BRDF_INPUT SpecularSetup
 #endif
@@ -546,7 +614,7 @@ inline half3 UnityGI_IndirectSpecular(UnityGIInput data, half occlusion, Unity_G
         glossIn.reflUVW = BoxProjectedCubemapDirection (originalReflUVW, data.worldPos, data.probePosition[0], data.boxMin[0], data.boxMax[0]);
     #endif
 
-    #ifdef _GLOSSYREFLECTIONS_OFF//enabled by 'Standard'
+    #ifdef _GLOSSYREFLECTIONS_OFF
         specular = unity_IndirectSpecColor.rgb;
     #else
         half3 env0 = Unity_GlossyEnvironment (UNITY_PASS_TEXCUBE(unity_SpecCube0), data.probeHDR[0], glossIn);
@@ -926,6 +994,17 @@ half3 Emission(float2 uv)
 #else
     return tex2D(_EmissionMap, uv).rgb * _EmissionColor.rgb;
 #endif
+}
+
+/********** OutputForward **********/
+half4 OutputForward (half4 output, half alphaFromSurface)
+{
+    #if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
+        output.a = alphaFromSurface;
+    #else
+        UNITY_OPAQUE_ALPHA(output.a);
+    #endif
+    return output;
 }
 
 /********** fragForwardBaseInternal **********/

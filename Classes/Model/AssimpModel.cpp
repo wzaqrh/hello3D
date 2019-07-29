@@ -476,19 +476,24 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			op.mTextures = mesh->mTextures;
 			opList.push_back(op);
 #else
+#define DEBUG_UNITY_PBR 1
 #if DEBUG_UNITY_PBR
 			if (mesh->indices.size() == 18258) {
 				cbUnityMaterial cb;
-				//cb._Color = XMFLOAT4(0, 0, 0, 0);
-				//cb._SpecLightOff = 0;
+				//cb._Color = XMFLOAT4(1, 0, 0, 0);
+				//cb._SpecLightOff = 1;
+				//cb._OcclusionStrength = 0;
+				//cb._GlossMapScale = 0;
 				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
 			}
 			else {
 				cbUnityMaterial cb;
 				//cb._Color = XMFLOAT4(0, 0, 0, 0);
 				//cb._SpecLightOff = 1;
+				//cb._OcclusionStrength = 0;
+				//cb._GlossMapScale = 0;
 				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
-			}
+		}
 #endif
 			mesh->Draw(mRenderSys);
 #endif
