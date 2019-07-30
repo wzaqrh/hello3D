@@ -6,14 +6,16 @@ TMesh::TMesh(const aiMesh* __data,
 	std::vector<MeshVertex>& __vertices,
 	std::vector<UINT>& __indices,
 	TTextureBySlot& __textures,
-	TRenderSystem *renderSys)
+	TMaterialPtr __material,
+	TRenderSystem *__renderSys)
 {
 	data = __data;
 	vertices.swap(__vertices); __vertices.clear();
 	indices.swap(__indices); __indices.clear();
 	mTextures.swap(__textures); __textures.clear();
+	mMaterial = __material;
 
-	setupMesh(renderSys);
+	setupMesh(__renderSys);
 }
 
 bool TMesh::setupMesh(TRenderSystem *renderSys)

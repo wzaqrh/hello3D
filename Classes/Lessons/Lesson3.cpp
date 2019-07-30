@@ -24,8 +24,8 @@ void Lesson3::OnPostInitDevice()
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.2.fx", "shader\\Lesson3.2.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.1.fx", "shader\\Lesson3.1.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.fx", "shader\\Lesson3.fx");
-	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mScale = 0.01;
-	//gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.03; mPosition = XMFLOAT3(0, -5, 0);
+	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mScale = 0.01;
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.03; mPosition = XMFLOAT3(0, -5, 0);
 	//mModel->PlayAnim(0);
 }
 

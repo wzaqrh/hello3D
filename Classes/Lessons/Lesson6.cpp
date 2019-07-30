@@ -53,18 +53,19 @@ void Lesson6::OnPostInitDevice()
 	light3->SetDiffuseColor(3,3,3,1);
 #endif
 
-	mModel = new AssimpModel(mRenderSys, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx");
-	{
-		auto buffer = mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
-		cbUnityMaterial cb;
-		//cb._Color = XMFLOAT4(0,0,0,0);
-		mRenderSys->UpdateConstBuffer(buffer, &cb);
-	}
-	{
-		auto buffer = mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
-		cbUnityGlobal cb;
-		mRenderSys->UpdateConstBuffer(buffer, &cb);
-	}
+	mModel = new AssimpModel(mRenderSys, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx", [&](TMaterialPtr mat) {
+		{
+			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
+			cbUnityMaterial cb;
+			//cb._Color = XMFLOAT4(0,0,0,0);
+			mRenderSys->UpdateConstBuffer(buffer, &cb);
+		}
+		{
+			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
+			cbUnityGlobal cb;
+			mRenderSys->UpdateConstBuffer(buffer, &cb);
+		}
+	});
 #ifndef PBR_DEBUG
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.3; mPosition = XMFLOAT3(0, -5, 0);
 
@@ -125,7 +126,11 @@ void Lesson6::OnPostInitDevice()
 void Lesson6::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
+#ifdef USE_RENDER_OP
+	mRenderSys->SetWorldTransform(GetWorldTransform());
+#else
 	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
+#endif
 	mModel->Draw();
 }
 

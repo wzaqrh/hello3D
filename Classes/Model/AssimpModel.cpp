@@ -130,10 +130,10 @@ void Evaluator::Eval(float pTime)
 }
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(TRenderSystem* RenderSys, const char* vsName, const char* psName)
+AssimpModel::AssimpModel(TRenderSystem* RenderSys, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
 {
 	mRenderSys = RenderSys;
-	LoadMaterial(vsName, psName);
+	LoadMaterial(vsName, psName, cb);
 }
 
 AssimpModel::~AssimpModel()
@@ -313,7 +313,10 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			textures[E_TEXTURE_NORMAL] = normalMaps[0];
 	}
 
-	return std::make_shared<TMesh>(mesh, vertices, indices, textures, mRenderSys);
+	auto material = mMaterial->Clone();
+	material->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
+	if (mMatCb) mMatCb(material);
+	return std::make_shared<TMesh>(mesh, vertices, indices, textures, material, mRenderSys);
 }
 
 std::vector<TTexture> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
@@ -426,7 +429,7 @@ void AssimpModel::PlayAnim(int Index)
 	}
 }
 
-void AssimpModel::LoadMaterial(const char* vsName, const char* psName)
+void AssimpModel::LoadMaterial(const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
 {
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -439,7 +442,8 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName)
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
-	mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
+	//mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
+	mMatCb = cb;
 }
 
 void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
@@ -448,7 +452,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 	if (meshes.size() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.mModel = ToXM(mNodeInfos[node].mGlobalTransform);
-		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+		//mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
@@ -466,11 +470,11 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
 			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+			mRenderSys->mDeviceContext->UpdateSubresource(mesh->mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 #ifdef USE_RENDER_OP
 			TRenderOperation op = {};
-			op.mMaterial = mMaterial;
+			op.mMaterial = mesh->mMaterial;
 			op.mIndexBuffer = mesh->mIndexBuffer;
 			op.mVertexBuffer = mesh->mVertexBuffer;
 			op.mTextures = mesh->mTextures;

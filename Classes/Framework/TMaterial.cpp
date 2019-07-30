@@ -171,7 +171,7 @@ TMaterialFactory::TMaterialFactory(TRenderSystem* pRenderSys)
 	mRenderSys = pRenderSys;
 }
 
-TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback /*= nullptr*/, std::string identify /* = ""*/)
+TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback /*= nullptr*/, std::string identify /* = ""*/, bool readonly /*= false*/)
 {
 	TMaterialPtr material;
 
@@ -187,7 +187,7 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 			mMaterials.insert(std::make_pair(key, material));
 		}
 		else {
-			material = mMaterials[key];
+			material = readonly ? mMaterials[key] : mMaterials[key]->Clone();
 		}
 	}
 	else if (callback != nullptr) {
@@ -195,7 +195,7 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 		callback(material);
 	}
 	else {
-		material = mMaterials[name];
+		material = readonly ? mMaterials[name] : mMaterials[name]->Clone();
 	}
 	return material;
 }

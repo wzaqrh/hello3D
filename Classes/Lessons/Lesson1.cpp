@@ -14,7 +14,11 @@ void TAppLesson1::OnPostInitDevice()
 void TAppLesson1::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
+#ifdef USE_RENDER_OP
+	mRenderSys->SetWorldTransform(GetWorldTransform());
+#else
 	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
+#endif
 	mModel->Draw();
 }
 

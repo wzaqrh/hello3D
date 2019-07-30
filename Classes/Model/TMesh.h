@@ -16,25 +16,27 @@ struct MeshVertex
 class TRenderSystem;
 class TMesh {
 public:
+	const aiMesh* data = nullptr;
 	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
+
 	TTextureBySlot mTextures;
-	const aiMesh* data = nullptr;
+	TVertexBufferPtr mVertexBuffer;
+	TIndexBufferPtr mIndexBuffer;
+	TMaterialPtr mMaterial;
 public:
 	TMesh(const aiMesh* __data, 
 		std::vector<MeshVertex>& __vertices, 
 		std::vector<UINT>& __indices,
 		TTextureBySlot& __textures,
-		TRenderSystem *renderSys);
+		TMaterialPtr __material,
+		TRenderSystem *__renderSys);
 	void Close();
 	void Draw(TRenderSystem* renderSys);
 
 	bool HasTexture(int slot);
 private:
 	bool setupMesh(TRenderSystem *renderSys);
-public:
-	TVertexBufferPtr mVertexBuffer;
-	TIndexBufferPtr mIndexBuffer;
 };
 typedef std::shared_ptr<TMesh> TMeshSharedPtr;
 typedef std::vector<TMeshSharedPtr> TMeshSharedPtrVector;

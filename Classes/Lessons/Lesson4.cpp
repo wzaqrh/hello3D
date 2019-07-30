@@ -30,15 +30,15 @@ void Lesson4::OnPostInitDevice()
 	auto light2 = mRenderSys->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 
-	mModel = new AssimpModel(mRenderSys, "shader\\Lesson4.fx", "shader\\Lesson4.fx");
+	mModel = new AssimpModel(mRenderSys, "shader\\Lesson4.fx", "shader\\Lesson4.fx", [&](TMaterialPtr mat) {
+		TFogExp fog;
+		fog.SetColor(0.5, 0.5, 0.5);
+		fog.SetExp(0.1);
+		auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(TFogExp)));
+		mRenderSys->UpdateConstBuffer(buffer, &fog);
+	});
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mScale = 0.01; mPosition = XMFLOAT3(0, 0, 0);
 	//mModel->PlayAnim(0);
-
-	TFogExp fog;
-	fog.SetColor(0.5,0.5,0.5);
-	fog.SetExp(0.1);
-	auto buffer = mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(TFogExp)));
-	mRenderSys->UpdateConstBuffer(buffer, &fog);
 }
 
 void Lesson4::OnRender()

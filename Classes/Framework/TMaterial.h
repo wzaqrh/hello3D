@@ -66,7 +66,7 @@ struct TMaterialFactory {
 	std::map<std::string, TMaterialPtr> mMaterials;
 public:
 	TMaterialFactory(TRenderSystem* pRenderSys);
-	TMaterialPtr GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "");
+	TMaterialPtr GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly=false);
 private:
 	TMaterialPtr  CreateStdMaterial(std::string name);
 };
