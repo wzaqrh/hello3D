@@ -5,7 +5,7 @@ TRenderSystem* gRenderSys;
 
 TRenderSystem::TRenderSystem()
 {
-	//mPointLights.push_back(std::make_shared<TPointLight>());
+	mMaterialFac = std::make_shared<TMaterialFactory>(this);
 }
 
 TRenderSystem::~TRenderSystem()
@@ -169,20 +169,25 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	for (int i = 0; i < globalParam.mLightNum.z; ++i)
 		globalParam.mSpotLights[i] = *mSpotLights[i];
 	
-	mDeviceContext->UpdateSubresource(material->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
+	TTechniquePtr tech = material->CurTech();
+	for (int i = 0; i < tech->mPasses.size(); ++i) {
+		TPassPtr pass = tech->mPasses[i];
 
-	program = program ? program : material->mProgram;
-	mDeviceContext->VSSetShader(program->mVertexShader, NULL, 0);
-	mDeviceContext->PSSetShader(program->mPixelShader, NULL, 0);
+		mDeviceContext->UpdateSubresource(pass->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
 
-	mDeviceContext->VSSetConstantBuffers(0, material->mConstBuffers.size(), &material->mConstBuffers[0]);
-	mDeviceContext->PSSetConstantBuffers(0, material->mConstBuffers.size(), &material->mConstBuffers[0]);
-	mDeviceContext->IASetInputLayout(material->mInputLayout);
+		program = program ? program : pass->mProgram;
+		mDeviceContext->VSSetShader(program->mVertexShader, NULL, 0);
+		mDeviceContext->PSSetShader(program->mPixelShader, NULL, 0);
 
-	mDeviceContext->IASetPrimitiveTopology(material->mTopoLogy);
+		mDeviceContext->VSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
+		mDeviceContext->PSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
+		mDeviceContext->IASetInputLayout(pass->mInputLayout);
 
-	if (! material->mSamplers.empty()) {
-		mDeviceContext->PSSetSamplers(0, material->mSamplers.size(), &material->mSamplers[0]);
+		mDeviceContext->IASetPrimitiveTopology(pass->mTopoLogy);
+
+		if (!pass->mSamplers.empty()) {
+			mDeviceContext->PSSetSamplers(0, pass->mSamplers.size(), &pass->mSamplers[0]);
+		}
 	}
 }
 
@@ -237,23 +242,17 @@ void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
 
 TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
-	TMaterialPtr material = std::make_shared<TMaterial>();
-	material->mProgram = CreateProgram(vsPath, psPath);
-	material->mInputLayout = CreateLayout(material->mProgram->mVSBlob, descArray, descCount);
-	
-	material->mTopoLogy = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	material->AddSampler(CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
-	material->AddSampler(CreateSampler(D3D11_FILTER_ANISOTROPIC));
-	material->AddSampler(CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
-
-	material->AddConstBuffer(CreateConstBuffer(sizeof(cbGlobalParam)));
-	return material;
+	return mMaterialFac->GetMaterial("standard", [&](TMaterialPtr mat) {
+		TMaterialBuilder builder(mat);
+		auto program = builder.SetProgram(CreateProgram(vsPath, psPath));
+		builder.SetInputLayout(CreateLayout(program, descArray, descCount));
+	});
 }
 
-ID3D11InputLayout* TRenderSystem::CreateLayout(ID3DBlob* pVSBlob, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+ID3D11InputLayout* TRenderSystem::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	ID3D11InputLayout* pVertexLayout = nullptr;
-	HRESULT hr = mDevice->CreateInputLayout(descArray, descCount, pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &pVertexLayout);
+	HRESULT hr = mDevice->CreateInputLayout(descArray, descCount, pProgram->mVSBlob->GetBufferPointer(), pProgram->mVSBlob->GetBufferSize(), &pVertexLayout);
 	if (CheckHR(hr)) {
 		DXTrace(__FILE__, __LINE__, hr, DXGetErrorDescription(hr), FALSE);
 		return pVertexLayout;

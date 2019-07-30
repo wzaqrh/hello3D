@@ -54,18 +54,17 @@ void Lesson6::OnPostInitDevice()
 #endif
 
 	mModel = new AssimpModel(mRenderSys, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx");
-	mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
-	mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
 	{
+		auto buffer = mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
 		cbUnityMaterial cb;
 		//cb._Color = XMFLOAT4(0,0,0,0);
-		mRenderSys->UpdateConstBuffer(mModel->mMaterial->mConstantBuffers[2], &cb);
+		mRenderSys->UpdateConstBuffer(buffer, &cb);
 	}
 	{
+		auto buffer = mModel->mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
 		cbUnityGlobal cb;
-		mRenderSys->UpdateConstBuffer(mModel->mMaterial->mConstantBuffers[3], &cb);
+		mRenderSys->UpdateConstBuffer(buffer, &cb);
 	}
-
 #ifndef PBR_DEBUG
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.3; mPosition = XMFLOAT3(0, -5, 0);
 

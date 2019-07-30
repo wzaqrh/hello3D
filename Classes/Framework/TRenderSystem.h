@@ -20,6 +20,7 @@ public:
 	int mScreenWidth;
 	int mScreenHeight;
 	TD3DInput* mInput = nullptr;
+	TMaterialFactoryPtr mMaterialFac;
 public:
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
@@ -66,7 +67,7 @@ public:
 	TProgramPtr CreateProgram(const char* vsPath, const char* psPath);
 
 	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR);
-	ID3D11InputLayout* CreateLayout(ID3DBlob* pVSBlob, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	ID3D11InputLayout* CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
 	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile);
 	TTexture GetTexByPath(const std::string& __imgPath);

@@ -448,7 +448,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 	if (meshes.size() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.mModel = ToXM(mNodeInfos[node].mGlobalTransform);
-		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+		mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
@@ -466,7 +466,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
 			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 #ifdef USE_RENDER_OP
 			TRenderOperation op;
@@ -476,7 +476,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			op.mTextures = mesh->mTextures;
 			opList.push_back(op);
 #else
-#define DEBUG_UNITY_PBR 1
+//#define DEBUG_UNITY_PBR 1
 #if DEBUG_UNITY_PBR
 			if (mesh->indices.size() == 18258) {
 				cbUnityMaterial cb;
@@ -493,7 +493,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
 				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
-		}
+			}
 #endif
 			mesh->Draw(mRenderSys);
 #endif

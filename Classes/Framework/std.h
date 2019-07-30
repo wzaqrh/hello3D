@@ -14,10 +14,11 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <assert.h>
 #include <map>
 #include <memory>
 #include <queue>
-#include <assert.h>
+#include <functional>
 
 typedef struct _XMINT4 {
 	int x, y, z, w;

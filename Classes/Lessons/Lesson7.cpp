@@ -70,11 +70,11 @@ void Lesson7::OnRender()
 
 	//pass2
 	cbShadowMap cb = { LightCam.mView, LightCam.mProjection };
-	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->mConstantBuffers[2], &cb);
+	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), nullptr, mProgShadowMap);
 	mModel1->DrawShadow(mPass1RT->mRenderTargetSRV);
 
-	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->mConstantBuffers[2], &cb);
+	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 	mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), nullptr, mProgShadowMap);
 	mModel2->DrawShadow(mPass1RT->mRenderTargetSRV);
 #endif

@@ -378,6 +378,8 @@
   <ItemGroup>
     <ClCompile Include="Classes\Framework\TApp.cpp" />
     <ClCompile Include="Classes\Framework\TBaseTypes.cpp" />
+    <ClCompile Include="Classes\Framework\TInterfaceType.cpp" />
+    <ClCompile Include="Classes\Framework\TMaterial.cpp" />
     <ClCompile Include="Classes\Framework\TRenderSystem.cpp" />
     <ClCompile Include="Classes\Framework\TSprite.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson1.cpp" />
@@ -396,6 +398,8 @@
     <ClInclude Include="Classes\Framework\std.h" />
     <ClInclude Include="Classes\Framework\TApp.h" />
     <ClInclude Include="Classes\Framework\TBaseTypes.h" />
+    <ClInclude Include="Classes\Framework\TInterfaceType.h" />
+    <ClInclude Include="Classes\Framework\TMaterial.h" />
     <ClInclude Include="Classes\Framework\TRenderSystem.h" />
     <ClInclude Include="Classes\Framework\TSprite.h" />
     <ClInclude Include="Classes\Lessons\Lesson1.h" />
