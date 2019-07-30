@@ -2,7 +2,7 @@
 #include "TBaseTypes.h"
 
 class TD3DInput;
-class TRenderSystem
+__declspec(align(16)) class TRenderSystem
 {
 public:
 	HINSTANCE mHInst = NULL;
@@ -21,12 +21,20 @@ public:
 	int mScreenHeight;
 	TD3DInput* mInput = nullptr;
 	TMaterialFactoryPtr mMaterialFac;
+	std::map<std::string, ID3D11ShaderResourceView*> mTexByPath;
+	XMMATRIX mWorldTransform;
 public:
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
 	std::vector<TDirectLightPtr> mDirectLights;
 	std::vector<TSpotLightPtr> mSpotLights;
 public:
+	void* operator new(size_t i){
+		return _mm_malloc(i,16);
+	}
+	void operator delete(void* p) {
+		_mm_free(p);
+	}
 	TRenderSystem();
 	~TRenderSystem();
 
@@ -71,6 +79,8 @@ public:
 
 	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile);
 	TTexture GetTexByPath(const std::string& __imgPath);
+
+	void SetWorldTransform(const XMMATRIX& transform);
 
 	void SetBlendFunc(const TBlendFunc& blendFunc);
 	void SetDepthState(const TDepthState& depthState);

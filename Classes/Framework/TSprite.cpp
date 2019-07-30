@@ -102,6 +102,9 @@ void TSprite::SetFlipY(bool flipY)
 
 void TSprite::Draw()
 {
+#ifdef USE_RENDER_OP
+	mRenderSys->Draw(this);
+#else
 	mRenderSys->ApplyMaterial(mMaterial, XMMatrixIdentity());
 	mRenderSys->SetVertexBuffer(mVertexBuffer);
 	mRenderSys->SetIndexBuffer(mIndexBuffer);
@@ -109,5 +112,16 @@ void TSprite::Draw()
 		mRenderSys->mDeviceContext->PSSetShaderResources(0, 1, &mTexture);
 	}
 	mRenderSys->DrawIndexed(mIndexBuffer);
+#endif
 }
 
+int TSprite::GenRenderOperation(TRenderOperationList& opList)
+{
+	TRenderOperation op = {};
+	op.mMaterial = mMaterial;
+	op.mIndexBuffer = mIndexBuffer;
+	op.mVertexBuffer = mVertexBuffer;
+	op.mTextures.push_back(TTexture("", mTexture));
+	opList.push_back(op);
+	return 1;
+}

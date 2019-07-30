@@ -44,7 +44,11 @@ void Lesson4::OnPostInitDevice()
 void Lesson4::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
+#ifdef USE_RENDER_OP
+	mRenderSys->SetWorldTransform(GetWorldTransform());
+#else
 	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
+#endif
 	mModel->Draw();
 }
 

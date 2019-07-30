@@ -164,6 +164,16 @@ std::string MakeModelPath(const char* name) {
 	return GetModelPath() + name;
 }
 
+bool IsFileExist(const std::string& fileName)
+{
+	WIN32_FIND_DATAA wfd;
+	HANDLE hFind = FindFirstFileA(fileName.c_str(), &wfd);
+	if (INVALID_HANDLE_VALUE != hFind) {
+		return true;
+	}
+	return false;
+}
+
 double SDTimer::Update()
 {
 	double time = GetTickCount() / 1000.0;

@@ -469,7 +469,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 			mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 #ifdef USE_RENDER_OP
-			TRenderOperation op;
+			TRenderOperation op = {};
 			op.mMaterial = mMaterial;
 			op.mIndexBuffer = mesh->mIndexBuffer;
 			op.mVertexBuffer = mesh->mVertexBuffer;

@@ -9,6 +9,7 @@
 #include "std.h"
 
 #define USE_ONLY_PNG
+//#define USE_RENDER_OP
 
 template<class T>
 T clamp(T minVal, T maxVal, T v) {

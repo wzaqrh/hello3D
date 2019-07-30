@@ -100,6 +100,7 @@ TApp* gApp;
 TApp* CreateApp(std::string name)
 {
 	auto entry = gRegAppClasses[name];
+	assert(entry);
 	gApp = entry();
 	return gApp;
 }

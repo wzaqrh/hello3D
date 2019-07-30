@@ -204,3 +204,9 @@ int TIndexBuffer::GetWidth()
 	}
 	return width;
 }
+
+/********** TRenderOperation **********/
+TRenderOperation::TRenderOperation()
+{
+	mWorldTransform = XMMatrixIdentity();
+}

@@ -49,29 +49,6 @@ struct TContantBuffer : public THardwareBuffer {
 typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;
 
 
-class TRenderTexture {
-public:
-	ID3D11Texture2D* mRenderTargetTexture;
-	ID3D11ShaderResourceView* mRenderTargetSRV;
-	ID3D11RenderTargetView* mRenderTargetView;
-
-	ID3D11Texture2D* mDepthStencilTexture;
-	ID3D11DepthStencilView* mDepthStencilView;
-
-	DXGI_FORMAT mFormat;
-public:
-	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-private:
-	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
-	bool InitRenderTextureView(ID3D11Device* pDevice);
-	bool InitRenderTargetView(ID3D11Device* pDevice);
-
-	bool InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height);
-	bool InitDepthStencilView(ID3D11Device* pDevice);
-};
-typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
-
-
 enum enTextureType {
 	E_TEXTURE_DIFFUSE,
 	E_TEXTURE_SPECULAR,
@@ -111,6 +88,29 @@ public:
 };
 
 
+class TRenderTexture {
+public:
+	ID3D11Texture2D* mRenderTargetTexture;
+	ID3D11ShaderResourceView* mRenderTargetSRV;
+	ID3D11RenderTargetView* mRenderTargetView;
+
+	ID3D11Texture2D* mDepthStencilTexture;
+	ID3D11DepthStencilView* mDepthStencilView;
+
+	DXGI_FORMAT mFormat;
+public:
+	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
+private:
+	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitRenderTextureView(ID3D11Device* pDevice);
+	bool InitRenderTargetView(ID3D11Device* pDevice);
+
+	bool InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitDepthStencilView(ID3D11Device* pDevice);
+};
+typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
+
+
 struct TMaterial;
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
 
@@ -119,6 +119,10 @@ struct TRenderOperation {
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 	TTextureBySlot mTextures;
+
+	XMMATRIX mWorldTransform;
+public:
+	TRenderOperation();
 };
 typedef std::vector<TRenderOperation> TRenderOperationList;
 

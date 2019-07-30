@@ -30,16 +30,20 @@ void Lesson5::OnPostInitDevice()
 
 void Lesson5::OnRender()
 {
-	/*mRenderSys->ClearRenderTexture(mRendTexture, XMFLOAT4(0,0,0,0));
+	mRenderSys->ClearRenderTexture(mRendTexture, XMFLOAT4(0,0,0,0));
 	mRenderSys->SetRenderTarget(mRendTexture);
 	{
 		mModel->Update(mTimer.mDeltaTime);
+#ifdef USE_RENDER_OP
+		mRenderSys->SetWorldTransform(GetWorldTransform());
+#else
 		mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
+#endif
 		mModel->Draw();
 	}
 	mRenderSys->SetRenderTarget(nullptr);
 	
-	mSprite->Draw();*/
+	mSprite->Draw();
 
 	mLayerColor->Draw();
 }

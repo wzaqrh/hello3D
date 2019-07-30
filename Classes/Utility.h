@@ -10,6 +10,8 @@ extern std::string gModelPath;
 std::string GetModelPath();
 std::string MakeModelPath(const char* name);
 
+bool IsFileExist(const std::string& fileName);
+
 class TD3DInputImpl;
 class TD3DInput {
 public:

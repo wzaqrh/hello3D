@@ -129,4 +129,4 @@ void Lesson6::OnRender()
 	mModel->Draw();
 }
 
-auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");

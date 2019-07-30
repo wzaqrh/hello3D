@@ -24,6 +24,7 @@ struct Quad
 };
 
 class TSprite
+	: public IRenderable
 {
 private:
 	Quad mQuad;
@@ -38,6 +39,8 @@ public:
 public:
 	TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName);
 	~TSprite();
+	virtual int GenRenderOperation(TRenderOperationList& opList) override;
+public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);
 	void SetTexture(ID3D11ShaderResourceView* Texture);
