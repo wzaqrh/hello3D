@@ -130,8 +130,9 @@ void Evaluator::Eval(float pTime)
 }
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(TRenderSystem* RenderSys, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
+AssimpModel::AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
 {
+	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
 	LoadMaterial(vsName, psName, cb);
 }
@@ -431,22 +432,25 @@ void AssimpModel::PlayAnim(int Index)
 
 void AssimpModel::LoadMaterial(const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
 {
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
-	//mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
+	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL, [&](TMaterialPtr mat) {
+		TMaterialBuilder builder(mat);
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(vsName, psName));
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+	});
 	mMatCb = cb;
 }
 
-void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
+void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 {
 	auto& meshes = mNodeInfos[node];
 	if (meshes.size() > 0) {
@@ -488,7 +492,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 				//cb._SpecLightOff = 1;
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
-				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
+				mRenderSys->UpdateConstBuffer(mesh->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 			}
 			else {
 				cbUnityMaterial cb;
@@ -496,7 +500,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 				//cb._SpecLightOff = 1;
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
-				mRenderSys->UpdateConstBuffer(mMaterial->mConstantBuffers[2], &cb);
+				mRenderSys->UpdateConstBuffer(mesh->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 			}
 #endif
 			mesh->Draw(mRenderSys);
@@ -508,35 +512,21 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationList& opList)
 		DoDraw(node->mChildren[i], opList);
 }
 
-int AssimpModel::GenRenderOperation(TRenderOperationList& opList)
+int AssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
 {
 	int count = opList.size();
 	mDrawCount = 0;
 	DoDraw(mRootNode, opList);
+
+	XMMATRIX world = mMove->GetWorldTransform();
+	for (int i = count; i < opList.size(); ++i) {
+		opList[i].mWorldTransform = world;
+	}
+
 	return opList.size() - count;
 }
 
 void AssimpModel::Draw()
 {
-#ifdef USE_RENDER_OP
-	TRenderOperationList opList;
-	GenRenderOperation(opList);
-	for (int i = 0; i < opList.size(); ++i) {
-		mRenderSys->RenderOperation(opList[i]);
-	}
-#else
-	TRenderOperationList opList;
-	DoDraw(mRootNode, opList);
-#endif
-}
-
-void AssimpModel::DrawShadow(ID3D11ShaderResourceView* shadowMap)
-{
-	TRenderOperationList opList;
-	GenRenderOperation(opList);
-	for (int i = 0; i < opList.size(); ++i) {
-		TRenderOperation& op = opList[i];
-		op.mTextures[3] = TTexture("", shadowMap);
-		mRenderSys->RenderOperation(op);
-	}
+	mRenderSys->Draw(this);
 }

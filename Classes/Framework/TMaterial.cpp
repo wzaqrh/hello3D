@@ -2,6 +2,11 @@
 #include "TRenderSystem.h"
 
 /********** TPass **********/
+TPass::TPass(const std::string& passName)
+	:mName(passName)
+{
+}
+
 TContantBufferPtr TPass::AddConstBuffer(TContantBufferPtr buffer)
 {
 	mConstantBuffers.push_back(buffer);
@@ -17,8 +22,7 @@ ID3D11SamplerState* TPass::AddSampler(ID3D11SamplerState* sampler)
 
 std::shared_ptr<TPass> TPass::Clone()
 {
-	TPassPtr pass = std::make_shared<TPass>();
-	pass->mName = mName;
+	TPassPtr pass = std::make_shared<TPass>(mName);
 	pass->mInputLayout = mInputLayout;
 	pass->mTopoLogy = mTopoLogy;
 	pass->mProgram = mProgram;
@@ -49,6 +53,18 @@ ID3D11SamplerState* TTechnique::AddSampler(ID3D11SamplerState* sampler)
 	for (auto& pass : mPasses)
 		pass->AddSampler(sampler);
 	return sampler;
+}
+
+TPassPtr TTechnique::GetPassByName(const std::string& passName)
+{
+	TPassPtr pass;
+	for (int i = 0; i < mPasses.size(); ++i) {
+		if (mPasses[i]->mName == passName) {
+			pass = mPasses[i];
+			break;
+		}
+	}
+	return pass;
 }
 
 std::shared_ptr<TTechnique> TTechnique::Clone()
@@ -106,7 +122,7 @@ TMaterialBuilder::TMaterialBuilder()
 {
 	mMaterial = std::make_shared<TMaterial>();
 	AddTechnique();
-	AddPass();
+	AddPass(E_PASS_FORWARDBASE);
 }
 
 TMaterialBuilder::TMaterialBuilder(TMaterialPtr material)
@@ -123,9 +139,9 @@ TMaterialBuilder& TMaterialBuilder::AddTechnique()
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddPass()
+TMaterialBuilder& TMaterialBuilder::AddPass(const std::string& passName)
 {
-	mCurPass = std::make_shared<TPass>();
+	mCurPass = std::make_shared<TPass>(passName);
 	mCurTech->AddPass(mCurPass);
 	return *this;
 }
@@ -200,25 +216,64 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 	return material;
 }
 
+void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
+{
+	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
+	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC));
+	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
+	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(sizeof(cbGlobalParam)));
+}
+
 TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 {
 	TMaterialPtr material;
 	TMaterialBuilder builder;
-	if (name == "standard") {
+	if (name == E_MAT_STANDARD) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Sprite.fx", "shader\\Sprite.fx"));
+		std::string shaderName = "shader\\Sprite.fx";
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName.c_str(), shaderName.c_str()));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
-		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC));
-		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbGlobalParam)));
-		material = builder.Build();
 	}
+	else if (name == E_MAT_MODEL) {
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		std::string shaderName = "shader\\Model.fx";
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName.c_str(), shaderName.c_str()));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+	}
+	else if (name == E_MAT_MODEL_SHADOW) {
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		std::string shaderName = "shader\\Model.fx";
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName.c_str(), shaderName.c_str()));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
+
+	}
+
+	SetCommonField(builder, mRenderSys);
+	material = builder.Build();
 	return material;
 }

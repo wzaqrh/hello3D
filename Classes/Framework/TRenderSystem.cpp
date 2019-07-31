@@ -6,7 +6,6 @@ TRenderSystem* gRenderSys;
 TRenderSystem::TRenderSystem()
 {
 	mMaterialFac = std::make_shared<TMaterialFactory>(this);
-	mWorldTransform = XMMatrixIdentity();
 }
 
 TRenderSystem::~TRenderSystem()
@@ -141,6 +140,9 @@ HRESULT TRenderSystem::Initialize()
 	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight);
 
 	mInput = new TD3DInput(mHInst, mHWnd, width, height);
+
+	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+
 	return S_OK;
 }
 
@@ -197,13 +199,9 @@ void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
 	mDeviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 }
 
-TMaterialPtr TRenderSystem::CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+TMaterialPtr TRenderSystem::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
 {
-	return mMaterialFac->GetMaterial("standard", [&](TMaterialPtr mat) {
-		TMaterialBuilder builder(mat);
-		auto program = builder.SetProgram(CreateProgram(vsPath, psPath));
-		builder.SetInputLayout(CreateLayout(program, descArray, descCount));
-	});
+	return mMaterialFac->GetMaterial(name, callback);
 }
 
 ID3D11InputLayout* TRenderSystem::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
@@ -466,11 +464,6 @@ TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
 	return TTexture(__imgPath, texView);
 }
 
-void TRenderSystem::SetWorldTransform(const XMMATRIX& transform)
-{
-	mWorldTransform = transform;
-}
-
 void TRenderSystem::SetBlendFunc(const TBlendFunc& blendFunc)
 {
 	D3D11_BLEND_DESC blendDesc = { 0 };
@@ -503,13 +496,24 @@ void TRenderSystem::SetDepthState(const TDepthState& depthState)
 	mDeviceContext->OMSetDepthStencilState(mDepthStencilState,1);
 }
 
-void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform, TCameraBase* pCam, TProgramPtr program)
+cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShadow)
 {
 	cbGlobalParam globalParam = {};
-	globalParam.mWorld = worldTransform;
-	pCam = pCam ? pCam : mDefCamera.get();
-	globalParam.mView = pCam->mView;
-	globalParam.mProjection = pCam->mProjection;
+	//globalParam.mWorld = mWorldTransform;
+	
+	if (castShadow) {
+		globalParam.mView = pLightCam->mView;
+		globalParam.mProjection = pLightCam->mProjection;
+	}
+	else {
+		globalParam.mView = mDefCamera->mView;
+		globalParam.mProjection = mDefCamera->mProjection;
+
+		globalParam.mLightView = pLightCam->mView;
+		globalParam.mLightProjection = pLightCam->mProjection;
+	}
+	globalParam.HasDepthMap = TRUE;
+
 	XMVECTOR det = XMMatrixDeterminant(globalParam.mView);
 	globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
 
@@ -524,52 +528,83 @@ void TRenderSystem::ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTr
 	globalParam.mLightNum.z = min(MAX_LIGHTS, mSpotLights.size());
 	for (int i = 0; i < globalParam.mLightNum.z; ++i)
 		globalParam.mSpotLights[i] = *mSpotLights[i];
-
-	TTechniquePtr tech = material->CurTech();
-	for (int i = 0; i < tech->mPasses.size(); ++i) {
-		TPassPtr pass = tech->mPasses[i];
-
-		mDeviceContext->UpdateSubresource(pass->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
-
-		program = program ? program : pass->mProgram;
-		mDeviceContext->VSSetShader(program->mVertexShader, NULL, 0);
-		mDeviceContext->PSSetShader(program->mPixelShader, NULL, 0);
-
-		mDeviceContext->VSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
-		mDeviceContext->PSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
-		mDeviceContext->IASetInputLayout(pass->mInputLayout);
-
-		mDeviceContext->IASetPrimitiveTopology(pass->mTopoLogy);
-
-		if (!pass->mSamplers.empty()) {
-			mDeviceContext->PSSetSamplers(0, pass->mSamplers.size(), &pass->mSamplers[0]);
-		}
-	}
+	return globalParam;
 }
 
-void TRenderSystem::RenderOperation(const TRenderOperation& op)
+void TRenderSystem::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	ApplyMaterial(op.mMaterial, mWorldTransform);
-	SetVertexBuffer(op.mVertexBuffer);
-	SetIndexBuffer(op.mIndexBuffer);
-	if (op.mTextures.size() > 0) {
-		std::vector<ID3D11ShaderResourceView*> texViews = op.mTextures.GetTextureViews();
-		mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
-	}
-	else {
-		ID3D11ShaderResourceView* texViewNull = nullptr;
-		mDeviceContext->PSSetShaderResources(0, 1, &texViewNull);
-	}
+	mDeviceContext->UpdateSubresource(pass->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
 
-	DrawIndexed(op.mIndexBuffer);
+	mDeviceContext->VSSetShader(pass->mProgram->mVertexShader, NULL, 0);
+	mDeviceContext->PSSetShader(pass->mProgram->mPixelShader, NULL, 0);
+
+	mDeviceContext->VSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
+	mDeviceContext->PSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
+	mDeviceContext->IASetInputLayout(pass->mInputLayout);
+
+	mDeviceContext->IASetPrimitiveTopology(pass->mTopoLogy);
+
+	if (!pass->mSamplers.empty()) {
+		mDeviceContext->PSSetSamplers(0, pass->mSamplers.size(), &pass->mSamplers[0]);
+	}
 }
 
+void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+{
+	TTechniquePtr tech = op.mMaterial->CurTech();
+	auto pass = tech->GetPassByName(lightMode);
+	if (pass) 
+	{
+		BindPass(pass, globalParam);
+
+		SetVertexBuffer(op.mVertexBuffer);
+		SetIndexBuffer(op.mIndexBuffer);
+		if (op.mTextures.size() > 0) {
+			std::vector<ID3D11ShaderResourceView*> texViews = op.mTextures.GetTextureViews();
+			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
+		}
+
+		DrawIndexed(op.mIndexBuffer);
+	}
+}
+
+void TRenderSystem::RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode)
+{
+	auto LightCam = light->GetLightCamera(*mDefCamera);
+	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER);
+	for (int i = 0; i < opQueue.size(); ++i) {
+		globalParam.mWorld = opQueue[i].mWorldTransform;
+		RenderOperation(opQueue[i], lightMode, globalParam);
+	}
+}
+
+void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
+{
+	if (lightMode == E_PASS_SHADOWCASTER) {
+		ClearRenderTexture(mShadowPassRT, XMFLOAT4(1, 1, 1, 1.0f));
+		SetRenderTarget(mShadowPassRT);
+	}
+	else if (lightMode == E_PASS_FORWARDBASE) {
+		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->mRenderTargetSRV;
+		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
+	}
+
+	for (int i = 0; i < mPointLights.size(); ++i) {
+		RenderLight(mPointLights[i], opQueue, lightMode);
+	}
+
+	if (lightMode == E_PASS_SHADOWCASTER) {
+		SetRenderTarget(nullptr);
+	}
+	else if (lightMode == E_PASS_FORWARDBASE) {
+		ID3D11ShaderResourceView* texViewNull = nullptr;
+		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &texViewNull);
+	}
+}
 
 void TRenderSystem::Draw(IRenderable* renderable)
 {
-	TRenderOperationList opList;
-	renderable->GenRenderOperation(opList);
-	for (int i = 0; i < opList.size(); ++i) {
-		RenderOperation(opList[i]);
-	}
+	TRenderOperationQueue opQue;
+	renderable->GenRenderOperation(opQue);
+	RenderQueue(opQue, E_PASS_FORWARDBASE);
 }

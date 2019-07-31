@@ -20,12 +20,12 @@ void Lesson3::OnPostInitDevice()
 	auto light2 = mRenderSys->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 
-	mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
+	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.2.fx", "shader\\Lesson3.2.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.1.fx", "shader\\Lesson3.1.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.fx", "shader\\Lesson3.fx");
-	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mScale = 0.01;
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.03; mPosition = XMFLOAT3(0, -5, 0);
+	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
+	//gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.03; mPosition = XMFLOAT3(0, -5, 0);
 	//mModel->PlayAnim(0);
 }
 
@@ -33,11 +33,11 @@ void Lesson3::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
-	mRenderSys->SetWorldTransform(GetWorldTransform());
+	//mRenderSys->SetWorldTransform(GetWorldTransform());
 #else
 	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
 #endif
 	mModel->Draw();
 }
 
-auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light");
+//auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light");

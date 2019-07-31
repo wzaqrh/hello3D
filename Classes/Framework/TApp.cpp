@@ -5,10 +5,7 @@
 TApp::TApp()
 {
 	mRenderSys = new TRenderSystem;
-	
-	mScale = 1;
-	mPosition = XMFLOAT3(0, 0, 0);
-
+	mMove = std::make_shared<TMovable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 }
 
@@ -62,6 +59,16 @@ void TApp::Render()
 		mRenderSys->mDefCamera->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), mRenderSys->mDefCamera->mAt);
 	}
 
+	{
+		TINT4 m = mRenderSys->mInput->GetMouseLocation(true);
+		float scalez = clamp(0.00001f, 10.0f, mMove->mDefScale * (1000 + m.z) / 1000.0f);
+		float angy = 3.14 * -m.x / mRenderSys->mScreenWidth, angx = 3.14 * -m.y / mRenderSys->mScreenHeight;
+		
+		mMove->SetScale(scalez);
+		mMove->SetEulerX(angx);
+		mMove->SetEulerY(angy);
+	}
+
 	OnRender();
 
 	mRenderSys->mSwapChain->Present(0, 0);
@@ -79,14 +86,7 @@ void TApp::OnInitLight()
 
 XMMATRIX TApp::GetWorldTransform()
 {
-	TINT4 m = mRenderSys->mInput->GetMouseLocation(true);
-	float scalez = clamp(0.00001f, 10.0f, mScale * (1000 + m.z) / 1000.0f);
-	float angy = 3.14 * -m.x / mRenderSys->mScreenWidth, angx = 3.14 * -m.y / mRenderSys->mScreenHeight;
-	XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
-
-	return XMMatrixScaling(scalez, scalez, scalez)
-		* euler
-		* XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
+	return mMove->GetWorldTransform();
 }
 
 std::map<std::string, std::function<TApp*()>> gRegAppClasses;

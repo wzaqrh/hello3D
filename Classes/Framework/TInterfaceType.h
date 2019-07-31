@@ -61,6 +61,7 @@ enum enTexturePbrType {
 	E_TEXTURE_PBR_ROUGHNESS,
 	E_TEXTURE_PBR_AO
 };
+#define E_TEXTURE_DEPTH_MAP 8
 struct TTexture {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	std::string path;
@@ -119,13 +120,23 @@ struct TRenderOperation {
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 	TTextureBySlot mTextures;
-
 	XMMATRIX mWorldTransform;
 public:
 	TRenderOperation();
 };
-typedef std::vector<TRenderOperation> TRenderOperationList;
+
+struct TRenderOperationQueue {
+	std::vector<TRenderOperation> mOps;
+public:
+	void clear();
+	void push_back(const TRenderOperation& op);
+	size_t size() const;
+	TRenderOperation& At(size_t pos);
+	const TRenderOperation& At(size_t pos) const;
+	TRenderOperation& operator[](size_t pos);
+	const TRenderOperation& operator[](size_t pos) const;
+};
 
 struct IRenderable {
-	virtual int GenRenderOperation(TRenderOperationList& opList) = 0;
+	virtual int GenRenderOperation(TRenderOperationQueue& opList) = 0;
 };

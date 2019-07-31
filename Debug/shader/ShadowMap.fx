@@ -11,7 +11,7 @@ SamplerState samShadow : register(s1) {
 Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
-Texture2D txDepthMap : register(t3);
+Texture2D txDepthMap : register(t8);
 
 struct LIGHT_DIRECT
 {
@@ -45,6 +45,10 @@ cbuffer cbGlobalParam : register(b0)
 	LIGHT_DIRECT DirectLights[MAX_LIGHTS];
 	LIGHT_POINT PointLights[MAX_LIGHTS];
 	LIGHT_SPOT SpotLights[MAX_LIGHTS];
+	
+	matrix LightView;
+	matrix LightProjection;
+	int HasDepthMap;
 }
 
 static const int MAX_MATRICES = 256;
@@ -52,12 +56,6 @@ cbuffer cbWeightedSkin : register(b1)
 {
 	matrix Model;
 	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	
-}
-
-cbuffer cbShadowMap : register(b2)
-{
-	matrix LightView;
-	matrix LightProjection;
 }
 
 struct VS_INPUT
@@ -226,25 +224,30 @@ float4 PS(PS_INPUT input) : SV_Target
 	}
 #else
 	{//developed by microsoft
-		float depthInLight = posInLight.z / posInLight.w - SHADOW_EPSILON;
-		
-        float2 texelpos = SMAP_SIZE * projPosInLight;
-        
-        // Determine the lerp amounts           
-        float2 lerps = frac(texelpos);
+		float LightAmount;
+		if (HasDepthMap > 0) {
+			float depthInLight = posInLight.z / posInLight.w - SHADOW_EPSILON;
+			
+			float2 texelpos = SMAP_SIZE * projPosInLight;
+			
+			// Determine the lerp amounts           
+			float2 lerps = frac(texelpos);
 
-        //read in bilerp stamp, doing the shadow checks
-        float sourcevals[4];
-        sourcevals[0] = (txDepthMap.Sample(samShadow, projPosInLight) < depthInLight) ? 0.0f : 1.0f;  
-        sourcevals[1] = (txDepthMap.Sample(samShadow, projPosInLight + float2(1.0/SMAP_SIZE, 0) ) < depthInLight) ? 0.0f : 1.0f;  
-        sourcevals[2] = (txDepthMap.Sample(samShadow, projPosInLight + float2(0, 1.0/SMAP_SIZE) ) < depthInLight) ? 0.0f : 1.0f;  
-        sourcevals[3] = (txDepthMap.Sample(samShadow, projPosInLight + float2(1.0/SMAP_SIZE, 1.0/SMAP_SIZE) ) < depthInLight) ? 0.0f : 1.0f;  
-        
-        // lerp between the shadow values to calculate our light amount
-        float LightAmount = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
-                                 lerp(sourcevals[2], sourcevals[3], lerps.x),
-                                 lerps.y);
-		
+			//read in bilerp stamp, doing the shadow checks
+			float sourcevals[4];
+			sourcevals[0] = (txDepthMap.Sample(samShadow, projPosInLight) < depthInLight) ? 0.0f : 1.0f;  
+			sourcevals[1] = (txDepthMap.Sample(samShadow, projPosInLight + float2(1.0/SMAP_SIZE, 0) ) < depthInLight) ? 0.0f : 1.0f;  
+			sourcevals[2] = (txDepthMap.Sample(samShadow, projPosInLight + float2(0, 1.0/SMAP_SIZE) ) < depthInLight) ? 0.0f : 1.0f;  
+			sourcevals[3] = (txDepthMap.Sample(samShadow, projPosInLight + float2(1.0/SMAP_SIZE, 1.0/SMAP_SIZE) ) < depthInLight) ? 0.0f : 1.0f;  
+			
+			// lerp between the shadow values to calculate our light amount
+			LightAmount = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
+									 lerp(sourcevals[2], sourcevals[3], lerps.x),
+									 lerps.y);
+		}
+		else {
+			LightAmount = 1.0;
+		}
 		finalColor.rgb = color.rgb * LightAmount;
 	}
 #endif	

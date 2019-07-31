@@ -1,5 +1,6 @@
 #pragma once
 #include "TRenderSystem.h"
+#include "TMovable.h"
 
 struct Pos3Color3Tex2
 {
@@ -36,10 +37,11 @@ private:
 	TRenderSystem* mRenderSys = nullptr;
 public:
 	TMaterialPtr mMaterial;
+	TMovablePtr mMove;
 public:
 	TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName);
 	~TSprite();
-	virtual int GenRenderOperation(TRenderOperationList& opList) override;
+	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
 public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);

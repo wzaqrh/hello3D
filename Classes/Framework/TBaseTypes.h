@@ -96,6 +96,10 @@ struct cbGlobalParam
 	TDirectLight mDirectLights[MAX_LIGHTS];
 	TPointLight mPointLights[MAX_LIGHTS];
 	TSpotLight mSpotLights[MAX_LIGHTS];
+
+	XMMATRIX mLightView;
+	XMMATRIX mLightProjection;
+	BOOL HasDepthMap;
 public:
 	cbGlobalParam();
 };

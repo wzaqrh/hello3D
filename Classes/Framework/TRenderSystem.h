@@ -22,7 +22,7 @@ public:
 	TD3DInput* mInput = nullptr;
 	TMaterialFactoryPtr mMaterialFac;
 	std::map<std::string, ID3D11ShaderResourceView*> mTexByPath;
-	XMMATRIX mWorldTransform;
+	TRenderTexturePtr mShadowPassRT;
 public:
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
@@ -41,8 +41,6 @@ public:
 	HRESULT Initialize();
 	void CleanUp();
 public:
-	void ApplyMaterial(TMaterialPtr material, const XMMATRIX& worldTransform, TCameraBase* pCam=nullptr, TProgramPtr program=nullptr);
-public:
 	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();
 	TDirectLightPtr AddDirectLight();
@@ -52,10 +50,8 @@ public:
 	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
 	void SetRenderTarget(TRenderTexturePtr rendTarget);
 
-	TMaterialPtr CreateMaterial(const char* vsPath, 
-		const char* psPath, 
-		D3D11_INPUT_ELEMENT_DESC* descArray, 
-		size_t descCount);
+	TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback);
+	//TMaterialPtr CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
 	TContantBufferPtr CreateConstBuffer(int bufferSize);
 	TIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
@@ -80,11 +76,15 @@ public:
 	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile);
 	TTexture GetTexByPath(const std::string& __imgPath);
 
-	void SetWorldTransform(const XMMATRIX& transform);
-
 	void SetBlendFunc(const TBlendFunc& blendFunc);
 	void SetDepthState(const TDepthState& depthState);
 public:
 	void Draw(IRenderable* renderable);
-	void RenderOperation(const TRenderOperation& op);
+	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
+private:
+	void RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+
+	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow);
+	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
 };

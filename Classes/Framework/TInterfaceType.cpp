@@ -210,3 +210,39 @@ TRenderOperation::TRenderOperation()
 {
 	mWorldTransform = XMMatrixIdentity();
 }
+
+/********** TRenderOperationQueue **********/
+void TRenderOperationQueue::clear()
+{
+	mOps.clear();
+}
+
+void TRenderOperationQueue::push_back(const TRenderOperation& op)
+{
+	mOps.push_back(op);
+}
+
+size_t TRenderOperationQueue::size() const
+{
+	return mOps.size();
+}
+
+const TRenderOperation& TRenderOperationQueue::At(size_t pos) const
+{
+	return mOps[pos];
+}
+
+TRenderOperation& TRenderOperationQueue::At(size_t pos)
+{
+	return mOps[pos];
+}
+
+const TRenderOperation& TRenderOperationQueue::operator[](size_t pos) const
+{
+	return At(pos);
+}
+
+TRenderOperation& TRenderOperationQueue::operator[](size_t pos)
+{
+	return At(pos);
+}

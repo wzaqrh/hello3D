@@ -8,6 +8,7 @@
 #include <functional>
 #include "Utility.h"
 #include "TBaseTypes.h"
+#include "TMovable.h"
 
 class AssimpModel;
 struct aiNode;
@@ -32,8 +33,7 @@ protected:
 protected:
 	TRenderSystem* mRenderSys = nullptr;
 	SDTimer mTimer;
-	float mScale;
-	XMFLOAT3 mPosition;
+	TMovablePtr mMove;
 	XMFLOAT4 mBackgndColor;
 public:
 	std::string mName;

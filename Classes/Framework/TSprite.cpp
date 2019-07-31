@@ -54,17 +54,11 @@ const unsigned int indices[] = {
 TSprite::TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName)
 :mQuad(0,0,0,0)
 {
+	mMove = std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	mMaterial = mRenderSys->CreateMaterial(vsName, psName, layout, ARRAYSIZE(layout));
-	mMaterial->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(Pos3Color3Tex2)));
-
+	mMaterial = mRenderSys->CreateMaterial(E_MAT_STANDARD, [&](TMaterialPtr mat) {
+		mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(Pos3Color3Tex2)));
+	});
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 }
@@ -115,13 +109,14 @@ void TSprite::Draw()
 #endif
 }
 
-int TSprite::GenRenderOperation(TRenderOperationList& opList)
+int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 {
 	TRenderOperation op = {};
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
 	op.mTextures.push_back(TTexture("", mTexture));
+	op.mWorldTransform = mMove->GetWorldTransform();
 	opList.push_back(op);
 	return 1;
 }

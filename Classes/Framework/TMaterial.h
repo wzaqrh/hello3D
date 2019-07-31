@@ -1,6 +1,10 @@
 #pragma once
 #include "TInterfaceType.h"
 
+#define E_PASS_SHADOWCASTER "ShadowCaster"
+#define E_PASS_FORWARDBASE "ForwardBase"
+#define E_PASS_FORWARDADD "ForwardAdd"
+
 struct TPass {
 	std::string mName;
 	ID3D11InputLayout* mInputLayout = nullptr;
@@ -12,6 +16,7 @@ struct TPass {
 	std::vector<ID3D11Buffer*> mConstBuffers;
 	std::vector<TContantBufferPtr> mConstantBuffers;
 public:
+	TPass(const std::string& passName);
 	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 	std::shared_ptr<TPass> Clone();
@@ -23,9 +28,11 @@ struct TTechnique {
 	std::vector<TPassPtr> mPasses;
 public:
 	void AddPass(TPassPtr pass);
+	std::shared_ptr<TTechnique> Clone();
 	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
-	std::shared_ptr<TTechnique> Clone();
+	
+	TPassPtr GetPassByName(const std::string& passName);
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
@@ -50,7 +57,7 @@ public:
 	TMaterialBuilder(TMaterialPtr material);
 	TMaterialBuilder();
 	TMaterialBuilder& AddTechnique();
-	TMaterialBuilder& AddPass();
+	TMaterialBuilder& AddPass(const std::string& passName);
 
 	TMaterialBuilder& SetInputLayout(ID3D11InputLayout* inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
@@ -59,6 +66,10 @@ public:
 	TMaterialBuilder& AddConstBuffer(TContantBufferPtr buffer);
 	TMaterialPtr Build();
 };
+
+#define E_MAT_STANDARD "standard"
+#define E_MAT_MODEL "model"
+#define E_MAT_MODEL_SHADOW "model_shadow"
 
 class TRenderSystem;
 struct TMaterialFactory {

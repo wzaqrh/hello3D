@@ -53,7 +53,7 @@ void Lesson6::OnPostInitDevice()
 	light3->SetDiffuseColor(3,3,3,1);
 #endif
 
-	mModel = new AssimpModel(mRenderSys, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx", [&](TMaterialPtr mat) {
+	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx", [&](TMaterialPtr mat) {
 		{
 			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
 			cbUnityMaterial cb;
@@ -67,7 +67,7 @@ void Lesson6::OnPostInitDevice()
 		}
 	});
 #ifndef PBR_DEBUG
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.3; mPosition = XMFLOAT3(0, -5, 0);
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.3); mMove->SetPosition(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures.empty()) {
@@ -127,7 +127,7 @@ void Lesson6::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
-	mRenderSys->SetWorldTransform(GetWorldTransform());
+	//mRenderSys->SetWorldTransform(GetWorldTransform());
 #else
 	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
 #endif

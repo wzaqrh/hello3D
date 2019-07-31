@@ -17,9 +17,6 @@ protected:
 	virtual void OnInitLight() override;
 private:
 	AssimpModel *mModel1, *mModel2 = nullptr;
-	TRenderTexturePtr mPass1RT = nullptr;
-	TSpritePtr mSecondPass, mLayerColor;
 	TPointLightPtr mLight;
-	TProgramPtr mProgShadowMap;
 };
 

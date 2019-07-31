@@ -9,8 +9,8 @@ void Lesson5::OnPostInitDevice()
 	light1->SetSpecularPower(60);
 
 
-	mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
-	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mScale = 0.01; mPosition = XMFLOAT3(0, 0, 0);
+	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
+	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	
 
 	mRendTexture = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
@@ -35,7 +35,7 @@ void Lesson5::OnRender()
 	{
 		mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
-		mRenderSys->SetWorldTransform(GetWorldTransform());
+		//mRenderSys->SetWorldTransform(GetWorldTransform());
 #else
 		mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
 #endif
