@@ -32,6 +32,7 @@ class AssimpModel
 {
 public:
 	AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb = nullptr);
+	AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb = nullptr);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
@@ -44,6 +45,7 @@ private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 	void DoDraw(aiNode* node, TRenderOperationQueue& opList);
 	void LoadMaterial(const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb);
+	void LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
 	std::vector<TTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);

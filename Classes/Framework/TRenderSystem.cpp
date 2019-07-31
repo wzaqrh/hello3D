@@ -276,6 +276,7 @@ ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename)
 
 TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath)
 {
+	psPath = psPath ? psPath : vsPath;
 	TProgramPtr program = std::make_shared<TProgram>();
 	program->mVertexShader = _CreateVS(vsPath, program->mVSBlob);
 	program->mPixelShader = _CreatePS(psPath);

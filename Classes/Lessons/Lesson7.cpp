@@ -34,11 +34,11 @@ void Lesson7::OnPostInitDevice()
 
 	auto move1 = std::make_shared<TMovable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new AssimpModel(mRenderSys, move1, shaderName.c_str(), shaderName.c_str(), nullptr);
+	mModel1 = new AssimpModel(mRenderSys, move1, E_MAT_MODEL_SHADOW);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
 
-	mModel2 = new AssimpModel(mRenderSys, mMove, shaderName.c_str(), shaderName.c_str(), nullptr);
+	mModel2 = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_SHADOW);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 

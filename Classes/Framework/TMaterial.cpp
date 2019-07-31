@@ -229,6 +229,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 {
 	TMaterialPtr material;
 	TMaterialBuilder builder;
+	SetCommonField(builder, mRenderSys);
 	if (name == E_MAT_STANDARD) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
@@ -236,8 +237,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		std::string shaderName = "shader\\Sprite.fx";
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName.c_str(), shaderName.c_str()));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Sprite.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 	else if (name == E_MAT_MODEL) {
@@ -251,8 +251,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		std::string shaderName = "shader\\Model.fx";
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName.c_str(), shaderName.c_str()));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Model.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 	else if (name == E_MAT_MODEL_SHADOW) {
@@ -266,14 +265,16 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		std::string shaderName = "shader\\Model.fx";
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName.c_str(), shaderName.c_str()));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowMap.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
-
+		//pass E_PASS_SHADOWCASTER
+		builder.AddPass(E_PASS_SHADOWCASTER);
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowDepth.fx"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 
-	SetCommonField(builder, mRenderSys);
 	material = builder.Build();
 	return material;
 }

@@ -137,6 +137,13 @@ AssimpModel::AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const char
 	LoadMaterial(vsName, psName, cb);
 }
 
+AssimpModel::AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb /*= nullptr*/)
+{
+	mMove = pMove ? pMove : std::make_shared<TMovable>();
+	mRenderSys = RenderSys;
+	LoadMaterial(matType, cb);
+}
+
 AssimpModel::~AssimpModel()
 {
 	delete mImporter;
@@ -432,21 +439,31 @@ void AssimpModel::PlayAnim(int Index)
 
 void AssimpModel::LoadMaterial(const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
 {
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL, [&](TMaterialPtr mat) {
-		TMaterialBuilder builder(mat);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(vsName, psName));
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	std::function<void(TMaterialPtr)> callback;
+	if (vsName && psName) {
+		callback = [&](TMaterialPtr mat) {
+			TMaterialBuilder builder(mat);
+			auto program = builder.SetProgram(mRenderSys->CreateProgram(vsName, psName));
+			D3D11_INPUT_ELEMENT_DESC layout[] =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			};
+			builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		};
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-	});
+	}
+	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL, callback);
+	mMatCb = cb;
+}
+
+void AssimpModel::LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb)
+{
+	mMaterial = mRenderSys->CreateMaterial(matType, nullptr);
 	mMatCb = cb;
 }
 
