@@ -1,5 +1,6 @@
 #include "TRenderSystem.h"
 #include "Utility.h"
+#include "TSkyBox.h"
 
 TRenderSystem* gRenderSys;
 
@@ -109,13 +110,7 @@ HRESULT TRenderSystem::Initialize()
 	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
 
 
-	D3D11_DEPTH_STENCIL_DESC DSDesc;
-	ZeroMemory(&DSDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	DSDesc.DepthEnable = TRUE;
-	DSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	DSDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	DSDesc.StencilEnable = FALSE;
-	hr = (mDevice->CreateDepthStencilState(&DSDesc, &mDepthStencilState));
+	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
 
 	// Setup the viewport
 	D3D11_VIEWPORT vp;
@@ -130,7 +125,7 @@ HRESULT TRenderSystem::Initialize()
 	D3D11_RASTERIZER_DESC wfdesc;
 	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
 	wfdesc.FillMode = D3D11_FILL_SOLID;
-	wfdesc.CullMode = D3D11_CULL_BACK;
+	wfdesc.CullMode = D3D11_CULL_NONE;// D3D11_CULL_BACK;
 	ID3D11RasterizerState* pRasterizerState = nullptr;
 	hr = mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState);
 	mDeviceContext->RSSetState(pRasterizerState);
@@ -174,7 +169,15 @@ TDirectLightPtr TRenderSystem::AddDirectLight()
 TCameraPtr TRenderSystem::SetCamera(double fov, int eyeDistance, double far1)
 {
 	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
+	if (mSkyBox)
+		mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
+}
+
+TSkyBoxPtr TRenderSystem::SetSkyBox(const std::string& imgName)
+{
+	mSkyBox = std::make_shared<TSkyBox>(this, mDefCamera, imgName);
+	return mSkyBox;
 }
 
 TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
@@ -233,18 +236,20 @@ void TRenderSystem::UpdateConstBuffer(TContantBufferPtr buffer, void* data)
 	mDeviceContext->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
 }
 
-ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter)
+ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp)
 {
 	HRESULT hr = S_OK;
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = filter;
-	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MipLODBias = 0.0f;
+	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
+	sampDesc.ComparisonFunc = comp;
+	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
@@ -390,7 +395,12 @@ TIndexBufferPtr TRenderSystem::CreateIndexBuffer(int bufferSize, DXGI_FORMAT for
 
 void TRenderSystem::SetIndexBuffer(TIndexBufferPtr indexBuffer)
 {
-	mDeviceContext->IASetIndexBuffer(indexBuffer->buffer, indexBuffer->format, 0);
+	if (indexBuffer) {
+		mDeviceContext->IASetIndexBuffer(indexBuffer->buffer, indexBuffer->format, 0);
+	}
+	else {
+		mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
+	}
 }
 
 void TRenderSystem::DrawIndexed(TIndexBufferPtr indexBuffer)
@@ -416,7 +426,7 @@ TContantBufferPtr TRenderSystem::CreateConstBuffer(int bufferSize)
 	return std::make_shared<TContantBuffer>(pConstantBuffer, bufferSize);
 }
 
-ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile)
+ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
@@ -434,7 +444,11 @@ ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile)
 	if (IsFileExist(pSrcFile))
 	{
 		HRESULT hr = S_OK;
-		hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, NULL, NULL, &pTextureRV, NULL);
+
+		D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
+		LoadInfo.Format = format;
+
+		hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, format != DXGI_FORMAT_UNKNOWN ? &LoadInfo : nullptr, NULL, &pTextureRV, NULL);
 		if (CheckHR(hr)) 
 			return nullptr;
 	}
@@ -446,7 +460,7 @@ ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile)
 	return pTextureRV;
 }
 
-TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
+TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format/* = DXGI_FORMAT_UNKNOWN*/) {
 	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;
 	auto pos = __imgPath.find_last_of("\\");
@@ -456,7 +470,7 @@ TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath) {
 
 	ID3D11ShaderResourceView* texView = nullptr;
 	if (mTexByPath.find(imgPath) == mTexByPath.end()) {
-		texView = _CreateTexture(imgPath.c_str());
+		texView = _CreateTexture(imgPath.c_str(), format);
 		mTexByPath.insert(std::make_pair(imgPath, texView));
 	}
 	else {
@@ -515,8 +529,16 @@ cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShad
 	}
 	globalParam.HasDepthMap = TRUE;
 
-	XMVECTOR det = XMMatrixDeterminant(globalParam.mView);
-	globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
+	{
+		XMVECTOR det = XMMatrixDeterminant(globalParam.mWorld);
+		globalParam.mWorldInv = XMMatrixInverse(&det, globalParam.mWorld);
+
+		det = XMMatrixDeterminant(globalParam.mView);
+		globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
+
+		det = XMMatrixDeterminant(globalParam.mProjection);
+		globalParam.mProjectionInv = XMMatrixInverse(&det, globalParam.mProjection);
+	}
 
 	globalParam.mLightNum.x = min(MAX_LIGHTS, mDirectLights.size());
 	for (int i = 0; i < globalParam.mLightNum.x; ++i)
@@ -565,7 +587,12 @@ void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::strin
 			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 		}
 
-		DrawIndexed(op.mIndexBuffer);
+		if (op.mIndexBuffer) {
+			DrawIndexed(op.mIndexBuffer);
+		}
+		else {
+			mDeviceContext->Draw(op.mVertexBuffer->GetCount(), 0);
+		}
 	}
 }
 
@@ -608,4 +635,10 @@ void TRenderSystem::Draw(IRenderable* renderable)
 	TRenderOperationQueue opQue;
 	renderable->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_FORWARDBASE);
+}
+
+void TRenderSystem::RenderSkyBox()
+{
+	if (mSkyBox)
+		mSkyBox->Draw();
 }

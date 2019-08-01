@@ -9,6 +9,8 @@ void Lesson3::OnPostInitDevice()
 	light1->SetSpecularColor(0, 0, 0, 0);
 	light1->SetDiffuseColor(0, 0, 0, 0);
 
+	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+
 	//auto light2 = mRenderSys->AddSpotLight();
 	////light2->SetDiffuseColor(0, 0, 0, 0);
 	////light2->SetSpecularColor(1, 0, 0, 1);
@@ -31,6 +33,8 @@ void Lesson3::OnPostInitDevice()
 
 void Lesson3::OnRender()
 {
+	mRenderSys->RenderSkyBox();
+
 	mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
 	//mRenderSys->SetWorldTransform(GetWorldTransform());
@@ -40,4 +44,4 @@ void Lesson3::OnRender()
 	mModel->Draw();
 }
 
-//auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light");
+auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");

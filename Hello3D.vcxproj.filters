@@ -55,6 +55,9 @@
     <ClCompile Include="Classes\Framework\TMovable.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Framework\TSkyBox.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -109,6 +112,9 @@
       <Filter>Classes\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Framework\TMovable.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TSkyBox.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
   </ItemGroup>

@@ -28,6 +28,7 @@ void Lesson7::OnPostInitDevice()
 #else
 	mScale = 0.01;
 #endif
+	//mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 
 	//std::string shaderName = "shader\\ShadowMap.fx";
 	std::string shaderName = "shader\\Lesson3.3.fx";
@@ -52,6 +53,7 @@ void Lesson7::OnRender()
 	mModel1->GenRenderOperation(opQueue);
 	mModel2->GenRenderOperation(opQueue);
 
+	mRenderSys->RenderSkyBox();
 	mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
 	mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
 #else
@@ -81,4 +83,4 @@ void Lesson7::OnRender()
 #endif
 }
 
-auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");
+//auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");

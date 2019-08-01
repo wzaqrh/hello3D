@@ -1,6 +1,13 @@
 #include "TBaseTypes.h"
 
 
+TCameraBase::TCameraBase()
+{
+	mWorld = XMMatrixIdentity();
+	mView = XMMatrixIdentity();
+	mProjection = XMMatrixIdentity();
+}
+
 XMFLOAT3 TCameraBase::CalNDC(XMFLOAT3 pos)
 {
 	XMFLOAT3 ret = XMFLOAT3(0,0,0);
@@ -23,8 +30,10 @@ TCamera::TCamera(const TCamera& other)
 	mHeight = other.mHeight;
 	mFOV = other.mFOV;
 	mFar = other.mFar;
+	
 	mView = other.mView;
 	mProjection = other.mProjection;
+	mWorld = other.mWorld;
 }
 
 TCamera::TCamera(int width, int height, double fov, int eyeDistance, double far1)
@@ -42,6 +51,8 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
 	XMVECTOR At = XMVectorSet(mAt.x, mAt.y, mAt.z, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mView = XMMatrixLookAtLH(Eye, At, Up);
+
+	mWorld = XMMatrixTranslation(eye.x, eye.y, eye.z);
 }
 
 void TCamera::SetProjection(int width, int height, double fov, double far1)

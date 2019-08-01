@@ -1,15 +1,7 @@
 /********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
+#include "Standard.h"
 SamplerState samLinear : register(s0);
 Texture2D txDiffuse : register(t0);
-
-static const int MAX_LIGHTS = 1;
-cbuffer cbGlobalParam : register(b0)
-{
-	matrix World;
-	matrix View;
-	matrix Projection;
-	matrix ViewInv;
-}
 
 struct VS_INPUT
 {

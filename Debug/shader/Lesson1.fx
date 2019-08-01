@@ -1,13 +1,7 @@
 /********** Load Model FBX **********/
+#include "Standard.h"
 Texture2D txDiffuse : register( t0 );
 SamplerState samLinear : register( s0 );
-
-cbuffer cbGlobalParam : register(b0)
-{
-	matrix World;
-	matrix View;
-	matrix Projection;
-}
 
 static const int MAX_MATRICES = 256;
 cbuffer cbWeightedSkin : register(b1)

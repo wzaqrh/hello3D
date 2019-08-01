@@ -1,42 +1,9 @@
 /********** Fog **********/
+#include "Standard.h"
 SamplerState samLinear : register(s0);
 Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
-
-struct LIGHT_DIRECT
-{
-	float4 LightPos;//world space
-	float4 DiffuseColor;
-	float4 SpecularColorPower;
-};
-
-struct LIGHT_POINT
-{
-	LIGHT_DIRECT L;
-	float4 Attenuation;
-};
-
-struct LIGHT_SPOT
-{
-	LIGHT_POINT Base;
-	float3 Direction;
-    float Cutoff;
-};
-
-static const int MAX_LIGHTS = 4;
-cbuffer cbGlobalParam : register(b0)
-{
-	matrix World;
-	matrix View;
-	matrix Projection;
-	matrix ViewInv;
-	
-	int4 LightNum;
-	LIGHT_DIRECT DirectLights[MAX_LIGHTS];
-	LIGHT_POINT PointLights[MAX_LIGHTS];
-	LIGHT_SPOT SpotLights[MAX_LIGHTS];
-}
 
 static const int MAX_MATRICES = 256;
 cbuffer cbWeightedSkin : register(b1)

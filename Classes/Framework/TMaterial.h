@@ -68,6 +68,7 @@ public:
 };
 
 #define E_MAT_STANDARD "standard"
+#define E_MAT_SKYBOX "skybox"
 #define E_MAT_MODEL "model"
 #define E_MAT_MODEL_SHADOW "model_shadow"
 
@@ -79,6 +80,6 @@ public:
 	TMaterialFactory(TRenderSystem* pRenderSys);
 	TMaterialPtr GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly=false);
 private:
-	TMaterialPtr  CreateStdMaterial(std::string name);
+	TMaterialPtr CreateStdMaterial(std::string name);
 };
 typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;

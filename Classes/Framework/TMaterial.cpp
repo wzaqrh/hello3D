@@ -219,9 +219,15 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
 {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(sizeof(cbGlobalParam)));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
+}
+
+void SetCommonField2(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
+{
+	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(sizeof(cbGlobalParam)));
 }
 
@@ -229,8 +235,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 {
 	TMaterialPtr material;
 	TMaterialBuilder builder;
-	SetCommonField(builder, mRenderSys);
 	if (name == E_MAT_STANDARD) {
+		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -241,6 +247,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 	else if (name == E_MAT_MODEL) {
+		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -255,6 +262,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 	else if (name == E_MAT_MODEL_SHADOW) {
+		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -273,6 +281,17 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		SetCommonField(builder, mRenderSys);
 		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowDepth.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+	}
+	else if (name == E_MAT_SKYBOX) {
+		SetCommonField2(builder, mRenderSys);
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Skybox.fx"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS));
 	}
 
 	material = builder.Build();

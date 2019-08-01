@@ -205,6 +205,12 @@ int TIndexBuffer::GetWidth()
 	return width;
 }
 
+/********** TVertexBuffer **********/
+int TVertexBuffer::GetCount()
+{
+	return bufferSize / stride;
+}
+
 /********** TRenderOperation **********/
 TRenderOperation::TRenderOperation()
 {

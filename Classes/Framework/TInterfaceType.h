@@ -29,6 +29,7 @@ public:
 	TVertexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
 		:THardwareBuffer(__buffer, __bufferSize), stride(__stride), offset(__offset) {};
 	TVertexBuffer() :stride(0), offset(0) {};
+	int GetCount();
 };
 typedef std::shared_ptr<TVertexBuffer> TVertexBufferPtr;
 

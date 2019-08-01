@@ -21,6 +21,7 @@ struct TINT4 {
 };
 
 __declspec(align(16)) struct TCameraBase {
+	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 public:
@@ -30,6 +31,7 @@ public:
 	void operator delete(void* p) {
 		_mm_free(p);
 	}
+	TCameraBase();
 public:
 	XMFLOAT3 CalNDC(XMFLOAT3 pos);
 };
@@ -90,7 +92,9 @@ struct cbGlobalParam
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
+	XMMATRIX mWorldInv;
 	XMMATRIX mViewInv;
+	XMMATRIX mProjectionInv;
 
 	XMINT4 mLightNum;//directional,point,spot
 	TDirectLight mDirectLights[MAX_LIGHTS];

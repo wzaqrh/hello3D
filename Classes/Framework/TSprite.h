@@ -31,10 +31,12 @@ private:
 	Quad mQuad;
 	XMFLOAT2 mPosition;
 	XMFLOAT2 mSize;
+private:
+	TRenderSystem* mRenderSys = nullptr;
+
 	ID3D11ShaderResourceView* mTexture = nullptr;
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
-	TRenderSystem* mRenderSys = nullptr;
 public:
 	TMaterialPtr mMaterial;
 	TMovablePtr mMove;
@@ -42,13 +44,12 @@ public:
 	TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName);
 	~TSprite();
 	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	void Draw();
 public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);
 	void SetTexture(ID3D11ShaderResourceView* Texture);
 	void SetFlipY(bool flipY);
-
-	void Draw();
 };
 typedef std::shared_ptr<TSprite> TSpritePtr;
 

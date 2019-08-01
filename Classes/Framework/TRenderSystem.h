@@ -1,6 +1,7 @@
 #pragma once
 #include "TBaseTypes.h"
 
+typedef std::shared_ptr<class TSkyBox> TSkyBoxPtr;
 class TD3DInput;
 __declspec(align(16)) class TRenderSystem
 {
@@ -24,6 +25,7 @@ public:
 	std::map<std::string, ID3D11ShaderResourceView*> mTexByPath;
 	TRenderTexturePtr mShadowPassRT;
 public:
+	TSkyBoxPtr mSkyBox;
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
 	std::vector<TDirectLightPtr> mDirectLights;
@@ -45,6 +47,7 @@ public:
 	TPointLightPtr AddPointLight();
 	TDirectLightPtr AddDirectLight();
 	TCameraPtr SetCamera(double fov, int eyeDistance, double far1);
+	TSkyBoxPtr SetSkyBox(const std::string& imgName);
 public:
 	TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT);
 	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
@@ -70,16 +73,17 @@ public:
 	ID3D11PixelShader* _CreatePS(const char* filename);
 	TProgramPtr CreateProgram(const char* vsPath, const char* psPath = nullptr);
 
-	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR);
+	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
 	ID3D11InputLayout* CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
-	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile);
-	TTexture GetTexByPath(const std::string& __imgPath);
+	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile, DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN);
+	TTexture GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
 
 	void SetBlendFunc(const TBlendFunc& blendFunc);
 	void SetDepthState(const TDepthState& depthState);
 public:
 	void Draw(IRenderable* renderable);
+	void RenderSkyBox();
 	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
 private:
 	void RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode);

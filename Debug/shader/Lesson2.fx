@@ -1,21 +1,7 @@
 /********** Diffuse Light **********/
+#include "Standard.h"
 Texture2D txDiffuse : register( t0 );
 SamplerState samLinear : register( s0 );
-
-struct LIGHT_STRUCT
-{
-	float4 LightPos;//world space
-	float4 LightColor;
-	float4 SpecularColorPower;
-};
-
-cbuffer cbGlobalParam : register(b0)
-{
-	matrix World;
-	matrix View;
-	matrix Projection;
-	LIGHT_STRUCT DefLight = {{0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0}, {1.0,1.0,1.0,1.0}};
-}
 
 static const int MAX_MATRICES = 256;
 cbuffer cbWeightedSkin : register(b1)
@@ -72,7 +58,7 @@ PS_INPUT VS(VS_INPUT i)
 	output.Normal = normalize(mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 1.0)))).xyz;
 	output.Pos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
 	output.Pos = mul(MW, output.Pos);
-	output.Light = normalize(DefLight.LightPos - output.Pos).xyz;
+	output.Light = normalize(DirectLights[0].LightPos - output.Pos).xyz;
 	
     output.Pos = mul(View, output.Pos);
     output.Pos = mul(Projection, output.Pos);
@@ -84,7 +70,7 @@ PS_INPUT VS(VS_INPUT i)
 float3 GetDiffuse(float3 normal, float3 light, float2 texcoord) {
 	float diffuseFactor = saturate(dot(normal, light));
 	float3 diffuseMat = txDiffuse.Sample(samLinear, texcoord).xyz;
-	return diffuseMat * diffuseFactor * DefLight.LightColor;
+	return diffuseMat * diffuseFactor * DirectLights[0].DiffuseColor;
 }
 
 float4 PS(PS_INPUT input) : SV_Target

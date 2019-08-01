@@ -1,9 +1,5 @@
-cbuffer cbGlobalParam : register(b0)
-{
-	matrix World;
-	matrix View;
-	matrix Projection;
-}
+/********** ShadowCaster **********/
+#include "Standard.h"
 
 static const int MAX_MATRICES = 256;
 cbuffer cbWeightedSkin : register(b1)
