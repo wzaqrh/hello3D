@@ -33,15 +33,11 @@ void Lesson3::OnPostInitDevice()
 
 void Lesson3::OnRender()
 {
-	mRenderSys->RenderSkyBox();
-
-	mModel->Update(mTimer.mDeltaTime);
-#ifdef USE_RENDER_OP
-	//mRenderSys->SetWorldTransform(GetWorldTransform());
-#else
-	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
-#endif
-	mModel->Draw();
+	if (mRenderSys->BeginScene()) {
+		mModel->Update(mTimer.mDeltaTime);
+		mModel->Draw();
+		mRenderSys->EndScene();
+	}
 }
 
-auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");
+//auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");

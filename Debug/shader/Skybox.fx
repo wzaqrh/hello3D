@@ -1,4 +1,4 @@
-/********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
+/********** Skybox **********/
 #include "Standard.h"
 SamplerState samLinear : register(s0);
 TextureCube  txDiffuse : register(t0);
@@ -30,6 +30,5 @@ float4 PS(PS_INPUT input) : SV_Target
 	finalColor.rgb = txDiffuse.Sample(samLinear, input.Tex);
 	return finalColor;
 }
-
 
 

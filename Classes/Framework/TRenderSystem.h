@@ -2,6 +2,7 @@
 #include "TBaseTypes.h"
 
 typedef std::shared_ptr<class TSkyBox> TSkyBoxPtr;
+typedef std::shared_ptr<class TPostProcess> TPostProcessPtr;
 class TD3DInput;
 __declspec(align(16)) class TRenderSystem
 {
@@ -23,9 +24,10 @@ public:
 	TD3DInput* mInput = nullptr;
 	TMaterialFactoryPtr mMaterialFac;
 	std::map<std::string, ID3D11ShaderResourceView*> mTexByPath;
-	TRenderTexturePtr mShadowPassRT;
+	TRenderTexturePtr mShadowPassRT,mPostProcessRT;
 public:
 	TSkyBoxPtr mSkyBox;
+	std::vector<TPostProcessPtr> mPostProcs;
 	TCameraPtr mDefCamera;
 	std::vector<TPointLightPtr> mPointLights;
 	std::vector<TDirectLightPtr> mDirectLights;
@@ -48,6 +50,7 @@ public:
 	TDirectLightPtr AddDirectLight();
 	TCameraPtr SetCamera(double fov, int eyeDistance, double far1);
 	TSkyBoxPtr SetSkyBox(const std::string& imgName);
+	TPostProcessPtr AddPostProcess(const std::string& name);
 public:
 	TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT);
 	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
@@ -69,9 +72,10 @@ public:
 	bool UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize);
 	void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
 
-	ID3D11VertexShader* _CreateVS(const char* filename, ID3DBlob*& pVSBlob);
-	ID3D11PixelShader* _CreatePS(const char* filename);
-	TProgramPtr CreateProgram(const char* vsPath, const char* psPath = nullptr);
+	std::pair<ID3D11VertexShader*, ID3DBlob*> _CreateVS(const char* filename, const char* entry = nullptr);
+	ID3D11PixelShader* _CreatePS(const char* filename, const char* entry = nullptr);
+	TProgramPtr CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry);
+	TProgramPtr CreateProgram(const char* vsPath);
 
 	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
 	ID3D11InputLayout* CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
@@ -82,12 +86,15 @@ public:
 	void SetBlendFunc(const TBlendFunc& blendFunc);
 	void SetDepthState(const TDepthState& depthState);
 public:
+	bool BeginScene();
+	void EndScene();
 	void Draw(IRenderable* renderable);
-	void RenderSkyBox();
 	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
 private:
 	void RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+	void RenderSkyBox();
+	void DoPostProcess();
 
 	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow);
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);

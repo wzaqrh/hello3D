@@ -1,6 +1,7 @@
 #include "TRenderSystem.h"
 #include "Utility.h"
 #include "TSkyBox.h"
+#include "TPostProcess.h"
 
 TRenderSystem* gRenderSys;
 
@@ -137,6 +138,7 @@ HRESULT TRenderSystem::Initialize()
 	mInput = new TD3DInput(mHInst, mHWnd, width, height);
 
 	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	return S_OK;
 }
@@ -178,6 +180,18 @@ TSkyBoxPtr TRenderSystem::SetSkyBox(const std::string& imgName)
 {
 	mSkyBox = std::make_shared<TSkyBox>(this, mDefCamera, imgName);
 	return mSkyBox;
+}
+
+TPostProcessPtr TRenderSystem::AddPostProcess(const std::string& name)
+{
+	TPostProcessPtr process;
+	if (name == E_PASS_POSTPROCESS) {
+		TBloom* bloom = new TBloom(this, mPostProcessRT);
+		process = std::shared_ptr<TPostProcess>(bloom);
+	}
+
+	if (process) mPostProcs.push_back(process);
+	return process;
 }
 
 TRenderTexturePtr TRenderSystem::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
@@ -260,12 +274,13 @@ ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMP
 	return pSamplerLinear;
 }
 
-ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename)
+ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename, const char* entry)
 {
 	HRESULT hr = S_OK;
 
 	ID3DBlob* pBlob = NULL;
-	hr = CompileShaderFromFile(filename, "PS", "ps_4_0", &pBlob);
+	entry = entry ? entry : "PS";
+	hr = CompileShaderFromFile(filename, entry, "ps_4_0", &pBlob);
 	if (FAILED(hr)) {
 		MessageBox(NULL, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return nullptr;
@@ -279,25 +294,18 @@ ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename)
 	return PixelShader;
 }
 
-TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath)
+std::pair<ID3D11VertexShader*, ID3DBlob*> TRenderSystem::_CreateVS(const char* filename, const char* entry)
 {
-	psPath = psPath ? psPath : vsPath;
-	TProgramPtr program = std::make_shared<TProgram>();
-	program->mVertexShader = _CreateVS(vsPath, program->mVSBlob);
-	program->mPixelShader = _CreatePS(psPath);
-	return program;
-}
-
-ID3D11VertexShader* TRenderSystem::_CreateVS(const char* filename, ID3DBlob*& pVSBlob)
-{
+	std::pair<ID3D11VertexShader*, ID3DBlob*> ret = std::pair<ID3D11VertexShader*, ID3DBlob*>(nullptr, nullptr);
 	HRESULT hr = S_OK;
 
-	pVSBlob = NULL;
-	hr = CompileShaderFromFile(filename, "VS", "vs_4_0", &pVSBlob);
+	ID3DBlob* pVSBlob = NULL;
+	entry = entry ? entry : "VS";
+	hr = CompileShaderFromFile(filename, entry, "vs_4_0", &pVSBlob);
 	if (CheckHR(hr))
 	{
 		MessageBox(NULL, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		return nullptr;
+		return ret;
 	}
 
 	ID3D11VertexShader* pVertexShader = nullptr;
@@ -305,9 +313,27 @@ ID3D11VertexShader* TRenderSystem::_CreateVS(const char* filename, ID3DBlob*& pV
 	if (CheckHR(hr))
 	{
 		pVSBlob->Release();
-		return nullptr;
+		return ret;
 	}
-	return pVertexShader;
+	ret.first = pVertexShader;
+	ret.second = pVSBlob;
+	return ret;
+}
+
+TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
+{
+	psPath = psPath ? psPath : vsPath;
+	TProgramPtr program = std::make_shared<TProgram>();
+	auto ret = _CreateVS(vsPath, vsEntry);
+	program->mVertexShader = ret.first;
+	program->mVSBlob = ret.second;
+	program->mPixelShader = _CreatePS(psPath, psEntry);
+	return program;
+}
+
+TProgramPtr TRenderSystem::CreateProgram(const char* vsPath)
+{
+	return CreateProgram(vsPath, nullptr, nullptr, nullptr);
 }
 
 ID3D11Buffer* TRenderSystem::_CreateVertexBuffer(int bufferSize, void* buffer)
@@ -575,17 +601,22 @@ void TRenderSystem::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
 {
 	TTechniquePtr tech = op.mMaterial->CurTech();
-	auto pass = tech->GetPassByName(lightMode);
-	if (pass) 
+	auto passes = tech->GetPassesByName(lightMode);
+	for (auto& pass : passes)
 	{
-		BindPass(pass, globalParam);
-
 		SetVertexBuffer(op.mVertexBuffer);
 		SetIndexBuffer(op.mIndexBuffer);
-		if (op.mTextures.size() > 0) {
-			std::vector<ID3D11ShaderResourceView*> texViews = op.mTextures.GetTextureViews();
+
+		auto textures = op.mTextures;
+		textures.Merge(pass->mTextures);
+		if (textures.size() > 0) {
+			std::vector<ID3D11ShaderResourceView*> texViews = textures.GetTextureViews();
 			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 		}
+
+		if (pass->OnBind)
+			pass->OnBind(pass.get(), this, textures);
+		BindPass(pass, globalParam);
 
 		if (op.mIndexBuffer) {
 			DrawIndexed(op.mIndexBuffer);
@@ -593,6 +624,9 @@ void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::strin
 		else {
 			mDeviceContext->Draw(op.mVertexBuffer->GetCount(), 0);
 		}
+
+		if (pass->OnUnbind)
+			pass->OnUnbind(pass.get(), this, textures);
 	}
 }
 
@@ -615,6 +649,10 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->mRenderTargetSRV;
 		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
+	}
+	else if (lightMode == E_PASS_POSTPROCESS) {
+		ID3D11ShaderResourceView* pSRV = mPostProcessRT->mRenderTargetSRV;
+		mDeviceContext->PSSetShaderResources(0, 1, &pSRV);
 	}
 
 	for (int i = 0; i < mPointLights.size(); ++i) {
@@ -642,3 +680,30 @@ void TRenderSystem::RenderSkyBox()
 	if (mSkyBox)
 		mSkyBox->Draw();
 }
+
+void TRenderSystem::DoPostProcess()
+{
+	TRenderOperationQueue opQue;
+	for (size_t i = 0; i < mPostProcs.size(); ++i)
+		mPostProcs[i]->GenRenderOperation(opQue);
+	RenderQueue(opQue, E_PASS_POSTPROCESS);
+}
+
+bool TRenderSystem::BeginScene()
+{
+	if (!mPostProcs.empty()) {
+		ClearRenderTexture(mPostProcessRT, XMFLOAT4(0,0,0,0));
+		SetRenderTarget(mPostProcessRT);
+	}
+	RenderSkyBox();
+	return true;
+}
+
+void TRenderSystem::EndScene()
+{
+	if (!mPostProcs.empty()) {
+		SetRenderTarget(nullptr);
+	}
+	DoPostProcess();
+}
+

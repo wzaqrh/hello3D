@@ -4,7 +4,10 @@
 #define E_PASS_SHADOWCASTER "ShadowCaster"
 #define E_PASS_FORWARDBASE "ForwardBase"
 #define E_PASS_FORWARDADD "ForwardAdd"
+#define E_PASS_POSTPROCESS "PostProcess"
 
+class TRenderSystem;
+struct TRenderOperation;
 struct TPass {
 	std::string mName;
 	ID3D11InputLayout* mInputLayout = nullptr;
@@ -15,10 +18,18 @@ struct TPass {
 
 	std::vector<ID3D11Buffer*> mConstBuffers;
 	std::vector<TContantBufferPtr> mConstantBuffers;
+
+	TRenderTexturePtr mRenderTarget;
+	std::vector<TRenderTexturePtr> mIterTargets;
+	TTextureBySlot mTextures;
+
+	std::function<void(TPass*,TRenderSystem*,TTextureBySlot&)> OnBind;
+	std::function<void(TPass*,TRenderSystem*,TTextureBySlot&)> OnUnbind;
 public:
 	TPass(const std::string& passName);
 	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
+	TRenderTexturePtr AddIterTarget(TRenderTexturePtr target);
 	std::shared_ptr<TPass> Clone();
 };
 typedef std::shared_ptr<TPass> TPassPtr;
@@ -33,6 +44,7 @@ public:
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 	
 	TPassPtr GetPassByName(const std::string& passName);
+	std::vector<TPassPtr> GetPassesByName(const std::string& passName);
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
@@ -58,12 +70,16 @@ public:
 	TMaterialBuilder();
 	TMaterialBuilder& AddTechnique();
 	TMaterialBuilder& AddPass(const std::string& passName);
+	TMaterialBuilder& SetPassName(const std::string& passName);
 
 	TMaterialBuilder& SetInputLayout(ID3D11InputLayout* inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
 	TProgramPtr SetProgram(TProgramPtr program);
 	TMaterialBuilder& AddSampler(ID3D11SamplerState* sampler);
 	TMaterialBuilder& AddConstBuffer(TContantBufferPtr buffer);
+	TMaterialBuilder& SetRenderTarget(TRenderTexturePtr target);
+	TMaterialBuilder& AddIterTarget(TRenderTexturePtr target);
+	TMaterialBuilder& SetTexture(size_t slot, TTexture texture);
 	TMaterialPtr Build();
 };
 
@@ -71,6 +87,7 @@ public:
 #define E_MAT_SKYBOX "skybox"
 #define E_MAT_MODEL "model"
 #define E_MAT_MODEL_SHADOW "model_shadow"
+#define E_MAT_POSTPROC_BLOOM "bloom"
 
 class TRenderSystem;
 struct TMaterialFactory {

@@ -1,5 +1,6 @@
 #include "TMaterial.h"
 #include "TRenderSystem.h"
+#include "TPostProcess.h"
 
 /********** TPass **********/
 TPass::TPass(const std::string& passName)
@@ -18,6 +19,12 @@ ID3D11SamplerState* TPass::AddSampler(ID3D11SamplerState* sampler)
 {
 	mSamplers.push_back(sampler);
 	return sampler;
+}
+
+TRenderTexturePtr TPass::AddIterTarget(TRenderTexturePtr target)
+{
+	mIterTargets.push_back(target);
+	return target;
 }
 
 std::shared_ptr<TPass> TPass::Clone()
@@ -65,6 +72,17 @@ TPassPtr TTechnique::GetPassByName(const std::string& passName)
 		}
 	}
 	return pass;
+}
+
+std::vector<TPassPtr> TTechnique::GetPassesByName(const std::string& passName)
+{
+	std::vector<TPassPtr> passVec;
+	for (int i = 0; i < mPasses.size(); ++i) {
+		if (mPasses[i]->mName == passName) {
+			passVec.push_back(mPasses[i]);
+		}
+	}
+	return std::move(passVec);
 }
 
 std::shared_ptr<TTechnique> TTechnique::Clone()
@@ -146,6 +164,12 @@ TMaterialBuilder& TMaterialBuilder::AddPass(const std::string& passName)
 	return *this;
 }
 
+TMaterialBuilder& TMaterialBuilder::SetPassName(const std::string& passName)
+{
+	mCurPass->mName = passName;
+	return *this;
+}
+
 TMaterialBuilder& TMaterialBuilder::SetInputLayout(ID3D11InputLayout* inputLayout)
 {
 	mCurPass->mInputLayout = inputLayout;
@@ -173,6 +197,24 @@ TMaterialBuilder& TMaterialBuilder::AddSampler(ID3D11SamplerState* sampler)
 TMaterialBuilder& TMaterialBuilder::AddConstBuffer(TContantBufferPtr buffer)
 {
 	mCurPass->AddConstBuffer(buffer);
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::SetRenderTarget(TRenderTexturePtr target)
+{
+	mCurPass->mRenderTarget = target;
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::AddIterTarget(TRenderTexturePtr target)
+{
+	mCurPass->AddIterTarget(target);
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, TTexture texture)
+{
+	mCurPass->mTextures[slot] = texture;
 	return *this;
 }
 
@@ -284,14 +326,101 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 	}
 	else if (name == E_MAT_SKYBOX) {
 		SetCommonField2(builder, mRenderSys);
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
+		D3D11_INPUT_ELEMENT_DESC layout[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Skybox.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS));
+	}
+	else if (name == E_MAT_POSTPROC_BLOOM) {
+#define NUM_TONEMAP_TEXTURES  5
+#define NUM_BLOOM_TEXTURES    2
+		std::vector<TRenderTexturePtr> TexToneMaps(NUM_TONEMAP_TEXTURES);
+		int nSampleLen = 1;
+		for (size_t i = 0; i < NUM_TONEMAP_TEXTURES; i++) {
+			TexToneMaps[i] = mRenderSys->CreateRenderTexture(nSampleLen, nSampleLen, DXGI_FORMAT_R16G16B16A16_UNORM);
+			nSampleLen *= 3;
+		}
+		TRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
+		std::vector<TRenderTexturePtr> TexBlooms(NUM_BLOOM_TEXTURES);
+		for (size_t i = 0; i < NUM_BLOOM_TEXTURES; i++) {
+			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
+		}
+
+		//pass DownScale2x2
+		builder.SetPassName(E_PASS_POSTPROCESS);
+		SetCommonField(builder, mRenderSys);
+		D3D11_INPUT_ELEMENT_DESC layout[] = {
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale2x2"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.SetRenderTarget(TexToneMaps[NUM_TONEMAP_TEXTURES-1]);
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
+			auto mainTex = textures[0];
+			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex.GetWidth(), mainTex.GetHeight());
+			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+		};
+
+		//pass DownScale3x3
+		builder.AddPass(E_PASS_POSTPROCESS);
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale3x3"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.SetRenderTarget(TexToneMaps[0]);
+		for (int i = 1; i < NUM_TONEMAP_TEXTURES - 1; ++i) {
+			builder.AddIterTarget(TexToneMaps[i]);
+		}
+		builder.SetTexture(0, TTexture("", TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->mRenderTargetSRV));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
+			auto mainTex = textures[0];
+			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex.GetWidth(), mainTex.GetHeight());
+			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+		};
+
+		//pass DownScale3x3_BrightPass
+		builder.AddPass(E_PASS_POSTPROCESS);
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale3x3_BrightPass"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.SetRenderTarget(TexBrightPass);
+		builder.SetTexture(1, TTexture("", TexToneMaps[0]->mRenderTargetSRV));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
+			auto mainTex = textures[0];
+			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex.GetWidth(), mainTex.GetHeight());
+			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+		};
+
+		//pass Bloom
+		builder.AddPass(E_PASS_POSTPROCESS);
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "BloomPS"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.SetRenderTarget(TexBlooms[0]);
+		for (int i = 1; i < NUM_BLOOM_TEXTURES - 1; ++i) {
+			builder.AddIterTarget(TexBlooms[i]);
+		}
+		builder.SetTexture(1, TTexture("", TexBrightPass->mRenderTargetSRV));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
+			auto mainTex = textures[0];
+			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex.GetWidth(), 3.0f, 1.25f);
+			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+		};
+
+		//pass FinalPass
+		builder.AddPass(E_PASS_POSTPROCESS);
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "FinalPass"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.SetTexture(1, TTexture("", TexToneMaps[0]->mRenderTargetSRV));
+		builder.SetTexture(2, TTexture("", TexBlooms[0]->mRenderTargetSRV));
 	}
 
 	material = builder.Build();

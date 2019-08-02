@@ -381,6 +381,7 @@
     <ClCompile Include="Classes\Framework\TInterfaceType.cpp" />
     <ClCompile Include="Classes\Framework\TMaterial.cpp" />
     <ClCompile Include="Classes\Framework\TMovable.cpp" />
+    <ClCompile Include="Classes\Framework\TPostProcess.cpp" />
     <ClCompile Include="Classes\Framework\TRenderSystem.cpp" />
     <ClCompile Include="Classes\Framework\TSkyBox.cpp" />
     <ClCompile Include="Classes\Framework\TSprite.cpp" />
@@ -391,6 +392,7 @@
     <ClCompile Include="Classes\Lessons\Lesson5.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson6.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson7.cpp" />
+    <ClCompile Include="Classes\Lessons\Lesson8.cpp" />
     <ClCompile Include="Classes\Main.cpp" />
     <ClCompile Include="Classes\Model\AssimpModel.cpp" />
     <ClCompile Include="Classes\Model\TMesh.cpp" />
@@ -403,6 +405,7 @@
     <ClInclude Include="Classes\Framework\TInterfaceType.h" />
     <ClInclude Include="Classes\Framework\TMaterial.h" />
     <ClInclude Include="Classes\Framework\TMovable.h" />
+    <ClInclude Include="Classes\Framework\TPostProcess.h" />
     <ClInclude Include="Classes\Framework\TRenderSystem.h" />
     <ClInclude Include="Classes\Framework\TSkyBox.h" />
     <ClInclude Include="Classes\Framework\TSprite.h" />
@@ -413,6 +416,7 @@
     <ClInclude Include="Classes\Lessons\Lesson5.h" />
     <ClInclude Include="Classes\Lessons\Lesson6.h" />
     <ClInclude Include="Classes\Lessons\Lesson7.h" />
+    <ClInclude Include="Classes\Lessons\Lesson8.h" />
     <ClInclude Include="Classes\Model\AssimpModel.h" />
     <ClInclude Include="Classes\Model\TMesh.h" />
     <ClInclude Include="Classes\Utility.h" />

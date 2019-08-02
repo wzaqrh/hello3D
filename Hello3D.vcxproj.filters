@@ -58,6 +58,12 @@
     <ClCompile Include="Classes\Framework\TSkyBox.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Framework\TPostProcess.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson8.cpp">
+      <Filter>Classes\Lessons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -116,6 +122,12 @@
     </ClInclude>
     <ClInclude Include="Classes\Framework\TSkyBox.h">
       <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TPostProcess.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson8.h">
+      <Filter>Classes\Lessons</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

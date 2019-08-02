@@ -47,9 +47,10 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
 {
 	mEye = eye;
 	mAt = at;
+	mUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	XMVECTOR Eye = XMVectorSet(mEye.x, mEye.y, mEye.z, 0.0f);
 	XMVECTOR At = XMVectorSet(mAt.x, mAt.y, mAt.z, 0.0f);
-	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR Up = XMVectorSet(mUp.x, mUp.y, mUp.z, 0.0f);
 	mView = XMMatrixLookAtLH(Eye, At, Up);
 
 	mWorld = XMMatrixTranslation(eye.x, eye.y, eye.z);
@@ -103,7 +104,7 @@ TCameraBase TDirectLight::GetLightCamera(TCamera& otherCam)
 /********** TLight **********/
 TPointLight::TPointLight()
 {
-	SetPosition(0, 0, 0);
+	SetPosition(0, 0, -10);
 	SetAttenuation(1.0, 0.01, 0.0);
 }
 

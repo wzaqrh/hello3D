@@ -122,6 +122,32 @@ TTexture::TTexture()
 
 }
 
+D3D11_TEXTURE2D_DESC TTexture::GetDesc()
+{
+	ID3D11Texture2D* pTexture;
+	texture->GetResource((ID3D11Resource **)&pTexture);
+	
+	D3D11_TEXTURE2D_DESC desc;
+	pTexture->GetDesc(&desc);
+
+	return desc;
+}
+
+int TTexture::GetWidth()
+{
+	return GetDesc().Width;
+}
+
+int TTexture::GetHeight()
+{
+	return GetDesc().Height;
+}
+
+DXGI_FORMAT TTexture::GetFormat()
+{
+	return GetDesc().Format;
+}
+
 /********** TTextureBySlot **********/
 void TTextureBySlot::clear()
 {
@@ -173,6 +199,18 @@ std::vector<ID3D11ShaderResourceView*> TTextureBySlot::GetTextureViews() const
 	for (int i = 0; i < views.size(); ++i)
 		views[i] = textures[i].texture;
 	return views;
+}
+
+void TTextureBySlot::Merge(const TTextureBySlot& other)
+{
+	if (textures.size() < other.textures.size())
+		textures.resize(other.textures.size());
+
+	for (size_t i = 0; i < other.textures.size(); ++i) {
+		if (other.textures[i].texture) {
+			textures[i] = other.textures[i];
+		}
+	}
 }
 
 /********** TIndexBuffer **********/

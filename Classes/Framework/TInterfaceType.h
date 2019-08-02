@@ -67,9 +67,16 @@ struct TTexture {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	std::string path;
 	ID3D11ShaderResourceView *texture;
+	UINT Width;
+	UINT Height;
+	DXGI_FORMAT Format;
 public:
 	TTexture();
 	TTexture(std::string __path, ID3D11ShaderResourceView* __texture);
+	D3D11_TEXTURE2D_DESC GetDesc();
+	int GetWidth();
+	int GetHeight();
+	DXGI_FORMAT GetFormat();
 };
 
 
@@ -87,6 +94,7 @@ public:
 	const TTexture& operator[](size_t pos) const;
 	TTexture& operator[](size_t pos);
 	std::vector<ID3D11ShaderResourceView*> GetTextureViews() const;
+	void Merge(const TTextureBySlot& other);
 };
 
 

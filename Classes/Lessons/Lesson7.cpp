@@ -53,9 +53,11 @@ void Lesson7::OnRender()
 	mModel1->GenRenderOperation(opQueue);
 	mModel2->GenRenderOperation(opQueue);
 
-	mRenderSys->RenderSkyBox();
-	mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-	mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+	if (mRenderSys->BeginScene()) {
+		mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
+		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+		mRenderSys->EndScene();
+	}
 #else
 	//pass1
 	mRenderSys->ClearRenderTexture(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
