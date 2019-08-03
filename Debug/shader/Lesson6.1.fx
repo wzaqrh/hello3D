@@ -35,6 +35,7 @@ cbuffer cbUnityGlobal : register(b3)
 {
 	float4 _Unity_IndirectSpecColor;
 	float4 _AmbientOrLightmapUV;
+	float4 _Unity_SpecCube0_HDR;
 };
 
 struct VS_INPUT
@@ -361,9 +362,10 @@ float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
 
     float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
     float3 R = glossIn.reflUVW;
-    float4 rgbm = envTexture.Sample(samLinear, R);
+    float4 rgbm = envTexture.SampleLevel(samLinear, R, mip);
 
-    return rgbm;
+	float4 hdr = _Unity_SpecCube0_HDR;
+    return DecodeHDR(rgbm, hdr);
 }
 float3 Unity_GlossyEnvironment(float perceptualRoughness)
 {

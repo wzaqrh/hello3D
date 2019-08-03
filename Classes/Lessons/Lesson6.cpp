@@ -15,13 +15,14 @@ cbUnityGlobal::cbUnityGlobal()
 {
 	_Unity_IndirectSpecColor = XMFLOAT4(0,0,0,0);
 	_AmbientOrLightmapUV = XMFLOAT4(0.01,0.01,0.01,1);
+	_Unity_SpecCube0_HDR = XMFLOAT4(0.1, 1, 0, 0);
 }
 
 //#define PBR_DEBUG
 /********** Lesson6 **********/
 void Lesson6::OnPostInitDevice()
 {
-	mRenderSys->SetCamera(45, 150, 1000);
+	mRenderSys->SetCamera(45, 30, 1000);
 
 #ifndef PBR_DEBUG
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
@@ -60,7 +61,7 @@ void Lesson6::OnPostInitDevice()
 			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
 			cbUnityMaterial cb;
 			//cb._Color = XMFLOAT4(0,0,0,0);
-			cb._SpecLightOff = TRUE;
+			//cb._SpecLightOff = TRUE;
 			mRenderSys->UpdateConstBuffer(buffer, &cb);
 		}
 		{

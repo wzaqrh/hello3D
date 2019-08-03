@@ -17,6 +17,7 @@ struct cbUnityGlobal
 {
 	XMFLOAT4 _Unity_IndirectSpecColor;
 	XMFLOAT4 _AmbientOrLightmapUV;
+	XMFLOAT4 _Unity_SpecCube0_HDR;
 	cbUnityGlobal();
 };
 
