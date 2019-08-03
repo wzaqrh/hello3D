@@ -359,10 +359,13 @@ float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
     perceptualRoughness = perceptualRoughness*(1.7 - 0.7*perceptualRoughness);
 #endif
 
-
     float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
     float3 R = glossIn.reflUVW;
+	
     float4 rgbm = envTexture.SampleLevel(samLinear, R, mip);
+    //skybox tone mapping
+	rgbm.rgb *= (1.0f + rgbm.rgb/1.5f);
+	rgbm.rgb /= (1.0f + rgbm.rgb);
 
 	float4 hdr = _Unity_SpecCube0_HDR;
     return DecodeHDR(rgbm, hdr);

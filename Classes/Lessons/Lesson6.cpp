@@ -15,7 +15,7 @@ cbUnityGlobal::cbUnityGlobal()
 {
 	_Unity_IndirectSpecColor = XMFLOAT4(0,0,0,0);
 	_AmbientOrLightmapUV = XMFLOAT4(0.01,0.01,0.01,1);
-	_Unity_SpecCube0_HDR = XMFLOAT4(0.1, 1, 0, 0);
+	_Unity_SpecCube0_HDR = XMFLOAT4(1, 1, 0, 0);
 }
 
 //#define PBR_DEBUG
@@ -71,7 +71,7 @@ void Lesson6::OnPostInitDevice()
 		}
 	});
 #ifndef PBR_DEBUG
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.3); mMove->SetPosition(0, -5, 0);
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.1); mMove->SetPosition(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures.empty()) {
