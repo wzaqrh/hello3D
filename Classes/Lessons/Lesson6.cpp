@@ -24,6 +24,8 @@ void Lesson6::OnPostInitDevice()
 	mRenderSys->SetCamera(45, 150, 1000);
 
 #ifndef PBR_DEBUG
+	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+
 	/*auto light1 = mRenderSys->AddPointLight();
 	light1->SetPosition(-50, 50, -100);
 	int intensify = 10;
@@ -58,6 +60,7 @@ void Lesson6::OnPostInitDevice()
 			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
 			cbUnityMaterial cb;
 			//cb._Color = XMFLOAT4(0,0,0,0);
+			cb._SpecLightOff = TRUE;
 			mRenderSys->UpdateConstBuffer(buffer, &cb);
 		}
 		{
@@ -126,12 +129,10 @@ void Lesson6::OnPostInitDevice()
 void Lesson6::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
-#ifdef USE_RENDER_OP
-	//mRenderSys->SetWorldTransform(GetWorldTransform());
-#else
-	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
-#endif
-	mModel->Draw();
+	if (mRenderSys->BeginScene()) {
+		mModel->Draw();
+		mRenderSys->EndScene();
+	}
 }
 
-//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");

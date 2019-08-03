@@ -719,6 +719,10 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->mRenderTargetSRV;
 		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
+
+		if (mSkyBox) {
+			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &mSkyBox->mCubeSRV.texture);
+		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
 		ID3D11ShaderResourceView* pSRV = mPostProcessRT->mRenderTargetSRV;

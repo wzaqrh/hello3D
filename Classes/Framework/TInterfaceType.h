@@ -63,6 +63,7 @@ enum enTexturePbrType {
 	E_TEXTURE_PBR_AO
 };
 #define E_TEXTURE_DEPTH_MAP 8
+#define E_TEXTURE_ENV 9
 struct TTexture {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	std::string path;

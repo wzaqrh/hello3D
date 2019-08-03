@@ -9,6 +9,7 @@ Texture2D normalTexture : register(t1);//rgb
 Texture2D metalnessTexture : register(t2);//r
 Texture2D smoothnessTexture : register(t3);//r
 Texture2D aoTexture : register(t4);//r
+TextureCube envTexture : register(t9);
 
 static const int MAX_MATRICES = 256;
 cbuffer cbWeightedSkin : register(b1)
@@ -294,6 +295,7 @@ struct UnityGIInput
 struct Unity_GlossyEnvironmentData
 {
     float roughness;
+	float3 reflUVW;
 };
 float SmoothnessToPerceptualRoughness(float smoothness)//1-smoothness
 {
@@ -317,24 +319,89 @@ UnityGI UnityGI_Base(UnityGIInput data, float occlusion)
     o_gi.indirect.diffuse *= occlusion;
     return o_gi;
 }
-float3 UnityGI_IndirectSpecular(UnityGIInput data, float occlusion)//unity_IndirectSpecColor.rgb*occlusion
+#define UNITY_ARGS_TEXCUBE(tex) TextureCube tex, SamplerState sampler##tex
+#define UNITY_PASS_TEXCUBE(tex) tex, sampler##tex
+#define UNITY_PASS_TEXCUBE_SAMPLER(tex,samplertex) tex, sampler##samplertex
+#define UNITY_SAMPLE_TEXCUBE_LOD(tex,coord,lod) tex.SampleLevel (sampler##tex,coord, lod)
+
+#ifndef UNITY_SPECCUBE_LOD_STEPS
+#define UNITY_SPECCUBE_LOD_STEPS (6)
+#endif
+float perceptualRoughnessToMipmapLevel(float perceptualRoughness)
+{
+    return perceptualRoughness * UNITY_SPECCUBE_LOD_STEPS;
+}
+float3 DecodeHDR (float4 data, float4 decodeInstructions)
+{
+    float alpha = decodeInstructions.w * (data.a - 1.0) + 1.0;
+    #if defined(UNITY_COLORSPACE_GAMMA)
+        return (decodeInstructions.x * alpha) * data.rgb;
+    #else
+    #endif
+}
+float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
+{
+    float perceptualRoughness = glossIn.roughness /* perceptualRoughness */ ;
+
+// TODO: CAUTION: remap from Morten may work only with offline convolution, see impact with runtime convolution!
+// For now disabled
+#if 0
+    float m = PerceptualRoughnessToRoughness(perceptualRoughness); // m is the real roughness parameter
+    const float fEps = 1.192092896e-07F;        // smallest such that 1.0+FLT_EPSILON != 1.0  (+1e-4h is NOT good here. is visibly very wrong)
+    float n =  (2.0/max(fEps, m*m))-2.0;        // remap to spec power. See eq. 21 in --> https://dl.dropboxusercontent.com/u/55891920/papers/mm_brdf.pdf
+
+    n /= 4;                                     // remap from n_dot_h formulatino to n_dot_r. See section "Pre-convolved Cube Maps vs Path Tracers" --> https://s3.amazonaws.com/docs.knaldtech.com/knald/1.0.0/lys_power_drops.html
+
+    perceptualRoughness = pow( 2/(n+2), 0.25);      // remap back to square root of real roughness (0.25 include both the sqrt root of the conversion and sqrt for going from roughness to perceptualRoughness)
+#else
+    // MM: came up with a surprisingly close approximation to what the #if 0'ed out code above does.
+    perceptualRoughness = perceptualRoughness*(1.7 - 0.7*perceptualRoughness);
+#endif
+
+
+    float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
+    float3 R = glossIn.reflUVW;
+    float4 rgbm = envTexture.Sample(samLinear, R);
+
+    return rgbm;
+}
+float3 Unity_GlossyEnvironment(float perceptualRoughness)
+{
+    Unity_GlossyEnvironmentData g;
+    g.roughness /* perceptualRoughness */ = perceptualRoughness;
+    return Unity_GlossyEnvironment(g);
+}
+float3 UnityGI_IndirectSpecular(UnityGIInput data, float occlusion, Unity_GlossyEnvironmentData glossIn)//unity_IndirectSpecColor.rgb*occlusion
 {
     float3 specular;
-    specular = _Unity_IndirectSpecColor.rgb;
+
+    #ifdef UNITY_SPECCUBE_BOX_PROJECTION
+    #endif
+
+    #ifdef _GLOSSYREFLECTIONS_OFF
+    #else
+        float3 env0 = Unity_GlossyEnvironment(glossIn);
+        #ifdef UNITY_SPECCUBE_BLENDING
+        #else
+            specular = env0;
+        #endif
+    #endif
+
     return specular * occlusion;
 }
 UnityGI UnityGlobalIllumination(UnityGIInput data, float occlusion, Unity_GlossyEnvironmentData glossIn)//std_branch_this
 {
     UnityGI o_gi = UnityGI_Base(data, occlusion);
-    o_gi.indirect.specular = UnityGI_IndirectSpecular(data, occlusion);
+    o_gi.indirect.specular = UnityGI_IndirectSpecular(data, occlusion, glossIn);
     return o_gi;
 }
-UnityGI FragmentGI(FragmentCommonData s, float occlusion, UnityLight light)
+UnityGI FragmentGI(FragmentCommonData s, float occlusion, UnityLight light, float3 normal, float3 eye)
 {
     UnityGIInput d;
     d.light = light;
     d.ambient = _AmbientOrLightmapUV.rgb;
     Unity_GlossyEnvironmentData g = UnityGlossyEnvironmentSetup(s.smoothness);
+	g.reflUVW = reflect(-eye, normal);
     return UnityGlobalIllumination(d, occlusion, g);
 }
 
@@ -453,7 +520,7 @@ float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, f
 	FragmentCommonData s = FragmentSetup(texcoord);
 	UnityLight mainLight = MainLight(directLight);
 	float occlusion = Occlusion(texcoord);
-	UnityGI gi = FragmentGI(s, occlusion, mainLight);
+	UnityGI gi = FragmentGI(s, occlusion, mainLight, normal, toEye);
 	float3 c = UNITY_BRDF_PBS(s, gi, normal, toLight, toEye, texcoord);
 	//OutputForward
 	return c;

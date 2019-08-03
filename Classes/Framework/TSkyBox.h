@@ -14,11 +14,10 @@ class TSkyBox
 private:
 	TCameraPtr mRefCam;
 	TRenderSystem* mRenderSys = nullptr;
-
-	TTexture mCubeSRV;
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 public:
+	TTexture mCubeSRV;
 	TMaterialPtr mMaterial;
 public:
 	TSkyBox(TRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName);
