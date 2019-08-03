@@ -8,14 +8,10 @@ Texture2D txMain : register(t0);
 Texture2D txSecond : register(t1);
 Texture2D txThird : register(t2);
 
-static const float3 LUMINANCE_VECTOR  = float3(0.2125f, 0.7154f, 0.0721f);
-static const float3 MODEL_COLOR = float3(0.0f, 0.0f, 0.4f);
-static const float  MODEL_REFLECTIVITY = 0.2f;
+static const float3 LUMINANCE_VECTOR = float3(0.2125f, 0.7154f, 0.0721f);
 static const float  MIDDLE_GRAY = 0.72f;
 static const float  LUM_WHITE = 1.5f;
 static const float  BRIGHT_THRESHOLD = 0.5f;
-static const float  RGB16_MAX = 100;
-static const float  RGB16_EXP = 5;
 
 cbuffer cbBloom : register(b1)
 {
