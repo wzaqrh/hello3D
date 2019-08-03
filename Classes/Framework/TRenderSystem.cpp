@@ -75,7 +75,7 @@ HRESULT TRenderSystem::Initialize()
 	if (CheckHR(hr))
 		return hr;
 
-	hr = mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mRenderTargetView);
+	hr = mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mBackRenderTargetView);
 	pBackBuffer->Release();
 	if (CheckHR(hr))
 		return hr;
@@ -105,11 +105,10 @@ HRESULT TRenderSystem::Initialize()
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
-	hr = mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mDepthStencilView);
+	hr = mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mBackDepthStencilView);
 	if (CheckHR(hr))
 		return hr;
-	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
-
+	mDeviceContext->OMSetRenderTargets(1, &mBackRenderTargetView, mBackDepthStencilView);
 
 	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
 
@@ -138,8 +137,10 @@ HRESULT TRenderSystem::Initialize()
 	mInput = new TD3DInput(mHInst, mHWnd, width, height);
 
 	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
-	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
 
+	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 	return S_OK;
 }
 
@@ -205,15 +206,29 @@ void TRenderSystem::ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 co
 	mDeviceContext->ClearDepthStencilView(rendTarget->mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-void TRenderSystem::SetRenderTarget(TRenderTexturePtr rendTarget)
+void TRenderSystem::_SetRenderTarget(TRenderTexturePtr rendTarget)
 {
 	ID3D11ShaderResourceView* TextureNull = nullptr;
 	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
 
 	//ID3D11RenderTargetView* renderTargetView = mRenderTargetView;
-	ID3D11RenderTargetView* renderTargetView = rendTarget != nullptr ? rendTarget->mRenderTargetView : mRenderTargetView;
-	ID3D11DepthStencilView* depthStencilView = rendTarget != nullptr ? rendTarget->mDepthStencilView : mDepthStencilView;
-	mDeviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+	mCurRenderTargetView = rendTarget != nullptr ? rendTarget->mRenderTargetView : mBackRenderTargetView;
+	mCurDepthStencilView = rendTarget != nullptr ? rendTarget->mDepthStencilView : mBackDepthStencilView;
+	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
+}
+
+void TRenderSystem::_PushRenderTarget(TRenderTexturePtr rendTarget)
+{
+	mRenderTargetStk.push_back(rendTarget);
+	_SetRenderTarget(rendTarget);
+}
+
+void TRenderSystem::_PopRenderTarget()
+{
+	if (!mRenderTargetStk.empty())
+		mRenderTargetStk.pop_back();
+
+	_SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
 TMaterialPtr TRenderSystem::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
@@ -257,9 +272,9 @@ ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMP
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = filter;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;// D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;//D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;//D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.MipLODBias = 0.0f;
 	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	sampDesc.ComparisonFunc = comp;
@@ -526,6 +541,8 @@ void TRenderSystem::SetBlendFunc(const TBlendFunc& blendFunc)
 
 void TRenderSystem::SetDepthState(const TDepthState& depthState)
 {
+	mCurDepthState = depthState;
+
 	D3D11_DEPTH_STENCIL_DESC DSDesc;
 	ZeroMemory(&DSDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 	DSDesc.DepthEnable = depthState.depthEnable;
@@ -598,17 +615,26 @@ void TRenderSystem::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	}
 }
 
-void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+void TRenderSystem::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, TIndexBufferPtr indexBuffer, TVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
 {
-	TTechniquePtr tech = op.mMaterial->CurTech();
-	auto passes = tech->GetPassesByName(lightMode);
-	for (auto& pass : passes)
-	{
-		SetVertexBuffer(op.mVertexBuffer);
-		SetIndexBuffer(op.mIndexBuffer);
+	if (iterCnt >= 0) {
+		_PushRenderTarget(pass->mIterTargets[iterCnt]);
+	}
+	else {
+		if (pass->mRenderTarget)
+			_PushRenderTarget(pass->mRenderTarget);
+	}
 
-		auto textures = op.mTextures;
-		textures.Merge(pass->mTextures);
+	if (iterCnt >= 0) {
+		if (iterCnt + 1 < pass->mIterTargets.size())
+			textures[0] = pass->mIterTargets[iterCnt + 1]->GetRenderTargetSRV();
+	}
+	else {
+		if (!pass->mIterTargets.empty())
+			textures[0] = pass->mIterTargets[0]->GetRenderTargetSRV();
+	}
+
+	{
 		if (textures.size() > 0) {
 			std::vector<ID3D11ShaderResourceView*> texViews = textures.GetTextureViews();
 			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
@@ -616,17 +642,61 @@ void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::strin
 
 		if (pass->OnBind)
 			pass->OnBind(pass.get(), this, textures);
+
 		BindPass(pass, globalParam);
 
-		if (op.mIndexBuffer) {
-			DrawIndexed(op.mIndexBuffer);
+		if (indexBuffer) {
+			DrawIndexed(indexBuffer);
 		}
 		else {
-			mDeviceContext->Draw(op.mVertexBuffer->GetCount(), 0);
+			mDeviceContext->Draw(vertexBuffer->GetCount(), 0);
 		}
 
 		if (pass->OnUnbind)
 			pass->OnUnbind(pass.get(), this, textures);
+	}
+
+	if (iterCnt >= 0) {
+		_PopRenderTarget();
+	}
+	else {
+		if (pass->mRenderTarget)
+			_PopRenderTarget();
+	}
+}
+
+void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+{
+	TTechniquePtr tech = op.mMaterial->CurTech();
+	std::vector<TPassPtr> passes = tech->GetPassesByName(lightMode);
+	for (auto& pass : passes)
+	{
+		SetVertexBuffer(op.mVertexBuffer);
+		SetIndexBuffer(op.mIndexBuffer);
+
+		TTextureBySlot textures = op.mTextures;
+		textures.Merge(pass->mTextures);
+
+		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
+			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
+			if (iter != op.mVertBufferByPass.end()) {
+				SetVertexBuffer(iter->second);
+			}
+			else {
+				SetVertexBuffer(op.mVertexBuffer);
+			}
+			TTexture first = !textures.empty() ? textures[0] : TTexture("",nullptr);
+			RenderPass(pass, textures, i, op.mIndexBuffer, op.mVertexBuffer, globalParam);
+			textures[0] = first;
+		}
+		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
+		if (iter != op.mVertBufferByPass.end()) {
+			SetVertexBuffer(iter->second);
+		}
+		else {
+			SetVertexBuffer(op.mVertexBuffer);
+		}
+		RenderPass(pass, textures, -1, op.mIndexBuffer, op.mVertexBuffer, globalParam);
 	}
 }
 
@@ -644,7 +714,7 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 {
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		ClearRenderTexture(mShadowPassRT, XMFLOAT4(1, 1, 1, 1.0f));
-		SetRenderTarget(mShadowPassRT);
+		_PushRenderTarget(mShadowPassRT);
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->mRenderTargetSRV;
@@ -660,7 +730,7 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 	}
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		SetRenderTarget(nullptr);
+		_PopRenderTarget();
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* texViewNull = nullptr;
@@ -683,17 +753,22 @@ void TRenderSystem::RenderSkyBox()
 
 void TRenderSystem::DoPostProcess()
 {
+	TDepthState orgState = mCurDepthState;
+	SetDepthState(TDepthState(false));
+
 	TRenderOperationQueue opQue;
 	for (size_t i = 0; i < mPostProcs.size(); ++i)
 		mPostProcs[i]->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_POSTPROCESS);
+
+	SetDepthState(orgState);
 }
 
 bool TRenderSystem::BeginScene()
 {
 	if (!mPostProcs.empty()) {
 		ClearRenderTexture(mPostProcessRT, XMFLOAT4(0,0,0,0));
-		SetRenderTarget(mPostProcessRT);
+		_SetRenderTarget(mPostProcessRT);
 	}
 	RenderSkyBox();
 	return true;
@@ -702,7 +777,7 @@ bool TRenderSystem::BeginScene()
 void TRenderSystem::EndScene()
 {
 	if (!mPostProcs.empty()) {
-		SetRenderTarget(nullptr);
+		_SetRenderTarget(nullptr);
 	}
 	DoPostProcess();
 }

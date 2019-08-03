@@ -14,9 +14,7 @@ public:
 	ID3D11Device* mDevice = NULL;
 	ID3D11DeviceContext* mDeviceContext = NULL;
 	IDXGISwapChain* mSwapChain = NULL;
-	ID3D11RenderTargetView* mRenderTargetView = NULL;
 	ID3D11Texture2D* mDepthStencil = NULL;
-	ID3D11DepthStencilView* mDepthStencilView = NULL;
 	ID3D11DepthStencilState* mDepthStencilState = NULL;
 	ID3D11BlendState* mBlendState = NULL;
 	int mScreenWidth;
@@ -25,6 +23,14 @@ public:
 	TMaterialFactoryPtr mMaterialFac;
 	std::map<std::string, ID3D11ShaderResourceView*> mTexByPath;
 	TRenderTexturePtr mShadowPassRT,mPostProcessRT;
+
+	ID3D11RenderTargetView* mBackRenderTargetView = NULL;
+	ID3D11DepthStencilView* mBackDepthStencilView = NULL;
+	ID3D11RenderTargetView* mCurRenderTargetView = NULL;
+	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
+	std::vector<TRenderTexturePtr> mRenderTargetStk;
+
+	TDepthState mCurDepthState;
 public:
 	TSkyBoxPtr mSkyBox;
 	std::vector<TPostProcessPtr> mPostProcs;
@@ -54,7 +60,9 @@ public:
 public:
 	TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT);
 	void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
-	void SetRenderTarget(TRenderTexturePtr rendTarget);
+	void _SetRenderTarget(TRenderTexturePtr rendTarget);
+	void _PushRenderTarget(TRenderTexturePtr rendTarget);
+	void _PopRenderTarget();
 
 	TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback);
 	//TMaterialPtr CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
@@ -93,6 +101,7 @@ public:
 private:
 	void RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, TIndexBufferPtr indexBuffer, TVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
 	void RenderSkyBox();
 	void DoPostProcess();
 

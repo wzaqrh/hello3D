@@ -31,7 +31,7 @@ void Lesson5::OnPostInitDevice()
 void Lesson5::OnRender()
 {
 	mRenderSys->ClearRenderTexture(mRendTexture, XMFLOAT4(0,0,0,0));
-	mRenderSys->SetRenderTarget(mRendTexture);
+	mRenderSys->_SetRenderTarget(mRendTexture);
 	{
 		mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
@@ -41,7 +41,7 @@ void Lesson5::OnRender()
 #endif
 		mModel->Draw();
 	}
-	mRenderSys->SetRenderTarget(nullptr);
+	mRenderSys->_SetRenderTarget(nullptr);
 	
 	mSprite->Draw();
 

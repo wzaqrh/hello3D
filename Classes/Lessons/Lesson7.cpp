@@ -20,10 +20,10 @@ void Lesson7::OnPostInitDevice()
 	mMove->SetDefScale(SCALE_BASE * 0.02); mMove->SetPosition(dd, dd, -dd);
 #if 0
 	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
-	auto pCam = &LightCam;
-	//auto pCam = mRenderSys->mDefCamera;
-	XMFLOAT3 p0 = pCam->CalNDC(XMFLOAT3(0, 0, 0));
-	XMFLOAT3 p1 = pCam->CalNDC(mPosition);
+	//auto pCam = &LightCam;
+	auto pCam = mRenderSys->mDefCamera;
+	XMFLOAT4 p0 = pCam->CalNDC(XMFLOAT4(30, 30, 0, 1));
+	//XMFLOAT3 p1 = pCam->CalNDC(mPosition);
 #endif
 #else
 	mScale = 0.01;
@@ -61,7 +61,7 @@ void Lesson7::OnRender()
 #else
 	//pass1
 	mRenderSys->ClearRenderTexture(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
-	mRenderSys->SetRenderTarget(mPass1RT);
+	mRenderSys->_SetRenderTarget(mPass1RT);
 	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
 	{
 		mModel1->Update(mTimer.mDeltaTime);
@@ -73,7 +73,7 @@ void Lesson7::OnRender()
 		mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
 		mModel2->Draw();
 	}
-	mRenderSys->SetRenderTarget(nullptr);
+	mRenderSys->_SetRenderTarget(nullptr);
 
 	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), nullptr, mProgShadowMap);

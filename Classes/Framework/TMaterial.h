@@ -9,7 +9,7 @@
 class TRenderSystem;
 struct TRenderOperation;
 struct TPass {
-	std::string mName;
+	std::string mLightMode,mName;
 	ID3D11InputLayout* mInputLayout = nullptr;
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
 	
@@ -26,7 +26,7 @@ struct TPass {
 	std::function<void(TPass*,TRenderSystem*,TTextureBySlot&)> OnBind;
 	std::function<void(TPass*,TRenderSystem*,TTextureBySlot&)> OnUnbind;
 public:
-	TPass(const std::string& passName);
+	TPass(const std::string& lightMode, const std::string& name);
 	TContantBufferPtr AddConstBuffer(TContantBufferPtr buffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 	TRenderTexturePtr AddIterTarget(TRenderTexturePtr target);
@@ -69,8 +69,8 @@ public:
 	TMaterialBuilder(TMaterialPtr material);
 	TMaterialBuilder();
 	TMaterialBuilder& AddTechnique();
-	TMaterialBuilder& AddPass(const std::string& passName);
-	TMaterialBuilder& SetPassName(const std::string& passName);
+	TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName);
+	TMaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName);
 
 	TMaterialBuilder& SetInputLayout(ID3D11InputLayout* inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
