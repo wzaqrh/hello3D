@@ -252,3 +252,9 @@ XMFLOAT2 operator-(XMFLOAT2 lhs, XMFLOAT2 rht) {
 	ret.y = lhs.y - rht.y;
 	return ret;
 }
+
+void SetDebugName(ID3D11DeviceChild* child, const std::string& name)
+{
+	if (child != nullptr && name != "")
+		child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
+}

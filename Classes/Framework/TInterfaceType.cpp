@@ -109,6 +109,11 @@ bool TRenderTexture::InitDepthStencilView(ID3D11Device* pDevice)
 	return true;
 }
 
+TTexture TRenderTexture::GetRenderTargetSRV()
+{
+	return TTexture("", mRenderTargetSRV);
+}
+
 /********** TTexture **********/
 TTexture::TTexture(std::string __path, ID3D11ShaderResourceView* __texture)
 {

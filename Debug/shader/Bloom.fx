@@ -45,19 +45,25 @@ PS_INPUT VS(VS_INPUT input)
 
 float4 DownScale2x2(PS_INPUT input) : SV_Target
 {
+#if 0
     float4 vColor = 0.0f;
     float  fAvg = 0.0f;
-    for( int i = 0; i < 4; i++ )
+    for( int i = 0; i < 9; i++ )
     {
-		vColor = txMain.Sample(samPoint, input.Tex + SampleOffsets[i]);
+		vColor = txMain.Sample(samLinear, input.Tex + SampleOffsets[i]);
         fAvg += dot(vColor.rgb, LUMINANCE_VECTOR);
     }
-    fAvg /= 4;
+    fAvg /= 9;
+#else
+	float4 vColor = txMain.Sample(samLinear, input.Tex);
+    float fAvg = dot(vColor.rgb, LUMINANCE_VECTOR);
+#endif
     return float4(fAvg, fAvg, fAvg, 1.0f);
 }
 
 float4 DownScale3x3(PS_INPUT input) : SV_Target
 {
+#if 0
     float fAvg = 0.0f; 
     float4 vColor;
     for( int i = 0; i < 9; i++ )
@@ -66,13 +72,17 @@ float4 DownScale3x3(PS_INPUT input) : SV_Target
         fAvg += vColor.r; 
     }
     fAvg /= 9;
+#else
+	float4 vColor = txMain.Sample(samLinear, input.Tex);
+    float fAvg = vColor.r;
+#endif
     return float4(fAvg, fAvg, fAvg, 1.0f);
 }
 
 float4 DownScale3x3_BrightPass(PS_INPUT input) : SV_Target
 {
     float3 vColor = 0.0f;
-    float  fLum = txSecond.Sample(samLinear, float2(0.5f, 0.5f)).r;
+    float  fLum = txSecond.Sample(samPoint, float2(0.5f, 0.5f)).r;
     for (int i = 0; i < 9; i++ )
     {
         float4 vSample = txMain.Sample(samPoint, input.Tex + SampleOffsets[i]);
@@ -102,7 +112,7 @@ float4 BloomPS(PS_INPUT input) : SV_Target
 float4 FinalPass(PS_INPUT input) : SV_Target
 {
     float4 vColor = txMain.Sample(samPoint, input.Tex );
-    float fLum = txSecond.Sample(samLinear, float2(0.5f,0.5f)).r;
+    float fLum = txSecond.Sample(samPoint, float2(0.5f,0.5f)).r;
     float3 vBloom = txThird.Sample(samLinear, input.Tex);
      
     // Tone mapping
@@ -113,6 +123,7 @@ float4 FinalPass(PS_INPUT input) : SV_Target
 	vColor.rgb += 0.6f * vBloom;
 	vColor.a = 1.0f;
 	
+	//vColor = txSecond.Sample(samLinear, input.Tex).r;
 	return vColor;
 }
 

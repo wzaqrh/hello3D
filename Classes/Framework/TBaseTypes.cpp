@@ -20,6 +20,14 @@ XMFLOAT3 TCameraBase::CalNDC(XMFLOAT3 pos)
 	return ret;
 }
 
+XMFLOAT4 TCameraBase::CalNDC(XMFLOAT4 pos)
+{
+	XMMATRIX vp = mView * mProjection;
+	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, pos.z), vp);
+	XMFLOAT4 ret = XMFLOAT4(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec), XMVectorGetW(vec));
+	return ret;
+}
+
 /********** TCamera **********/
 TCamera::TCamera(const TCamera& other)
 {

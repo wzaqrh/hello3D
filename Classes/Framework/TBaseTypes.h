@@ -34,6 +34,7 @@ public:
 	TCameraBase();
 public:
 	XMFLOAT3 CalNDC(XMFLOAT3 pos);
+	XMFLOAT4 CalNDC(XMFLOAT4 pos);
 };
 
 struct TCamera : public TCameraBase {
@@ -117,6 +118,7 @@ struct TDepthState {
 	BOOL depthEnable;
 	D3D11_COMPARISON_FUNC depthFunc;
 	D3D11_DEPTH_WRITE_MASK depthWriteMask;
+	TDepthState() :depthEnable(false), depthFunc(D3D11_COMPARISON_LESS), depthWriteMask(D3D11_DEPTH_WRITE_MASK_ALL) {}
 	TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
 };
 

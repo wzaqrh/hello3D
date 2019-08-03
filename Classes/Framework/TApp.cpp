@@ -42,8 +42,8 @@ void TApp::CleanUp()
 void TApp::Render()
 {
 	float ClearColor[4] = { mBackgndColor.x, mBackgndColor.y, mBackgndColor.z, mBackgndColor.w }; // red, green, blue, alpha
-	mRenderSys->mDeviceContext->ClearRenderTargetView(mRenderSys->mRenderTargetView, ClearColor);
-	mRenderSys->mDeviceContext->ClearDepthStencilView(mRenderSys->mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	mRenderSys->mDeviceContext->ClearRenderTargetView(mRenderSys->mBackRenderTargetView, ClearColor);
+	mRenderSys->mDeviceContext->ClearDepthStencilView(mRenderSys->mBackDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	mTimer.Update();
 	mRenderSys->mInput->Frame();

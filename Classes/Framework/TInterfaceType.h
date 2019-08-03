@@ -110,6 +110,7 @@ public:
 	DXGI_FORMAT mFormat;
 public:
 	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
+	TTexture GetRenderTargetSRV();
 private:
 	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
 	bool InitRenderTextureView(ID3D11Device* pDevice);
@@ -121,12 +122,13 @@ private:
 typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
 
 
-struct TMaterial;
-typedef std::shared_ptr<TMaterial> TMaterialPtr;
+typedef std::shared_ptr<struct TMaterial> TMaterialPtr;
+typedef std::shared_ptr<struct TPass> TPassPtr;
 
 struct TRenderOperation {
 	TMaterialPtr mMaterial;
 	TVertexBufferPtr mVertexBuffer;
+	std::map<std::pair<TPassPtr,int>, TVertexBufferPtr> mVertBufferByPass;
 	TIndexBufferPtr mIndexBuffer;
 	TTextureBySlot mTextures;
 	XMMATRIX mWorldTransform;
