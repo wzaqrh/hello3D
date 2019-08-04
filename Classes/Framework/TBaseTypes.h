@@ -52,7 +52,14 @@ public:
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 
-struct TDirectLight {
+enum enLightType {
+	E_LIGHT_DIRECT,
+	E_LIGHT_POINT,
+	E_LIGHT_SPOT
+};
+
+class TDirectLight {
+public:
 	XMFLOAT4 mPosition;//world space
 	XMFLOAT4 mDiffuseColor;
 	XMFLOAT4 mSpecularColorPower;
@@ -67,7 +74,8 @@ public:
 };
 typedef std::shared_ptr<TDirectLight> TDirectLightPtr;
 
-struct TPointLight : public TDirectLight {
+class TPointLight : public TDirectLight {
+public:
 	XMFLOAT4 mAttenuation;
 public:
 	TPointLight();
@@ -77,7 +85,8 @@ public:
 };
 typedef std::shared_ptr<TPointLight> TPointLightPtr;
 
-struct TSpotLight : public TPointLight {
+class TSpotLight : public TPointLight {
+public:
 	XMFLOAT4 mDirCutOff;
 public:
 	TSpotLight();
@@ -111,6 +120,7 @@ public:
 
 struct TBlendFunc {
 	D3D11_BLEND src,dst;
+	TBlendFunc() :src(D3D11_BLEND_ONE), dst(D3D11_BLEND_INV_SRC_ALPHA) {};
 	TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst);
 };
 

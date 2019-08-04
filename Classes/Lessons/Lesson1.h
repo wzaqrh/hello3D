@@ -10,5 +10,4 @@ protected:
 private:
 	int mDrawFlag = 0;
 	AssimpModel* mModel = nullptr;
-	cbWeightedSkin mWeightedSkin;
 };

@@ -1,4 +1,5 @@
 #include "AssimpModel.h"
+#include "TMaterialCB.h"
 #include "Utility.h"
 #include "TRenderSystem.h"
 #include "Lesson6.h"
@@ -321,8 +322,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			textures[E_TEXTURE_NORMAL] = normalMaps[0];
 	}
 
-	auto material = mMaterial->Clone();
-	material->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)));
+	auto material = mMaterial->Clone(mRenderSys);
 	if (mMatCb) mMatCb(material);
 	return std::make_shared<TMesh>(mesh, vertices, indices, textures, material, mRenderSys);
 }
@@ -457,7 +457,7 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName, std::func
 			builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		};
 	}
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL, callback);
+	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL_PBR, callback);
 	mMatCb = cb;
 }
 
@@ -491,7 +491,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
 			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mRenderSys->mDeviceContext->UpdateSubresource(mesh->mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+			mesh->mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), &weightedSkin);
 
 #ifdef USE_RENDER_OP
 			TRenderOperation op = {};

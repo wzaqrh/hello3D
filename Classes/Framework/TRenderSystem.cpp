@@ -111,6 +111,7 @@ HRESULT TRenderSystem::Initialize()
 	mDeviceContext->OMSetRenderTargets(1, &mBackRenderTargetView, mBackDepthStencilView);
 
 	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
+	SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
 
 	// Setup the viewport
 	D3D11_VIEWPORT vp;
@@ -152,6 +153,7 @@ TSpotLightPtr TRenderSystem::AddSpotLight()
 {
 	TSpotLightPtr light = std::make_shared<TSpotLight>();
 	mSpotLights.push_back(light);
+	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_SPOT));
 	return light;
 }
 
@@ -159,6 +161,7 @@ TPointLightPtr TRenderSystem::AddPointLight()
 {
 	TPointLightPtr light = std::make_shared<TPointLight>();
 	mPointLights.push_back(light);
+	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_POINT));
 	return light;
 }
 
@@ -166,6 +169,7 @@ TDirectLightPtr TRenderSystem::AddDirectLight()
 {
 	TDirectLightPtr light = std::make_shared<TDirectLight>();
 	mDirectLights.push_back(light);
+	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_DIRECT));
 	return light;
 }
 
@@ -260,11 +264,6 @@ bool TRenderSystem::UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSi
 	return true;
 }
 
-void TRenderSystem::UpdateConstBuffer(TContantBufferPtr buffer, void* data)
-{
-	mDeviceContext->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
-}
-
 ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp)
 {
 	HRESULT hr = S_OK;
@@ -272,9 +271,9 @@ ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMP
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = filter;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;// D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;//D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;//D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;//D3D11_TEXTURE_ADDRESS_MIRROR
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.MipLODBias = 0.0f;
 	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	sampDesc.ComparisonFunc = comp;
@@ -449,7 +448,7 @@ void TRenderSystem::DrawIndexed(TIndexBufferPtr indexBuffer)
 	mDeviceContext->DrawIndexed(indexBuffer->bufferSize / indexBuffer->GetWidth(), 0, 0);
 }
 
-TContantBufferPtr TRenderSystem::CreateConstBuffer(int bufferSize)
+TContantBufferPtr TRenderSystem::CreateConstBuffer(int bufferSize, void* data)
 {
 	HRESULT hr = S_OK;
 
@@ -464,7 +463,20 @@ TContantBufferPtr TRenderSystem::CreateConstBuffer(int bufferSize)
 	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
 	if (CheckHR(hr))
 		return nullptr;
-	return std::make_shared<TContantBuffer>(pConstantBuffer, bufferSize);
+	TContantBufferPtr ret = std::make_shared<TContantBuffer>(pConstantBuffer, bufferSize);
+
+	if (data) UpdateConstBuffer(ret, data);
+	return ret;
+}
+
+TContantBufferPtr TRenderSystem::CloneConstBuffer(TContantBufferPtr buffer)
+{
+	return CreateConstBuffer(buffer->bufferSize);
+}
+
+void TRenderSystem::UpdateConstBuffer(TContantBufferPtr buffer, void* data)
+{
+	mDeviceContext->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
 }
 
 ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format)
@@ -495,7 +507,8 @@ ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile, DX
 	}
 	else {
 		char szBuf[260]; sprintf(szBuf, "image file %s not exist", pSrcFile);
-		MessageBoxA(0, szBuf, "", MB_OK);
+		OutputDebugStringA(szBuf);
+		//MessageBoxA(0, szBuf, "", MB_OK);
 	}
 	//mDeviceContext->GenerateMips(pTextureRV);
 	return pTextureRV;
@@ -522,6 +535,8 @@ TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT f
 
 void TRenderSystem::SetBlendFunc(const TBlendFunc& blendFunc)
 {
+	mCurBlendFunc = blendFunc;
+
 	D3D11_BLEND_DESC blendDesc = { 0 };
 	blendDesc.RenderTarget[0].BlendEnable = true;
 	blendDesc.RenderTarget[0].SrcBlend = blendFunc.src;
@@ -554,7 +569,7 @@ void TRenderSystem::SetDepthState(const TDepthState& depthState)
 	mDeviceContext->OMSetDepthStencilState(mDepthStencilState,1);
 }
 
-cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShadow)
+cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType)
 {
 	cbGlobalParam globalParam = {};
 	//globalParam.mWorld = mWorldTransform;
@@ -583,6 +598,25 @@ cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShad
 		globalParam.mProjectionInv = XMMatrixInverse(&det, globalParam.mProjection);
 	}
 
+#if 1
+	switch (lightType)
+	{
+	case E_LIGHT_DIRECT:
+		globalParam.mLightNum.x = 1;
+		globalParam.mDirectLights[0] = *light;
+		break;
+	case E_LIGHT_POINT:
+		globalParam.mLightNum.y = 1;
+		globalParam.mPointLights[0] = *(TPointLight*)light;
+		break;
+	case E_LIGHT_SPOT:
+		globalParam.mLightNum.z = 1;
+		globalParam.mSpotLights[0] = *(TSpotLight*)light;
+		break;
+	default:
+		break;
+	}
+#else
 	globalParam.mLightNum.x = min(MAX_LIGHTS, mDirectLights.size());
 	for (int i = 0; i < globalParam.mLightNum.x; ++i)
 		globalParam.mDirectLights[i] = *mDirectLights[i];
@@ -594,6 +628,7 @@ cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShad
 	globalParam.mLightNum.z = min(MAX_LIGHTS, mSpotLights.size());
 	for (int i = 0; i < globalParam.mLightNum.z; ++i)
 		globalParam.mSpotLights[i] = *mSpotLights[i];
+#endif
 	return globalParam;
 }
 
@@ -700,10 +735,10 @@ void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::strin
 	}
 }
 
-void TRenderSystem::RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode)
+void TRenderSystem::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mDefCamera);
-	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER);
+	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 	for (int i = 0; i < opQueue.size(); ++i) {
 		globalParam.mWorld = opQueue[i].mWorldTransform;
 		RenderOperation(opQueue[i], lightMode, globalParam);
@@ -729,8 +764,18 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 		mDeviceContext->PSSetShaderResources(0, 1, &pSRV);
 	}
 
-	for (int i = 0; i < mPointLights.size(); ++i) {
-		RenderLight(mPointLights[i], opQueue, lightMode);
+	if (!mLightsOrder.empty()) {
+		TBlendFunc orgBlend = mCurBlendFunc;
+		SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
+		RenderLight(mLightsOrder[0].first, mLightsOrder[0].second, opQueue, lightMode);
+
+		for (int i = 1; i < mLightsOrder.size(); ++i) {
+			auto order = mLightsOrder[i];
+			SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
+			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
+			RenderLight(order.first, order.second, opQueue, __lightMode);
+		}
+		SetBlendFunc(orgBlend);
 	}
 
 	if (lightMode == E_PASS_SHADOWCASTER) {

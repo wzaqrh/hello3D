@@ -34,8 +34,8 @@ void Lesson4::OnPostInitDevice()
 		TFogExp fog;
 		fog.SetColor(0.5, 0.5, 0.5);
 		fog.SetExp(0.1);
-		auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(TFogExp)));
-		mRenderSys->UpdateConstBuffer(buffer, &fog);
+		TMaterialBuilder builder(mat);
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(TFogExp), &fog), MAKE_CBNAME(TFogExp), true);
 	});
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	//mModel->PlayAnim(0);

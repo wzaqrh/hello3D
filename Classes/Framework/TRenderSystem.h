@@ -30,14 +30,16 @@ public:
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
 	std::vector<TRenderTexturePtr> mRenderTargetStk;
 
+	TBlendFunc mCurBlendFunc;
 	TDepthState mCurDepthState;
 public:
 	TSkyBoxPtr mSkyBox;
-	std::vector<TPostProcessPtr> mPostProcs;
 	TCameraPtr mDefCamera;
+	std::vector<TPostProcessPtr> mPostProcs;
 	std::vector<TPointLightPtr> mPointLights;
 	std::vector<TDirectLightPtr> mDirectLights;
 	std::vector<TSpotLightPtr> mSpotLights;
+	std::vector<std::pair<TDirectLight*, enLightType>> mLightsOrder;
 public:
 	void* operator new(size_t i){
 		return _mm_malloc(i,16);
@@ -67,7 +69,8 @@ public:
 	TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback);
 	//TMaterialPtr CreateMaterial(const char* vsPath, const char* psPath, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
-	TContantBufferPtr CreateConstBuffer(int bufferSize);
+	TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer);
+	TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr);
 	TIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
 	void SetIndexBuffer(TIndexBufferPtr indexBuffer);
 	void DrawIndexed(TIndexBufferPtr indexBuffer);
@@ -99,12 +102,12 @@ public:
 	void Draw(IRenderable* renderable);
 	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
 private:
-	void RenderLight(TPointLightPtr light, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
 	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, TIndexBufferPtr indexBuffer, TVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
 	void RenderSkyBox();
 	void DoPostProcess();
 
-	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow);
+	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
 };

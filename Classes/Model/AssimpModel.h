@@ -3,16 +3,7 @@
 #include "TMesh.h"
 #include "TMovable.h"
 
-const int MAX_MATRICES = 256;
-struct cbWeightedSkin
-{
-	XMMATRIX mModel;
-	XMMATRIX Models[MAX_MATRICES];
-	int hasNormal;
-	int hasMetalness;
-	int hasRoughness;
-	int hasAO;
-};
+
 
 struct AiNodeInfo {
 	aiMatrix4x4 mLocalTransform;

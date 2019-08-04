@@ -1,7 +1,16 @@
 #include "TMaterial.h"
+#include "TMaterialCB.h"
 #include "TRenderSystem.h"
 #include "TPostProcess.h"
 #include "Utility.h"
+
+/********** TContantBufferInfo **********/
+TContantBufferInfo::TContantBufferInfo(TContantBufferPtr __buffer, const std::string& __name, bool __isUnique)
+	:buffer(__buffer)
+	,name(__name)
+	,isUnique(__isUnique)
+{
+}
 
 /********** TPass **********/
 TPass::TPass(const std::string& lightMode, const std::string& name)
@@ -10,11 +19,11 @@ TPass::TPass(const std::string& lightMode, const std::string& name)
 {
 }
 
-TContantBufferPtr TPass::AddConstBuffer(TContantBufferPtr buffer)
+TContantBufferPtr TPass::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
-	mConstantBuffers.push_back(buffer);
-	mConstBuffers.push_back(buffer->buffer);
-	return buffer;
+	mConstantBuffers.push_back(cbuffer);
+	mConstBuffers.push_back(cbuffer.buffer->buffer);
+	return cbuffer.buffer;
 }
 
 ID3D11SamplerState* TPass::AddSampler(ID3D11SamplerState* sampler)
@@ -29,7 +38,34 @@ TRenderTexturePtr TPass::AddIterTarget(TRenderTexturePtr target)
 	return target;
 }
 
-std::shared_ptr<TPass> TPass::Clone()
+TContantBufferPtr TPass::GetConstBufferByIdx(size_t idx)
+{
+	TContantBufferPtr ret = nullptr;
+	if (idx < mConstantBuffers.size())
+		ret = mConstantBuffers[idx].buffer;
+	return ret;
+}
+
+TContantBufferPtr TPass::GetConstBufferByName(const std::string& name)
+{
+	TContantBufferPtr ret = nullptr;
+	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
+		if (mConstantBuffers[i].name == name) {
+			ret = mConstantBuffers[i].buffer;
+			break;
+		}
+	}
+	return ret;
+}
+
+void TPass::UpdateConstBufferByName(TRenderSystem* pRenderSys, const std::string& name, void* data)
+{
+	TContantBufferPtr buffer = GetConstBufferByName(name);
+	if (buffer)
+		pRenderSys->UpdateConstBuffer(buffer, data);
+}
+
+std::shared_ptr<TPass> TPass::Clone(TRenderSystem* pRenderSys)
 {
 	TPassPtr pass = std::make_shared<TPass>(mLightMode, mName);
 	pass->mInputLayout = mInputLayout;
@@ -39,8 +75,12 @@ std::shared_ptr<TPass> TPass::Clone()
 	for (auto& sampler : mSamplers)
 		pass->AddSampler(sampler);
 
-	for (auto& buffer : mConstantBuffers)
+	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
+		auto buffer = mConstantBuffers[i];
+		if (!buffer.isUnique)
+			buffer.buffer = pRenderSys->CloneConstBuffer(buffer.buffer);
 		pass->AddConstBuffer(buffer);
+	}
 
 	pass->mRenderTarget = mRenderTarget;
 	for (auto& target : mIterTargets)
@@ -58,11 +98,11 @@ void TTechnique::AddPass(TPassPtr pass)
 	mPasses.push_back(pass);
 }
 
-TContantBufferPtr TTechnique::AddConstBuffer(TContantBufferPtr buffer)
+TContantBufferPtr TTechnique::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	for (auto& pass : mPasses)
-		pass->AddConstBuffer(buffer);
-	return buffer;
+		pass->AddConstBuffer(cbuffer);
+	return cbuffer.buffer;
 }
 
 ID3D11SamplerState* TTechnique::AddSampler(ID3D11SamplerState* sampler)
@@ -95,11 +135,17 @@ std::vector<TPassPtr> TTechnique::GetPassesByName(const std::string& passName)
 	return std::move(passVec);
 }
 
-std::shared_ptr<TTechnique> TTechnique::Clone()
+void TTechnique::UpdateConstBufferByName(TRenderSystem* pRenderSys, const std::string& name, void* data)
+{
+	for (int i = 0; i < mPasses.size(); ++i)
+		mPasses[i]->UpdateConstBufferByName(pRenderSys, name, data);
+}
+
+std::shared_ptr<TTechnique> TTechnique::Clone(TRenderSystem* pRenderSys)
 {
 	TTechniquePtr technique = std::make_shared<TTechnique>();
 	for (int i = 0; i < mPasses.size(); ++i)
-		technique->AddPass(mPasses[i]->Clone());
+		technique->AddPass(mPasses[i]->Clone(pRenderSys));
 	technique->mName = mName;
 	return technique;
 }
@@ -121,11 +167,11 @@ TTechniquePtr TMaterial::SetCurTechByIdx(int idx)
 	return mTechniques[mCurTechIdx];
 }
 
-TContantBufferPtr TMaterial::AddConstBuffer(TContantBufferPtr buffer)
+TContantBufferPtr TMaterial::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	for (auto& tech : mTechniques)
-		tech->AddConstBuffer(buffer);
-	return buffer;
+		tech->AddConstBuffer(cbuffer);
+	return cbuffer.buffer;
 }
 
 ID3D11SamplerState* TMaterial::AddSampler(ID3D11SamplerState* sampler)
@@ -135,11 +181,11 @@ ID3D11SamplerState* TMaterial::AddSampler(ID3D11SamplerState* sampler)
 	return sampler;
 }
 
-std::shared_ptr<TMaterial> TMaterial::Clone()
+std::shared_ptr<TMaterial> TMaterial::Clone(TRenderSystem* pRenderSys)
 {
 	TMaterialPtr material = std::make_shared<TMaterial>();
 	for (int i = 0; i < mTechniques.size(); ++i) {
-		material->AddTechnique(mTechniques[i]->Clone());
+		material->AddTechnique(mTechniques[i]->Clone(pRenderSys));
 	}
 	material->mCurTechIdx = mCurTechIdx;
 	return material;
@@ -205,9 +251,15 @@ TMaterialBuilder& TMaterialBuilder::AddSampler(ID3D11SamplerState* sampler)
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddConstBuffer(TContantBufferPtr buffer)
+TMaterialBuilder& TMaterialBuilder::AddConstBuffer(TContantBufferPtr buffer, const std::string& name, bool isUnique)
 {
-	mCurPass->AddConstBuffer(buffer);
+	mCurPass->AddConstBuffer(TContantBufferInfo(buffer, name, isUnique));
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::AddConstBufferToTech(TContantBufferPtr buffer, const std::string& name, bool isUnique)
+{
+	mCurTech->AddConstBuffer(TContantBufferInfo(buffer, name, isUnique));
 	return *this;
 }
 
@@ -251,20 +303,20 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 	if (!identify.empty()) {
 		auto key = name + ":" + identify;
 		if (mMaterials.find(key) == mMaterials.end()) {
-			material = mMaterials[name]->Clone();
+			material = mMaterials[name]->Clone(mRenderSys);
 			if (callback) callback(material);
 			mMaterials.insert(std::make_pair(key, material));
 		}
 		else {
-			material = readonly ? mMaterials[key] : mMaterials[key]->Clone();
+			material = readonly ? mMaterials[key] : mMaterials[key]->Clone(mRenderSys);
 		}
 	}
 	else if (callback != nullptr) {
-		material = mMaterials[name]->Clone();
+		material = mMaterials[name]->Clone(mRenderSys);
 		callback(material);
 	}
 	else {
-		material = readonly ? mMaterials[name] : mMaterials[name]->Clone();
+		material = readonly ? mMaterials[name] : mMaterials[name]->Clone(mRenderSys);
 	}
 	return material;
 }
@@ -288,7 +340,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 {
 	TMaterialPtr material;
 	TMaterialBuilder builder;
-	if (name == E_MAT_STANDARD) {
+	if (name == E_MAT_SPRITE) {
 		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
@@ -300,7 +352,6 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 	else if (name == E_MAT_MODEL) {
-		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -311,11 +362,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
+		SetCommonField(builder, mRenderSys);
 		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Model.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
-	else if (name == E_MAT_MODEL_SHADOW) {
-		SetCommonField(builder, mRenderSys);
+	else if (name == E_MAT_MODEL_PBR) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -326,6 +377,40 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
+
+		//pass E_PASS_FORWARDBASE
+		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
+		SetCommonField(builder, mRenderSys);
+		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
+		//pass E_PASS_FORWARDADD
+		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx", nullptr, nullptr, "PSAdd"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		cbUnityMaterial cbUnityMat;
+		//cbUnityMat._Color = XMFLOAT4(0,0,0,0);
+		//cbUnityMat._SpecLightOff = TRUE;
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial), &cbUnityMat), MAKE_CBNAME(cbUnityMaterial));
+		cbUnityGlobal cbUnityGlb;
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal), &cbUnityGlb), MAKE_CBNAME(cbUnityGlobal));
+	}
+	else if (name == E_MAT_MODEL_SHADOW) {
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		//pass E_PASS_FORWARDBASE
+		SetCommonField(builder, mRenderSys);
 		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowMap.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
@@ -373,11 +458,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale2x2"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexToneMaps[NUM_TONEMAP_TEXTURES-1]);
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex.GetWidth(), mainTex.GetHeight());
-			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
 		//pass DownScale3x3
@@ -390,11 +475,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			builder.AddIterTarget(TexToneMaps[i]);
 		}
 		builder.SetTexture(0, TTexture("", TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->mRenderTargetSRV));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex.GetWidth(), mainTex.GetHeight());
-			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
 		//pass DownScale3x3_BrightPass
@@ -404,11 +489,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexBrightPass);
 		builder.SetTexture(1, TTexture("", TexToneMaps[0]->mRenderTargetSRV));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex.GetWidth(), mainTex.GetHeight());
-			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
 		//pass Bloom
@@ -421,11 +506,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			builder.AddIterTarget(TexBlooms[i]);
 		}
 		builder.SetTexture(1, TTexture("", TexBrightPass->mRenderTargetSRV));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex.GetWidth(), 3.0f, 1.25f);
-			pRenderSys->UpdateConstBuffer(pass->mConstantBuffers[1], &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
 		//pass FinalPass

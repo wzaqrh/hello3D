@@ -1,21 +1,60 @@
 #include "Lesson6.h"
+#include "TMaterialCB.h"
 
-/********** cbUnityMaterial **********/
-cbUnityMaterial::cbUnityMaterial()
+void Lesson6::OnInitLight()
 {
-	_SpecColor = XMFLOAT4(1,1,1,1);
-	_Color = XMFLOAT4(1,1,1,1);
-	_GlossMapScale = 1;
-	_OcclusionStrength = 1;
-	_SpecLightOff = 0;
-}
+#if 0
+	{
+		auto light = mRenderSys->AddPointLight();//1, -1, 1
+		float ddd = 10;
+		light->SetPosition(ddd, ddd, -ddd);
+		light->SetAttenuation(1, 0.01, 0);
+		float intensify = 0.7;
+		light->SetDiffuseColor(intensify, intensify, intensify, 1.0);
+	}
+#endif
 
-/********** cbUnityGlobal **********/
-cbUnityGlobal::cbUnityGlobal()
-{
-	_Unity_IndirectSpecColor = XMFLOAT4(0,0,0,0);
-	_AmbientOrLightmapUV = XMFLOAT4(0.01,0.01,0.01,1);
-	_Unity_SpecCube0_HDR = XMFLOAT4(1, 1, 0, 0);
+#if 0
+	{
+		auto light = mRenderSys->AddDirectLight();
+		light->SetDirection(0, -1, 0);
+		float i = 0.7;
+		light->SetDiffuseColor(i, i, i, 1.0);
+	}
+#endif
+
+#if 0
+	{
+		auto light = mRenderSys->AddDirectLight();
+		light->SetDirection(1, -1, 1);
+		float i = 0.7;
+		light->SetDiffuseColor(i, i, i, 1.0);
+	}
+#endif
+
+#if 0
+	{
+		auto light = mRenderSys->AddDirectLight();
+		light->SetDirection(-1, -1, 0);
+		float i = 1.0;
+		light->SetDiffuseColor(i, i, i, 1.0);
+	}
+#endif
+
+#if 1
+	{
+		auto light = mRenderSys->AddDirectLight();
+		light->SetDirection(1, -1, 1);
+		float i = 1.0;
+		light->SetDiffuseColor(i, i, i, 1.0);
+	}
+	{
+		auto light = mRenderSys->AddDirectLight();
+		light->SetDirection(-1, -1, -1);
+		float i = 1.0;
+		light->SetDiffuseColor(i, i, i, 1.0);
+	}
+#endif
 }
 
 //#define PBR_DEBUG
@@ -23,55 +62,25 @@ cbUnityGlobal::cbUnityGlobal()
 void Lesson6::OnPostInitDevice()
 {
 	mRenderSys->SetCamera(45, 30, 1000);
-
-#ifndef PBR_DEBUG
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 
-	/*auto light1 = mRenderSys->AddPointLight();
-	light1->SetPosition(-50, 50, -100);
-	int intensify = 10;
-	light1->SetDiffuseColor(intensify, intensify, intensify,1);*/
-
-	/*auto dl1 = mRenderSys->AddDirectLight();
-	dl1->SetDirection(-1, 0, 0);
-
-	auto dl2 = mRenderSys->AddDirectLight();
-	dl2->SetDirection(1, 0, 0);*/
-
-	//mBackgndColor = XMFLOAT4(0,0,0,0);
-	//mRenderSys->SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
-	//mRenderSys->SetDepthState(TDepthState(false));
-
-	mRenderSys->AddDirectLight()->SetDirection(1, -1, 1);
-	//mRenderSys->AddDirectLight()->SetDirection(0, 0, 1);
-#else
-	auto light1 = mRenderSys->AddDirectLight();
-	light1->SetDirection(-1, 0, 0);
-
-	auto light2 = mRenderSys->AddDirectLight();
-	light2->SetDirection(1, 0, 0);
-
-	auto light3 = mRenderSys->AddDirectLight();
-	light3->SetDirection(0, 0, 1);
-	light3->SetDiffuseColor(3,3,3,1);
-#endif
-
-	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson6.1.fx", "shader\\Lesson6.1.fx", [&](TMaterialPtr mat) {
-		{
-			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial)));
-			cbUnityMaterial cb;
-			//cb._Color = XMFLOAT4(0,0,0,0);
-			//cb._SpecLightOff = TRUE;
-			mRenderSys->UpdateConstBuffer(buffer, &cb);
-		}
-		{
-			auto buffer = mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal)));
-			cbUnityGlobal cb;
-			mRenderSys->UpdateConstBuffer(buffer, &cb);
-		}
+#if 1
+	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
+#elif 0
+	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR, [](TMaterialPtr mat) {
+		
 	});
-#ifndef PBR_DEBUG
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.1); mMove->SetPosition(0, -5, 0);
+#else
+	mModel = new AssimpModel(mRenderSys, mMove, "shader\\ModelPbr.fx", nullptr, [&](TMaterialPtr mat) {
+		cbUnityMaterial cbUnityMat;
+		//cbUnityMat._Color = XMFLOAT4(0,0,0,0);
+		//cbUnityMat._SpecLightOff = TRUE;
+		cbUnityGlobal cbUnityGlb;
+		mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial), &cbUnityMat));
+		mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal), &cbUnityGlb));
+	});
+#endif
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures.empty()) {
@@ -104,27 +113,6 @@ void Lesson6::OnPostInitDevice()
 			}
 		}
 	}
-#else
-	gModelPath = "cerberus\\"; mModel->LoadModel(MakeModelPath("cerberus.fbx"));;// mScale = 0.1; mPosition = XMFLOAT3(0, 0, 0);
-
-	std::vector<TTexture> textures(4);
-	const char* images[] = {
-		"cerberus_A.png",
-		"cerberus_N.png",
-		"cerberus_M.png",
-		"cerberus_R.png"
-	};
-	for (int i = 0; i < 4; ++i) {
-		std::string path = images[i];
-		textures[i].texture = mRenderSys->_CreateTexture(path.c_str());
-		textures[i].path = images[i];
-		textures[i].texture->GetDesc(&textures[i].desc);
-	}
-	for (auto& iter : mModel->mMeshes) {
-		iter->mTextures = textures;
-	}
-	//mModel->mMaterial->mSampler = mRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC);
-#endif
 }
 
 void Lesson6::OnRender()
