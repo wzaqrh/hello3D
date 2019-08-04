@@ -105,7 +105,7 @@ void TDirectLight::SetSpecularPower(float power)
 TCameraBase TDirectLight::GetLightCamera(TCamera& otherCam)
 {
 	TCamera ret(otherCam);
-	ret.SetLookAt(XMFLOAT3(ret.mAt.x-mPosition.x, ret.mAt.y-mPosition.y, ret.mAt.z-mPosition.z), ret.mAt);
+	ret.SetLookAt(XMFLOAT3(mPosition.x, mPosition.y, mPosition.z), ret.mAt);
 	return ret;
 }
 

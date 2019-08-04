@@ -64,6 +64,9 @@
     <ClCompile Include="Classes\Lessons\Lesson8.cpp">
       <Filter>Classes\Lessons</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Framework\TMaterialCB.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -128,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="Classes\Lessons\Lesson8.h">
       <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TMaterialCB.h">
+      <Filter>Classes\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

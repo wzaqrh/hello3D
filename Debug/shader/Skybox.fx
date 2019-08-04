@@ -1,6 +1,5 @@
 /********** Skybox **********/
 #include "Standard.h"
-SamplerState samLinear : register(s0);
 TextureCube  txDiffuse : register(t0);
 
 struct VS_INPUT

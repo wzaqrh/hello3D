@@ -1,26 +1,12 @@
 /********** PBR **********/
 #include "Standard.h"
-SamplerState samLinear : register(s0);
-SamplerState samAnsp   : register(s1);
-SamplerState samPoint  : register(s2);
+#include "Skeleton.h"
 
-Texture2D albedoTexture : register(t0);//rgb
-Texture2D normalTexture : register(t1);//rgb
-Texture2D metalnessTexture : register(t2);//r
-Texture2D smoothnessTexture : register(t3);//r
-Texture2D aoTexture : register(t4);//r
-TextureCube envTexture : register(t9);
-
-static const int MAX_MATRICES = 256;
-cbuffer cbWeightedSkin : register(b1)
-{
-	matrix Model;
-	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	
-	int hasNormal;
-	int hasMetalness;
-	int hasRoughness;
-	int hasAO;
-}
+Texture2D txAlbedo : register(t0);//rgb
+Texture2D txNormal : register(t1);//rgb
+Texture2D txMetalness : register(t2);//r
+Texture2D txSmoothness : register(t3);//r
+Texture2D txAmbientOcclusion : register(t4);//r
 
 cbuffer cbUnityMaterial : register(b2)
 {
@@ -59,39 +45,52 @@ struct PS_INPUT
 	float3 Eye : POSITION0;//world space
 	float3 SurfacePosition : POSITION1;//world space
 	float3x3 TangentBasis : TBASIS;
+	float4 PosInLight : POSITION2;//world space
 };
 
-float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
+/************ ShadowCaster ************/
+struct SHADOW_PS_INPUT
 {
-    float BlendWeights[4] = (float[4])iBlendWeights;
-	BlendWeights[3] = 1.0 - BlendWeights[0] - BlendWeights[1] - BlendWeights[2];
-    uint  BlendIndices[4] = (uint[4])iBlendIndices;	
-	
-    float4	Pos = float4(0.0,0.0,0.0,iPos.w);   
-	const int NumBones = 4;
-    for (int iBone = 0; iBone < NumBones; iBone++) {
-		uint Indice = BlendIndices[iBone];
-		float Weight = BlendWeights[iBone];
-			
-		float4 bonePos = mul(iPos, Models[Indice]);
-        Pos.xyz += bonePos.xyz * Weight;
-    }
-	return Pos;
+    float4 Pos : SV_POSITION;
+	float4 Depth : TEXCOORD0;
+};
+
+SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
+{
+	SHADOW_PS_INPUT output;
+	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	matrix MW = mul(World, transpose(Model));
+	matrix MWVP = mul(Projection, mul(View, MW));
+	output.Pos = mul(MWVP, skinPos);
+	output.Depth = output.Pos;	
+	return output;
 }
 
+float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
+{
+	float depthValue = i.Depth.z / i.Depth.w;
+	float4 finalColor = depthValue;
+	return finalColor;
+}
+
+/************ ForwardBase ************/
 PS_INPUT VS(VS_INPUT i)
 {
 	PS_INPUT output = (PS_INPUT)0;
 
 	matrix MW = mul(World, transpose(Model));
-	matrix MWV = mul(View, MW);
+	//matrix MWV = mul(View, MW);
 	
 	output.Tangent = normalize(mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Tangent.xyz, 0.0))).xyz);
 	output.BiTangent = normalize(mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.BiTangent.xyz, 0.0))).xyz);
 	output.Normal = normalize(mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0))).xyz);
 	
-	output.Pos = mul(MW, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0)));
+	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	output.Pos = mul(MW, skinPos);
 	output.SurfacePosition = output.Pos.xyz;
+	
+	matrix LightMWVP = mul(LightProjection,mul(LightView, MW));
+	output.PosInLight = mul(LightMWVP, skinPos);
 	
 	output.Pos = mul(View, output.Pos);	
 	output.Eye = mul(ViewInv, float4(0.0,0.0,0.0,1.0)).xyz;
@@ -125,8 +124,8 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 #ifdef _SPECGLOSSMAP//Shader='Standard(Specular setup)' -> 'Specular'=$texture
     #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     #else
-		sg.rgb = metalnessTexture.Sample(samLinear, uv).rgb;
-		sg.a = smoothnessTexture.Sample(samLinear, uv).r;
+		sg.rgb = txMetalness.Sample(samLinear, uv).rgb;
+		sg.a = txSmoothness.Sample(samLinear, uv).r;
     #endif
     sg.a *= _GlossMapScale;//Shader='Standard' -> 'Smoothness Scale'=[0,1]
 #else
@@ -135,7 +134,7 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 }
 float3 Albedo(float2 i_tex)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 {
-	return _Color.rgb * albedoTexture.Sample(samLinear, i_tex).rgb;
+	return _Color.rgb * txAlbedo.Sample(samLinear, i_tex).rgb;
 }
 float SpecularStrength(float3 specular)//max(specular.rgb)
 {
@@ -175,8 +174,8 @@ float2 MetallicGloss(float2 uv)
 	//_METALLICGLOSSMAP
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     #else
-        mg.x = metalnessTexture.Sample(samLinear, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
-		mg.y = smoothnessTexture.Sample(samLinear, uv).r;
+        mg.x = txMetalness.Sample(samLinear, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
+		mg.y = txSmoothness.Sample(samLinear, uv).r;
     #endif
 	mg.y *= _GlossMapScale;
 	//_METALLICGLOSSMAP
@@ -225,7 +224,7 @@ float Alpha(float2 uv)//_Color.a
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return _Color.a;
 #else
-    return albedoTexture.Sample(samLinear, uv).a * _Color.a;
+    return txAlbedo.Sample(samLinear, uv).a * _Color.a;
 #endif
 }
 float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivity, out float outModifiedAlpha)//diffColor*alpha,1-oneMinusReflectivity + alpha*oneMinusReflectivity
@@ -271,9 +270,9 @@ float LerpOneTo(float b, float t)
 float Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_OcclusionStrength
 {
 #if (SHADER_TARGET < 30)
-    return aoTexture.Sample(samLinear, uv).g;
+    return txAmbientOcclusion.Sample(samLinear, uv).g;
 #else
-    float occ = aoTexture.Sample(samLinear, uv).g;
+    float occ = txAmbientOcclusion.Sample(samLinear, uv).g;
     return LerpOneTo(occ, _OcclusionStrength);
 #endif
 }
@@ -363,7 +362,7 @@ float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
     float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
     float3 R = glossIn.reflUVW;
 	
-    float4 rgbm = envTexture.SampleLevel(samLinear, R, mip);
+    float4 rgbm = txSkybox.SampleLevel(samLinear, R, mip);
     //skybox tone mapping
 	rgbm.rgb *= (1.0f + rgbm.rgb/1.5f);
 	rgbm.rgb /= (1.0f + rgbm.rgb);
@@ -564,7 +563,7 @@ float3x3 CalTBN(float3 normal, float3 tangent, float3 bitangent) {
 	return float3x3(t,b,n);
 }
 float3 GetBumpBySampler(float3x3 tbn, float2 texcoord) {
-	float3 bump = normalTexture.Sample(samLinear, texcoord).xyz * 2.0 - 1.0;
+	float3 bump = txNormal.Sample(samLinear, texcoord).xyz * 2.0 - 1.0;
 	bump = mul(bump, tbn);
 	return bump;
 }
@@ -578,7 +577,7 @@ float4 PS(PS_INPUT input) : SV_Target
 	if (hasNormal > 0) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
-		float3 rawNormal = normalTexture.Sample(samLinear, input.Tex).xyz;
+		float3 rawNormal = txNormal.Sample(samLinear, input.Tex).xyz;
 		normal = normalize(2.0 * rawNormal - 1.0);
 		normal = normalize(mul(input.TangentBasis, normal));
 	}
@@ -606,22 +605,28 @@ float4 PS(PS_INPUT input) : SV_Target
 		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection, false);
 	}
 
+	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
+
+    float2 projPosInLight = 0.5 * input.PosInLight.xy / input.PosInLight.w + float2(0.5, 0.5);
+    projPosInLight.y = 1.0f - input.PosInLight.y;
+	//finalColor.rgb = txDepthMap.Sample(samShadow, projPosInLight);
+	
 #if 0
 	{
 		float3 ao;
 		if (hasAO)
-			ao = aoTexture.Sample(samLinear, input.Tex).xyz;
+			ao = txAmbientOcclusion.Sample(samLinear, input.Tex).xyz;
 		else
 			ao = 0.0;
 		
-		float3 albedo = albedoTexture.Sample(samLinear, input.Tex).rgb; 
+		float3 albedo = txAlbedo.Sample(samLinear, input.Tex).rgb; 
 		albedo = pow(albedo, 2.2);
 		
 		float3 ambient = albedo * ao * 0.03;
 		finalColor.xyz += ambient;
 	}
 #endif
-	//float4 c = albedoTexture.Sample(samLinear, input.Tex).rgba;
+	//float4 c = txAlbedo.Sample(samLinear, input.Tex).rgba;
 	//finalColor.rgb = float4(c.rgb * c.a,c.a);
 	
     //finalColor.xyz = finalColor.xyz / (finalColor.xyz + 1.0); // HDR tonemapping
@@ -629,6 +634,7 @@ float4 PS(PS_INPUT input) : SV_Target
 	return finalColor;
 }
 
+/************ ForwardAdd ************/
 float4 PSAdd(PS_INPUT input) : SV_Target
 {
 	float3 toEye = normalize(input.Eye - input.SurfacePosition);
@@ -638,7 +644,7 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 	if (hasNormal > 0) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
-		float3 rawNormal = normalTexture.Sample(samLinear, input.Tex).xyz;
+		float3 rawNormal = txNormal.Sample(samLinear, input.Tex).xyz;
 		normal = normalize(2.0 * rawNormal - 1.0);
 		normal = normalize(mul(input.TangentBasis, normal));
 	}
@@ -666,5 +672,6 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection, true);
 	}
 	
+	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);	
 	return finalColor;
 }

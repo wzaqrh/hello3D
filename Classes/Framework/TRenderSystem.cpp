@@ -585,7 +585,7 @@ cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShad
 		globalParam.mLightView = pLightCam->mView;
 		globalParam.mLightProjection = pLightCam->mProjection;
 	}
-	globalParam.HasDepthMap = TRUE;
+	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
 
 	{
 		XMVECTOR det = XMMatrixDeterminant(globalParam.mWorld);
@@ -750,6 +750,7 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		ClearRenderTexture(mShadowPassRT, XMFLOAT4(1, 1, 1, 1.0f));
 		_PushRenderTarget(mShadowPassRT);
+		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->mRenderTargetSRV;
@@ -815,6 +816,8 @@ void TRenderSystem::DoPostProcess()
 
 bool TRenderSystem::BeginScene()
 {
+	mCastShdowFlag = false;
+
 	if (!mPostProcs.empty()) {
 		ClearRenderTexture(mPostProcessRT, XMFLOAT4(0,0,0,0));
 		_SetRenderTarget(mPostProcessRT);

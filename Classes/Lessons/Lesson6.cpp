@@ -3,14 +3,12 @@
 
 void Lesson6::OnInitLight()
 {
-#if 0
+#if 1
 	{
 		auto light = mRenderSys->AddPointLight();//1, -1, 1
 		float ddd = 10;
-		light->SetPosition(ddd, ddd, -ddd);
-		light->SetAttenuation(1, 0.01, 0);
-		float intensify = 0.7;
-		light->SetDiffuseColor(intensify, intensify, intensify, 1.0);
+		light->SetPosition(-ddd, ddd, -ddd);
+		light->SetAttenuation(1, 0.001, 0);
 	}
 #endif
 
@@ -41,7 +39,7 @@ void Lesson6::OnInitLight()
 	}
 #endif
 
-#if 1
+#if 0
 	{
 		auto light = mRenderSys->AddDirectLight();
 		light->SetDirection(1, -1, 1);
@@ -119,7 +117,12 @@ void Lesson6::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
 	if (mRenderSys->BeginScene()) {
-		mModel->Draw();
+		TRenderOperationQueue opQueue;
+		mModel->GenRenderOperation(opQueue);
+
+		mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
+		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+
 		mRenderSys->EndScene();
 	}
 }

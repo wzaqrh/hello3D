@@ -1,9 +1,6 @@
 /********** Bloom **********/
 #include "Standard.h"
 
-SamplerState samLinear : register(s0);
-SamplerState samAnisot : register(s1);
-SamplerState samPoint  : register(s2);
 Texture2D txMain : register(t0);
 Texture2D txSecond : register(t1);
 Texture2D txThird : register(t2);

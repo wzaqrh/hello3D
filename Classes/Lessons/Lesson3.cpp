@@ -1,16 +1,15 @@
 #include "Lesson3.h"
 
-void Lesson3::OnPostInitDevice()
+void Lesson3::OnInitLight()
 {
+#if 0
 	auto light1 = mRenderSys->mPointLights[0];
 	light1->SetPosition(20, 0, -20);
 	light1->SetAttenuation(1.0, 0.1, 0);
 	light1->SetSpecularPower(60);
 	light1->SetSpecularColor(0, 0, 0, 0);
 	light1->SetDiffuseColor(0, 0, 0, 0);
-
-	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
-
+#endif
 	//auto light2 = mRenderSys->AddSpotLight();
 	////light2->SetDiffuseColor(0, 0, 0, 0);
 	////light2->SetSpecularColor(1, 0, 0, 1);
@@ -21,8 +20,14 @@ void Lesson3::OnPostInitDevice()
 
 	auto light2 = mRenderSys->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
+}
 
-	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
+void Lesson3::OnPostInitDevice()
+{
+	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+	
+	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL);
+	//mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.2.fx", "shader\\Lesson3.2.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.1.fx", "shader\\Lesson3.1.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.fx", "shader\\Lesson3.fx");

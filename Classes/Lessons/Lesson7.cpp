@@ -15,6 +15,7 @@ void Lesson7::OnPostInitDevice()
 {
 #if 1
 	mRenderSys->SetCamera(45, 30, 300);
+	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 
 	float dd = 9;
 	mMove->SetDefScale(SCALE_BASE * 0.02); mMove->SetPosition(dd, dd, -dd);
@@ -28,18 +29,16 @@ void Lesson7::OnPostInitDevice()
 #else
 	mScale = 0.01;
 #endif
-	//mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
-
-	//std::string shaderName = "shader\\ShadowMap.fx";
-	std::string shaderName = "shader\\Lesson3.3.fx";
+	
+	//std::string matName = E_MAT_MODEL_PBR;
+	std::string matName = E_MAT_MODEL_SHADOW;
 
 	auto move1 = std::make_shared<TMovable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new AssimpModel(mRenderSys, move1, E_MAT_MODEL_SHADOW);
+	mModel1 = new AssimpModel(mRenderSys, move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-
-	mModel2 = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_SHADOW);
+	mModel2 = new AssimpModel(mRenderSys, mMove, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 

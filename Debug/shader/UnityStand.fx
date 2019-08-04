@@ -1055,6 +1055,113 @@ half4 fragForwardBaseInternal (VertexOutputForwardBase i)
 half4 fragBase (VertexOutputForwardBase i) : SV_Target { return fragForwardBaseInternal(i); }
 
 
+//Pass Add
+struct VertexOutputForwardAdd
+{
+    UNITY_POSITION(pos);
+    float4 tex                          : TEXCOORD0;
+    float4 eyeVec                       : TEXCOORD1;    // eyeVec.xyz | fogCoord
+    float4 tangentToWorldAndLightDir[3] : TEXCOORD2;    // [3x3:tangentToWorld | 1x3:lightDir]
+    float3 posWorld                     : TEXCOORD5;
+    UNITY_LIGHTING_COORDS(6, 7)
+
+    // next ones would not fit into SM2.0 limits, but they are always for SM3.0+
+#if defined(_PARALLAXMAP)
+    half3 viewDirForParallax            : TEXCOORD8;
+#endif
+
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+VertexOutputForwardAdd vertForwardAdd (VertexInput v)
+{
+    UNITY_SETUP_INSTANCE_ID(v);
+    VertexOutputForwardAdd o;
+    UNITY_INITIALIZE_OUTPUT(VertexOutputForwardAdd, o);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+    float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
+    o.pos = UnityObjectToClipPos(v.vertex);
+
+    o.tex = TexCoords(v);
+    o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
+    o.posWorld = posWorld.xyz;
+    float3 normalWorld = UnityObjectToWorldNormal(v.normal);
+    #ifdef _TANGENT_TO_WORLD
+        float4 tangentWorld = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
+
+        float3x3 tangentToWorld = CreateTangentToWorldPerVertex(normalWorld, tangentWorld.xyz, tangentWorld.w);
+        o.tangentToWorldAndLightDir[0].xyz = tangentToWorld[0];
+        o.tangentToWorldAndLightDir[1].xyz = tangentToWorld[1];
+        o.tangentToWorldAndLightDir[2].xyz = tangentToWorld[2];
+    #else
+        o.tangentToWorldAndLightDir[0].xyz = 0;
+        o.tangentToWorldAndLightDir[1].xyz = 0;
+        o.tangentToWorldAndLightDir[2].xyz = normalWorld;
+    #endif
+    //We need this for shadow receiving and lighting
+    UNITY_TRANSFER_LIGHTING(o, v.uv1);
+
+    float3 lightDir = _WorldSpaceLightPos0.xyz - posWorld.xyz * _WorldSpaceLightPos0.w;
+    #ifndef USING_DIRECTIONAL_LIGHT
+        lightDir = NormalizePerVertexNormal(lightDir);
+    #endif
+    o.tangentToWorldAndLightDir[0].w = lightDir.x;
+    o.tangentToWorldAndLightDir[1].w = lightDir.y;
+    o.tangentToWorldAndLightDir[2].w = lightDir.z;
+
+    #ifdef _PARALLAXMAP
+        TANGENT_SPACE_ROTATION;
+        o.viewDirForParallax = mul (rotation, ObjSpaceViewDir(v.vertex));
+    #endif
+
+    UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o, o.pos);
+    return o;
+}
+VertexOutputForwardAdd vertAdd (VertexInput v) { return vertForwardAdd(v); }
+
+/**AdditiveLight**/
+UnityLight AdditiveLight (half3 lightDir, half atten)
+{
+    UnityLight l;
+
+    l.color = _LightColor0.rgb;
+    l.dir = lightDir;
+    #ifndef USING_DIRECTIONAL_LIGHT
+        l.dir = NormalizePerPixelNormal(l.dir);
+    #endif
+
+    // shadow the light
+    l.color *= atten;
+    return l;
+}
+/**ZeroIndirect**/
+UnityIndirect ZeroIndirect ()
+{
+    UnityIndirect ind;
+    ind.diffuse = 0;
+    ind.specular = 0;
+    return ind;
+}
+half4 fragForwardAddInternal (VertexOutputForwardAdd i)
+{
+    UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
+
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
+    FRAGMENT_SETUP_FWDADD(s)
+
+    UNITY_LIGHT_ATTENUATION(atten, i, s.posWorld)
+    UnityLight light = AdditiveLight (IN_LIGHTDIR_FWDADD(i), atten);
+    UnityIndirect noIndirect = ZeroIndirect ();
+
+    half4 c = UNITY_BRDF_PBS (s.diffColor, s.specColor, s.oneMinusReflectivity, s.smoothness, s.normalWorld, -s.eyeVec, light, noIndirect);
+
+    UNITY_EXTRACT_FOG_FROM_EYE_VEC(i);
+    UNITY_APPLY_FOG_COLOR(_unity_fogCoord, c.rgb, half4(0,0,0,0)); // fog towards black in additive pass
+    return OutputForward (c, s.alpha);
+}
+half4 fragAdd (VertexOutputForwardAdd i) : SV_Target { return fragForwardAddInternal(i); }
+
 
 
 

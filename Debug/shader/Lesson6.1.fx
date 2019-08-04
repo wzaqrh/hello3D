@@ -1,8 +1,6 @@
 /********** PBR **********/
 #include "Standard.h"
-SamplerState samLinear : register(s0);
-SamplerState samAnsp   : register(s1);
-SamplerState samPoint  : register(s2);
+#include "Skeleton.h"
 
 Texture2D albedoTexture : register(t0);//rgb
 Texture2D normalTexture : register(t1);//rgb
@@ -10,17 +8,6 @@ Texture2D metalnessTexture : register(t2);//r
 Texture2D smoothnessTexture : register(t3);//r
 Texture2D aoTexture : register(t4);//r
 TextureCube envTexture : register(t9);
-
-static const int MAX_MATRICES = 256;
-cbuffer cbWeightedSkin : register(b1)
-{
-	matrix Model;
-	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	
-	int hasNormal;
-	int hasMetalness;
-	int hasRoughness;
-	int hasAO;
-}
 
 cbuffer cbUnityMaterial : register(b2)
 {
@@ -60,24 +47,6 @@ struct PS_INPUT
 	float3 SurfacePosition : POSITION1;//world space
 	float3x3 TangentBasis : TBASIS;
 };
-
-float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
-{
-    float BlendWeights[4] = (float[4])iBlendWeights;
-	BlendWeights[3] = 1.0 - BlendWeights[0] - BlendWeights[1] - BlendWeights[2];
-    uint  BlendIndices[4] = (uint[4])iBlendIndices;	
-	
-    float4	Pos = float4(0.0,0.0,0.0,iPos.w);   
-	const int NumBones = 4;
-    for (int iBone = 0; iBone < NumBones; iBone++) {
-		uint Indice = BlendIndices[iBone];
-		float Weight = BlendWeights[iBone];
-			
-		float4 bonePos = mul(iPos, Models[Indice]);
-        Pos.xyz += bonePos.xyz * Weight;
-    }
-	return Pos;
-}
 
 PS_INPUT VS(VS_INPUT i)
 {
@@ -520,28 +489,32 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
     return color;
 }
 
-float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord) 
+float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, bool forwardAdd) 
 {
 	FragmentCommonData s = FragmentSetup(texcoord);
 	UnityLight mainLight = MainLight(directLight);
 	float occlusion = Occlusion(texcoord);
 	UnityGI gi = FragmentGI(s, occlusion, mainLight, normal, toEye);
+	if (forwardAdd) {
+		gi.indirect.diffuse = 0.0;
+		gi.indirect.specular = 0.0;
+	}
 	float3 c = UNITY_BRDF_PBS(s, gi, normal, toLight, toEye, texcoord);
 	//OutputForward
 	return c;
 }
-float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance) {
-	float3 color = CalDirectLight(pointLight.L, normal, toLight, toEye, texcoord);
+float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, bool forwardAdd) {
+	float3 color = CalDirectLight(pointLight.L, normal, toLight, toEye, texcoord, forwardAdd);
 	float Attenuation = pointLight.Attenuation.x 
 	+ pointLight.Attenuation.y * Distance 
 	+ pointLight.Attenuation.z * Distance * Distance;
 	return color / Attenuation;
 }
-float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, float3 spotDirection) {
+float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, float3 spotDirection, bool forwardAdd) {
 	float3 color = 0.0;
 	float spotFactor = dot(toLight, spotDirection);
 	if (spotFactor > spotLight.Cutoff) {
-		color = CalPointLight(spotLight.Base, normal, toLight, toEye, texcoord, Distance);
+		color = CalPointLight(spotLight.Base, normal, toLight, toEye, texcoord, Distance, forwardAdd);
         color = color * ((spotFactor - spotLight.Cutoff) / (1.0 - spotLight.Cutoff));
 	}
 	return color;
@@ -584,13 +557,13 @@ float4 PS(PS_INPUT input) : SV_Target
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
 	for (int i = 0; i < LightNum.x; ++i) {//direction light
 		float3 toLight = normalize(-DirectLights[i].LightPos.xyz);
-		finalColor.xyz += CalDirectLight(DirectLights[i], normal, toLight, toEye, input.Tex);
+		finalColor.xyz += CalDirectLight(DirectLights[i], normal, toLight, toEye, input.Tex, false);
 	}
 	for (int i = 0; i < LightNum.y; ++i) {//point light
 		float3 toLight = PointLights[i].L.LightPos.xyz - input.SurfacePosition.xyz;
 		float Distance = length(toLight);
 		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(PointLights[i], normal, toLight, toEye, input.Tex, Distance);
+		finalColor.xyz += CalPointLight(PointLights[i], normal, toLight, toEye, input.Tex, Distance, false);
 	}
 	for (int i = 0; i < LightNum.z; ++i) {//spot light
 		float3 toLight = SpotLights[i].Base.L.LightPos.xyz - input.SurfacePosition.xyz;
@@ -598,7 +571,7 @@ float4 PS(PS_INPUT input) : SV_Target
 		toLight = normalize(toLight);
 		
 		float3 spotDirection = -SpotLights[i].Direction.xyz;
-		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection);
+		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection, false);
 	}
 
 #if 0
@@ -622,6 +595,46 @@ float4 PS(PS_INPUT input) : SV_Target
 	
     //finalColor.xyz = finalColor.xyz / (finalColor.xyz + 1.0); // HDR tonemapping
     //finalColor.xyz = pow(finalColor.xyz, 1.0/2.2); // gamma correct
+	return finalColor;
+}
+
+float4 PSAdd(PS_INPUT input) : SV_Target
+{
+	float3 toEye = normalize(input.Eye - input.SurfacePosition);
+	//float3 toEye = normalize(float3(0.0,0.0,-150.0) - input.SurfacePosition);
+	
+	float3 normal;
+	if (hasNormal > 0) {
+		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
+		//normal = GetBumpBySampler(tbn, input.Tex);
+		float3 rawNormal = normalTexture.Sample(samLinear, input.Tex).xyz;
+		normal = normalize(2.0 * rawNormal - 1.0);
+		normal = normalize(mul(input.TangentBasis, normal));
+	}
+	else {
+		normal = normalize(input.Normal);
+	}
+	
+	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
+	for (int i = 0; i < LightNum.x; ++i) {//direction light
+		float3 toLight = normalize(-DirectLights[i].LightPos.xyz);
+		finalColor.xyz += CalDirectLight(DirectLights[i], normal, toLight, toEye, input.Tex, true);
+	}
+	for (int i = 0; i < LightNum.y; ++i) {//point light
+		float3 toLight = PointLights[i].L.LightPos.xyz - input.SurfacePosition.xyz;
+		float Distance = length(toLight);
+		toLight = normalize(toLight);
+		finalColor.xyz += CalPointLight(PointLights[i], normal, toLight, toEye, input.Tex, Distance, true);
+	}
+	for (int i = 0; i < LightNum.z; ++i) {//spot light
+		float3 toLight = SpotLights[i].Base.L.LightPos.xyz - input.SurfacePosition.xyz;
+		float Distance = length(toLight);
+		toLight = normalize(toLight);
+		
+		float3 spotDirection = -SpotLights[i].Direction.xyz;
+		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection, true);
+	}
+	
 	return finalColor;
 }
 

@@ -1,6 +1,5 @@
 /********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
 #include "Standard.h"
-SamplerState samLinear : register(s0);
 Texture2D txDiffuse : register(t0);
 
 struct VS_INPUT

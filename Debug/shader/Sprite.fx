@@ -1,7 +1,6 @@
 /********** Sprite **********/
 #include "Standard.h"
 
-SamplerState samLinear : register(s0);
 Texture2D txDiffuse : register(t0);
 
 struct VS_INPUT

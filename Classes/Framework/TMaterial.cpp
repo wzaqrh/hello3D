@@ -365,6 +365,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		SetCommonField(builder, mRenderSys);
 		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Model.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_MODEL_PBR) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -378,18 +380,18 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
-		//pass E_PASS_FORWARDBASE
+		//*//pass E_PASS_FORWARDBASE
 		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
 		SetCommonField(builder, mRenderSys);
 		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
-		//pass E_PASS_FORWARDADD
+		//*//pass E_PASS_FORWARDADD
 		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
 		SetCommonField(builder, mRenderSys);
 		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx", nullptr, nullptr, "PSAdd"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		
+
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 		cbUnityMaterial cbUnityMat;
 		//cbUnityMat._Color = XMFLOAT4(0,0,0,0);
@@ -397,6 +399,13 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial), &cbUnityMat), MAKE_CBNAME(cbUnityMaterial));
 		cbUnityGlobal cbUnityGlb;
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal), &cbUnityGlb), MAKE_CBNAME(cbUnityGlobal));
+
+		//*//pass E_PASS_SHADOWCASTER
+		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx", nullptr, "VSShadowCaster", "PSShadowCaster"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_MODEL_SHADOW) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -419,6 +428,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		SetCommonField(builder, mRenderSys);
 		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowDepth.fx"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_SKYBOX) {
 		SetCommonField2(builder, mRenderSys);

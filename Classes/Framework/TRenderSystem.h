@@ -30,6 +30,7 @@ public:
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
 	std::vector<TRenderTexturePtr> mRenderTargetStk;
 
+	bool mCastShdowFlag = false;
 	TBlendFunc mCurBlendFunc;
 	TDepthState mCurDepthState;
 public:
