@@ -93,7 +93,7 @@ public:
 	ID3D11InputLayout* CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
 	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile, DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN);
-	TTexture GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
+	TTexturePtr GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
 
 	void SetBlendFunc(const TBlendFunc& blendFunc);
 	void SetDepthState(const TDepthState& depthState);

@@ -82,7 +82,7 @@ void TSprite::SetSize(float w, float h)
 	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
 }
 
-void TSprite::SetTexture(ID3D11ShaderResourceView* Texture)
+void TSprite::SetTexture(TTexturePtr Texture)
 {
 	mTexture = Texture;
 }
@@ -113,7 +113,7 @@ int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.push_back(TTexture("", mTexture));
+	op.mTextures.push_back(mTexture);
 	op.mWorldTransform = mMove->GetWorldTransform();
 	opList.push_back(op);
 	return 1;

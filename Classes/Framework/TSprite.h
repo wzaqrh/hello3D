@@ -34,7 +34,7 @@ private:
 private:
 	TRenderSystem* mRenderSys = nullptr;
 
-	ID3D11ShaderResourceView* mTexture = nullptr;
+	TTexturePtr mTexture = nullptr;
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 public:
@@ -48,7 +48,7 @@ public:
 public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);
-	void SetTexture(ID3D11ShaderResourceView* Texture);
+	void SetTexture(TTexturePtr Texture);
 	void SetFlipY(bool flipY);
 };
 typedef std::shared_ptr<TSprite> TSpritePtr;

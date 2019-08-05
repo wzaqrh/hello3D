@@ -37,7 +37,7 @@ void TMesh::Draw(TRenderSystem* renderSys)
 	{
 		std::vector<ID3D11ShaderResourceView*> texViews(mTextures.size());
 		for (int i = 0; i < mTextures.size(); ++i)
-			texViews[i] = mTextures[i].texture;
+			texViews[i] = mTextures[i]->texture;
 		renderSys->mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 	}
 	else {
@@ -50,5 +50,7 @@ void TMesh::Draw(TRenderSystem* renderSys)
 
 bool TMesh::HasTexture(int slot)
 {
-	return slot < mTextures.size() && mTextures[slot].texture != nullptr;
+	return (slot < mTextures.size()) 
+		&& mTextures[slot]
+		&& mTextures[slot]->texture != nullptr;
 }

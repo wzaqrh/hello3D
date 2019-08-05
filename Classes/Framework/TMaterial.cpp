@@ -275,7 +275,7 @@ TMaterialBuilder& TMaterialBuilder::AddIterTarget(TRenderTexturePtr target)
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, TTexture texture)
+TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, TTexturePtr texture)
 {
 	mCurPass->mTextures[slot] = texture;
 	return *this;
@@ -472,7 +472,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex.GetWidth(), mainTex.GetHeight());
+			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex->GetWidth(), mainTex->GetHeight());
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
@@ -485,11 +485,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES - 1; ++i) {
 			builder.AddIterTarget(TexToneMaps[i]);
 		}
-		builder.SetTexture(0, TTexture("", TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->mRenderTargetSRV));
+		builder.SetTexture(0, TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->GetRenderTargetSRV());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex.GetWidth(), mainTex.GetHeight());
+			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
@@ -499,11 +499,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale3x3_BrightPass"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexBrightPass);
-		builder.SetTexture(1, TTexture("", TexToneMaps[0]->mRenderTargetSRV));
+		builder.SetTexture(1, TexToneMaps[0]->GetRenderTargetSRV());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex.GetWidth(), mainTex.GetHeight());
+			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
@@ -516,11 +516,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		for (int i = 1; i < NUM_BLOOM_TEXTURES; ++i) {
 			builder.AddIterTarget(TexBlooms[i]);
 		}
-		builder.SetTexture(1, TTexture("", TexBrightPass->mRenderTargetSRV));
+		builder.SetTexture(1, TexBrightPass->GetRenderTargetSRV());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, TRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex.GetWidth(), 3.0f, 1.25f);
+			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex->GetWidth(), 3.0f, 1.25f);
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
 		};
 
@@ -529,8 +529,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		SetCommonField(builder, mRenderSys);
 		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "FinalPass"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetTexture(1, TTexture("", TexToneMaps[0]->mRenderTargetSRV));
-		builder.SetTexture(2, TTexture("", TexBlooms[0]->mRenderTargetSRV));
+		builder.SetTexture(1, TexToneMaps[0]->GetRenderTargetSRV());
+		builder.SetTexture(2, TexBlooms[0]->GetRenderTargetSRV());
 	}
 
 	material = builder.Build();

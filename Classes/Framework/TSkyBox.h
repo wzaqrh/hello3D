@@ -17,7 +17,7 @@ private:
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 public:
-	TTexture mCubeSRV;
+	TTexturePtr mCubeSRV;
 	TMaterialPtr mMaterial;
 public:
 	TSkyBox(TRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName);

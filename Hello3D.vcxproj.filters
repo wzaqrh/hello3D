@@ -67,6 +67,9 @@
     <ClCompile Include="Classes\Framework\TMaterialCB.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Framework\TThreadPump.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -133,6 +136,9 @@
       <Filter>Classes\Lessons</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Framework\TMaterialCB.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TThreadPump.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
   </ItemGroup>

@@ -80,9 +80,9 @@ void Lesson6::OnPostInitDevice()
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
-		if (!iter->mTextures.empty()) {
+		if (!iter->mTextures.empty() && iter->mTextures[0]) {
 			std::string firstPostfix;
-			auto prefix = iter->mTextures[0].path;
+			auto prefix = iter->mTextures[0]->path;
 			auto pos = prefix.find_last_of("_");
 			if (pos != std::string::npos) {
 				firstPostfix = prefix.substr(pos + 1, std::string::npos);
@@ -103,9 +103,9 @@ void Lesson6::OnPostInitDevice()
 			if (postfixs[0] == firstPostfix) {
 				iter->mTextures.clear();
 				for (int i = iter->mTextures.size(); i < ARRAYSIZE(postfixs); ++i) {
-					TTexture texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
+					TTexturePtr texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
 					iter->mTextures.push_back(texInfo);
-					assert(texInfo.texture);
+					assert(texInfo->texture);
 				}
 			}
 		}

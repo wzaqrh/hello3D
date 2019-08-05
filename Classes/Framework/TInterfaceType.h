@@ -65,35 +65,33 @@ enum enTexturePbrType {
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
 struct TTexture {
-	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	std::string path;
 	ID3D11ShaderResourceView *texture;
-	UINT Width;
-	UINT Height;
-	DXGI_FORMAT Format;
 public:
-	TTexture();
-	TTexture(std::string __path, ID3D11ShaderResourceView* __texture);
+	//TTexture();
+	TTexture(ID3D11ShaderResourceView* __texture, std::string __path);
+	void SetSRV(ID3D11ShaderResourceView* __texture);
+public:
 	D3D11_TEXTURE2D_DESC GetDesc();
 	int GetWidth();
 	int GetHeight();
 	DXGI_FORMAT GetFormat();
 };
-
+typedef std::shared_ptr<TTexture> TTexturePtr;
 
 struct TTextureBySlot {
-	std::vector<TTexture> textures;
+	std::vector<TTexturePtr> textures;
 public:
 	void clear();
-	void push_back(const TTexture& texture);
+	void push_back(TTexturePtr texture);
 	bool empty() const;
 	size_t size() const;
 	void swap(TTextureBySlot& other);
 	void resize(size_t size);
-	const TTexture& At(size_t pos) const;
-	TTexture& At(size_t pos);
-	const TTexture& operator[](size_t pos) const;
-	TTexture& operator[](size_t pos);
+	const TTexturePtr At(size_t pos) const;
+	TTexturePtr& At(size_t pos);
+	const TTexturePtr operator[](size_t pos) const;
+	TTexturePtr& operator[](size_t pos);
 	std::vector<ID3D11ShaderResourceView*> GetTextureViews() const;
 	void Merge(const TTextureBySlot& other);
 };
@@ -103,6 +101,7 @@ class TRenderTexture {
 public:
 	ID3D11Texture2D* mRenderTargetTexture;
 	ID3D11ShaderResourceView* mRenderTargetSRV;
+	TTexturePtr mRenderTargetPtr;
 	ID3D11RenderTargetView* mRenderTargetView;
 
 	ID3D11Texture2D* mDepthStencilTexture;
@@ -111,7 +110,7 @@ public:
 	DXGI_FORMAT mFormat;
 public:
 	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-	TTexture GetRenderTargetSRV();
+	TTexturePtr GetRenderTargetSRV();
 private:
 	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
 	bool InitRenderTextureView(ID3D11Device* pDevice);

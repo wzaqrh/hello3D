@@ -64,6 +64,7 @@ bool TRenderTexture::InitRenderTextureView(ID3D11Device* pDevice)
 	if (FAILED(result)) {
 		return false;
 	}
+	mRenderTargetPtr = std::make_shared<TTexture>(mRenderTargetSRV, "RenderTexture");
 	return true;
 }
 
@@ -109,22 +110,28 @@ bool TRenderTexture::InitDepthStencilView(ID3D11Device* pDevice)
 	return true;
 }
 
-TTexture TRenderTexture::GetRenderTargetSRV()
+TTexturePtr TRenderTexture::GetRenderTargetSRV()
 {
-	return TTexture("", mRenderTargetSRV);
+	return mRenderTargetPtr;
 }
 
 /********** TTexture **********/
-TTexture::TTexture(std::string __path, ID3D11ShaderResourceView* __texture)
+#if 0
+TTexture::TTexture()
+	:texture(nullptr)
+{
+}
+#endif
+
+TTexture::TTexture(ID3D11ShaderResourceView* __texture, std::string __path)
 {
 	path = __path;
 	texture = __texture;
 }
 
-TTexture::TTexture()
-	:texture(nullptr)
+void TTexture::SetSRV(ID3D11ShaderResourceView* __texture)
 {
-
+	texture = __texture;
 }
 
 D3D11_TEXTURE2D_DESC TTexture::GetDesc()
@@ -159,7 +166,7 @@ void TTextureBySlot::clear()
 	textures.clear();
 }
 
-void TTextureBySlot::push_back(const TTexture& texture)
+void TTextureBySlot::push_back(TTexturePtr texture)
 {
 	textures.push_back(texture);
 }
@@ -184,35 +191,36 @@ void TTextureBySlot::resize(size_t size)
 	textures.resize(size);
 }
 
-const TTexture& TTextureBySlot::At(size_t pos)  const {
+const TTexturePtr TTextureBySlot::At(size_t pos)  const {
 	return textures[pos];
 }
-TTexture& TTextureBySlot::At(size_t pos) {
+TTexturePtr& TTextureBySlot::At(size_t pos) {
 	if (pos >= textures.size()) textures.resize(pos + 1);
 	return textures[pos];
 }
-const TTexture& TTextureBySlot::operator[](size_t pos)  const {
+const TTexturePtr TTextureBySlot::operator[](size_t pos)  const {
 	return At(pos);
 }
-TTexture& TTextureBySlot::operator[](size_t pos) {
+TTexturePtr& TTextureBySlot::operator[](size_t pos) {
 	return At(pos);
 }
 
-std::vector<ID3D11ShaderResourceView*> TTextureBySlot::GetTextureViews() const
-{
+std::vector<ID3D11ShaderResourceView*> TTextureBySlot::GetTextureViews() const {
 	std::vector<ID3D11ShaderResourceView*> views(textures.size());
-	for (int i = 0; i < views.size(); ++i)
-		views[i] = textures[i].texture;
+	for (int i = 0; i < views.size(); ++i) {
+		if (textures[i]) {
+			views[i] = textures[i]->texture;
+		}
+	}
 	return views;
 }
 
-void TTextureBySlot::Merge(const TTextureBySlot& other)
-{
+void TTextureBySlot::Merge(const TTextureBySlot& other) {
 	if (textures.size() < other.textures.size())
 		textures.resize(other.textures.size());
 
 	for (size_t i = 0; i < other.textures.size(); ++i) {
-		if (other.textures[i].texture) {
+		if (other.textures[i]->texture) {
 			textures[i] = other.textures[i];
 		}
 	}

@@ -386,6 +386,7 @@
     <ClCompile Include="Classes\Framework\TRenderSystem.cpp" />
     <ClCompile Include="Classes\Framework\TSkyBox.cpp" />
     <ClCompile Include="Classes\Framework\TSprite.cpp" />
+    <ClCompile Include="Classes\Framework\TThreadPump.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson1.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson2.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson3.cpp" />
@@ -411,6 +412,7 @@
     <ClInclude Include="Classes\Framework\TRenderSystem.h" />
     <ClInclude Include="Classes\Framework\TSkyBox.h" />
     <ClInclude Include="Classes\Framework\TSprite.h" />
+    <ClInclude Include="Classes\Framework\TThreadPump.h" />
     <ClInclude Include="Classes\Lessons\Lesson1.h" />
     <ClInclude Include="Classes\Lessons\Lesson2.h" />
     <ClInclude Include="Classes\Lessons\Lesson3.h" />

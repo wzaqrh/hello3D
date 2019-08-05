@@ -514,7 +514,7 @@ ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile, DX
 	return pTextureRV;
 }
 
-TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format/* = DXGI_FORMAT_UNKNOWN*/) {
+TTexturePtr TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format/* = DXGI_FORMAT_UNKNOWN*/) {
 	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;
 	auto pos = __imgPath.find_last_of("\\");
@@ -530,7 +530,7 @@ TTexture TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT f
 	else {
 		texView = mTexByPath[imgPath];
 	}
-	return TTexture(__imgPath, texView);
+	return std::make_shared<TTexture>(texView, __imgPath);
 }
 
 void TRenderSystem::SetBlendFunc(const TBlendFunc& blendFunc)
@@ -720,7 +720,7 @@ void TRenderSystem::RenderOperation(const TRenderOperation& op, const std::strin
 			else {
 				SetVertexBuffer(op.mVertexBuffer);
 			}
-			TTexture first = !textures.empty() ? textures[0] : TTexture("",nullptr);
+			TTexturePtr first = !textures.empty() ? textures[0] : nullptr;
 			RenderPass(pass, textures, i, op.mIndexBuffer, op.mVertexBuffer, globalParam);
 			textures[0] = first;
 		}
@@ -756,8 +756,8 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->mRenderTargetSRV;
 		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
 
-		if (mSkyBox) {
-			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &mSkyBox->mCubeSRV.texture);
+		if (mSkyBox && mSkyBox->mCubeSRV) {
+			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &mSkyBox->mCubeSRV->texture);
 		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
