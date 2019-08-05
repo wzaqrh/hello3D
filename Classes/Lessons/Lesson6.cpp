@@ -3,7 +3,7 @@
 
 void Lesson6::OnInitLight()
 {
-#if 1
+#if 0
 	{
 		auto light = mRenderSys->AddPointLight();//1, -1, 1
 		float ddd = 10;
@@ -21,16 +21,13 @@ void Lesson6::OnInitLight()
 	}
 #endif
 
-#if 0
+#if 1
 	{
 		auto light = mRenderSys->AddDirectLight();
 		light->SetDirection(1, -1, 1);
 		float i = 0.7;
 		light->SetDiffuseColor(i, i, i, 1.0);
 	}
-#endif
-
-#if 0
 	{
 		auto light = mRenderSys->AddDirectLight();
 		light->SetDirection(-1, -1, 0);
@@ -78,7 +75,9 @@ void Lesson6::OnPostInitDevice()
 		mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal), &cbUnityGlb));
 	});
 #endif
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
+	//auto fileName = "Male02.FBX";//99ms,4688ms
+	auto fileName = "Male02.assbin";//37ms,2823ms
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures.empty()) {
@@ -120,7 +119,7 @@ void Lesson6::OnRender()
 		TRenderOperationQueue opQueue;
 		mModel->GenRenderOperation(opQueue);
 
-		mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
+		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
 		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
 
 		mRenderSys->EndScene();

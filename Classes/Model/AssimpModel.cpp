@@ -164,9 +164,14 @@ aiProcess_ValidateDataStructure;*/
 
 void AssimpModel::LoadModel(const std::string& imgPath)
 {
-	delete mImporter;
-	mImporter = new Assimp::Importer;
-	mScene = mImporter->ReadFile(imgPath, ImportFlags);
+	TIME_PROFILE(AssimpModel_LoadModel);
+
+	{
+		TIME_PROFILE(Assimp_Importer);
+		delete mImporter;
+		mImporter = new Assimp::Importer;
+		mScene = mImporter->ReadFile(imgPath, ImportFlags);
+	}
 
 	for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
 		const aiMesh* mesh = mScene->mMeshes[i];
@@ -181,7 +186,10 @@ void AssimpModel::LoadModel(const std::string& imgPath)
 	mRootNode = mScene->mRootNode;
 	processNode(mScene->mRootNode, mScene);
 
-	Update(0);
+	{
+		TIME_PROFILE(AssimpModel_LoadModel_Update);
+		Update(0);
+	}
 }
 
 void AssimpModel::processNode(aiNode* node, const aiScene* scene)
@@ -252,14 +260,11 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	{
 		MeshVertex vertex;
 		memset(&vertex, 0, sizeof(vertex));
-
 		vertex.Pos = ToXM(mesh->mVertices[vertexId]);
-
 		if (mesh->mTextureCoords[0]) {
 			vertex.Tex.x = (float)mesh->mTextureCoords[0][vertexId].x;
 			vertex.Tex.y = (float)mesh->mTextureCoords[0][vertexId].y;
 		}
-
 		if (mesh->mNormals) {
 			vertex.Normal = ToXM(mesh->mNormals[vertexId]);
 		}
@@ -272,8 +277,8 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 		vertices.push_back(vertex);
 	}
 
-	std::map<int, int> spMap;
 	if (mesh->HasBones()) {
+		std::map<int, int> spMap;
 		for (int boneId = 0; boneId < mesh->mNumBones; ++boneId) {
 			aiBone* bone = mesh->mBones[boneId];
 			for (int k = 0; k < bone->mNumWeights; ++k) {

@@ -109,6 +109,20 @@ TINT4 TD3DInput::GetMouseLocation(bool left)
 	return ret;
 }
 
+/********** TTimeProfile **********/
+TTimeProfile::TTimeProfile(const std::string& name)
+{
+	mName = name;
+	mCurTime = timeGetTime();
+}
+
+TTimeProfile::~TTimeProfile()
+{
+	char szBuf[260]; 
+	sprintf(szBuf, "%s takes %d ms", mName.c_str(), timeGetTime() - mCurTime);
+	OutputDebugStringA(szBuf);
+}
+
 /********** Functions **********/
 bool CheckHR(HRESULT result)
 {

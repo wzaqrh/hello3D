@@ -36,6 +36,15 @@ private:
 	TINT4 mMouseL, mMouseR;
 };
 
+class TTimeProfile {
+	std::string mName;
+	unsigned int mCurTime;
+public:
+	TTimeProfile(const std::string& name);
+	~TTimeProfile();
+};
+#define TIME_PROFILE(NAME) TTimeProfile NAME(#NAME)
+
 class SDTimer {
 	double mLastTime = 0.0;
 public:
