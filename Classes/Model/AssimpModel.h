@@ -1,9 +1,7 @@
 #pragma once
-#include "std.h"
+#include "TPredefine.h"
 #include "TMesh.h"
-#include "TMovable.h"
-
-
+#include "IRenderable.h"
 
 struct AiNodeInfo {
 	aiMatrix4x4 mLocalTransform;

@@ -2,6 +2,7 @@
 #include "TMaterialCB.h"
 #include "Utility.h"
 #include "TRenderSystem.h"
+#include "TInterfaceType.h"
 #include "Lesson6.h"
 
 /********** AiNodeInfo **********/
@@ -247,7 +248,8 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	// Data to fill
 	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
-	TTextureBySlot textures;
+	TTextureBySlotPtr texturesPtr = std::make_shared<TTextureBySlot>();
+	TTextureBySlot& textures = *texturesPtr;
 	textures.resize(4);
 
 	if (mesh->mMaterialIndex >= 0)
@@ -329,7 +331,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 	auto material = mMaterial->Clone(mRenderSys);
 	if (mMatCb) mMatCb(material);
-	return std::make_shared<TMesh>(mesh, vertices, indices, textures, material, mRenderSys);
+	return std::make_shared<TMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
 std::vector<TTexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
@@ -503,7 +505,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			op.mMaterial = mesh->mMaterial;
 			op.mIndexBuffer = mesh->mIndexBuffer;
 			op.mVertexBuffer = mesh->mVertexBuffer;
-			op.mTextures = mesh->mTextures;
+			op.mTextures = *mesh->mTextures;
 			opList.push_back(op);
 #else
 //#define DEBUG_UNITY_PBR 1

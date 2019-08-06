@@ -1,5 +1,5 @@
 #include "Lesson1.h"
-#include "TRenderSystem.h"
+#include "TInterfaceType.h"
 
 void TAppLesson1::OnPostInitDevice()
 {

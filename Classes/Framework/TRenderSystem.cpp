@@ -1,13 +1,16 @@
 #include "TRenderSystem.h"
+#include "TMaterial.h"
 #include "Utility.h"
 #include "TSkyBox.h"
 #include "TPostProcess.h"
+#include "TThreadPump.h"
 
 TRenderSystem* gRenderSys;
 
 TRenderSystem::TRenderSystem()
 {
 	mMaterialFac = std::make_shared<TMaterialFactory>(this);
+	mThreadPump = std::make_shared<TThreadPump>();
 }
 
 TRenderSystem::~TRenderSystem()
@@ -145,6 +148,11 @@ HRESULT TRenderSystem::Initialize()
 	return S_OK;
 }
 
+void TRenderSystem::Update(float dt)
+{
+	mThreadPump->Update(dt);
+}
+
 void TRenderSystem::CleanUp()
 {
 }
@@ -240,15 +248,29 @@ TMaterialPtr TRenderSystem::CreateMaterial(std::string name, std::function<void(
 	return mMaterialFac->GetMaterial(name, callback);
 }
 
-ID3D11InputLayout* TRenderSystem::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+ID3D11InputLayout* TRenderSystem::_CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr)
 {
-	ID3D11InputLayout* pVertexLayout = nullptr;
-	HRESULT hr = mDevice->CreateInputLayout(descArray, descCount, pProgram->mVSBlob->GetBufferPointer(), pProgram->mVSBlob->GetBufferSize(), &pVertexLayout);
+	ID3D11InputLayout* pVertexLayout;
+	HRESULT hr = mDevice->CreateInputLayout(&descArr[0], descArr.size(), pProgram->mVertex->mBlob->GetBufferPointer(), pProgram->mVertex->mBlob->GetBufferSize(), &pVertexLayout);
 	if (CheckHR(hr)) {
 		DXTrace(__FILE__, __LINE__, hr, DXGetErrorDescription(hr), FALSE);
 		return pVertexLayout;
 	}
 	return pVertexLayout;
+}
+TInputLayoutPtr TRenderSystem::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+{
+	TInputLayoutPtr ret = std::make_shared<TInputLayout>();
+	ret->mInputDescs.assign(descArray, descArray + descCount);
+	if (pProgram->IsLoaded()) {
+		ret->mLayout = _CreateInputLayout(pProgram.get(), ret->mInputDescs);
+	}
+	else {
+		pProgram->AddOnLoadedListener([=](IResource* program) {
+			ret->mLayout = _CreateInputLayout(static_cast<TProgram*>(program), ret->mInputDescs);
+		});
+	}
+	return ret;
 }
 
 bool TRenderSystem::UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize)
@@ -288,49 +310,57 @@ ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMP
 	return pSamplerLinear;
 }
 
-ID3D11PixelShader* TRenderSystem::_CreatePS(const char* filename, const char* entry)
+bool CompileShaderFromFile(const char* szFileName, const char* szEntryPoint, const char* szShaderModel, ID3DBlob** ppBlobOut, ID3DBlob** ppErrorBlob, ID3DX11ThreadPump* pPump = nullptr)
 {
-	HRESULT hr = S_OK;
+	bool ret = true;
 
-	ID3DBlob* pBlob = NULL;
-	entry = entry ? entry : "PS";
-	hr = CompileShaderFromFile(filename, entry, "ps_4_0", &pBlob);
-	if (FAILED(hr)) {
-		MessageBox(NULL, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		return nullptr;
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined(_DEBUG) && defined(D3D11_DEBUG)
+	dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	HRESULT hr = D3DX11CompileFromFileA(szFileName, NULL, NULL, szEntryPoint, szShaderModel, dwShaderFlags, 0, pPump, ppBlobOut, ppErrorBlob, NULL);
+	if (FAILED(hr))
+	{
+		if (*ppErrorBlob != NULL)
+			OutputDebugStringA((char*)(*ppErrorBlob)->GetBufferPointer());
+		CheckHR(hr);
+		ret = false;
 	}
-
-	ID3D11PixelShader* PixelShader = nullptr;
-	hr = mDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), NULL, &PixelShader);
-	pBlob->Release();
-	if (CheckHR(hr))
-		return nullptr;
-	return PixelShader;
+	if (*ppErrorBlob) {
+		(*ppErrorBlob)->Release();
+		(*ppErrorBlob) = nullptr;
+	}
+	return ret;
 }
 
-std::pair<ID3D11VertexShader*, ID3DBlob*> TRenderSystem::_CreateVS(const char* filename, const char* entry)
+TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* entry)
 {
-	std::pair<ID3D11VertexShader*, ID3DBlob*> ret = std::pair<ID3D11VertexShader*, ID3DBlob*>(nullptr, nullptr);
-	HRESULT hr = S_OK;
-
-	ID3DBlob* pVSBlob = NULL;
-	entry = entry ? entry : "VS";
-	hr = CompileShaderFromFile(filename, entry, "vs_4_0", &pVSBlob);
-	if (CheckHR(hr))
-	{
-		MessageBox(NULL, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		return ret;
+	TPixelShaderPtr ret = std::make_shared<TPixelShader>();
+	if (CompileShaderFromFile(filename, entry ? entry : "PS", "ps_4_0", &ret->mBlob, &ret->mErrBlob)) {
+		HRESULT hr = mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader);
+		if (CheckHR(hr)) {
+			ret = nullptr;
+		}
 	}
-
-	ID3D11VertexShader* pVertexShader = nullptr;
-	hr = mDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), NULL, &pVertexShader);
-	if (CheckHR(hr))
-	{
-		pVSBlob->Release();
-		return ret;
+	else {
+		ret = nullptr;
 	}
-	ret.first = pVertexShader;
-	ret.second = pVSBlob;
+	return ret;
+}
+
+TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* entry)
+{
+	TVertexShaderPtr ret = std::make_shared<TVertexShader>();
+	if (CompileShaderFromFile(filename, entry ? entry : "VS", "vs_4_0", &ret->mBlob, &ret->mErrBlob)) {
+		HRESULT hr = mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader);
+		if (CheckHR(hr)) {
+			ret = nullptr;
+		}
+	}
+	else {
+		ret = nullptr;
+	}
 	return ret;
 }
 
@@ -338,15 +368,14 @@ TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath,
 {
 	psPath = psPath ? psPath : vsPath;
 	TProgramPtr program = std::make_shared<TProgram>();
-	auto ret = _CreateVS(vsPath, vsEntry);
-	program->mVertexShader = ret.first;
-	program->mVSBlob = ret.second;
-	program->mPixelShader = _CreatePS(psPath, psEntry);
+	program->mVertex = _CreateVS(vsPath, vsEntry);
+	program->mPixel = _CreatePS(psPath, psEntry);
 	return program;
 }
 
 TProgramPtr TRenderSystem::CreateProgram(const char* vsPath)
 {
+	TIME_PROFILE2(CreateProgram, std::string(vsPath));
 	return CreateProgram(vsPath, nullptr, nullptr, nullptr);
 }
 
@@ -479,7 +508,7 @@ void TRenderSystem::UpdateConstBuffer(TContantBufferPtr buffer, void* data)
 	mDeviceContext->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
 }
 
-ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format)
+TTexturePtr TRenderSystem::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
@@ -493,20 +522,28 @@ ID3D11ShaderResourceView* TRenderSystem::_CreateTexture(const char* pSrcFile, DX
 #endif
 	pSrcFile = imgPath.c_str();
 
-	ID3D11ShaderResourceView* pTextureRV = nullptr;
+	TTexturePtr pTextureRV;
 	if (IsFileExist(pSrcFile))
 	{
-		HRESULT hr = S_OK;
-
 		D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
 		LoadInfo.Format = format;
+		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != DXGI_FORMAT_UNKNOWN ? &LoadInfo : nullptr;
 
-		hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, format != DXGI_FORMAT_UNKNOWN ? &LoadInfo : nullptr, NULL, &pTextureRV, NULL);
-		if (CheckHR(hr)) 
+		pTextureRV = std::make_shared<TTexture>(nullptr, imgPath);
+		HRESULT hr;
+		if (async) {
+			hr = mThreadPump->AddWorkItem(pTextureRV, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
+				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, (ID3D11ShaderResourceView**)&entry->deviceObject, NULL);
+			});
+		}
+		else {
+			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, nullptr, &pTextureRV->GetSRV(), NULL);
+		}
+		if (CheckHR(hr))
 			return nullptr;
 	}
 	else {
-		char szBuf[260]; sprintf(szBuf, "image file %s not exist", pSrcFile);
+		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
 		OutputDebugStringA(szBuf);
 		//MessageBoxA(0, szBuf, "", MB_OK);
 	}
@@ -522,15 +559,15 @@ TTexturePtr TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMA
 		imgPath = __imgPath.substr(pos + 1, std::string::npos);
 	}
 
-	ID3D11ShaderResourceView* texView = nullptr;
+	TTexturePtr texView = nullptr;
 	if (mTexByPath.find(imgPath) == mTexByPath.end()) {
-		texView = _CreateTexture(imgPath.c_str(), format);
+		texView = _CreateTexture(imgPath.c_str(), format, true);
 		mTexByPath.insert(std::make_pair(imgPath, texView));
 	}
 	else {
 		texView = mTexByPath[imgPath];
 	}
-	return std::make_shared<TTexture>(texView, __imgPath);
+	return texView;
 }
 
 void TRenderSystem::SetBlendFunc(const TBlendFunc& blendFunc)
@@ -636,12 +673,12 @@ void TRenderSystem::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
 	mDeviceContext->UpdateSubresource(pass->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
 
-	mDeviceContext->VSSetShader(pass->mProgram->mVertexShader, NULL, 0);
-	mDeviceContext->PSSetShader(pass->mProgram->mPixelShader, NULL, 0);
+	mDeviceContext->VSSetShader(pass->mProgram->mVertex->mShader, NULL, 0);
+	mDeviceContext->PSSetShader(pass->mProgram->mPixel->mShader, NULL, 0);
 
 	mDeviceContext->VSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
 	mDeviceContext->PSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
-	mDeviceContext->IASetInputLayout(pass->mInputLayout);
+	mDeviceContext->IASetInputLayout(pass->mInputLayout->mLayout);
 
 	mDeviceContext->IASetPrimitiveTopology(pass->mTopoLogy);
 
@@ -757,7 +794,8 @@ void TRenderSystem::RenderQueue(const TRenderOperationQueue& opQueue, const std:
 		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
 
 		if (mSkyBox && mSkyBox->mCubeSRV) {
-			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &mSkyBox->mCubeSRV->texture);
+			auto texture = mSkyBox->mCubeSRV->GetSRV();
+			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &texture);
 		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {

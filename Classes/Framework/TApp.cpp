@@ -47,7 +47,7 @@ void TApp::Render()
 
 	mTimer.Update();
 	mRenderSys->mInput->Frame();
-
+	mRenderSys->Update(0);
 	//rotate camera
 	{
 		TINT4 m = mRenderSys->mInput->GetMouseLocation(false);

@@ -1,4 +1,6 @@
 #include "TSkyBox.h"
+#include "TRenderSystem.h"
+#include "TMaterial.h"
 
 TSkyBox::TSkyBox(TRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
 {

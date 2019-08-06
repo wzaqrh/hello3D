@@ -1,20 +1,35 @@
 #pragma once
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dcompiler.h>
-#include <xnamath.h>
-#include <dinput.h>
-#include <dxerr.h>
-#include "std.h"
+#include "TPredefine.h"
+#include "IResource.h"
 
-struct TProgram {
-	ID3D11VertexShader* mVertexShader = nullptr;
-	ID3D11PixelShader* mPixelShader = nullptr;
-	ID3DBlob* mVSBlob = nullptr;
+/********** Program **********/
+struct TVertexShader : public IResource {
+	ID3D11VertexShader* mShader = nullptr;
+	ID3DBlob* mBlob = nullptr;
+	ID3DBlob* mErrBlob = nullptr;
+};
+typedef std::shared_ptr<TVertexShader> TVertexShaderPtr;
+
+struct TPixelShader : public IResource {
+	ID3D11PixelShader* mShader = nullptr;
+	ID3DBlob* mBlob = nullptr;
+	ID3DBlob* mErrBlob = nullptr;
+};
+typedef std::shared_ptr<TPixelShader> TPixelShaderPtr;
+
+struct TProgram : public IResource {
+	TVertexShaderPtr mVertex;
+	TPixelShaderPtr mPixel;
 };
 typedef std::shared_ptr<TProgram> TProgramPtr;
 
+struct TInputLayout : public IResource {
+	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
+	ID3D11InputLayout* mLayout = nullptr;
+};
+typedef std::shared_ptr<TInputLayout> TInputLayoutPtr;
+
+/********** HardwareBuffer **********/
 struct THardwareBuffer {
 	ID3D11Buffer* buffer;
 	unsigned int bufferSize;
@@ -49,7 +64,7 @@ struct TContantBuffer : public THardwareBuffer {
 };
 typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;
 
-
+/********** Texture **********/
 enum enTextureType {
 	E_TEXTURE_DIFFUSE,
 	E_TEXTURE_SPECULAR,
@@ -64,7 +79,8 @@ enum enTexturePbrType {
 };
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
-struct TTexture {
+struct TTexture : public IResource {
+private:
 	std::string path;
 	ID3D11ShaderResourceView *texture;
 public:
@@ -72,30 +88,15 @@ public:
 	TTexture(ID3D11ShaderResourceView* __texture, std::string __path);
 	void SetSRV(ID3D11ShaderResourceView* __texture);
 public:
+	const std::string& GetPath() const;
+	ID3D11ShaderResourceView*& GetSRV();
+public:
 	D3D11_TEXTURE2D_DESC GetDesc();
 	int GetWidth();
 	int GetHeight();
 	DXGI_FORMAT GetFormat();
 };
 typedef std::shared_ptr<TTexture> TTexturePtr;
-
-struct TTextureBySlot {
-	std::vector<TTexturePtr> textures;
-public:
-	void clear();
-	void push_back(TTexturePtr texture);
-	bool empty() const;
-	size_t size() const;
-	void swap(TTextureBySlot& other);
-	void resize(size_t size);
-	const TTexturePtr At(size_t pos) const;
-	TTexturePtr& At(size_t pos);
-	const TTexturePtr operator[](size_t pos) const;
-	TTexturePtr& operator[](size_t pos);
-	std::vector<ID3D11ShaderResourceView*> GetTextureViews() const;
-	void Merge(const TTextureBySlot& other);
-};
-
 
 class TRenderTexture {
 public:
@@ -121,33 +122,3 @@ private:
 };
 typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
 
-
-typedef std::shared_ptr<struct TMaterial> TMaterialPtr;
-typedef std::shared_ptr<struct TPass> TPassPtr;
-
-struct TRenderOperation {
-	TMaterialPtr mMaterial;
-	TVertexBufferPtr mVertexBuffer;
-	std::map<std::pair<TPassPtr,int>, TVertexBufferPtr> mVertBufferByPass;
-	TIndexBufferPtr mIndexBuffer;
-	TTextureBySlot mTextures;
-	XMMATRIX mWorldTransform;
-public:
-	TRenderOperation();
-};
-
-struct TRenderOperationQueue {
-	std::vector<TRenderOperation> mOps;
-public:
-	void clear();
-	void push_back(const TRenderOperation& op);
-	size_t size() const;
-	TRenderOperation& At(size_t pos);
-	const TRenderOperation& At(size_t pos) const;
-	TRenderOperation& operator[](size_t pos);
-	const TRenderOperation& operator[](size_t pos) const;
-};
-
-struct IRenderable {
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) = 0;
-};

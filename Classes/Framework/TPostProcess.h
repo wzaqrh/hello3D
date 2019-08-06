@@ -1,5 +1,6 @@
 #pragma once
-#include "TRenderSystem.h"
+#include "IRenderable.h"
+#include "TPredefine.h"
 
 struct POSTPROCESS_VERTEX
 {

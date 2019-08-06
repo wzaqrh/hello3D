@@ -1,6 +1,5 @@
 #pragma once
-#include "TBaseTypes.h"
-#include "std.h"
+#include "TPredefine.h"
 
 struct MeshVertex
 {
@@ -20,7 +19,7 @@ public:
 	std::vector<MeshVertex> vertices;
 	std::vector<UINT> indices;
 
-	TTextureBySlot mTextures;
+	TTextureBySlotPtr mTextures;
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 	TMaterialPtr mMaterial;
@@ -28,7 +27,7 @@ public:
 	TMesh(const aiMesh* __data, 
 		std::vector<MeshVertex>& __vertices, 
 		std::vector<UINT>& __indices,
-		TTextureBySlot& __textures,
+		TTextureBySlotPtr __textures,
 		TMaterialPtr __material,
 		TRenderSystem *__renderSys);
 	void Close();

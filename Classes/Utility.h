@@ -4,8 +4,6 @@
 
 bool CheckHR(HRESULT result);
 
-HRESULT CompileShaderFromFile(const char* szFileName, const char* szEntryPoint, const char* szShaderModel, ID3DBlob** ppBlobOut);
-
 extern std::string gModelPath;
 std::string GetModelPath();
 std::string MakeModelPath(const char* name);
@@ -44,6 +42,7 @@ public:
 	~TTimeProfile();
 };
 #define TIME_PROFILE(NAME) TTimeProfile NAME(#NAME)
+#define TIME_PROFILE2(NAME1,NAME2) TTimeProfile NAME(#NAME1+(":"+NAME2))
 
 class SDTimer {
 	double mLastTime = 0.0;

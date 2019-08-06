@@ -1,13 +1,13 @@
 #pragma once
-#include "TInterfaceType.h"
+#include "TPredefine.h"
+#include "IRenderable.h"
+#include "IResource.h"
 
 #define E_PASS_SHADOWCASTER "ShadowCaster"
 #define E_PASS_FORWARDBASE "ForwardBase"
 #define E_PASS_FORWARDADD "ForwardAdd"
 #define E_PASS_POSTPROCESS "PostProcess"
 
-class TRenderSystem;
-struct TRenderOperation;
 struct TContantBufferInfo {
 	TContantBufferPtr buffer;
 	bool isUnique;
@@ -20,7 +20,7 @@ public:
 
 struct TPass {
 	std::string mLightMode,mName;
-	ID3D11InputLayout* mInputLayout = nullptr;
+	TInputLayoutPtr mInputLayout;
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
 	
 	TProgramPtr mProgram;
@@ -64,7 +64,7 @@ public:
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
-struct TMaterial {
+struct TMaterial : public IResource {
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
@@ -89,7 +89,7 @@ public:
 	TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName);
 	TMaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName);
 
-	TMaterialBuilder& SetInputLayout(ID3D11InputLayout* inputLayout);
+	TMaterialBuilder& SetInputLayout(TInputLayoutPtr inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
 	TProgramPtr SetProgram(TProgramPtr program);
 	TMaterialBuilder& AddSampler(ID3D11SamplerState* sampler);
@@ -108,7 +108,6 @@ public:
 #define E_MAT_MODEL_SHADOW "model_shadow"
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
-class TRenderSystem;
 struct TMaterialFactory {
 	TRenderSystem* mRenderSys;
 	std::map<std::string, TMaterialPtr> mMaterials;

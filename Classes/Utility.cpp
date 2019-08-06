@@ -119,7 +119,7 @@ TTimeProfile::TTimeProfile(const std::string& name)
 TTimeProfile::~TTimeProfile()
 {
 	char szBuf[260]; 
-	sprintf(szBuf, "%s takes %d ms", mName.c_str(), timeGetTime() - mCurTime);
+	sprintf(szBuf, "%s takes %d ms\n", mName.c_str(), timeGetTime() - mCurTime);
 	OutputDebugStringA(szBuf);
 }
 
@@ -133,30 +133,7 @@ bool CheckHR(HRESULT result)
 	return false;
 }
 
-HRESULT CompileShaderFromFile(const char* szFileName, const char* szEntryPoint, const char* szShaderModel, ID3DBlob** ppBlobOut)
-{
-	HRESULT hr = S_OK;
 
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-	dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFileA(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
-	if (FAILED(hr))
-	{
-		if (pErrorBlob != NULL)
-			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-		if (pErrorBlob) pErrorBlob->Release();
-		CheckHR(hr);
-		return hr;
-	}
-	if (pErrorBlob) pErrorBlob->Release();
-
-	return S_OK;
-}
 
 std::string GetCurDirectory()
 {

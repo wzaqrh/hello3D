@@ -1,18 +1,20 @@
 #include "TMesh.h"
 #include "TRenderSystem.h"
+#include "IRenderable.h"
+#include "TInterfaceType.h"
 
 /********** TMesh **********/
 TMesh::TMesh(const aiMesh* __data,
 	std::vector<MeshVertex>& __vertices,
 	std::vector<UINT>& __indices,
-	TTextureBySlot& __textures,
+	TTextureBySlotPtr __textures,
 	TMaterialPtr __material,
 	TRenderSystem *__renderSys)
 {
 	data = __data;
 	vertices.swap(__vertices); __vertices.clear();
 	indices.swap(__indices); __indices.clear();
-	mTextures.swap(__textures); __textures.clear();
+	mTextures = __textures;
 	mMaterial = __material;
 
 	setupMesh(__renderSys);
@@ -29,15 +31,14 @@ void TMesh::Close()
 {
 }
 
+#if 0
 void TMesh::Draw(TRenderSystem* renderSys)
 {
 	renderSys->SetVertexBuffer(mVertexBuffer);
 	renderSys->SetIndexBuffer(mIndexBuffer);
 	if (mTextures.size() > 0)
 	{
-		std::vector<ID3D11ShaderResourceView*> texViews(mTextures.size());
-		for (int i = 0; i < mTextures.size(); ++i)
-			texViews[i] = mTextures[i]->texture;
+		std::vector<ID3D11ShaderResourceView*> texViews = mTextures.GetTextureViews();
 		renderSys->mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 	}
 	else {
@@ -47,10 +48,11 @@ void TMesh::Draw(TRenderSystem* renderSys)
 
 	renderSys->DrawIndexed(mIndexBuffer);
 }
+#endif
 
 bool TMesh::HasTexture(int slot)
 {
-	return (slot < mTextures.size()) 
-		&& mTextures[slot]
-		&& mTextures[slot]->texture != nullptr;
+	return (slot < mTextures->size()) 
+		&& mTextures->At(slot)
+		&& mTextures->At(slot)->GetSRV() != nullptr;
 }

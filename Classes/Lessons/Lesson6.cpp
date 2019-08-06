@@ -1,5 +1,7 @@
 #include "Lesson6.h"
 #include "TMaterialCB.h"
+#include "IRenderable.h"
+#include "TInterfaceType.h"
 
 void Lesson6::OnInitLight()
 {
@@ -56,33 +58,25 @@ void Lesson6::OnInitLight()
 /********** Lesson6 **********/
 void Lesson6::OnPostInitDevice()
 {
-	mRenderSys->SetCamera(45, 30, 1000);
-	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
+	mRenderSys->SetCamera(45, 30, 1000);
+	{
+		TIME_PROFILE(SetSkyBox);
+		mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+	}
 #if 1
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
-#elif 0
-	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR, [](TMaterialPtr mat) {
-		
-	});
-#else
-	mModel = new AssimpModel(mRenderSys, mMove, "shader\\ModelPbr.fx", nullptr, [&](TMaterialPtr mat) {
-		cbUnityMaterial cbUnityMat;
-		//cbUnityMat._Color = XMFLOAT4(0,0,0,0);
-		//cbUnityMat._SpecLightOff = TRUE;
-		cbUnityGlobal cbUnityGlb;
-		mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial), &cbUnityMat));
-		mat->AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal), &cbUnityGlb));
-	});
 #endif
 	//auto fileName = "Male02.FBX";//99ms,4688ms
 	auto fileName = "Male02.assbin";//37ms,2823ms
+	//auto fileName = "Male02.dae";//37ms,2823ms
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 
 	for (auto& iter : mModel->mMeshes) {
-		if (!iter->mTextures.empty() && iter->mTextures[0]) {
+		if (!iter->mTextures->empty() && (*iter->mTextures)[0]) {
 			std::string firstPostfix;
-			auto prefix = iter->mTextures[0]->path;
+			auto prefix = ((*iter->mTextures)[0])->GetPath();
 			auto pos = prefix.find_last_of("_");
 			if (pos != std::string::npos) {
 				firstPostfix = prefix.substr(pos + 1, std::string::npos);
@@ -101,11 +95,11 @@ void Lesson6::OnPostInitDevice()
 				"AO"
 			};
 			if (postfixs[0] == firstPostfix) {
-				iter->mTextures.clear();
-				for (int i = iter->mTextures.size(); i < ARRAYSIZE(postfixs); ++i) {
+				iter->mTextures->clear();
+				for (int i = iter->mTextures->size(); i < ARRAYSIZE(postfixs); ++i) {
 					TTexturePtr texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
-					iter->mTextures.push_back(texInfo);
-					assert(texInfo->texture);
+					iter->mTextures->push_back(texInfo);
+					//assert(texInfo->texture);
 				}
 			}
 		}

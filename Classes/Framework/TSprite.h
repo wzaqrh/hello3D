@@ -1,6 +1,6 @@
 #pragma once
-#include "TRenderSystem.h"
-#include "TMovable.h"
+#include "IRenderable.h"
+#include "TPredefine.h"
 
 struct Pos3Color3Tex2
 {

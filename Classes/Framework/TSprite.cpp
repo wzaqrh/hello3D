@@ -1,4 +1,8 @@
 #include "TSprite.h"
+#include "TRenderSystem.h"
+#include "TMaterial.h"
+#include "TMovable.h"
+#include "TInterfaceType.h"
 
 /********** Quad **********/
 Quad::Quad(float x, float y, float w, float h)

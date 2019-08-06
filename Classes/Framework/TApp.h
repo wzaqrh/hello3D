@@ -1,14 +1,9 @@
 #pragma once
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dcompiler.h>
-#include <xnamath.h>
-#include <dinput.h>
-#include <functional>
-#include "Utility.h"
-#include "TBaseTypes.h"
+#include "TPredefine.h"
+#include "TRenderSystem.h"
 #include "TMovable.h"
+#include "TMaterial.h"
+#include "Utility.h"
 
 class AssimpModel;
 struct aiNode;

@@ -15,15 +15,17 @@ typedef std::shared_ptr<TThreadPumpEntry> TThreadPumpEntryPtr;
 
 class TThreadPump
 {
-	ID3DX11ThreadPump* mThreadPump;
 	std::vector<TThreadPumpEntryPtr> mEntries;
+	ID3DX11ThreadPump* mThreadPump;
 public:
-	TThreadPump(ID3DX11ThreadPump* threadPump);
+	TThreadPump(ID3DX11ThreadPump* threadPump = nullptr);
 	~TThreadPump();
 
-	void AddWorkItem(TTexturePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, std::function<void(HRESULT, void*, TTexturePtr)> callback);
+	HRESULT AddWorkItem(TTexturePtr res, std::function<HRESULT(ID3DX11ThreadPump*, TThreadPumpEntryPtr entry)> addItemCB, std::function<void(HRESULT, void*, TTexturePtr)> callback=nullptr);
+	void AddWorkItem(TTexturePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, std::function<void(HRESULT, void*, TTexturePtr)> callback=nullptr);
 	bool RemoveWorkItem(TTexturePtr res);
 	void ClearWorkItems();
 	void Update(float dt);
 };
+typedef std::shared_ptr<TThreadPump> TThreadPumpPtr;
 

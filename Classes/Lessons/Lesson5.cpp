@@ -1,4 +1,5 @@
 #include "Lesson5.h"
+#include "TInterfaceType.h"
 
 /********** Lesson5 **********/
 void Lesson5::OnPostInitDevice()

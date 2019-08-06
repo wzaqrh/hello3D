@@ -1,8 +1,7 @@
 #pragma once
 #include "TBaseTypes.h"
+#include "TPredefine.h"
 
-typedef std::shared_ptr<class TSkyBox> TSkyBoxPtr;
-typedef std::shared_ptr<class TPostProcess> TPostProcessPtr;
 class TD3DInput;
 __declspec(align(16)) class TRenderSystem
 {
@@ -21,7 +20,7 @@ public:
 	int mScreenHeight;
 	TD3DInput* mInput = nullptr;
 	TMaterialFactoryPtr mMaterialFac;
-	std::map<std::string, ID3D11ShaderResourceView*> mTexByPath;
+	std::map<std::string, TTexturePtr> mTexByPath;
 	TRenderTexturePtr mShadowPassRT,mPostProcessRT;
 
 	ID3D11RenderTargetView* mBackRenderTargetView = NULL;
@@ -29,6 +28,8 @@ public:
 	ID3D11RenderTargetView* mCurRenderTargetView = NULL;
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
 	std::vector<TRenderTexturePtr> mRenderTargetStk;
+
+	TThreadPumpPtr mThreadPump;
 
 	bool mCastShdowFlag = false;
 	TBlendFunc mCurBlendFunc;
@@ -52,6 +53,7 @@ public:
 	~TRenderSystem();
 
 	HRESULT Initialize();
+	void Update(float dt);
 	void CleanUp();
 public:
 	TSpotLightPtr AddSpotLight();
@@ -84,15 +86,16 @@ public:
 	bool UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize);
 	void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
 
-	std::pair<ID3D11VertexShader*, ID3DBlob*> _CreateVS(const char* filename, const char* entry = nullptr);
-	ID3D11PixelShader* _CreatePS(const char* filename, const char* entry = nullptr);
+	TVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr);
+	TPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr);
 	TProgramPtr CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry);
 	TProgramPtr CreateProgram(const char* vsPath);
 
 	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
-	ID3D11InputLayout* CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	TInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	ID3D11InputLayout* _CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 
-	ID3D11ShaderResourceView* _CreateTexture(const char* pSrcFile, DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN);
+	TTexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN, bool async=false);
 	TTexturePtr GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
 
 	void SetBlendFunc(const TBlendFunc& blendFunc);

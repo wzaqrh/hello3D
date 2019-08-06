@@ -1,5 +1,6 @@
 #include "TMaterial.h"
 #include "TMaterialCB.h"
+#include "TInterfaceType.h"
 #include "TRenderSystem.h"
 #include "TPostProcess.h"
 #include "Utility.h"
@@ -227,7 +228,7 @@ TMaterialBuilder& TMaterialBuilder::SetPassName(const std::string& lightMode, co
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::SetInputLayout(ID3D11InputLayout* inputLayout)
+TMaterialBuilder& TMaterialBuilder::SetInputLayout(TInputLayoutPtr inputLayout)
 {
 	mCurPass->mInputLayout = inputLayout;
 	return *this;
@@ -338,6 +339,8 @@ void SetCommonField2(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
 
 TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 {
+	TIME_PROFILE2(CreateStdMaterial, name);
+
 	TMaterialPtr material;
 	TMaterialBuilder builder;
 	if (name == E_MAT_SPRITE) {

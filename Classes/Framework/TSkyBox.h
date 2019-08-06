@@ -1,7 +1,6 @@
 #pragma once
-#include "TRenderSystem.h"
-#include "TBaseTypes.h"
-#include "TMovable.h"
+#include "IRenderable.h"
+#include "TPredefine.h"
 
 struct SKYBOX_VERTEX
 {

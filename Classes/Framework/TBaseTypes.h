@@ -10,6 +10,7 @@
 
 #define USE_ONLY_PNG
 #define USE_RENDER_OP
+#define D3D11_DEBUG
 
 template<class T>
 T clamp(T minVal, T maxVal, T v) {
@@ -132,5 +133,6 @@ struct TDepthState {
 	TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
 };
 
-#include "TInterfaceType.h"
-#include "TMaterial.h"
+#include "TPredefine.h"
+//#include "TInterfaceType.h"
+//#include "TMaterial.h"

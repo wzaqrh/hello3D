@@ -1,4 +1,7 @@
 #include "TPostProcess.h"
+#include "TRenderSystem.h"
+#include "TInterfaceType.h"
+#include "TMaterial.h"
 
 /********** POSTPROCESS_VERTEX_QUAD **********/
 POSTPROCESS_VERTEX_QUAD::POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h)
