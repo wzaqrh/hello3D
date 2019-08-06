@@ -4,6 +4,7 @@
 #include "TSkyBox.h"
 #include "TPostProcess.h"
 #include "TThreadPump.h"
+#include <d3dcompiler.h>
 
 TRenderSystem* gRenderSys;
 
@@ -28,7 +29,7 @@ HRESULT TRenderSystem::Initialize()
 
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
-	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_DRIVER_TYPE driverTypes[] =
@@ -332,7 +333,7 @@ bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
 }
 TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* szEntry, bool async)
 {
-	TPixelShaderPtr ret = std::make_shared<TPixelShader>();
+	TPixelShaderPtr ret = std::make_shared<TPixelShader>(std::shared_ptr<IBlobData>(new TBlobDataD3d(nullptr)));
 	szEntry = szEntry ? szEntry : "PS";
 	const char* shaderModel = "ps_4_0";
 	DWORD dwShaderFlags = GetShaderFlag();
@@ -341,8 +342,9 @@ TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* szEnt
 	if (async) {
 		hr = mThreadPump->AddWorkItem(ret, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
 			const D3D10_SHADER_MACRO* pDefines = nullptr;
-			LPD3D10INCLUDE pInclude = new TIncludeStdio("shader\\");
-			return D3DX11CompileFromFileA(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, pump, &ret->mBlob, &ret->mErrBlob, (HRESULT*)&entry->hr);
+			LPD3D10INCLUDE pInclude =  new TIncludeStdio("shader\\");
+			return D3DX11CompileFromFileA(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, pump,
+				&static_cast<TBlobDataD3d*>(ret->mBlob.get())->mBlob, &ret->mErrBlob, (HRESULT*)&entry->hr);
 		}, [=](IResource* res, HRESULT hr) {
 			if (!FAILED(hr)) {
 				TPixelShader* ret = static_cast<TPixelShader*>(res);
@@ -357,7 +359,9 @@ TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* szEnt
 		});
 	}
 	else {
-		hr = D3DX11CompileFromFileA(filename, NULL, NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr, &ret->mBlob, &ret->mErrBlob, NULL);
+		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataD3d(nullptr));
+		hr = D3DX11CompileFromFileA(filename, NULL, NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr, 
+			&static_cast<TBlobDataD3d*>(ret->mBlob.get())->mBlob, &ret->mErrBlob, NULL);
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
 			ret->SetLoaded();
@@ -369,13 +373,31 @@ TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* szEnt
 	return ret;
 }
 
-/*
-HRESULT WINAPI D3DX11CompileFromFileA(LPCSTR pSrcFile,CONST D3D10_SHADER_MACRO* pDefines, LPD3D10INCLUDE pInclude,
-LPCSTR pFunctionName, LPCSTR pProfile, UINT Flags1, UINT Flags2, ID3DX11ThreadPump* pPump, ID3D10Blob** ppShader, ID3D10Blob** ppErrorMsgs, HRESULT* pHResult);
-*/
+TPixelShaderPtr TRenderSystem::_CreatePSByFXC(const char* filename)
+{
+	TPixelShaderPtr ret = std::make_shared<TPixelShader>(nullptr);
+	std::vector<char> buffer = ReadFile(filename, "rb");
+	if (!buffer.empty()){
+		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataStd(buffer));
+		HRESULT hr = mDevice->CreatePixelShader(&buffer[0], buffer.size(), NULL, &ret->mShader);
+		if (!FAILED(hr)) {
+			ret->SetLoaded();
+		}
+		else {
+			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
+			CheckCompileError(hr, ret->mErrBlob);
+			ret = nullptr;
+		}
+	}
+	else {
+		ret = nullptr;
+	}
+	return ret;
+}
+
 TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* szEntry, bool async)
 {
-	TVertexShaderPtr ret = std::make_shared<TVertexShader>();
+	TVertexShaderPtr ret = std::make_shared<TVertexShader>(std::shared_ptr<IBlobData>(new TBlobDataD3d(nullptr)));
 	szEntry = szEntry ? szEntry : "VS";
 	const char* shaderModel = "vs_4_0";
 	DWORD dwShaderFlags = GetShaderFlag();
@@ -386,7 +408,8 @@ TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* szEn
 		ID3DX11DataLoader* pDataLoader = nullptr;
 		const D3D10_SHADER_MACRO* pDefines = nullptr;
 		LPD3D10INCLUDE pInclude = new TIncludeStdio("shader\\");
-		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, &ret->mBlob, &ret->mErrBlob, &pProcessor))
+		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, 
+			&static_cast<TBlobDataD3d*>(ret->mBlob.get())->mBlob, &ret->mErrBlob, &pProcessor))
 			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename, &pDataLoader))) {
 			hr = mThreadPump->AddWorkItem(ret, pDataLoader, pProcessor,[=](IResource* res, HRESULT hr) {
 				if (!FAILED(hr)) {
@@ -404,7 +427,8 @@ TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* szEn
 		}
 	}
 	else {
-		hr = D3DX11CompileFromFileA(filename, NULL, NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr, &ret->mBlob, &ret->mErrBlob, NULL);
+		hr = D3DX11CompileFromFileA(filename, NULL, NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr, 
+			&static_cast<TBlobDataD3d*>(ret->mBlob.get())->mBlob, &ret->mErrBlob, NULL);
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
 			ret->SetLoaded();
@@ -416,8 +440,32 @@ TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* szEn
 	return ret;
 }
 
+TVertexShaderPtr TRenderSystem::_CreateVSByFXC(const char* filename)
+{
+	TVertexShaderPtr ret = std::make_shared<TVertexShader>(nullptr);
+	std::vector<char> buffer = ReadFile(filename, "rb");
+	if (!buffer.empty()){
+		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataStd(buffer));
+		auto buffer_size = buffer.size();
+		HRESULT hr = mDevice->CreateVertexShader(&buffer[0], buffer_size, NULL, &ret->mShader);
+		if (!FAILED(hr)) {
+			ret->SetLoaded();
+		}
+		else {
+			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
+			CheckCompileError(hr, ret->mErrBlob);
+			ret = nullptr;
+		}
+	}
+	else {
+		ret = nullptr;
+	}
+	return ret;
+}
+
 TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
 {
+	TIME_PROFILE2(CreateProgram, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
 	TProgramPtr program = std::make_shared<TProgram>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
@@ -425,10 +473,19 @@ TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath,
 	return program;
 }
 
-TProgramPtr TRenderSystem::CreateProgram(const char* vsPath)
+TProgramPtr TRenderSystem::CreateProgramByFXC(const char* name, const char* vsEntry, const char* psEntry)
 {
-	TIME_PROFILE2(CreateProgram, std::string(vsPath));
-	return CreateProgram(vsPath, nullptr, nullptr, nullptr);
+	TIME_PROFILE2(CreateProgramByFXC, std::string(name));
+	TProgramPtr program = std::make_shared<TProgram>();
+	
+	vsEntry = vsEntry ? vsEntry : "VS";
+	std::string vsName = std::string(name) + "_" + vsEntry + ".fxc";
+	program->SetVertex(_CreateVSByFXC(vsName.c_str()));
+	
+	psEntry = psEntry ? psEntry : "PS";
+	std::string psName = std::string(name) + "_" + psEntry + ".fxc";
+	program->SetPixel(_CreatePSByFXC(psName.c_str()));
+	return program;
 }
 
 ID3D11Buffer* TRenderSystem::_CreateVertexBuffer(int bufferSize, void* buffer)

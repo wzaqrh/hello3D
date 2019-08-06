@@ -161,6 +161,26 @@ STDMETHODIMP TIncludeStdio::Close(THIS_ LPCVOID pData)
 	return S_OK;
 }
 
+std::vector<char> ReadFile(const char* fileName, const char* mode)
+{
+	std::vector<char> ret;
+	FILE* fd = fopen(fileName, "r");
+	if (fd) {
+		fseek(fd, 0, SEEK_END);
+		size_t size = ftell(fd);
+		fseek(fd, 0, SEEK_SET);
+
+		size_t first = ret.size();
+		ret.resize(first + size);
+		fread(&ret[first], sizeof(char), size, fd);
+		fclose(fd);
+		
+		//std::string str(ret.begin(), ret.end());
+		//OutputDebugStringA(str.c_str());
+	}
+	return ret;
+}
+
 
 /********** Functions **********/
 bool CheckHR(HRESULT result)

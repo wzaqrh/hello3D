@@ -63,6 +63,8 @@ public:
 	STDMETHOD(Close)(THIS_ LPCVOID pData);
 };
 
+std::vector<char> ReadFile(const char* fileName, const char* mode);
+
 aiMatrix4x4 FromXM(const XMMATRIX& m);
 XMMATRIX ToXM(const aiMatrix4x4& m);
 XMFLOAT3 ToXM(const aiVector3D& v);

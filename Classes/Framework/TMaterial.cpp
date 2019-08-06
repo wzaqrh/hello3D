@@ -389,13 +389,13 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//*//pass E_PASS_FORWARDBASE
 		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
 		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgramByFXC("shader\\ModelPbr"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		//*//pass E_PASS_FORWARDADD
 		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx", nullptr, nullptr, "PSAdd"));
+		program = builder.SetProgram(mRenderSys->CreateProgramByFXC("shader\\ModelPbr", nullptr, "PSAdd"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
@@ -409,7 +409,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//*//pass E_PASS_SHADOWCASTER
 		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ModelPbr.fx", nullptr, "VSShadowCaster", "PSShadowCaster"));
+		program = builder.SetProgram(mRenderSys->CreateProgramByFXC("shader\\ModelPbr", "VSShadowCaster", "PSShadowCaster"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}

@@ -59,7 +59,10 @@ void Lesson6::OnInitLight()
 void Lesson6::OnPostInitDevice()
 {
 #if 1
-	mRenderSys->_CreatePS("shader\\LayerColor.hlsl", nullptr, true);
+	//mRenderSys->_CreatePSByFXC("shader\\ModelPbr_PS.fxc");
+	//mRenderSys->_CreateVS("shader\\LayerColor.fx", nullptr, false);
+	mRenderSys->_CreateVSByFXC("shader\\LayerColor_VS.fxc");
+	//mRenderSys->_CreateVSByFXC("shader\\ModelPbr_VS.fxc");
 #else
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 

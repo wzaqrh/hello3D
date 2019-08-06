@@ -6,18 +6,55 @@ IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	IUnknown** ppDeviceObj = (IUnknown**)&ref;
 	return *ppDeviceObj;
 }
+/********** TBlobDataD3d **********/
+TBlobDataD3d::TBlobDataD3d(ID3DBlob* pBlob)
+	:mBlob(pBlob)
+{
+}
 
-/********** TProgram **********/
+void* TBlobDataD3d::GetBufferPointer()
+{
+	return mBlob->GetBufferPointer();
+}
+
+size_t TBlobDataD3d::GetBufferSize()
+{
+	return mBlob->GetBufferSize();
+}
+/********** TBlobDataStd **********/
+TBlobDataStd::TBlobDataStd(const std::vector<char>& buffer)
+	:mBuffer(buffer)
+{
+}
+
+void* TBlobDataStd::GetBufferPointer()
+{
+	return mBuffer.empty() ? nullptr : &mBuffer[0];
+}
+
+size_t TBlobDataStd::GetBufferSize()
+{
+	return mBuffer.size();
+}
+/********** TVertexShader **********/
+TVertexShader::TVertexShader(IBlobDataPtr pBlob)
+	:mBlob(pBlob)
+{
+}
 IUnknown*& TVertexShader::GetDeviceObject()
 {
-	return MakeDeviceObjectRef(mBlob);
+	return MakeDeviceObjectRef(mErrBlob);
 }
-
+/********** TPixelShader **********/
+TPixelShader::TPixelShader(IBlobDataPtr pBlob)
+	: mBlob(pBlob)
+{
+}
 IUnknown*& TPixelShader::GetDeviceObject()
 {
-	return MakeDeviceObjectRef(mBlob);
+	return MakeDeviceObjectRef(mErrBlob);
 }
-
+/********** TProgram **********/
 void TProgram::SetVertex(TVertexShaderPtr pVertex)
 {
 	mVertex = pVertex;

@@ -3,20 +3,42 @@
 #include "IResource.h"
 
 /********** Program **********/
+struct IBlobData {
+	virtual void* GetBufferPointer() = 0;
+	virtual size_t GetBufferSize() = 0;
+};
+struct TBlobDataD3d : public IBlobData {
+	ID3DBlob* mBlob = nullptr;
+public:
+	TBlobDataD3d(ID3DBlob* pBlob);
+	virtual void* GetBufferPointer() override;
+	virtual size_t GetBufferSize() override;
+};
+struct TBlobDataStd : public IBlobData {
+	std::vector<char> mBuffer;
+public:
+	TBlobDataStd(const std::vector<char>& buffer);
+	virtual void* GetBufferPointer() override;
+	virtual size_t GetBufferSize() override;
+};
+typedef std::shared_ptr<IBlobData> IBlobDataPtr;
+
 struct TVertexShader : public IResource {
 	ID3D11VertexShader* mShader = nullptr;
-	ID3DBlob* mBlob = nullptr;
+	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
 public:
+	TVertexShader(IBlobDataPtr pBlob);
 	virtual IUnknown*& GetDeviceObject() override;
 };
 typedef std::shared_ptr<TVertexShader> TVertexShaderPtr;
 
 struct TPixelShader : public IResource {
 	ID3D11PixelShader* mShader = nullptr;
-	ID3DBlob* mBlob = nullptr;
+	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
 public:
+	TPixelShader(IBlobDataPtr pBlob);
 	virtual IUnknown*& GetDeviceObject() override;
 };
 typedef std::shared_ptr<TPixelShader> TPixelShaderPtr;

@@ -87,9 +87,12 @@ public:
 	void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
 
 	TVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
+	TVertexShaderPtr _CreateVSByFXC(const char* filename);
 	TPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
-	TProgramPtr CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry);
-	TProgramPtr CreateProgram(const char* vsPath);
+	TPixelShaderPtr _CreatePSByFXC(const char* filename);
+	TProgramPtr CreateProgram(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	TProgramPtr CreateProgramByFXC(const char* name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+
 
 	ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
 	TInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
