@@ -58,16 +58,18 @@ void Lesson6::OnInitLight()
 /********** Lesson6 **********/
 void Lesson6::OnPostInitDevice()
 {
+#if 1
+	mRenderSys->_CreatePS("shader\\LayerColor.hlsl", nullptr, true);
+#else
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
 	mRenderSys->SetCamera(45, 30, 1000);
 	{
 		TIME_PROFILE(SetSkyBox);
-		mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+		//mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 	}
-#if 1
+
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
-#endif
 	//auto fileName = "Male02.FBX";//99ms,4688ms
 	auto fileName = "Male02.assbin";//37ms,2823ms
 	//auto fileName = "Male02.dae";//37ms,2823ms
@@ -104,14 +106,15 @@ void Lesson6::OnPostInitDevice()
 			}
 		}
 	}
+#endif
 }
 
 void Lesson6::OnRender()
 {
-	mModel->Update(mTimer.mDeltaTime);
+	if (mModel) mModel->Update(mTimer.mDeltaTime);
 	if (mRenderSys->BeginScene()) {
 		TRenderOperationQueue opQueue;
-		mModel->GenRenderOperation(opQueue);
+		if (mModel) mModel->GenRenderOperation(opQueue);
 
 		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
 		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);

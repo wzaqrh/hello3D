@@ -7,6 +7,8 @@ struct TVertexShader : public IResource {
 	ID3D11VertexShader* mShader = nullptr;
 	ID3DBlob* mBlob = nullptr;
 	ID3DBlob* mErrBlob = nullptr;
+public:
+	virtual IUnknown*& GetDeviceObject() override;
 };
 typedef std::shared_ptr<TVertexShader> TVertexShaderPtr;
 
@@ -14,12 +16,17 @@ struct TPixelShader : public IResource {
 	ID3D11PixelShader* mShader = nullptr;
 	ID3DBlob* mBlob = nullptr;
 	ID3DBlob* mErrBlob = nullptr;
+public:
+	virtual IUnknown*& GetDeviceObject() override;
 };
 typedef std::shared_ptr<TPixelShader> TPixelShaderPtr;
 
 struct TProgram : public IResource {
 	TVertexShaderPtr mVertex;
 	TPixelShaderPtr mPixel;
+public:
+	void SetVertex(TVertexShaderPtr pVertex);
+	void SetPixel(TPixelShaderPtr pPixel);
 };
 typedef std::shared_ptr<TProgram> TProgramPtr;
 
@@ -87,6 +94,7 @@ public:
 	//TTexture();
 	TTexture(ID3D11ShaderResourceView* __texture, std::string __path);
 	void SetSRV(ID3D11ShaderResourceView* __texture);
+	virtual IUnknown*& GetDeviceObject() override;
 public:
 	const std::string& GetPath() const;
 	ID3D11ShaderResourceView*& GetSRV();

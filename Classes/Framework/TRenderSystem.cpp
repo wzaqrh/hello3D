@@ -310,56 +310,108 @@ ID3D11SamplerState* TRenderSystem::CreateSampler(D3D11_FILTER filter, D3D11_COMP
 	return pSamplerLinear;
 }
 
-bool CompileShaderFromFile(const char* szFileName, const char* szEntryPoint, const char* szShaderModel, ID3DBlob** ppBlobOut, ID3DBlob** ppErrorBlob, ID3DX11ThreadPump* pPump = nullptr)
-{
-	bool ret = true;
-
+DWORD GetShaderFlag() {
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(_DEBUG) && defined(D3D11_DEBUG)
 	dwShaderFlags |= D3DCOMPILE_DEBUG;
 #endif
-
-	HRESULT hr = D3DX11CompileFromFileA(szFileName, NULL, NULL, szEntryPoint, szShaderModel, dwShaderFlags, 0, pPump, ppBlobOut, ppErrorBlob, NULL);
-	if (FAILED(hr))
-	{
-		if (*ppErrorBlob != NULL)
-			OutputDebugStringA((char*)(*ppErrorBlob)->GetBufferPointer());
+	return dwShaderFlags;
+}
+bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
+	bool ret = true;
+	if (pErrorBlob != NULL) {
+		OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+		pErrorBlob->Release();
+		pErrorBlob = nullptr;
+	}
+	if (FAILED(hr)) {
 		CheckHR(hr);
 		ret = false;
 	}
-	if (*ppErrorBlob) {
-		(*ppErrorBlob)->Release();
-		(*ppErrorBlob) = nullptr;
-	}
 	return ret;
 }
-
-TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* entry)
+TPixelShaderPtr TRenderSystem::_CreatePS(const char* filename, const char* szEntry, bool async)
 {
 	TPixelShaderPtr ret = std::make_shared<TPixelShader>();
-	if (CompileShaderFromFile(filename, entry ? entry : "PS", "ps_4_0", &ret->mBlob, &ret->mErrBlob)) {
-		HRESULT hr = mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader);
-		if (CheckHR(hr)) {
-			ret = nullptr;
-		}
+	szEntry = szEntry ? szEntry : "PS";
+	const char* shaderModel = "ps_4_0";
+	DWORD dwShaderFlags = GetShaderFlag();
+
+	HRESULT hr;
+	if (async) {
+		hr = mThreadPump->AddWorkItem(ret, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
+			const D3D10_SHADER_MACRO* pDefines = nullptr;
+			LPD3D10INCLUDE pInclude = new TIncludeStdio("shader\\");
+			return D3DX11CompileFromFileA(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, pump, &ret->mBlob, &ret->mErrBlob, (HRESULT*)&entry->hr);
+		}, [=](IResource* res, HRESULT hr) {
+			if (!FAILED(hr)) {
+				TPixelShader* ret = static_cast<TPixelShader*>(res);
+				assert(dynamic_cast<TVertexShader*>(res) && ret->mBlob);
+				if (!CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+					ret->SetLoaded();
+				}
+			}
+			else {
+				CheckCompileError(hr, ret->mErrBlob);
+			}
+		});
 	}
 	else {
-		ret = nullptr;
+		hr = D3DX11CompileFromFileA(filename, NULL, NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr, &ret->mBlob, &ret->mErrBlob, NULL);
+		if (CheckCompileError(hr, ret->mErrBlob)
+			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+			ret->SetLoaded();
+		}
+		else {
+			ret = nullptr;
+		}
 	}
 	return ret;
 }
 
-TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* entry)
+/*
+HRESULT WINAPI D3DX11CompileFromFileA(LPCSTR pSrcFile,CONST D3D10_SHADER_MACRO* pDefines, LPD3D10INCLUDE pInclude,
+LPCSTR pFunctionName, LPCSTR pProfile, UINT Flags1, UINT Flags2, ID3DX11ThreadPump* pPump, ID3D10Blob** ppShader, ID3D10Blob** ppErrorMsgs, HRESULT* pHResult);
+*/
+TVertexShaderPtr TRenderSystem::_CreateVS(const char* filename, const char* szEntry, bool async)
 {
 	TVertexShaderPtr ret = std::make_shared<TVertexShader>();
-	if (CompileShaderFromFile(filename, entry ? entry : "VS", "vs_4_0", &ret->mBlob, &ret->mErrBlob)) {
-		HRESULT hr = mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader);
-		if (CheckHR(hr)) {
-			ret = nullptr;
+	szEntry = szEntry ? szEntry : "VS";
+	const char* shaderModel = "vs_4_0";
+	DWORD dwShaderFlags = GetShaderFlag();
+
+	HRESULT hr;
+	if (async) {
+		ID3DX11DataProcessor* pProcessor = nullptr;
+		ID3DX11DataLoader* pDataLoader = nullptr;
+		const D3D10_SHADER_MACRO* pDefines = nullptr;
+		LPD3D10INCLUDE pInclude = new TIncludeStdio("shader\\");
+		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, &ret->mBlob, &ret->mErrBlob, &pProcessor))
+			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename, &pDataLoader))) {
+			hr = mThreadPump->AddWorkItem(ret, pDataLoader, pProcessor,[=](IResource* res, HRESULT hr) {
+				if (!FAILED(hr)) {
+					TVertexShader* ret = static_cast<TVertexShader*>(res);
+					assert(dynamic_cast<TVertexShader*>(res) && ret->mBlob);
+					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+						ret->SetLoaded();
+					}
+				}
+				else {
+					CheckCompileError(hr, ret->mErrBlob);
+				}
+			});
+			CheckCompileError(hr, ret->mErrBlob);
 		}
 	}
 	else {
-		ret = nullptr;
+		hr = D3DX11CompileFromFileA(filename, NULL, NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr, &ret->mBlob, &ret->mErrBlob, NULL);
+		if (CheckCompileError(hr, ret->mErrBlob)
+			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+			ret->SetLoaded();
+		}
+		else {
+			ret = nullptr;
+		}
 	}
 	return ret;
 }
@@ -368,8 +420,8 @@ TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath,
 {
 	psPath = psPath ? psPath : vsPath;
 	TProgramPtr program = std::make_shared<TProgram>();
-	program->mVertex = _CreateVS(vsPath, vsEntry);
-	program->mPixel = _CreatePS(psPath, psEntry);
+	program->SetVertex(_CreateVS(vsPath, vsEntry));
+	program->SetPixel(_CreatePS(psPath, psEntry));
 	return program;
 }
 
@@ -533,21 +585,22 @@ TTexturePtr TRenderSystem::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 		HRESULT hr;
 		if (async) {
 			hr = mThreadPump->AddWorkItem(pTextureRV, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
-				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, (ID3D11ShaderResourceView**)&entry->deviceObject, NULL);
-			});
+				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, &pTextureRV->GetSRV(), NULL);
+			}, ResourceSetLoaded);
 		}
 		else {
 			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, nullptr, &pTextureRV->GetSRV(), NULL);
+			pTextureRV->SetLoaded();
 		}
-		if (CheckHR(hr))
-			return nullptr;
+		if (CheckHR(hr)) {
+			pTextureRV = nullptr;
+		}
 	}
 	else {
 		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
 		OutputDebugStringA(szBuf);
 		//MessageBoxA(0, szBuf, "", MB_OK);
 	}
-	//mDeviceContext->GenerateMips(pTextureRV);
 	return pTextureRV;
 }
 
@@ -871,4 +924,3 @@ void TRenderSystem::EndScene()
 	}
 	DoPostProcess();
 }
-

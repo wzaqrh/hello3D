@@ -11,7 +11,8 @@ enum enResourceState {
 struct IResource {
 	typedef std::function<void(IResource*)> Listener;
 	enResourceState mCurState;
-	Listener OnLoaded;
+	std::vector<Listener> OnLoadeds;
+	std::vector<std::shared_ptr<IResource>> mDepends;
 public:
 	IResource();
 	bool IsLoaded() const {
@@ -26,5 +27,11 @@ public:
 	void SetLoaded();
 public:
 	void SetCurState(enResourceState state);
+	
+	virtual IUnknown*& GetDeviceObject();
+
 	void AddOnLoadedListener(Listener lis);
+	virtual bool CheckLoaded() const;
+	void AddDependency(std::shared_ptr<IResource> res);
 };
+typedef std::shared_ptr<IResource> IResourcePtr;

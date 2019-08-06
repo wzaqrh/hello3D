@@ -86,8 +86,8 @@ public:
 	bool UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize);
 	void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
 
-	TVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr);
-	TPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr);
+	TVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
+	TPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
 	TProgramPtr CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry);
 	TProgramPtr CreateProgram(const char* vsPath);
 

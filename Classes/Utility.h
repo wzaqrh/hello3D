@@ -52,6 +52,17 @@ public:
 	double Update();
 };
 
+struct TIncludeStdio : public ID3DInclude
+{
+	std::string mModelPath;
+	std::vector<char> mBuffer;
+	std::vector<std::string> mStrBuffer;
+public:
+	TIncludeStdio(const std::string& modelPath);
+	STDMETHOD(Open)(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes);
+	STDMETHOD(Close)(THIS_ LPCVOID pData);
+};
+
 aiMatrix4x4 FromXM(const XMMATRIX& m);
 XMMATRIX ToXM(const aiMatrix4x4& m);
 XMFLOAT3 ToXM(const aiVector3D& v);

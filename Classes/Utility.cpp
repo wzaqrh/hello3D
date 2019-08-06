@@ -123,6 +123,45 @@ TTimeProfile::~TTimeProfile()
 	OutputDebugStringA(szBuf);
 }
 
+TIncludeStdio::TIncludeStdio(const std::string& modelPath)
+	:mModelPath(modelPath)
+{
+}
+
+/********** TIncludeStdio **********/
+STDMETHODIMP TIncludeStdio::Open(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
+{
+	std::string fullPath = mModelPath + pFileName;
+	FILE* fd = fopen(fullPath.c_str(), "r");
+	if (fd) {
+		fseek(fd, 0, SEEK_END);
+		size_t size = ftell(fd);
+		fseek(fd, 0, SEEK_SET);
+		size_t first = mBuffer.size();
+		mBuffer.resize(first + size);
+		fread(&mBuffer[first], sizeof(char), size, fd);
+		fclose(fd);
+
+		//if (ppData) *ppData = &mBuffer[first];
+		//if (pBytes) *pBytes = mBuffer.size();
+
+		mStrBuffer.push_back(std::string(mBuffer.begin(), mBuffer.end()));
+		if (ppData) *ppData = mStrBuffer.back().c_str();
+		if (pBytes) *pBytes = mStrBuffer.back().size();
+		
+		OutputDebugStringA(mStrBuffer.back().c_str());
+
+		return S_OK;
+	}
+	return S_FALSE;
+}
+
+STDMETHODIMP TIncludeStdio::Close(THIS_ LPCVOID pData)
+{
+	return S_OK;
+}
+
+
 /********** Functions **********/
 bool CheckHR(HRESULT result)
 {
@@ -132,8 +171,6 @@ bool CheckHR(HRESULT result)
 	}
 	return false;
 }
-
-
 
 std::string GetCurDirectory()
 {

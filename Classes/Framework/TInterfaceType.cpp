@@ -1,6 +1,35 @@
 #include "TInterfaceType.h"
 #include "TRenderSystem.h"
 
+template<class T>
+IUnknown*& MakeDeviceObjectRef(T*& ref) {
+	IUnknown** ppDeviceObj = (IUnknown**)&ref;
+	return *ppDeviceObj;
+}
+
+/********** TProgram **********/
+IUnknown*& TVertexShader::GetDeviceObject()
+{
+	return MakeDeviceObjectRef(mBlob);
+}
+
+IUnknown*& TPixelShader::GetDeviceObject()
+{
+	return MakeDeviceObjectRef(mBlob);
+}
+
+void TProgram::SetVertex(TVertexShaderPtr pVertex)
+{
+	mVertex = pVertex;
+	AddDependency(pVertex);
+}
+
+void TProgram::SetPixel(TPixelShaderPtr pPixel)
+{
+	mPixel = pPixel;
+	AddDependency(pPixel);
+}
+
 /********** TRenderTexture **********/
 TRenderTexture::TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format)
 {
@@ -133,6 +162,11 @@ TTexture::TTexture(ID3D11ShaderResourceView* __texture, std::string __path)
 void TTexture::SetSRV(ID3D11ShaderResourceView* __texture)
 {
 	texture = __texture;
+}
+
+IUnknown*& TTexture::GetDeviceObject()
+{
+	return MakeDeviceObjectRef(texture);
 }
 
 const std::string& TTexture::GetPath() const

@@ -1,11 +1,16 @@
 #include "TThreadPump.h"
 #include "Utility.h"
 
+void ResourceSetLoaded(IResource* res, HRESULT hr)
+{
+	if (! FAILED(hr))
+		res->SetLoaded();
+}
+
 /********** TThreadPumpEntry **********/
 void TThreadPumpEntry::Clear()
 {
 	hr = 0;
-	deviceObject = nullptr;
 	res = nullptr;
 	callback = nullptr;
 }
@@ -17,7 +22,7 @@ bool TThreadPumpEntry::IsNull() const
 
 bool TThreadPumpEntry::IsAttached() const
 {
-	return deviceObject != nullptr;
+	return res->GetDeviceObject() != nullptr;
 }
 
 /********** TThreadPump **********/
@@ -39,7 +44,7 @@ void TThreadPump::ClearWorkItems()
 	mEntries.clear();
 }
 
-void TThreadPump::AddWorkItem(TTexturePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, std::function<void(HRESULT, void*, TTexturePtr)> callback)
+HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, TThreadPumpCallback callback)
 {
 	TThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -57,10 +62,10 @@ void TThreadPump::AddWorkItem(TTexturePtr res, ID3DX11DataLoader* loader, ID3DX1
 	entry->Clear();
 	entry->res = res;
 	entry->callback = callback;
-	CheckHR(mThreadPump->AddWorkItem(loader, processor, (HRESULT*)&entry->hr, (void**)entry->deviceObject));
+	return mThreadPump->AddWorkItem(loader, processor, (HRESULT*)&entry->hr, (void**)res->GetDeviceObject());
 }
 
-HRESULT TThreadPump::AddWorkItem(TTexturePtr res, std::function<HRESULT(ID3DX11ThreadPump*, TThreadPumpEntryPtr entry)> addItemCB, std::function<void(HRESULT, void*, TTexturePtr)> callback)
+HRESULT TThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, TThreadPumpEntryPtr entry)> addItemCB, TThreadPumpCallback callback)
 {
 	TThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -81,7 +86,7 @@ HRESULT TThreadPump::AddWorkItem(TTexturePtr res, std::function<HRESULT(ID3DX11T
 	return addItemCB(mThreadPump, entry);
 }
 
-bool TThreadPump::RemoveWorkItem(TTexturePtr res)
+bool TThreadPump::RemoveWorkItem(IResourcePtr res)
 {
 	bool result = false;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -98,6 +103,11 @@ void TThreadPump::Update(float dt)
 {
 	UINT ioCount = 0, proceeCount = 0, deviceObjectCount = 0;
 	CheckHR(mThreadPump->GetQueueStatus(&ioCount, &proceeCount, &deviceObjectCount));
+
+	if (ioCount > 0 || proceeCount > 0) {
+		ioCount = ioCount;
+	}
+
 	if (deviceObjectCount > 0) {
 		mThreadPump->ProcessDeviceWorkItems(deviceObjectCount);
 
@@ -105,13 +115,26 @@ void TThreadPump::Update(float dt)
 			auto entry = mEntries[i];
 			if (!entry->IsNull() && entry->IsAttached()) {
 				HRESULT hr = entry->hr;
-				void* deviceObject = (void*)entry->deviceObject;
-				TTexturePtr res = entry->res;
+				IResourcePtr res = entry->res;
 				auto callback = entry->callback;
 				entry->Clear();
 
-				res->SetSRV((ID3D11ShaderResourceView*)deviceObject);
-				if (callback) callback(hr, deviceObject, res);
+				if (callback) 
+					callback(res.get(), hr);
+			}
+		}
+	}
+	else {
+		for (size_t i = 0; i < mEntries.size(); ++i) {
+			auto entry = mEntries[i];
+			if (FAILED(entry->hr)) {
+				HRESULT hr = entry->hr;
+				IResourcePtr res = entry->res;
+				auto callback = entry->callback;
+				entry->Clear();
+
+				if (callback)
+					callback(entry->res.get(), hr);
 			}
 		}
 	}

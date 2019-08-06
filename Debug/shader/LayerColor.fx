@@ -20,7 +20,6 @@ PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
 	matrix WVP = mul(Projection,mul(View, World));
-	
     output.Pos = mul(WVP, float4(input.Pos,1.0));
 	output.Color = input.Color;
 	output.Tex = input.Tex;
