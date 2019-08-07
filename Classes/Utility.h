@@ -1,12 +1,13 @@
 #pragma once
-#include "TRenderSystem.h"
-#include "TMesh.h"
+#include "TPredefine.h"
+#include "TBaseTypes.h"
 
 bool CheckHR(HRESULT result);
 
 extern std::string gModelPath;
 std::string GetModelPath();
 std::string MakeModelPath(const char* name);
+std::string GetFileExt(const std::string& fileName);
 
 bool IsFileExist(const std::string& fileName);
 

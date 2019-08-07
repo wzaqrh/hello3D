@@ -118,3 +118,13 @@ private:
 	TMaterialPtr CreateStdMaterial(std::string name);
 };
 typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;
+
+
+#define FILE_EXT_CSO ".cso"
+#define FILE_EXT_FX ".fx"
+
+#ifdef PRELOAD_SHADER
+#define MAKE_MAT_NAME(NAME) ("shader\\" NAME)
+#else
+#define MAKE_MAT_NAME(NAME) ("shader\\" NAME FILE_EXT_FX)
+#endif

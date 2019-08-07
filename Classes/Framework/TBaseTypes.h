@@ -8,10 +8,6 @@
 #include <dxerr.h>
 #include "std.h"
 
-#define USE_ONLY_PNG
-#define USE_RENDER_OP
-#define D3D11_DEBUG
-
 template<class T>
 T clamp(T minVal, T maxVal, T v) {
 	return min(max(v, minVal),maxVal);

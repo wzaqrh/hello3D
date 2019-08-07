@@ -266,10 +266,12 @@ TInputLayoutPtr TRenderSystem::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_EL
 	ret->mInputDescs.assign(descArray, descArray + descCount);
 	if (pProgram->IsLoaded()) {
 		ret->mLayout = _CreateInputLayout(pProgram.get(), ret->mInputDescs);
+		ret->SetLoaded();
 	}
 	else {
 		pProgram->AddOnLoadedListener([=](IResource* program) {
 			ret->mLayout = _CreateInputLayout(static_cast<TProgram*>(program), ret->mInputDescs);
+			ret->SetLoaded();
 		});
 	}
 	return ret;
@@ -464,29 +466,43 @@ TVertexShaderPtr TRenderSystem::_CreateVSByFXC(const char* filename)
 	return ret;
 }
 
-TProgramPtr TRenderSystem::CreateProgram(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
+TProgramPtr TRenderSystem::CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
 {
-	TIME_PROFILE2(CreateProgram, std::string(vsPath));
+	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
 	TProgramPtr program = std::make_shared<TProgram>();
-	program->SetVertex(_CreateVS(vsPath, vsEntry));
-	program->SetPixel(_CreatePS(psPath, psEntry));
+	program->SetVertex(_CreateVS(vsPath, vsEntry, false));
+	program->SetPixel(_CreatePS(psPath, psEntry, false));
+	program->CheckAndSetLoaded();
 	return program;
 }
 
-TProgramPtr TRenderSystem::CreateProgramByFXC(const char* name, const char* vsEntry, const char* psEntry)
+TProgramPtr TRenderSystem::CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry)
 {
-	TIME_PROFILE2(CreateProgramByFXC, std::string(name));
+	TIME_PROFILE2(CreateProgramByFXC, (name));
 	TProgramPtr program = std::make_shared<TProgram>();
 	
 	vsEntry = vsEntry ? vsEntry : "VS";
-	std::string vsName = std::string(name) + "_" + vsEntry + ".fxc";
+	std::string vsName = (name) + "_" + vsEntry + FILE_EXT_CSO;
 	program->SetVertex(_CreateVSByFXC(vsName.c_str()));
 	
 	psEntry = psEntry ? psEntry : "PS";
-	std::string psName = std::string(name) + "_" + psEntry + ".fxc";
+	std::string psName = (name) + "_" + psEntry + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
+
+	program->CheckAndSetLoaded();
 	return program;
+}
+
+TProgramPtr TRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+{
+	std::string ext = GetFileExt(name);
+	if (ext.empty()) {
+		return CreateProgramByFXC(name, vsEntry, psEntry);
+	}
+	else {
+		return CreateProgramByCompile(name.c_str(), name.c_str(), vsEntry, psEntry);
+	}
 }
 
 ID3D11Buffer* TRenderSystem::_CreateVertexBuffer(int bufferSize, void* buffer)
@@ -658,6 +674,7 @@ TTexturePtr TRenderSystem::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
 		OutputDebugStringA(szBuf);
 		//MessageBoxA(0, szBuf, "", MB_OK);
+		pTextureRV = nullptr;
 	}
 	return pTextureRV;
 }
@@ -887,7 +904,9 @@ void TRenderSystem::RenderLight(TDirectLight* light, enLightType lightType, cons
 {
 	auto LightCam = light->GetLightCamera(*mDefCamera);
 	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
-	for (int i = 0; i < opQueue.size(); ++i) {
+	for (int i = 0; i < opQueue.size(); ++i) 
+	//if (opQueue[i].mMaterial->IsLoaded()) 
+	{
 		globalParam.mWorld = opQueue[i].mWorldTransform;
 		RenderOperation(opQueue[i], lightMode, globalParam);
 	}

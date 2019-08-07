@@ -58,11 +58,13 @@ void Lesson6::OnInitLight()
 /********** Lesson6 **********/
 void Lesson6::OnPostInitDevice()
 {
-#if 1
-	//mRenderSys->_CreatePSByFXC("shader\\ModelPbr_PS.fxc");
+	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+#if 0
+	//mRenderSys->_CreatePSByFXC("shader\\ModelPbr_PS.cso");
 	//mRenderSys->_CreateVS("shader\\LayerColor.fx", nullptr, false);
-	mRenderSys->_CreateVSByFXC("shader\\LayerColor_VS.fxc");
-	//mRenderSys->_CreateVSByFXC("shader\\ModelPbr_VS.fxc");
+	//mRenderSys->_CreateVSByFXC("shader\\LayerColor_VS.cso");
+	//mRenderSys->_CreateVSByFXC("shader\\Model_VS.cso");
+	//mRenderSys->_CreateVSByFXC("shader\\ModelPbr_VS.cso");
 #else
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 

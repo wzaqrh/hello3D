@@ -354,7 +354,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Sprite.fx"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Sprite")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 	}
 	else if (name == E_MAT_MODEL) {
@@ -369,7 +369,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Model.fx"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
@@ -389,13 +389,13 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//*//pass E_PASS_FORWARDBASE
 		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
 		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgramByFXC("shader\\ModelPbr"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		//*//pass E_PASS_FORWARDADD
 		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgramByFXC("shader\\ModelPbr", nullptr, "PSAdd"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), nullptr, "PSAdd"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
@@ -409,7 +409,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//*//pass E_PASS_SHADOWCASTER
 		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgramByFXC("shader\\ModelPbr", "VSShadowCaster", "PSShadowCaster"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), "VSShadowCaster", "PSShadowCaster"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
@@ -426,13 +426,13 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		};
 		//pass E_PASS_FORWARDBASE
 		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowMap.fx"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ShadowMap")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		//pass E_PASS_SHADOWCASTER
 		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\ShadowDepth.fx"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ShadowDepth")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
@@ -442,7 +442,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		D3D11_INPUT_ELEMENT_DESC layout[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Skybox.fx"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Skybox")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS));
@@ -472,7 +472,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale2x2"));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale2x2"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexToneMaps[NUM_TONEMAP_TEXTURES-1]);
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
@@ -485,7 +485,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//pass DownScale3x3
 		builder.AddPass(E_PASS_POSTPROCESS, "DownScale3x3");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale3x3"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale3x3"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexToneMaps[0]);
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES - 1; ++i) {
@@ -502,7 +502,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//pass DownScale3x3_BrightPass
 		builder.AddPass(E_PASS_POSTPROCESS, "DownScale3x3_BrightPass");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "DownScale3x3_BrightPass"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale3x3_BrightPass"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexBrightPass);
 		builder.SetTexture(1, TexToneMaps[0]->GetRenderTargetSRV());
@@ -516,7 +516,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//pass Bloom
 		builder.AddPass(E_PASS_POSTPROCESS, "Bloom");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "BloomPS"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "BloomPS"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexBlooms[0]);
 		for (int i = 1; i < NUM_BLOOM_TEXTURES; ++i) {
@@ -533,7 +533,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		//pass FinalPass
 		builder.AddPass(E_PASS_POSTPROCESS, "FinalPass");
 		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram("shader\\Bloom.fx", nullptr, "VS", "FinalPass"));
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "FinalPass"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetTexture(1, TexToneMaps[0]->GetRenderTargetSRV());
 		builder.SetTexture(2, TexBlooms[0]->GetRenderTargetSRV());

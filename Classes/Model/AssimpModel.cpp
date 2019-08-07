@@ -450,7 +450,7 @@ void AssimpModel::LoadMaterial(const char* vsName, const char* psName, std::func
 	if (vsName && psName) {
 		callback = [&](TMaterialPtr mat) {
 			TMaterialBuilder builder(mat);
-			auto program = builder.SetProgram(mRenderSys->CreateProgram(vsName, psName, nullptr, nullptr));
+			auto program = builder.SetProgram(mRenderSys->CreateProgramByCompile(vsName, psName, nullptr, nullptr));
 			D3D11_INPUT_ELEMENT_DESC layout[] =
 			{
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },

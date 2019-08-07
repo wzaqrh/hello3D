@@ -32,6 +32,7 @@ public:
 
 	void AddOnLoadedListener(Listener lis);
 	virtual bool CheckLoaded() const;
+	void CheckAndSetLoaded();
 	void AddDependency(std::shared_ptr<IResource> res);
 };
 typedef std::shared_ptr<IResource> IResourcePtr;

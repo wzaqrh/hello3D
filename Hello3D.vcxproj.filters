@@ -182,9 +182,4 @@
       <Filter>Lib</Filter>
     </Library>
   </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Debug\shader\LayerColor.fx">
-      <Filter>fx</Filter>
-    </FxCompile>
-  </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@
 /********** IResource **********/
 IResource::IResource()
 	:mCurState(E_RES_STATE_NONE)
+	//:mCurState(E_RES_STATE_LOADED)
 {
 }
 
@@ -38,18 +39,27 @@ void IResource::SetLoaded()
 
 bool IResource::CheckLoaded() const
 {
-	for (auto& depent : mDepends)
-		if (!depent->CheckLoaded())
-			return false;
-	return mCurState == E_RES_STATE_LOADED;
+	if (!mDepends.empty()) {
+		for (auto& depent : mDepends)
+			if (!depent->CheckLoaded())
+				return false;
+		return true;
+	}
+	else {
+		return mCurState == E_RES_STATE_LOADED;
+	}
+}
+
+void IResource::CheckAndSetLoaded()
+{
+	if (!IsLoaded() && CheckLoaded())
+		SetLoaded();
 }
 
 void IResource::AddDependency(std::shared_ptr<IResource> res)
 {
 	mDepends.push_back(res);
 	res->AddOnLoadedListener([=](IResource* res) {
-		if (CheckLoaded()) {
-			SetLoaded();
-		}
+		CheckAndSetLoaded();
 	});
 }

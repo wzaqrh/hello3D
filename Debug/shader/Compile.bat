@@ -1,11 +1,36 @@
-::Fxc.exe /Od /Zi /E PS /T ps_4_0 /Fo LayerColor_PS.fxc LayerColor.fx
-fxc.exe /E VS /T vs_4_0_level_9_3 /Fo LayerColor_VS.fxc LayerColor.fx
-::Fxc.exe /nologo /E main /T vs_5_1 /Fo ParticleVS.cso ParticleVS.hlsl
+SET VS_VERSION=vs_5_0
+SET PS_VERSION=ps_4_0
 
-::Fxc.exe /Od /Zi /E VS /T vs_3_0 /Fo ModelPbr_VS.fxc ModelPbr.fx
-::Fxc.exe /E PS /T ps_4_0 /Fo ModelPbr_PS.fxc ModelPbr.fx
-::Fxc.exe /E PSAdd /T ps_4_0 /Fo ModelPbr_PSAdd.fxc ModelPbr.fx
-::Fxc.exe /E VSShadowCaster /T vs_4_0 /Fo ModelPbr_VSShadowCaster.fxc ModelPbr.fx
-::Fxc.exe /E PSShadowCaster /T ps_4_0 /Fo ModelPbr_PSShadowCaster.fxc ModelPbr.fx
+::LayerColor
+fxc /T "%VS_VERSION%" /Fo LayerColor_VS.cso /E VS LayerColor.fx
+fxc /T "%PS_VERSION%" /Fo LayerColor_PS.cso /E PS LayerColor.fx
+
+::Sprite
+fxc /T "%VS_VERSION%" /Fo Sprite_VS.cso /E VS Sprite.fx
+fxc /T "%PS_VERSION%" /Fo Sprite_PS.cso /E PS Sprite.fx
+
+::Model
+fxc /T "%VS_VERSION%" /Fo Model_VS.fxc /E VS Model.fx
+fxc /T "%PS_VERSION%" /Fo Model_PS.cso /E PS Model.fx
+
+::ModelPbr
+fxc /T "%VS_VERSION%" /Fo ModelPbr_VS.cso /E VS ModelPbr.fx
+fxc /T "%PS_VERSION%" /Fo ModelPbr_PS.cso /E PS ModelPbr.fx
+fxc /T "%PS_VERSION%" /Fo ModelPbr_PSAdd.cso /E PSAdd ModelPbr.fx
+fxc /T "%VS_VERSION%" /Fo ModelPbr_VSShadowCaster.cso /E VSShadowCaster ModelPbr.fx
+fxc /T "%PS_VERSION%" /Fo ModelPbr_PSShadowCaster.cso /E PSShadowCaster ModelPbr.fx
+
+::ShadowMap
+fxc /T "%VS_VERSION%" /Fo ShadowMap_VS.fxc /E VS ShadowMap.fx
+fxc /T "%PS_VERSION%" /Fo ShadowMap_PS.cso /E PS ShadowMap.fx
+
+::ShadowMap
+fxc /T "%VS_VERSION%" /Fo ShadowDepth_VS.fxc /E VS ShadowDepth.fx
+fxc /T "%PS_VERSION%" /Fo ShadowDepth_PS.cso /E PS ShadowDepth.fx
+
+::Skybox
+fxc /T "%VS_VERSION%" /Fo Skybox_VS.cso /E VS Skybox.fx
+fxc /T "%PS_VERSION%" /Fo Skybox_PS.cso /E PS Skybox.fx
+
 
 PAUSE

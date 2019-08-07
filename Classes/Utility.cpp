@@ -212,6 +212,16 @@ std::string MakeModelPath(const char* name) {
 	return GetModelPath() + name;
 }
 
+std::string GetFileExt(const std::string& fileName)
+{
+	std::string ext;
+	size_t pos = fileName.find_last_of(".");
+	if (pos != std::string::npos) {
+		ext = fileName.substr(pos + 1);
+	}
+	return ext;
+}
+
 bool IsFileExist(const std::string& fileName)
 {
 	WIN32_FIND_DATAA wfd;
