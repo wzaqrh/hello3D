@@ -25,14 +25,14 @@ public:
 class TPostProcess 
 	: public IRenderable {
 protected:
-	TRenderSystem* mRenderSys = nullptr;
+	IRenderSystem* mRenderSys = nullptr;
 	TRenderTexturePtr mMainTex;
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 	TMaterialPtr mMaterial;
 	std::map<std::pair<TPassPtr, int>, TVertexBufferPtr> mVertBufferByPass;
 public:
-	TPostProcess(TRenderSystem* RenderSys, TRenderTexturePtr mainTex);
+	TPostProcess(IRenderSystem* RenderSys, TRenderTexturePtr mainTex);
 	~TPostProcess();
 	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
 	void Draw();
@@ -51,5 +51,5 @@ class TBloom
 	: public TPostProcess
 {
 public:
-	TBloom(TRenderSystem* RenderSys, TRenderTexturePtr mainTex);
+	TBloom(IRenderSystem* RenderSys, TRenderTexturePtr mainTex);
 };

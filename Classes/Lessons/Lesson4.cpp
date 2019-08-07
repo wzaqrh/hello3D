@@ -20,13 +20,6 @@ void TFogExp::SetExp(float exp)
 /********** Lesson4 **********/
 void Lesson4::OnPostInitDevice()
 {
-	auto light1 = mRenderSys->mPointLights[0];
-	light1->SetPosition(20, 0, -20);
-	light1->SetAttenuation(1.0, 0.1, 0);
-	light1->SetSpecularPower(60);
-	light1->SetSpecularColor(0, 0, 0, 0);
-	light1->SetDiffuseColor(0, 0, 0, 0);
-
 	auto light2 = mRenderSys->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 
@@ -44,12 +37,10 @@ void Lesson4::OnPostInitDevice()
 void Lesson4::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
-#ifdef USE_RENDER_OP
-	//mRenderSys->SetWorldTransform(GetWorldTransform());
-#else
-	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
-#endif
-	mModel->Draw();
+	if (mRenderSys->BeginScene()) {
+		mModel->Draw();
+		mRenderSys->EndScene();
+	}
 }
 
 //auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");

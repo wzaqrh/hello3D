@@ -2,14 +2,16 @@
 #include "TInterfaceType.h"
 
 /********** Lesson5 **********/
-void Lesson5::OnPostInitDevice()
+void Lesson5::OnInitLight()
 {
-	auto light1 = mRenderSys->mPointLights[0];
+	auto light1 = mRenderSys->AddPointLight();
 	light1->SetPosition(20, 0, -20);
 	light1->SetAttenuation(1.0, 0.01, 0);
 	light1->SetSpecularPower(60);
+}
 
-
+void Lesson5::OnPostInitDevice()
+{
 	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	
@@ -32,7 +34,7 @@ void Lesson5::OnPostInitDevice()
 void Lesson5::OnRender()
 {
 	mRenderSys->ClearRenderTexture(mRendTexture, XMFLOAT4(0,0,0,0));
-	mRenderSys->_SetRenderTarget(mRendTexture);
+	mRenderSys->SetRenderTarget(mRendTexture);
 	{
 		mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
@@ -42,7 +44,7 @@ void Lesson5::OnRender()
 #endif
 		mModel->Draw();
 	}
-	mRenderSys->_SetRenderTarget(nullptr);
+	mRenderSys->SetRenderTarget(nullptr);
 	
 	mSprite->Draw();
 

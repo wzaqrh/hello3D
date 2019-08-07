@@ -1,5 +1,5 @@
 #include "TMesh.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "IRenderable.h"
 #include "TInterfaceType.h"
 
@@ -9,7 +9,7 @@ TMesh::TMesh(const aiMesh* __data,
 	std::vector<UINT>& __indices,
 	TTextureBySlotPtr __textures,
 	TMaterialPtr __material,
-	TRenderSystem *__renderSys)
+	IRenderSystem *__renderSys)
 {
 	data = __data;
 	vertices.swap(__vertices); __vertices.clear();
@@ -20,7 +20,7 @@ TMesh::TMesh(const aiMesh* __data,
 	setupMesh(__renderSys);
 }
 
-bool TMesh::setupMesh(TRenderSystem *renderSys)
+bool TMesh::setupMesh(IRenderSystem *renderSys)
 {
 	mVertexBuffer = renderSys->CreateVertexBuffer(sizeof(MeshVertex) * vertices.size(), sizeof(MeshVertex), 0, &vertices[0]);
 	mIndexBuffer = renderSys->CreateIndexBuffer(sizeof(UINT) * indices.size(), DXGI_FORMAT_R32_UINT, &indices[0]);

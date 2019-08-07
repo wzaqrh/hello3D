@@ -1,5 +1,5 @@
 #include "TInterfaceType.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 
 template<class T>
 IUnknown*& MakeDeviceObjectRef(T*& ref) {

@@ -12,7 +12,7 @@
 #include <xnamath.h>
 #include <dinput.h>
 #include "Utility.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "TApp.h"
 
 #pragma comment(lib, "legacy_stdio_definitions.lib")

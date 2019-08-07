@@ -12,7 +12,7 @@ struct MeshVertex
 	XMFLOAT3 BiTangent;
 };
 
-class TRenderSystem;
+class IRenderSystem;
 class TMesh {
 public:
 	const aiMesh* data = nullptr;
@@ -29,13 +29,13 @@ public:
 		std::vector<UINT>& __indices,
 		TTextureBySlotPtr __textures,
 		TMaterialPtr __material,
-		TRenderSystem *__renderSys);
+		IRenderSystem *__renderSys);
 	void Close();
-	void Draw(TRenderSystem* renderSys);
+	void Draw(IRenderSystem* renderSys);
 
 	bool HasTexture(int slot);
 private:
-	bool setupMesh(TRenderSystem *renderSys);
+	bool setupMesh(IRenderSystem *renderSys);
 };
 typedef std::shared_ptr<TMesh> TMeshSharedPtr;
 typedef std::vector<TMeshSharedPtr> TMeshSharedPtrVector;

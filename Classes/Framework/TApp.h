@@ -1,6 +1,6 @@
 #pragma once
 #include "TPredefine.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "TMovable.h"
 #include "TMaterial.h"
 #include "Utility.h"
@@ -26,7 +26,7 @@ protected:
 protected:
 	XMMATRIX GetWorldTransform();
 protected:
-	TRenderSystem* mRenderSys = nullptr;
+	IRenderSystem* mRenderSys = nullptr;
 	SDTimer mTimer;
 	TMovablePtr mMove;
 	XMFLOAT4 mBackgndColor;

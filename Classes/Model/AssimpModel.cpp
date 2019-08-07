@@ -1,7 +1,7 @@
 #include "AssimpModel.h"
 #include "TMaterialCB.h"
 #include "Utility.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "TInterfaceType.h"
 #include "Lesson6.h"
 
@@ -132,14 +132,14 @@ void Evaluator::Eval(float pTime)
 }
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
+AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
 	LoadMaterial(vsName, psName, cb);
 }
 
-AssimpModel::AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb /*= nullptr*/)
+AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb /*= nullptr*/)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;

@@ -1,10 +1,11 @@
 #include "TApp.h"
 #include "Utility.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
+#include "TRenderSystem11.h"
 
 TApp::TApp()
 {
-	mRenderSys = new TRenderSystem;
+	mRenderSys = new TRenderSystem11;
 	mMove = std::make_shared<TMovable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 }
@@ -16,8 +17,7 @@ TApp::~TApp()
 
 void TApp::Attach(HINSTANCE hInstance, HWND hWnd)
 {
-	mRenderSys->mHInst = hInstance;
-	mRenderSys->mHWnd = hWnd;
+	mRenderSys->SetHandle(hInstance, hWnd);
 }
 
 bool TApp::Initialize()
@@ -41,9 +41,8 @@ void TApp::CleanUp()
 
 void TApp::Render()
 {
-	float ClearColor[4] = { mBackgndColor.x, mBackgndColor.y, mBackgndColor.z, mBackgndColor.w }; // red, green, blue, alpha
-	mRenderSys->mDeviceContext->ClearRenderTargetView(mRenderSys->mBackRenderTargetView, ClearColor);
-	mRenderSys->mDeviceContext->ClearDepthStencilView(mRenderSys->mBackDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	mRenderSys->ClearColor(mBackgndColor);
+	mRenderSys->ClearDepthStencil(1.0f, 0);
 
 	mTimer.Update();
 	mRenderSys->mInput->Frame();
@@ -70,8 +69,6 @@ void TApp::Render()
 	}
 
 	OnRender();
-
-	mRenderSys->mSwapChain->Present(0, 0);
 }
 
 std::string TApp::GetName()

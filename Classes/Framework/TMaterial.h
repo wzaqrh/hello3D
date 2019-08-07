@@ -33,18 +33,18 @@ struct TPass {
 	std::vector<TRenderTexturePtr> mIterTargets;
 	TTextureBySlot mTextures;
 
-	std::function<void(TPass*,TRenderSystem*,TTextureBySlot&)> OnBind;
-	std::function<void(TPass*,TRenderSystem*,TTextureBySlot&)> OnUnbind;
+	std::function<void(TPass*,IRenderSystem*,TTextureBySlot&)> OnBind;
+	std::function<void(TPass*,IRenderSystem*,TTextureBySlot&)> OnUnbind;
 public:
 	TPass(const std::string& lightMode, const std::string& name);
-	std::shared_ptr<TPass> Clone(TRenderSystem* pRenderSys);
+	std::shared_ptr<TPass> Clone(IRenderSystem* pRenderSys);
 	TContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 	TRenderTexturePtr AddIterTarget(TRenderTexturePtr target);
 	
 	TContantBufferPtr GetConstBufferByIdx(size_t idx);
 	TContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(TRenderSystem* pRenderSys, const std::string& name, void* data);
+	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data);
 };
 typedef std::shared_ptr<TPass> TPassPtr;
 
@@ -53,14 +53,14 @@ struct TTechnique {
 	std::vector<TPassPtr> mPasses;
 public:
 	void AddPass(TPassPtr pass);
-	std::shared_ptr<TTechnique> Clone(TRenderSystem* pRenderSys);
+	std::shared_ptr<TTechnique> Clone(IRenderSystem* pRenderSys);
 	TContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 	
 	TPassPtr GetPassByName(const std::string& passName);
 	std::vector<TPassPtr> GetPassesByName(const std::string& passName);
 
-	void UpdateConstBufferByName(TRenderSystem* pRenderSys, const std::string& name, void* data);
+	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data);
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
@@ -69,7 +69,7 @@ struct TMaterial : public IResource {
 	int mCurTechIdx = 0;
 public:
 	void AddTechnique(TTechniquePtr technique);
-	std::shared_ptr<TMaterial> Clone(TRenderSystem* pRenderSys);
+	std::shared_ptr<TMaterial> Clone(IRenderSystem* pRenderSys);
 
 	TTechniquePtr CurTech();
 	TTechniquePtr SetCurTechByIdx(int idx);
@@ -109,10 +109,10 @@ public:
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
 struct TMaterialFactory {
-	TRenderSystem* mRenderSys;
+	IRenderSystem* mRenderSys;
 	std::map<std::string, TMaterialPtr> mMaterials;
 public:
-	TMaterialFactory(TRenderSystem* pRenderSys);
+	TMaterialFactory(IRenderSystem* pRenderSys);
 	TMaterialPtr GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly=false);
 private:
 	TMaterialPtr CreateStdMaterial(std::string name);

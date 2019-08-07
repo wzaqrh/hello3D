@@ -1,8 +1,8 @@
 #include "TSkyBox.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "TMaterial.h"
 
-TSkyBox::TSkyBox(TRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
+TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
 {
 	mRenderSys = pRenderSys;
 	mRefCam = pCam;

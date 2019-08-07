@@ -1,5 +1,5 @@
 #include "TSprite.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "TMaterial.h"
 #include "TMovable.h"
 #include "TInterfaceType.h"
@@ -55,7 +55,7 @@ void Quad::SetFlipY(bool flipY)
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
-TSprite::TSprite(TRenderSystem* RenderSys, const char* vsName, const char* psName)
+TSprite::TSprite(IRenderSystem* RenderSys, const char* vsName, const char* psName)
 :mQuad(0,0,0,0)
 {
 	mMove = std::make_shared<TMovable>();

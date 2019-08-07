@@ -1,5 +1,5 @@
 #include "TPostProcess.h"
-#include "TRenderSystem.h"
+#include "IRenderSystem.h"
 #include "TInterfaceType.h"
 #include "TMaterial.h"
 
@@ -47,7 +47,7 @@ const unsigned int indices[] = {
 };
 
 /********** TPostProcess **********/
-TPostProcess::TPostProcess(TRenderSystem* RenderSys, TRenderTexturePtr mainTex)
+TPostProcess::TPostProcess(IRenderSystem* RenderSys, TRenderTexturePtr mainTex)
 {
 	mRenderSys = RenderSys;
 	mMainTex = mainTex;
@@ -80,7 +80,7 @@ int TPostProcess::GenRenderOperation(TRenderOperationQueue& opList)
 }
 
 /********** TBloom **********/
-TVertexBufferPtr GetVertBufByRT(TRenderSystem* RenderSys, TRenderTexturePtr target) {
+TVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, TRenderTexturePtr target) {
 	auto srv = target->GetRenderTargetSRV();
 	float sx = srv->GetWidth() * 1.0 / RenderSys->mScreenWidth;
 	float sy = srv->GetHeight() * 1.0 / RenderSys->mScreenHeight;
@@ -90,7 +90,7 @@ TVertexBufferPtr GetVertBufByRT(TRenderSystem* RenderSys, TRenderTexturePtr targ
 	return vertBuf;
 }
 
-TBloom::TBloom(TRenderSystem* RenderSys, TRenderTexturePtr mainTex)
+TBloom::TBloom(IRenderSystem* RenderSys, TRenderTexturePtr mainTex)
 	:TPostProcess(RenderSys, mainTex)
 {
 	mMaterial = mRenderSys->CreateMaterial(E_MAT_POSTPROC_BLOOM, nullptr);

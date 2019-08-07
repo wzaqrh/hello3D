@@ -12,12 +12,10 @@ void TAppLesson1::OnPostInitDevice()
 void TAppLesson1::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
-#ifdef USE_RENDER_OP
-	//mRenderSys->SetWorldTransform(GetWorldTransform());
-#else
-	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
-#endif
-	mModel->Draw();
+	if (mRenderSys->BeginScene()) {
+		mModel->Draw();
+		mRenderSys->EndScene();
+	}
 }
 
 //auto reg = AppRegister<TAppLesson1>("TAppLesson1: Load Model");

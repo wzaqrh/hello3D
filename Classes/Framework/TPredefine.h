@@ -6,7 +6,7 @@
 #define D3D11_DEBUG
 #define PRELOAD_SHADER
 
-class TRenderSystem;
+class IRenderSystem;
 
 //BaseType.h
 struct TCamera;

@@ -15,13 +15,13 @@ public:
 	void push_back(TMeshSharedPtr mesh);
 };
 
-class TRenderSystem;
+class IRenderSystem;
 class AssimpModel 
 	: public IRenderable
 {
 public:
-	AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb = nullptr);
-	AssimpModel(TRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb = nullptr);
+	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb = nullptr);
+	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb = nullptr);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
@@ -55,7 +55,7 @@ private:
 	std::vector<aiMatrix4x4> mTransforms;
 	float mElapse = 0.0f;
 	Assimp::Importer* mImporter = nullptr;
-	TRenderSystem* mRenderSys;
+	IRenderSystem* mRenderSys;
 };
 
 struct Evaluator

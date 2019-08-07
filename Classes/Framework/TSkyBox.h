@@ -12,14 +12,14 @@ class TSkyBox
 {
 private:
 	TCameraPtr mRefCam;
-	TRenderSystem* mRenderSys = nullptr;
+	IRenderSystem* mRenderSys = nullptr;
 	TVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 public:
 	TTexturePtr mCubeSRV;
 	TMaterialPtr mMaterial;
 public:
-	TSkyBox(TRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName);
+	TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName);
 	~TSkyBox();
 	void SetRefCamera(TCameraPtr pCam);
 	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;

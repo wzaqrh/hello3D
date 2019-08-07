@@ -60,7 +60,7 @@ void Lesson7::OnRender()
 #else
 	//pass1
 	mRenderSys->ClearRenderTexture(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
-	mRenderSys->_SetRenderTarget(mPass1RT);
+	mRenderSys->SetRenderTarget(mPass1RT);
 	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
 	{
 		mModel1->Update(mTimer.mDeltaTime);
@@ -72,7 +72,7 @@ void Lesson7::OnRender()
 		mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
 		mModel2->Draw();
 	}
-	mRenderSys->_SetRenderTarget(nullptr);
+	mRenderSys->SetRenderTarget(nullptr);
 
 	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), nullptr, mProgShadowMap);

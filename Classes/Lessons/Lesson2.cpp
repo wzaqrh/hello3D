@@ -1,10 +1,14 @@
 #include "Lesson2.h"
 
+void TAppLesson2::OnInitLight()
+{
+	auto light = mRenderSys->AddPointLight();
+	light->SetDiffuseColor(1, 0, 0, 1);
+	light->SetPosition(0, 0, -200);
+}
+
 void TAppLesson2::OnPostInitDevice()
 {
-	mRenderSys->mPointLights[0]->SetDiffuseColor(1, 0, 0, 1);
-	mRenderSys->mPointLights[0]->SetPosition(0, 0, -200);
-
 	mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson2.fx", "shader\\Lesson2.fx");
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); mScale = 0.05;
@@ -14,12 +18,10 @@ void TAppLesson2::OnPostInitDevice()
 void TAppLesson2::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
-#ifdef USE_RENDER_OP
-	//mRenderSys->SetWorldTransform(GetWorldTransform());
-#else
-	mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
-#endif
-	mModel->Draw();
+	if (mRenderSys->BeginScene()) {
+		mModel->Draw();
+		mRenderSys->EndScene();
+	}
 }
 
 //auto reg = AppRegister<TAppLesson2>("TAppLesson2: Diffuse Light");
