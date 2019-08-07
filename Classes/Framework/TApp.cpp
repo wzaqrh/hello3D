@@ -5,7 +5,6 @@
 
 TApp::TApp()
 {
-	mRenderSys = new TRenderSystem11;
 	mMove = std::make_shared<TMovable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 }
@@ -13,6 +12,16 @@ TApp::TApp()
 TApp::~TApp()
 {
 	delete mRenderSys;
+}
+
+void TApp::Create()
+{
+	mRenderSys = OnCreateRenderSys();
+}
+
+IRenderSystem* TApp::OnCreateRenderSys()
+{
+	return new TRenderSystem11;
 }
 
 void TApp::Attach(HINSTANCE hInstance, HWND hWnd)
@@ -99,5 +108,6 @@ TApp* CreateApp(std::string name)
 	auto entry = gRegAppClasses[name];
 	assert(entry);
 	gApp = entry();
+	gApp->Create();
 	return gApp;
 }

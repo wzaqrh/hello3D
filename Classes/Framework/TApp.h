@@ -12,6 +12,7 @@ class TApp
 public:
 	TApp();
 	~TApp();
+	void Create();
 public:
 	void Attach(HINSTANCE hInstance, HWND hWnd);
 	bool Initialize();
@@ -23,6 +24,7 @@ protected:
 	virtual void OnPostInitDevice() {};
 	virtual void OnRender() = 0;
 	virtual void OnInitLight();
+	virtual IRenderSystem* OnCreateRenderSys();
 protected:
 	XMMATRIX GetWorldTransform();
 protected:

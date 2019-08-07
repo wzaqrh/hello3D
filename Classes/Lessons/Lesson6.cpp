@@ -75,8 +75,8 @@ void Lesson6::OnPostInitDevice()
 	}
 
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
-	//auto fileName = "Male02.FBX";//99ms,4688ms
-	auto fileName = "Male02.assbin";//37ms,2823ms
+	auto fileName = "Male02.FBX";//99ms,4688ms
+	//auto fileName = "Male02.assbin";//37ms,2823ms
 	//auto fileName = "Male02.dae";//37ms,2823ms
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 
@@ -128,4 +128,4 @@ void Lesson6::OnRender()
 	}
 }
 
-auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
