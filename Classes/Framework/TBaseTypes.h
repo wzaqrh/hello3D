@@ -45,6 +45,12 @@ public:
 	int mWidth, mHeight;
 	double mFOV, mFar;
 public:
+	void* operator new(size_t i){
+		return _mm_malloc(i,16);
+	}
+	void operator delete(void* p) {
+		_mm_free(p);
+	}
 	TCamera() {}
 	TCamera(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1=100);
 	TCamera(const TCamera& other);
@@ -98,7 +104,7 @@ public:
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
 #define MAX_LIGHTS 4
-struct cbGlobalParam
+__declspec(align(16)) struct cbGlobalParam
 {
 	XMMATRIX mWorld;
 	XMMATRIX mView;

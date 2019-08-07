@@ -29,7 +29,7 @@ HRESULT TRenderSystem::Initialize()
 
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
-	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_DRIVER_TYPE driverTypes[] =
@@ -65,6 +65,7 @@ HRESULT TRenderSystem::Initialize()
 	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
 	{
 		mDriverType = driverTypes[driverTypeIndex];
+		mDriverType = D3D_DRIVER_TYPE_HARDWARE;
 		hr = D3D11CreateDeviceAndSwapChain(NULL, mDriverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
 			D3D11_SDK_VERSION, &sd, &mSwapChain, &mDevice, &mFeatureLevel, &mDeviceContext);
 		if (SUCCEEDED(hr))
@@ -722,27 +723,27 @@ cbGlobalParam TRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShad
 	//globalParam.mWorld = mWorldTransform;
 	
 	if (castShadow) {
-		globalParam.mView = pLightCam->mView;
-		globalParam.mProjection = pLightCam->mProjection;
+		globalParam.mView = COPY_TO_GPU(pLightCam->mView);
+		globalParam.mProjection = COPY_TO_GPU(pLightCam->mProjection);
 	}
 	else {
-		globalParam.mView = mDefCamera->mView;
-		globalParam.mProjection = mDefCamera->mProjection;
+		globalParam.mView = COPY_TO_GPU(mDefCamera->mView);
+		globalParam.mProjection = COPY_TO_GPU(mDefCamera->mProjection);
 
-		globalParam.mLightView = pLightCam->mView;
-		globalParam.mLightProjection = pLightCam->mProjection;
+		globalParam.mLightView = COPY_TO_GPU(pLightCam->mView);
+		globalParam.mLightProjection = COPY_TO_GPU(pLightCam->mProjection);
 	}
 	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
 
 	{
-		XMVECTOR det = XMMatrixDeterminant(globalParam.mWorld);
-		globalParam.mWorldInv = XMMatrixInverse(&det, globalParam.mWorld);
+		XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mWorld));
+		globalParam.mWorldInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mWorld));
 
-		det = XMMatrixDeterminant(globalParam.mView);
-		globalParam.mViewInv = XMMatrixInverse(&det, globalParam.mView);
+		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mView));
+		globalParam.mViewInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mView));
 
-		det = XMMatrixDeterminant(globalParam.mProjection);
-		globalParam.mProjectionInv = XMMatrixInverse(&det, globalParam.mProjection);
+		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mProjection));
+		globalParam.mProjectionInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mProjection));
 	}
 
 #if 1

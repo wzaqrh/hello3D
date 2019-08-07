@@ -164,11 +164,11 @@ STDMETHODIMP TIncludeStdio::Close(THIS_ LPCVOID pData)
 std::vector<char> ReadFile(const char* fileName, const char* mode)
 {
 	std::vector<char> ret;
-	FILE* fd = fopen(fileName, "r");
+	FILE* fd = fopen(fileName, "rb");
 	if (fd) {
 		fseek(fd, 0, SEEK_END);
 		size_t size = ftell(fd);
-		fseek(fd, 0, SEEK_SET);
+		rewind(fd);
 
 		size_t first = ret.size();
 		ret.resize(first + size);

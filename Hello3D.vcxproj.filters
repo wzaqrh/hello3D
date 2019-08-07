@@ -173,10 +173,18 @@
     <Filter Include="Lib">
       <UniqueIdentifier>{43b959a5-9db6-4dcf-9832-11705bedfd9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="fx">
+      <UniqueIdentifier>{0f5daee9-9076-4f36-baca-5b152488f6b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\assimp-vc140-mt.lib">
       <Filter>Lib</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Debug\shader\LayerColor.fx">
+      <Filter>fx</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
