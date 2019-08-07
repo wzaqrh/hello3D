@@ -7,7 +7,7 @@ void TTextureBySlot::clear()
 	textures.clear();
 }
 
-void TTextureBySlot::push_back(TTexturePtr texture)
+void TTextureBySlot::push_back(ITexturePtr texture)
 {
 	textures.push_back(texture);
 }
@@ -32,17 +32,17 @@ void TTextureBySlot::resize(size_t size)
 	textures.resize(size);
 }
 
-const TTexturePtr TTextureBySlot::At(size_t pos)  const {
+const ITexturePtr TTextureBySlot::At(size_t pos)  const {
 	return textures[pos];
 }
-TTexturePtr& TTextureBySlot::At(size_t pos) {
+ITexturePtr& TTextureBySlot::At(size_t pos) {
 	if (pos >= textures.size()) textures.resize(pos + 1);
 	return textures[pos];
 }
-const TTexturePtr TTextureBySlot::operator[](size_t pos)  const {
+const ITexturePtr TTextureBySlot::operator[](size_t pos)  const {
 	return At(pos);
 }
-TTexturePtr& TTextureBySlot::operator[](size_t pos) {
+ITexturePtr& TTextureBySlot::operator[](size_t pos) {
 	return At(pos);
 }
 
@@ -50,7 +50,7 @@ std::vector<ID3D11ShaderResourceView*> TTextureBySlot::GetTextureViews() const {
 	std::vector<ID3D11ShaderResourceView*> views(textures.size());
 	for (int i = 0; i < views.size(); ++i) {
 		if (textures[i]) {
-			views[i] = textures[i]->GetSRV();
+			views[i] = textures[i]->GetSRV11();
 		}
 	}
 	return views;
@@ -61,7 +61,7 @@ void TTextureBySlot::Merge(const TTextureBySlot& other) {
 		textures.resize(other.textures.size());
 
 	for (size_t i = 0; i < other.textures.size(); ++i) {
-		if (other.textures[i]->GetSRV()) {
+		if (other.textures[i]->GetSRV11()) {
 			textures[i] = other.textures[i];
 		}
 	}

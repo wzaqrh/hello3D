@@ -64,6 +64,13 @@ public:
 	STDMETHOD(Close)(THIS_ LPCVOID pData);
 };
 
+class D3DEnumCT {
+public:
+	static _D3DBLEND d3d11To9(D3D11_BLEND blend);
+	static _D3DCMPFUNC d3d11To9(D3D11_COMPARISON_FUNC cmp);
+	static DXGI_FORMAT d3d9To11(D3DFORMAT fmt);
+};
+
 std::vector<char> ReadFile(const char* fileName, const char* mode);
 
 aiMatrix4x4 FromXM(const XMMATRIX& m);

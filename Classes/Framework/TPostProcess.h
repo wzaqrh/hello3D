@@ -27,10 +27,10 @@ class TPostProcess
 protected:
 	IRenderSystem* mRenderSys = nullptr;
 	TRenderTexturePtr mMainTex;
-	TVertexBufferPtr mVertexBuffer;
+	IVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 	TMaterialPtr mMaterial;
-	std::map<std::pair<TPassPtr, int>, TVertexBufferPtr> mVertBufferByPass;
+	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 public:
 	TPostProcess(IRenderSystem* RenderSys, TRenderTexturePtr mainTex);
 	~TPostProcess();

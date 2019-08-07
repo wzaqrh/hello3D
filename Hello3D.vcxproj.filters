@@ -13,9 +13,6 @@
     <ClCompile Include="Classes\Model\AssimpModel.cpp">
       <Filter>Classes\Model</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Framework\TSprite.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Main.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
@@ -43,34 +40,16 @@
     <ClCompile Include="Classes\Lessons\Lesson7.cpp">
       <Filter>Classes\Lessons</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Framework\TMaterial.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Framework\TInterfaceType.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Classes\Framework\TMovable.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Framework\TSkyBox.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TPostProcess.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Lessons\Lesson8.cpp">
       <Filter>Classes\Lessons</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Framework\TMaterialCB.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Framework\TThreadPump.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\IRenderable.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\IResource.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Classes\Framework\d3d11\TRenderSystem11.cpp">
@@ -84,6 +63,33 @@
     </ClCompile>
     <ClCompile Include="Classes\Lessons\LessonD3D9.cpp">
       <Filter>Classes\Lessons</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TSprite.cpp">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TSkyBox.cpp">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TPostProcess.cpp">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\IRenderable.cpp">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\IResource.cpp">
+      <Filter>Classes\Framework\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TMaterial.cpp">
+      <Filter>Classes\Framework\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TMaterialCB.cpp">
+      <Filter>Classes\Framework\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\d3d11\TInterfaceType11.cpp">
+      <Filter>Classes\Framework\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\d3d9\TInterfaceType9.cpp">
+      <Filter>Classes\Framework\d3d9</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -101,9 +107,6 @@
     </ClInclude>
     <ClInclude Include="Classes\Model\AssimpModel.h">
       <Filter>Classes\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TSprite.h">
-      <Filter>Classes\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Utility.h">
       <Filter>Classes</Filter>
@@ -129,34 +132,16 @@
     <ClInclude Include="Classes\Lessons\Lesson7.h">
       <Filter>Classes\Lessons</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Framework\TMaterial.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Framework\TInterfaceType.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Framework\TMovable.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Framework\TSkyBox.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TPostProcess.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Lessons\Lesson8.h">
       <Filter>Classes\Lessons</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Framework\TMaterialCB.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Framework\TThreadPump.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\IRenderable.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\IResource.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Framework\TPredefine.h">
@@ -173,6 +158,39 @@
     </ClInclude>
     <ClInclude Include="Classes\Lessons\LessonD3D9.h">
       <Filter>Classes\Lessons</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\d3d11\stddx11.h">
+      <Filter>Classes\Framework\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\d3d9\stddx9.h">
+      <Filter>Classes\Framework\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TSprite.h">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TSkyBox.h">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TPostProcess.h">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\IRenderable.h">
+      <Filter>Classes\Framework\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\IResource.h">
+      <Filter>Classes\Framework\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TMaterial.h">
+      <Filter>Classes\Framework\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TMaterialCB.h">
+      <Filter>Classes\Framework\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\d3d11\TInterfaceType11.h">
+      <Filter>Classes\Framework\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\d3d9\TInterfaceType9.h">
+      <Filter>Classes\Framework\d3d9</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +217,12 @@
     </Filter>
     <Filter Include="Classes\Framework\d3d9">
       <UniqueIdentifier>{3845ec8c-3527-46d9-9713-6812481afa31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Framework\renderable">
+      <UniqueIdentifier>{45e61584-a97b-4a83-97e3-7d79d6b7670c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Framework\resource">
+      <UniqueIdentifier>{f7e74a1a-95b2-4d5e-8d40-97953e960d10}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

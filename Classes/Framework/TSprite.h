@@ -34,8 +34,8 @@ private:
 private:
 	IRenderSystem* mRenderSys = nullptr;
 
-	TTexturePtr mTexture = nullptr;
-	TVertexBufferPtr mVertexBuffer;
+	ITexturePtr mTexture = nullptr;
+	IVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 public:
 	TMaterialPtr mMaterial;
@@ -48,7 +48,7 @@ public:
 public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);
-	void SetTexture(TTexturePtr Texture);
+	void SetTexture(ITexturePtr Texture);
 	void SetFlipY(bool flipY);
 };
 typedef std::shared_ptr<TSprite> TSpritePtr;

@@ -86,7 +86,7 @@ void TSprite::SetSize(float w, float h)
 	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
 }
 
-void TSprite::SetTexture(TTexturePtr Texture)
+void TSprite::SetTexture(ITexturePtr Texture)
 {
 	mTexture = Texture;
 }

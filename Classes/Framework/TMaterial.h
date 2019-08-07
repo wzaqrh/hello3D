@@ -97,7 +97,7 @@ public:
 	TMaterialBuilder& AddConstBufferToTech(TContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
 	TMaterialBuilder& SetRenderTarget(TRenderTexturePtr target);
 	TMaterialBuilder& AddIterTarget(TRenderTexturePtr target);
-	TMaterialBuilder& SetTexture(size_t slot, TTexturePtr texture);
+	TMaterialBuilder& SetTexture(size_t slot, ITexturePtr texture);
 	TMaterialPtr Build();
 };
 

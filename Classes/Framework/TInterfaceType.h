@@ -59,6 +59,11 @@ struct TInputLayout : public IResource {
 typedef std::shared_ptr<TInputLayout> TInputLayoutPtr;
 
 /********** HardwareBuffer **********/
+struct IHardwareBuffer {
+	virtual ID3D11Buffer*& GetBuffer11();
+	virtual unsigned int GetBufferSize();
+};
+
 struct THardwareBuffer {
 	ID3D11Buffer* buffer;
 	unsigned int bufferSize;
@@ -67,21 +72,18 @@ public:
 	THardwareBuffer() :buffer(nullptr), bufferSize(0) {};
 };
 
-struct TVertexBuffer : public THardwareBuffer {
-	unsigned int stride, offset;
-public:
-	TVertexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
-		:THardwareBuffer(__buffer, __bufferSize), stride(__stride), offset(__offset) {};
-	TVertexBuffer() :stride(0), offset(0) {};
-	int GetCount();
+struct IVertexBuffer : public IHardwareBuffer {
+	virtual IDirect3DVertexBuffer9*& GetBuffer9();
+	virtual unsigned int GetStride();
+	virtual unsigned int GetOffset();
 };
-typedef std::shared_ptr<TVertexBuffer> TVertexBufferPtr;
+typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
 
 struct TIndexBuffer : public THardwareBuffer {
 	DXGI_FORMAT format;
 public:
 	TIndexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, DXGI_FORMAT __format)
-		:THardwareBuffer(__buffer, __bufferSize), format(__format) {};
+	:THardwareBuffer(__buffer, __bufferSize), format(__format) {};
 	TIndexBuffer() :format(DXGI_FORMAT_UNKNOWN) {};
 	int GetWidth();
 };
@@ -108,31 +110,26 @@ enum enTexturePbrType {
 };
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
-struct TTexture : public IResource {
-private:
-	std::string path;
-	ID3D11ShaderResourceView *texture;
-public:
-	//TTexture();
-	TTexture(ID3D11ShaderResourceView* __texture, std::string __path);
-	void SetSRV(ID3D11ShaderResourceView* __texture);
-	virtual IUnknown*& GetDeviceObject() override;
-public:
-	const std::string& GetPath() const;
-	ID3D11ShaderResourceView*& GetSRV();
-public:
-	D3D11_TEXTURE2D_DESC GetDesc();
-	int GetWidth();
-	int GetHeight();
-	DXGI_FORMAT GetFormat();
+
+struct ITexture : public IResource {
+	virtual void SetSRV11(ID3D11ShaderResourceView* __texture) {};
+	virtual ID3D11ShaderResourceView*& GetSRV11();
+	
+	virtual void SetSRV9(IDirect3DTexture9* __texture) {};
+	virtual IDirect3DTexture9*& GetSRV9();
+
+	virtual const std::string& GetPath() const = 0;
+	virtual int GetWidth() = 0;
+	virtual int GetHeight() = 0;
+	virtual DXGI_FORMAT GetFormat() = 0;
 };
-typedef std::shared_ptr<TTexture> TTexturePtr;
+typedef std::shared_ptr<ITexture> ITexturePtr;
 
 class TRenderTexture {
 public:
 	ID3D11Texture2D* mRenderTargetTexture;
 	ID3D11ShaderResourceView* mRenderTargetSRV;
-	TTexturePtr mRenderTargetPtr;
+	ITexturePtr mRenderTargetPtr;
 	ID3D11RenderTargetView* mRenderTargetView;
 
 	ID3D11Texture2D* mDepthStencilTexture;
@@ -141,7 +138,7 @@ public:
 	DXGI_FORMAT mFormat;
 public:
 	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-	TTexturePtr GetRenderTargetSRV();
+	ITexturePtr GetRenderTargetSRV();
 private:
 	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
 	bool InitRenderTextureView(ID3D11Device* pDevice);

@@ -1,8 +1,9 @@
 #include "TInterfaceType.h"
 #include "IRenderSystem.h"
+#include "TInterfaceType11.h"
 
 template<class T>
-IUnknown*& MakeDeviceObjectRef(T*& ref) {
+static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	IUnknown** ppDeviceObj = (IUnknown**)&ref;
 	return *ppDeviceObj;
 }
@@ -131,7 +132,7 @@ bool TRenderTexture::InitRenderTextureView(ID3D11Device* pDevice)
 	if (FAILED(result)) {
 		return false;
 	}
-	mRenderTargetPtr = std::make_shared<TTexture>(mRenderTargetSRV, "RenderTexture");
+	mRenderTargetPtr = std::make_shared<TTexture11>(mRenderTargetSRV, "RenderTexture");
 	return true;
 }
 
@@ -177,69 +178,9 @@ bool TRenderTexture::InitDepthStencilView(ID3D11Device* pDevice)
 	return true;
 }
 
-TTexturePtr TRenderTexture::GetRenderTargetSRV()
+ITexturePtr TRenderTexture::GetRenderTargetSRV()
 {
 	return mRenderTargetPtr;
-}
-
-/********** TTexture **********/
-#if 0
-TTexture::TTexture()
-	:texture(nullptr)
-{
-}
-#endif
-
-TTexture::TTexture(ID3D11ShaderResourceView* __texture, std::string __path)
-{
-	path = __path;
-	texture = __texture;
-}
-
-void TTexture::SetSRV(ID3D11ShaderResourceView* __texture)
-{
-	texture = __texture;
-}
-
-IUnknown*& TTexture::GetDeviceObject()
-{
-	return MakeDeviceObjectRef(texture);
-}
-
-const std::string& TTexture::GetPath() const
-{
-	return path;
-}
-
-ID3D11ShaderResourceView*& TTexture::GetSRV()
-{
-	return texture;
-}
-
-D3D11_TEXTURE2D_DESC TTexture::GetDesc()
-{
-	ID3D11Texture2D* pTexture;
-	texture->GetResource((ID3D11Resource **)&pTexture);
-	
-	D3D11_TEXTURE2D_DESC desc;
-	pTexture->GetDesc(&desc);
-
-	return desc;
-}
-
-int TTexture::GetWidth()
-{
-	return GetDesc().Width;
-}
-
-int TTexture::GetHeight()
-{
-	return GetDesc().Height;
-}
-
-DXGI_FORMAT TTexture::GetFormat()
-{
-	return GetDesc().Format;
 }
 
 /********** TIndexBuffer **********/
@@ -272,8 +213,44 @@ int TIndexBuffer::GetWidth()
 	return width;
 }
 
-/********** TVertexBuffer **********/
-int TVertexBuffer::GetCount()
+/********** ITexture **********/
+ID3D11ShaderResourceView*& ITexture::GetSRV11()
 {
-	return bufferSize / stride;
+	static ID3D11ShaderResourceView* srv;
+	return srv;
+}
+
+IDirect3DTexture9*& ITexture::GetSRV9()
+{
+	static IDirect3DTexture9* srv;
+	return srv;
+}
+
+/********** IHardwareBuffer **********/
+ID3D11Buffer*& IHardwareBuffer::GetBuffer11()
+{
+	ID3D11Buffer* buffer11;
+	return buffer11;
+}
+
+unsigned int IHardwareBuffer::GetBufferSize()
+{
+	return 0;
+}
+
+/********** IVertexBuffer **********/
+IDirect3DVertexBuffer9*& IVertexBuffer::GetBuffer9()
+{
+	IDirect3DVertexBuffer9* buffer9;
+	return buffer9;
+}
+
+unsigned int IVertexBuffer::GetStride()
+{
+	return 0;
+}
+
+unsigned int IVertexBuffer::GetOffset()
+{
+	return 0;
 }

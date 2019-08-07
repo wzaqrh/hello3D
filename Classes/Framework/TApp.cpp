@@ -50,8 +50,7 @@ void TApp::CleanUp()
 
 void TApp::Render()
 {
-	mRenderSys->ClearColor(mBackgndColor);
-	mRenderSys->ClearDepthStencil(1.0f, 0);
+	mRenderSys->ClearColorDepthStencil(mBackgndColor, 1.0f, 0);
 
 	mTimer.Update();
 	mRenderSys->mInput->Frame();

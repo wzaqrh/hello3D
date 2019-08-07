@@ -104,7 +104,7 @@ void Lesson6::OnPostInitDevice()
 			if (postfixs[0] == firstPostfix) {
 				iter->mTextures->clear();
 				for (int i = iter->mTextures->size(); i < ARRAYSIZE(postfixs); ++i) {
-					TTexturePtr texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
+					ITexturePtr texInfo = mRenderSys->GetTexByPath(prefix + "_" + postfixs[i] + ".png");
 					iter->mTextures->push_back(texInfo);
 					//assert(texInfo->texture);
 				}
@@ -128,4 +128,4 @@ void Lesson6::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");

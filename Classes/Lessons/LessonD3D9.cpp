@@ -24,4 +24,4 @@ void LessonD3D9::OnPostInitDevice()
 
 }
 
-auto reg = AppRegister<LessonD3D9>("LessonD3D9: D3D9");
+//auto reg = AppRegister<LessonD3D9>("LessonD3D9: D3D9");

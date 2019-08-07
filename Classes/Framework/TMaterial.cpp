@@ -283,7 +283,7 @@ TMaterialBuilder& TMaterialBuilder::AddIterTarget(TRenderTexturePtr target)
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, TTexturePtr texture)
+TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, ITexturePtr texture)
 {
 	mCurPass->mTextures[slot] = texture;
 	mMaterial->AddDependency(texture);

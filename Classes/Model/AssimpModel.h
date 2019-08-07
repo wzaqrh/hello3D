@@ -37,7 +37,7 @@ private:
 	void LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
-	std::vector<TTexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
+	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 private:
 	TMaterialPtr mMaterial;
 	TMovablePtr mMove;
@@ -46,7 +46,7 @@ public:
 	TMeshSharedPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
 	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
-	std::map<std::string, TTexturePtr> mLoadedTexture;
+	std::map<std::string, ITexturePtr> mLoadedTexture;
 	aiNode* mRootNode = nullptr;
 	const aiScene* mScene = nullptr;
 	int mCurrentAnimIndex = -1;

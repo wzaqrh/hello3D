@@ -36,10 +36,14 @@ typedef std::shared_ptr<TProgram> TProgramPtr;
 struct TInputLayout;
 typedef std::shared_ptr<TInputLayout> TInputLayoutPtr;
 
+struct IHardwareBuffer;
 struct THardwareBuffer;
 
-struct TVertexBuffer;
-typedef std::shared_ptr<TVertexBuffer> TVertexBufferPtr;
+struct IVertexBuffer;
+typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
+
+struct TVertex11Buffer;
+typedef std::shared_ptr<TVertex11Buffer> TVertex11BufferPtr;
 
 struct TIndexBuffer;
 typedef std::shared_ptr<TIndexBuffer> TIndexBufferPtr;
@@ -47,8 +51,11 @@ typedef std::shared_ptr<TIndexBuffer> TIndexBufferPtr;
 struct TContantBuffer;
 typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;
 
-struct TTexture;
-typedef std::shared_ptr<TTexture> TTexturePtr;
+struct ITexture;
+typedef std::shared_ptr<ITexture> ITexturePtr;
+
+struct TTexture11;
+typedef std::shared_ptr<TTexture11> TTexture11Ptr;
 
 struct TTextureBySlot;
 typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;

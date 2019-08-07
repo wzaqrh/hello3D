@@ -4,18 +4,18 @@
 
 /********** RenderOperation **********/
 struct TTextureBySlot {
-	std::vector<TTexturePtr> textures;
+	std::vector<ITexturePtr> textures;
 public:
 	void clear();
-	void push_back(TTexturePtr texture);
+	void push_back(ITexturePtr texture);
 	bool empty() const;
 	size_t size() const;
 	void swap(TTextureBySlot& other);
 	void resize(size_t size);
-	const TTexturePtr At(size_t pos) const;
-	TTexturePtr& At(size_t pos);
-	const TTexturePtr operator[](size_t pos) const;
-	TTexturePtr& operator[](size_t pos);
+	const ITexturePtr At(size_t pos) const;
+	ITexturePtr& At(size_t pos);
+	const ITexturePtr operator[](size_t pos) const;
+	ITexturePtr& operator[](size_t pos);
 	std::vector<ID3D11ShaderResourceView*> GetTextureViews() const;
 	void Merge(const TTextureBySlot& other);
 };
@@ -23,8 +23,8 @@ typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
 
 struct TRenderOperation {
 	TMaterialPtr mMaterial;
-	TVertexBufferPtr mVertexBuffer;
-	std::map<std::pair<TPassPtr, int>, TVertexBufferPtr> mVertBufferByPass;
+	IVertexBufferPtr mVertexBuffer;
+	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 	TIndexBufferPtr mIndexBuffer;
 	TTextureBySlot mTextures;
 	XMMATRIX mWorldTransform;

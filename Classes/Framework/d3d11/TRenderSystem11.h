@@ -17,7 +17,6 @@ private:
 	ID3D11BlendState* mBlendState = NULL;
 
 	TMaterialFactoryPtr mMaterialFac;
-	std::map<std::string, TTexturePtr> mTexByPath;
 	TRenderTexturePtr mShadowPassRT, mPostProcessRT;
 
 	ID3D11RenderTargetView* mBackRenderTargetView = NULL;
@@ -47,7 +46,7 @@ public:
 		_mm_free(p);
 	}
 public:
-	virtual HRESULT Initialize();
+	virtual bool Initialize();
 	virtual void Update(float dt);
 	virtual void CleanUp();
 
@@ -59,8 +58,7 @@ public:
 	virtual TPostProcessPtr AddPostProcess(const std::string& name);
 public:
 	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd);
-	virtual void ClearColor(const XMFLOAT4& color);
-	virtual void ClearDepthStencil(FLOAT Depth, UINT8 Stencil);
+	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
 
 	virtual TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
 	virtual void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
@@ -74,10 +72,10 @@ public:
 	virtual void SetIndexBuffer(TIndexBufferPtr indexBuffer);
 	virtual void DrawIndexed(TIndexBufferPtr indexBuffer);
 
-	virtual TVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
-	virtual void SetVertexBuffer(TVertexBufferPtr vertexBuffer);
+	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
+	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
 
-	virtual bool UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize);
+	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize);
 	virtual void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
 
 	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
@@ -87,8 +85,6 @@ public:
 	virtual ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
 	virtual TInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
-	virtual TTexturePtr GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
-
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc);
 	virtual void SetDepthState(const TDepthState& depthState);
 public:
@@ -96,6 +92,14 @@ public:
 	virtual void EndScene();
 	virtual void Draw(IRenderable* renderable);
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
+protected:
+	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false);
+private:
+	HRESULT _CreateDeviceAndSwapChain(int width, int height);
+	HRESULT _CreateBackRenderTargetView();
+	HRESULT _CreateBackDepthStencilView(int width, int height);
+	void _SetViewports(int width, int height);
+	HRESULT _SetRasterizerState();
 protected:
 	void _PushRenderTarget(TRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
@@ -109,12 +113,10 @@ protected:
 	TPixelShaderPtr _CreatePSByFXC(const char* filename);
 
 	ID3D11InputLayout* _CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
-
-	TTexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false);
 protected:
 	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, TIndexBufferPtr indexBuffer, TVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, TIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
 	void RenderSkyBox();
 	void DoPostProcess();
 

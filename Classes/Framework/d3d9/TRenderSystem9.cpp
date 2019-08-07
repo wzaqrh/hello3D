@@ -3,8 +3,7 @@
 #include "Utility.h"
 #include "TSkyBox.h"
 #include "TPostProcess.h"
-#include "TThreadPump.h"
-#include <d3dcompiler.h>
+#include "TInterfaceType9.h"
 
 TRenderSystem9::TRenderSystem9()
 {
@@ -16,20 +15,69 @@ TRenderSystem9::~TRenderSystem9()
 
 }
 
-HRESULT TRenderSystem9::Initialize()
+bool TRenderSystem9::Initialize()
 {
+	RECT rc;
+	GetClientRect(mHWnd, &rc);
+	UINT width = rc.right - rc.left;
+	UINT height = rc.bottom - rc.top;
 
-	return S_OK;
+	if (!_CreateDeviceAndSwapChain()) return false;
+
+	_SetRasterizerState();
+
+	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
+	SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
+
+	mScreenWidth = width;
+	mScreenHeight = height;
+	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight);
+
+	mInput = new TD3DInput(mHInst, mHWnd, width, height);
+
+	//mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+	//SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
+
+	//mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+	//SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
+	return true;
+}
+
+bool TRenderSystem9::_CreateDeviceAndSwapChain()
+{
+	if (NULL == (g_pD3D = Direct3DCreate9(D3D_SDK_VERSION))) {
+		CheckHR(E_FAIL);
+		return false;
+	}
+
+	D3DPRESENT_PARAMETERS d3dpp;
+	ZeroMemory(&d3dpp, sizeof(d3dpp));
+	d3dpp.Windowed = TRUE;
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
+	d3dpp.EnableAutoDepthStencil = TRUE;
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd,
+		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &g_pd3dDevice))) {
+		CheckHR(E_FAIL);
+		return false;
+	}
+	return true;
+}
+
+void TRenderSystem9::_SetRasterizerState()
+{
+	g_pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	g_pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+	//g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 }
 
 void TRenderSystem9::Update(float dt)
 {
-
 }
 
 void TRenderSystem9::CleanUp()
 {
-
 }
 
 TSpotLightPtr TRenderSystem9::AddSpotLight()
@@ -64,17 +112,16 @@ TPostProcessPtr TRenderSystem9::AddPostProcess(const std::string& name)
 
 void TRenderSystem9::SetHandle(HINSTANCE hInstance, HWND hWnd)
 {
-
+	mHInst = hInstance;
+	mHWnd = hWnd;
 }
 
-void TRenderSystem9::ClearColor(const XMFLOAT4& color)
+void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
 {
-
-}
-
-void TRenderSystem9::ClearDepthStencil(FLOAT Depth, UINT8 Stencil)
-{
-
+	g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+		D3DCOLOR_ARGB(int(color.w * 255), int(color.x * 255), int(color.y * 255), int(color.z * 255)),
+		Depth, 
+		Stencil);
 }
 
 TRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
@@ -122,17 +169,17 @@ void TRenderSystem9::DrawIndexed(TIndexBufferPtr indexBuffer)
 
 }
 
-TVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
+IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
 	return nullptr;
 }
 
-void TRenderSystem9::SetVertexBuffer(TVertexBufferPtr vertexBuffer)
+void TRenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 {
 
 }
 
-bool TRenderSystem9::UpdateBuffer(THardwareBuffer* buffer, void* data, int dataSize)
+bool TRenderSystem9::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize)
 {
 	return false;
 }
@@ -167,29 +214,51 @@ TInputLayoutPtr TRenderSystem9::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_E
 	return nullptr;
 }
 
-TTexturePtr TRenderSystem9::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/)
+ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async /*= false*/)
 {
-	return nullptr;
+	std::string imgPath = GetModelPath() + pSrcFile;
+#ifdef USE_ONLY_PNG
+	if (!IsFileExist(imgPath)) {
+		auto pos = imgPath.find_last_of(".");
+		if (pos != std::string::npos) {
+			imgPath = imgPath.substr(0, pos);
+			imgPath += ".png";
+		}
+	}
+#endif
+	pSrcFile = imgPath.c_str();
+
+	TTexture9Ptr pTextureRV = std::make_shared<TTexture9>(nullptr, imgPath);
+	if (CheckHR(D3DXCreateTextureFromFileA(g_pd3dDevice, pSrcFile, &pTextureRV->GetSRV9()))) {
+		pTextureRV = nullptr;
+	}
+	return pTextureRV;
 }
 
 void TRenderSystem9::SetBlendFunc(const TBlendFunc& blendFunc)
 {
-
+	g_pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DEnumCT::d3d11To9(blendFunc.src));
+	g_pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DEnumCT::d3d11To9(blendFunc.dst));
 }
 
 void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 {
-
+	g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, depthState.depthEnable);
+	g_pd3dDevice->SetRenderState(D3DRS_ZFUNC, D3DEnumCT::d3d11To9(depthState.depthFunc));
+	g_pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, depthState.depthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
 bool TRenderSystem9::BeginScene()
 {
+	if (FAILED(g_pd3dDevice->BeginScene())) 
+		return false;
 	return false;
 }
 
 void TRenderSystem9::EndScene()
 {
-
+	g_pd3dDevice->EndScene();
+	g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
 void TRenderSystem9::Draw(IRenderable* renderable)

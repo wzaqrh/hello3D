@@ -20,7 +20,7 @@ public:
 	std::vector<UINT> indices;
 
 	TTextureBySlotPtr mTextures;
-	TVertexBufferPtr mVertexBuffer;
+	IVertexBufferPtr mVertexBuffer;
 	TIndexBufferPtr mIndexBuffer;
 	TMaterialPtr mMaterial;
 public:
