@@ -28,7 +28,7 @@ protected:
 	IRenderSystem* mRenderSys = nullptr;
 	TRenderTexturePtr mMainTex;
 	IVertexBufferPtr mVertexBuffer;
-	TIndexBufferPtr mIndexBuffer;
+	IIndexBufferPtr mIndexBuffer;
 	TMaterialPtr mMaterial;
 	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 public:

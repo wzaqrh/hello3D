@@ -14,7 +14,7 @@ private:
 	TCameraPtr mRefCam;
 	IRenderSystem* mRenderSys = nullptr;
 	IVertexBufferPtr mVertexBuffer;
-	TIndexBufferPtr mIndexBuffer;
+	IIndexBufferPtr mIndexBuffer;
 public:
 	ITexturePtr mCubeSRV;
 	TMaterialPtr mMaterial;

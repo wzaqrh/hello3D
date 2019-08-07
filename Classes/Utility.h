@@ -69,6 +69,8 @@ public:
 	static _D3DBLEND d3d11To9(D3D11_BLEND blend);
 	static _D3DCMPFUNC d3d11To9(D3D11_COMPARISON_FUNC cmp);
 	static DXGI_FORMAT d3d9To11(D3DFORMAT fmt);
+	static D3DFORMAT d3d11To9(DXGI_FORMAT fmt);
+	static int GetWidth(DXGI_FORMAT format);
 };
 
 std::vector<char> ReadFile(const char* fileName, const char* mode);

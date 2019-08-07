@@ -36,7 +36,7 @@ private:
 
 	ITexturePtr mTexture = nullptr;
 	IVertexBufferPtr mVertexBuffer;
-	TIndexBufferPtr mIndexBuffer;
+	IIndexBufferPtr mIndexBuffer;
 public:
 	TMaterialPtr mMaterial;
 	TMovablePtr mMove;

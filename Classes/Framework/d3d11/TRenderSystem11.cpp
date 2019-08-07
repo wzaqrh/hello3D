@@ -583,10 +583,10 @@ IVertexBufferPtr TRenderSystem11::CreateVertexBuffer(int bufferSize, int stride,
 {
 	IVertexBufferPtr vertexBuffer;
 	if (buffer) {
-		vertexBuffer = std::make_shared<TVertex11Buffer>(_CreateVertexBuffer(bufferSize, buffer), bufferSize, stride, offset);
+		vertexBuffer = std::make_shared<TVertexBuffer11>(_CreateVertexBuffer(bufferSize, buffer), bufferSize, stride, offset);
 	}
 	else {
-		vertexBuffer = std::make_shared<TVertex11Buffer>(_CreateVertexBuffer(bufferSize), bufferSize, stride, offset);
+		vertexBuffer = std::make_shared<TVertexBuffer11>(_CreateVertexBuffer(bufferSize), bufferSize, stride, offset);
 	}
 	return vertexBuffer;
 }
@@ -598,7 +598,7 @@ void TRenderSystem11::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 	mDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer->GetBuffer11(), &stride, &offset);
 }
 
-TIndexBufferPtr TRenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
+IIndexBufferPtr TRenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
 {
 	HRESULT hr = S_OK;
 
@@ -618,23 +618,23 @@ TIndexBufferPtr TRenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT f
 	if (CheckHR(hr))
 		return nullptr;
 
-	TIndexBufferPtr indexBuffer = std::make_shared<TIndexBuffer>(pIndexBuffer, bufferSize, format);
+	IIndexBufferPtr indexBuffer = std::make_shared<TIndexBuffer11>(pIndexBuffer, bufferSize, format);
 	return indexBuffer;
 }
 
-void TRenderSystem11::SetIndexBuffer(TIndexBufferPtr indexBuffer)
+void TRenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
 	if (indexBuffer) {
-		mDeviceContext->IASetIndexBuffer(indexBuffer->buffer, indexBuffer->format, 0);
+		mDeviceContext->IASetIndexBuffer(indexBuffer->GetBuffer11(), indexBuffer->GetFormat(), 0);
 	}
 	else {
 		mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
 	}
 }
 
-void TRenderSystem11::DrawIndexed(TIndexBufferPtr indexBuffer)
+void TRenderSystem11::DrawIndexed(IIndexBufferPtr indexBuffer)
 {
-	mDeviceContext->DrawIndexed(indexBuffer->bufferSize / indexBuffer->GetWidth(), 0, 0);
+	mDeviceContext->DrawIndexed(indexBuffer->GetBufferSize() / indexBuffer->GetWidth(), 0, 0);
 }
 
 TContantBufferPtr TRenderSystem11::CreateConstBuffer(int bufferSize, void* data)
@@ -830,7 +830,7 @@ void TRenderSystem11::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	}
 }
 
-void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, TIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
+void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
 {
 	if (iterCnt >= 0) {
 		_PushRenderTarget(pass->mIterTargets[iterCnt]);

@@ -8,7 +8,7 @@ class TRenderSystem9
 	HWND mHWnd = NULL;
 
 	LPDIRECT3D9             g_pD3D = NULL; // Used to create the D3DDevice
-	LPDIRECT3DDEVICE9       g_pd3dDevice = NULL; // Our rendering device
+	LPDIRECT3DDEVICE9       mDevice9 = NULL; // Our rendering device
 	LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL; // Buffer to hold vertices
 	LPDIRECT3DTEXTURE9      g_pTexture = NULL; // Our texture
 public:
@@ -44,9 +44,9 @@ public:
 
 	virtual TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer) override;
 	virtual TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) override;
-	virtual TIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
-	virtual void SetIndexBuffer(TIndexBufferPtr indexBuffer) override;
-	virtual void DrawIndexed(TIndexBufferPtr indexBuffer) override;
+	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
+	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
+	virtual void DrawIndexed(IIndexBufferPtr indexBuffer) override;
 
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) override;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;

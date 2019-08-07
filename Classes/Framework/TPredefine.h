@@ -42,11 +42,14 @@ struct THardwareBuffer;
 struct IVertexBuffer;
 typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
 
-struct TVertex11Buffer;
-typedef std::shared_ptr<TVertex11Buffer> TVertex11BufferPtr;
+struct TVertexBuffer11;
+typedef std::shared_ptr<TVertexBuffer11> TVertexBuffer11Ptr;
 
-struct TIndexBuffer;
-typedef std::shared_ptr<TIndexBuffer> TIndexBufferPtr;
+struct IIndexBuffer;
+typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
+
+struct TIndexBuffer11;
+typedef std::shared_ptr<TIndexBuffer11> TIndexBufferPtr;
 
 struct TContantBuffer;
 typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;

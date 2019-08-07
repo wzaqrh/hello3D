@@ -58,7 +58,7 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd,
-		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &g_pd3dDevice))) {
+		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &mDevice9))) {
 		CheckHR(E_FAIL);
 		return false;
 	}
@@ -67,8 +67,8 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 
 void TRenderSystem9::_SetRasterizerState()
 {
-	g_pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	g_pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+	mDevice9->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	mDevice9->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 	//g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 }
 
@@ -118,7 +118,7 @@ void TRenderSystem9::SetHandle(HINSTANCE hInstance, HWND hWnd)
 
 void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
 {
-	g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
 		D3DCOLOR_ARGB(int(color.w * 255), int(color.x * 255), int(color.y * 255), int(color.z * 255)),
 		Depth, 
 		Stencil);
@@ -154,23 +154,34 @@ TContantBufferPtr TRenderSystem9::CreateConstBuffer(int bufferSize, void* data /
 	return nullptr;
 }
 
-TIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
+IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
 {
-	return nullptr;
+	TIndexBuffer9Ptr ret;
+	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
+	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
+	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, 0, Format, D3DPOOL_DEFAULT, &pIndexBuffer, NULL))) {
+		ret = std::make_shared<TIndexBuffer9>(pIndexBuffer, bufferSize, format);
+	}
+	return ret;
 }
 
-void TRenderSystem9::SetIndexBuffer(TIndexBufferPtr indexBuffer)
+void TRenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-
+	mDevice9->SetIndices(indexBuffer->GetBuffer9());
 }
 
-void TRenderSystem9::DrawIndexed(TIndexBufferPtr indexBuffer)
+void TRenderSystem9::DrawIndexed(IIndexBufferPtr indexBuffer)
 {
 
 }
 
 IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
+	/*TIndexBuffer9Ptr vertexBuffer = std::make_shared<TIndexBuffer9>(bufferSize);
+	if (CheckHR(g_pd3dDevice->CreateVertexBuffer(bufferSize, 0, D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1, D3DPOOL_DEFAULT, &g_pVB, NULL)))
+	{
+		return E_FAIL;
+	}*/
 	return nullptr;
 }
 
@@ -229,7 +240,7 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 	pSrcFile = imgPath.c_str();
 
 	TTexture9Ptr pTextureRV = std::make_shared<TTexture9>(nullptr, imgPath);
-	if (CheckHR(D3DXCreateTextureFromFileA(g_pd3dDevice, pSrcFile, &pTextureRV->GetSRV9()))) {
+	if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile, &pTextureRV->GetSRV9()))) {
 		pTextureRV = nullptr;
 	}
 	return pTextureRV;
@@ -237,28 +248,28 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 
 void TRenderSystem9::SetBlendFunc(const TBlendFunc& blendFunc)
 {
-	g_pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DEnumCT::d3d11To9(blendFunc.src));
-	g_pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DEnumCT::d3d11To9(blendFunc.dst));
+	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3DEnumCT::d3d11To9(blendFunc.src));
+	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3DEnumCT::d3d11To9(blendFunc.dst));
 }
 
 void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 {
-	g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, depthState.depthEnable);
-	g_pd3dDevice->SetRenderState(D3DRS_ZFUNC, D3DEnumCT::d3d11To9(depthState.depthFunc));
-	g_pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, depthState.depthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
+	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.depthEnable);
+	mDevice9->SetRenderState(D3DRS_ZFUNC, D3DEnumCT::d3d11To9(depthState.depthFunc));
+	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.depthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
 bool TRenderSystem9::BeginScene()
 {
-	if (FAILED(g_pd3dDevice->BeginScene())) 
+	if (FAILED(mDevice9->BeginScene())) 
 		return false;
 	return false;
 }
 
 void TRenderSystem9::EndScene()
 {
-	g_pd3dDevice->EndScene();
-	g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
+	mDevice9->EndScene();
+	mDevice9->Present(NULL, NULL, NULL, NULL);
 }
 
 void TRenderSystem9::Draw(IRenderable* renderable)

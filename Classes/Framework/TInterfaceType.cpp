@@ -183,36 +183,6 @@ ITexturePtr TRenderTexture::GetRenderTargetSRV()
 	return mRenderTargetPtr;
 }
 
-/********** TIndexBuffer **********/
-int TIndexBuffer::GetWidth()
-{
-	int width = 4;
-	switch (format)
-	{
-	case DXGI_FORMAT_R32_UINT:
-		width = 4;
-		break;
-	case DXGI_FORMAT_R32_SINT:
-		width = 4;
-		break;
-	case DXGI_FORMAT_R16_UINT:
-		width = 2;
-		break;
-	case DXGI_FORMAT_R16_SINT:
-		width = 2;
-		break;
-	case DXGI_FORMAT_R8_UINT:
-		width = 1;
-		break;
-	case DXGI_FORMAT_R8_SINT:
-		width = 1;
-		break;
-	default:
-		break;
-	}
-	return width;
-}
-
 /********** ITexture **********/
 ID3D11ShaderResourceView*& ITexture::GetSRV11()
 {
@@ -229,8 +199,8 @@ IDirect3DTexture9*& ITexture::GetSRV9()
 /********** IHardwareBuffer **********/
 ID3D11Buffer*& IHardwareBuffer::GetBuffer11()
 {
-	ID3D11Buffer* buffer11;
-	return buffer11;
+	static ID3D11Buffer* buffer;
+	return buffer;
 }
 
 unsigned int IHardwareBuffer::GetBufferSize()
@@ -241,8 +211,8 @@ unsigned int IHardwareBuffer::GetBufferSize()
 /********** IVertexBuffer **********/
 IDirect3DVertexBuffer9*& IVertexBuffer::GetBuffer9()
 {
-	IDirect3DVertexBuffer9* buffer9;
-	return buffer9;
+	static IDirect3DVertexBuffer9* buffer;
+	return buffer;
 }
 
 unsigned int IVertexBuffer::GetStride()
@@ -253,4 +223,11 @@ unsigned int IVertexBuffer::GetStride()
 unsigned int IVertexBuffer::GetOffset()
 {
 	return 0;
+}
+
+/********** IIndexBuffer **********/
+IDirect3DIndexBuffer9*& IIndexBuffer::GetBuffer9()
+{
+	static IDirect3DIndexBuffer9* buffer;
+	return buffer;
 }

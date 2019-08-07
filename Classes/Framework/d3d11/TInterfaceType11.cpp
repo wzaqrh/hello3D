@@ -1,5 +1,6 @@
 #include "TInterfaceType11.h"
 #include "IRenderSystem.h"
+#include "Utility.h"
 
 template<class T>
 static IUnknown*& MakeDeviceObjectRef(T*& ref) {
@@ -61,27 +62,48 @@ DXGI_FORMAT TTexture11::GetFormat()
 }
 
 /********** TVertex11Buffer **********/
-int TVertex11Buffer::GetCount()
+int TVertexBuffer11::GetCount()
 {
 	return bufferSize / stride;
 }
 
-ID3D11Buffer*& TVertex11Buffer::GetBuffer11()
+ID3D11Buffer*& TVertexBuffer11::GetBuffer11()
 {
 	return buffer;
 }
 
-unsigned int TVertex11Buffer::GetBufferSize()
+unsigned int TVertexBuffer11::GetBufferSize()
 {
 	return bufferSize;
 }
 
-unsigned int TVertex11Buffer::GetStride()
+unsigned int TVertexBuffer11::GetStride()
 {
 	return stride;
 }
 
-unsigned int TVertex11Buffer::GetOffset()
+unsigned int TVertexBuffer11::GetOffset()
 {
 	return offset;
+}
+
+/********** TIndexBuffer **********/
+ID3D11Buffer*& TIndexBuffer11::GetBuffer11()
+{
+	return buffer;
+}
+
+unsigned int TIndexBuffer11::GetBufferSize()
+{
+	return bufferSize;
+}
+
+int TIndexBuffer11::GetWidth()
+{
+	return D3DEnumCT::GetWidth(format);
+}
+
+DXGI_FORMAT TIndexBuffer11::GetFormat()
+{
+	return format;
 }

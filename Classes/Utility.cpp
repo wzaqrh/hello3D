@@ -348,7 +348,41 @@ _D3DCMPFUNC D3DEnumCT::d3d11To9(D3D11_COMPARISON_FUNC cmp)
 	return (_D3DCMPFUNC)cmp;
 }
 
+D3DFORMAT D3DEnumCT::d3d11To9(DXGI_FORMAT fmt)
+{
+	return D3DFORMAT(fmt);
+}
+
 DXGI_FORMAT D3DEnumCT::d3d9To11(D3DFORMAT fmt)
 {
 	return DXGI_FORMAT(fmt);
+}
+
+int D3DEnumCT::GetWidth(DXGI_FORMAT format)
+{
+	int width = 4;
+	switch (format)
+	{
+	case DXGI_FORMAT_R32_UINT:
+		width = 4;
+		break;
+	case DXGI_FORMAT_R32_SINT:
+		width = 4;
+		break;
+	case DXGI_FORMAT_R16_UINT:
+		width = 2;
+		break;
+	case DXGI_FORMAT_R16_SINT:
+		width = 2;
+		break;
+	case DXGI_FORMAT_R8_UINT:
+		width = 1;
+		break;
+	case DXGI_FORMAT_R8_SINT:
+		width = 1;
+		break;
+	default:
+		break;
+	}
+	return width;
 }

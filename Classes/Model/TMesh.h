@@ -21,7 +21,7 @@ public:
 
 	TTextureBySlotPtr mTextures;
 	IVertexBufferPtr mVertexBuffer;
-	TIndexBufferPtr mIndexBuffer;
+	IIndexBufferPtr mIndexBuffer;
 	TMaterialPtr mMaterial;
 public:
 	TMesh(const aiMesh* __data, 

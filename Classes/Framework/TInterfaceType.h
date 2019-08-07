@@ -79,15 +79,12 @@ struct IVertexBuffer : public IHardwareBuffer {
 };
 typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
 
-struct TIndexBuffer : public THardwareBuffer {
-	DXGI_FORMAT format;
-public:
-	TIndexBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize, DXGI_FORMAT __format)
-	:THardwareBuffer(__buffer, __bufferSize), format(__format) {};
-	TIndexBuffer() :format(DXGI_FORMAT_UNKNOWN) {};
-	int GetWidth();
+struct IIndexBuffer : public IHardwareBuffer {
+	virtual IDirect3DIndexBuffer9*& GetBuffer9();
+	virtual int GetWidth() = 0;
+	virtual DXGI_FORMAT GetFormat() = 0;
 };
-typedef std::shared_ptr<TIndexBuffer> TIndexBufferPtr;
+typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 
 struct TContantBuffer : public THardwareBuffer {
 	TContantBuffer() {}

@@ -68,9 +68,9 @@ public:
 
 	virtual TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer);
 	virtual TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr);
-	virtual TIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
-	virtual void SetIndexBuffer(TIndexBufferPtr indexBuffer);
-	virtual void DrawIndexed(TIndexBufferPtr indexBuffer);
+	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
+	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer);
+	virtual void DrawIndexed(IIndexBufferPtr indexBuffer);
 
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
@@ -116,7 +116,7 @@ protected:
 protected:
 	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, TIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
 	void RenderSkyBox();
 	void DoPostProcess();
 

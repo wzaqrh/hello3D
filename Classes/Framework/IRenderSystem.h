@@ -40,9 +40,9 @@ public:
 
 	virtual TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer) = 0;
 	virtual TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) = 0;
-	virtual TIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
-	virtual void SetIndexBuffer(TIndexBufferPtr indexBuffer) = 0;
-	virtual void DrawIndexed(TIndexBufferPtr indexBuffer) = 0;
+	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
+	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
+	virtual void DrawIndexed(IIndexBufferPtr indexBuffer) = 0;
 
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) = 0;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;

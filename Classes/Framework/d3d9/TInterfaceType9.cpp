@@ -47,3 +47,24 @@ D3DSURFACE_DESC TTexture9::GetDesc()
 	texture->GetLevelDesc(0, &desc);
 	return desc;
 }
+
+/********** TIndexBuffer9 **********/
+IDirect3DIndexBuffer9*& TIndexBuffer9::GetBuffer9()
+{
+	return buffer;
+}
+
+unsigned int TIndexBuffer9::GetBufferSize()
+{
+	return bufferSize;
+}
+
+int TIndexBuffer9::GetWidth()
+{
+	return D3DEnumCT::GetWidth(format);
+}
+
+DXGI_FORMAT TIndexBuffer9::GetFormat()
+{
+	return format;
+}
