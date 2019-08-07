@@ -185,6 +185,11 @@ ID3D11SamplerState* TMaterial::AddSampler(ID3D11SamplerState* sampler)
 std::shared_ptr<TMaterial> TMaterial::Clone(TRenderSystem* pRenderSys)
 {
 	TMaterialPtr material = std::make_shared<TMaterial>();
+	
+	for (auto& depend : mDepends)
+		material->AddDependency(depend);
+	material->mCurState = mCurState;
+
 	for (int i = 0; i < mTechniques.size(); ++i) {
 		material->AddTechnique(mTechniques[i]->Clone(pRenderSys));
 	}
@@ -287,6 +292,7 @@ TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, TTexturePtr texture)
 
 TMaterialPtr TMaterialBuilder::Build()
 {
+	mMaterial->CheckAndSetLoaded();
 	return mMaterial;
 }
 

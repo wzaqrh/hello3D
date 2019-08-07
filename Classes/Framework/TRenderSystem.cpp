@@ -905,7 +905,7 @@ void TRenderSystem::RenderLight(TDirectLight* light, enLightType lightType, cons
 	auto LightCam = light->GetLightCamera(*mDefCamera);
 	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 	for (int i = 0; i < opQueue.size(); ++i) 
-	//if (opQueue[i].mMaterial->IsLoaded()) 
+	if (opQueue[i].mMaterial->IsLoaded()) 
 	{
 		globalParam.mWorld = opQueue[i].mWorldTransform;
 		RenderOperation(opQueue[i], lightMode, globalParam);

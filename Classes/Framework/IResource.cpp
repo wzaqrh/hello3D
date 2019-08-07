@@ -52,8 +52,9 @@ bool IResource::CheckLoaded() const
 
 void IResource::CheckAndSetLoaded()
 {
-	if (!IsLoaded() && CheckLoaded())
+	if (!IsLoaded() && CheckLoaded()) {
 		SetLoaded();
+	}
 }
 
 void IResource::AddDependency(std::shared_ptr<IResource> res)
