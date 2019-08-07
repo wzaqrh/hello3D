@@ -377,6 +377,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Classes\Framework\d3d11\TRenderSystem11.cpp" />
+    <ClCompile Include="Classes\Framework\d3d9\TRenderSystem9.cpp" />
     <ClCompile Include="Classes\Framework\IRenderable.cpp" />
     <ClCompile Include="Classes\Framework\IResource.cpp" />
     <ClCompile Include="Classes\Framework\TApp.cpp" />
@@ -405,6 +406,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\d3d11\TRenderSystem11.h" />
+    <ClInclude Include="Classes\Framework\d3d9\TRenderSystem9.h" />
     <ClInclude Include="Classes\Framework\IRenderable.h" />
     <ClInclude Include="Classes\Framework\IResource.h" />
     <ClInclude Include="Classes\Framework\std.h" />

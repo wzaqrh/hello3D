@@ -79,6 +79,9 @@
     <ClCompile Include="Classes\Framework\IRenderSystem.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Framework\d3d9\TRenderSystem9.cpp">
+      <Filter>Classes\Framework\d3d9</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -162,6 +165,9 @@
     <ClInclude Include="Classes\Framework\IRenderSystem.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\Framework\d3d9\TRenderSystem9.h">
+      <Filter>Classes\Framework\d3d9</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Classes">
@@ -184,6 +190,9 @@
     </Filter>
     <Filter Include="Classes\Framework\d3d11">
       <UniqueIdentifier>{b5c952d2-d239-4894-92c4-54bf2f51c839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Framework\d3d9">
+      <UniqueIdentifier>{3845ec8c-3527-46d9-9713-6812481afa31}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
