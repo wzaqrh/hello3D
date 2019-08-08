@@ -215,7 +215,7 @@ TProgramPtr TRenderSystem9::CreateProgram(const std::string& name, const char* v
 	return nullptr;
 }
 
-ID3D11SamplerState* TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
+ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
 {
 	return nullptr;
 }

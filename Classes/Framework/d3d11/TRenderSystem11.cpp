@@ -325,7 +325,7 @@ bool TRenderSystem11::UpdateBuffer(IHardwareBuffer* buffer, void* data, int data
 	return true;
 }
 
-ID3D11SamplerState* TRenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp)
+ISamplerStatePtr TRenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp)
 {
 	HRESULT hr = S_OK;
 
@@ -346,7 +346,9 @@ ID3D11SamplerState* TRenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_CO
 	hr = mDevice->CreateSamplerState(&sampDesc, &pSamplerLinear);
 	if (CheckHR(hr))
 		return nullptr;
-	return pSamplerLinear;
+
+	TSamplerState11Ptr ret = std::make_shared<TSamplerState11>(pSamplerLinear);
+	return ret;
 }
 
 DWORD GetShaderFlag() {
@@ -813,21 +815,36 @@ cbGlobalParam TRenderSystem11::MakeAutoParam(TCameraBase* pLightCam, bool castSh
 	return globalParam;
 }
 
+static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<TContantBufferInfo>& bufferInfos) {
+	std::vector<ID3D11Buffer*> ret;
+	for (auto& iter : bufferInfos)
+		ret.push_back(iter.buffer->GetBuffer11());
+	return ret;
+}
+static std::vector<ID3D11SamplerState*> GetSampler11List(const std::vector<ISamplerStatePtr>& samplers) {
+	std::vector<ID3D11SamplerState*> ret;
+	for (auto& iter : samplers)
+		ret.push_back(iter->GetSampler11());
+	return ret;
+}
+
 void TRenderSystem11::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	mDeviceContext->UpdateSubresource(pass->mConstBuffers[0], 0, NULL, &globalParam, 0, 0);
+	std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
+	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
 
 	mDeviceContext->VSSetShader(pass->mProgram->mVertex->GetShader11(), NULL, 0);
 	mDeviceContext->PSSetShader(pass->mProgram->mPixel->GetShader11(), NULL, 0);
 
-	mDeviceContext->VSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
-	mDeviceContext->PSSetConstantBuffers(0, pass->mConstBuffers.size(), &pass->mConstBuffers[0]);
+	mDeviceContext->VSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
+	mDeviceContext->PSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
 	mDeviceContext->IASetInputLayout(pass->mInputLayout->GetLayout11());
 
 	mDeviceContext->IASetPrimitiveTopology(pass->mTopoLogy);
 
 	if (!pass->mSamplers.empty()) {
-		mDeviceContext->PSSetSamplers(0, pass->mSamplers.size(), &pass->mSamplers[0]);
+		std::vector<ID3D11SamplerState*> passSamplers = GetSampler11List(pass->mSamplers);
+		mDeviceContext->PSSetSamplers(0, passSamplers.size(), &passSamplers[0]);
 	}
 }
 

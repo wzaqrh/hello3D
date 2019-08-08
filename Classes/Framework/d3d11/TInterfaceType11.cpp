@@ -305,3 +305,9 @@ ID3D11DepthStencilView*& TRenderTexture11::GetDepthStencilBuffer11()
 {
 	return mDepthStencilView;
 }
+
+/********** TSamplerState11 **********/
+ID3D11SamplerState*& TSamplerState11::GetSampler11()
+{
+	return mSampler;
+}

@@ -144,3 +144,11 @@ private:
 	bool InitDepthStencilView(ID3D11Device* pDevice);
 };
 typedef std::shared_ptr<TRenderTexture11> TRenderTexture11Ptr;
+
+struct TSamplerState11 : public ISamplerState {
+	ID3D11SamplerState* mSampler = nullptr;
+public:
+	TSamplerState11(ID3D11SamplerState* sampler) :mSampler(sampler) {};
+	virtual ID3D11SamplerState*& GetSampler11() override;
+};
+typedef std::shared_ptr<TSamplerState11> TSamplerState11Ptr;

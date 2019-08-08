@@ -23,11 +23,10 @@ TPass::TPass(const std::string& lightMode, const std::string& name)
 IContantBufferPtr TPass::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	mConstantBuffers.push_back(cbuffer);
-	mConstBuffers.push_back(cbuffer.buffer->GetBuffer11());
 	return cbuffer.buffer;
 }
 
-ID3D11SamplerState* TPass::AddSampler(ID3D11SamplerState* sampler)
+ISamplerStatePtr TPass::AddSampler(ISamplerStatePtr sampler)
 {
 	mSamplers.push_back(sampler);
 	return sampler;
@@ -106,7 +105,7 @@ IContantBufferPtr TTechnique::AddConstBuffer(const TContantBufferInfo& cbuffer)
 	return cbuffer.buffer;
 }
 
-ID3D11SamplerState* TTechnique::AddSampler(ID3D11SamplerState* sampler)
+ISamplerStatePtr TTechnique::AddSampler(ISamplerStatePtr sampler)
 {
 	for (auto& pass : mPasses)
 		pass->AddSampler(sampler);
@@ -175,7 +174,7 @@ IContantBufferPtr TMaterial::AddConstBuffer(const TContantBufferInfo& cbuffer)
 	return cbuffer.buffer;
 }
 
-ID3D11SamplerState* TMaterial::AddSampler(ID3D11SamplerState* sampler)
+ISamplerStatePtr TMaterial::AddSampler(ISamplerStatePtr sampler)
 {
 	for (auto& tech : mTechniques)
 		tech->AddSampler(sampler);
@@ -253,7 +252,7 @@ TProgramPtr TMaterialBuilder::SetProgram(TProgramPtr program)
 	return program;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddSampler(ID3D11SamplerState* sampler)
+TMaterialBuilder& TMaterialBuilder::AddSampler(ISamplerStatePtr sampler)
 {
 	mCurPass->AddSampler(sampler);
 	return *this;

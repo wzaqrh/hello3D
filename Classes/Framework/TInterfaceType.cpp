@@ -148,3 +148,10 @@ IDirect3DPixelShader9*& IPixelShader::GetShader9()
 	static IDirect3DPixelShader9* shader;
 	return shader;
 }
+
+/********** ISamplerState **********/
+ID3D11SamplerState*& ISamplerState::GetSampler11()
+{
+	static ID3D11SamplerState* sampler;
+	return sampler;
+}

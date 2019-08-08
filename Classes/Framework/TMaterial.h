@@ -24,9 +24,8 @@ struct TPass {
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
 	
 	TProgramPtr mProgram;
-	std::vector<ID3D11SamplerState*> mSamplers;
+	std::vector<ISamplerStatePtr> mSamplers;
 
-	std::vector<ID3D11Buffer*> mConstBuffers;
 	std::vector<TContantBufferInfo> mConstantBuffers;
 
 	IRenderTexturePtr mRenderTarget;
@@ -39,7 +38,7 @@ public:
 	TPass(const std::string& lightMode, const std::string& name);
 	std::shared_ptr<TPass> Clone(IRenderSystem* pRenderSys);
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
-	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
+	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	IRenderTexturePtr AddIterTarget(IRenderTexturePtr target);
 	
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
@@ -55,7 +54,7 @@ public:
 	void AddPass(TPassPtr pass);
 	std::shared_ptr<TTechnique> Clone(IRenderSystem* pRenderSys);
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
-	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
+	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	
 	TPassPtr GetPassByName(const std::string& passName);
 	std::vector<TPassPtr> GetPassesByName(const std::string& passName);
@@ -74,7 +73,7 @@ public:
 	TTechniquePtr CurTech();
 	TTechniquePtr SetCurTechByIdx(int idx);
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
-	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
+	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
 
@@ -92,7 +91,7 @@ public:
 	TMaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
 	TProgramPtr SetProgram(TProgramPtr program);
-	TMaterialBuilder& AddSampler(ID3D11SamplerState* sampler);
+	TMaterialBuilder& AddSampler(ISamplerStatePtr sampler);
 	TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique=true);
 	TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
 	TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target);

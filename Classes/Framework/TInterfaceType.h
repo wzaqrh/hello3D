@@ -111,3 +111,8 @@ struct IRenderTexture {
 	virtual IDirect3DSurface9*& GetDepthStencilBuffer9();
 };
 typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;
+
+struct ISamplerState {
+	virtual ID3D11SamplerState*& GetSampler11();
+};
+typedef std::shared_ptr<ISamplerState> ISamplerStatePtr;

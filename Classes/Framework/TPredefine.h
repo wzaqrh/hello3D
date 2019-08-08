@@ -81,6 +81,12 @@ typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;
 class TRenderTexture11;
 typedef std::shared_ptr<TRenderTexture11> TRenderTexturePtr;
 
+struct ISamplerState;
+typedef std::shared_ptr<ISamplerState> ISamplerStatePtr;
+
+struct TSamplerState11;
+typedef std::shared_ptr<TSamplerState11> TSamplerState11Ptr;
+
 struct TRenderOperation;
 struct TRenderOperationQueue;
 struct IRenderable;
