@@ -68,3 +68,52 @@ DXGI_FORMAT TIndexBuffer9::GetFormat()
 {
 	return format;
 }
+
+/********** TVertexShader9 **********/
+unsigned int TVertexBuffer9::GetBufferSize()
+{
+	return bufferSize;
+}
+
+IDirect3DVertexBuffer9*& TVertexBuffer9::GetBuffer9()
+{
+	return buffer;
+}
+
+unsigned int TVertexBuffer9::GetStride()
+{
+	return stride;
+}
+
+unsigned int TVertexBuffer9::GetOffset()
+{
+	return offset;
+}
+
+/********** TRenderTexture9 **********/
+TRenderTexture9::TRenderTexture9(IDirect3DSurface9* colorBuffer, IDirect3DSurface9* depthStencilBuffer)
+{
+	mColorBuffer = colorBuffer;
+	mDepthStencilBuffer = depthStencilBuffer;
+
+	void *pContainer = NULL;
+	HRESULT hr = mColorBuffer->GetContainer(IID_IDirect3DTexture9, &pContainer);
+	if (SUCCEEDED(hr) && pContainer) {
+		mColorTexture = std::make_shared<TTexture9>((IDirect3DTexture9 *)pContainer, "");
+	}
+}
+
+ITexturePtr TRenderTexture9::GetColorTexture()
+{
+	return mColorTexture;
+}
+
+IDirect3DSurface9*& TRenderTexture9::GetColorBuffer9()
+{
+	return mColorBuffer;
+}
+
+IDirect3DSurface9*& TRenderTexture9::GetDepthStencilBuffer9()
+{
+	return mDepthStencilBuffer;
+}

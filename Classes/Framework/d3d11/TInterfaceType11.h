@@ -1,6 +1,7 @@
 #pragma once
 #include "TInterfaceType.h"
 
+/********** Program **********/
 struct TBlobDataD3d11 : public IBlobData {
 	ID3DBlob* mBlob = nullptr;
 public:
@@ -44,26 +45,7 @@ public:
 };
 typedef std::shared_ptr<TPixelShader11> TPixelShader11Ptr;
 
-struct TTexture11 : public ITexture {
-private:
-	std::string path;
-	ID3D11ShaderResourceView *texture;
-public:
-	TTexture11(ID3D11ShaderResourceView* __texture, std::string __path);
-	virtual IUnknown*& GetDeviceObject() override;
-
-	void SetSRV11(ID3D11ShaderResourceView* __texture);
-	ID3D11ShaderResourceView*& GetSRV11();
-
-	const std::string& GetPath() const;
-	int GetWidth();
-	int GetHeight();
-	DXGI_FORMAT GetFormat();
-private:
-	D3D11_TEXTURE2D_DESC GetDesc();
-};
-typedef std::shared_ptr<TTexture11> TTexture11Ptr;
-
+/********** HardwareBuffer **********/
 struct THardwareBuffer {
 	ID3D11Buffer* buffer;
 	unsigned int bufferSize;
@@ -117,6 +99,27 @@ public:
 	virtual unsigned int GetBufferSize() override;
 };
 typedef std::shared_ptr<TContantBuffer11> TContantBuffer11Ptr;
+
+/********** Texture **********/
+struct TTexture11 : public ITexture {
+private:
+	std::string path;
+	ID3D11ShaderResourceView *texture;
+public:
+	TTexture11(ID3D11ShaderResourceView* __texture, std::string __path);
+	virtual IUnknown*& GetDeviceObject() override;
+
+	void SetSRV11(ID3D11ShaderResourceView* __texture);
+	ID3D11ShaderResourceView*& GetSRV11();
+
+	const std::string& GetPath() const;
+	int GetWidth();
+	int GetHeight();
+	DXGI_FORMAT GetFormat();
+private:
+	D3D11_TEXTURE2D_DESC GetDesc();
+};
+typedef std::shared_ptr<TTexture11> TTexture11Ptr;
 
 class TRenderTexture11 : public IRenderTexture {
 private:

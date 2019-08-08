@@ -7,10 +7,8 @@ class TRenderSystem9
 	HINSTANCE mHInst = NULL;
 	HWND mHWnd = NULL;
 
-	LPDIRECT3D9             g_pD3D = NULL; // Used to create the D3DDevice
-	LPDIRECT3DDEVICE9       mDevice9 = NULL; // Our rendering device
-	LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL; // Buffer to hold vertices
-	LPDIRECT3DTEXTURE9      g_pTexture = NULL; // Our texture
+	IDirect3D9 *mD3D9 = NULL; // Used to create the D3DDevice
+	IDirect3DDevice9 *mDevice9 = NULL; // Our rendering device
 public:
 	int mScreenWidth;
 	int mScreenHeight;
@@ -37,7 +35,7 @@ public:
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
 
 	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
-	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color) override;
+	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth = 1.0, UINT8 Stencil = 0) override;
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) override;
@@ -46,7 +44,6 @@ public:
 	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) override;
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
-	virtual void DrawIndexed(IIndexBufferPtr indexBuffer) override;
 
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) override;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;

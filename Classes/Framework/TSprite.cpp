@@ -98,17 +98,7 @@ void TSprite::SetFlipY(bool flipY)
 
 void TSprite::Draw()
 {
-#ifdef USE_RENDER_OP
 	mRenderSys->Draw(this);
-#else
-	mRenderSys->ApplyMaterial(mMaterial, XMMatrixIdentity());
-	mRenderSys->SetVertexBuffer(mVertexBuffer);
-	mRenderSys->SetIndexBuffer(mIndexBuffer);
-	if (mTexture != nullptr) {
-		mRenderSys->mDeviceContext->PSSetShaderResources(0, 1, &mTexture);
-	}
-	mRenderSys->DrawIndexed(mIndexBuffer);
-#endif
 }
 
 int TSprite::GenRenderOperation(TRenderOperationQueue& opList)

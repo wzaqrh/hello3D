@@ -47,19 +47,29 @@ public:
 typedef std::shared_ptr<TProgram> TProgramPtr;
 
 /********** HardwareBuffer **********/
+enum enHardwareBufferType {
+	E_HWBUFFER_CONSTANT,
+	E_HWBUFFER_VERTEX,
+	E_HWBUFFER_INDEX
+};
 struct IHardwareBuffer {
+	virtual enHardwareBufferType GetType() = 0;
 	virtual ID3D11Buffer*& GetBuffer11();
 	virtual unsigned int GetBufferSize();
 };
 
 struct IVertexBuffer : public IHardwareBuffer {
+	virtual enHardwareBufferType GetType() override final;
+
 	virtual IDirect3DVertexBuffer9*& GetBuffer9();
-	virtual unsigned int GetStride();
-	virtual unsigned int GetOffset();
+	virtual unsigned int GetStride() = 0;
+	virtual unsigned int GetOffset() = 0;
 };
 typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
 
 struct IIndexBuffer : public IHardwareBuffer {
+	virtual enHardwareBufferType GetType() override final;
+
 	virtual IDirect3DIndexBuffer9*& GetBuffer9();
 	virtual int GetWidth() = 0;
 	virtual DXGI_FORMAT GetFormat() = 0;
@@ -67,7 +77,7 @@ struct IIndexBuffer : public IHardwareBuffer {
 typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 
 struct IContantBuffer : public IHardwareBuffer {
-
+	virtual enHardwareBufferType GetType() override final;
 };
 typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
 

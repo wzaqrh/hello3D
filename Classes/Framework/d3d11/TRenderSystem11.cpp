@@ -239,7 +239,6 @@ void TRenderSystem11::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth,
 {
 	float colorArr[4] = { color.x, color.y, color.z, color.w }; // red, green, blue, alpha
 	mDeviceContext->ClearRenderTargetView(mBackRenderTargetView, colorArr);
-
 	mDeviceContext->ClearDepthStencilView(mBackDepthStencilView, D3D11_CLEAR_DEPTH, Depth, Stencil);
 }
 
@@ -248,10 +247,10 @@ IRenderTexturePtr TRenderSystem11::CreateRenderTexture(int width, int height, DX
 	return std::make_shared<TRenderTexture11>(mDevice, width, height, format);
 }
 
-void TRenderSystem11::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color)
+void TRenderSystem11::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
 {
 	mDeviceContext->ClearRenderTargetView(rendTarget->GetColorBuffer11(), (const float*)&color);
-	mDeviceContext->ClearDepthStencilView(rendTarget->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	mDeviceContext->ClearDepthStencilView(rendTarget->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, Depth, Stencil);
 }
 
 void TRenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
@@ -635,11 +634,6 @@ void TRenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 	}
 }
 
-void TRenderSystem11::DrawIndexed(IIndexBufferPtr indexBuffer)
-{
-	mDeviceContext->DrawIndexed(indexBuffer->GetBufferSize() / indexBuffer->GetWidth(), 0, 0);
-}
-
 IContantBufferPtr TRenderSystem11::CreateConstBuffer(int bufferSize, void* data)
 {
 	HRESULT hr = S_OK;
@@ -879,7 +873,7 @@ void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int it
 		BindPass(pass, globalParam);
 
 		if (indexBuffer) {
-			DrawIndexed(indexBuffer);
+			mDeviceContext->DrawIndexed(indexBuffer->GetBufferSize() / indexBuffer->GetWidth(), 0, 0);
 		}
 		else {
 			mDeviceContext->Draw(vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(), 0);

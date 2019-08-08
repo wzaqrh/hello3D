@@ -31,25 +31,6 @@ void TMesh::Close()
 {
 }
 
-#if 0
-void TMesh::Draw(TRenderSystem* renderSys)
-{
-	renderSys->SetVertexBuffer(mVertexBuffer);
-	renderSys->SetIndexBuffer(mIndexBuffer);
-	if (mTextures.size() > 0)
-	{
-		std::vector<ID3D11ShaderResourceView*> texViews = mTextures.GetTextureViews();
-		renderSys->mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
-	}
-	else {
-		ID3D11ShaderResourceView* texViewNull = nullptr;
-		renderSys->mDeviceContext->PSSetShaderResources(0, 1, &texViewNull);
-	}
-
-	renderSys->DrawIndexed(mIndexBuffer);
-}
-#endif
-
 bool TMesh::HasTexture(int slot)
 {
 	return (slot < mTextures->size()) 

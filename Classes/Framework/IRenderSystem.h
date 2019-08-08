@@ -33,7 +33,7 @@ public:
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) = 0;
 
 	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
-	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color) = 0;
+	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
@@ -42,7 +42,6 @@ public:
 	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) = 0;
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
-	virtual void DrawIndexed(IIndexBufferPtr indexBuffer) = 0;
 
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) = 0;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;

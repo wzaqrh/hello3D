@@ -51,6 +51,9 @@ struct THardwareBuffer;
 struct IVertexBuffer;
 typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
 
+struct TVertexBuffer9;
+typedef std::shared_ptr<TVertexBuffer9> TVertexBuffer9Ptr;
+
 struct TVertexBuffer11;
 typedef std::shared_ptr<TVertexBuffer11> TVertexBuffer11Ptr;
 
@@ -80,6 +83,9 @@ typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;
 
 class TRenderTexture11;
 typedef std::shared_ptr<TRenderTexture11> TRenderTexturePtr;
+
+class TRenderTexture9;
+typedef std::shared_ptr<TRenderTexture9> TRenderTexture9Ptr;
 
 struct ISamplerState;
 typedef std::shared_ptr<ISamplerState> ISamplerStatePtr;

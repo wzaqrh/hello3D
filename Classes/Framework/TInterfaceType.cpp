@@ -75,23 +75,33 @@ unsigned int IHardwareBuffer::GetBufferSize()
 }
 
 /********** IVertexBuffer **********/
+enHardwareBufferType IVertexBuffer::GetType()
+{
+	return E_HWBUFFER_VERTEX;
+}
+
 IDirect3DVertexBuffer9*& IVertexBuffer::GetBuffer9()
 {
 	static IDirect3DVertexBuffer9* buffer;
 	return buffer;
 }
-
+#if 0
 unsigned int IVertexBuffer::GetStride()
 {
 	return 0;
 }
-
 unsigned int IVertexBuffer::GetOffset()
 {
 	return 0;
 }
+#endif
 
 /********** IIndexBuffer **********/
+enHardwareBufferType IIndexBuffer::GetType()
+{
+	return E_HWBUFFER_INDEX;
+}
+
 IDirect3DIndexBuffer9*& IIndexBuffer::GetBuffer9()
 {
 	static IDirect3DIndexBuffer9* buffer;
@@ -147,6 +157,12 @@ IDirect3DPixelShader9*& IPixelShader::GetShader9()
 {
 	static IDirect3DPixelShader9* shader;
 	return shader;
+}
+
+/********** IContantBuffer **********/
+enHardwareBufferType IContantBuffer::GetType()
+{
+	return E_HWBUFFER_CONSTANT;
 }
 
 /********** ISamplerState **********/

@@ -45,7 +45,7 @@ bool TRenderSystem9::Initialize()
 
 bool TRenderSystem9::_CreateDeviceAndSwapChain()
 {
-	if (NULL == (g_pD3D = Direct3DCreate9(D3D_SDK_VERSION))) {
+	if (NULL == (mD3D9 = Direct3DCreate9(D3D_SDK_VERSION))) {
 		CheckHR(E_FAIL);
 		return false;
 	}
@@ -57,9 +57,8 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
-	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd,
+	if (CheckHR(mD3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd,
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &mDevice9))) {
-		CheckHR(E_FAIL);
 		return false;
 	}
 	return true;
@@ -116,22 +115,33 @@ void TRenderSystem9::SetHandle(HINSTANCE hInstance, HWND hWnd)
 	mHWnd = hWnd;
 }
 
+static inline D3DCOLOR XMFLOAT2D3DCOLOR(XMFLOAT4 color) {
+	return D3DCOLOR_ARGB(int(color.w * 255), int(color.x * 255), int(color.y * 255), int(color.z * 255));
+}
 void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
 {
-	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
-		D3DCOLOR_ARGB(int(color.w * 255), int(color.x * 255), int(color.y * 255), int(color.z * 255)),
-		Depth, 
-		Stencil);
+	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), Depth, Stencil);
 }
 
 IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
-	return nullptr;
+	IDirect3DTexture9 *pTextureColor = nullptr;
+	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
+	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureColor, NULL))) return nullptr;
+
+	IDirect3DSurface9 *pSurfaceColor = nullptr;
+	if (CheckHR(pTextureColor->GetSurfaceLevel(0, &pSurfaceColor))) return nullptr;
+
+	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
+	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24FS8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
+
+	TRenderTexture9Ptr ret = std::make_shared<TRenderTexture9>(pSurfaceColor, pSurfaceDepthStencil);
+	return ret;
 }
 
-void TRenderSystem9::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color)
+void TRenderSystem9::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
 {
-
+	if (CheckHR(mDevice9->ColorFill(rendTarget->GetColorBuffer9(), NULL, XMFLOAT2D3DCOLOR(color)))) return;
 }
 
 void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
@@ -162,6 +172,7 @@ IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, 0, Format, D3DPOOL_DEFAULT, &pIndexBuffer, NULL))) {
 		ret = std::make_shared<TIndexBuffer9>(pIndexBuffer, bufferSize, format);
 	}
+	if (buffer) UpdateBuffer(ret.get(), buffer, bufferSize);
 	return ret;
 }
 
@@ -170,29 +181,51 @@ void TRenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 	mDevice9->SetIndices(indexBuffer->GetBuffer9());
 }
 
-void TRenderSystem9::DrawIndexed(IIndexBufferPtr indexBuffer)
-{
-
-}
-
 IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
-	/*TIndexBuffer9Ptr vertexBuffer = std::make_shared<TIndexBuffer9>(bufferSize);
-	if (CheckHR(g_pd3dDevice->CreateVertexBuffer(bufferSize, 0, D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1, D3DPOOL_DEFAULT, &g_pVB, NULL)))
-	{
-		return E_FAIL;
-	}*/
-	return nullptr;
+	TVertexBuffer9Ptr ret;
+	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
+	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, 0, 0/*non-FVF*/, D3DPOOL_DEFAULT, &pVertexBuffer, NULL))) {
+		ret = std::make_shared<TVertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
+	}
+	if (buffer) UpdateBuffer(ret.get(), buffer, bufferSize);
+	return ret;
 }
 
 void TRenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 {
-
+	UINT offset = vertexBuffer->GetOffset();
+	UINT stride = vertexBuffer->GetStride();
+	IDirect3DVertexBuffer9* buffer = vertexBuffer->GetBuffer9();
+	mDevice9->SetStreamSource(0, buffer, offset, stride);
 }
 
 bool TRenderSystem9::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize)
 {
-	return false;
+	enHardwareBufferType bufferType = buffer->GetType();
+	switch (bufferType)
+	{
+	case E_HWBUFFER_CONSTANT: {
+
+	}break;
+	case E_HWBUFFER_VERTEX: {
+		IDirect3DVertexBuffer9* buffer9 = static_cast<IVertexBuffer*>(buffer)->GetBuffer9();
+		void* pByteDest = nullptr;
+		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
+		memcpy(pByteDest, data, dataSize);
+		if (CheckHR(buffer9->Unlock())) return false;
+	}break;
+	case E_HWBUFFER_INDEX: {
+		IDirect3DIndexBuffer9* buffer9 = static_cast<IIndexBuffer*>(buffer)->GetBuffer9();
+		void* pByteDest = nullptr;
+		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
+		memcpy(pByteDest, data, dataSize);
+		if (CheckHR(buffer9->Unlock())) return false;
+	}break;
+	default:
+		break;
+	}
+	return true;
 }
 
 void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data)
