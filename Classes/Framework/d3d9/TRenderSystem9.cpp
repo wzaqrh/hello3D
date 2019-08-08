@@ -124,17 +124,17 @@ void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, 
 		Stencil);
 }
 
-TRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
+IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
 	return nullptr;
 }
 
-void TRenderSystem9::ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color)
+void TRenderSystem9::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color)
 {
 
 }
 
-void TRenderSystem9::SetRenderTarget(TRenderTexturePtr rendTarget)
+void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 {
 
 }
@@ -144,12 +144,12 @@ TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void
 	return nullptr;
 }
 
-TContantBufferPtr TRenderSystem9::CloneConstBuffer(TContantBufferPtr buffer)
+IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
 {
 	return nullptr;
 }
 
-TContantBufferPtr TRenderSystem9::CreateConstBuffer(int bufferSize, void* data /*= nullptr*/)
+IContantBufferPtr TRenderSystem9::CreateConstBuffer(int bufferSize, void* data /*= nullptr*/)
 {
 	return nullptr;
 }
@@ -195,7 +195,7 @@ bool TRenderSystem9::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataS
 	return false;
 }
 
-void TRenderSystem9::UpdateConstBuffer(TContantBufferPtr buffer, void* data)
+void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data)
 {
 
 }
@@ -220,7 +220,7 @@ ID3D11SamplerState* TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_
 	return nullptr;
 }
 
-TInputLayoutPtr TRenderSystem9::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+IInputLayoutPtr TRenderSystem9::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	return nullptr;
 }

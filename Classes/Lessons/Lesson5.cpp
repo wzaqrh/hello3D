@@ -21,7 +21,7 @@ void Lesson5::OnPostInitDevice()
 
 	mSprite = std::make_shared<TSprite>(mRenderSys, "shader\\Sprite.fx", "shader\\Sprite.fx");
 	//mSprite->SetTexture(mRenderSys->CreateTexture("image\\smile.png"));
-	mSprite->SetTexture(mRendTexture->GetRenderTargetSRV());
+	mSprite->SetTexture(mRendTexture->GetColorTexture());
 	mSprite->SetPosition(0, 0, 0);
 	mSprite->SetSize(5,5);
 

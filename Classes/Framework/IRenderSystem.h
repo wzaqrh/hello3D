@@ -32,14 +32,14 @@ public:
 	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd) = 0;
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) = 0;
 
-	virtual TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
-	virtual void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color) = 0;
-	virtual void SetRenderTarget(TRenderTexturePtr rendTarget) = 0;
+	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
+	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color) = 0;
+	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
 
-	virtual TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer) = 0;
-	virtual TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) = 0;
+	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) = 0;
+	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) = 0;
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 	virtual void DrawIndexed(IIndexBufferPtr indexBuffer) = 0;
@@ -48,14 +48,14 @@ public:
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
 
 	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize) = 0;
-	virtual void UpdateConstBuffer(TContantBufferPtr buffer, void* data) = 0;
+	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data) = 0;
 
 	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
 	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
 	virtual TProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
 
 	virtual ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) = 0;
-	virtual TInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
+	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
 
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc) = 0;
 	virtual void SetDepthState(const TDepthState& depthState) = 0;

@@ -6,7 +6,7 @@
 #include "Utility.h"
 
 /********** TContantBufferInfo **********/
-TContantBufferInfo::TContantBufferInfo(TContantBufferPtr __buffer, const std::string& __name, bool __isUnique)
+TContantBufferInfo::TContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name, bool __isUnique)
 	:buffer(__buffer)
 	,name(__name)
 	,isUnique(__isUnique)
@@ -20,10 +20,10 @@ TPass::TPass(const std::string& lightMode, const std::string& name)
 {
 }
 
-TContantBufferPtr TPass::AddConstBuffer(const TContantBufferInfo& cbuffer)
+IContantBufferPtr TPass::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	mConstantBuffers.push_back(cbuffer);
-	mConstBuffers.push_back(cbuffer.buffer->buffer);
+	mConstBuffers.push_back(cbuffer.buffer->GetBuffer11());
 	return cbuffer.buffer;
 }
 
@@ -33,23 +33,23 @@ ID3D11SamplerState* TPass::AddSampler(ID3D11SamplerState* sampler)
 	return sampler;
 }
 
-TRenderTexturePtr TPass::AddIterTarget(TRenderTexturePtr target)
+IRenderTexturePtr TPass::AddIterTarget(IRenderTexturePtr target)
 {
 	mIterTargets.push_back(target);
 	return target;
 }
 
-TContantBufferPtr TPass::GetConstBufferByIdx(size_t idx)
+IContantBufferPtr TPass::GetConstBufferByIdx(size_t idx)
 {
-	TContantBufferPtr ret = nullptr;
+	IContantBufferPtr ret = nullptr;
 	if (idx < mConstantBuffers.size())
 		ret = mConstantBuffers[idx].buffer;
 	return ret;
 }
 
-TContantBufferPtr TPass::GetConstBufferByName(const std::string& name)
+IContantBufferPtr TPass::GetConstBufferByName(const std::string& name)
 {
-	TContantBufferPtr ret = nullptr;
+	IContantBufferPtr ret = nullptr;
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
 		if (mConstantBuffers[i].name == name) {
 			ret = mConstantBuffers[i].buffer;
@@ -61,7 +61,7 @@ TContantBufferPtr TPass::GetConstBufferByName(const std::string& name)
 
 void TPass::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data)
 {
-	TContantBufferPtr buffer = GetConstBufferByName(name);
+	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer)
 		pRenderSys->UpdateConstBuffer(buffer, data);
 }
@@ -99,7 +99,7 @@ void TTechnique::AddPass(TPassPtr pass)
 	mPasses.push_back(pass);
 }
 
-TContantBufferPtr TTechnique::AddConstBuffer(const TContantBufferInfo& cbuffer)
+IContantBufferPtr TTechnique::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	for (auto& pass : mPasses)
 		pass->AddConstBuffer(cbuffer);
@@ -168,7 +168,7 @@ TTechniquePtr TMaterial::SetCurTechByIdx(int idx)
 	return mTechniques[mCurTechIdx];
 }
 
-TContantBufferPtr TMaterial::AddConstBuffer(const TContantBufferInfo& cbuffer)
+IContantBufferPtr TMaterial::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	for (auto& tech : mTechniques)
 		tech->AddConstBuffer(cbuffer);
@@ -233,7 +233,7 @@ TMaterialBuilder& TMaterialBuilder::SetPassName(const std::string& lightMode, co
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::SetInputLayout(TInputLayoutPtr inputLayout)
+TMaterialBuilder& TMaterialBuilder::SetInputLayout(IInputLayoutPtr inputLayout)
 {
 	mCurPass->mInputLayout = inputLayout;
 	mMaterial->AddDependency(inputLayout);
@@ -259,25 +259,25 @@ TMaterialBuilder& TMaterialBuilder::AddSampler(ID3D11SamplerState* sampler)
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddConstBuffer(TContantBufferPtr buffer, const std::string& name, bool isUnique)
+TMaterialBuilder& TMaterialBuilder::AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique)
 {
 	mCurPass->AddConstBuffer(TContantBufferInfo(buffer, name, isUnique));
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddConstBufferToTech(TContantBufferPtr buffer, const std::string& name, bool isUnique)
+TMaterialBuilder& TMaterialBuilder::AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name, bool isUnique)
 {
 	mCurTech->AddConstBuffer(TContantBufferInfo(buffer, name, isUnique));
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::SetRenderTarget(TRenderTexturePtr target)
+TMaterialBuilder& TMaterialBuilder::SetRenderTarget(IRenderTexturePtr target)
 {
 	mCurPass->mRenderTarget = target;
 	return *this;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddIterTarget(TRenderTexturePtr target)
+TMaterialBuilder& TMaterialBuilder::AddIterTarget(IRenderTexturePtr target)
 {
 	mCurPass->AddIterTarget(target);
 	return *this;
@@ -456,16 +456,16 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 	else if (name == E_MAT_POSTPROC_BLOOM) {
 #define NUM_TONEMAP_TEXTURES  10
 #define NUM_BLOOM_TEXTURES    2
-		std::vector<TRenderTexturePtr> TexToneMaps(NUM_TONEMAP_TEXTURES);
+		std::vector<IRenderTexturePtr> TexToneMaps(NUM_TONEMAP_TEXTURES);
 		int nSampleLen = 1;
 		for (size_t i = 0; i < NUM_TONEMAP_TEXTURES; i++) {
 			TexToneMaps[i] = mRenderSys->CreateRenderTexture(nSampleLen, nSampleLen, DXGI_FORMAT_R16G16B16A16_UNORM);
 			SET_DEBUG_NAME(TexToneMaps[i]->mDepthStencilView, "TexToneMaps"+i);
 			nSampleLen *= 2;
 		}
-		TRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
+		IRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
 		SET_DEBUG_NAME(TexBrightPass->mDepthStencilView, "TexBrightPass");
-		std::vector<TRenderTexturePtr> TexBlooms(NUM_BLOOM_TEXTURES);
+		std::vector<IRenderTexturePtr> TexBlooms(NUM_BLOOM_TEXTURES);
 		for (size_t i = 0; i < NUM_BLOOM_TEXTURES; i++) {
 			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
 			SET_DEBUG_NAME(TexBlooms[i]->mDepthStencilView, "TexBlooms"+i);
@@ -497,7 +497,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES - 1; ++i) {
 			builder.AddIterTarget(TexToneMaps[i]);
 		}
-		builder.SetTexture(0, TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->GetRenderTargetSRV());
+		builder.SetTexture(0, TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->GetColorTexture());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
@@ -511,7 +511,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale3x3_BrightPass"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexBrightPass);
-		builder.SetTexture(1, TexToneMaps[0]->GetRenderTargetSRV());
+		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
@@ -528,7 +528,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		for (int i = 1; i < NUM_BLOOM_TEXTURES; ++i) {
 			builder.AddIterTarget(TexBlooms[i]);
 		}
-		builder.SetTexture(1, TexBrightPass->GetRenderTargetSRV());
+		builder.SetTexture(1, TexBrightPass->GetColorTexture());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
@@ -541,8 +541,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		SetCommonField(builder, mRenderSys);
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "FinalPass"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetTexture(1, TexToneMaps[0]->GetRenderTargetSRV());
-		builder.SetTexture(2, TexBlooms[0]->GetRenderTargetSRV());
+		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
+		builder.SetTexture(2, TexBlooms[0]->GetColorTexture());
 	}
 
 	material = builder.Build();

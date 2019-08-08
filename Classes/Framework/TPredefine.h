@@ -24,17 +24,26 @@ typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 //TInterfaceType.h
 struct IResource;
 
-struct TVertexShader;
-typedef std::shared_ptr<TVertexShader> TVertexShaderPtr;
+struct IVertexShader;
+typedef std::shared_ptr<IVertexShader> IVertexShaderPtr;
 
-struct TPixelShader;
-typedef std::shared_ptr<TPixelShader> TPixelShaderPtr;
+struct TVertexShader11;
+typedef std::shared_ptr<TVertexShader11> TVertexShader11Ptr;
+
+struct IPixelShader;
+typedef std::shared_ptr<IPixelShader> IPixelShaderPtr;
+
+struct TPixelShader11;
+typedef std::shared_ptr<TPixelShader11> TPixelShader11Ptr;
 
 struct TProgram;
 typedef std::shared_ptr<TProgram> TProgramPtr;
 
-struct TInputLayout;
-typedef std::shared_ptr<TInputLayout> TInputLayoutPtr;
+struct IInputLayout;
+typedef std::shared_ptr<IInputLayout> IInputLayoutPtr;
+
+struct TInputLayout11;
+typedef std::shared_ptr<TInputLayout11> TInputLayoutPtr;
 
 struct IHardwareBuffer;
 struct THardwareBuffer;
@@ -51,8 +60,11 @@ typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 struct TIndexBuffer11;
 typedef std::shared_ptr<TIndexBuffer11> TIndexBufferPtr;
 
-struct TContantBuffer;
-typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;
+struct IContantBuffer;
+typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
+
+struct TContantBuffer11;
+typedef std::shared_ptr<TContantBuffer11> TContantBuffer11Ptr;
 
 struct ITexture;
 typedef std::shared_ptr<ITexture> ITexturePtr;
@@ -63,8 +75,11 @@ typedef std::shared_ptr<TTexture11> TTexture11Ptr;
 struct TTextureBySlot;
 typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
 
-class TRenderTexture;
-typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
+struct IRenderTexture;
+typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;
+
+class TRenderTexture11;
+typedef std::shared_ptr<TRenderTexture11> TRenderTexturePtr;
 
 struct TRenderOperation;
 struct TRenderOperationQueue;

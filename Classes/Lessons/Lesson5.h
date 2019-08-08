@@ -11,7 +11,7 @@ protected:
 	virtual void OnInitLight() override;
 private:
 	AssimpModel* mModel = nullptr;
-	TRenderTexturePtr mRendTexture = nullptr;
+	IRenderTexturePtr mRendTexture = nullptr;
 	TSpritePtr mSprite,mLayerColor;
 };
 

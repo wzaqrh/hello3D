@@ -36,14 +36,14 @@ public:
 	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd) override;
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
 
-	virtual TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
-	virtual void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color) override;
-	virtual void SetRenderTarget(TRenderTexturePtr rendTarget) override;
+	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
+	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color) override;
+	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) override;
 
-	virtual TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer) override;
-	virtual TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) override;
+	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
+	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) override;
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 	virtual void DrawIndexed(IIndexBufferPtr indexBuffer) override;
@@ -52,14 +52,14 @@ public:
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
 	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize) override;
-	virtual void UpdateConstBuffer(TContantBufferPtr buffer, void* data) override;
+	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data) override;
 
 	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 	virtual TProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 
 	virtual ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
-	virtual TInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
+	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
 
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc) override;
 	virtual void SetDepthState(const TDepthState& depthState) override;

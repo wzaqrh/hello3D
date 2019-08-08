@@ -17,13 +17,13 @@ private:
 	ID3D11BlendState* mBlendState = NULL;
 
 	TMaterialFactoryPtr mMaterialFac;
-	TRenderTexturePtr mShadowPassRT, mPostProcessRT;
+	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
 
 	ID3D11RenderTargetView* mBackRenderTargetView = NULL;
 	ID3D11DepthStencilView* mBackDepthStencilView = NULL;
 	ID3D11RenderTargetView* mCurRenderTargetView = NULL;
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
-	std::vector<TRenderTexturePtr> mRenderTargetStk;
+	std::vector<IRenderTexturePtr> mRenderTargetStk;
 
 	TThreadPumpPtr mThreadPump;
 
@@ -60,14 +60,14 @@ public:
 	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd);
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
 
-	virtual TRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-	virtual void ClearRenderTexture(TRenderTexturePtr rendTarget, XMFLOAT4 color);
-	virtual void SetRenderTarget(TRenderTexturePtr rendTarget);
+	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
+	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color);
+	virtual void SetRenderTarget(IRenderTexturePtr rendTarget);
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback);
 
-	virtual TContantBufferPtr CloneConstBuffer(TContantBufferPtr buffer);
-	virtual TContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr);
+	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer);
+	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr);
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer);
 	virtual void DrawIndexed(IIndexBufferPtr indexBuffer);
@@ -76,14 +76,14 @@ public:
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
 
 	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize);
-	virtual void UpdateConstBuffer(TContantBufferPtr buffer, void* data);
+	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data);
 
 	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 	virtual TProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 
 	virtual ID3D11SamplerState* CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
-	virtual TInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc);
 	virtual void SetDepthState(const TDepthState& depthState);
@@ -101,16 +101,16 @@ private:
 	void _SetViewports(int width, int height);
 	HRESULT _SetRasterizerState();
 protected:
-	void _PushRenderTarget(TRenderTexturePtr rendTarget);
+	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
 
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 
-	TVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
-	TVertexShaderPtr _CreateVSByFXC(const char* filename);
-	TPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
-	TPixelShaderPtr _CreatePSByFXC(const char* filename);
+	IVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
+	IVertexShaderPtr _CreateVSByFXC(const char* filename);
+	IPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
+	IPixelShaderPtr _CreatePSByFXC(const char* filename);
 
 	ID3D11InputLayout* _CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 protected:

@@ -7,13 +7,6 @@ struct IBlobData {
 	virtual void* GetBufferPointer() = 0;
 	virtual size_t GetBufferSize() = 0;
 };
-struct TBlobDataD3d : public IBlobData {
-	ID3DBlob* mBlob = nullptr;
-public:
-	TBlobDataD3d(ID3DBlob* pBlob);
-	virtual void* GetBufferPointer() override;
-	virtual size_t GetBufferSize() override;
-};
 struct TBlobDataStd : public IBlobData {
 	std::vector<char> mBuffer;
 public:
@@ -23,53 +16,40 @@ public:
 };
 typedef std::shared_ptr<IBlobData> IBlobDataPtr;
 
-struct TVertexShader : public IResource {
-	ID3D11VertexShader* mShader = nullptr;
-	IBlobDataPtr mBlob;
-	ID3DBlob* mErrBlob = nullptr;
-public:
-	TVertexShader(IBlobDataPtr pBlob);
-	virtual IUnknown*& GetDeviceObject() override;
+struct IInputLayout : public IResource {
+	virtual ID3D11InputLayout*& GetLayout11();
+	virtual IDirect3DVertexDeclaration9*& GetLayout9();
 };
-typedef std::shared_ptr<TVertexShader> TVertexShaderPtr;
+typedef std::shared_ptr<IInputLayout> IInputLayoutPtr;
 
-struct TPixelShader : public IResource {
-	ID3D11PixelShader* mShader = nullptr;
-	IBlobDataPtr mBlob;
-	ID3DBlob* mErrBlob = nullptr;
-public:
-	TPixelShader(IBlobDataPtr pBlob);
-	virtual IUnknown*& GetDeviceObject() override;
+struct IVertexShader : public IResource {
+	virtual IBlobDataPtr GetBlob() = 0;
+	virtual ID3D11VertexShader*& GetShader11();
+	virtual IDirect3DVertexShader9*& GetShader9();
 };
-typedef std::shared_ptr<TPixelShader> TPixelShaderPtr;
+typedef std::shared_ptr<IVertexShader> IVertexShaderPtr;
+
+struct IPixelShader : public IResource {
+public:
+	virtual IBlobDataPtr GetBlob() = 0;
+	virtual ID3D11PixelShader*& GetShader11();
+	virtual IDirect3DPixelShader9*& GetShader9();
+};
+typedef std::shared_ptr<IPixelShader> IPixelShaderPtr;
 
 struct TProgram : public IResource {
-	TVertexShaderPtr mVertex;
-	TPixelShaderPtr mPixel;
+	IVertexShaderPtr mVertex;
+	IPixelShaderPtr mPixel;
 public:
-	void SetVertex(TVertexShaderPtr pVertex);
-	void SetPixel(TPixelShaderPtr pPixel);
+	void SetVertex(IVertexShaderPtr pVertex);
+	void SetPixel(IPixelShaderPtr pPixel);
 };
 typedef std::shared_ptr<TProgram> TProgramPtr;
-
-struct TInputLayout : public IResource {
-	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
-	ID3D11InputLayout* mLayout = nullptr;
-};
-typedef std::shared_ptr<TInputLayout> TInputLayoutPtr;
 
 /********** HardwareBuffer **********/
 struct IHardwareBuffer {
 	virtual ID3D11Buffer*& GetBuffer11();
 	virtual unsigned int GetBufferSize();
-};
-
-struct THardwareBuffer {
-	ID3D11Buffer* buffer;
-	unsigned int bufferSize;
-public:
-	THardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :buffer(__buffer), bufferSize(__bufferSize) {};
-	THardwareBuffer() :buffer(nullptr), bufferSize(0) {};
 };
 
 struct IVertexBuffer : public IHardwareBuffer {
@@ -86,11 +66,10 @@ struct IIndexBuffer : public IHardwareBuffer {
 };
 typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 
-struct TContantBuffer : public THardwareBuffer {
-	TContantBuffer() {}
-	TContantBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :THardwareBuffer(__buffer, __bufferSize) {}
+struct IContantBuffer : public IHardwareBuffer {
+
 };
-typedef std::shared_ptr<TContantBuffer> TContantBufferPtr;
+typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
 
 /********** Texture **********/
 enum enTextureType {
@@ -122,27 +101,13 @@ struct ITexture : public IResource {
 };
 typedef std::shared_ptr<ITexture> ITexturePtr;
 
-class TRenderTexture {
-public:
-	ID3D11Texture2D* mRenderTargetTexture;
-	ID3D11ShaderResourceView* mRenderTargetSRV;
-	ITexturePtr mRenderTargetPtr;
-	ID3D11RenderTargetView* mRenderTargetView;
+struct IRenderTexture {
+	virtual ITexturePtr GetColorTexture() = 0;
 
-	ID3D11Texture2D* mDepthStencilTexture;
-	ID3D11DepthStencilView* mDepthStencilView;
+	virtual ID3D11RenderTargetView*& GetColorBuffer11();
+	virtual ID3D11DepthStencilView*& GetDepthStencilBuffer11();
 
-	DXGI_FORMAT mFormat;
-public:
-	TRenderTexture(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-	ITexturePtr GetRenderTargetSRV();
-private:
-	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
-	bool InitRenderTextureView(ID3D11Device* pDevice);
-	bool InitRenderTargetView(ID3D11Device* pDevice);
-
-	bool InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height);
-	bool InitDepthStencilView(ID3D11Device* pDevice);
+	virtual IDirect3DSurface9*& GetColorBuffer9();
+	virtual IDirect3DSurface9*& GetDepthStencilBuffer9();
 };
-typedef std::shared_ptr<TRenderTexture> TRenderTexturePtr;
-
+typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;

@@ -9,18 +9,18 @@
 #define E_PASS_POSTPROCESS "PostProcess"
 
 struct TContantBufferInfo {
-	TContantBufferPtr buffer;
+	IContantBufferPtr buffer;
 	bool isUnique;
 	std::string name;
 public:
 	TContantBufferInfo() :buffer(nullptr), isUnique(false) {}
-	TContantBufferInfo(TContantBufferPtr __buffer, const std::string& __name = "", bool __isUnique = true);
+	TContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name = "", bool __isUnique = true);
 };
 #define MAKE_CBNAME(V) #V
 
 struct TPass {
 	std::string mLightMode,mName;
-	TInputLayoutPtr mInputLayout;
+	IInputLayoutPtr mInputLayout;
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
 	
 	TProgramPtr mProgram;
@@ -29,8 +29,8 @@ struct TPass {
 	std::vector<ID3D11Buffer*> mConstBuffers;
 	std::vector<TContantBufferInfo> mConstantBuffers;
 
-	TRenderTexturePtr mRenderTarget;
-	std::vector<TRenderTexturePtr> mIterTargets;
+	IRenderTexturePtr mRenderTarget;
+	std::vector<IRenderTexturePtr> mIterTargets;
 	TTextureBySlot mTextures;
 
 	std::function<void(TPass*,IRenderSystem*,TTextureBySlot&)> OnBind;
@@ -38,12 +38,12 @@ struct TPass {
 public:
 	TPass(const std::string& lightMode, const std::string& name);
 	std::shared_ptr<TPass> Clone(IRenderSystem* pRenderSys);
-	TContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
-	TRenderTexturePtr AddIterTarget(TRenderTexturePtr target);
+	IRenderTexturePtr AddIterTarget(IRenderTexturePtr target);
 	
-	TContantBufferPtr GetConstBufferByIdx(size_t idx);
-	TContantBufferPtr GetConstBufferByName(const std::string& name);
+	IContantBufferPtr GetConstBufferByIdx(size_t idx);
+	IContantBufferPtr GetConstBufferByName(const std::string& name);
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data);
 };
 typedef std::shared_ptr<TPass> TPassPtr;
@@ -54,7 +54,7 @@ struct TTechnique {
 public:
 	void AddPass(TPassPtr pass);
 	std::shared_ptr<TTechnique> Clone(IRenderSystem* pRenderSys);
-	TContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 	
 	TPassPtr GetPassByName(const std::string& passName);
@@ -73,7 +73,7 @@ public:
 
 	TTechniquePtr CurTech();
 	TTechniquePtr SetCurTechByIdx(int idx);
-	TContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ID3D11SamplerState* AddSampler(ID3D11SamplerState* sampler);
 };
 typedef std::shared_ptr<TMaterial> TMaterialPtr;
@@ -89,14 +89,14 @@ public:
 	TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName);
 	TMaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName);
 
-	TMaterialBuilder& SetInputLayout(TInputLayoutPtr inputLayout);
+	TMaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
 	TProgramPtr SetProgram(TProgramPtr program);
 	TMaterialBuilder& AddSampler(ID3D11SamplerState* sampler);
-	TMaterialBuilder& AddConstBuffer(TContantBufferPtr buffer, const std::string& name = "", bool isUnique=true);
-	TMaterialBuilder& AddConstBufferToTech(TContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
-	TMaterialBuilder& SetRenderTarget(TRenderTexturePtr target);
-	TMaterialBuilder& AddIterTarget(TRenderTexturePtr target);
+	TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique=true);
+	TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
+	TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target);
+	TMaterialBuilder& AddIterTarget(IRenderTexturePtr target);
 	TMaterialBuilder& SetTexture(size_t slot, ITexturePtr texture);
 	TMaterialPtr Build();
 };

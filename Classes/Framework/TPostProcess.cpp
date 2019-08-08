@@ -47,7 +47,7 @@ const unsigned int indices[] = {
 };
 
 /********** TPostProcess **********/
-TPostProcess::TPostProcess(IRenderSystem* RenderSys, TRenderTexturePtr mainTex)
+TPostProcess::TPostProcess(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
 {
 	mRenderSys = RenderSys;
 	mMainTex = mainTex;
@@ -72,7 +72,7 @@ int TPostProcess::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.push_back(mMainTex->GetRenderTargetSRV());
+	op.mTextures.push_back(mMainTex->GetColorTexture());
 	op.mWorldTransform = XMMatrixIdentity();
 	op.mVertBufferByPass = mVertBufferByPass;
 	opList.push_back(op);
@@ -80,8 +80,8 @@ int TPostProcess::GenRenderOperation(TRenderOperationQueue& opList)
 }
 
 /********** TBloom **********/
-IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, TRenderTexturePtr target) {
-	auto srv = target->GetRenderTargetSRV();
+IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, IRenderTexturePtr target) {
+	auto srv = target->GetColorTexture();
 	float sx = srv->GetWidth() * 1.0 / RenderSys->mScreenWidth;
 	float sy = srv->GetHeight() * 1.0 / RenderSys->mScreenHeight;
 	assert(sx <= 1 && sy <= 1);
@@ -90,7 +90,7 @@ IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, TRenderTexturePtr targ
 	return vertBuf;
 }
 
-TBloom::TBloom(IRenderSystem* RenderSys, TRenderTexturePtr mainTex)
+TBloom::TBloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
 	:TPostProcess(RenderSys, mainTex)
 {
 	mMaterial = mRenderSys->CreateMaterial(E_MAT_POSTPROC_BLOOM, nullptr);
