@@ -117,3 +117,47 @@ IDirect3DSurface9*& TRenderTexture9::GetDepthStencilBuffer9()
 {
 	return mDepthStencilBuffer;
 }
+
+/********** TPixelShader9 **********/
+IBlobDataPtr TPixelShader9::GetBlob()
+{
+	return mBlob;
+}
+
+IDirect3DPixelShader9*& TPixelShader9::GetShader9()
+{
+	return mShader;
+}
+
+/********** TInputLayout9 **********/
+IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
+{
+	return mLayout;
+}
+
+/********** TVertexShader9 **********/
+IBlobDataPtr TVertexShader9::GetBlob()
+{
+	return mBlob;
+}
+
+IDirect3DVertexShader9*& TVertexShader9::GetShader9()
+{
+	return mShader;
+}
+
+/********** TBlobDataD3d9 **********/
+TBlobDataD3d9::TBlobDataD3d9(ID3DXBuffer* pBlob)
+	:mBlob(pBlob)
+{
+}
+
+void* TBlobDataD3d9::GetBufferPointer()
+{
+	return mBlob->GetBufferPointer();
+}
+
+size_t TBlobDataD3d9::GetBufferSize()
+{
+	return mBlob->GetBufferSize();
+}

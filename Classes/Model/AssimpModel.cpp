@@ -498,7 +498,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
 			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mesh->mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), &weightedSkin);
+			mesh->mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), make_data(weightedSkin));
 
 #ifdef USE_RENDER_OP
 			TRenderOperation op = {};

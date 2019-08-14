@@ -27,11 +27,17 @@ struct IResource;
 struct IVertexShader;
 typedef std::shared_ptr<IVertexShader> IVertexShaderPtr;
 
+struct TVertexShader9;
+typedef std::shared_ptr<TVertexShader9> TVertexShader9Ptr;
+
 struct TVertexShader11;
 typedef std::shared_ptr<TVertexShader11> TVertexShader11Ptr;
 
 struct IPixelShader;
 typedef std::shared_ptr<IPixelShader> IPixelShaderPtr;
+
+struct TPixelShader9;
+typedef std::shared_ptr<TPixelShader9> TPixelShader9Ptr;
 
 struct TPixelShader11;
 typedef std::shared_ptr<TPixelShader11> TPixelShader11Ptr;
@@ -41,6 +47,9 @@ typedef std::shared_ptr<TProgram> TProgramPtr;
 
 struct IInputLayout;
 typedef std::shared_ptr<IInputLayout> IInputLayoutPtr;
+
+struct TInputLayout9;
+typedef std::shared_ptr<TInputLayout9> TInputLayout9Ptr;
 
 struct TInputLayout11;
 typedef std::shared_ptr<TInputLayout11> TInputLayoutPtr;
@@ -119,6 +128,7 @@ typedef std::shared_ptr<class TThreadPump> TThreadPumpPtr;
 typedef std::shared_ptr<class TSprite> TSpritePtr;
 
 //Utility.h
+struct TData;
 class SDTimer;
 typedef std::shared_ptr<class SDTimer> SDTimerPtr;
 

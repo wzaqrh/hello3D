@@ -72,6 +72,7 @@ public:
 	static D3DFORMAT d3d11To9(DXGI_FORMAT fmt);
 	static int GetWidth(DXGI_FORMAT format);
 	static D3DPRIMITIVETYPE d3d11To9(D3D11_PRIMITIVE_TOPOLOGY topo);
+	static D3DVERTEXELEMENT9 d3d11To9(const D3D11_INPUT_ELEMENT_DESC& desc);
 };
 
 std::vector<char> ReadFile(const char* fileName, const char* mode);

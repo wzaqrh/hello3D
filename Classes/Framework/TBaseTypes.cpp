@@ -178,3 +178,10 @@ TDepthState::TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /
 	depthFunc = __depthFunc;
 	depthWriteMask = __depthWriteMask;
 }
+
+/********** TData **********/
+TData::TData(void* __data, unsigned int __dataSize)
+	:data(__data)
+	,dataSize(__dataSize)
+{
+}

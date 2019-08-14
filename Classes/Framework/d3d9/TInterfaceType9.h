@@ -1,6 +1,43 @@
 #pragma once
 #include "TInterfaceType.h"
 
+struct TBlobDataD3d9 : public IBlobData {
+	ID3DXBuffer* mBlob = nullptr;
+public:
+	TBlobDataD3d9(ID3DXBuffer* pBlob);
+	virtual void* GetBufferPointer() override;
+	virtual size_t GetBufferSize() override;
+};
+typedef std::shared_ptr<TBlobDataD3d9> TBlobDataD3d9Ptr;
+
+struct TInputLayout9 : public IInputLayout {
+public:
+	std::vector<D3DVERTEXELEMENT9> mInputDescs;
+	IDirect3DVertexDeclaration9* mLayout = nullptr;
+public:
+	virtual IDirect3DVertexDeclaration9*& GetLayout9() override;
+};
+typedef std::shared_ptr<TInputLayout9> TInputLayout9Ptr;
+
+struct TVertexShader9 : public IVertexShader {
+	IBlobDataPtr mBlob,mErrBlob;
+	IDirect3DVertexShader9* mShader = nullptr;
+public:
+	virtual IBlobDataPtr GetBlob() override;
+	virtual IDirect3DVertexShader9*& GetShader9() override;
+};
+typedef std::shared_ptr<TVertexShader9> TVertexShader9Ptr;
+
+struct TPixelShader9 : public IPixelShader {
+	IBlobDataPtr mBlob, mErrBlob;
+	IDirect3DPixelShader9* mShader = nullptr;
+public:
+	virtual IBlobDataPtr GetBlob() override;
+	virtual IDirect3DPixelShader9*& GetShader9() override;
+};
+typedef std::shared_ptr<TPixelShader9> TPixelShader9Ptr;
+
+/********** HardwareBuffer **********/
 struct TIndexBuffer9 : public IIndexBuffer {
 	IDirect3DIndexBuffer9* buffer;
 	unsigned int bufferSize;

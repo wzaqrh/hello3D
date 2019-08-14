@@ -9,6 +9,8 @@ class TRenderSystem9
 
 	IDirect3D9 *mD3D9 = NULL; // Used to create the D3DDevice
 	IDirect3DDevice9 *mDevice9 = NULL; // Our rendering device
+
+	TMaterialFactoryPtr mMaterialFac;
 public:
 	int mScreenWidth;
 	int mScreenHeight;
@@ -49,11 +51,10 @@ public:
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
 	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize) override;
-	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data) override;
+	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 
 	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
-	virtual TProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 
 	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
 	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
@@ -70,4 +71,11 @@ protected:
 private:
 	void _SetRasterizerState();
 	bool _CreateDeviceAndSwapChain();
+
+	IVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr);
+	IPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr);
+	IVertexShaderPtr _CreateVSByFXC(const char* filename);
+	IPixelShaderPtr _CreatePSByFXC(const char* filename);
+
+	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 };

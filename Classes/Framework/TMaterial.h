@@ -43,7 +43,7 @@ public:
 	
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data);
+	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
 typedef std::shared_ptr<TPass> TPassPtr;
 
@@ -59,7 +59,7 @@ public:
 	TPassPtr GetPassByName(const std::string& passName);
 	std::vector<TPassPtr> GetPassesByName(const std::string& passName);
 
-	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data);
+	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 

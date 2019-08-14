@@ -11,6 +11,16 @@ struct TINT4 {
 	int x, y, z, w;
 };
 
+struct TData {
+	void* data;
+	unsigned int dataSize;
+	TData(void* __data, unsigned int __dataSize);
+};
+template <class T>
+inline TData make_data(const T& v) {
+	return TData((void*)&v, sizeof(v));
+}
+
 __declspec(align(16)) struct TCameraBase {
 	XMMATRIX mWorld;
 	XMMATRIX mView;

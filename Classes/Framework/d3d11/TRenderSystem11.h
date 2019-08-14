@@ -75,11 +75,10 @@ public:
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
 
 	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize);
-	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data);
+	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize);
 
 	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
-	virtual TProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 
 	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
 	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);

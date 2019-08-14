@@ -58,11 +58,11 @@ IContantBufferPtr TPass::GetConstBufferByName(const std::string& name)
 	return ret;
 }
 
-void TPass::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data)
+void TPass::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data)
 {
 	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer)
-		pRenderSys->UpdateConstBuffer(buffer, data);
+		pRenderSys->UpdateConstBuffer(buffer, data.data, data.dataSize);
 }
 
 std::shared_ptr<TPass> TPass::Clone(IRenderSystem* pRenderSys)
@@ -135,7 +135,7 @@ std::vector<TPassPtr> TTechnique::GetPassesByName(const std::string& passName)
 	return std::move(passVec);
 }
 
-void TTechnique::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, void* data)
+void TTechnique::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data)
 {
 	for (int i = 0; i < mPasses.size(); ++i)
 		mPasses[i]->UpdateConstBufferByName(pRenderSys, name, data);
@@ -484,7 +484,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
 		};
 
 		//pass DownScale3x3
@@ -501,7 +501,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
 		};
 
 		//pass DownScale3x3_BrightPass
@@ -515,7 +515,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
 		};
 
 		//pass Bloom
@@ -532,7 +532,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex->GetWidth(), 3.0f, 1.25f);
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), &bloom);
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
 		};
 
 		//pass FinalPass

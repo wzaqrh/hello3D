@@ -14,6 +14,17 @@ IRenderSystem::~IRenderSystem()
 {
 }
 
+TProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+{
+	std::string ext = GetFileExt(name);
+	if (ext.empty()) {
+		return CreateProgramByFXC(name, vsEntry, psEntry);
+	}
+	else {
+		return CreateProgramByCompile(name.c_str(), name.c_str(), vsEntry, psEntry);
+	}
+}
+
 ITexturePtr IRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/)
 {
 	const char* pSrc = __imgPath.c_str();

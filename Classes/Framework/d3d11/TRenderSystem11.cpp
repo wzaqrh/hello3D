@@ -530,17 +530,6 @@ TProgramPtr TRenderSystem11::CreateProgramByFXC(const std::string& name, const c
 	return program;
 }
 
-TProgramPtr TRenderSystem11::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
-{
-	std::string ext = GetFileExt(name);
-	if (ext.empty()) {
-		return CreateProgramByFXC(name, vsEntry, psEntry);
-	}
-	else {
-		return CreateProgramByCompile(name.c_str(), name.c_str(), vsEntry, psEntry);
-	}
-}
-
 ID3D11Buffer* TRenderSystem11::_CreateVertexBuffer(int bufferSize, void* buffer)
 {
 	HRESULT hr = S_OK;
@@ -651,7 +640,7 @@ IContantBufferPtr TRenderSystem11::CreateConstBuffer(int bufferSize, void* data)
 		return nullptr;
 	IContantBufferPtr ret = std::make_shared<TContantBuffer11>(pConstantBuffer, bufferSize);
 
-	if (data) UpdateConstBuffer(ret, data);
+	if (data) UpdateConstBuffer(ret, data, bufferSize);
 	return ret;
 }
 
@@ -660,7 +649,7 @@ IContantBufferPtr TRenderSystem11::CloneConstBuffer(IContantBufferPtr buffer)
 	return CreateConstBuffer(buffer->GetBufferSize());
 }
 
-void TRenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data)
+void TRenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
 {
 	mDeviceContext->UpdateSubresource(buffer->GetBuffer11(), 0, NULL, data, 0, 0);
 }

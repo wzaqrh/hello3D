@@ -9,6 +9,7 @@ public:
 	virtual void* GetBufferPointer() override;
 	virtual size_t GetBufferSize() override;
 };
+typedef std::shared_ptr<TBlobDataD3d11> TBlobDataD3d11Ptr;
 
 struct TInputLayout11 : public IInputLayout {
 public:

@@ -7,7 +7,7 @@
 
 TRenderSystem9::TRenderSystem9()
 {
-
+	mMaterialFac = std::make_shared<TMaterialFactory>(this);
 }
 
 TRenderSystem9::~TRenderSystem9()
@@ -146,12 +146,13 @@ void TRenderSystem9::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 c
 
 void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 {
-
+	if (CheckHR(mDevice9->SetRenderTarget(0, rendTarget->GetColorBuffer9()))) return;
+	if (CheckHR(mDevice9->SetDepthStencilSurface(rendTarget->GetDepthStencilBuffer9()))) return;
 }
 
 TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
 {
-	return nullptr;
+	return mMaterialFac->GetMaterial(name, callback);
 }
 
 IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
@@ -228,24 +229,118 @@ bool TRenderSystem9::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataS
 	return true;
 }
 
-void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data)
+void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
 {
+	UpdateBuffer(buffer.get(), data, dataSize);
+}
 
+IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
+{
+	DWORD Flag = 0;
+#ifdef _DEBUG
+	Flag = D3DXSHADER_DEBUG;
+#endif
+	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
+	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
+	ID3DXConstantTable* constTable = nullptr;
+	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) return nullptr;
+
+	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
+	ret->mBlob = blob;
+	ret->mErrBlob = errBlob;
+	if (CheckHR(mDevice9->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
+		
+	ret->SetLoaded();
+	return ret;
+}
+
+IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
+{
+	DWORD Flag = 0;
+#ifdef _DEBUG
+	Flag = D3DXSHADER_DEBUG;
+#endif
+	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
+	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
+	ID3DXConstantTable* constTable = nullptr;
+	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) return nullptr;
+
+	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
+	ret->mBlob = blob;
+	ret->mErrBlob = errBlob;
+	if (CheckHR(mDevice9->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
+
+	ret->SetLoaded();
+	return ret;
 }
 
 TProgramPtr TRenderSystem9::CreateProgramByCompile(const char* vsPath, const char* psPath /*= nullptr*/, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
-	return nullptr;
+	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
+	psPath = psPath ? psPath : vsPath;
+	TProgramPtr program = std::make_shared<TProgram>();
+	program->SetVertex(_CreateVS(vsPath, vsEntry));
+	program->SetPixel(_CreatePS(psPath, psEntry));
+	program->CheckAndSetLoaded();
+	return program;
+}
+
+IVertexShaderPtr TRenderSystem9::_CreateVSByFXC(const char* filename)
+{
+	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
+	std::vector<char> buffer = ReadFile(filename, "rb");
+	if (!buffer.empty()) {
+		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataStd(buffer));
+		auto buffer_size = buffer.size();
+		HRESULT hr = mDevice9->CreateVertexShader((DWORD*)&buffer[0], &ret->mShader);
+		if (!FAILED(hr)) {
+			ret->SetLoaded();
+		}
+		else {
+			ret = nullptr;
+		}
+	}
+	else {
+		ret = nullptr;
+	}
+	return ret;
+}
+
+IPixelShaderPtr TRenderSystem9::_CreatePSByFXC(const char* filename)
+{
+	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
+	std::vector<char> buffer = ReadFile(filename, "rb");
+	if (!buffer.empty()) {
+		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataStd(buffer));
+		HRESULT hr = mDevice9->CreatePixelShader((DWORD*)&buffer[0], &ret->mShader);
+		if (!FAILED(hr)) {
+			ret->SetLoaded();
+		}
+		else {
+			ret = nullptr;
+		}
+	}
+	else {
+		ret = nullptr;
+	}
+	return ret;
 }
 
 TProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
-	return nullptr;
-}
+	TIME_PROFILE2(CreateProgramByFXC, (name));
+	TProgramPtr program = std::make_shared<TProgram>();
 
-TProgramPtr TRenderSystem9::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
-{
-	return nullptr;
+	vsEntry = vsEntry ? vsEntry : "VS";
+	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
+	program->SetVertex(_CreateVSByFXC(vsName.c_str()));
+
+	psEntry = psEntry ? psEntry : "PS";
+	std::string psName = (name)+"_" + psEntry + FILE_EXT_CSO;
+	program->SetPixel(_CreatePSByFXC(psName.c_str()));
+
+	program->CheckAndSetLoaded();
+	return program;
 }
 
 ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
@@ -253,9 +348,31 @@ ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FIL
 	return nullptr;
 }
 
+IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr)
+{
+	IDirect3DVertexDeclaration9* ret = nullptr;
+	if (CheckHR(mDevice9->CreateVertexDeclaration(&descArr[0], &ret))) return nullptr;
+	return ret;
+}
+
 IInputLayoutPtr TRenderSystem9::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
-	return nullptr;
+	TInputLayout9Ptr ret = std::make_shared<TInputLayout9>();
+	for (size_t i = 0; i < descCount; ++i)
+		ret->mInputDescs.push_back(D3DEnumCT::d3d11To9(descArray[i]));
+	ret->mInputDescs.push_back(D3DDECL_END());
+
+	if (pProgram->IsLoaded()) {
+		ret->mLayout = _CreateInputLayout(pProgram.get(), ret->mInputDescs);
+		ret->SetLoaded();
+	}
+	else {
+		pProgram->AddOnLoadedListener([=](IResource* program) {
+			ret->mLayout = _CreateInputLayout(static_cast<TProgram*>(program), ret->mInputDescs);
+			ret->SetLoaded();
+		});
+	}
+	return ret;
 }
 
 ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async /*= false*/)
