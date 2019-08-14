@@ -171,6 +171,17 @@ DXGI_FORMAT TIndexBuffer11::GetFormat()
 }
 
 /********** TContantBuffer11 **********/
+TContantBuffer11::TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl)
+	: THardwareBuffer(__buffer, decl->bufferSize)
+	, mDecl(decl)
+{
+}
+
+TConstBufferDeclPtr TContantBuffer11::GetDecl()
+{
+	return mDecl;
+}
+
 ID3D11Buffer*& TContantBuffer11::GetBuffer11()
 {
 	return buffer;

@@ -50,7 +50,7 @@ public:
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
 
 	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) = 0;
-	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) = 0;
+	virtual IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) = 0;
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 

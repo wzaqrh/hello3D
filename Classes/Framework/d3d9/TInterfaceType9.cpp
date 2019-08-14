@@ -161,3 +161,9 @@ size_t TBlobDataD3d9::GetBufferSize()
 {
 	return mBlob->GetBufferSize();
 }
+
+/********** TSamplerState9 **********/
+std::map<D3DSAMPLERSTATETYPE, DWORD>& TSamplerState9::GetSampler9()
+{
+	return mStates;
+}

@@ -93,9 +93,13 @@ typedef std::shared_ptr<TIndexBuffer11> TIndexBuffer11Ptr;
 struct TContantBuffer11
 	: public IContantBuffer
 	, public THardwareBuffer {
-	TContantBuffer11() {}
-	TContantBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize) :THardwareBuffer(__buffer, __bufferSize) {}
+	TConstBufferDeclPtr mDecl;
 public:
+	TContantBuffer11() {}
+	TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl);
+public:
+	virtual TConstBufferDeclPtr GetDecl();
+
 	virtual ID3D11Buffer*& GetBuffer11() override;
 	virtual unsigned int GetBufferSize() override;
 };
@@ -152,7 +156,7 @@ typedef std::shared_ptr<TRenderTexture11> TRenderTexture11Ptr;
 struct TSamplerState11 : public ISamplerState {
 	ID3D11SamplerState* mSampler = nullptr;
 public:
-	TSamplerState11(ID3D11SamplerState* sampler) :mSampler(sampler) {};
+	TSamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
 	virtual ID3D11SamplerState*& GetSampler11() override;
 };
 typedef std::shared_ptr<TSamplerState11> TSamplerState11Ptr;

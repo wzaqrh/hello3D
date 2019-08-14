@@ -21,6 +21,8 @@ typedef std::shared_ptr<TPointLight> TPointLightPtr;
 class TSpotLight;
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
+struct TConstBufferDecl;
+typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
 //TInterfaceType.h
 struct IResource;
 
@@ -98,6 +100,9 @@ typedef std::shared_ptr<TRenderTexture9> TRenderTexture9Ptr;
 
 struct ISamplerState;
 typedef std::shared_ptr<ISamplerState> ISamplerStatePtr;
+
+struct TSamplerState9;
+typedef std::shared_ptr<TSamplerState9> TSamplerState9Ptr;
 
 struct TSamplerState11;
 typedef std::shared_ptr<TSamplerState11> TSamplerState11Ptr;

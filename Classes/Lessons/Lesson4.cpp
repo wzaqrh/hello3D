@@ -1,4 +1,5 @@
 #include "Lesson4.h"
+#include "TMaterialCB.h"
 
 /********** TFogExp **********/
 TFogExp::TFogExp()
@@ -17,6 +18,11 @@ void TFogExp::SetExp(float exp)
 	mFogColorExp.w = exp;
 }
 
+TConstBufferDecl& TFogExp::GetDesc()
+{
+	return TConstBufferDeclBuilder().Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4)).Build();
+}
+
 /********** Lesson4 **********/
 void Lesson4::OnPostInitDevice()
 {
@@ -28,7 +34,7 @@ void Lesson4::OnPostInitDevice()
 		fog.SetColor(0.5, 0.5, 0.5);
 		fog.SetExp(0.1);
 		TMaterialBuilder builder(mat);
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(TFogExp), &fog), MAKE_CBNAME(TFogExp), true);
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(TFogExp), &fog), MAKE_CBNAME(TFogExp), true);
 	});
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	//mModel->PlayAnim(0);

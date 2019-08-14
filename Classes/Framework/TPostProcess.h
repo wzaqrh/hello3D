@@ -45,6 +45,7 @@ struct cbBloom {
 	static cbBloom CreateDownScale2x2Offsets(int dwWidth, int dwHeight);
 	static cbBloom CreateDownScale3x3Offsets(int dwWidth, int dwHeight);
 	static cbBloom CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier);
+	static TConstBufferDecl& GetDesc();
 };
 
 class TBloom 

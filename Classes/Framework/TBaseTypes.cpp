@@ -155,15 +155,6 @@ void TSpotLight::SetAngle(float radian)
 	SetCutOff(cos(radian));
 }
 
-/********** cbGlobalParam **********/
-cbGlobalParam::cbGlobalParam()
-{
-	auto Ident = XMMatrixIdentity();
-	mWorld = Ident;
-	mView = Ident;
-	mProjection = Ident;
-}
-
 /********** TBlendFunc **********/
 TBlendFunc::TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst)
 {

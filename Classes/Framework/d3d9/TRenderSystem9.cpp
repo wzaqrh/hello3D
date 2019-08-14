@@ -136,7 +136,7 @@ IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
 	return nullptr;
 }
 
-IContantBufferPtr TRenderSystem9::CreateConstBuffer(int bufferSize, void* data /*= nullptr*/)
+IContantBufferPtr TRenderSystem9::CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
 	return nullptr;
 }
@@ -321,7 +321,22 @@ TProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const ch
 
 ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
 {
-	return nullptr;
+	TSamplerState9Ptr ret = std::make_shared<TSamplerState9>();
+	
+	ret->mStates[D3DSAMP_ADDRESSU] = D3DEnumCT::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSV] = D3DEnumCT::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSW] = D3DEnumCT::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_BORDERCOLOR] = D3DCOLOR_ARGB(0,0,0,0);
+
+	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = D3DEnumCT::d3d11To9(filter);
+	for (auto& iter : fts)
+		ret->mStates[iter.first] = iter.second;
+
+	ret->mStates[D3DSAMP_MIPMAPLODBIAS] = 0.0f;
+	ret->mStates[D3DSAMP_MAXANISOTROPY] = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
+	ret->mStates[D3DSAMP_MAXMIPLEVEL] = D3D11_FLOAT32_MAX;
+
+	return ret;
 }
 
 IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr)

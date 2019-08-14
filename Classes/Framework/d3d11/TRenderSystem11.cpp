@@ -573,7 +573,7 @@ void TRenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 	}
 }
 
-IContantBufferPtr TRenderSystem11::CreateConstBuffer(int bufferSize, void* data)
+IContantBufferPtr TRenderSystem11::CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data)
 {
 	HRESULT hr = S_OK;
 
@@ -582,21 +582,22 @@ IContantBufferPtr TRenderSystem11::CreateConstBuffer(int bufferSize, void* data)
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = bufferSize % sizeof(XMFLOAT4) == 0 ? bufferSize : (bufferSize / sizeof(XMFLOAT4) + 1) * sizeof(XMFLOAT4);
+	bd.ByteWidth = cbDecl.bufferSize % sizeof(XMFLOAT4) == 0 ? cbDecl.bufferSize : (cbDecl.bufferSize / sizeof(XMFLOAT4) + 1) * sizeof(XMFLOAT4);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
 	if (CheckHR(hr))
 		return nullptr;
-	IContantBufferPtr ret = std::make_shared<TContantBuffer11>(pConstantBuffer, bufferSize);
+	TConstBufferDeclPtr declPtr = std::make_shared<TConstBufferDecl>(cbDecl);
+	IContantBufferPtr ret = std::make_shared<TContantBuffer11>(pConstantBuffer, declPtr);
 
-	if (data) UpdateConstBuffer(ret, data, bufferSize);
+	if (data) UpdateConstBuffer(ret, data, ret->GetBufferSize());
 	return ret;
 }
 
 IContantBufferPtr TRenderSystem11::CloneConstBuffer(IContantBufferPtr buffer)
 {
-	return CreateConstBuffer(buffer->GetBufferSize());
+	return CreateConstBuffer(*buffer->GetDecl());
 }
 
 void TRenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)

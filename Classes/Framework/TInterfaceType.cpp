@@ -171,3 +171,9 @@ ID3D11SamplerState*& ISamplerState::GetSampler11()
 	static ID3D11SamplerState* sampler;
 	return sampler;
 }
+
+std::map<D3DSAMPLERSTATETYPE, DWORD>& ISamplerState::GetSampler9()
+{
+	static std::map<D3DSAMPLERSTATETYPE, DWORD> sampler;
+	return sampler;
+}

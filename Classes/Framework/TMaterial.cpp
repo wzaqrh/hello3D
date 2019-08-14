@@ -333,7 +333,7 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 void SetCommonField(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
 {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(sizeof(cbGlobalParam)));
+	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
@@ -342,7 +342,7 @@ void SetCommonField(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
 void SetCommonField2(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
 {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(sizeof(cbGlobalParam)));
+	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 }
 
 TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
@@ -377,7 +377,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_MODEL_PBR) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -403,20 +403,20 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), nullptr, "PSAdd"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 		cbUnityMaterial cbUnityMat;
 		//cbUnityMat._Color = XMFLOAT4(0,0,0,0);
 		//cbUnityMat._SpecLightOff = TRUE;
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbUnityMaterial), &cbUnityMat), MAKE_CBNAME(cbUnityMaterial));
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbUnityMaterial), &cbUnityMat), MAKE_CBNAME(cbUnityMaterial));
 		cbUnityGlobal cbUnityGlb;
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbUnityGlobal), &cbUnityGlb), MAKE_CBNAME(cbUnityGlobal));
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbUnityGlobal), &cbUnityGlb), MAKE_CBNAME(cbUnityGlobal));
 
 		//*//pass E_PASS_SHADOWCASTER
 		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
 		SetCommonField(builder, mRenderSys);
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), "VSShadowCaster", "PSShadowCaster"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_MODEL_SHADOW) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -440,7 +440,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ShadowDepth")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(sizeof(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_SKYBOX) {
 		SetCommonField2(builder, mRenderSys);
@@ -480,7 +480,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale2x2"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexToneMaps[NUM_TONEMAP_TEXTURES-1]);
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex->GetWidth(), mainTex->GetHeight());
@@ -497,7 +497,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			builder.AddIterTarget(TexToneMaps[i]);
 		}
 		builder.SetTexture(0, TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->GetColorTexture());
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
@@ -511,7 +511,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexBrightPass);
 		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
@@ -528,7 +528,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			builder.AddIterTarget(TexBlooms[i]);
 		}
 		builder.SetTexture(1, TexBrightPass->GetColorTexture());
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(sizeof(cbBloom)), MAKE_CBNAME(cbBloom));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
 		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex->GetWidth(), 3.0f, 1.25f);

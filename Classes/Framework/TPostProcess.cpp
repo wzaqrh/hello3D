@@ -2,6 +2,7 @@
 #include "IRenderSystem.h"
 #include "TInterfaceType.h"
 #include "TMaterial.h"
+#include "TMaterialCB.h"
 
 /********** POSTPROCESS_VERTEX_QUAD **********/
 POSTPROCESS_VERTEX_QUAD::POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h)
@@ -177,4 +178,16 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 		bloom.SampleWeights[i] = bloom.SampleWeights[i - 7];
 	}
 	return bloom;
+}
+
+TConstBufferDecl& cbBloom::GetDesc()
+{
+	TConstBufferDeclBuilder builder;
+	for (size_t i = 0; i < 16; ++i) {
+		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
+	}
+	for (size_t i = 0; i < 16; ++i) {
+		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
+	}
+	return builder.Build();
 }

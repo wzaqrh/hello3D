@@ -103,6 +103,31 @@ public:
 };
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
+enum EConstBufferElementType {
+	E_CONSTBUF_ELEM_BOOL,
+	E_CONSTBUF_ELEM_FLOAT4,
+	E_CONSTBUF_ELEM_INT4,
+	E_CONSTBUF_ELEM_MATRIX,
+	E_CONSTBUF_ELEM_MAX
+};
+struct TConstBufferDeclElement {
+	size_t offset;
+	size_t size;
+	EConstBufferElementType type;
+	D3DTRANSFORMSTATETYPE matrixType;
+public:
+	TConstBufferDeclElement(size_t __size, EConstBufferElementType __type, D3DTRANSFORMSTATETYPE __mtype = D3DTS_FORCE_DWORD, size_t __offset = 0);
+};
+#define CBELEMNT(CLS,TYPE) TConstBufferDeclElement(sizeof(CLS),TYPE)
+
+struct TConstBufferDecl {
+	std::vector<TConstBufferDeclElement> elements;
+	size_t bufferSize = 0;
+public:
+	TConstBufferDeclElement& Add(const TConstBufferDeclElement& elem);
+};
+typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
+
 #define MAX_LIGHTS 4
 __declspec(align(16)) struct cbGlobalParam
 {
@@ -123,10 +148,12 @@ __declspec(align(16)) struct cbGlobalParam
 	BOOL HasDepthMap;
 public:
 	cbGlobalParam();
+	static TConstBufferDecl& GetDesc();
+	static TConstBufferDecl MKDesc();
 };
 
 struct TBlendFunc {
-	D3D11_BLEND src,dst;
+	D3D11_BLEND src, dst;
 	TBlendFunc() :src(D3D11_BLEND_ONE), dst(D3D11_BLEND_INV_SRC_ALPHA) {};
 	TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst);
 };

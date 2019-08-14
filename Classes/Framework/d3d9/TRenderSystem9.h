@@ -36,7 +36,7 @@ public:
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) override;
 
 	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
-	virtual IContantBufferPtr CreateConstBuffer(int bufferSize, void* data = nullptr) override;
+	virtual IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) override;
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 

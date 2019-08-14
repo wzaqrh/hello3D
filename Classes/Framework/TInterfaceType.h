@@ -78,6 +78,7 @@ typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 
 struct IContantBuffer : public IHardwareBuffer {
 	virtual enHardwareBufferType GetType() override final;
+	virtual TConstBufferDeclPtr GetDecl() = 0;
 };
 typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
 
@@ -124,5 +125,6 @@ typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;
 
 struct ISamplerState {
 	virtual ID3D11SamplerState*& GetSampler11();
+	virtual std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();
 };
 typedef std::shared_ptr<ISamplerState> ISamplerStatePtr;

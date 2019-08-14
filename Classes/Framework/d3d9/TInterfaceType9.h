@@ -102,3 +102,10 @@ public:
 	virtual IDirect3DSurface9*& GetDepthStencilBuffer9() override;
 };
 typedef std::shared_ptr<TRenderTexture9> TRenderTexture9Ptr;
+
+struct TSamplerState9 : public ISamplerState {
+	std::map<D3DSAMPLERSTATETYPE, DWORD> mStates;
+public:
+	virtual std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9() override;
+};
+typedef std::shared_ptr<TSamplerState9> TSamplerState9Ptr;
