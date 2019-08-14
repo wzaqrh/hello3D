@@ -179,56 +179,6 @@ void TRenderSystem11::CleanUp()
 {
 }
 
-TSpotLightPtr TRenderSystem11::AddSpotLight()
-{
-	TSpotLightPtr light = std::make_shared<TSpotLight>();
-	mSpotLights.push_back(light);
-	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_SPOT));
-	return light;
-}
-
-TPointLightPtr TRenderSystem11::AddPointLight()
-{
-	TPointLightPtr light = std::make_shared<TPointLight>();
-	mPointLights.push_back(light);
-	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_POINT));
-	return light;
-}
-
-TDirectLightPtr TRenderSystem11::AddDirectLight()
-{
-	TDirectLightPtr light = std::make_shared<TDirectLight>();
-	mDirectLights.push_back(light);
-	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_DIRECT));
-	return light;
-}
-
-TCameraPtr TRenderSystem11::SetCamera(double fov, int eyeDistance, double far1)
-{
-	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
-	if (mSkyBox)
-		mSkyBox->SetRefCamera(mDefCamera);
-	return mDefCamera;
-}
-
-TSkyBoxPtr TRenderSystem11::SetSkyBox(const std::string& imgName)
-{
-	mSkyBox = std::make_shared<TSkyBox>(this, mDefCamera, imgName);
-	return mSkyBox;
-}
-
-TPostProcessPtr TRenderSystem11::AddPostProcess(const std::string& name)
-{
-	TPostProcessPtr process;
-	if (name == E_PASS_POSTPROCESS) {
-		TBloom* bloom = new TBloom(this, mPostProcessRT);
-		process = std::shared_ptr<TPostProcess>(bloom);
-	}
-
-	if (process) mPostProcs.push_back(process);
-	return process;
-}
-
 void TRenderSystem11::SetHandle(HINSTANCE hInstance, HWND hWnd)
 {
 	mHInst = hInstance;
@@ -247,7 +197,7 @@ IRenderTexturePtr TRenderSystem11::CreateRenderTexture(int width, int height, DX
 	return std::make_shared<TRenderTexture11>(mDevice, width, height, format);
 }
 
-void TRenderSystem11::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
+void TRenderSystem11::_ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
 {
 	mDeviceContext->ClearRenderTargetView(rendTarget->GetColorBuffer11(), (const float*)&color);
 	mDeviceContext->ClearDepthStencilView(rendTarget->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, Depth, Stencil);
@@ -931,8 +881,8 @@ void TRenderSystem11::RenderLight(TDirectLight* light, enLightType lightType, co
 void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		ClearRenderTexture(mShadowPassRT, XMFLOAT4(1, 1, 1, 1.0f));
 		_PushRenderTarget(mShadowPassRT);
+		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1.0f), 1.0, 0);
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
@@ -972,13 +922,6 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 	}
 }
 
-void TRenderSystem11::Draw(IRenderable* renderable)
-{
-	TRenderOperationQueue opQue;
-	renderable->GenRenderOperation(opQue);
-	RenderQueue(opQue, E_PASS_FORWARDBASE);
-}
-
 void TRenderSystem11::RenderSkyBox()
 {
 	if (mSkyBox)
@@ -1003,8 +946,8 @@ bool TRenderSystem11::BeginScene()
 	mCastShdowFlag = false;
 
 	if (!mPostProcs.empty()) {
-		ClearRenderTexture(mPostProcessRT, XMFLOAT4(0, 0, 0, 0));
 		SetRenderTarget(mPostProcessRT);
+		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
 	RenderSkyBox();
 	return true;

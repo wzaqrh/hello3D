@@ -10,7 +10,8 @@ class TRenderSystem9
 	IDirect3D9 *mD3D9 = NULL; // Used to create the D3DDevice
 	IDirect3DDevice9 *mDevice9 = NULL; // Our rendering device
 
-	TMaterialFactoryPtr mMaterialFac;
+	IDirect3DSurface9 *mBackColorBuffer = NULL, *mBackDepthStencilBuffer = NULL;
+	IDirect3DSurface9 *mCurColorBuffer = NULL, *mCurDepthStencilBuffer = NULL;
 public:
 	int mScreenWidth;
 	int mScreenHeight;
@@ -26,18 +27,10 @@ public:
 	virtual void Update(float dt) override;
 	virtual void CleanUp() override;
 public:
-	virtual TSpotLightPtr AddSpotLight() override;
-	virtual TPointLightPtr AddPointLight() override;
-	virtual TDirectLightPtr AddDirectLight() override;
-	virtual TCameraPtr SetCamera(double fov, int eyeDistance, double far1) override;
-	virtual TSkyBoxPtr SetSkyBox(const std::string& imgName) override;
-	virtual TPostProcessPtr AddPostProcess(const std::string& name) override;
-public:
 	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd) override;
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
 
 	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
-	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth = 1.0, UINT8 Stencil = 0) override;
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) override;
@@ -64,7 +57,6 @@ public:
 public:
 	virtual bool BeginScene() override;
 	virtual void EndScene() override;
-	virtual void Draw(IRenderable* renderable) override;
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
 	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false);

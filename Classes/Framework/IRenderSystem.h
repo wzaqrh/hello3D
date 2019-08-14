@@ -14,7 +14,18 @@ public:
 public:
 	TSkyBoxPtr mSkyBox;
 	TCameraPtr mDefCamera;
+protected:
+	TMaterialFactoryPtr mMaterialFac;
+	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
+
+	std::vector<TPostProcessPtr> mPostProcs;
+	std::vector<TPointLightPtr> mPointLights;
+	std::vector<TDirectLightPtr> mDirectLights;
+	std::vector<TSpotLightPtr> mSpotLights;
+	std::vector<std::pair<TDirectLight*, enLightType>> mLightsOrder;
 public:
+	void* operator new(size_t i){ return _mm_malloc(i,16); }
+	void operator delete(void* p) { _mm_free(p); }
 	IRenderSystem();
 	virtual ~IRenderSystem();
 
@@ -22,18 +33,18 @@ public:
 	virtual void Update(float dt) = 0;
 	virtual void CleanUp() = 0;
 public:
-	virtual TSpotLightPtr AddSpotLight() = 0;
-	virtual TPointLightPtr AddPointLight() = 0;
-	virtual TDirectLightPtr AddDirectLight() = 0;
-	virtual TCameraPtr SetCamera(double fov, int eyeDistance, double far1) = 0;
-	virtual TSkyBoxPtr SetSkyBox(const std::string& imgName) = 0;
-	virtual TPostProcessPtr AddPostProcess(const std::string& name) = 0;
+	TSpotLightPtr AddSpotLight();
+	TPointLightPtr AddPointLight();
+	TDirectLightPtr AddDirectLight();
+	TCameraPtr SetCamera(double fov, int eyeDistance, double far1);
+	TSkyBoxPtr SetSkyBox(const std::string& imgName);
+	TPostProcessPtr AddPostProcess(const std::string& name);
 public:
 	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd) = 0;
-	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) = 0;
+	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 
 	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
-	virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
+	//virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
 	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
@@ -63,8 +74,8 @@ public:
 public:
 	virtual bool BeginScene() = 0;
 	virtual void EndScene() = 0;
-	virtual void Draw(IRenderable* renderable) = 0;
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) = 0;
+	void Draw(IRenderable* renderable);
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false) = 0;
 };

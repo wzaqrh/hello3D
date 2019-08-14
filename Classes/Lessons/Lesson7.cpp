@@ -59,8 +59,8 @@ void Lesson7::OnRender()
 	}
 #else
 	//pass1
-	mRenderSys->ClearRenderTexture(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
 	mRenderSys->SetRenderTarget(mPass1RT);
+	mRenderSys->ClearColorDepthStencil(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
 	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
 	{
 		mModel1->Update(mTimer.mDeltaTime);

@@ -29,6 +29,9 @@ bool TRenderSystem9::Initialize()
 	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
 	SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
 
+	mDevice9->GetRenderTarget(0, &mBackColorBuffer); mCurColorBuffer = mBackColorBuffer;
+	mDevice9->GetDepthStencilSurface(&mBackDepthStencilBuffer); mCurDepthStencilBuffer = mBackDepthStencilBuffer;
+
 	mScreenWidth = width;
 	mScreenHeight = height;
 	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight);
@@ -79,36 +82,6 @@ void TRenderSystem9::CleanUp()
 {
 }
 
-TSpotLightPtr TRenderSystem9::AddSpotLight()
-{
-	return nullptr;
-}
-
-TPointLightPtr TRenderSystem9::AddPointLight()
-{
-	return nullptr;
-}
-
-TDirectLightPtr TRenderSystem9::AddDirectLight()
-{
-	return nullptr;
-}
-
-TCameraPtr TRenderSystem9::SetCamera(double fov, int eyeDistance, double far1)
-{
-	return nullptr;
-}
-
-TSkyBoxPtr TRenderSystem9::SetSkyBox(const std::string& imgName)
-{
-	return nullptr;
-}
-
-TPostProcessPtr TRenderSystem9::AddPostProcess(const std::string& name)
-{
-	return nullptr;
-}
-
 void TRenderSystem9::SetHandle(HINSTANCE hInstance, HWND hWnd)
 {
 	mHInst = hInstance;
@@ -139,15 +112,18 @@ IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXG
 	return ret;
 }
 
-void TRenderSystem9::ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
-{
-	if (CheckHR(mDevice9->ColorFill(rendTarget->GetColorBuffer9(), NULL, XMFLOAT2D3DCOLOR(color)))) return;
-}
-
 void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 {
-	if (CheckHR(mDevice9->SetRenderTarget(0, rendTarget->GetColorBuffer9()))) return;
-	if (CheckHR(mDevice9->SetDepthStencilSurface(rendTarget->GetDepthStencilBuffer9()))) return;
+	if (rendTarget) {
+		mCurColorBuffer = rendTarget->GetColorBuffer9();
+		mCurDepthStencilBuffer = rendTarget->GetDepthStencilBuffer9();
+	}
+	else {
+		mCurColorBuffer = mBackColorBuffer;
+		mCurDepthStencilBuffer = mBackDepthStencilBuffer;
+	}
+	if (CheckHR(mDevice9->SetRenderTarget(0, mCurColorBuffer))) return;
+	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
 TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
@@ -420,11 +396,6 @@ void TRenderSystem9::EndScene()
 {
 	mDevice9->EndScene();
 	mDevice9->Present(NULL, NULL, NULL, NULL);
-}
-
-void TRenderSystem9::Draw(IRenderable* renderable)
-{
-
 }
 
 void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)

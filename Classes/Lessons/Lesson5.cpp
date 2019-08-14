@@ -33,8 +33,8 @@ void Lesson5::OnPostInitDevice()
 
 void Lesson5::OnRender()
 {
-	mRenderSys->ClearRenderTexture(mRendTexture, XMFLOAT4(0,0,0,0));
 	mRenderSys->SetRenderTarget(mRendTexture);
+	mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
 	{
 		mModel->Update(mTimer.mDeltaTime);
 #ifdef USE_RENDER_OP
