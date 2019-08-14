@@ -20,6 +20,7 @@ public:
 typedef std::shared_ptr<TInputLayout9> TInputLayout9Ptr;
 
 struct TVertexShader9 : public IVertexShader {
+	ID3DXConstantTable* mConstTable = nullptr;
 	IBlobDataPtr mBlob,mErrBlob;
 	IDirect3DVertexShader9* mShader = nullptr;
 public:
@@ -29,6 +30,7 @@ public:
 typedef std::shared_ptr<TVertexShader9> TVertexShader9Ptr;
 
 struct TPixelShader9 : public IPixelShader {
+	ID3DXConstantTable* mConstTable = nullptr;
 	IBlobDataPtr mBlob, mErrBlob;
 	IDirect3DPixelShader9* mShader = nullptr;
 public:

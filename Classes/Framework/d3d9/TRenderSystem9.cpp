@@ -222,11 +222,15 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
 	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) return nullptr;
+	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
+		return nullptr;
+	}
 
 	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
 	ret->mBlob = blob;
 	ret->mErrBlob = errBlob;
+	ret->mConstTable = constTable;
 	if (CheckHR(mDevice9->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
 		
 	ret->SetLoaded();
@@ -242,11 +246,15 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
 	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) return nullptr;
+	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
+		return nullptr;
+	}
 
 	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
 	ret->mBlob = blob;
 	ret->mErrBlob = errBlob;
+	ret->mConstTable = constTable;
 	if (CheckHR(mDevice9->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
 
 	ret->SetLoaded();
@@ -420,10 +428,8 @@ void TRenderSystem9::EndScene()
 
 void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	/*std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
-	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
-	mDeviceContext->VSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
-	mDeviceContext->PSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);*/
+	TPixelShader9* ps = static_cast<TPixelShader9*>(pass->mProgram->mPixel.get());
+	TVertexShader9* vs = static_cast<TVertexShader9*>(pass->mProgram->mVertex.get());
 
 	size_t regId = 0;
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
@@ -432,6 +438,10 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		char* buffer9 = (char*)buffer->GetBuffer9();
 		for (size_t j = 0; j < decl->elements.size(); ++i) {
 			TConstBufferDeclElement& elem = decl->elements[i];
+#if 1
+			D3DXHANDLE h = ps->mConstTable->GetConstant(NULL, regId++);
+			ps->mConstTable->SetValue(mDevice9, h, buffer9 + elem.offset, elem.size);
+#else
 			switch (elem.type)
 			{
 			case E_CONSTBUF_ELEM_BOOL: {
@@ -448,6 +458,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 			}break;
 			default:break;
 			}
+#endif
 		}
 	}
 
