@@ -165,6 +165,11 @@ enHardwareBufferType IContantBuffer::GetType()
 	return E_HWBUFFER_CONSTANT;
 }
 
+void* IContantBuffer::GetBuffer9()
+{
+	return nullptr;
+}
+
 /********** ISamplerState **********/
 ID3D11SamplerState*& ISamplerState::GetSampler11()
 {

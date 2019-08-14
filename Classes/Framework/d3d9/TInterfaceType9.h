@@ -70,6 +70,18 @@ public:
 };
 typedef std::shared_ptr<TVertexBuffer9> TVertexBuffer9Ptr;
 
+struct TContantBuffer9 : public IContantBuffer {
+	TConstBufferDeclPtr mDecl;
+	std::vector<char> mBuffer9;
+public:
+	TContantBuffer9(TConstBufferDeclPtr decl);
+public:
+	virtual TConstBufferDeclPtr GetDecl() override;
+	virtual unsigned int GetBufferSize() override;
+	virtual void* GetBuffer9() override;
+};
+typedef std::shared_ptr<TContantBuffer9> TContantBuffer9Ptr;
+
 /********** Texture **********/
 struct TTexture9 : public ITexture {
 private:

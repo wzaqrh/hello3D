@@ -77,6 +77,9 @@ typedef std::shared_ptr<TIndexBuffer11> TIndexBufferPtr;
 struct IContantBuffer;
 typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
 
+struct TContantBuffer9;
+typedef std::shared_ptr<TContantBuffer9> TContantBuffer9Ptr;
+
 struct TContantBuffer11;
 typedef std::shared_ptr<TContantBuffer11> TContantBuffer11Ptr;
 

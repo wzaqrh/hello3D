@@ -133,12 +133,15 @@ TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void
 
 IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
 {
-	return nullptr;
+	TContantBuffer9Ptr ret = std::make_shared<TContantBuffer9>(buffer->GetDecl());
+	return ret;
 }
 
 IContantBufferPtr TRenderSystem9::CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
-	return nullptr;
+	TContantBuffer9Ptr ret = std::make_shared<TContantBuffer9>(std::make_shared<TConstBufferDecl>(cbDecl));
+	if (data) UpdateBuffer(ret.get(), data, ret->GetBufferSize());
+	return ret;
 }
 
 IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
@@ -183,7 +186,7 @@ bool TRenderSystem9::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataS
 	switch (bufferType)
 	{
 	case E_HWBUFFER_CONSTANT: {
-
+		static_cast<TContantBuffer9*>(buffer)->mBuffer9.assign((char*)data, (char*)data + dataSize);
 	}break;
 	case E_HWBUFFER_VERTEX: {
 		IDirect3DVertexBuffer9* buffer9 = static_cast<IVertexBuffer*>(buffer)->GetBuffer9();

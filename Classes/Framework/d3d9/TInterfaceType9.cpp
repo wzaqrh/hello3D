@@ -167,3 +167,25 @@ std::map<D3DSAMPLERSTATETYPE, DWORD>& TSamplerState9::GetSampler9()
 {
 	return mStates;
 }
+
+/********** TContantBuffer9 **********/
+TContantBuffer9::TContantBuffer9(TConstBufferDeclPtr decl)
+	:mDecl(decl)
+{
+	mBuffer9.resize(mDecl->bufferSize);
+}
+
+TConstBufferDeclPtr TContantBuffer9::GetDecl()
+{
+	return mDecl;
+}
+
+unsigned int TContantBuffer9::GetBufferSize()
+{
+	return mDecl->bufferSize;
+}
+
+void* TContantBuffer9::GetBuffer9()
+{
+	return mBuffer9.empty() ? nullptr : &mBuffer9[0];
+}

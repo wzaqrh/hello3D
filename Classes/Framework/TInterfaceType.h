@@ -78,6 +78,8 @@ typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 
 struct IContantBuffer : public IHardwareBuffer {
 	virtual enHardwareBufferType GetType() override final;
+
+	virtual void* GetBuffer9();
 	virtual TConstBufferDeclPtr GetDecl() = 0;
 };
 typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
