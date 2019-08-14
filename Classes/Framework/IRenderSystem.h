@@ -15,6 +15,12 @@ public:
 	TSkyBoxPtr mSkyBox;
 	TCameraPtr mDefCamera;
 protected:
+	bool mCastShdowFlag = false;
+	TBlendFunc mCurBlendFunc;
+	TDepthState mCurDepthState;
+
+	std::vector<IRenderTexturePtr> mRenderTargetStk;
+
 	TMaterialFactoryPtr mMaterialFac;
 	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
 
@@ -32,6 +38,10 @@ public:
 	virtual bool Initialize() = 0;
 	virtual void Update(float dt) = 0;
 	virtual void CleanUp() = 0;
+protected:
+	void _PushRenderTarget(IRenderTexturePtr rendTarget);
+	void _PopRenderTarget();
+	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
 public:
 	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();

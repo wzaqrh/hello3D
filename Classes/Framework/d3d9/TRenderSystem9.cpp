@@ -392,12 +392,14 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 
 void TRenderSystem9::SetBlendFunc(const TBlendFunc& blendFunc)
 {
+	mCurBlendFunc = blendFunc;
 	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3DEnumCT::d3d11To9(blendFunc.src));
 	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3DEnumCT::d3d11To9(blendFunc.dst));
 }
 
 void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 {
+	mCurDepthState = depthState;
 	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.depthEnable);
 	mDevice9->SetRenderState(D3DRS_ZFUNC, D3DEnumCT::d3d11To9(depthState.depthFunc));
 	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.depthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
@@ -416,7 +418,193 @@ void TRenderSystem9::EndScene()
 	mDevice9->Present(NULL, NULL, NULL, NULL);
 }
 
+void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
+{
+	/*std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
+	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
+	mDeviceContext->VSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
+	mDeviceContext->PSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);*/
+
+	size_t regId = 0;
+	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
+		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
+		TConstBufferDeclPtr decl = buffer->GetDecl();
+		char* buffer9 = (char*)buffer->GetBuffer9();
+		for (size_t j = 0; j < decl->elements.size(); ++i) {
+			TConstBufferDeclElement& elem = decl->elements[i];
+			switch (elem.type)
+			{
+			case E_CONSTBUF_ELEM_BOOL: {
+				mDevice9->SetPixelShaderConstantB(regId++, (const BOOL*)buffer9 + elem.offset, elem.size / sizeof(BOOL));
+			}break;
+			case E_CONSTBUF_ELEM_FLOAT4: {
+				mDevice9->SetPixelShaderConstantF(regId++, (const float*)buffer9 + elem.offset, elem.size / sizeof(XMFLOAT4));
+			}break;
+			case E_CONSTBUF_ELEM_INT4: {
+				mDevice9->SetPixelShaderConstantI(regId++, (const int*)buffer9 + elem.offset, elem.size / sizeof(TINT4));
+			}break;
+			case E_CONSTBUF_ELEM_MATRIX: {
+				mDevice9->SetTransform(elem.matrixType, (const D3DMATRIX*)buffer9 + elem.offset);
+			}break;
+			default:break;
+			}
+		}
+	}
+
+	mDevice9->SetVertexShader(pass->mProgram->mVertex->GetShader9());
+	mDevice9->SetPixelShader(pass->mProgram->mPixel->GetShader9());
+
+	if (!pass->mSamplers.empty()) {
+		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
+			ISamplerStatePtr sampler = pass->mSamplers[i];
+			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = sampler->GetSampler9();
+			for (auto& pair : states) {
+				mDevice9->SetSamplerState(i, pair.first, pair.second);
+			}
+		}
+	}
+}
+
+void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
+{
+	if (iterCnt >= 0) {
+		_PushRenderTarget(pass->mIterTargets[iterCnt]);
+	}
+	else {
+		if (pass->mRenderTarget)
+			_PushRenderTarget(pass->mRenderTarget);
+	}
+
+	if (iterCnt >= 0) {
+		if (iterCnt + 1 < pass->mIterTargets.size())
+			textures[0] = pass->mIterTargets[iterCnt + 1]->GetColorTexture();
+	}
+	else {
+		if (!pass->mIterTargets.empty())
+			textures[0] = pass->mIterTargets[0]->GetColorTexture();
+	}
+
+	{
+		if (textures.size() > 0) {
+			for (size_t i = 0; i < textures.size(); ++i)
+				mDevice9->SetTexture(i, textures[i]->GetSRV9());
+		}
+
+		if (pass->OnBind)
+			pass->OnBind(pass.get(), this, textures);
+
+		BindPass(pass, globalParam);
+
+		if (indexBuffer) {
+			mDevice9->DrawIndexedPrimitive(D3DEnumCT::d3d11To9(pass->mTopoLogy), 
+				0, 0, vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(),
+				0, indexBuffer->GetBufferSize() / indexBuffer->GetWidth());
+		}
+		else {
+			mDevice9->DrawPrimitive(D3DEnumCT::d3d11To9(pass->mTopoLogy), 0, vertexBuffer->GetBufferSize() / vertexBuffer->GetStride());
+		}
+
+		if (pass->OnUnbind)
+			pass->OnUnbind(pass.get(), this, textures);
+	}
+
+	if (iterCnt >= 0) {
+		_PopRenderTarget();
+	}
+	else {
+		if (pass->mRenderTarget)
+			_PopRenderTarget();
+	}
+}
+
+void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+{
+	TTechniquePtr tech = op.mMaterial->CurTech();
+	std::vector<TPassPtr> passes = tech->GetPassesByName(lightMode);
+	for (auto& pass : passes)
+	{
+		mDevice9->SetVertexDeclaration(pass->mInputLayout->GetLayout9());
+		SetVertexBuffer(op.mVertexBuffer);
+		SetIndexBuffer(op.mIndexBuffer);
+
+		TTextureBySlot textures = op.mTextures;
+		textures.Merge(pass->mTextures);
+
+		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
+			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
+			if (iter != op.mVertBufferByPass.end()) {
+				SetVertexBuffer(iter->second);
+			}
+			else {
+				SetVertexBuffer(op.mVertexBuffer);
+			}
+			ITexturePtr first = !textures.empty() ? textures[0] : nullptr;
+			RenderPass(pass, textures, i, op.mIndexBuffer, op.mVertexBuffer, globalParam);
+			textures[0] = first;
+		}
+		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
+		if (iter != op.mVertBufferByPass.end()) {
+			SetVertexBuffer(iter->second);
+		}
+		else {
+			SetVertexBuffer(op.mVertexBuffer);
+		}
+		RenderPass(pass, textures, -1, op.mIndexBuffer, op.mVertexBuffer, globalParam);
+	}
+}
+
+void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
+{
+	auto LightCam = light->GetLightCamera(*mDefCamera);
+	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+	for (int i = 0; i < opQueue.size(); ++i)
+		if (opQueue[i].mMaterial->IsLoaded())
+		{
+			globalParam.mWorld = opQueue[i].mWorldTransform;
+			RenderOperation(opQueue[i], lightMode, globalParam);
+		}
+}
+
 void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
+	if (lightMode == E_PASS_SHADOWCASTER) {
+		_PushRenderTarget(mShadowPassRT);
+		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1.0f), 1.0, 0);
+		mCastShdowFlag = true;
+	}
+	else if (lightMode == E_PASS_FORWARDBASE) {
+		IDirect3DTexture9* depthMapView = mShadowPassRT->GetColorTexture()->GetSRV9();
+		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
 
+		if (mSkyBox && mSkyBox->mCubeSRV) {
+			IDirect3DTexture9* texture = mSkyBox->mCubeSRV->GetSRV9();
+			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
+		}
+	}
+	else if (lightMode == E_PASS_POSTPROCESS) {
+		IDirect3DTexture9* pSRV = mPostProcessRT->GetColorTexture()->GetSRV9();
+		mDevice9->SetTexture(0, pSRV);
+	}
+
+	if (!mLightsOrder.empty()) {
+		TBlendFunc orgBlend = mCurBlendFunc;
+		SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
+		RenderLight(mLightsOrder[0].first, mLightsOrder[0].second, opQueue, lightMode);
+
+		for (int i = 1; i < mLightsOrder.size(); ++i) {
+			auto order = mLightsOrder[i];
+			SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
+			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
+			RenderLight(order.first, order.second, opQueue, __lightMode);
+		}
+		SetBlendFunc(orgBlend);
+	}
+
+	if (lightMode == E_PASS_SHADOWCASTER) {
+		_PopRenderTarget();
+	}
+	else if (lightMode == E_PASS_FORWARDBASE) {
+		IDirect3DTexture9* texViewNull = nullptr;
+		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, texViewNull);
+	}
 }

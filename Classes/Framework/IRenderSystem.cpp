@@ -14,6 +14,20 @@ IRenderSystem::~IRenderSystem()
 {
 }
 
+void IRenderSystem::_PushRenderTarget(IRenderTexturePtr rendTarget)
+{
+	mRenderTargetStk.push_back(rendTarget);
+	SetRenderTarget(rendTarget);
+}
+
+void IRenderSystem::_PopRenderTarget()
+{
+	if (!mRenderTargetStk.empty())
+		mRenderTargetStk.pop_back();
+
+	SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
+}
+
 TSpotLightPtr IRenderSystem::AddSpotLight()
 {
 	TSpotLightPtr light = std::make_shared<TSpotLight>();
@@ -101,4 +115,53 @@ void IRenderSystem::Draw(IRenderable* renderable)
 	TRenderOperationQueue opQue;
 	renderable->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_FORWARDBASE);
+}
+
+cbGlobalParam IRenderSystem::MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType)
+{
+	cbGlobalParam globalParam = {};
+	//globalParam.mWorld = mWorldTransform;
+
+	if (castShadow) {
+		globalParam.mView = COPY_TO_GPU(pLightCam->mView);
+		globalParam.mProjection = COPY_TO_GPU(pLightCam->mProjection);
+	}
+	else {
+		globalParam.mView = COPY_TO_GPU(mDefCamera->mView);
+		globalParam.mProjection = COPY_TO_GPU(mDefCamera->mProjection);
+
+		globalParam.mLightView = COPY_TO_GPU(pLightCam->mView);
+		globalParam.mLightProjection = COPY_TO_GPU(pLightCam->mProjection);
+	}
+	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
+
+	{
+		XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mWorld));
+		globalParam.mWorldInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mWorld));
+
+		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mView));
+		globalParam.mViewInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mView));
+
+		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mProjection));
+		globalParam.mProjectionInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mProjection));
+	}
+
+	switch (lightType)
+	{
+	case E_LIGHT_DIRECT:
+		globalParam.mLightNum.x = 1;
+		globalParam.mDirectLights[0] = *light;
+		break;
+	case E_LIGHT_POINT:
+		globalParam.mLightNum.y = 1;
+		globalParam.mPointLights[0] = *(TPointLight*)light;
+		break;
+	case E_LIGHT_SPOT:
+		globalParam.mLightNum.z = 1;
+		globalParam.mSpotLights[0] = *(TSpotLight*)light;
+		break;
+	default:
+		break;
+	}
+	return globalParam;
 }

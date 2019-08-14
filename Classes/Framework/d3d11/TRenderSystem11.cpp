@@ -214,20 +214,6 @@ void TRenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
 	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
 }
 
-void TRenderSystem11::_PushRenderTarget(IRenderTexturePtr rendTarget)
-{
-	mRenderTargetStk.push_back(rendTarget);
-	SetRenderTarget(rendTarget);
-}
-
-void TRenderSystem11::_PopRenderTarget()
-{
-	if (!mRenderTargetStk.empty())
-		mRenderTargetStk.pop_back();
-
-	SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
-}
-
 TMaterialPtr TRenderSystem11::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
 {
 	return mMaterialFac->GetMaterial(name, callback);
@@ -686,68 +672,7 @@ void TRenderSystem11::SetDepthState(const TDepthState& depthState)
 	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
 }
 
-cbGlobalParam TRenderSystem11::MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType)
-{
-	cbGlobalParam globalParam = {};
-	//globalParam.mWorld = mWorldTransform;
 
-	if (castShadow) {
-		globalParam.mView = COPY_TO_GPU(pLightCam->mView);
-		globalParam.mProjection = COPY_TO_GPU(pLightCam->mProjection);
-	}
-	else {
-		globalParam.mView = COPY_TO_GPU(mDefCamera->mView);
-		globalParam.mProjection = COPY_TO_GPU(mDefCamera->mProjection);
-
-		globalParam.mLightView = COPY_TO_GPU(pLightCam->mView);
-		globalParam.mLightProjection = COPY_TO_GPU(pLightCam->mProjection);
-	}
-	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
-
-	{
-		XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mWorld));
-		globalParam.mWorldInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mWorld));
-
-		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mView));
-		globalParam.mViewInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mView));
-
-		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.mProjection));
-		globalParam.mProjectionInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.mProjection));
-	}
-
-#if 1
-	switch (lightType)
-	{
-	case E_LIGHT_DIRECT:
-		globalParam.mLightNum.x = 1;
-		globalParam.mDirectLights[0] = *light;
-		break;
-	case E_LIGHT_POINT:
-		globalParam.mLightNum.y = 1;
-		globalParam.mPointLights[0] = *(TPointLight*)light;
-		break;
-	case E_LIGHT_SPOT:
-		globalParam.mLightNum.z = 1;
-		globalParam.mSpotLights[0] = *(TSpotLight*)light;
-		break;
-	default:
-		break;
-	}
-#else
-	globalParam.mLightNum.x = min(MAX_LIGHTS, mDirectLights.size());
-	for (int i = 0; i < globalParam.mLightNum.x; ++i)
-		globalParam.mDirectLights[i] = *mDirectLights[i];
-
-	globalParam.mLightNum.y = min(MAX_LIGHTS, mPointLights.size());
-	for (int i = 0; i < globalParam.mLightNum.y; ++i)
-		globalParam.mPointLights[i] = *mPointLights[i];
-
-	globalParam.mLightNum.z = min(MAX_LIGHTS, mSpotLights.size());
-	for (int i = 0; i < globalParam.mLightNum.z; ++i)
-		globalParam.mSpotLights[i] = *mSpotLights[i];
-#endif
-	return globalParam;
-}
 
 static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<TContantBufferInfo>& bufferInfos) {
 	std::vector<ID3D11Buffer*> ret;
@@ -803,7 +728,7 @@ void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int it
 
 	{
 		if (textures.size() > 0) {
-			std::vector<ID3D11ShaderResourceView*> texViews = textures.GetTextureViews();
+			std::vector<ID3D11ShaderResourceView*> texViews = textures.GetTextureViews11();
 			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 		}
 

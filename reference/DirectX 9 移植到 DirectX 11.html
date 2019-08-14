@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping -->
+<html class="hasSidebar hasPageActions hasBreadcrumb conceptual has-default-focus" lang="en-us" dir="ltr" data-css-variable-support="true" data-authenticated="false" data-auth-status-determined="true" data-target="docs" x-ms-format-detection="none"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta property="og:title" content="Map DirectX 9 features to DirectX 11 APIs - Windows UWP applications">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping">
+		<meta property="og:description" content="Understand how the features your Direct3D 9 game uses will translate to Direct3D 11 and the Universal Windows Platform (UWP).">
+		<meta property="og:image" content="https://docs.microsoft.com/en-us/media/logos/logo-ms-social.png">
+		<meta property="og:image:alt" content="Microsoft Logo">
+
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="@docsmsft">
+
+		<meta name="Search.Product" content="eADQiWindows 10XVcnh">
+<meta name="ROBOTS" content="INDEX, FOLLOW">
+<meta name="htmlDangerZone" content="true">
+<meta name="author" content="eliotcowley">
+<meta name="ms.author" content="elcowle">
+<meta name="breadcrumb_path" content="/windows/uwp/breadcrumbs/toc.json">
+<meta name="ms.technology" content="games">
+<meta name="ms.prod" content="uwp">
+<meta name="uhfHeaderId" content="MSDocsHeader-WinDevCenter">
+<meta name="ms.localizationpriority" content="medium">
+<meta name="ms.assetid" content="3aa8a114-4e47-ae0a-9447-88ba324377b8">
+<meta name="description" content="Understand how the features your Direct3D 9 game uses will translate to Direct3D 11 and the Universal Windows Platform (UWP).">
+<meta name="keywords" content="windows 10, uwp, games, directx 9, directx 11, porting">
+<meta name="ms.topic" content="article">
+<meta name="ms.date" content="02/08/2017">
+<meta name="search.ms_sitename" content="Docs">
+<meta name="search.ms_docsetname" content="windows-uwp">
+<meta name="version" content="0">
+<meta name="locale" content="en-us">
+<meta name="site_name" content="Docs">
+<meta name="search.ms_product" content="MSDN">
+<meta name="depot_name" content="MSDN.windows-uwp">
+<meta name="updated_at" content="2019-05-29 10:49 PM">
+<meta name="gitcommit" content="https://github.com/MicrosoftDocs/windows-uwp-pr/blob/154ab34461b1801ac946caa08783e15bd458dd14/windows-apps-src/gaming/feature-mapping.md">
+<meta name="original_content_git_url" content="https://github.com/MicrosoftDocs/windows-uwp-pr/blob/live/windows-apps-src/gaming/feature-mapping.md">
+<meta name="document_id" content="aab803ac-da29-4b5f-7d3c-b394baf29f84">
+<meta name="document_version_independent_id" content="5cb054cf-2874-3bfe-04fb-be7644124a15">
+<meta name="page_type" content="conceptual">
+<meta name="toc_rel" content="../toc.json">
+<meta name="pdf_url_template" content="https://docs.microsoft.com/pdfstore/en-us/MSDN.windows-uwp/{branchName}{pdfName}">
+<meta name="word_count" content="1476">
+
+	<meta name="scope" content="UWP">
+<link href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping" rel="canonical">
+	<title>Map DirectX 9 features to DirectX 11 APIs - Windows UWP applications | Microsoft Docs</title>
+
+		<link rel="stylesheet" href="./DirectX 9 移植到 DirectX 11_files/ee773375.site-ltr.css">
+
+	<link rel="stylesheet" href="./DirectX 9 移植到 DirectX 11_files/cd54db8b.conceptual.css">
+
+
+	<script>
+	var msDocs = {
+		data: {
+			timeOrigin: Date.now(),
+			azureHeaderLocale: 'en-us',
+			contentLocale: 'en-us',
+			contentDir: 'ltr',
+			userLocale: 'en-us',
+			userDir: 'ltr',
+			pageTemplate: 'Conceptual',
+			brand: '',
+			context: {
+
+			},
+			hasComments: true,
+			feedbackSystem: 'GitHub',
+			feedbackGitHubRepo: 'MicrosoftDocs/windows-uwp',
+			feedbackProductUrl: 'https://wpdev.uservoice.com/',
+			contentGitUrl: 'https://github.com/MicrosoftDocs/windows-uwp/blob/docs/windows-apps-src/gaming/feature-mapping.md',
+		},
+		functions:{},
+		settings:{
+			extendBreadcrumb: false,
+		}
+	};
+	if (!('Promise' in window && 'resolve' in window.Promise && 'reject' in window.Promise && 'all' in window.Promise && 'race' in window.Promise)) {
+		document.write('<script src="https://static.docs.com/ui/third-party/bluebird/3.5.0/bluebird.min.js" integrity="sha384-aD4BDeDGeLXLpPK4yKeqtZQa9dv4a/7mQ+4L5vwshIYH1Mc2BrXvHd32iHzYCQy5" crossorigin="anonymous"><\/script>');
+	}
+	if (typeof fetch !== 'function') {
+		document.write('<script src="https://static.docs.com/ui/third-party/fetch/2.0.3/fetch.min.js" integrity="sha384-H3LQq82b6Mm80GYRHtRSlTwO9DoXctmYCVEYk9M8mp97lRzs6DuSrHVUg3SBP9w0" crossorigin="anonymous"><\/script>');
+	}
+	if (typeof HTMLTemplateElement === 'undefined') {
+		document.write('<script src="https://static.docs.com/ui/third-party/template/1.4.0/template.min.js" integrity="sha384-1zKzI6ldTVHMU7n0W2HpE/lhHI+UG4D9IIaxbj3kT2UhCWicdTuJkTtnKuu0CQzN" crossorigin="anonymous"><\/script>');
+	}
+	if (typeof URL !== 'function') {
+		document.write('<script src="https://static.docs.com/ui/third-party/url/0.5.7/url.min.js" integrity="sha384-vn7xBMtpSTfzaTRWxj0kVq0UcsbBrTOgZ/M1ISHqe1V358elYva+lfiEC+T8jLPc" crossorigin="anonymous"><\/script>');
+	}
+	</script><style></style>
+
+	<script src="./DirectX 9 移植到 DirectX 11_files/jquery-3.3.1.min.js.下载" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+		<script src="./DirectX 9 移植到 DirectX 11_files/16607a66.index-docs.js.下载"></script><style></style><script src="./DirectX 9 移植到 DirectX 11_files/jsll-4.js.下载" async="" defer=""></script>
+
+</head>
+
+<body lang="en-us" dir="ltr" class="js-focus-visible">
+<div class="header-holder has-default-focus">
+	<a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#main" class="skip-to-main-link visually-hidden-until-focused is-fixed has-inner-focus focus-visible has-top-zero has-left-zero has-right-zero has-padding-medium has-text-centered has-body-background-medium" tabindex="1">Skip to main content</a>
+		<div id="headerAreaHolder" data-bi-name="header">
+			<div id="uhf-placeholder"></div>
+		</div>
+	<div class="content-header uhf-container has-padding has-default-focus" data-bi-name="content-header">
+		<nav class="has-padding-none-mobile" data-bi-name="breadcrumb" itemscope="" itemtype="http://schema.org/BreadcrumbList" role="navigation" aria-label="Breadcrumb">
+			<ul id="page-breadcrumbs" class="breadcrumbs">
+			</ul>
+		</nav>
+		<div class="content-header-controls">
+			<button type="button" class="contents-button button" data-bi-name="contents-expand" aria-haspopup="true">
+				<span class="icon"><span class="docon docon-menu" aria-hidden="true"></span></span>
+				<span>Contents</span>
+			</button>
+		</div>
+		<div class="content-header-controls exit-focus">
+			<button type="button" class="ap-collapse-behavior ap-expanded button" data-bi-name="ap-collapse" aria-controls="action-panel">
+				<span class="icon"><span class="docon docon-exit-mode" aria-hidden="true"></span></span>
+				<span>Exit focus mode</span>
+			</button>
+		</div>
+		<div id="page-actions" class="is-flex-touch has-flex-justify-content-space-between-touch has-padding-none has-padding-none-mobile">
+			<ul class="action-list has-flex-justify-content-start-mobile is-flex is-flex-row has-flex-wrap">
+						<li>
+							<a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#feedback" class="button is-text has-inner-focus is-small is-icon-only-touch" data-bi-name="comments">
+								<span class="icon">
+									<span class="docon docon-comment-lines" aria-hidden="true"></span>
+								</span>
+								<span class="is-visually-hidden-touch is-hidden-portrait">Feedback</span>
+							</a>
+						</li>
+							<li id="contenteditbtn">
+									<a href="https://github.com/MicrosoftDocs/windows-uwp/blob/docs/windows-apps-src/gaming/feature-mapping.md" class="button is-text has-inner-focus is-icon-only-touch is-small" title="Edit This Document" data-bi-name="edit" data-original_content_git_url="https://github.com/MicrosoftDocs/windows-uwp-pr/blob/live/windows-apps-src/gaming/feature-mapping.md" data-original_content_git_url_template="" data-pr_repo="" data-pr_branch="">
+									<span class="icon">
+										<span class="docon docon-edit-outline" aria-hidden="true"></span>
+									</span>
+									<span class="is-visually-hidden-touch is-hidden-portrait">Edit</span>
+								</a>
+							</li>
+				<li>
+<div class="sharing dropdown has-caret">
+	<button class="dropdown-trigger button is-text is-fullwidth has-flex-justify-content-start has-inner-focus is-small is-icon-only-touch" aria-controls="sharing-menu" aria-expanded="false" title="Share This Document" data-bi-name="share">
+		<span class="icon" aria-hidden="true">
+			<span class="docon docon-sharing"></span>
+		</span>
+		<span class="is-visually-hidden-touch is-hidden-portrait">Share</span>
+	</button>
+	<div class="dropdown-menu has-padding-small" id="sharing-menu">
+		<ul data-bi-name="share-links">
+			<li>
+				<a class="button is-text is-fullwidth has-flex-justify-content-start has-inner-focus is-small share-twitter" data-bi-name="twitter" href="https://twitter.com/intent/tweet?original_referer=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping%3FWT.mc_id%3Dtwitter&amp;text=Map%20DirectX%209%20features%20to%20DirectX%2011%20APIs%20-%20Windows%20UWP%20applications%20%7C%20Microsoft%20Docs&amp;tw_p=tweetbutton&amp;url=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping%3FWT.mc_id%3Dtwitter">
+					<span class="icon">
+						<span class="docon docon-brand-twitter has-text-primary" aria-hidden="true"></span>
+					</span>
+					<span>Twitter</span>
+				</a>
+			</li>
+			<li>
+				<a class="button is-text is-fullwidth has-flex-justify-content-start has-inner-focus is-small share-linkedin" data-bi-name="linkedin" href="https://www.linkedin.com/cws/share?url=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping%3FWT.mc_id%3Dlinkedin">
+					<span class="icon">
+						<span class="docon docon-brand-linkedin has-text-primary" aria-hidden="true"></span>
+					</span>
+					<span>LinkedIn</span>
+				</a>
+			</li>
+			<li>
+				<a class="button is-text is-fullwidth has-flex-justify-content-start has-inner-focus is-small share-facebook" data-bi-name="facebook" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping%3FWT.mc_id%3Dfacebook">
+					<span class="icon">
+						<span class="docon docon-brand-facebook has-text-primary" aria-hidden="true"></span>
+					</span>
+					<span>Facebook</span>
+				</a>
+			</li>
+			<li>
+				<a class="button is-text is-fullwidth has-flex-justify-content-start has-inner-focus is-small share-email" data-bi-name="email" href="mailto:?subject=%5BShared%20Article%5D%20Map%20DirectX%209%20features%20to%20DirectX%2011%20APIs%20-%20Windows%20UWP%20applications%20%7C%20Microsoft%20Docs&amp;body=Map%20DirectX%209%20features%20to%20DirectX%2011%20APIs%20-%20Windows%20UWP%20applications%20%7C%20Microsoft%20Docs%0A%0Ahttps%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping%3FWT.mc_id%3Demail">
+					<span class="icon">
+						<span class="docon docon-mail-message-fill has-text-primary" aria-hidden="true"></span>
+					</span>
+					<span>Email</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>				</li>
+				<li>
+<div class="dropdown has-caret">
+	<button class="dropdown-trigger button is-text is-small is-icon-only-touch has-inner-focus" aria-controls="theme-menu" aria-expanded="false" title="Theme" data-bi-name="theme">
+		<span class="icon">
+			<span class="docon docon-sun" aria-hidden="true"></span>
+		</span>
+		<span class="is-visually-hidden-touch is-hidden-portrait">Theme</span>
+	</button>
+	<div class="dropdown-menu" id="theme-menu" role="menu">
+		<div class="theme-selector has-padding-small">
+			<div class="theme is-block">
+				<button class="button is-text is-small theme-control is-fullwidth has-flex-justify-content-start is-selected" data-theme-to="light" role="menuitem" aria-selected="true">
+					<span class="theme-light has-margin-right-small">
+						<span class="theme-selector-icon css-variable-support has-border is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span>
+Light					</span>
+				</button>
+			</div>
+			<div class="theme is-block">
+				<button class="button is-text is-small theme-control is-fullwidth has-flex-justify-content-start" data-theme-to="dark" role="menuitem" aria-selected="false">
+					<span class="theme-dark has-margin-right-small">
+						<span class="has-border theme-selector-icon css-variable-support is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span>
+Dark					</span>
+				</button>
+			</div>
+			<div class="theme is-block">
+				<button class="button is-text is-small theme-control is-fullwidth has-flex-justify-content-start" data-theme-to="high-contrast" role="menuitem" aria-selected="false">
+					<span class="theme-high-contrast has-margin-right-small">
+						<span class="has-border theme-selector-icon css-variable-support is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span>
+High contrast					</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>				</li>
+				<li>
+					<a class="docs-sign-in auth-status-determined not-authenticated button is-text has-inner-focus has-text-primary is-small" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#">Sign in</a>
+					<div class="dropdown has-caret auth-status-determined authenticated">
+						<button class="dropdown-trigger button is-text has-inner-focus is-small is-icon-only-touch has-inner-focus" aria-label="Your Account" aria-controls="user-menu" aria-expanded="false">
+							<span class="icon" aria-hidden="true">
+								<span class="image">
+									<img class="has-body-background-medium is-rounded" data-profile-property="avatarUrl">
+								</span>
+							</span>
+							<span class="is-truncated has-margin-left-small" data-profile-property="userName"></span>
+						</button>
+						<div class="dropdown-menu box" id="user-menu" role="menu">
+							<div class="media is-user-dir">
+								<div class="media-left">
+									<span class="image is-64x64" aria-hidden="true">
+										<img class="has-body-background-medium is-rounded" data-profile-property="avatarUrl">
+									</span>
+								</div>
+								<div class="media-content">
+									<p class="title">
+										<span class="is-truncated" style="max-width: 200px" data-profile-property="userName"></span>
+									</p>
+									<p class="subtitle has-margin-bottom-none">
+										<span class="is-truncated" style="max-width: 200px" data-profile-property="upn"></span>
+									</p>
+									<ul class="is-unstyled has-margin-none has-margin-top-small">
+										<li><a href="https://docs.microsoft.com/profile" data-profile-property="profileUrl">Profile</a></li>
+										<li><a class="docs-sign-out" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#">Sign out</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<button type="button" class="contents-button button is-small is-text is-hidden-tablet has-inner-focus is-hidden-tablet" aria-label="Contents" data-bi-name="contents-expand-">
+				<span class="icon">
+					<span class="docon docon-editor-list-bullet" aria-hidden="true"></span>
+				</span>
+				<span>Contents</span>
+			</button>
+		</div>
+	</div>
+
+		<div id="banner-holder" class="has-default-focus has-overflow-hidden">
+		</div>
+
+	<div id="disclaimer-holder" class="has-overflow-hidden has-default-focus"></div>
+	</div>
+
+	<div class="mainContainer  uhf-container has-top-padding  has-default-focus" data-bi-name="body">
+
+		<div class="columns has-large-gaps is-gapless-mobile ">
+
+			<div id="left-container" class="left-container is-hidden-mobile column is-one-third-tablet is-one-quarter-desktop">
+				<nav id="affixed-left-container" class="is-fixed is-flex is-flex-column" role="navigation" aria-label="Primary" style="width: 352.813px; top: 24px; bottom: 24px;"></nav>
+			</div>
+
+			<section class="primary-holder column is-two-thirds-tablet is-three-quarters-desktop">
+				<div class="columns is-gapless-mobile has-large-gaps ">
+
+
+				<div id="main-column" class="column  is-full is-four-fifths-desktop ">
+
+					<main id="main" role="main" class="content " data-bi-name="content" lang="en-us" dir="ltr">
+
+
+
+						<h1 id="map-directx-9-features-to-directx-11-apis" sourcefile="gaming/feature-mapping.md" sourcestartlinenumber="10">Map DirectX 9 features to DirectX 11 APIs</h1>
+
+						<ul class="metadata page-metadata" data-bi-name="page info" lang="en-us" dir="ltr">
+							<li class="displayDate">
+								<time role="presentation" datetime="2017-02-08T00:00:00.000Z" data-article-date-source="ms.date">02/08/2017</time>
+							</li>
+								<li class="readingTime">7 minutes to read</li>
+							<li class="contributors-holder">
+								<a class="has-inner-focus" href="https://github.com/MicrosoftDocs/windows-uwp/blob/docs/windows-apps-src/gaming/feature-mapping.md" title="4 Contributors" aria-label="4 Contributors">
+									<ul class="contributors" data-bi-name="contributors" aria-hidden="true">
+												<li><img src="./DirectX 9 移植到 DirectX 11_files/contributor.svg" data-src="https://github.com/eliotcowley.png?size=32" role="presentation"></li>
+												<li><img src="./DirectX 9 移植到 DirectX 11_files/contributor.svg" data-src="https://github.com/mijacobs.png?size=32" role="presentation"></li>
+												<li><img src="./DirectX 9 移植到 DirectX 11_files/contributor.svg" data-src="https://github.com/joannaleecy.png?size=32" role="presentation"></li>
+												<li><img src="./DirectX 9 移植到 DirectX 11_files/contributor.svg" data-src="https://github.com/msatranjr.png?size=32" role="presentation"></li>
+									</ul>
+								</a>
+							</li>
+
+						</ul>
+
+						<nav id="center-doc-outline" class="doc-outline is-hidden-desktop" data-bi-name="intopic toc" role="navigation" aria-label="Article Outline">
+							<h3>In this article</h3>
+						<ol><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#mapping-direct3d-9-to-directx-11-apis">Mapping Direct3D 9 to DirectX 11 APIs</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#moving-from-direct2d-9-to-direct2d-11">Moving from Direct2D 9 to Direct2D 11</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-deprecated-helper-libraries">Replace deprecated helper libraries</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#move-shader-programs-from-fx-to-hlsl">Move shader programs from FX to HLSL</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-xnamath-and-d3dxmath">Replace XNAMath and D3DXMath</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directsound-with-xaudio2-and-background-audio">Replace DirectSound with XAudio2 (and background audio)</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directinput-with-xinput-and-uwp-apis">Replace DirectInput with XInput and UWP APIs</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#use-microsoft-media-foundation-instead-of-directshow">Use Microsoft Media Foundation instead of DirectShow</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directplay-with-networking-code">Replace DirectPlay with networking code</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#function-mapping">Function mapping</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#surface-format-mapping">Surface format mapping</a></li></ol></nav>
+
+
+						<!-- <content> -->
+							
+<p><strong>Summary</strong></p>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/plan-your-directx-port" data-linktype="relative-path">Plan your DirectX port</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/understand-direct3d-11-1-concepts" data-linktype="relative-path">Important changes from Direct3D 9 to Direct3D 11</a></li>
+<li>Feature mapping</li>
+</ul>
+<p>Understand how the features your Direct3D 9 game uses will translate to Direct3D 11 and the Universal Windows Platform (UWP).</p>
+<h2 id="mapping-direct3d-9-to-directx-11-apis">Mapping Direct3D 9 to DirectX 11 APIs<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#mapping-direct3d-9-to-directx-11-apis" aria-labelledby="mapping-direct3d-9-to-directx-11-apis"></a></h2>
+<p><a href="https://docs.microsoft.com/windows/desktop/direct3d" data-linktype="external">Direct3D</a> is still the foundation of DirectX graphics, but the API has changed since DirectX 9:</p>
+<ul>
+<li>Microsoft DirectX Graphics Infrastructure (DXGI) is used to set up graphics adapters. Use <a href="https://docs.microsoft.com/windows/desktop/direct3ddxgi/dx-graphics-dxgi" data-linktype="external">DXGI</a> to select buffer formats, create swap chains, present frames, and create shared resources. See <a href="https://docs.microsoft.com/windows/desktop/direct3ddxgi/d3d10-graphics-programming-guide-dxgi" data-linktype="external">DXGI Overview</a>.</li>
+<li>A Direct3D device context is used to set pipeline state and generate rendering commands. Most of our samples use an immediate context to render directly to the device; Direct3D 11 also supports multithreaded rendering, in which case deferred contexts are used. See <a href="https://docs.microsoft.com/windows/desktop/direct3d11/overviews-direct3d-11-devices-intro" data-linktype="external">Introduction to a Device in Direct3D 11</a>.</li>
+<li>Some features have been deprecated, most notably the fixed function pipeline. See <a href="https://docs.microsoft.com/windows/desktop/direct3d10/d3d10-graphics-programming-guide-api-features-deprecated" data-linktype="external">Deprecated Features</a>.</li>
+</ul>
+<p>For a full list of Direct3D 11 features, see <a href="https://docs.microsoft.com/windows/desktop/direct3d11/direct3d-11-features" data-linktype="external">Direct3D 11 Features</a> and <a href="https://docs.microsoft.com/windows/desktop/direct3d11/direct3d-11-1-features" data-linktype="external">Direct3D 11 Features</a>.</p>
+<h2 id="moving-from-direct2d-9-to-direct2d-11">Moving from Direct2D 9 to Direct2D 11<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#moving-from-direct2d-9-to-direct2d-11" aria-labelledby="moving-from-direct2d-9-to-direct2d-11"></a></h2>
+<p><a href="https://docs.microsoft.com/windows/desktop/Direct2D/direct2d-portal" data-linktype="external">Direct2D (Windows)</a> is still an important part of DirectX graphics and Windows. You can still use Direct2D to draw 2D games, and to draw overlays (HUDs) on top of Direct3D.</p>
+<p>Direct2D runs on top of Direct3D; 2D games can be implemented using either API. For example, a 2D game implemented using Direct3D can use orthographic projection, set Z-values to control the drawing order of primitives, and use pixel shaders to add special effects.</p>
+<p>Since Direct2D is based on Direct3D it also uses DXGI and device contexts. See <a href="https://docs.microsoft.com/windows/desktop/Direct2D/the-direct2d-api" data-linktype="external">Direct2D API Overview</a>.</p>
+<p>The <a href="https://docs.microsoft.com/windows/desktop/DirectWrite/direct-write-portal" data-linktype="external">DirectWrite</a> API adds support for formatted text using Direct2D. See <a href="https://docs.microsoft.com/windows/desktop/DirectWrite/introducing-directwrite" data-linktype="external">Introducing DirectWrite</a>.</p>
+<h2 id="replace-deprecated-helper-libraries">Replace deprecated helper libraries<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-deprecated-helper-libraries" aria-labelledby="replace-deprecated-helper-libraries"></a></h2>
+<p>D3DX and DXUT are deprecated and cannot be used by UWP games. These helper libraries provided resources for tasks such as texture loading and mesh loading.</p>
+<ul>
+<li>The <a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/walkthrough--simple-port-from-direct3d-9-to-11-1" data-linktype="relative-path">Simple port from Direct3D 9 to UWP</a> walkthrough demonstrates how to set up a window, initialize Direct3D, and do basic 3D rendering.</li>
+<li>The <a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/tutorial--create-your-first-uwp-directx-game" data-linktype="relative-path">Simple UWP game with DirectX</a> walkthrough demonstrates common game programming tasks including graphics, loading files, UI, controls, and sound.</li>
+<li>The <a href="https://go.microsoft.com/fwlink/p/?LinkID=248929" data-linktype="external">DirectX Tool Kit</a> community project offers helper classes for use with Direct3D 11 and UWP apps.</li>
+</ul>
+<h2 id="move-shader-programs-from-fx-to-hlsl">Move shader programs from FX to HLSL<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#move-shader-programs-from-fx-to-hlsl" aria-labelledby="move-shader-programs-from-fx-to-hlsl"></a></h2>
+<p>The D3DX utility library (D3DX 9, D3DX 10, and D3DX 11), including Effects, is deprecated for UWP. All DirectX games for UWP drive the graphics pipeline using <a href="https://docs.microsoft.com/windows/desktop/direct3dhlsl/dx-graphics-hlsl" data-linktype="external">HLSL</a> without Effects.</p>
+<p>Visual Studio still uses FXC under the hood to compile shader objects. UWP game shaders are compiled ahead of time. The bytecode is loaded at runtime, then each shader resource is bound to the graphics pipeline during the appropriate rendering pass. Shaders should be moved to their own separate .HLSL files and rendering techniques should be implemented in your C++ code.</p>
+<p>For a quick look at loading shader resources see <a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/walkthrough--simple-port-from-direct3d-9-to-11-1" data-linktype="relative-path">Simple port from Direct3D 9 to UWP</a>.</p>
+<p>Direct3D 11 introduced Shader Model 5, which requires Direct3D feature level 11_0 (or above). See <a href="https://docs.microsoft.com/windows/desktop/direct3dhlsl/overviews-direct3d-11-hlsl" data-linktype="external">HLSL Shader Model 5 Features for Direct3D 11</a>.</p>
+<h2 id="replace-xnamath-and-d3dxmath">Replace XNAMath and D3DXMath<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-xnamath-and-d3dxmath" aria-labelledby="replace-xnamath-and-d3dxmath"></a></h2>
+<p>Code using XNAMath (or D3DXMath) should be migrated to <a href="https://docs.microsoft.com/windows/desktop/dxmath/directxmath-portal" data-linktype="external">DirectXMath</a>. DirectXMath includes types that are portable across x86, x64, and ARM. See <a href="https://docs.microsoft.com/windows/desktop/dxmath/pg-xnamath-migration" data-linktype="external">Code Migration from the XNA Math Library</a>.</p>
+<p>Note that DirectXMath float types are convenient for use with shaders. For example <a href="https://docs.microsoft.com/windows/desktop/api/directxmath/ns-directxmath-xmfloat4" data-linktype="external"><strong>XMFLOAT4</strong></a> and <a href="https://docs.microsoft.com/windows/desktop/api/directxmath/ns-directxmath-xmfloat4x4" data-linktype="external"><strong>XMFLOAT4X4</strong></a> conveniently align data for constant buffers.</p>
+<h2 id="replace-directsound-with-xaudio2-and-background-audio">Replace DirectSound with XAudio2 (and background audio)<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directsound-with-xaudio2-and-background-audio" aria-labelledby="replace-directsound-with-xaudio2-and-background-audio"></a></h2>
+<p>DirectSound is not supported for UWP:</p>
+<ul>
+<li>Use <a href="https://docs.microsoft.com/windows/desktop/xaudio2/xaudio2-apis-portal" data-linktype="external">XAudio2</a> to add sound effects to your game.</li>
+</ul>
+<h2 id="replace-directinput-with-xinput-and-uwp-apis">Replace DirectInput with XInput and UWP APIs<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directinput-with-xinput-and-uwp-apis" aria-labelledby="replace-directinput-with-xinput-and-uwp-apis"></a></h2>
+<p>DirectInput is not supported for UWP:</p>
+<ul>
+<li>Use <a href="https://docs.microsoft.com/uwp/api/Windows.UI.Core.CoreWindow" data-linktype="external"><strong>CoreWindow</strong></a> input event callbacks for mouse, keyboard, and touch input.</li>
+<li>Use <a href="https://docs.microsoft.com/windows/desktop/xinput/getting-started-with-xinput" data-linktype="external">XInput</a> 1.4 for game controller support (and game controller headset support). If you are using a shared code base for desktop and UWP, see <a href="https://docs.microsoft.com/windows/desktop/xinput/xinput-versions" data-linktype="external">XInput Versions</a> for information on backwards compatibility.</li>
+<li>Register for <a href="https://docs.microsoft.com/uwp/api/Windows.UI.Input.EdgeGesture" data-linktype="external"><strong>EdgeGesture</strong></a> events if your game needs to use the app bar.</li>
+</ul>
+<h2 id="use-microsoft-media-foundation-instead-of-directshow">Use Microsoft Media Foundation instead of DirectShow<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#use-microsoft-media-foundation-instead-of-directshow" aria-labelledby="use-microsoft-media-foundation-instead-of-directshow"></a></h2>
+<p>DirectShow is no longer part of the DirectX API (or the Windows API). <a href="https://docs.microsoft.com/windows/desktop/medfound/microsoft-media-foundation-sdk" data-linktype="external">Microsoft Media Foundation</a> provides video content to Direct3D using shared surfaces. See <a href="https://docs.microsoft.com/windows/desktop/medfound/direct3d-11-video-apis" data-linktype="external">Direct3D 11 Video APIs</a>.</p>
+<h2 id="replace-directplay-with-networking-code">Replace DirectPlay with networking code<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directplay-with-networking-code" aria-labelledby="replace-directplay-with-networking-code"></a></h2>
+<p>Microsoft DirectPlay has been deprecated. If your game uses network services, you need to provide networking code that complies with UWP requirements. Use the following APIs:</p>
+<ul>
+<li><a href="https://docs.microsoft.com/uwp/win32-and-com/win32-and-com-for-uwp-apps" data-linktype="external">Win32 and COM for UWP apps (networking) (Windows)</a></li>
+<li><a href="https://docs.microsoft.com/uwp/api/Windows.Networking" data-linktype="external"><strong>Windows.Networking namespace (Windows)</strong></a></li>
+<li><a href="https://docs.microsoft.com/uwp/api/Windows.Networking.Sockets" data-linktype="external"><strong>Windows.Networking.Sockets namespace (Windows)</strong></a></li>
+<li><a href="https://docs.microsoft.com/uwp/api/Windows.Networking.Connectivity" data-linktype="external"><strong>Windows.Networking.Connectivity namespace (Windows)</strong></a></li>
+<li><a href="https://docs.microsoft.com/uwp/api/Windows.ApplicationModel.Background" data-linktype="external"><strong>Windows.ApplicationModel.Background namespace (Windows)</strong></a></li>
+</ul>
+<p>The following articles help you add networking features and declare support for networking in your app's package manifest.</p>
+<ul>
+<li><a href="https://docs.microsoft.com/previous-versions/windows/apps/hh452976(v=win.10)" data-linktype="external">Connecting with sockets (UWP apps using C#/VB/C++ and XAML) (Windows)</a></li>
+<li><a href="https://docs.microsoft.com/previous-versions/windows/apps/hh994396(v=win.10)" data-linktype="external">Connecting with WebSockets (UWP apps using C#/VB/C++ and XAML) (Windows)</a></li>
+<li><a href="https://docs.microsoft.com/previous-versions/windows/apps/hh761504(v=win.10)" data-linktype="external">Connecting to web services (UWP apps using C#/VB/C++ and XAML) (Windows)</a></li>
+<li><a href="https://docs.microsoft.com/windows/uwp/networking/networking-basics" data-linktype="external">Networking basics</a></li>
+</ul>
+<p>Note that all UWP apps (including games) use specific types of background tasks to maintain connectivity while the app is suspended. If your game needs to maintain connection state while suspended see <a href="https://docs.microsoft.com/windows/uwp/networking/networking-basics" data-linktype="external">Networking basics</a>.</p>
+<h2 id="function-mapping">Function mapping<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#function-mapping" aria-labelledby="function-mapping"></a></h2>
+<p>Use the following table to help convert code from Direct3D 9 to Direct3D 11. This can also help distinguish between the device and device context.</p>
+<div class="table-scroll-wrapper"><table>
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Direct3D9</th>
+<th align="left">Direct3D 11 Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3ddevice9" data-linktype="external">IDirect3DDevice9</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11_2/nn-d3d11_2-id3d11device2" data-linktype="external">ID3D11Device2</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11_2/nn-d3d11_2-id3d11devicecontext2" data-linktype="external">ID3D11DeviceContext2</a></p>
+<p>The graphics pipeline stages are described in <a href="https://docs.microsoft.com/windows/desktop/direct3d11/overviews-direct3d-11-graphics-pipeline" data-linktype="external">Graphics Pipeline</a>.</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3d9" data-linktype="external">IDirect3D9</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/dxgi1_2/nn-dxgi1_2-idxgifactory2" data-linktype="external">IDXGIFactory2</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/dxgi1_2/nn-dxgi1_2-idxgiadapter2" data-linktype="external">IDXGIAdapter2</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/dxgi1_3/nn-dxgi1_3-idxgidevice3" data-linktype="external">IDXGIDevice3</a></p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-present" data-linktype="external">IDirect3DDevice9::Present</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/dxgi1_2/nf-dxgi1_2-idxgiswapchain1-present1" data-linktype="external">IDXGISwapChain1::Present1</a></p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-testcooperativelevel" data-linktype="external">IDirect3DDevice9::TestCooperativeLevel</a></p></td>
+<td align="left"><p>Call <a href="https://docs.microsoft.com/windows/desktop/api/dxgi1_2/nf-dxgi1_2-idxgiswapchain1-present1" data-linktype="external">IDXGISwapChain1::Present1</a> with the DXGI_PRESENT_TEST flag set.</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dbasetexture9" data-linktype="external">IDirect3DBaseTexture9</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dtexture9" data-linktype="external">IDirect3DTexture9</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dcubetexture9" data-linktype="external">IDirect3DCubeTexture9</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dvolumetexture9" data-linktype="external">IDirect3DVolumeTexture9</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dindexbuffer9" data-linktype="external">IDirect3DIndexBuffer9</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dvertexbuffer9" data-linktype="external">IDirect3DVertexBuffer9</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11buffer" data-linktype="external">ID3D11Buffer</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11texture1d" data-linktype="external">ID3D11Texture1D</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11texture2d" data-linktype="external">ID3D11Texture2D</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11texture3d" data-linktype="external">ID3D11Texture3D</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11shaderresourceview" data-linktype="external">ID3D11ShaderResourceView</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11rendertargetview" data-linktype="external">ID3D11RenderTargetView</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11depthstencilview" data-linktype="external">ID3D11DepthStencilView</a></p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dvertexshader9" data-linktype="external">IDirect3DVertexShader9</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dpixelshader9" data-linktype="external">IDirect3DPixelShader9</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11vertexshader" data-linktype="external">ID3D11VertexShader</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11pixelshader" data-linktype="external">ID3D11PixelShader</a></p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nn-d3d9helper-idirect3dvertexdeclaration9" data-linktype="external">IDirect3DVertexDeclaration9</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11inputlayout" data-linktype="external">ID3D11InputLayout</a></p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/direct3d9/id3dxeffectstatemanager--setrenderstate" data-linktype="external">IDirect3DDevice9::SetRenderState</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/direct3d9/id3dxeffectstatemanager--setsamplerstate" data-linktype="external">IDirect3DDevice9::SetSamplerState</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11_1/nn-d3d11_1-id3d11blendstate1" data-linktype="external">ID3D11BlendState1</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11depthstencilstate" data-linktype="external">ID3D11DepthStencilState</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11_1/nn-d3d11_1-id3d11rasterizerstate1" data-linktype="external">ID3D11RasterizerState1</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nn-d3d11-id3d11samplerstate" data-linktype="external">ID3D11SamplerState</a></p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-drawindexedprimitive" data-linktype="external">IDirect3DDevice9::DrawIndexedPrimitive</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-drawprimitive" data-linktype="external">IDirect3DDevice9::DrawPrimitive</a></p></td>
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nf-d3d11-id3d11devicecontext-draw" data-linktype="external">ID3D11DeviceContext::Draw</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nf-d3d11-id3d11devicecontext-drawindexed" data-linktype="external">ID3D11DeviceContext::DrawIndexed</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d10/nf-d3d10-id3d10device-drawindexedinstanced" data-linktype="external">ID3D11DeviceContext::DrawIndexedInstanced</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d10/nf-d3d10-id3d10device-drawinstanced" data-linktype="external">ID3D11DeviceContext::DrawInstanced</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d10/nf-d3d10-id3d10device-iasetprimitivetopology" data-linktype="external">ID3D11DeviceContext::IASetPrimitiveTopology</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d10/nf-d3d10-id3d10device-drawauto" data-linktype="external">ID3D11DeviceContext::DrawAuto</a></p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-beginscene" data-linktype="external">IDirect3DDevice9::BeginScene</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-endscene" data-linktype="external">IDirect3DDevice9::EndScene</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-drawprimitiveup" data-linktype="external">IDirect3DDevice9::DrawPrimitiveUP</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-drawindexedprimitiveup" data-linktype="external">IDirect3DDevice9::DrawIndexedPrimitiveUP</a></p></td>
+<td align="left"><p>No direct equivalent</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-showcursor" data-linktype="external">IDirect3DDevice9::ShowCursor</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-setcursorposition" data-linktype="external">IDirect3DDevice9::SetCursorPosition</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-setcursorproperties" data-linktype="external">IDirect3DDevice9::SetCursorProperties</a></p></td>
+<td align="left"><p>Use standard cursor APIs.</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-reset" data-linktype="external">IDirect3DDevice9::Reset</a></p></td>
+<td align="left"><p>LOST device and POOL_MANAGED no longer exist. <a href="https://docs.microsoft.com/windows/desktop/api/dxgi1_2/nf-dxgi1_2-idxgiswapchain1-present1" data-linktype="external">IDXGISwapChain1::Present1</a> can fail with a <a href="https://docs.microsoft.com/windows/desktop/direct3ddxgi/dxgi-error" data-linktype="external">DXGI_ERROR_DEVICE_REMOVED</a> return value.</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-drawrectpatch" data-linktype="external">IDirect3DDevice9:DrawRectPatch</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-drawtripatch" data-linktype="external">IDirect3DDevice9:DrawTriPatch</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-lightenable" data-linktype="external">IDirect3DDevice9:LightEnable</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-multiplytransform" data-linktype="external">IDirect3DDevice9:MultiplyTransform</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/direct3d9/id3dxeffectstatemanager--setlight" data-linktype="external">IDirect3DDevice9:SetLight</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-setmaterial" data-linktype="external">IDirect3DDevice9:SetMaterial</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-setnpatchmode" data-linktype="external">IDirect3DDevice9:SetNPatchMode</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-settransform" data-linktype="external">IDirect3DDevice9:SetTransform</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-setfvf" data-linktype="external">IDirect3DDevice9:SetFVF</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9helper/nf-d3d9helper-idirect3ddevice9-settexturestagestate" data-linktype="external">IDirect3DDevice9:SetTextureStageState</a></p></td>
+<td align="left"><p>The fixed-function pipeline has been deprecated.</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3d9-checkdepthstencilmatch" data-linktype="external">IDirect3DDevice9:CheckDepthStencilMatch</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3d9-checkdeviceformat" data-linktype="external">IDirect3DDevice9:CheckDeviceFormat</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3d9-getdevicecaps" data-linktype="external">IDirect3DDevice9:GetDeviceCaps</a></p>
+<p><a href="https://docs.microsoft.com/windows/desktop/api/d3d9/nf-d3d9-idirect3ddevice9-validatedevice" data-linktype="external">IDirect3DDevice9:ValidateDevice</a></p></td>
+<td align="left"><p>Capability bits are replaced with feature levels. Only a few format and feature usage cases are optional for any given feature level. These can be checked with <a href="https://docs.microsoft.com/windows/desktop/api/d3d11/nf-d3d11-id3d11device-checkfeaturesupport" data-linktype="external">ID3D11Device::CheckFeatureSupport</a> and <a href="https://docs.microsoft.com/windows/desktop/api/d3d10/nf-d3d10-id3d10device-checkformatsupport" data-linktype="external">ID3D11Device::CheckFormatSupport</a>.</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>&nbsp;</p>
+<h2 id="surface-format-mapping">Surface format mapping<a class="docon docon-link heading-anchor" href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#surface-format-mapping" aria-labelledby="surface-format-mapping"></a></h2>
+<p>Use the following table to convert Direct3D 9 formats into DXGI formats.</p>
+<div class="table-scroll-wrapper"><table>
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Direct3D 9 Format</th>
+<th align="left">Direct3D 11 Format</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><p>D3DFMT_UNKNOWN</p></td>
+<td align="left"><p>DXGI_FORMAT_UNKNOWN</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_R8G8B8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A8R8G8B8</p></td>
+<td align="left"><p>DXGI_FORMAT_B8G8R8A8_UNORM</p>
+<p>DXGI_FORMAT_B8G8R8A8_UNORM_SRGB</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_X8R8G8B8</p></td>
+<td align="left"><p>DXGI_FORMAT_B8G8R8X8_UNORM</p>
+<p>DXGI_FORMAT_B8G8R8X8_UNORM_SRGB</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_R5G6B5</p></td>
+<td align="left"><p>DXGI_FORMAT_B5G6R5_UNORM</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_X1R5G5B5</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A1R5G5B5</p></td>
+<td align="left"><p>DXGI_FORMAT_B5G5R5A1_UNORM</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A4R4G4B4</p></td>
+<td align="left"><p>DXGI_FORMAT_B4G4R4A4_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_R3G3B2</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A8</p></td>
+<td align="left"><p>DXGI_FORMAT_A8_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A8R3G3B2</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_X4R4G4B4</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A2B10G10R10</p></td>
+<td align="left"><p>DXGI_FORMAT_R10G10B10A2</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A8B8G8R8</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8B8A8_UNORM</p>
+<p>DXGI_FORMAT_R8G8B8A8_UNORM_SRGB</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_X8B8G8R8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_G16R16</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A2R10G10B10</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A16B16G16R16</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A8P8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_P8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_L8</p></td>
+<td align="left"><p>DXGI_FORMAT_R8_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; Use .r swizzle in shader to duplicate red to other components to get Direct3D 9 behavior.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A8L8</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; Use swizzle .rrrg in shader to duplicate red and move green to the alpha components to get Direct3D 9 behavior.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A4L4</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_V8U8</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8_SNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_L6V5U5</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_X8L8V8U8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_Q8W8V8U8</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8B8A8_SNORM</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_V16U16</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_SNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_W11V11U10</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A2W10V10U10</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_UYVY</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_R8G8_B8G8</p></td>
+<td align="left"><p>DXGI_FORMAT_G8R8_G8B8_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; In Direct3D 9 the data was scaled up by 255.0f, but this can be handled in the shader.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_YUY2</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_G8R8_G8B8</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8_B8G8_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; In Direct3D 9 the data was scaled up by 255.0f, but this can be handled in the shader.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_DXT1</p></td>
+<td align="left"><p>DXGI_FORMAT_BC1_UNORM &amp; DXGI_FORMAT_BC1_UNORM_SRGB</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_DXT2</p></td>
+<td align="left"><p>DXGI_FORMAT_BC1_UNORM &amp; DXGI_FORMAT_BC1_UNORM_SRGB</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; DXT1 and DXT2 are the same from an API/hardware perspective. The only difference is whether premultiplied alpha is used, which can be tracked by an application and doesn't need a separate format.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_DXT3</p></td>
+<td align="left"><p>DXGI_FORMAT_BC2_UNORM &amp; DXGI_FORMAT_BC2_UNORM_SRGB</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_DXT4</p></td>
+<td align="left"><p>DXGI_FORMAT_BC2_UNORM &amp; DXGI_FORMAT_BC2_UNORM_SRGB</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; DXT3 and DXT4 are the same from an API/hardware perspective. The only difference is whether premultiplied alpha is used, which can be tracked by an application and doesn't need a separate format.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_DXT5</p></td>
+<td align="left"><p>DXGI_FORMAT_BC3_UNORM &amp; DXGI_FORMAT_BC3_UNORM_SRGB</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_D16 &amp; D3DFMT_D16_LOCKABLE</p></td>
+<td align="left"><p>DXGI_FORMAT_D16_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_D32</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_D15S1</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_D24S8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_D24X8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_D24X4S4</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_D16</p></td>
+<td align="left"><p>DXGI_FORMAT_D16_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_D32F_LOCKABLE</p></td>
+<td align="left"><p>DXGI_FORMAT_D32_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_D24FS8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_S1D15</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_S8D24</p></td>
+<td align="left"><p>DXGI_FORMAT_D24_UNORM_S8_UINT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_X8D24</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_X4S4D24</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_L16</p></td>
+<td align="left"><p>DXGI_FORMAT_R16_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; Use .r swizzle in shader to duplicate red to other components to get D3D9 behavior.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_INDEX16</p></td>
+<td align="left"><p>DXGI_FORMAT_R16_UINT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_INDEX32</p></td>
+<td align="left"><p>DXGI_FORMAT_R32_UINT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_Q16W16V16U16</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_SNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_MULTI2_ARGB8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_R16F</p></td>
+<td align="left"><p>DXGI_FORMAT_R16_FLOAT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_G16R16F</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_A16B16G16R16F</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_FLOAT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_R32F</p></td>
+<td align="left"><p>DXGI_FORMAT_R32_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_G32R32F</p></td>
+<td align="left"><p>DXGI_FORMAT_R32G32_FLOAT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DFMT_A32B32G32R32F</p></td>
+<td align="left"><p>DXGI_FORMAT_R32G32B32A32_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DFMT_CxV8U8</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_FLOAT1</p></td>
+<td align="left"><p>DXGI_FORMAT_R32_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_FLOAT2</p></td>
+<td align="left"><p>DXGI_FORMAT_R32G32_FLOAT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_FLOAT3</p></td>
+<td align="left"><p>DXGI_FORMAT_R32G32B32_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_FLOAT4</p></td>
+<td align="left"><p>DXGI_FORMAT_R32G32B32A32_FLOAT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPED3DCOLOR</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_UBYTE4</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8B8A8_UINT</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; The shader gets UINT values, but if Direct3D 9 style integral floats are needed (0.0f, 1.0f... 255.f), UINT can just be converted to float32 in the shader.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_SHORT2</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_SINT</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; The shader gets SINT values, but if Direct3D 9 style integral floats are needed, SINT can just be converted to float32 in the shader.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_SHORT4</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_SINT</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; The shader gets SINT values, but if Direct3D 9 style integral floats are needed, SINT can just be converted to float32 in the shader.
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_UBYTE4N</p></td>
+<td align="left"><p>DXGI_FORMAT_R8G8B8A8_UNORM</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_SHORT2N</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_SNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_SHORT4N</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_SNORM</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_USHORT2N</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_UNORM</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_USHORT4N</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_UNORM</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_UDEC3</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_DEC3N</p></td>
+<td align="left"><p>Not available</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>D3DDECLTYPE_FLOAT16_2</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16_FLOAT</p></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>D3DDECLTYPE_FLOAT16_4</p></td>
+<td align="left"><p>DXGI_FORMAT_R16G16B16A16_FLOAT</p></td>
+</tr>
+<tr class="even">
+<td align="left"><p>FourCC 'ATI1'</p></td>
+<td align="left"><p>DXGI_FORMAT_BC4_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; Requires Feature Level 10.0 or later
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+<tr class="odd">
+<td align="left"><p>FourCC 'ATI2'</p></td>
+<td align="left"><p>DXGI_FORMAT_BC5_UNORM</p>
+<div class="alert">
+<strong>Note</strong>&nbsp;&nbsp; Requires Feature Level 10.0 or later
+</div>
+<div>
+&nbsp;
+</div></td>
+</tr>
+</tbody>
+</table></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+						<!-- </content> -->
+
+						</main>
+
+						<!-- rating mobile section -->
+								<div class="is-hidden-desktop has-border-top has-margin-top-large has-padding-top-small">
+<div data-bi-name="rating" class="feedback-verbatim has-border-bottom has-padding-bottom-small has-margin-bottom-small">
+	<div class="binary-rating">
+		<div class="binary-rating-buttons">
+			<h3 class="has-text-weight-semibold has-margin-top-none has-margin-bottom-small">Is this page helpful?</h3>
+			<div>
+				<button class="thumb-rating like has-inner-focus has-padding-left-extra-small has-padding-right-extra-small" title="Yes" data-bi-name="rating-yes" data-bi-sat="1">
+					<span class="icon docon docon-like" aria-hidden="true"></span><span>Yes</span>
+				</button>
+				<button class="thumb-rating dislike has-inner-focus has-padding-none has-padding-right-extra-small" title="No" data-bi-name="rating-no" data-bi-sat="0" aria-expanded="false" aria-haspopup="true" aria-controls="rating-feedback">
+					<span class="icon docon docon-dislike" aria-hidden="true"></span><span>No</span>
+				</button>
+			</div>
+		</div>
+		<form class="feedback-verbatim-form is-hidden">
+			<div class="verbatim-textarea box is-relative has-box-shadow-none has-border has-margin-top-small has-padding-extra-small is-size-8">
+				<label for="rating-feedback-mobile" class="visually-hidden">Any additional feedback?</label>
+				<textarea id="rating-feedback-mobile" rows="4" maxlength="999" placeholder="Any additional feedback?" required="" class="textarea has-border-none has-box-shadow-none has-inner-focus"></textarea>
+			</div>
+			<div class="buttons is-right has-margin-top-medium has-margin-right-extra-small">
+				<button class="skip-rating button is-text is-link is-small" type="button">Skip</button>
+				<button disabled="" class="submit-rating button is-primary is-small" type="submit" data-bi-name="rating-verbatim">Submit</button>
+			</div>
+		</form>
+	</div>
+	<div class="thankyou-rating is-hidden">
+		<p>Thank you.</p>
+	</div>
+</div>								</div>
+						<!-- end rating mobile section -->
+
+						<!-- feedback section -->
+
+
+
+<section class="feedback-section" data-bi-name="feedback-section">
+
+	<h2 id="feedback">Feedback</h2>
+
+	<div class="alert choose-feedback-type">
+		<p id="send-feedback-about" aria-hidden="true">Send feedback about</p>
+
+		<div class="choose-feedback-buttons">
+			<a class="button feedback-type-product has-margin-bottom-small" aria-label="Send feedback about this product" href="https://wpdev.uservoice.com/" data-bi-name="product-feedback">
+				<span>This product</span>
+				<span class="icon docon docon-navigate-external" aria-hidden="true"></span>
+			</a>
+
+			<div class="field has-addons is-inline-flex has-margin-bottom-small">
+				<div class="control has-margin-top-none has-margin-bottom-none">
+					<button class="button feedback-sign-in-button has-text-wrap" aria-label="Send feedback about this page" data-bi-name="feedback-sign-in">
+						<span class="icon docon docon-brand-github" aria-hidden="true"></span>
+						<span>This page</span>
+					</button>
+				</div>
+				<div class="control dropdown has-caret has-margin-top-none has-margin-bottom-none">
+					<button class="button dropdown-trigger is-full-height" aria-describedby="send-feedback-about" aria-expanded="false" aria-controls="fbm0" aria-label="Additional feedback options" data-bi-name="documentation-feedback-menu">
+						<span class="icon" aria-hidden="true">
+							<span class="docon docon-chevron-down-light expanded-indicator"></span>
+						</span>
+					</button>
+					<div id="fbm0" class="dropdown-menu documentation-feedback-menu">
+						You may also leave feedback directly on <a data-bi-name="create-issue-on-github" href="https://github.com/MicrosoftDocs/windows-uwp/issues/new?title=&amp;body=%0A%0A%5BEnter%20feedback%20here%5D%0A%0A%0A---%0A%23%23%23%23%20Document%20Details%0A%0A%E2%9A%A0%20*Do%20not%20edit%20this%20section.%20It%20is%20required%20for%20docs.microsoft.com%20%E2%9E%9F%20GitHub%20issue%20linking.*%0A%0A*%20ID%3A%20aab803ac-da29-4b5f-7d3c-b394baf29f84%0A*%20Version%20Independent%20ID%3A%205cb054cf-2874-3bfe-04fb-be7644124a15%0A*%20Content%3A%20%5BMap%20DirectX%209%20features%20to%20DirectX%2011%20APIs%20-%20Windows%20UWP%20applications%5D(https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping)%0A*%20Content%20Source%3A%20%5Bwindows-apps-src%2Fgaming%2Ffeature-mapping.md%5D(https%3A%2F%2Fgithub.com%2FMicrosoftDocs%2Fwindows-uwp%2Fblob%2Fdocs%2Fwindows-apps-src%2Fgaming%2Ffeature-mapping.md)%0A*%20Product%3A%20**uwp**%0A*%20Technology%3A%20**games**%0A*%20GitHub%20Login%3A%20%40eliotcowley%0A*%20Microsoft%20Alias%3A%20**elcowle**">GitHub <span class="docon docon-navigate-external" aria-hidden="true"></span></a>.					</div>
+				</div>
+			</div>
+
+			<div class="field has-addons is-inline-flex has-margin-bottom-small" hidden="">
+				<div class="control has-margin-top-none has-margin-bottom-none">
+					<button class="button feedback-form-toggle" aria-describedby="send-feedback-about" aria-expanded="false" aria-controls="feedback-form" data-bi-name="documentation-feedback">
+This page					</button>
+				</div>
+				<div class="control dropdown has-caret has-margin-top-none has-margin-bottom-none">
+					<button class="button dropdown-trigger" aria-describedby="send-feedback-about" aria-expanded="false" aria-controls="fbm1" aria-label="Additional feedback options" data-bi-name="documentation-feedback-menu">
+						<span class="icon" aria-hidden="true">
+							<span class="docon docon-chevron-down-light expanded-indicator"></span>
+						</span>
+					</button>
+					<div id="fbm1" class="dropdown-menu documentation-feedback-menu">
+						You may also leave feedback directly on <a data-bi-name="create-issue-on-github" href="https://github.com/MicrosoftDocs/windows-uwp/issues/new?title=&amp;body=%0A%0A%5BEnter%20feedback%20here%5D%0A%0A%0A---%0A%23%23%23%23%20Document%20Details%0A%0A%E2%9A%A0%20*Do%20not%20edit%20this%20section.%20It%20is%20required%20for%20docs.microsoft.com%20%E2%9E%9F%20GitHub%20issue%20linking.*%0A%0A*%20ID%3A%20aab803ac-da29-4b5f-7d3c-b394baf29f84%0A*%20Version%20Independent%20ID%3A%205cb054cf-2874-3bfe-04fb-be7644124a15%0A*%20Content%3A%20%5BMap%20DirectX%209%20features%20to%20DirectX%2011%20APIs%20-%20Windows%20UWP%20applications%5D(https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fwindows%2Fuwp%2Fgaming%2Ffeature-mapping)%0A*%20Content%20Source%3A%20%5Bwindows-apps-src%2Fgaming%2Ffeature-mapping.md%5D(https%3A%2F%2Fgithub.com%2FMicrosoftDocs%2Fwindows-uwp%2Fblob%2Fdocs%2Fwindows-apps-src%2Fgaming%2Ffeature-mapping.md)%0A*%20Product%3A%20**uwp**%0A*%20Technology%3A%20**games**%0A*%20GitHub%20Login%3A%20%40eliotcowley%0A*%20Microsoft%20Alias%3A%20**elcowle**">GitHub <span class="docon docon-navigate-external" aria-hidden="true"></span></a>.					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<form class="feedback-form" id="feedback-form" accept-charset="UTF-8" autocomplete="off" action="javascript:" hidden="">
+		<h3 class="feedback-form-heading current-user">
+			<img class="avatar" alt="Avatar" width="36" height="36" aria-hidden="true" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9InRyYW5zcGFyZW50IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==">
+			<span class="username" aria-hidden="true"></span>
+			<span class="visually-hidden">Liquid error: Can't find the localized string giveDocumentationFeedback for template Conceptual.</span>
+		</h3>
+
+		<label>
+			<span class="visually-hidden">Issue Title</span>
+			<input class="input is-radiusless has-margin-bottom-small" name="title" type="text" placeholder="Issue Title" required="" pattern=".*[^\s]+.*">
+		</label>
+		<label>
+			<span class="visually-hidden">Leave a comment</span>
+			<textarea name="body" placeholder="Leave a comment" class="textarea is-radiusless" required=""></textarea>
+		</label>
+
+		<div class="action-container">
+			<button class="button is-primary" type="submit" name="submit">Submit feedback</button>
+		</div>
+	</form>
+
+	<div class="feedback-status alert is-loading">
+		<p>Loading feedback...</p>
+	</div>
+
+	<div class="feedback-tab-group tabGroup" data-tab-group-independent="" hidden="" data-bi-name="tab-group">
+		<ul role="tablist">
+			<li role="presentation">
+				<a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#tabpanel-issues-open" role="tab" aria-controls="tabpanel-issues-open" data-tab="issues-open" data-bi-name="tab" aria-selected="true" tabindex="0"></a>
+			</li>
+			<li role="presentation">
+				<a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#tabpanel-issues-closed" role="tab" aria-controls="tabpanel-issues-closed" data-tab="issues-closed" data-bi-name="tab" aria-selected="false" tabindex="-1"></a>
+			</li>
+		</ul>
+		<section id="tabpanel-issues-open" role="tabpanel" data-tab="issues-open">
+			<div class="no-issues-placeholder">There are no open issues</div>
+			<ul class="github-issues-list" aria-label="Open Issues"></ul>
+		</section>
+		<section id="tabpanel-issues-closed" role="tabpanel" data-tab="issues-closed" hidden="hidden" aria-hidden="true">
+			<div class="no-issues-placeholder">There are no closed issues</div>
+			<ul class="github-issues-list" aria-label="Closed Issues"></ul>
+		</section>
+	</div>
+	<div class="action-container">
+		<a class="view-on-github" href="https://github.com/MicrosoftDocs/windows-uwp/issues?utf8=%E2%9C%93&amp;q=%225cb054cf-2874-3bfe-04fb-be7644124a15%22&amp;in=body" data-bi-name="view-on-github" hidden="">
+			<span class="docon docon-brand-github" aria-hidden="true"></span>
+			<span>View on GitHub</span>
+			<span class="docon docon-navigate-external" aria-hidden="true"></span>
+		</a>
+	</div>
+</section>
+
+
+						<!-- end feedback section -->
+
+						<div class="footerContainer is-visible-interactive has-default-focus ">
+<footer id="footer-interactive" data-bi-name="footer" class="footer-layout">
+
+    <a data-mscc-ic="false" class="locale-selector-link" href="https://docs.microsoft.com/en-us/locale?target=https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping" data-bi-name="select-locale"><span class="icon docon docon-world is-size-4 has-margin-right-small" aria-hidden="true"></span><span class="local-selector-link-text">English (United States)</span></a>
+
+    <ul class="links" data-bi-name="footerlinks">
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/previous-versions/" data-bi-name="archivelink">Previous Version Docs</a></li>
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/teamblog" data-bi-name="bloglink">Blog</a></li>
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/contribute" data-bi-name="contributorGuide">Contribute</a></li>
+			<li><a data-mscc-ic="false" href="https://go.microsoft.com/fwlink/?LinkId=521839" data-bi-name="privacy">Privacy &amp; Cookies</a></li>
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/en-us/legal/termsofuse" data-bi-name="termsofuse">Terms of Use</a></li>
+		<li><a data-mscc-ic="false" href="https://aka.ms/sitefeedback" data-bi-name="feedback">Site Feedback</a></li>
+		<li><a data-mscc-ic="false" href="https://www.microsoft.com/en-us/legal/intellectualproperty/Trademarks/EN-US.aspx" data-bi-name="trademarks">Trademarks</a></li>
+    </ul>
+</footer>
+						</div>
+					</div>
+
+					<div id="page-actions" class="right-container column is-one-quarter is-one-fifth-desktop is-hidden-mobile is-hidden-tablet-only" data-bi-name="pageactions" role="complementary" aria-label="Page Actions">
+							<div id="affixed-right-container" class="doc-outline is-fixed is-vertically-scrollable" style="width: 192.484px; top: 24px; bottom: 24px;">
+<div data-bi-name="rating" class="feedback-verbatim has-border-bottom has-padding-bottom-small has-margin-bottom-small">
+	<div class="binary-rating">
+		<div class="binary-rating-buttons">
+			<h3 class="has-text-weight-semibold has-margin-top-none has-margin-bottom-small">Is this page helpful?</h3>
+			<div>
+				<button class="thumb-rating like has-inner-focus has-padding-left-extra-small has-padding-right-extra-small" title="Yes" data-bi-name="rating-yes" data-bi-sat="1">
+					<span class="icon docon docon-like" aria-hidden="true"></span><span>Yes</span>
+				</button>
+				<button class="thumb-rating dislike has-inner-focus has-padding-none has-padding-right-extra-small" title="No" data-bi-name="rating-no" data-bi-sat="0" aria-expanded="false" aria-haspopup="true" aria-controls="rating-feedback">
+					<span class="icon docon docon-dislike" aria-hidden="true"></span><span>No</span>
+				</button>
+			</div>
+		</div>
+		<form class="feedback-verbatim-form is-hidden">
+			<div class="verbatim-textarea box is-relative has-box-shadow-none has-border has-margin-top-small has-padding-extra-small is-size-8">
+				<label for="rating-feedback-mobile" class="visually-hidden">Any additional feedback?</label>
+				<textarea id="rating-feedback-mobile" rows="4" maxlength="999" placeholder="Any additional feedback?" required="" class="textarea has-border-none has-box-shadow-none has-inner-focus"></textarea>
+			</div>
+			<div class="buttons is-right has-margin-top-medium has-margin-right-extra-small">
+				<button class="skip-rating button is-text is-link is-small" type="button">Skip</button>
+				<button disabled="" class="submit-rating button is-primary is-small" type="submit" data-bi-name="rating-verbatim">Submit</button>
+			</div>
+		</form>
+	</div>
+	<div class="thankyou-rating is-hidden">
+		<p>Thank you.</p>
+	</div>
+</div>								<nav id="side-doc-outline" data-bi-name="intopic toc" role="navigation" aria-label="Article Outline">
+									<h3>In this article</h3>
+								<ol><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#mapping-direct3d-9-to-directx-11-apis">Mapping Direct3D 9 to DirectX 11 APIs</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#moving-from-direct2d-9-to-direct2d-11">Moving from Direct2D 9 to Direct2D 11</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-deprecated-helper-libraries">Replace deprecated helper libraries</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#move-shader-programs-from-fx-to-hlsl">Move shader programs from FX to HLSL</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-xnamath-and-d3dxmath">Replace XNAMath and D3DXMath</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directsound-with-xaudio2-and-background-audio">Replace DirectSound with XAudio2 (and background audio)</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directinput-with-xinput-and-uwp-apis">Replace DirectInput with XInput and UWP APIs</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#use-microsoft-media-foundation-instead-of-directshow">Use Microsoft Media Foundation instead of DirectShow</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#replace-directplay-with-networking-code">Replace DirectPlay with networking code</a></li><li><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#function-mapping">Function mapping</a></li><li class="selected"><a href="https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping#surface-format-mapping">Surface format mapping</a></li></ol></nav>
+							</div>
+					</div>
+
+					<!--end of div.columns -->
+				</div>
+
+			<!--end of .primary-holder -->
+			</section>
+
+			<aside id="interactive-container" class="interactive-container is-visible-interactive column has-body-background-dark ">
+			</aside>
+		</div>
+
+		<!--end of .mainContainer -->
+	</div>
+
+	<div id="openFeedbackContainer" class="openfeedback-container"></div>
+
+	<div class="footerContainer has-default-focus is-hidden-interactive ">
+<footer id="footer" data-bi-name="footer" class="footer-layout uhf-container has-padding" role="contentinfo">
+
+    <a data-mscc-ic="false" class="locale-selector-link" href="https://docs.microsoft.com/en-us/locale?target=https://docs.microsoft.com/en-us/windows/uwp/gaming/feature-mapping" data-bi-name="select-locale"><span class="icon docon docon-world is-size-4 has-margin-right-small" aria-hidden="true"></span><span class="local-selector-link-text">English (United States)</span></a>
+
+    <ul class="links" data-bi-name="footerlinks">
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/previous-versions/" data-bi-name="archivelink">Previous Version Docs</a></li>
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/teamblog" data-bi-name="bloglink">Blog</a></li>
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/contribute" data-bi-name="contributorGuide">Contribute</a></li>
+			<li><a data-mscc-ic="false" href="https://go.microsoft.com/fwlink/?LinkId=521839" data-bi-name="privacy">Privacy &amp; Cookies</a></li>
+		<li><a data-mscc-ic="false" href="https://docs.microsoft.com/en-us/legal/termsofuse" data-bi-name="termsofuse">Terms of Use</a></li>
+		<li><a data-mscc-ic="false" href="https://aka.ms/sitefeedback" data-bi-name="feedback">Site Feedback</a></li>
+		<li><a data-mscc-ic="false" href="https://www.microsoft.com/en-us/legal/intellectualproperty/Trademarks/EN-US.aspx" data-bi-name="trademarks">Trademarks</a></li>
+    </ul>
+</footer>
+	</div>
+
+	<div id="action-panel" role="region" aria-label="Action Panel" class="action-panel has-default-focus" tabindex="-1"></div>
+
+
+</body></html>

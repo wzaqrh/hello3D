@@ -59,10 +59,12 @@ public:
 	virtual void EndScene() override;
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
+	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
+	void RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+
 	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false);
-private:
-	void _SetRasterizerState();
-	bool _CreateDeviceAndSwapChain();
 
 	IVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr);
 	IPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr);
@@ -70,4 +72,7 @@ private:
 	IPixelShaderPtr _CreatePSByFXC(const char* filename);
 
 	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
+private:
+	void _SetRasterizerState();
+	bool _CreateDeviceAndSwapChain();
 };

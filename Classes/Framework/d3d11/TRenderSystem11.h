@@ -20,13 +20,8 @@ private:
 	ID3D11DepthStencilView* mBackDepthStencilView = NULL;
 	ID3D11RenderTargetView* mCurRenderTargetView = NULL;
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
-	std::vector<IRenderTexturePtr> mRenderTargetStk;
 
 	TThreadPumpPtr mThreadPump;
-
-	bool mCastShdowFlag = false;
-	TBlendFunc mCurBlendFunc;
-	TDepthState mCurDepthState;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -78,9 +73,6 @@ private:
 	void _SetViewports(int width, int height);
 	HRESULT _SetRasterizerState();
 protected:
-	void _PushRenderTarget(IRenderTexturePtr rendTarget);
-	void _PopRenderTarget();
-
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 
@@ -97,7 +89,6 @@ protected:
 	void RenderSkyBox();
 	void DoPostProcess();
 
-	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
 };
 
