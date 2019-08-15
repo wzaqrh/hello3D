@@ -1,6 +1,7 @@
 #pragma once
 #include "TPredefine.h"
 #include "TBaseTypes.h"
+#include "D3DEnumCT.h"
 
 bool CheckHR(HRESULT result);
 
@@ -62,20 +63,6 @@ public:
 	TIncludeStdio(const std::string& modelPath);
 	STDMETHOD(Open)(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes);
 	STDMETHOD(Close)(THIS_ LPCVOID pData);
-};
-
-class D3DEnumCT {
-public:
-	static _D3DBLEND d3d11To9(D3D11_BLEND blend);
-	static _D3DCMPFUNC d3d11To9(D3D11_COMPARISON_FUNC cmp);
-	static DXGI_FORMAT d3d9To11(D3DFORMAT fmt);
-	static D3DFORMAT d3d11To9(DXGI_FORMAT fmt);
-	static int GetWidth(DXGI_FORMAT format);
-	static D3DPRIMITIVETYPE d3d11To9(D3D11_PRIMITIVE_TOPOLOGY topo);
-	static D3DVERTEXELEMENT9 d3d11To9(const D3D11_INPUT_ELEMENT_DESC& desc);
-
-	static D3DTEXTUREADDRESS d3d11To9(D3D11_TEXTURE_ADDRESS_MODE addrMode);
-	static std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> d3d11To9(D3D11_FILTER filter);
 };
 
 std::vector<char> ReadFile(const char* fileName, const char* mode);

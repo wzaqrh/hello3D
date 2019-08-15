@@ -93,7 +93,7 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(DXSDK_DIR)Include;$(ProjectDir)Classes;$(ProjectDir)Classes\Lessons;$(ProjectDir)Classes\Model;$(ProjectDir)Classes\Framework;$(ProjectDir)Classes\Framework\d3d11;$(ProjectDir)Classes\Framework\d3d9;$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)Include;$(ProjectDir)Classes;$(ProjectDir)Classes\Lessons;$(ProjectDir)Classes\Utility;$(ProjectDir)Classes\Model;$(ProjectDir)Classes\Framework;$(ProjectDir)Classes\Framework\d3d11;$(ProjectDir)Classes\Framework\d3d9;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
     <IntDir>$(Configuration)\objs</IntDir>
   </PropertyGroup>
@@ -405,7 +405,8 @@
     <ClCompile Include="Classes\Main.cpp" />
     <ClCompile Include="Classes\Model\AssimpModel.cpp" />
     <ClCompile Include="Classes\Model\TMesh.cpp" />
-    <ClCompile Include="Classes\Utility.cpp" />
+    <ClCompile Include="Classes\Utility\D3DEnumCT.cpp" />
+    <ClCompile Include="Classes\Utility\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\d3d11\stddx11.h" />
@@ -440,7 +441,8 @@
     <ClInclude Include="Classes\Lessons\LessonD3D9.h" />
     <ClInclude Include="Classes\Model\AssimpModel.h" />
     <ClInclude Include="Classes\Model\TMesh.h" />
-    <ClInclude Include="Classes\Utility.h" />
+    <ClInclude Include="Classes\Utility\D3DEnumCT.h" />
+    <ClInclude Include="Classes\Utility\Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\assimp-vc140-mt.lib" />

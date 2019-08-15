@@ -16,9 +16,6 @@
     <ClCompile Include="Classes\Main.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Utility.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Lessons\Lesson1.cpp">
       <Filter>Classes\Lessons</Filter>
     </ClCompile>
@@ -91,6 +88,12 @@
     <ClCompile Include="Classes\Framework\d3d9\TInterfaceType9.cpp">
       <Filter>Classes\Framework\d3d9</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Utility\D3DEnumCT.cpp">
+      <Filter>Classes\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Utility\Utility.cpp">
+      <Filter>Classes\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -107,9 +110,6 @@
     </ClInclude>
     <ClInclude Include="Classes\Model\AssimpModel.h">
       <Filter>Classes\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Utility.h">
-      <Filter>Classes</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Lessons\Lesson1.h">
       <Filter>Classes\Lessons</Filter>
@@ -192,6 +192,12 @@
     <ClInclude Include="Classes\Framework\d3d9\TInterfaceType9.h">
       <Filter>Classes\Framework\d3d9</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\Utility\D3DEnumCT.h">
+      <Filter>Classes\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Utility\Utility.h">
+      <Filter>Classes\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Classes">
@@ -223,6 +229,9 @@
     </Filter>
     <Filter Include="Classes\Framework\resource">
       <UniqueIdentifier>{f7e74a1a-95b2-4d5e-8d40-97953e960d10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Utility">
+      <UniqueIdentifier>{af3d38b9-c3eb-47d9-932c-8e801eb59167}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
