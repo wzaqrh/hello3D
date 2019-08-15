@@ -40,6 +40,7 @@ public:
 
 struct TCamera : public TCameraBase {
 public:
+	bool mIsPespective = true;
 	float mEyeDistance;
 	XMFLOAT3 mEye, mAt, mUp;
 	int mWidth, mHeight;
@@ -52,10 +53,13 @@ public:
 		_mm_free(p);
 	}
 	TCamera() {}
-	TCamera(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1=100);
 	TCamera(const TCamera& other);
-	void SetProjection(int width, int height, double fov, double far1);
 	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at);
+	void SetPerspectiveProj(int width, int height, double fov, double far1);
+	void SetOthogonalProj(int width, int height, double far1);
+public:
+	static std::shared_ptr<TCamera> CreatePerspective(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1 = 100);
+	static std::shared_ptr<TCamera> CreateOthogonal(int width, int height, double far1 = 100);
 };
 typedef std::shared_ptr<TCamera> TCameraPtr;
 

@@ -9,9 +9,9 @@ LessonD3D9::~LessonD3D9()
 {
 }
 
-IRenderSystem* LessonD3D9::OnCreateRenderSys()
+std::string LessonD3D9::OnCreateRenderSys()
 {
-	return new TRenderSystem9;
+	return "d3d9";
 }
 
 void LessonD3D9::OnRender()

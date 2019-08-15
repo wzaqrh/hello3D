@@ -14,7 +14,7 @@ void Lesson7::OnInitLight()
 void Lesson7::OnPostInitDevice()
 {
 #if 1
-	mRenderSys->SetCamera(45, 30, 300);
+	mRenderSys->SetPerspectiveCamera(45, 30, 300);
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 
 	float dd = 9;

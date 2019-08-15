@@ -38,7 +38,7 @@ bool TRenderSystem11::Initialize()
 
 	mScreenWidth = width;
 	mScreenHeight = height;
-	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight);
+	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight);
 
 	mInput = new TD3DInput(mHInst, mHWnd, width, height);
 
@@ -630,7 +630,7 @@ ITexturePtr TRenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT fo
 	else {
 		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
 		OutputDebugStringA(szBuf);
-		//MessageBoxA(0, szBuf, "", MB_OK);
+		MessageBoxA(0, szBuf, "", MB_OK);
 		pTextureRV = nullptr;
 	}
 	return pTextureRV;

@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "IRenderSystem.h"
 #include "TRenderSystem11.h"
+#include "TRenderSystem9.h"
 
 TApp::TApp()
 {
@@ -16,12 +17,17 @@ TApp::~TApp()
 
 void TApp::Create()
 {
-	mRenderSys = OnCreateRenderSys();
+	if (OnCreateRenderSys() == "d3d9") {
+		mRenderSys = new TRenderSystem9;
+	}
+	else {
+		mRenderSys = new TRenderSystem11;
+	}
 }
 
-IRenderSystem* TApp::OnCreateRenderSys()
+std::string TApp::OnCreateRenderSys()
 {
-	return new TRenderSystem11;
+	return "d3d11";
 }
 
 void TApp::Attach(HINSTANCE hInstance, HWND hWnd)
@@ -56,6 +62,7 @@ void TApp::Render()
 	mRenderSys->mInput->Frame();
 	mRenderSys->Update(0);
 	//rotate camera
+	if (mRenderSys->mDefCamera->mIsPespective)
 	{
 		TINT4 m = mRenderSys->mInput->GetMouseLocation(false);
 		float angy = 3.14 * m.x / mRenderSys->mScreenWidth, angx = 3.14 * m.y / mRenderSys->mScreenHeight;

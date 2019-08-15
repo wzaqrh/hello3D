@@ -68,7 +68,7 @@ void Lesson6::OnPostInitDevice()
 #else
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
-	mRenderSys->SetCamera(45, 30, 1000);
+	mRenderSys->SetPerspectiveCamera(45, 30, 1000);
 	{
 		TIME_PROFILE(SetSkyBox);
 		//mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
@@ -128,4 +128,4 @@ void Lesson6::OnRender()
 	}
 }
 
-auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");

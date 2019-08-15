@@ -31,6 +31,7 @@ private:
 	Quad mQuad;
 	XMFLOAT2 mPosition;
 	XMFLOAT2 mSize;
+	bool mFlipY;
 private:
 	IRenderSystem* mRenderSys = nullptr;
 
@@ -41,7 +42,7 @@ public:
 	TMaterialPtr mMaterial;
 	TMovablePtr mMove;
 public:
-	TSprite(IRenderSystem* RenderSys, const char* vsName, const char* psName);
+	TSprite(IRenderSystem* RenderSys, const std::string& matName = "");
 	~TSprite();
 	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
 	void Draw();

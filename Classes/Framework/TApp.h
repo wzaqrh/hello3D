@@ -24,7 +24,7 @@ protected:
 	virtual void OnPostInitDevice() {};
 	virtual void OnRender() = 0;
 	virtual void OnInitLight();
-	virtual IRenderSystem* OnCreateRenderSys();
+	virtual std::string OnCreateRenderSys();
 protected:
 	XMMATRIX GetWorldTransform();
 protected:

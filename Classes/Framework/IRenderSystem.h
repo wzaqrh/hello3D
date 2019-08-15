@@ -46,7 +46,8 @@ public:
 	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();
 	TDirectLightPtr AddDirectLight();
-	TCameraPtr SetCamera(double fov, int eyeDistance, double far1);
+	TCameraPtr SetOthogonalCamera(double far1);
+	TCameraPtr SetPerspectiveCamera(double fov, int eyeDistance, double far1);
 	TSkyBoxPtr SetSkyBox(const std::string& imgName);
 	TPostProcessPtr AddPostProcess(const std::string& name);
 public:

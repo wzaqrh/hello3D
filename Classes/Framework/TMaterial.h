@@ -100,7 +100,8 @@ public:
 	TMaterialPtr Build();
 };
 
-#define E_MAT_SPRITE "standard"
+#define E_MAT_SPRITE "sprite"
+#define E_MAT_LAYERCOLOR "LayerColor"
 #define E_MAT_SKYBOX "skybox"
 #define E_MAT_MODEL "model"
 #define E_MAT_MODEL_PBR "model_pbr"

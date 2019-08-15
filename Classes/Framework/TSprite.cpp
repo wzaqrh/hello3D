@@ -55,12 +55,13 @@ void Quad::SetFlipY(bool flipY)
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
-TSprite::TSprite(IRenderSystem* RenderSys, const char* vsName, const char* psName)
+TSprite::TSprite(IRenderSystem* RenderSys, const std::string& matName)
 :mQuad(0,0,0,0)
+, mFlipY(true)
 {
 	mMove = std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_SPRITE, nullptr);
+	mMaterial = mRenderSys->CreateMaterial(matName != "" ? matName : E_MAT_SPRITE, nullptr);
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 }
@@ -74,6 +75,7 @@ void TSprite::SetPosition(float x, float y, float z)
 	mPosition = XMFLOAT2(x, y);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetZ(z);
+	mQuad.SetFlipY(mFlipY);
 
 	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
 }
@@ -82,18 +84,20 @@ void TSprite::SetSize(float w, float h)
 {
 	mSize = XMFLOAT2(w,h);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
+	mQuad.SetFlipY(mFlipY);
 
 	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
+}
+
+void TSprite::SetFlipY(bool flipY)
+{
+	mFlipY = flipY;
+	mQuad.SetFlipY(flipY);
 }
 
 void TSprite::SetTexture(ITexturePtr Texture)
 {
 	mTexture = Texture;
-}
-
-void TSprite::SetFlipY(bool flipY)
-{
-	mQuad.SetFlipY(flipY);
 }
 
 void TSprite::Draw()

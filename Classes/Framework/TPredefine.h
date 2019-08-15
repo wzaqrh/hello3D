@@ -4,7 +4,7 @@
 #define USE_ONLY_PNG
 #define USE_RENDER_OP
 #define D3D11_DEBUG
-#define PRELOAD_SHADER
+//#define PRELOAD_SHADER
 
 class IRenderSystem;
 

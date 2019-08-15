@@ -52,11 +52,17 @@ TDirectLightPtr IRenderSystem::AddDirectLight()
 	return light;
 }
 
-TCameraPtr IRenderSystem::SetCamera(double fov, int eyeDistance, double far1)
+TCameraPtr IRenderSystem::SetOthogonalCamera(double far1)
 {
-	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
-	if (mSkyBox)
-		mSkyBox->SetRefCamera(mDefCamera);
+	mDefCamera = TCamera::CreateOthogonal(mScreenWidth, mScreenHeight, far1);
+	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
+	return mDefCamera;
+}
+
+TCameraPtr IRenderSystem::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
+{
+	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
+	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }
 

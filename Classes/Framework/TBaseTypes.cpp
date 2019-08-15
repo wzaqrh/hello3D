@@ -31,6 +31,7 @@ XMFLOAT4 TCameraBase::CalNDC(XMFLOAT4 pos)
 /********** TCamera **********/
 TCamera::TCamera(const TCamera& other)
 {
+	mIsPespective = other.mIsPespective;
 	mEye = other.mEye;
 	mAt = other.mAt;
 	mUp = other.mUp;
@@ -44,11 +45,21 @@ TCamera::TCamera(const TCamera& other)
 	mWorld = other.mWorld;
 }
 
-TCamera::TCamera(int width, int height, double fov, int eyeDistance, double far1)
+TCameraPtr TCamera::CreatePerspective(int width, int height, double fov /*= 45.0*/, int eyeDistance /*= 10*/, double far1 /*= 100*/)
 {
-	mEyeDistance = eyeDistance;
-	SetLookAt(XMFLOAT3(0.0f, 0.0f, -mEyeDistance), XMFLOAT3(0,0,0));
-	SetProjection(width, height, fov, far1);
+	TCameraPtr pCam = std::make_shared<TCamera>();
+	pCam->mEyeDistance = eyeDistance;
+	pCam->SetLookAt(XMFLOAT3(0.0f, 0.0f, -eyeDistance), XMFLOAT3(0, 0, 0));
+	pCam->SetPerspectiveProj(width, height, fov, far1);
+	return pCam;
+}
+
+TCameraPtr TCamera::CreateOthogonal(int width, int height, double far1 /*= 100*/)
+{
+	TCameraPtr pCam = std::make_shared<TCamera>();
+	pCam->SetLookAt(XMFLOAT3(0.0f, 0.0f, -10), XMFLOAT3(0, 0, 0));
+	pCam->SetOthogonalProj(width, height, far1);
+	return pCam;
 }
 
 void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
@@ -64,13 +75,23 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
 	mWorld = XMMatrixTranslation(eye.x, eye.y, eye.z);
 }
 
-void TCamera::SetProjection(int width, int height, double fov, double far1)
+void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)
 {
 	mWidth = width;
 	mHeight = height;
-	mFOV = fov / 180.0 * XM_PI;
 	mFar = far1;
+	mFOV = fov / 180.0 * XM_PI;
 	mProjection = XMMatrixPerspectiveFovLH(mFOV, mWidth / mHeight, 0.01f, mFar);
+	mIsPespective = true;
+}
+
+void TCamera::SetOthogonalProj(int width, int height, double far1)
+{
+	mWidth = width;
+	mHeight = height;
+	mFar = far1;
+	mProjection = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
+	mIsPespective = false;
 }
 
 /********** TDirectLight **********/

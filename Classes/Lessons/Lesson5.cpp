@@ -19,14 +19,14 @@ void Lesson5::OnPostInitDevice()
 	mRendTexture = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
 
 
-	mSprite = std::make_shared<TSprite>(mRenderSys, "shader\\Sprite.fx", "shader\\Sprite.fx");
+	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
 	//mSprite->SetTexture(mRenderSys->CreateTexture("image\\smile.png"));
 	mSprite->SetTexture(mRendTexture->GetColorTexture());
 	mSprite->SetPosition(0, 0, 0);
 	mSprite->SetSize(5,5);
 
 
-	mLayerColor = std::make_shared<TSprite>(mRenderSys, "shader\\LayerColor.fx", "shader\\LayerColor.fx");
+	mLayerColor = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
 	mLayerColor->SetPosition(-5, -5, 0);
 	mLayerColor->SetSize(5, 5);
 }

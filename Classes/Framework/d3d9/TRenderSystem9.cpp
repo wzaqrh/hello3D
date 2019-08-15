@@ -34,7 +34,7 @@ bool TRenderSystem9::Initialize()
 
 	mScreenWidth = width;
 	mScreenHeight = height;
-	mDefCamera = std::make_shared<TCamera>(mScreenWidth, mScreenHeight);
+	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight);
 
 	mInput = new TD3DInput(mHInst, mHWnd, width, height);
 

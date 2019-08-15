@@ -2,7 +2,7 @@
 
 void Lesson8::OnPostInitDevice()
 {
-	mRenderSys->SetCamera(45, 10, 300);
+	mRenderSys->SetPerspectiveCamera(45, 10, 300);
 
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 	mRenderSys->AddPostProcess(E_PASS_POSTPROCESS);
