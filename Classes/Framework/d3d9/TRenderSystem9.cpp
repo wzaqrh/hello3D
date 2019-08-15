@@ -404,6 +404,7 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 void TRenderSystem9::SetBlendFunc(const TBlendFunc& blendFunc)
 {
 	mCurBlendFunc = blendFunc;
+	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.src == D3D11_BLEND_ONE && blendFunc.dst == D3D11_BLEND_ZERO) ? FALSE : TRUE);
 	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3DEnumCT::d3d11To9(blendFunc.src));
 	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3DEnumCT::d3d11To9(blendFunc.dst));
 }
@@ -434,6 +435,10 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	TPixelShader9* ps = static_cast<TPixelShader9*>(pass->mProgram->mPixel.get());
 	TVertexShader9* vs = static_cast<TVertexShader9*>(pass->mProgram->mVertex.get());
 
+	if (pass->mConstantBuffers.size() > 0) {
+		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
+	}
+
 	size_t vsReg = 0,psReg = 0;
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
@@ -441,36 +446,20 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		char* buffer9 = (char*)buffer->GetBuffer9();
 		for (size_t j = 0; j < decl->elements.size(); ++j) {
 			TConstBufferDeclElement& elem = decl->elements[j];
-#if 1
+
 			if (vsReg < vs->mConstHandles.size()) {
 				D3DXHANDLE handle = vs->mConstHandles[vsReg];
-				CheckHR(vs->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size));
+				auto hr = vs->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
+				CheckHR(hr);
 			}
 			vsReg++;
 
 			if (psReg < ps->mConstHandles.size()) {
 				D3DXHANDLE handle = ps->mConstHandles[psReg];
-				CheckHR(ps->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size));
+				auto hr = ps->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
+				//CheckHR(hr);
 			}
 			psReg++;
-#else
-			switch (elem.type)
-			{
-			case E_CONSTBUF_ELEM_BOOL: {
-				mDevice9->SetPixelShaderConstantB(vsReg++, (const BOOL*)buffer9 + elem.offset, elem.size / sizeof(BOOL));
-			}break;
-			case E_CONSTBUF_ELEM_FLOAT4: {
-				mDevice9->SetPixelShaderConstantF(vsReg++, (const float*)buffer9 + elem.offset, elem.size / sizeof(XMFLOAT4));
-			}break;
-			case E_CONSTBUF_ELEM_INT4: {
-				mDevice9->SetPixelShaderConstantI(vsReg++, (const int*)buffer9 + elem.offset, elem.size / sizeof(TINT4));
-			}break;
-			case E_CONSTBUF_ELEM_MATRIX: {
-				mDevice9->SetTransform(elem.matrixType, (const D3DMATRIX*)buffer9 + elem.offset);
-			}break;
-			default:break;
-			}
-#endif
 		}
 	}
 
@@ -509,8 +498,10 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 
 	{
 		if (textures.size() > 0) {
-			for (size_t i = 0; i < textures.size(); ++i)
-				mDevice9->SetTexture(i, textures[i] ? textures[i]->GetSRV9() : nullptr);
+			for (size_t i = 0; i < textures.size(); ++i) {
+				auto texture = textures[i] ? textures[i]->GetSRV9() : nullptr;
+				mDevice9->SetTexture(i, texture);
+			}
 		}
 
 		if (pass->OnBind)
