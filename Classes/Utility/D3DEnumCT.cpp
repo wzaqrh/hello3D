@@ -235,6 +235,7 @@ D3DFORMAT D3DEnumCT::d3d11To9(DXGI_FORMAT fmt)
 	default:
 		break;
 	}
+	assert(false);
 	return ret;
 }
 
@@ -256,6 +257,7 @@ D3DPRIMITIVETYPE D3DEnumCT::d3d11To9(D3D11_PRIMITIVE_TOPOLOGY topo)
 	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ:
 		return D3DPT_TRIANGLEFAN;
 	default:
+		assert(false);
 		break;
 	}
 	return ret;
@@ -302,6 +304,9 @@ static D3DDECLUSAGE __d3d11To9(const std::string& semantic) {
 	else if (semantic.find("DEPTH") != std::string::npos) {
 		ret = D3DDECLUSAGE_DEPTH;
 	}
+	else {
+		assert(false);
+	}
 	return ret;
 }
 
@@ -313,9 +318,9 @@ static D3DDECLTYPE __d3d11To9(DXGI_FORMAT fmt) {
 		return D3DDECLTYPE_FLOAT1;
 	case DXGI_FORMAT_R32G32_FLOAT:
 		return D3DDECLTYPE_FLOAT2;
-	case D3DDECLTYPE_FLOAT3:
+	case DXGI_FORMAT_R32G32B32_FLOAT:
 		return D3DDECLTYPE_FLOAT3;
-	case D3DDECLTYPE_FLOAT4:
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
 		return D3DDECLTYPE_FLOAT4;
 	case DXGI_FORMAT_R8G8B8A8_UINT:
 		return D3DDECLTYPE_UBYTE4;
@@ -338,6 +343,7 @@ static D3DDECLTYPE __d3d11To9(DXGI_FORMAT fmt) {
 	case DXGI_FORMAT_R16G16B16A16_FLOAT:
 		return D3DDECLTYPE_FLOAT16_4;
 	default:
+		assert(false);
 		break;
 	}
 	return ret;
@@ -348,7 +354,7 @@ D3DVERTEXELEMENT9 D3DEnumCT::d3d11To9(const D3D11_INPUT_ELEMENT_DESC& desc)
 	D3DVERTEXELEMENT9 ret;
 	ret.Stream = desc.InputSlot;
 	ret.Offset = desc.AlignedByteOffset;     
-	ret.Type = __d3d11To9(desc.Format);
+	ret.Type = (D3DDECLTYPE)__d3d11To9(desc.Format);
 	ret.Method = D3DDECLMETHOD_DEFAULT;
 	ret.Usage = __d3d11To9(desc.SemanticName);
 	ret.UsageIndex = desc.SemanticIndex;

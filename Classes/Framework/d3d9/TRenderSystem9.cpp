@@ -57,11 +57,10 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 	ZeroMemory(&d3dpp, sizeof(d3dpp));
 	d3dpp.Windowed = TRUE;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
+	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;// D3DFMT_A8B8G8R8;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
-	if (CheckHR(mD3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd,
-		D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &mDevice9))) {
+	if (CheckHR(mD3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &mDevice9))) {
 		return false;
 	}
 	return true;
@@ -219,11 +218,13 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
+	entry = entry ? entry : "VS";
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
 	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
+		assert(FALSE);
 		return nullptr;
 	}
 
@@ -243,11 +244,13 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
+	entry = entry ? entry : "PS";
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
 	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
+		assert(FALSE);
 		return nullptr;
 	}
 

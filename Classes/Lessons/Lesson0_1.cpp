@@ -6,7 +6,8 @@
 
 std::string TAppLesson0_1::OnCreateRenderSys()
 {
-	return "d3d11";
+	//return "d3d11";
+	return "d3d9";
 }
 
 void TAppLesson0_1::OnPostInitDevice()
@@ -20,8 +21,8 @@ void TAppLesson0_1::OnPostInitDevice()
 	mRenderSys->SetOthogonalCamera(100);
 
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
-	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
-	mSprite->SetTexture(mRenderSys->GetTexByPath("image\\smile.png"));
+	//mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
+	//mSprite->SetTexture(mRenderSys->GetTexByPath("image\\smile.png"));
 
 	mSprite->SetPosition(-mRenderSys->mScreenWidth / 2, -mRenderSys->mScreenHeight / 2, 0);
 	mSprite->SetSize(mRenderSys->mScreenWidth / 2, mRenderSys->mScreenHeight / 2);

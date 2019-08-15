@@ -13,13 +13,6 @@ class TRenderSystem9
 	IDirect3DSurface9 *mBackColorBuffer = NULL, *mBackDepthStencilBuffer = NULL;
 	IDirect3DSurface9 *mCurColorBuffer = NULL, *mCurDepthStencilBuffer = NULL;
 public:
-	int mScreenWidth;
-	int mScreenHeight;
-	TD3DInput* mInput = nullptr;
-public:
-	TSkyBoxPtr mSkyBox;
-	TCameraPtr mDefCamera;
-public:
 	TRenderSystem9();
 	virtual ~TRenderSystem9();
 
