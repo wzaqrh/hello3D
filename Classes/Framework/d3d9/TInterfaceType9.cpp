@@ -129,6 +129,19 @@ IDirect3DPixelShader9*& TPixelShader9::GetShader9()
 	return mShader;
 }
 
+void TPixelShader9::SetConstTable(ID3DXConstantTable* constTable)
+{
+	mConstTable = constTable;
+
+	size_t reg = 0;
+	D3DXHANDLE handle = 0;
+	do {
+		handle = mConstTable->GetConstant(NULL, reg++);
+		mConstHandles.push_back(handle);
+	} while (handle);
+	mConstHandles.pop_back();
+}
+
 /********** TInputLayout9 **********/
 IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
 {
@@ -144,6 +157,19 @@ IBlobDataPtr TVertexShader9::GetBlob()
 IDirect3DVertexShader9*& TVertexShader9::GetShader9()
 {
 	return mShader;
+}
+
+void TVertexShader9::SetConstTable(ID3DXConstantTable* constTable)
+{
+	mConstTable = constTable;
+
+	size_t reg = 0;
+	D3DXHANDLE handle = 0;
+	do {
+		handle = mConstTable->GetConstant(NULL, reg++);
+		mConstHandles.push_back(handle);
+	} while (handle);
+	mConstHandles.pop_back();
 }
 
 /********** TBlobDataD3d9 **********/

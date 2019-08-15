@@ -21,21 +21,25 @@ typedef std::shared_ptr<TInputLayout9> TInputLayout9Ptr;
 
 struct TVertexShader9 : public IVertexShader {
 	ID3DXConstantTable* mConstTable = nullptr;
+	std::vector<D3DXHANDLE> mConstHandles;
 	IBlobDataPtr mBlob,mErrBlob;
 	IDirect3DVertexShader9* mShader = nullptr;
 public:
 	virtual IBlobDataPtr GetBlob() override;
 	virtual IDirect3DVertexShader9*& GetShader9() override;
+	void SetConstTable(ID3DXConstantTable* constTable);
 };
 typedef std::shared_ptr<TVertexShader9> TVertexShader9Ptr;
 
 struct TPixelShader9 : public IPixelShader {
 	ID3DXConstantTable* mConstTable = nullptr;
+	std::vector<D3DXHANDLE> mConstHandles;
 	IBlobDataPtr mBlob, mErrBlob;
 	IDirect3DPixelShader9* mShader = nullptr;
 public:
 	virtual IBlobDataPtr GetBlob() override;
 	virtual IDirect3DPixelShader9*& GetShader9() override;
+	void SetConstTable(ID3DXConstantTable* constTable);
 };
 typedef std::shared_ptr<TPixelShader9> TPixelShader9Ptr;
 

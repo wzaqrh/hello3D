@@ -183,9 +183,18 @@ std::vector<char> ReadFile(const char* fileName, const char* mode)
 
 
 /********** Functions **********/
-bool CheckHR(HRESULT result)
+bool CheckHR(HRESULT hr)
 {
-	if (FAILED(result)) {
+	if (FAILED(hr)) {
+		__log(DXGetErrorDescriptionA(hr));
+		__log(DXGetErrorStringA(hr));
+
+		DXTRACE_ERR_MSGBOX(DXGetErrorDescription(hr), hr);
+		DXTRACE_ERR_MSGBOX(DXGetErrorString(hr), hr);
+		DXTRACE_ERR_MSGBOX(L"Clear failed!", hr); // Use customized error string
+		DXTRACE_MSG(DXGetErrorDescription(hr));
+		DXTRACE_ERR(DXGetErrorDescription(hr), hr);
+
 		assert(false);
 		return true;
 	}
@@ -317,4 +326,9 @@ void SetDebugName(ID3D11DeviceChild* child, const std::string& name)
 		child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
 }
 
+void __log(const char* msg)
+{
+	OutputDebugStringA(msg);
+	OutputDebugStringA("\n");
+}
 

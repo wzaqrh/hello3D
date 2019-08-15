@@ -90,3 +90,5 @@ void SetDebugName(ID3D11DeviceChild* child, const std::string& name);
 #else
 #define SET_DEBUG_NAME(A,NAME)
 #endif
+
+void __log(const char* msg);

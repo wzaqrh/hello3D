@@ -38,11 +38,11 @@ bool TRenderSystem9::Initialize()
 
 	mInput = new TD3DInput(mHInst, mHWnd, width, height);
 
-	//mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
-	//SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
+	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
 
-	//mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
-	//SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
+	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 	return true;
 }
 
@@ -105,7 +105,7 @@ IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXG
 	if (CheckHR(pTextureColor->GetSurfaceLevel(0, &pSurfaceColor))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
-	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24FS8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
+	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
 	TRenderTexture9Ptr ret = std::make_shared<TRenderTexture9>(pSurfaceColor, pSurfaceDepthStencil);
 	return ret;
@@ -231,7 +231,7 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
 	ret->mBlob = blob;
 	ret->mErrBlob = errBlob;
-	ret->mConstTable = constTable;
+	ret->SetConstTable(constTable);
 	if (CheckHR(mDevice9->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
 		
 	ret->SetLoaded();
@@ -257,7 +257,7 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
 	ret->mBlob = blob;
 	ret->mErrBlob = errBlob;
-	ret->mConstTable = constTable;
+	ret->SetConstTable(constTable);
 	if (CheckHR(mDevice9->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
 
 	ret->SetLoaded();
@@ -420,7 +420,7 @@ bool TRenderSystem9::BeginScene()
 {
 	if (FAILED(mDevice9->BeginScene())) 
 		return false;
-	return false;
+	return true;
 }
 
 void TRenderSystem9::EndScene()
@@ -434,27 +434,36 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	TPixelShader9* ps = static_cast<TPixelShader9*>(pass->mProgram->mPixel.get());
 	TVertexShader9* vs = static_cast<TVertexShader9*>(pass->mProgram->mVertex.get());
 
-	size_t regId = 0;
+	size_t vsReg = 0,psReg = 0;
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
 		TConstBufferDeclPtr decl = buffer->GetDecl();
 		char* buffer9 = (char*)buffer->GetBuffer9();
-		for (size_t j = 0; j < decl->elements.size(); ++i) {
-			TConstBufferDeclElement& elem = decl->elements[i];
+		for (size_t j = 0; j < decl->elements.size(); ++j) {
+			TConstBufferDeclElement& elem = decl->elements[j];
 #if 1
-			D3DXHANDLE h = ps->mConstTable->GetConstant(NULL, regId++);
-			ps->mConstTable->SetValue(mDevice9, h, buffer9 + elem.offset, elem.size);
+			if (vsReg < vs->mConstHandles.size()) {
+				D3DXHANDLE handle = vs->mConstHandles[vsReg];
+				CheckHR(vs->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size));
+			}
+			vsReg++;
+
+			if (psReg < ps->mConstHandles.size()) {
+				D3DXHANDLE handle = ps->mConstHandles[psReg];
+				CheckHR(ps->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size));
+			}
+			psReg++;
 #else
 			switch (elem.type)
 			{
 			case E_CONSTBUF_ELEM_BOOL: {
-				mDevice9->SetPixelShaderConstantB(regId++, (const BOOL*)buffer9 + elem.offset, elem.size / sizeof(BOOL));
+				mDevice9->SetPixelShaderConstantB(vsReg++, (const BOOL*)buffer9 + elem.offset, elem.size / sizeof(BOOL));
 			}break;
 			case E_CONSTBUF_ELEM_FLOAT4: {
-				mDevice9->SetPixelShaderConstantF(regId++, (const float*)buffer9 + elem.offset, elem.size / sizeof(XMFLOAT4));
+				mDevice9->SetPixelShaderConstantF(vsReg++, (const float*)buffer9 + elem.offset, elem.size / sizeof(XMFLOAT4));
 			}break;
 			case E_CONSTBUF_ELEM_INT4: {
-				mDevice9->SetPixelShaderConstantI(regId++, (const int*)buffer9 + elem.offset, elem.size / sizeof(TINT4));
+				mDevice9->SetPixelShaderConstantI(vsReg++, (const int*)buffer9 + elem.offset, elem.size / sizeof(TINT4));
 			}break;
 			case E_CONSTBUF_ELEM_MATRIX: {
 				mDevice9->SetTransform(elem.matrixType, (const D3DMATRIX*)buffer9 + elem.offset);
@@ -465,8 +474,8 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		}
 	}
 
-	mDevice9->SetVertexShader(pass->mProgram->mVertex->GetShader9());
-	mDevice9->SetPixelShader(pass->mProgram->mPixel->GetShader9());
+	mDevice9->SetVertexShader(vs->GetShader9());
+	mDevice9->SetPixelShader(ps->GetShader9());
 
 	if (!pass->mSamplers.empty()) {
 		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
@@ -501,7 +510,7 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 	{
 		if (textures.size() > 0) {
 			for (size_t i = 0; i < textures.size(); ++i)
-				mDevice9->SetTexture(i, textures[i]->GetSRV9());
+				mDevice9->SetTexture(i, textures[i] ? textures[i]->GetSRV9() : nullptr);
 		}
 
 		if (pass->OnBind)
