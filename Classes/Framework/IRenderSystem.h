@@ -29,6 +29,8 @@ protected:
 	std::vector<TDirectLightPtr> mDirectLights;
 	std::vector<TSpotLightPtr> mSpotLights;
 	std::vector<std::pair<TDirectLight*, enLightType>> mLightsOrder;
+
+	size_t mDrawCount = 0,mDrawLimit = INT_MAX;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -39,6 +41,7 @@ public:
 	virtual void Update(float dt) = 0;
 	virtual void CleanUp() = 0;
 protected:
+	bool _CanDraw();
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
 	void MakeAutoParam(cbGlobalParam& param, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);

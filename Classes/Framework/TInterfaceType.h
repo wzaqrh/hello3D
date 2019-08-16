@@ -73,6 +73,7 @@ struct IIndexBuffer : public IHardwareBuffer {
 	virtual IDirect3DIndexBuffer9*& GetBuffer9();
 	virtual int GetWidth() = 0;
 	virtual DXGI_FORMAT GetFormat() = 0;
+	int GetCount();
 };
 typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
 

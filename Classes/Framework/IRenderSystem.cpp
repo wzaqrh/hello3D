@@ -8,10 +8,17 @@
 
 IRenderSystem::IRenderSystem()
 {
+	//mDrawLimit = 5;
 }
 
 IRenderSystem::~IRenderSystem()
 {
+}
+
+bool IRenderSystem::_CanDraw()
+{
+	//return mDrawCount++ == mDrawLimit-1;
+	return true;
 }
 
 void IRenderSystem::_PushRenderTarget(IRenderTexturePtr rendTarget)
@@ -151,18 +158,16 @@ void IRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 		globalParam.ProjectionInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.Projection));
 	}
 
+	globalParam.LightType = lightType + 1;
 	switch (lightType)
 	{
 	case E_LIGHT_DIRECT:
-		globalParam.LightNum.x = 1;
 		static_cast<TDirectLight&>(globalParam.Light) = *light;
 		break;
 	case E_LIGHT_POINT:
-		globalParam.LightNum.y = 1;
 		static_cast<TPointLight&>(globalParam.Light) = *(TPointLight*)light;
 		break;
 	case E_LIGHT_SPOT:
-		globalParam.LightNum.z = 1;
 		globalParam.Light = *(TSpotLight*)light;
 		break;
 	default:

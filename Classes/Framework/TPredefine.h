@@ -23,6 +23,7 @@ typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
 struct cbGlobalParam;
 
+struct TConstBufferDeclElement;
 struct TConstBufferDecl;
 typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
 //TInterfaceType.h

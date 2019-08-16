@@ -108,6 +108,11 @@ IDirect3DIndexBuffer9*& IIndexBuffer::GetBuffer9()
 	return buffer;
 }
 
+int IIndexBuffer::GetCount()
+{
+	return GetBufferSize() / GetWidth();
+}
+
 /********** IRenderTexture **********/
 ID3D11RenderTargetView*& IRenderTexture::GetColorBuffer11()
 {

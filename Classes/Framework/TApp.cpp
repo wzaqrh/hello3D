@@ -25,7 +25,7 @@ void TApp::Create()
 	}
 }
 
-#if 0
+#if 1
 std::string gDefRenderSystem = "d3d9";
 #else
 std::string gDefRenderSystem = "d3d11";

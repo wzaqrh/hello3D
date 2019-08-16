@@ -121,18 +121,39 @@ struct TDepthState {
 	TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
 };
 
+enum EConstBufferElementType {
+	E_CONSTBUF_ELEM_BOOL,
+	E_CONSTBUF_ELEM_INT,
+	E_CONSTBUF_ELEM_FLOAT,
+	E_CONSTBUF_ELEM_FLOAT4,
+	E_CONSTBUF_ELEM_MATRIX,
+	E_CONSTBUF_ELEM_STRUCT,
+	E_CONSTBUF_ELEM_MAX
+};
+template<class T> struct CBETypeTrait {};
+#define DECLRAE_CBET(E,CLS) template<> struct CBETypeTrait<CLS> { enum {value = E }; };
+DECLRAE_CBET(E_CONSTBUF_ELEM_INT, unsigned int);
+DECLRAE_CBET(E_CONSTBUF_ELEM_FLOAT, float);
+DECLRAE_CBET(E_CONSTBUF_ELEM_FLOAT4, XMFLOAT4);
+DECLRAE_CBET(E_CONSTBUF_ELEM_MATRIX, XMMATRIX);
+DECLRAE_CBET(E_CONSTBUF_ELEM_STRUCT, TDirectLight);
+DECLRAE_CBET(E_CONSTBUF_ELEM_STRUCT, TPointLight);
+DECLRAE_CBET(E_CONSTBUF_ELEM_STRUCT, TSpotLight);
+template<class T> inline EConstBufferElementType GetCBEType(const T& Value) { return static_cast<EConstBufferElementType>(CBETypeTrait<T>::value); }
+
 struct TConstBufferDeclElement {
 	size_t offset;
 	size_t size;
 	size_t count;
 	std::string name;
+	EConstBufferElementType type;
 public:
-	TConstBufferDeclElement(const char* __name, size_t __size, size_t __count = 0, size_t __offset = 0);
+	TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count = 0, size_t __offset = 0);
 };
-#define CBELEMNT(CLS) TConstBufferDeclElement(#CLS, sizeof(cb.CLS))
+#define CBELEMNT(CLS) TConstBufferDeclElement(#CLS, GetCBEType(cb.CLS), sizeof(cb.CLS))
 #define BUILD_ADD(CLS) builder.Add(CBELEMNT(CLS));
 
-#define CBELEMNTS(CLS, N) TConstBufferDeclElement(#CLS, sizeof(cb.CLS), ARRAYSIZE(cb.CLS))
+#define CBELEMNTS(CLS, N) TConstBufferDeclElement(#CLS, GetCBEType(cb.CLS[0]), sizeof(cb.CLS), ARRAYSIZE(cb.CLS))
 #define BUILD_ADDS(CLS) builder.Add(CBELEMNTS(CLS));
 
 struct TConstBufferDecl {
