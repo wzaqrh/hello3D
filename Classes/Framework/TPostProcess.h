@@ -40,7 +40,7 @@ public:
 typedef std::shared_ptr<TPostProcess> TPostProcessPtr;
 
 struct cbBloom {
-	XMFLOAT2 SampleOffsets[16];
+	XMFLOAT4 SampleOffsets[16];
 	XMFLOAT4 SampleWeights[16];
 	static cbBloom CreateDownScale2x2Offsets(int dwWidth, int dwHeight);
 	static cbBloom CreateDownScale3x3Offsets(int dwWidth, int dwHeight);

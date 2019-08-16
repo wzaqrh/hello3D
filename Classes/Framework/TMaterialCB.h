@@ -12,12 +12,12 @@ __declspec(align(16)) struct cbGlobalParam
 	XMMATRIX ViewInv;
 	XMMATRIX ProjectionInv;
 
-	XMINT4 LightNum;//directional,point,spot
 	TSpotLight Light;
-
+	unsigned int LightType;//directional=1,point=2,spot=3
+	
+	unsigned int HasDepthMap;
 	XMMATRIX LightView;
 	XMMATRIX LightProjection;
-	int HasDepthMap;
 public:
 	cbGlobalParam();
 	static TConstBufferDecl& GetDesc();
@@ -25,8 +25,7 @@ public:
 };
 
 struct TFogExp {
-	XMFLOAT3 FogColor;
-	float FogExp;
+	XMFLOAT4 FogColorExp;
 public:
 	TFogExp();
 	void SetColor(float r, float g, float b);
@@ -37,12 +36,12 @@ public:
 const int MAX_MATRICES = 256;
 __declspec(align(16)) struct cbWeightedSkin
 {
-	XMMATRIX mModel;
+	XMMATRIX Model;
 	XMMATRIX Models[MAX_MATRICES];
-	int hasNormal;
-	int hasMetalness;
-	int hasRoughness;
-	int hasAO;
+	unsigned int hasNormal;
+	unsigned int hasMetalness;
+	unsigned int hasRoughness;
+	unsigned int hasAO;
 
 	static TConstBufferDecl& GetDesc();
 	static TConstBufferDecl MKDesc();
@@ -54,7 +53,7 @@ __declspec(align(16)) struct cbUnityMaterial
 	XMFLOAT4 _Color;
 	float _GlossMapScale;
 	float _OcclusionStrength;
-	int _SpecLightOff;
+	unsigned int _SpecLightOff;
 
 	cbUnityMaterial();
 	static TConstBufferDecl& GetDesc();

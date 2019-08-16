@@ -29,12 +29,12 @@ cbuffer cbGlobalParam : register(b0)
 	matrix ViewInv;
 	matrix ProjectionInv;
 	
-	int4 LightNum;
 	LIGHT_SPOT Light;
+	int LightType;
 	
+	int HasDepthMap;
 	matrix LightView;
 	matrix LightProjection;
-	int HasDepthMap;
 }
 
 #if SHADER_MODEL > 30000
@@ -60,11 +60,6 @@ sampler2D txMain : register(s0) =
 sampler_state
 {
     Texture = <textureMain>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
 };
 
 texture  textureDepthMap : register(t8);

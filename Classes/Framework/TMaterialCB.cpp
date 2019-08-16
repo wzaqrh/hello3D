@@ -1,7 +1,8 @@
 #include "TMaterialCB.h"
 
-TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, size_t __size, size_t __count, size_t __offset)
+TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)
 	:name(__name)
+	,type(__type)
 	,size(__size)
 	,count(__count)
 	,offset(__offset)
@@ -53,7 +54,7 @@ TConstBufferDecl cbGlobalParam::MKDesc()
 	BUILD_ADD(ViewInv);
 	BUILD_ADD(ProjectionInv);
 
-	BUILD_ADD(LightNum);
+	BUILD_ADD(LightType);
 	BUILD_ADD(Light);
 
 	BUILD_ADD(LightView);
@@ -71,20 +72,19 @@ TFogExp::TFogExp()
 
 void TFogExp::SetColor(float r, float g, float b)
 {
-	FogColor = XMFLOAT3(r, g, b);
+	FogColorExp = XMFLOAT4(r, g, b, FogColorExp.w);
 }
 
 void TFogExp::SetExp(float exp)
 {
-	FogExp = exp;
+	FogColorExp.w = exp;
 }
 
 TConstBufferDecl& TFogExp::GetDesc()
 {
 	TConstBufferDeclBuilder builder;
 	TFogExp cb;
-	BUILD_ADD(FogColor);
-	BUILD_ADD(FogExp);
+	BUILD_ADD(FogColorExp);
 	return builder.Build();
 }
 
@@ -99,7 +99,7 @@ TConstBufferDecl cbWeightedSkin::MKDesc()
 {
 	TConstBufferDeclBuilder builder;
 	cbWeightedSkin cb;
-	BUILD_ADD(mModel);
+	BUILD_ADD(Model);
 	BUILD_ADDS(Models);
 	BUILD_ADD(hasNormal);
 	BUILD_ADD(hasMetalness);

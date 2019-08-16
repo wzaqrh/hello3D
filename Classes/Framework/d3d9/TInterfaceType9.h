@@ -23,13 +23,20 @@ struct TConstantTable {
 	ID3DXConstantTable* mTable = nullptr;
 	std::vector<D3DXHANDLE> mHandles;
 	std::map<std::string, D3DXHANDLE> mHandleByName;
+	std::map<std::string, D3DXCONSTANT_DESC> mDescByName;
 public:
+	void ReInit();
 	void Init(ID3DXConstantTable* constTable);
 	ID3DXConstantTable* get();
 	ID3DXConstantTable* operator->();
 	size_t size() const;
 	D3DXHANDLE operator[](size_t pos) const;
 	D3DXHANDLE operator[](const std::string& name) const;
+private:
+	D3DXHANDLE At(size_t pos) const;
+	D3DXHANDLE At(const std::string& name) const;
+public:
+	void SetValue(IDirect3DDevice9* device, TConstBufferDeclElement& elem, char* buffer9);
 };
 
 struct TVertexShader9 : public IVertexShader {

@@ -468,7 +468,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 	auto& meshes = mNodeInfos[node];
 	if (meshes.size() > 0) {
 		cbWeightedSkin weightedSkin = {};
-		weightedSkin.mModel = ToXM(mNodeInfos[node].mGlobalTransform);
+		weightedSkin.Model = ToXM(mNodeInfos[node].mGlobalTransform);
 		//mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.size(); i++) {

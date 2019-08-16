@@ -63,7 +63,7 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;// D3DFMT_A8B8G8R8;
 	d3dpp.EnableAutoDepthStencil = TRUE;
-	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D24X8;
 	if (CheckHR(mD3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &mDevice9))) {
 		return false;
 	}
@@ -399,9 +399,17 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 #endif
 	pSrcFile = imgPath.c_str();
 
-	TTexture9Ptr pTextureRV = std::make_shared<TTexture9>(nullptr, imgPath);
-	if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile, &pTextureRV->GetSRV9()))) {
-		pTextureRV = nullptr;
+	TTexture9Ptr pTextureRV;
+	if (IsFileExist(pSrcFile)) {
+		pTextureRV = std::make_shared<TTexture9>(nullptr, imgPath);
+		if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile, &pTextureRV->GetSRV9()))) {
+			pTextureRV = nullptr;
+		}
+	}
+	else {
+		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
+		OutputDebugStringA(szBuf);
+		MessageBoxA(0, szBuf, "", MB_OK);
 	}
 	return pTextureRV;
 }
@@ -450,18 +458,8 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		char* buffer9 = (char*)buffer->GetBuffer9();
 		for (size_t j = 0; j < decl->elements.size(); ++j) {
 			TConstBufferDeclElement& elem = decl->elements[j];
-
-			D3DXHANDLE handle = vs->mConstTable[elem.name];
-			if (handle) {
-				auto hr = vs->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
-				CheckHR(hr);
-			}
-
-			handle = ps->mConstTable[elem.name];
-			if (handle) {
-				auto hr = ps->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
-				//CheckHR(hr);
-			}
+			vs->mConstTable.SetValue(mDevice9, elem, buffer9);
+			ps->mConstTable.SetValue(mDevice9, elem, buffer9);
 		}
 	}
 
@@ -479,6 +477,21 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		}
 	}
 #endif
+}
+
+inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
+	switch (topo)
+	{
+	case D3DPT_POINTLIST: return indexCount;
+	case D3DPT_LINELIST: return indexCount / 2;
+	case D3DPT_LINESTRIP: return indexCount - 1;
+	case D3DPT_TRIANGLELIST: return indexCount / 3;
+	case D3DPT_TRIANGLESTRIP: return indexCount - 2;
+	case D3DPT_TRIANGLEFAN: return indexCount - 2;
+	default:break;
+	}
+	assert(FALSE);
+	return 0;
 }
 
 void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
@@ -514,12 +527,16 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 		BindPass(pass, globalParam);
 
 		if (indexBuffer) {
-			mDevice9->DrawIndexedPrimitive(D3DEnumCT::d3d11To9(pass->mTopoLogy), 
+			D3DPRIMITIVETYPE topo = D3DEnumCT::d3d11To9(pass->mTopoLogy);
+			if (_CanDraw())
+			mDevice9->DrawIndexedPrimitive(topo,
 				0, 0, vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(),
-				0, indexBuffer->GetBufferSize() / indexBuffer->GetWidth());
+				0, CalPrimCount(indexBuffer->GetCount(), topo));
 		}
 		else {
-			mDevice9->DrawPrimitive(D3DEnumCT::d3d11To9(pass->mTopoLogy), 0, vertexBuffer->GetBufferSize() / vertexBuffer->GetStride());
+			D3DPRIMITIVETYPE topo = D3DEnumCT::d3d11To9(pass->mTopoLogy);
+			if (_CanDraw())
+			mDevice9->DrawPrimitive(topo, 0, CalPrimCount(vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(), topo));
 		}
 
 		if (pass->OnUnbind)
@@ -571,11 +588,15 @@ void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::stri
 	}
 }
 
+#define MKTRANSPOSE(M) globalParam.M = XMMatrixTranspose(globalParam.M);
+
 void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mDefCamera);
+	
 	cbGlobalParam globalParam;
 	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+
 	for (int i = 0; i < opQueue.size(); ++i)
 		if (opQueue[i].mMaterial->IsLoaded())
 		{
@@ -586,6 +607,8 @@ void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, con
 
 void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
+	mDrawCount = 0;
+
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowPassRT);
 		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1.0f), 1.0, 0);

@@ -124,6 +124,13 @@ IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
 	return mLayout;
 }
 
+void TConstantTable::ReInit()
+{
+	mHandles.clear();
+	mHandleByName.clear();
+	Init(mTable);
+}
+
 /********** TConstantTable **********/
 void TConstantTable::Init(ID3DXConstantTable* constTable)
 {
@@ -141,6 +148,8 @@ void TConstantTable::Init(ID3DXConstantTable* constTable)
 		if (count >= 1) {
 			handleName.first = constDesc.Name;
 			mHandleByName.insert(handleName);
+
+			mDescByName.insert(std::make_pair(handleName.first, constDesc));
 		}
 		mHandles.push_back(handleName.second);
 	}
@@ -166,14 +175,57 @@ D3DXHANDLE TConstantTable::operator[](size_t pos) const
 	return mHandles[pos];
 }
 
+D3DXHANDLE TConstantTable::At(size_t pos) const
+{
+	return mHandles[pos];
+}
+
 D3DXHANDLE TConstantTable::operator[](const std::string& name) const
 {
 	auto iter = mHandleByName.find(name);
 	if (iter != mHandleByName.end()) {
 		return iter->second;
 	}
-	else
-		return NULL;
+	else return NULL;
+}
+
+D3DXHANDLE TConstantTable::At(const std::string& name) const
+{
+	auto iter = mHandleByName.find(name);
+	if (iter != mHandleByName.end()) {
+		return iter->second;
+	}
+	else return NULL;
+}
+
+void TConstantTable::SetValue(IDirect3DDevice9* device, TConstBufferDeclElement& elem, char* buffer9)
+{
+	D3DXHANDLE handle = At(elem.name);
+	if (handle) {
+		HRESULT hr = S_OK;
+		switch (elem.type)
+		{
+		case E_CONSTBUF_ELEM_MATRIX: {
+			if (elem.count == 0) {
+				assert(elem.size == sizeof(D3DXMATRIX));
+				hr = mTable->SetMatrixTranspose(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.offset));
+			}
+			else {
+				assert(elem.size == sizeof(D3DXMATRIX) * elem.count);
+				hr = mTable->SetMatrixTransposeArray(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.offset), elem.count);
+			}
+		}break;
+		case E_CONSTBUF_ELEM_BOOL:
+		case E_CONSTBUF_ELEM_INT:
+		case E_CONSTBUF_ELEM_FLOAT:
+		case E_CONSTBUF_ELEM_FLOAT4:
+		case E_CONSTBUF_ELEM_STRUCT:
+		default:
+			hr = mTable->SetValue(device, handle, buffer9 + elem.offset, elem.size);
+			break;
+		}
+		CheckHR(hr);
+	}
 }
 
 /********** TPixelShader9 **********/

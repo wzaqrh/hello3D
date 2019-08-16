@@ -3,16 +3,15 @@
 #include "Skeleton.h"
 
 #if SHADER_MODEL > 30000
-Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
 #else
-texture  textureSpecular : register(t0);
-sampler2D txSpecular : register(s0) =
+texture  textureSpecular : register(t1);
+sampler2D txSpecular : register(s1) =
 sampler_state { Texture = <textureSpecular>; };
 
-texture  textureNormal : register(t0);
-sampler2D txNormal : register(s0) =
+texture  textureNormal : register(t2);
+sampler2D txNormal : register(s2) =
 sampler_state { Texture = <textureNormal>; };
 #endif
 
@@ -49,10 +48,10 @@ PS_INPUT VS(VS_INPUT i)
 	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
 	output.Pos = mul(MWV, skinPos);
 	
-	if (LightNum.x > 0) {
+	if (LightType == 1) {
 		output.ToLight = normalize(mul(View, float4(-Light.Base.Base.LightPos.xyz,0.0)));	
 	}
-	else {
+	else if (LightType >= 2) {
 		output.ToLight = mul(View,float4(Light.Base.Base.LightPos.xyz,1.0)).xyz - output.Pos.xyz;
 	}
 	
@@ -102,11 +101,11 @@ float4 PS(PS_INPUT input) : SV_Target
 	float3 eye = normalize(input.Eye);
 	
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	if (LightNum.x > 0) {
+	if (LightType == 1) {
 		float3 light = normalize(input.ToLight);
 		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);
 	}
-	else if (LightNum.y > 0) {
+	else if (LightType == 2) {
 		float Distance = length(input.ToLight);
 		float3 light = normalize(input.ToLight);
 		finalColor.xyz += CalPointLight(Light.Base, normal, light, eye, input.Tex, Distance);

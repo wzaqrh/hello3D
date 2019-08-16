@@ -160,21 +160,21 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 
 	// Fill the center texel
 	float weight = 1.0f * GaussianDistribution(0, 0, fDeviation);
-	bloom.SampleOffsets[0] = XMFLOAT2(0.0f, 0);
+	bloom.SampleOffsets[0] = XMFLOAT4(0.0f, 0, 0, 0);
 	bloom.SampleWeights[0] = XMFLOAT4(weight, weight, weight, 1.0f);
 
 	// Fill the right side
 	for (i = 1; i < 8; i++)
 	{
 		weight = fMultiplier * GaussianDistribution((float)i, 0, fDeviation);
-		bloom.SampleOffsets[i] = XMFLOAT2(i * tu,0);
+		bloom.SampleOffsets[i] = XMFLOAT4(i * tu,0, 0, 0);
 		bloom.SampleWeights[i] = XMFLOAT4(weight, weight, weight, 1.0f);
 	}
 
 	// Copy to the left side
 	for (i = 8; i < 15; i++)
 	{
-		bloom.SampleOffsets[i] = XMFLOAT2(-bloom.SampleOffsets[i - 7].x, 0);
+		bloom.SampleOffsets[i] = XMFLOAT4(-bloom.SampleOffsets[i - 7].x, 0, 0, 0);
 		bloom.SampleWeights[i] = bloom.SampleWeights[i - 7];
 	}
 	return bloom;

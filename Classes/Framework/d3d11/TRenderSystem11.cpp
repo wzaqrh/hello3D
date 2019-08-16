@@ -676,8 +676,6 @@ void TRenderSystem11::SetDepthState(const TDepthState& depthState)
 	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
 }
 
-
-
 static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<TContantBufferInfo>& bufferInfos) {
 	std::vector<ID3D11Buffer*> ret;
 	for (auto& iter : bufferInfos)
@@ -742,9 +740,11 @@ void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int it
 		BindPass(pass, globalParam);
 
 		if (indexBuffer) {
+			if (_CanDraw())
 			mDeviceContext->DrawIndexed(indexBuffer->GetBufferSize() / indexBuffer->GetWidth(), 0, 0);
 		}
 		else {
+			if (_CanDraw())
 			mDeviceContext->Draw(vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(), 0);
 		}
 
@@ -811,6 +811,8 @@ void TRenderSystem11::RenderLight(TDirectLight* light, enLightType lightType, co
 
 void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
+	mDrawCount = 0;
+
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowPassRT);
 		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1.0f), 1.0, 0);

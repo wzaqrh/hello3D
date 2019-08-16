@@ -12,7 +12,7 @@ static const float  BRIGHT_THRESHOLD = 0.5f;
 
 cbuffer cbBloom : register(b1)
 {
-	float2 SampleOffsets[16];
+	float4 SampleOffsets[16];
 	float4 SampleWeights[16];
 }
 
