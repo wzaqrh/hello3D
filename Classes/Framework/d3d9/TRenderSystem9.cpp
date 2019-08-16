@@ -517,7 +517,7 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 		if (textures.size() > 0) {
 			for (size_t i = 0; i < textures.size(); ++i) {
 				auto texture = textures[i] ? textures[i]->GetSRV9() : nullptr;
-				mDevice9->SetTexture(i, texture);
+				if (texture) mDevice9->SetTexture(i, texture);
 			}
 		}
 

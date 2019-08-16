@@ -24,7 +24,7 @@ PS_INPUT VS(VS_INPUT i)
 {
 	PS_INPUT output = (PS_INPUT)0;
 	matrix WVP = mul(Projection,mul(View, World));
-#if 0
+#if 1
 	matrix MWVP = mul(WVP, transpose(Model));
 	
 	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
