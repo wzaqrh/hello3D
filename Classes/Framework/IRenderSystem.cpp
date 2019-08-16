@@ -155,15 +155,15 @@ void IRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 	{
 	case E_LIGHT_DIRECT:
 		globalParam.LightNum.x = 1;
-		globalParam.DirectLights[0] = *light;
+		static_cast<TDirectLight&>(globalParam.Light) = *light;
 		break;
 	case E_LIGHT_POINT:
 		globalParam.LightNum.y = 1;
-		globalParam.PointLights[0] = *(TPointLight*)light;
+		static_cast<TPointLight&>(globalParam.Light) = *(TPointLight*)light;
 		break;
 	case E_LIGHT_SPOT:
 		globalParam.LightNum.z = 1;
-		globalParam.SpotLights[0] = *(TSpotLight*)light;
+		globalParam.Light = *(TSpotLight*)light;
 		break;
 	default:
 		break;

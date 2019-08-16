@@ -6,8 +6,7 @@
 
 std::string TAppLesson0_1::OnCreateRenderSys()
 {
-	//return "d3d11";
-	return "d3d9";
+	return gDefRenderSystem;
 }
 
 void TAppLesson0_1::OnPostInitDevice()
@@ -37,4 +36,4 @@ void TAppLesson0_1::OnRender()
 	}
 }
 
-auto reg = AppRegister<TAppLesson0_1>("TAppLesson0_1: LayerColor");
+//auto reg = AppRegister<TAppLesson0_1>("TAppLesson0_1: LayerColor");

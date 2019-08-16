@@ -54,9 +54,7 @@ TConstBufferDecl cbGlobalParam::MKDesc()
 	BUILD_ADD(ProjectionInv);
 
 	BUILD_ADD(LightNum);
-	BUILD_ADDS(DirectLights);
-	BUILD_ADDS(PointLights);
-	BUILD_ADDS(SpotLights);
+	BUILD_ADD(Light);
 
 	BUILD_ADD(LightView);
 	BUILD_ADD(LightProjection);

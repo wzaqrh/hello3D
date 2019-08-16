@@ -7,7 +7,7 @@ struct LIGHT_DIRECT
 
 struct LIGHT_POINT
 {
-	LIGHT_DIRECT L;
+	LIGHT_DIRECT Base;
 	float4 Attenuation;
 };
 
@@ -30,9 +30,7 @@ cbuffer cbGlobalParam : register(b0)
 	matrix ProjectionInv;
 	
 	int4 LightNum;
-	LIGHT_DIRECT DirectLights[MAX_LIGHTS];
-	LIGHT_POINT PointLights[MAX_LIGHTS];
-	LIGHT_SPOT SpotLights[MAX_LIGHTS];
+	LIGHT_SPOT Light;
 	
 	matrix LightView;
 	matrix LightProjection;

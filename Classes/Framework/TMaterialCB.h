@@ -13,9 +13,7 @@ __declspec(align(16)) struct cbGlobalParam
 	XMMATRIX ProjectionInv;
 
 	XMINT4 LightNum;//directional,point,spot
-	TDirectLight DirectLights[MAX_LIGHTS];
-	TPointLight PointLights[MAX_LIGHTS];
-	TSpotLight SpotLights[MAX_LIGHTS];
+	TSpotLight Light;
 
 	XMMATRIX LightView;
 	XMMATRIX LightProjection;
