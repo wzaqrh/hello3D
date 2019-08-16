@@ -24,7 +24,7 @@ bool TRenderSystem9::Initialize()
 	UINT height = rc.bottom - rc.top;
 
 	if (!_CreateDeviceAndSwapChain()) return false;
-
+	if (!_GetDeviceCaps()) return false;
 	_SetRasterizerState();
 
 	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
@@ -64,9 +64,23 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;// D3DFMT_A8B8G8R8;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24X8;
-	if (CheckHR(mD3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &mDevice9))) {
-		return false;
+
+	bool success = false;
+	int BehaviorFlags[] = { D3DCREATE_HARDWARE_VERTEXPROCESSING, D3DCREATE_HARDWARE_VERTEXPROCESSING, D3DCREATE_MIXED_VERTEXPROCESSING, D3DCREATE_SOFTWARE_VERTEXPROCESSING };
+	for (size_t i = 0; i < ARRAYSIZE(BehaviorFlags); ++i) {
+		if (! FAILED(mD3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, mHWnd, BehaviorFlags[i], &d3dpp, &mDevice9))) {
+			success = true;
+			break;
+		}
 	}
+
+	return success;
+}
+
+bool TRenderSystem9::_GetDeviceCaps()
+{
+	if (CheckHR(mD3D9->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &mD3DCaps))) return false;
+	__log(mD3DCaps);
 	return true;
 }
 
@@ -74,7 +88,6 @@ void TRenderSystem9::_SetRasterizerState()
 {
 	mDevice9->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	mDevice9->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-	//g_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 }
 
 void TRenderSystem9::Update(float dt)
@@ -152,7 +165,7 @@ IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 	TIndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
 	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
-	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, 0, Format, D3DPOOL_DEFAULT, &pIndexBuffer, NULL))) {
+	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
 		ret = std::make_shared<TIndexBuffer9>(pIndexBuffer, bufferSize, format);
 	}
 	if (buffer) UpdateBuffer(ret.get(), buffer, bufferSize);
@@ -168,7 +181,7 @@ IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, 
 {
 	TVertexBuffer9Ptr ret;
 	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
-	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, 0, 0/*non-FVF*/, D3DPOOL_DEFAULT, &pVertexBuffer, NULL))) {
+	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, D3DUSAGE_WRITEONLY, 0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
 		ret = std::make_shared<TVertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
 	}
 	if (buffer) UpdateBuffer(ret.get(), buffer, bufferSize);
@@ -292,6 +305,7 @@ IVertexShaderPtr TRenderSystem9::_CreateVSByFXC(const char* filename)
 			ret->SetLoaded();
 		}
 		else {
+			CheckHR(hr);
 			ret = nullptr;
 		}
 	}
@@ -312,6 +326,7 @@ IPixelShaderPtr TRenderSystem9::_CreatePSByFXC(const char* filename)
 			ret->SetLoaded();
 		}
 		else {
+			CheckHR(hr);
 			ret = nullptr;
 		}
 	}
@@ -409,7 +424,7 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 	else {
 		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
 		OutputDebugStringA(szBuf);
-		MessageBoxA(0, szBuf, "", MB_OK);
+		//MessageBoxA(0, szBuf, "", MB_OK);
 	}
 	return pTextureRV;
 }

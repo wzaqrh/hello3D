@@ -93,3 +93,4 @@ void SetDebugName(ID3D11DeviceChild* child, const std::string& name);
 #endif
 
 void __log(const char* msg);
+void __log(const D3DCAPS9& caps);

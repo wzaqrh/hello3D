@@ -1,15 +1,20 @@
 #pragma once
 #include "TPredefine.h"
 
+//#define MESH_VETREX_POSTEX
 struct MeshVertex
 {
 	XMFLOAT3 Pos;
+#ifndef MESH_VETREX_POSTEX
 	XMFLOAT3 Normal;
 	XMFLOAT3 Tangent;
+#endif
 	XMFLOAT2 Tex;
+#ifndef MESH_VETREX_POSTEX
 	XMFLOAT4 BlendWeights;
 	unsigned int  BlendIndices[4];
 	XMFLOAT3 BiTangent;
+#endif
 };
 
 class IRenderSystem;

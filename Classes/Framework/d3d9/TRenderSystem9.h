@@ -7,6 +7,7 @@ class TRenderSystem9
 	HINSTANCE mHInst = NULL;
 	HWND mHWnd = NULL;
 
+	D3DCAPS9 mD3DCaps;
 	IDirect3D9 *mD3D9 = NULL; // Used to create the D3DDevice
 	IDirect3DDevice9 *mDevice9 = NULL; // Our rendering device
 
@@ -68,6 +69,7 @@ protected:
 
 	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:
+	bool _GetDeviceCaps();
 	void _SetRasterizerState();
 	bool _CreateDeviceAndSwapChain();
 };

@@ -26,12 +26,14 @@ size_t TBlobDataStd::GetBufferSize()
 /********** TProgram **********/
 void TProgram::SetVertex(IVertexShaderPtr pVertex)
 {
+	assert(pVertex);
 	mVertex = pVertex;
 	AddDependency(pVertex);
 }
 
 void TProgram::SetPixel(IPixelShaderPtr pPixel)
 {
+	assert(pPixel);
 	mPixel = pPixel;
 	AddDependency(pPixel);
 }

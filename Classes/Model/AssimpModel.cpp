@@ -230,7 +230,7 @@ void ReCalculateTangents(std::vector<MeshVertex>& vertices, const std::vector<UI
 		// UV delta
 		XMFLOAT2 deltaUV1 = uv1 - uv0;
 		XMFLOAT2 deltaUV2 = uv2 - uv0;
-
+#ifndef MESH_VETREX_POSTEX
 		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 		XMFLOAT3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
 		v0.Tangent = v0.Tangent + tangent;
@@ -241,6 +241,7 @@ void ReCalculateTangents(std::vector<MeshVertex>& vertices, const std::vector<UI
 		v0.BiTangent = v0.BiTangent + bitangent;
 		v1.BiTangent = v1.BiTangent + bitangent;
 		v2.BiTangent = v2.BiTangent + bitangent;
+#endif
 	}
 }
 
@@ -268,18 +269,18 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			vertex.Tex.x = (float)mesh->mTextureCoords[0][vertexId].x;
 			vertex.Tex.y = (float)mesh->mTextureCoords[0][vertexId].y;
 		}
-		if (mesh->mNormals) {
+#ifndef MESH_VETREX_POSTEX
+		if (mesh->mNormals)
 			vertex.Normal = ToXM(mesh->mNormals[vertexId]);
-		}
-		if (mesh->mTangents) {
+		if (mesh->mTangents)
 			vertex.Tangent = ToXM(mesh->mTangents[vertexId]);
-		}
-		if (mesh->mBitangents) {
+		if (mesh->mBitangents)
 			vertex.BiTangent = ToXM(mesh->mBitangents[vertexId]);
-		}
+#endif
 		vertices.push_back(vertex);
 	}
 
+#ifndef MESH_VETREX_POSTEX
 	if (mesh->HasBones()) {
 		std::map<int, int> spMap;
 		for (int boneId = 0; boneId < mesh->mNumBones; ++boneId) {
@@ -301,6 +302,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			}
 		}
 	}
+#endif
 
 	for (UINT i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -475,7 +477,8 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			auto mesh = meshes[i];
 			if (mesh->data->HasBones()) {
 				const auto& boneMats = GetBoneMatrices(node, i);
-				size_t boneSize = boneMats.size(); assert(boneSize <= MAX_MATRICES);
+				size_t boneSize = boneMats.size(); 
+				assert(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
 					weightedSkin.Models[j] = ToXM(boneMats[j]);
 			}

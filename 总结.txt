@@ -1,2 +1,5 @@
 向量转换w要等于0,
 顶点转换w要等于1
+
+d3d9 对const buffer有大小限制,做skinning时bone matrix表限制为56已经是极限了
+D3DCREATE_MIXED_VERTEXPROCESSING是d3d9慢的原因

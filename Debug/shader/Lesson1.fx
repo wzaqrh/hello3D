@@ -9,7 +9,7 @@ struct VS_INPUT
 	float3 Tangent : NORMAL1;
 	float2 Tex  : TEXCOORD0;
     float4 BlendWeights : BLENDWEIGHT;
-    uint4  BlendIndices : BLENDINDICES;
+    int4 BlendIndices : BLENDINDICES;
 	float3 BiTangent : NORMAL2;
 };
 
@@ -27,7 +27,7 @@ PS_INPUT VS(VS_INPUT i)
 #if 1
 	matrix MWVP = mul(WVP, transpose(Model));
 	
-	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	float4 skinPos = Skinning(i.BlendWeights, (i.BlendIndices), float4(i.Pos.xyz, 1.0));
 	//float4 skinPos = float4(i.Pos.xyz, 1.0);
 	output.Pos = mul(MWVP, skinPos);
 #else
