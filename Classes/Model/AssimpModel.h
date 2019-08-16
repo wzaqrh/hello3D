@@ -20,8 +20,9 @@ class AssimpModel
 	: public IRenderable
 {
 public:
-	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb = nullptr);
-	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb = nullptr);
+	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, 
+		const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb = nullptr);
+	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
@@ -33,7 +34,7 @@ public:
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 	void DoDraw(aiNode* node, TRenderOperationQueue& opList);
-	void LoadMaterial(const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb);
+	void LoadMaterial(const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, std::function<void(TMaterialPtr)> cb);
 	void LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb);
 	void processNode(aiNode * node, const aiScene * scene);
 	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);

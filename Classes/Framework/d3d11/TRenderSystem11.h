@@ -22,6 +22,7 @@ private:
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
 
 	TThreadPumpPtr mThreadPump;
+	std::vector<D3D_SHADER_MACRO> mShaderMacros;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -71,7 +72,7 @@ private:
 	HRESULT _CreateBackRenderTargetView();
 	HRESULT _CreateBackDepthStencilView(int width, int height);
 	void _SetViewports(int width, int height);
-	HRESULT _SetRasterizerState();
+	HRESULT _SetRasterizerState(); 
 protected:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);

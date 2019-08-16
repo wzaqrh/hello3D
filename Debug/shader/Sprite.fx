@@ -1,8 +1,6 @@
 /********** Sprite **********/
 #include "Standard.h"
 
-Texture2D txDiffuse : register(t0);
-
 struct VS_INPUT
 {
     float3 Pos : POSITION;
@@ -30,8 +28,7 @@ PS_INPUT VS(VS_INPUT input)
 
 float4 PS(PS_INPUT input) : SV_Target
 {	
-	//float4 diffuseColor = txDiffuse.Sample(samLinear, input.Tex);
-	float4 diffuseColor = tex2D(samLinear, input.Tex);
+	float4 diffuseColor = GetTextureMain(input.Tex);
 	float4 finalColor = diffuseColor * input.Color;
 	return finalColor;
 }

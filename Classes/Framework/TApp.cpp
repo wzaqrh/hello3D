@@ -25,9 +25,14 @@ void TApp::Create()
 	}
 }
 
+#if 0
+std::string gDefRenderSystem = "d3d9";
+#else
+std::string gDefRenderSystem = "d3d11";
+#endif
 std::string TApp::OnCreateRenderSys()
 {
-	return "d3d11";
+	return gDefRenderSystem;
 }
 
 void TApp::Attach(HINSTANCE hInstance, HWND hWnd)

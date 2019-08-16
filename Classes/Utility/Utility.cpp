@@ -9,6 +9,8 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
+
+
 /********** TD3DInput **********/
 TD3DInput::TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {

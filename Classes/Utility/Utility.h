@@ -5,6 +5,7 @@
 
 bool CheckHR(HRESULT result);
 
+extern std::string gDefRenderSystem;
 extern std::string gModelPath;
 std::string GetModelPath();
 std::string MakeModelPath(const char* name);

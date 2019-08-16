@@ -118,6 +118,64 @@ IDirect3DSurface9*& TRenderTexture9::GetDepthStencilBuffer9()
 	return mDepthStencilBuffer;
 }
 
+/********** TInputLayout9 **********/
+IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
+{
+	return mLayout;
+}
+
+/********** TConstantTable **********/
+void TConstantTable::Init(ID3DXConstantTable* constTable)
+{
+	mTable = constTable;
+
+	D3DXCONSTANTTABLE_DESC desc;
+	CheckHR(constTable->GetDesc(&desc));
+
+	D3DXCONSTANT_DESC constDesc;
+	std::pair<std::string, D3DXHANDLE> handleName;
+	for (size_t reg = 0; reg < desc.Constants; ++reg) {
+		handleName.second = constTable->GetConstant(NULL, reg);
+		UINT count = 1;
+		constTable->GetConstantDesc(handleName.second, &constDesc, &count);
+		if (count >= 1) {
+			handleName.first = constDesc.Name;
+			mHandleByName.insert(handleName);
+		}
+		mHandles.push_back(handleName.second);
+	}
+}
+
+ID3DXConstantTable* TConstantTable::get()
+{
+	return mTable;
+}
+
+ID3DXConstantTable* TConstantTable::operator->()
+{
+	return mTable;
+}
+
+size_t TConstantTable::size() const
+{
+	return mHandles.size();
+}
+
+D3DXHANDLE TConstantTable::operator[](size_t pos) const
+{
+	return mHandles[pos];
+}
+
+D3DXHANDLE TConstantTable::operator[](const std::string& name) const
+{
+	auto iter = mHandleByName.find(name);
+	if (iter != mHandleByName.end()) {
+		return iter->second;
+	}
+	else
+		return NULL;
+}
+
 /********** TPixelShader9 **********/
 IBlobDataPtr TPixelShader9::GetBlob()
 {
@@ -131,30 +189,7 @@ IDirect3DPixelShader9*& TPixelShader9::GetShader9()
 
 void TPixelShader9::SetConstTable(ID3DXConstantTable* constTable)
 {
-	mConstTable = constTable;
-
-	D3DXCONSTANTTABLE_DESC desc;
-	CheckHR(mConstTable->GetDesc(&desc));
-
-	D3DXCONSTANT_DESC constDesc;
-	std::pair<D3DXHANDLE, std::string> handleName;
-	for (size_t reg = 0; reg < desc.Constants; ++reg) {
-		handleName.first = mConstTable->GetConstant(NULL, reg);
-		UINT count = 1;
-		mConstTable->GetConstantDesc(handleName.first, &constDesc, &count);
-		if (count >= 1) {
-			handleName.second = constDesc.Name;
-		}
-		else 
-			handleName.second.clear();
-		mConstHandles.push_back(handleName);
-	}
-}
-
-/********** TInputLayout9 **********/
-IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
-{
-	return mLayout;
+	mConstTable.Init(constTable);
 }
 
 /********** TVertexShader9 **********/
@@ -170,24 +205,7 @@ IDirect3DVertexShader9*& TVertexShader9::GetShader9()
 
 void TVertexShader9::SetConstTable(ID3DXConstantTable* constTable)
 {
-	mConstTable = constTable;
-
-	D3DXCONSTANTTABLE_DESC desc;
-	CheckHR(mConstTable->GetDesc(&desc));
-
-	D3DXCONSTANT_DESC constDesc;
-	std::pair<D3DXHANDLE, std::string> handleName;
-	for (size_t reg = 0; reg < desc.Constants; ++reg) {
-		handleName.first = mConstTable->GetConstant(NULL, reg);
-		UINT count = 1;
-		mConstTable->GetConstantDesc(handleName.first, &constDesc, &count);
-		if (count >= 1) {
-			handleName.second = constDesc.Name;
-		}
-		else
-			handleName.second.clear();
-		mConstHandles.push_back(handleName);
-	}
+	mConstTable.Init(constTable);
 }
 
 /********** TBlobDataD3d9 **********/

@@ -12,6 +12,8 @@ class TRenderSystem9
 
 	IDirect3DSurface9 *mBackColorBuffer = NULL, *mBackDepthStencilBuffer = NULL;
 	IDirect3DSurface9 *mCurColorBuffer = NULL, *mCurDepthStencilBuffer = NULL;
+
+	std::vector<D3DXMACRO> mShaderMacros;
 public:
 	TRenderSystem9();
 	virtual ~TRenderSystem9();

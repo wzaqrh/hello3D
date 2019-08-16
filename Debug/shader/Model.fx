@@ -22,20 +22,24 @@ struct PS_INPUT
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL;//eye space
-	float3 Eye : POSITION0;//eye space
-	float3 PointLights[MAX_LIGHTS] : POSITION1;//eye space
-	float3 DirectLights[MAX_LIGHTS] : POSITION5;//eye space
+	float3 Eye : POSITION1;//eye space
+	float3 PointLights[MAX_LIGHTS] : POSITION2;//eye space
+	float3 DirectLights[MAX_LIGHTS] : POSITION6;//eye space
 };
 
 PS_INPUT VS(VS_INPUT i)
 {
 	PS_INPUT output = (PS_INPUT)0;
 
-	matrix MW = mul(World, transpose(Model));
-	matrix MWV = mul(View, MW);
+	matrix WV = mul(View, World);
+	matrix MWV = mul(WV, transpose(Model));
 	
-	output.Normal = normalize(mul(MWV, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0))).xyz);
-	output.Pos = mul(MWV, Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0)));	
+	float4 skinNormal = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0));
+	output.Normal = normalize(mul(MWV, skinNormal).xyz);
+	
+	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	output.Pos = mul(MWV, skinPos);
+	
 	for (int j = 0; j < LightNum.x; ++j) {
 		output.DirectLights[j] = normalize(mul(View, float4(-DirectLights[j].LightPos.xyz,0.0)));	
 	}
@@ -44,9 +48,7 @@ PS_INPUT VS(VS_INPUT i)
 	}
 	
 	output.Eye = -output.Pos;
-	
     output.Pos = mul(Projection, output.Pos);
-    
 	output.Tex = i.Tex;
     return output;
 }

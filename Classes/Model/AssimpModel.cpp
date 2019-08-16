@@ -132,18 +132,19 @@ void Evaluator::Eval(float pTime)
 }
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
+AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, 
+	const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-	LoadMaterial(vsName, psName, cb);
+	LoadMaterial(shaderName, layouts, cb);
 }
 
-AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType, std::function<void(TMaterialPtr)> cb /*= nullptr*/)
+AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-	LoadMaterial(matType, cb);
+	LoadMaterial(matType, nullptr);
 }
 
 AssimpModel::~AssimpModel()
@@ -444,27 +445,15 @@ void AssimpModel::PlayAnim(int Index)
 	}
 }
 
-void AssimpModel::LoadMaterial(const char* vsName, const char* psName, std::function<void(TMaterialPtr)> cb)
+void AssimpModel::LoadMaterial(const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
 {
 	std::function<void(TMaterialPtr)> callback;
-	if (vsName && psName) {
-		callback = [&](TMaterialPtr mat) {
-			TMaterialBuilder builder(mat);
-			auto program = builder.SetProgram(mRenderSys->CreateProgramByCompile(vsName, psName, nullptr, nullptr));
-			D3D11_INPUT_ELEMENT_DESC layout[] =
-			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			};
-			builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		};
-	}
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL_PBR, callback);
+	callback = [&](TMaterialPtr mat) {
+		TMaterialBuilder builder(mat);
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName, nullptr, nullptr));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, (D3D11_INPUT_ELEMENT_DESC*)&layouts[0], layouts.size()));
+	};
+	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL, callback);
 	mMatCb = cb;
 }
 

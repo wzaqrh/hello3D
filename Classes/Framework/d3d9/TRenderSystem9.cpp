@@ -44,6 +44,9 @@ bool TRenderSystem9::Initialize()
 
 	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
+
+	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
+	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));
 	return true;
 }
 
@@ -223,7 +226,8 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
 	ID3DXConstantTable* constTable = nullptr;
-	if (FAILED(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+	 
+	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
@@ -249,7 +253,7 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
 	ID3DXConstantTable* constTable = nullptr;
-	if (FAILED(D3DXCompileShaderFromFileA(filename, nullptr, nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
@@ -440,7 +444,6 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
 	}
 
-	size_t vsReg = 0,psReg = 0;
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
 		TConstBufferDeclPtr decl = buffer->GetDecl();
@@ -448,18 +451,16 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		for (size_t j = 0; j < decl->elements.size(); ++j) {
 			TConstBufferDeclElement& elem = decl->elements[j];
 
-			if (vsReg < vs->mConstHandles.size() && elem.name == vs->mConstHandles[vsReg].second) {
-				D3DXHANDLE handle = vs->mConstHandles[vsReg].first;
+			D3DXHANDLE handle = vs->mConstTable[elem.name];
+			if (handle) {
 				auto hr = vs->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
 				CheckHR(hr);
-				vsReg++;
 			}
 
-			if (psReg < ps->mConstHandles.size() && elem.name == ps->mConstHandles[psReg].second) {
-				D3DXHANDLE handle = ps->mConstHandles[psReg].first;
+			handle = ps->mConstTable[elem.name];
+			if (handle) {
 				auto hr = ps->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
 				//CheckHR(hr);
-				psReg++;
 			}
 		}
 	}
@@ -467,6 +468,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	mDevice9->SetVertexShader(vs->GetShader9());
 	mDevice9->SetPixelShader(ps->GetShader9());
 
+#if 0
 	if (!pass->mSamplers.empty()) {
 		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
 			ISamplerStatePtr sampler = pass->mSamplers[i];
@@ -476,6 +478,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 			}
 		}
 	}
+#endif
 }
 
 void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
