@@ -33,7 +33,7 @@ public:
 	static TConstBufferDecl& GetDesc();
 };
 
-const int MAX_MATRICES = 256;
+const int MAX_MATRICES = 56;
 __declspec(align(16)) struct cbWeightedSkin
 {
 	XMMATRIX Model;
