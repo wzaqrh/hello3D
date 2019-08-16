@@ -2,9 +2,19 @@
 #include "Standard.h"
 #include "Skeleton.h"
 
+#if SHADER_MODEL > 30000
 Texture2D txDiffuse : register(t0);
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
+#else
+texture  textureSpecular : register(t0);
+sampler2D txSpecular : register(s0) =
+sampler_state { Texture = <textureSpecular>; };
+
+texture  textureNormal : register(t0);
+sampler2D txNormal : register(s0) =
+sampler_state { Texture = <textureNormal>; };
+#endif
 
 struct VS_INPUT
 {
@@ -55,7 +65,7 @@ PS_INPUT VS(VS_INPUT i)
 
 float3 GetDiffuseBySampler(float3 normal, float3 light, float3 lightDiffuseColor, float2 texcoord) {
 	float diffuseFactor = saturate(dot(normal, light));
-	float3 diffuseMat = txDiffuse.Sample(samLinear, texcoord).xyz;
+	float3 diffuseMat = GetTextureMain(texcoord).xyz;
 	return diffuseMat * diffuseFactor * lightDiffuseColor;
 }
 
@@ -66,7 +76,7 @@ float3 GetSpecularByDef(float3 normal, float3 light, float3 eye, float4 SpecColo
 	return specularFactor * SpecColorPower.xyz;
 }
 float3 GetSpecularBySampler(float3 normal, float3 light, float3 eye, float4 SpecColorPower, float2 texcoord) {
-	float3 specularMat = txSpecular.Sample(samLinear, texcoord).xyz;
+	float3 specularMat = GetTexture2D(txSpecular, samLinear, texcoord).xyz;
 	return GetSpecularByDef(normal, light, eye, SpecColorPower) * specularMat;
 }
 

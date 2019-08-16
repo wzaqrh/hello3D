@@ -55,12 +55,7 @@ Texture2D txMain : register(t0);
 Texture2D txDepthMap : register(t8);
 TextureCube txSkybox : register(t9);
 
-float4 GetTextureMain(float2 inputTex) {
-	return txMain.Sample(samLinear, inputTex);
-}
-float GetTextureDepthMap(float2 inputTex) {
-	return txDepthMap.Sample(samShadow, inputTex).r;
-}
+#define GetTexture2D(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
 #else
 texture  textureMain : register(t0);
 sampler2D txMain : register(s0) =
@@ -98,13 +93,14 @@ sampler_state
 	AddressV = Wrap;
 };
 
+#define GetTexture2D(TEX, SAMPLER, COORD) tex2D(TEX, COORD)
+#endif
 float4 GetTextureMain(float2 inputTex) {
-	return tex2D(txMain, inputTex);
+	return GetTexture2D(txMain, samLinear, inputTex);
 }
 float GetTextureDepthMap(float2 inputTex) {
-	return tex2D(txDepthMap, inputTex).r;
+	return GetTexture2D(txDepthMap, samShadow, inputTex).r;
 }
-#endif
 
 //implements
 #define SHADOW_EPSILON 0.00005f
