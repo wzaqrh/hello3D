@@ -238,9 +238,7 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 	entry = entry ? entry : "VS";
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
-	ID3DXConstantTable* constTable = nullptr;
-	 
-	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
@@ -249,9 +247,12 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
 	ret->mBlob = blob;
 	ret->mErrBlob = errBlob;
-	ret->SetConstTable(constTable);
 	if (CheckHR(mDevice9->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
 		
+	ID3DXConstantTable* constTable = nullptr;
+	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)blob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
+	ret->SetConstTable(constTable);
+
 	ret->SetLoaded();
 	return ret;
 }
@@ -265,8 +266,7 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 	entry = entry ? entry : "PS";
 	TBlobDataD3d9Ptr blob = std::make_shared<TBlobDataD3d9>(nullptr);
 	TBlobDataD3d9Ptr errBlob = std::make_shared<TBlobDataD3d9>(nullptr);
-	ID3DXConstantTable* constTable = nullptr;
-	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, &constTable))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
@@ -275,8 +275,11 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
 	ret->mBlob = blob;
 	ret->mErrBlob = errBlob;
-	ret->SetConstTable(constTable);
 	if (CheckHR(mDevice9->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
+
+	ID3DXConstantTable* constTable = nullptr;
+	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)blob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
+	ret->SetConstTable(constTable);
 
 	ret->SetLoaded();
 	return ret;
@@ -469,13 +472,10 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
-		TConstBufferDeclPtr decl = buffer->GetDecl();
 		char* buffer9 = (char*)buffer->GetBuffer9();
-		for (size_t j = 0; j < decl->elements.size(); ++j) {
-			TConstBufferDeclElement& elem = decl->elements[j];
-			vs->mConstTable.SetValue(mDevice9, elem, buffer9);
-			ps->mConstTable.SetValue(mDevice9, elem, buffer9);
-		}
+		TConstBufferDeclPtr decl = buffer->GetDecl();
+		vs->mConstTable.SetValue(mDevice9, buffer9, *decl);
+		ps->mConstTable.SetValue(mDevice9, buffer9, *decl);
 	}
 
 	mDevice9->SetVertexShader(vs->GetShader9());

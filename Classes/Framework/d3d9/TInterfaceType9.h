@@ -23,21 +23,20 @@ struct TConstantTable {
 	ID3DXConstantTable* mTable = nullptr;
 	std::vector<D3DXHANDLE> mHandles;
 	std::map<std::string, D3DXHANDLE> mHandleByName;
-	std::map<std::string, D3DXCONSTANT_DESC> mDescByName;
+	std::map<std::string, std::shared_ptr<TConstantTable>> mSubByName;
 public:
 	void ReInit();
-	void Init(ID3DXConstantTable* constTable);
+	void Init(ID3DXConstantTable* constTable, D3DXHANDLE handle = NULL, int count = 0);
 	ID3DXConstantTable* get();
-	ID3DXConstantTable* operator->();
 	size_t size() const;
-	D3DXHANDLE operator[](size_t pos) const;
-	D3DXHANDLE operator[](const std::string& name) const;
-private:
-	D3DXHANDLE At(size_t pos) const;
-	D3DXHANDLE At(const std::string& name) const;
+	D3DXHANDLE GetHandle(size_t pos) const;
+	D3DXHANDLE GetHandle(const std::string& name) const;
+	std::shared_ptr<TConstantTable> At(const std::string& name);
 public:
-	void SetValue(IDirect3DDevice9* device, TConstBufferDeclElement& elem, char* buffer9);
+	void SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDeclElement& elem);
+	void SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDecl& decl);
 };
+typedef std::shared_ptr<TConstantTable> TConstantTablePtr;
 
 struct TVertexShader9 : public IVertexShader {
 	TConstantTable mConstTable;

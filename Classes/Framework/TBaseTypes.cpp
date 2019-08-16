@@ -1,5 +1,5 @@
 #include "TBaseTypes.h"
-
+#include "TMaterialCB.h"
 
 TCameraBase::TCameraBase()
 {
@@ -105,29 +105,40 @@ TDirectLight::TDirectLight()
 
 void TDirectLight::SetDirection(float x, float y, float z)
 {
-	mPosition = XMFLOAT4(x, y, z, 0);
+	LightPos = XMFLOAT4(x, y, z, 0);
 }
 
 void TDirectLight::SetDiffuseColor(float r, float g, float b, float a)
 {
-	mDiffuseColor = XMFLOAT4(r, g, b, a);
+	DiffuseColor = XMFLOAT4(r, g, b, a);
 }
 
 void TDirectLight::SetSpecularColor(float r, float g, float b, float a)
 {
-	mSpecularColorPower = XMFLOAT4(r, g, b, mSpecularColorPower.w);
+	SpecularColorPower = XMFLOAT4(r, g, b, SpecularColorPower.w);
 }
 
 void TDirectLight::SetSpecularPower(float power)
 {
-	mSpecularColorPower.w = power;
+	SpecularColorPower.w = power;
 }
 
 TCameraBase TDirectLight::GetLightCamera(TCamera& otherCam)
 {
 	TCamera ret(otherCam);
-	ret.SetLookAt(XMFLOAT3(mPosition.x, mPosition.y, mPosition.z), ret.mAt);
+	ret.SetLookAt(XMFLOAT3(LightPos.x, LightPos.y, LightPos.z), ret.mAt);
 	return ret;
+}
+
+TConstBufferDecl& TDirectLight::GetDesc()
+{
+	static TConstBufferDecl decl;
+	TConstBufferDeclBuilder builder(decl);
+	TDirectLight cb;
+	BUILD_ADD(LightPos);
+	BUILD_ADD(DiffuseColor);
+	BUILD_ADD(SpecularColorPower);
+	return builder.Build();
 }
 
 /********** TLight **********/
@@ -139,19 +150,30 @@ TPointLight::TPointLight()
 
 void TPointLight::SetPosition(float x, float y, float z)
 {
-	mPosition = XMFLOAT4(x, y, z, 1);
+	LightPos = XMFLOAT4(x, y, z, 1);
 }
 
 void TPointLight::SetAttenuation(float a, float b, float c)
 {
-	mAttenuation = XMFLOAT4(a, b, c, 0);
+	Attenuation = XMFLOAT4(a, b, c, 0);
 }
 
 TCameraBase TPointLight::GetLightCamera(TCamera& otherCam)
 {
 	TCamera ret(otherCam);
-	ret.SetLookAt(XMFLOAT3(mPosition.x, mPosition.y, mPosition.z), ret.mAt);
+	ret.SetLookAt(XMFLOAT3(LightPos.x, LightPos.y, LightPos.z), ret.mAt);
 	return ret;
+}
+
+TConstBufferDecl& TPointLight::GetDesc()
+{
+	static TConstBufferDecl decl;
+	decl = TDirectLight::GetDesc();
+
+	TConstBufferDeclBuilder builder(decl);
+	TPointLight cb;
+	BUILD_ADD(Attenuation);
+	return builder.Build();
 }
 
 /********** TSpotLight **********/
@@ -163,17 +185,28 @@ TSpotLight::TSpotLight()
 
 void TSpotLight::SetDirection(float x, float y, float z)
 {
-	mDirCutOff = XMFLOAT4(x, y, z, mDirCutOff.w);
+	DirectionCutOff = XMFLOAT4(x, y, z, DirectionCutOff.w);
 }
 
 void TSpotLight::SetCutOff(float cutoff)
 {
-	mDirCutOff.w = cutoff;
+	DirectionCutOff.w = cutoff;
 }
 
 void TSpotLight::SetAngle(float radian)
 {
 	SetCutOff(cos(radian));
+}
+
+TConstBufferDecl& TSpotLight::GetDesc()
+{
+	static TConstBufferDecl decl;
+	decl = TPointLight::GetDesc();
+
+	TConstBufferDeclBuilder builder(decl);
+	TSpotLight cb;
+	BUILD_ADD(DirectionCutOff);
+	return builder.Build();
 }
 
 /********** TBlendFunc **********/
@@ -194,6 +227,6 @@ TDepthState::TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /
 /********** TData **********/
 TData::TData(void* __data, unsigned int __dataSize)
 	:data(__data)
-	,dataSize(__dataSize)
+	, dataSize(__dataSize)
 {
 }

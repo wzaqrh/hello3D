@@ -15,14 +15,15 @@ sampler2D txNormal : register(s2) =
 sampler_state { Texture = <textureNormal>; };
 #endif
 
+
 struct VS_INPUT
 {
-    float4 Pos : POSITION;
+    float3 Pos : POSITION;
     float3 Normal : NORMAL;
 	float3 Tangent : NORMAL1;
 	float2 Tex  : TEXCOORD0;
     float4 BlendWeights : BLENDWEIGHT;
-    uint4  BlendIndices : BLENDINDICES;
+    int4  BlendIndices : BLENDINDICES;
 	float3 BiTangent : NORMAL2;
 };
 
@@ -30,9 +31,10 @@ struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
-	float3 Normal : NORMAL;//eye space
-	float3 Eye : POSITION1;//eye space
-	float3 ToLight : POSITION2;//eye space
+	
+	float3 Normal : NORMAL0;//eye space
+	float3 Eye : TEXCOORD1;//eye space
+	float3 ToLight : TEXCOORD2;//eye space
 };
 
 PS_INPUT VS(VS_INPUT i)
@@ -101,6 +103,7 @@ float4 PS(PS_INPUT input) : SV_Target
 	float3 eye = normalize(input.Eye);
 	
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
+	
 	if (LightType == 1) {
 		float3 light = normalize(input.ToLight);
 		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);

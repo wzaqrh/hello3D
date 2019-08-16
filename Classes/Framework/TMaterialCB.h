@@ -72,9 +72,13 @@ __declspec(align(16)) struct cbUnityGlobal
 };
 
 struct TConstBufferDeclBuilder {
-	TConstBufferDecl mDecl;
+	TConstBufferDecl mDeclNative;
+	TConstBufferDecl& mDecl;
 public:
+	TConstBufferDeclBuilder();
+	TConstBufferDeclBuilder(TConstBufferDecl& decl);
 	TConstBufferDecl& Build();
 	TConstBufferDeclBuilder& Add(const TConstBufferDeclElement& elem);
+	TConstBufferDeclBuilder& Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl);
 };
 #define MAKE_CBDESC(CB) (CB::GetDesc())

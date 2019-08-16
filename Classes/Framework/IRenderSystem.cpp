@@ -8,7 +8,7 @@
 
 IRenderSystem::IRenderSystem()
 {
-	//mDrawLimit = 5;
+	mDrawLimit = 4;
 }
 
 IRenderSystem::~IRenderSystem()
@@ -17,6 +17,7 @@ IRenderSystem::~IRenderSystem()
 
 bool IRenderSystem::_CanDraw()
 {
+	//return mDrawCount++ < mDrawLimit;
 	//return mDrawCount++ == mDrawLimit-1;
 	return true;
 }

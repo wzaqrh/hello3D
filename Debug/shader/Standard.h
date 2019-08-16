@@ -14,8 +14,7 @@ struct LIGHT_POINT
 struct LIGHT_SPOT
 {
 	LIGHT_POINT Base;
-	float3 Direction;
-    float Cutoff;
+	float4 DirectionCutOff;
 };
 
 static const int MAX_LIGHTS = 4;

@@ -1,6 +1,6 @@
 #pragma once
-
 #include "std.h"
+#include "TPredefine.h"
 
 template<class T>
 T clamp(T minVal, T maxVal, T v) {
@@ -71,9 +71,9 @@ enum enLightType {
 
 class TDirectLight {
 public:
-	XMFLOAT4 mPosition;//world space
-	XMFLOAT4 mDiffuseColor;
-	XMFLOAT4 mSpecularColorPower;
+	XMFLOAT4 LightPos;//world space
+	XMFLOAT4 DiffuseColor;
+	XMFLOAT4 SpecularColorPower;
 public:
 	TDirectLight();
 	void SetDirection(float x, float y, float z);
@@ -82,28 +82,33 @@ public:
 	void SetSpecularPower(float power);
 public:
 	TCameraBase GetLightCamera(TCamera& otherCam);
+	static TConstBufferDecl& GetDesc();
 };
 typedef std::shared_ptr<TDirectLight> TDirectLightPtr;
 
 class TPointLight : public TDirectLight {
 public:
-	XMFLOAT4 mAttenuation;
+	XMFLOAT4 Attenuation;
 public:
 	TPointLight();
 	void SetPosition(float x, float y, float z);
 	void SetAttenuation(float a, float b, float c);
+public:
 	TCameraBase GetLightCamera(TCamera& otherCam);
+	static TConstBufferDecl& GetDesc();
 };
 typedef std::shared_ptr<TPointLight> TPointLightPtr;
 
 class TSpotLight : public TPointLight {
 public:
-	XMFLOAT4 mDirCutOff;
+	XMFLOAT4 DirectionCutOff;
 public:
 	TSpotLight();
 	void SetDirection(float x, float y, float z);
 	void SetCutOff(float cutoff);
 	void SetAngle(float radian);
+public:
+	static TConstBufferDecl& GetDesc();
 };
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
@@ -140,6 +145,7 @@ DECLRAE_CBET(E_CONSTBUF_ELEM_STRUCT, TDirectLight);
 DECLRAE_CBET(E_CONSTBUF_ELEM_STRUCT, TPointLight);
 DECLRAE_CBET(E_CONSTBUF_ELEM_STRUCT, TSpotLight);
 template<class T> inline EConstBufferElementType GetCBEType(const T& Value) { return static_cast<EConstBufferElementType>(CBETypeTrait<T>::value); }
+template<class T> inline TConstBufferDecl& GetDecl(const T& Value) { return T::GetDesc(); }
 
 struct TConstBufferDeclElement {
 	size_t offset;
@@ -153,14 +159,19 @@ public:
 #define CBELEMNT(CLS) TConstBufferDeclElement(#CLS, GetCBEType(cb.CLS), sizeof(cb.CLS))
 #define BUILD_ADD(CLS) builder.Add(CBELEMNT(CLS));
 
+#define BUILD_ADDSUB(CLS) builder.Add(CBELEMNT(CLS), GetDecl(cb.CLS));
+
 #define CBELEMNTS(CLS, N) TConstBufferDeclElement(#CLS, GetCBEType(cb.CLS[0]), sizeof(cb.CLS), ARRAYSIZE(cb.CLS))
 #define BUILD_ADDS(CLS) builder.Add(CBELEMNTS(CLS));
 
 struct TConstBufferDecl {
 	std::vector<TConstBufferDeclElement> elements;
+	std::map<std::string, TConstBufferDecl> subDecls;
 	size_t bufferSize = 0;
 public:
 	TConstBufferDeclElement& Add(const TConstBufferDeclElement& elem);
+	TConstBufferDeclElement& Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl);
+	TConstBufferDeclElement& Last();
 };
 typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
 

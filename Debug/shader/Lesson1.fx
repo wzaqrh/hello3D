@@ -27,8 +27,7 @@ PS_INPUT VS(VS_INPUT i)
 #if 1
 	matrix MWVP = mul(WVP, transpose(Model));
 	
-	float4 skinPos = Skinning(i.BlendWeights, (i.BlendIndices), float4(i.Pos.xyz, 1.0));
-	//float4 skinPos = float4(i.Pos.xyz, 1.0);
+	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
 	output.Pos = mul(MWVP, skinPos);
 #else
 	output.Pos = mul(WVP, float4(i.Pos,1.0));

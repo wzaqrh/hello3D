@@ -14,10 +14,25 @@ TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& el
 	elements.push_back(elem);
 	return elements.back();
 }
-
-TConstBufferDecl& TConstBufferDeclBuilder::Build()
+TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl)
 {
-	return mDecl;
+	elements.push_back(elem);
+	subDecls.insert(std::make_pair(elem.name, subDecl));
+	return elements.back();
+}
+TConstBufferDeclElement& TConstBufferDecl::Last()
+{
+	return elements.back();
+}
+
+TConstBufferDeclBuilder::TConstBufferDeclBuilder(TConstBufferDecl& decl)
+	:mDecl(decl)
+{
+}
+
+TConstBufferDeclBuilder::TConstBufferDeclBuilder()
+	: mDecl(mDeclNative)
+{
 }
 
 TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElement& elem)
@@ -25,6 +40,18 @@ TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElem
 	mDecl.Add(elem).offset = mDecl.bufferSize;
 	mDecl.bufferSize += elem.size;
 	return *this;
+}
+
+TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl)
+{
+	mDecl.Add(elem, subDecl).offset = mDecl.bufferSize;
+	mDecl.bufferSize += elem.size;
+	return *this;
+}
+
+TConstBufferDecl& TConstBufferDeclBuilder::Build()
+{
+	return mDecl;
 }
 
 /********** cbGlobalParam **********/
@@ -54,12 +81,12 @@ TConstBufferDecl cbGlobalParam::MKDesc()
 	BUILD_ADD(ViewInv);
 	BUILD_ADD(ProjectionInv);
 
+	BUILD_ADDSUB(Light);
 	BUILD_ADD(LightType);
-	BUILD_ADD(Light);
-
+	
+	BUILD_ADD(HasDepthMap);
 	BUILD_ADD(LightView);
 	BUILD_ADD(LightProjection);
-	BUILD_ADD(HasDepthMap);
 	return builder.Build();
 }
 

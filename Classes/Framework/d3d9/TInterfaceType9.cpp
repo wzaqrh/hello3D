@@ -132,24 +132,31 @@ void TConstantTable::ReInit()
 }
 
 /********** TConstantTable **********/
-void TConstantTable::Init(ID3DXConstantTable* constTable)
+void TConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int constCount)
 {
 	mTable = constTable;
 
-	D3DXCONSTANTTABLE_DESC desc;
-	CheckHR(constTable->GetDesc(&desc));
+	if (constCount == 0) {
+		D3DXCONSTANTTABLE_DESC desc;
+		CheckHR(constTable->GetDesc(&desc));
+		constCount = desc.Constants;
+	}
 
 	D3DXCONSTANT_DESC constDesc;
 	std::pair<std::string, D3DXHANDLE> handleName;
-	for (size_t reg = 0; reg < desc.Constants; ++reg) {
-		handleName.second = constTable->GetConstant(NULL, reg);
+	for (size_t reg = 0; reg < constCount; ++reg) {
+		handleName.second = constTable->GetConstant(handle, reg);
 		UINT count = 1;
 		constTable->GetConstantDesc(handleName.second, &constDesc, &count);
 		if (count >= 1) {
 			handleName.first = constDesc.Name;
 			mHandleByName.insert(handleName);
 
-			mDescByName.insert(std::make_pair(handleName.first, constDesc));
+			if (constDesc.Class == D3DXPC_STRUCT) {
+				TConstantTablePtr subTab = std::make_shared<TConstantTable>();
+				subTab->Init(constTable, handleName.second, constDesc.StructMembers);
+				mSubByName[handleName.first] = subTab;
+			}
 		}
 		mHandles.push_back(handleName.second);
 	}
@@ -160,27 +167,17 @@ ID3DXConstantTable* TConstantTable::get()
 	return mTable;
 }
 
-ID3DXConstantTable* TConstantTable::operator->()
-{
-	return mTable;
-}
-
 size_t TConstantTable::size() const
 {
 	return mHandles.size();
 }
 
-D3DXHANDLE TConstantTable::operator[](size_t pos) const
+D3DXHANDLE TConstantTable::GetHandle(size_t pos) const
 {
 	return mHandles[pos];
 }
 
-D3DXHANDLE TConstantTable::At(size_t pos) const
-{
-	return mHandles[pos];
-}
-
-D3DXHANDLE TConstantTable::operator[](const std::string& name) const
+D3DXHANDLE TConstantTable::GetHandle(const std::string& name) const
 {
 	auto iter = mHandleByName.find(name);
 	if (iter != mHandleByName.end()) {
@@ -189,18 +186,37 @@ D3DXHANDLE TConstantTable::operator[](const std::string& name) const
 	else return NULL;
 }
 
-D3DXHANDLE TConstantTable::At(const std::string& name) const
+TConstantTablePtr TConstantTable::At(const std::string& name)
 {
-	auto iter = mHandleByName.find(name);
-	if (iter != mHandleByName.end()) {
+	auto iter = mSubByName.find(name);
+	if (iter != mSubByName.end()) {
 		return iter->second;
 	}
 	else return NULL;
 }
 
-void TConstantTable::SetValue(IDirect3DDevice9* device, TConstBufferDeclElement& elem, char* buffer9)
+void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDecl& decl)
 {
-	D3DXHANDLE handle = At(elem.name);
+	for (size_t j = 0; j < decl.elements.size(); ++j) {
+		TConstBufferDeclElement& elem = decl.elements[j];
+		const char* pName = elem.name.c_str();
+#if 0
+		auto iter = decl.subDecls.find(elem.name);
+		if (iter != decl.subDecls.end()) {
+			TConstantTablePtr subTab = At(elem.name);
+			if (subTab) {
+				subTab->SetValue(device, buffer9 + elem.offset, iter->second);
+			}
+		}
+		else 
+#endif
+			SetValue(device, buffer9, elem);
+	}
+}
+
+void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDeclElement& elem)
+{
+	D3DXHANDLE handle = GetHandle(elem.name);
 	if (handle) {
 		HRESULT hr = S_OK;
 		switch (elem.type)
@@ -215,11 +231,11 @@ void TConstantTable::SetValue(IDirect3DDevice9* device, TConstBufferDeclElement&
 				hr = mTable->SetMatrixTransposeArray(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.offset), elem.count);
 			}
 		}break;
+		case E_CONSTBUF_ELEM_STRUCT:
 		case E_CONSTBUF_ELEM_BOOL:
 		case E_CONSTBUF_ELEM_INT:
 		case E_CONSTBUF_ELEM_FLOAT:
 		case E_CONSTBUF_ELEM_FLOAT4:
-		case E_CONSTBUF_ELEM_STRUCT:
 		default:
 			hr = mTable->SetValue(device, handle, buffer9 + elem.offset, elem.size);
 			break;
