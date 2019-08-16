@@ -5,6 +5,7 @@
 #include "TPostProcess.h"
 #include "TThreadPump.h"
 #include "TInterfaceType11.h"
+#include "TMaterialCB.h"
 
 TRenderSystem11::TRenderSystem11()
 {
@@ -795,11 +796,12 @@ void TRenderSystem11::RenderOperation(const TRenderOperation& op, const std::str
 void TRenderSystem11::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mDefCamera);
-	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+	cbGlobalParam globalParam;
+	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 	for (int i = 0; i < opQueue.size(); ++i)
 		if (opQueue[i].mMaterial->IsLoaded())
 		{
-			globalParam.mWorld = opQueue[i].mWorldTransform;
+			globalParam.World = opQueue[i].mWorldTransform;
 			RenderOperation(opQueue[i], lightMode, globalParam);
 		}
 }

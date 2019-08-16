@@ -41,7 +41,7 @@ public:
 protected:
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
-	cbGlobalParam MakeAutoParam(TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
+	void MakeAutoParam(cbGlobalParam& param, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
 public:
 	TSpotLightPtr AddSpotLight();
 	TPointLightPtr AddPointLight();

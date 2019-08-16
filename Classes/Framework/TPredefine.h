@@ -21,6 +21,8 @@ typedef std::shared_ptr<TPointLight> TPointLightPtr;
 class TSpotLight;
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
+struct cbGlobalParam;
+
 struct TConstBufferDecl;
 typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
 //TInterfaceType.h

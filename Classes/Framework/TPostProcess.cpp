@@ -183,11 +183,8 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 TConstBufferDecl& cbBloom::GetDesc()
 {
 	TConstBufferDeclBuilder builder;
-	for (size_t i = 0; i < 16; ++i) {
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-	}
-	for (size_t i = 0; i < 16; ++i) {
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-	}
+	cbBloom cb;
+	builder.Add(CBELEMNTS(SampleOffsets));
+	builder.Add(CBELEMNTS(SampleWeights));
 	return builder.Build();
 }

@@ -1,10 +1,10 @@
 #include "TMaterialCB.h"
 
-TConstBufferDeclElement::TConstBufferDeclElement(size_t __size, EConstBufferElementType __type, D3DTRANSFORMSTATETYPE __mtype /*= D3DTS_FORCE_DWORD*/, size_t __offset /*= 0*/)
-	:offset(__offset)
+TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, size_t __size, size_t __count, size_t __offset)
+	:name(__name)
 	,size(__size)
-	,type(__type)
-	,matrixType(__mtype)
+	,count(__count)
+	,offset(__offset)
 {
 }
 
@@ -14,7 +14,7 @@ TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& el
 	return elements.back();
 }
 
-TConstBufferDecl TConstBufferDeclBuilder::Build()
+TConstBufferDecl& TConstBufferDeclBuilder::Build()
 {
 	return mDecl;
 }
@@ -30,9 +30,9 @@ TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElem
 cbGlobalParam::cbGlobalParam()
 {
 	auto Ident = XMMatrixIdentity();
-	mWorld = Ident;
-	mView = Ident;
-	mProjection = Ident;
+	World = Ident;
+	View = Ident;
+	Projection = Ident;
 }
 
 TConstBufferDecl& cbGlobalParam::GetDesc()
@@ -44,31 +44,49 @@ TConstBufferDecl& cbGlobalParam::GetDesc()
 TConstBufferDecl cbGlobalParam::MKDesc()
 {
 	TConstBufferDeclBuilder builder;
-	for (size_t i = 0; i < 6; ++i) {
-		builder.Add(CBELEMNT(XMMATRIX, E_CONSTBUF_ELEM_MATRIX));
-	}
-	builder.Add(CBELEMNT(TINT4, E_CONSTBUF_ELEM_INT4));
-	for (size_t i = 0; i < MAX_LIGHTS; ++i) {
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-	}
-	for (size_t i = 0; i < MAX_LIGHTS; ++i) {
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-	}
-	for (size_t i = 0; i < MAX_LIGHTS; ++i) {
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-		builder.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4));
-	}
-	builder.Add(CBELEMNT(XMMATRIX, E_CONSTBUF_ELEM_MATRIX));
-	builder.Add(CBELEMNT(XMMATRIX, E_CONSTBUF_ELEM_MATRIX));
-	builder.Add(CBELEMNT(BOOL, E_CONSTBUF_ELEM_BOOL));
+	cbGlobalParam cb;
+	BUILD_ADD(World);
+	BUILD_ADD(View);
+	BUILD_ADD(Projection);
+
+	BUILD_ADD(WorldInv);
+	BUILD_ADD(ViewInv);
+	BUILD_ADD(ProjectionInv);
+
+	BUILD_ADD(LightNum);
+	BUILD_ADDS(DirectLights);
+	BUILD_ADDS(PointLights);
+	BUILD_ADDS(SpotLights);
+
+	BUILD_ADD(LightView);
+	BUILD_ADD(LightProjection);
+	BUILD_ADD(HasDepthMap);
+	return builder.Build();
+}
+
+/********** TFogExp **********/
+TFogExp::TFogExp()
+{
+	SetColor(0.5, 0.5, 0.5);
+	SetExp(1);
+}
+
+void TFogExp::SetColor(float r, float g, float b)
+{
+	FogColor = XMFLOAT3(r, g, b);
+}
+
+void TFogExp::SetExp(float exp)
+{
+	FogExp = exp;
+}
+
+TConstBufferDecl& TFogExp::GetDesc()
+{
+	TConstBufferDeclBuilder builder;
+	TFogExp cb;
+	BUILD_ADD(FogColor);
+	BUILD_ADD(FogExp);
 	return builder.Build();
 }
 
@@ -82,10 +100,13 @@ TConstBufferDecl& cbWeightedSkin::GetDesc()
 TConstBufferDecl cbWeightedSkin::MKDesc()
 {
 	TConstBufferDeclBuilder builder;
-	builder.Add(CBELEMNT(XMMATRIX, E_CONSTBUF_ELEM_MATRIX));
-	for (size_t i = 0; i < MAX_MATRICES; ++i)
-		builder.Add(CBELEMNT(XMMATRIX, E_CONSTBUF_ELEM_MATRIX));
-	builder.Add(CBELEMNT(TINT4, E_CONSTBUF_ELEM_INT4));
+	cbWeightedSkin cb;
+	BUILD_ADD(mModel);
+	BUILD_ADDS(Models);
+	BUILD_ADD(hasNormal);
+	BUILD_ADD(hasMetalness);
+	BUILD_ADD(hasRoughness);
+	BUILD_ADD(hasAO);
 	return builder.Build();
 }
 
@@ -101,14 +122,20 @@ cbUnityMaterial::cbUnityMaterial()
 
 TConstBufferDecl& cbUnityMaterial::GetDesc()
 {
-	static TConstBufferDecl desc = 
-		TConstBufferDeclBuilder()
-		.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4))
-		.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4))
-		.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4))
-		.Add(CBELEMNT(TINT4, E_CONSTBUF_ELEM_INT4))
-		.Build();
+	static TConstBufferDecl desc = MKDesc();
 	return desc;
+}
+
+TConstBufferDecl cbUnityMaterial::MKDesc()
+{
+	TConstBufferDeclBuilder builder;
+	cbUnityMaterial cb;
+	BUILD_ADD(_SpecColor);
+	BUILD_ADD(_Color);
+	BUILD_ADD(_GlossMapScale);
+	BUILD_ADD(_OcclusionStrength);
+	BUILD_ADD(_SpecLightOff);
+	return builder.Build();
 }
 
 /********** cbUnityGlobal **********/
@@ -121,11 +148,16 @@ cbUnityGlobal::cbUnityGlobal()
 
 TConstBufferDecl& cbUnityGlobal::GetDesc()
 {
-	static TConstBufferDecl desc =
-		TConstBufferDeclBuilder()
-		.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4))
-		.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4))
-		.Add(CBELEMNT(XMFLOAT4, E_CONSTBUF_ELEM_FLOAT4))
-		.Build();
+	static TConstBufferDecl desc = MKDesc();
 	return desc;
+}
+
+TConstBufferDecl cbUnityGlobal::MKDesc()
+{
+	TConstBufferDeclBuilder builder;
+	cbUnityGlobal cb;
+	BUILD_ADD(_Unity_IndirectSpecColor);
+	BUILD_ADD(_AmbientOrLightmapUV);
+	BUILD_ADD(_Unity_SpecCube0_HDR);
+	return builder.Build();
 }

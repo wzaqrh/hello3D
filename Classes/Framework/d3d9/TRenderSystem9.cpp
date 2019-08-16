@@ -4,6 +4,7 @@
 #include "TSkyBox.h"
 #include "TPostProcess.h"
 #include "TInterfaceType9.h"
+#include "TMaterialCB.h"
 
 TRenderSystem9::TRenderSystem9()
 {
@@ -447,19 +448,19 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		for (size_t j = 0; j < decl->elements.size(); ++j) {
 			TConstBufferDeclElement& elem = decl->elements[j];
 
-			if (vsReg < vs->mConstHandles.size()) {
-				D3DXHANDLE handle = vs->mConstHandles[vsReg];
+			if (vsReg < vs->mConstHandles.size() && elem.name == vs->mConstHandles[vsReg].second) {
+				D3DXHANDLE handle = vs->mConstHandles[vsReg].first;
 				auto hr = vs->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
 				CheckHR(hr);
+				vsReg++;
 			}
-			vsReg++;
 
-			if (psReg < ps->mConstHandles.size()) {
-				D3DXHANDLE handle = ps->mConstHandles[psReg];
+			if (psReg < ps->mConstHandles.size() && elem.name == ps->mConstHandles[psReg].second) {
+				D3DXHANDLE handle = ps->mConstHandles[psReg].first;
 				auto hr = ps->mConstTable->SetValue(mDevice9, handle, buffer9 + elem.offset, elem.size);
 				//CheckHR(hr);
+				psReg++;
 			}
-			psReg++;
 		}
 	}
 
@@ -570,11 +571,12 @@ void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::stri
 void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mDefCamera);
-	cbGlobalParam globalParam = MakeAutoParam(&LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+	cbGlobalParam globalParam;
+	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 	for (int i = 0; i < opQueue.size(); ++i)
 		if (opQueue[i].mMaterial->IsLoaded())
 		{
-			globalParam.mWorld = opQueue[i].mWorldTransform;
+			globalParam.World = opQueue[i].mWorldTransform;
 			RenderOperation(opQueue[i], lightMode, globalParam);
 		}
 }
