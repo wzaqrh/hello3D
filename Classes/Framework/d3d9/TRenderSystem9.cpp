@@ -230,6 +230,19 @@ void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int
 	UpdateBuffer(buffer.get(), data, dataSize);
 }
 
+static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
+	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
+
+	if (CheckHR(pDevice9->CreateVertexShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
+
+	ID3DXConstantTable* constTable = nullptr;
+	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)pBlob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
+	ret->SetConstTable(constTable);
+
+	ret->mBlob = pBlob;
+	ret->SetLoaded();
+	return ret;
+}
 IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
@@ -245,19 +258,33 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 		return nullptr;
 	}
 
-	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
-	ret->mBlob = blob;
+	TVertexShader9Ptr ret = _CreateVSByBlob(mDevice9, blob);
 	ret->mErrBlob = errBlob;
-	if (CheckHR(mDevice9->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
-		
+	return ret;
+}
+IVertexShaderPtr TRenderSystem9::_CreateVSByFXC(const char* filename)
+{
+	TVertexShader9Ptr ret;
+	std::vector<char> buffer = ReadFile(filename, "rb");
+	if (!buffer.empty()) {
+		ret = _CreateVSByBlob(mDevice9, std::shared_ptr<IBlobData>(new TBlobDataStd(buffer)));
+	}
+	return ret;
+}
+
+static TPixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
+	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
+	ret->mBlob = pBlob;
+	
+	if (CheckHR(pDevice9->CreatePixelShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
+
 	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)blob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
+	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)pBlob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
 	ret->SetConstTable(constTable);
 
 	ret->SetLoaded();
 	return ret;
 }
-
 IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
@@ -273,16 +300,17 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 		return nullptr;
 	}
 
-	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
-	ret->mBlob = blob;
+	TPixelShader9Ptr ret = _CreatePSByBlob(mDevice9, blob);
 	ret->mErrBlob = errBlob;
-	if (CheckHR(mDevice9->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &ret->mShader))) return nullptr;
-
-	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)blob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
-	ret->SetConstTable(constTable);
-
-	ret->SetLoaded();
+	return ret;
+}
+IPixelShaderPtr TRenderSystem9::_CreatePSByFXC(const char* filename)
+{
+	TPixelShader9Ptr ret;
+	std::vector<char> buffer = ReadFile(filename, "rb");
+	if (!buffer.empty()) {
+		ret = _CreatePSByBlob(mDevice9, std::shared_ptr<IBlobData>(new TBlobDataStd(buffer)));
+	}
 	return ret;
 }
 
@@ -295,49 +323,6 @@ TProgramPtr TRenderSystem9::CreateProgramByCompile(const char* vsPath, const cha
 	program->SetPixel(_CreatePS(psPath, psEntry));
 	program->CheckAndSetLoaded();
 	return program;
-}
-
-IVertexShaderPtr TRenderSystem9::_CreateVSByFXC(const char* filename)
-{
-	TVertexShader9Ptr ret = std::make_shared<TVertexShader9>();
-	std::vector<char> buffer = ReadFile(filename, "rb");
-	if (!buffer.empty()) {
-		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataStd(buffer));
-		auto buffer_size = buffer.size();
-		HRESULT hr = mDevice9->CreateVertexShader((DWORD*)&buffer[0], &ret->mShader);
-		if (!FAILED(hr)) {
-			ret->SetLoaded();
-		}
-		else {
-			CheckHR(hr);
-			ret = nullptr;
-		}
-	}
-	else {
-		ret = nullptr;
-	}
-	return ret;
-}
-
-IPixelShaderPtr TRenderSystem9::_CreatePSByFXC(const char* filename)
-{
-	TPixelShader9Ptr ret = std::make_shared<TPixelShader9>();
-	std::vector<char> buffer = ReadFile(filename, "rb");
-	if (!buffer.empty()) {
-		ret->mBlob = std::shared_ptr<IBlobData>(new TBlobDataStd(buffer));
-		HRESULT hr = mDevice9->CreatePixelShader((DWORD*)&buffer[0], &ret->mShader);
-		if (!FAILED(hr)) {
-			ret->SetLoaded();
-		}
-		else {
-			CheckHR(hr);
-			ret = nullptr;
-		}
-	}
-	else {
-		ret = nullptr;
-	}
-	return ret;
 }
 
 TProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)

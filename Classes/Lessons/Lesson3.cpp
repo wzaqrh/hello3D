@@ -45,4 +45,4 @@ void Lesson3::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");
+auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");
