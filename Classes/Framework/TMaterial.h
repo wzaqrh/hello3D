@@ -39,6 +39,7 @@ public:
 	std::shared_ptr<TPass> Clone(IRenderSystem* pRenderSys);
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
+	void ClearSamplers();
 	IRenderTexturePtr AddIterTarget(IRenderTexturePtr target);
 	
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
@@ -55,7 +56,8 @@ public:
 	std::shared_ptr<TTechnique> Clone(IRenderSystem* pRenderSys);
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
-	
+	void ClearSamplers();
+
 	TPassPtr GetPassByName(const std::string& passName);
 	std::vector<TPassPtr> GetPassesByName(const std::string& passName);
 
@@ -67,11 +69,13 @@ struct TMaterial : public IResource {
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
-	void AddTechnique(TTechniquePtr technique);
 	std::shared_ptr<TMaterial> Clone(IRenderSystem* pRenderSys);
+	void AddTechnique(TTechniquePtr technique);
 
 	TTechniquePtr CurTech();
 	TTechniquePtr SetCurTechByIdx(int idx);
+	void SetCurTechByName(const std::string& name);
+
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 };
@@ -84,14 +88,17 @@ struct TMaterialBuilder {
 public:
 	TMaterialBuilder(TMaterialPtr material);
 	TMaterialBuilder();
-	TMaterialBuilder& AddTechnique();
+	TMaterialBuilder& AddTechnique(const std::string& name = "d3d11");
+	TMaterialBuilder& CloneTechnique(IRenderSystem* pRenderSys, const std::string& name);
 	TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName);
 	TMaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName);
 
 	TMaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
 	TProgramPtr SetProgram(TProgramPtr program);
-	TMaterialBuilder& AddSampler(ISamplerStatePtr sampler);
+	TMaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1);
+	TMaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1);
+	TMaterialBuilder& ClearSamplersToTech();
 	TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique=true);
 	TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
 	TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target);

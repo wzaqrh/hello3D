@@ -59,21 +59,11 @@ void Lesson6::OnInitLight()
 void Lesson6::OnPostInitDevice()
 {
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
-#if 0
-	//mRenderSys->_CreatePSByFXC("shader\\ModelPbr_PS.cso");
-	//mRenderSys->_CreateVS("shader\\LayerColor.fx", nullptr, false);
-	//mRenderSys->_CreateVSByFXC("shader\\LayerColor_VS.cso");
-	//mRenderSys->_CreateVSByFXC("shader\\Model_VS.cso");
-	//mRenderSys->_CreateVSByFXC("shader\\ModelPbr_VS.cso");
-#else
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
 	mRenderSys->SetPerspectiveCamera(45, 30, 1000);
-	{
-		TIME_PROFILE(SetSkyBox);
-		//mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
-	}
 
+#if 1
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
 	auto fileName = "Male02.FBX";//99ms,4688ms
 	//auto fileName = "Male02.assbin";//37ms,2823ms
@@ -111,6 +101,10 @@ void Lesson6::OnPostInitDevice()
 			}
 		}
 	}
+#else
+	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL);
+	auto fileName = "Male02.FBX";//99ms,4688ms
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 #endif
 }
 

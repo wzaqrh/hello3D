@@ -24,11 +24,11 @@ SET OUT=d3d9/
 ::fxc "%MACRO%" /T "%PS_VERSION%" /Fo "%OUT%"Model_PSShadowCaster.cso /E PSShadowCaster Model.fx
 
 ::ModelPbr
-::fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VS.cso /E VS ModelPbr.fx
-::fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PS.cso /E PS ModelPbr.fx
-::fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PSAdd.cso /E PSAdd ModelPbr.fx
-::fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VSShadowCaster.cso /E VSShadowCaster ModelPbr.fx
-::fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PSShadowCaster.cso /E PSShadowCaster ModelPbr.fx
+fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VS.cso /E VS ModelPbr.fx
+fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PS.cso /E PS ModelPbr.fx
+fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PSAdd.cso /E PSAdd ModelPbr.fx
+fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VSShadowCaster.cso /E VSShadowCaster ModelPbr.fx
+fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PSShadowCaster.cso /E PSShadowCaster ModelPbr.fx
 
 ::Skybox
 ::fxc "%MACRO%" /T "%VS_VERSION%" /Fo "%OUT%"Skybox_VS.cso /E VS Skybox.fx

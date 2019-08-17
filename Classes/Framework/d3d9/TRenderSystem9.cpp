@@ -24,8 +24,12 @@ bool TRenderSystem9::Initialize()
 	UINT width = rc.right - rc.left;
 	UINT height = rc.bottom - rc.top;
 
-	if (!_CreateDeviceAndSwapChain()) return false;
+	if (NULL == (mD3D9 = Direct3DCreate9(D3D_SDK_VERSION))) {
+		CheckHR(E_FAIL);
+		return false;
+	}
 	if (!_GetDeviceCaps()) return false;
+	if (!_CreateDeviceAndSwapChain()) return false;
 	_SetRasterizerState();
 
 	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
@@ -52,19 +56,30 @@ bool TRenderSystem9::Initialize()
 }
 
 bool TRenderSystem9::_CreateDeviceAndSwapChain()
-{
-	if (NULL == (mD3D9 = Direct3DCreate9(D3D_SDK_VERSION))) {
-		CheckHR(E_FAIL);
+{	
+	// Get the desktop display mode.
+	D3DDISPLAYMODE displayMode;
+	if (CheckHR(mD3D9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &displayMode)))
 		return false;
+
+	int sampleType = D3DMULTISAMPLE_16_SAMPLES;
+	DWORD sampleQuality = 0;
+	for (; sampleType >= D3DMULTISAMPLE_NONE; --sampleType) {
+		if (SUCCEEDED(mD3D9->CheckDeviceMultiSampleType(mD3DCaps.AdapterOrdinal, mD3DCaps.DeviceType, 
+			displayMode.Format, FALSE, (D3DMULTISAMPLE_TYPE)sampleType, &sampleQuality))) {
+			break;
+		}
 	}
 
 	D3DPRESENT_PARAMETERS d3dpp;
 	ZeroMemory(&d3dpp, sizeof(d3dpp));
 	d3dpp.Windowed = TRUE;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;// D3DFMT_A8B8G8R8;
+	d3dpp.BackBufferFormat = displayMode.Format;// D3DFMT_A8B8G8R8;
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24X8;
+	d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)sampleType;
+	//d3dpp.MultiSampleQuality = sampleQuality;
 
 	bool success = false;
 	int BehaviorFlags[] = { D3DCREATE_HARDWARE_VERTEXPROCESSING, D3DCREATE_HARDWARE_VERTEXPROCESSING, D3DCREATE_MIXED_VERTEXPROCESSING, D3DCREATE_SOFTWARE_VERTEXPROCESSING };
@@ -74,7 +89,7 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 			break;
 		}
 	}
-
+	assert(success);
 	return success;
 }
 
@@ -146,7 +161,9 @@ void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 
 TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
 {
-	return mMaterialFac->GetMaterial(name, callback);
+	TMaterialPtr material = mMaterialFac->GetMaterial(name, callback);
+	material->SetCurTechByName("d3d9");
+	return material;
 }
 
 IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
@@ -465,7 +482,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	mDevice9->SetVertexShader(vs->GetShader9());
 	mDevice9->SetPixelShader(ps->GetShader9());
 
-#if 0
+#if 1
 	if (!pass->mSamplers.empty()) {
 		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
 			ISamplerStatePtr sampler = pass->mSamplers[i];
@@ -474,6 +491,16 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 				mDevice9->SetSamplerState(i, pair.first, pair.second);
 			}
 		}
+	}
+#else
+	for (size_t slot = 0; slot < 8; ++slot) {
+		mDevice9->SetSamplerState(slot, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+		mDevice9->SetSamplerState(slot, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+		mDevice9->SetSamplerState(slot, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+
+		mDevice9->SetSamplerState(slot, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		mDevice9->SetSamplerState(slot, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		mDevice9->SetSamplerState(slot, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 	}
 #endif
 }

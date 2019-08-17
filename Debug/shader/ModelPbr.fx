@@ -2,11 +2,39 @@
 #include "Standard.h"
 #include "Skeleton.h"
 
+#if SHADER_MODEL > 30000
 Texture2D txAlbedo : register(t0);//rgb
 Texture2D txNormal : register(t1);//rgb
 Texture2D txMetalness : register(t2);//r
 Texture2D txSmoothness : register(t3);//r
 Texture2D txAmbientOcclusion : register(t4);//r
+#else
+texture  textureAlbedo : register(t0);
+sampler2D txAlbedo : register(s0) = sampler_state { 
+	Texture = <textureAlbedo>; 
+};
+
+texture  textureNormal : register(t1);
+sampler2D txNormal : register(s1) = sampler_state { 
+	Texture = <textureNormal>; 
+};
+
+texture  textureMetalness : register(t2);
+sampler2D txMetalness : register(s2) = sampler_state { 
+	Texture = <textureMetalness>; 
+};
+
+texture  textureSmoothness : register(t3);
+sampler2D txSmoothness : register(s3) = sampler_state { 
+	Texture = <textureSmoothness>;
+};
+
+texture  textureAmbientOcclusion : register(t4);
+sampler2D txAmbientOcclusion : register(s4) = sampler_state { 
+	Texture = <textureAmbientOcclusion>; 	
+};
+#endif
+
 
 cbuffer cbUnityMaterial : register(b2)
 {

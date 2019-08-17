@@ -32,6 +32,11 @@ ISamplerStatePtr TPass::AddSampler(ISamplerStatePtr sampler)
 	return sampler;
 }
 
+void TPass::ClearSamplers()
+{
+	mSamplers.clear();
+}
+
 IRenderTexturePtr TPass::AddIterTarget(IRenderTexturePtr target)
 {
 	mIterTargets.push_back(target);
@@ -112,6 +117,12 @@ ISamplerStatePtr TTechnique::AddSampler(ISamplerStatePtr sampler)
 	return sampler;
 }
 
+void TTechnique::ClearSamplers()
+{
+	for (auto& pass : mPasses)
+		pass->ClearSamplers();
+}
+
 TPassPtr TTechnique::GetPassByName(const std::string& passName)
 {
 	TPassPtr pass;
@@ -167,6 +178,15 @@ TTechniquePtr TMaterial::SetCurTechByIdx(int idx)
 	return mTechniques[mCurTechIdx];
 }
 
+void TMaterial::SetCurTechByName(const std::string& name)
+{
+	for (size_t idx = 0; idx < mTechniques.size(); ++idx)
+		if (mTechniques[idx]->mName == name) {
+			mCurTechIdx = idx;
+			break;
+		}
+}
+
 IContantBufferPtr TMaterial::AddConstBuffer(const TContantBufferInfo& cbuffer)
 {
 	for (auto& tech : mTechniques)
@@ -211,9 +231,18 @@ TMaterialBuilder::TMaterialBuilder(TMaterialPtr material)
 	mCurPass = mCurTech->mPasses.empty() ? nullptr : mCurTech->mPasses[mCurTech->mPasses.size()-1];
 }
 
-TMaterialBuilder& TMaterialBuilder::AddTechnique()
+TMaterialBuilder& TMaterialBuilder::AddTechnique(const std::string& name)
 {
 	mCurTech = std::make_shared<TTechnique>();
+	mCurTech->mName = name;
+	mMaterial->AddTechnique(mCurTech);
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::CloneTechnique(IRenderSystem* pRenderSys, const std::string& name)
+{
+	mCurTech = mCurTech->Clone(pRenderSys);
+	mCurTech->mName = name;
 	mMaterial->AddTechnique(mCurTech);
 	return *this;
 }
@@ -252,9 +281,23 @@ TProgramPtr TMaterialBuilder::SetProgram(TProgramPtr program)
 	return program;
 }
 
-TMaterialBuilder& TMaterialBuilder::AddSampler(ISamplerStatePtr sampler)
+TMaterialBuilder& TMaterialBuilder::AddSampler(ISamplerStatePtr sampler, int count)
 {
-	mCurPass->AddSampler(sampler);
+	while (count-- > 0)
+		mCurPass->AddSampler(sampler);
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::AddSamplerToTech(ISamplerStatePtr sampler, int count /*= 1*/)
+{
+	while (count-- > 0)
+		mCurTech->AddSampler(sampler);
+	return *this;
+}
+
+TMaterialBuilder& TMaterialBuilder::ClearSamplersToTech()
+{
+	mCurTech->ClearSamplers();
 	return *this;
 }
 
@@ -345,6 +388,13 @@ void SetCommonField2(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 }
 
+void AddD3D9Technique(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
+{
+	builder.CloneTechnique(pRenderSys, "d3d9");
+	builder.ClearSamplersToTech();
+	builder.AddSamplerToTech(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS), 8);
+}
+
 TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 {
 	TIME_PROFILE2(CreateStdMaterial, name);
@@ -361,6 +411,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		};
 		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Sprite")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
+		AddD3D9Technique(builder, mRenderSys);
 	}
 	else if (name == E_MAT_LAYERCOLOR) {
 		SetCommonField(builder, mRenderSys);
@@ -372,6 +424,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		};
 		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("LayerColor")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
+		AddD3D9Technique(builder, mRenderSys);
 	}
 	else if (name == E_MAT_MODEL) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -404,6 +458,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model"), "VSShadowCaster", "PSShadowCaster"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		
+		AddD3D9Technique(builder, mRenderSys);
 	}
 	else if (name == E_MAT_MODEL_PBR) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -443,6 +499,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), "VSShadowCaster", "PSShadowCaster"));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		
+		AddD3D9Technique(builder, mRenderSys);
 	}
 	else if (name == E_MAT_MODEL_SHADOW) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -467,6 +525,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+		
+		AddD3D9Technique(builder, mRenderSys);
 	}
 	else if (name == E_MAT_SKYBOX) {
 		SetCommonField2(builder, mRenderSys);
@@ -477,6 +537,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS));
+		
+		AddD3D9Technique(builder, mRenderSys);
 	}
 	else if (name == E_MAT_POSTPROC_BLOOM) {
 #define NUM_TONEMAP_TEXTURES  10
@@ -568,6 +630,8 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
 		builder.SetTexture(2, TexBlooms[0]->GetColorTexture());
+
+		AddD3D9Technique(builder, mRenderSys);
 	}
 
 	material = builder.Build();
