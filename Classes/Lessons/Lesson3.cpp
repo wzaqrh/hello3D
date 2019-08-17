@@ -31,7 +31,7 @@ void Lesson3::OnPostInitDevice()
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.2.fx", "shader\\Lesson3.2.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.1.fx", "shader\\Lesson3.1.fx");
 	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.fx", "shader\\Lesson3.fx");
-	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
+	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 	//gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.03; mPosition = XMFLOAT3(0, -5, 0);
 	//mModel->PlayAnim(0);
 }
@@ -39,10 +39,10 @@ void Lesson3::OnPostInitDevice()
 void Lesson3::OnRender()
 {
 	if (mRenderSys->BeginScene()) {
-		mModel->Update(mTimer.mDeltaTime);
-		mModel->Draw();
+		if (mModel) mModel->Update(mTimer.mDeltaTime);
+		if (mModel) mModel->Draw();
 		mRenderSys->EndScene();
 	}
 }
 
-//auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");
+auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");

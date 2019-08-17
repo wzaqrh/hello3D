@@ -66,7 +66,7 @@ public:
 	virtual void EndScene();
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
 protected:
-	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false);
+	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 private:
 	HRESULT _CreateDeviceAndSwapChain(int width, int height);
 	HRESULT _CreateBackRenderTargetView();
@@ -84,12 +84,11 @@ protected:
 
 	ID3D11InputLayout* _CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 protected:
-	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
-	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
-	void RenderSkyBox();
-	void DoPostProcess();
-
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
+	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void _RenderSkyBox();
+	void _DoPostProcess();
 };
 

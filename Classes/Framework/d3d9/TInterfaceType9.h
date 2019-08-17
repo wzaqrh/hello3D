@@ -110,12 +110,15 @@ struct TTexture9 : public ITexture {
 private:
 	std::string path;
 	IDirect3DTexture9 *texture;
+	IDirect3DCubeTexture9* textureCube;
 public:
-	TTexture9(IDirect3DTexture9* __texture, std::string __path);
+	TTexture9(const std::string& __path);
+	TTexture9(IDirect3DTexture9 *__texture, const std::string& __path);
 	virtual IUnknown*& GetDeviceObject() override;
 
 	virtual void SetSRV9(IDirect3DTexture9* __texture);
 	virtual IDirect3DTexture9*& GetSRV9();
+	virtual IDirect3DCubeTexture9*& GetSRVCube9();
 
 	const std::string& GetPath() const;
 	int GetWidth();

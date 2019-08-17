@@ -104,7 +104,7 @@ TProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vs
 	}
 }
 
-ITexturePtr IRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/)
+ITexturePtr IRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
 {
 	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;
@@ -115,7 +115,7 @@ ITexturePtr IRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMA
 
 	ITexturePtr texView = nullptr;
 	if (mTexByPath.find(imgPath) == mTexByPath.end()) {
-		texView = _CreateTexture(imgPath.c_str(), format, true);
+		texView = _CreateTexture(imgPath.c_str(), format, async, isCube);
 		mTexByPath.insert(std::make_pair(imgPath, texView));
 	}
 	else {
@@ -148,16 +148,9 @@ void IRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 	}
 	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
 
-	{
-		XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.World));
-		globalParam.WorldInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.World));
-
-		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.View));
-		globalParam.ViewInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.View));
-
-		det = XMMatrixDeterminant(COPY_TO_GPU(globalParam.Projection));
-		globalParam.ProjectionInv = COPY_TO_GPU(XMMatrixInverse(&det, globalParam.Projection));
-	}
+	globalParam.WorldInv = XM::Inverse(globalParam.World);
+	globalParam.ViewInv = XM::Inverse(globalParam.View);
+	globalParam.ProjectionInv = XM::Inverse(globalParam.Projection);
 
 	globalParam.LightType = lightType + 1;
 	switch (lightType)

@@ -8,11 +8,20 @@ static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	return *ppDeviceObj;
 }
 /********** TTexture9 **********/
-TTexture9::TTexture9(IDirect3DTexture9* __texture, std::string __path)
-	:texture(__texture)
-	,path(__path)
+TTexture9::TTexture9(const std::string& __path)
+	:texture(nullptr)
+	, textureCube(nullptr)
+	, path(__path)
 {
 }
+
+TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
+	:texture(__texture)
+	, textureCube(nullptr)
+	, path(__path)
+{
+}
+
 IUnknown*& TTexture9::GetDeviceObject()
 {
 	return MakeDeviceObjectRef(texture);
@@ -25,6 +34,12 @@ IDirect3DTexture9*& TTexture9::GetSRV9()
 {
 	return texture;
 }
+
+IDirect3DCubeTexture9*& TTexture9::GetSRVCube9()
+{
+	return textureCube;
+}
+
 const std::string& TTexture9::GetPath() const
 {
 	return path;

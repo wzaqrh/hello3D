@@ -56,17 +56,17 @@ public:
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
 	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void _RenderSkyBox();
+	void _DoPostProcess();
 
-	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false);
-
+	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 	IVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr);
 	IPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr);
 	IVertexShaderPtr _CreateVSByFXC(const char* filename);
 	IPixelShaderPtr _CreatePSByFXC(const char* filename);
-
 	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:
 	bool _GetDeviceCaps();

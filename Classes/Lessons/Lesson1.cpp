@@ -33,4 +33,4 @@ void TAppLesson1::OnRender()
 	}
 }
 
-auto reg = AppRegister<TAppLesson1>("TAppLesson1: Load Model");
+//auto reg = AppRegister<TAppLesson1>("TAppLesson1: Load Model");

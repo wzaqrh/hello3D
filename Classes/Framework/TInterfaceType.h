@@ -107,6 +107,7 @@ struct ITexture : public IResource {
 	
 	virtual void SetSRV9(IDirect3DTexture9* __texture) {};
 	virtual IDirect3DTexture9*& GetSRV9();
+	virtual IDirect3DCubeTexture9*& GetSRVCube9();
 
 	virtual const std::string& GetPath() const = 0;
 	virtual int GetWidth() = 0;

@@ -174,7 +174,7 @@ IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 
 void TRenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-	mDevice9->SetIndices(indexBuffer->GetBuffer9());
+	mDevice9->SetIndices(indexBuffer ? indexBuffer->GetBuffer9() : nullptr);
 }
 
 IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
@@ -403,7 +403,7 @@ IInputLayoutPtr TRenderSystem9::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_E
 	return ret;
 }
 
-ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async /*= false*/)
+ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
@@ -419,9 +419,19 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 
 	TTexture9Ptr pTextureRV;
 	if (IsFileExist(pSrcFile)) {
-		pTextureRV = std::make_shared<TTexture9>(nullptr, imgPath);
-		if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile, &pTextureRV->GetSRV9()))) {
-			pTextureRV = nullptr;
+		pTextureRV = std::make_shared<TTexture9>(imgPath);
+		if (isCube) {
+			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile, 
+				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3DEnumCT::d3d11To9(format)/*D3DFMT_A16B16G16R16F*/,
+				D3DPOOL_MANAGED, D3DX_FILTER_NONE/*D3DX_DEFAULT */, D3DX_FILTER_NONE, 0, NULL,
+				NULL, &pTextureRV->GetSRVCube9()))) {
+				pTextureRV = nullptr;
+			}
+		}
+		else {
+			if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile, &pTextureRV->GetSRV9()))) {
+				pTextureRV = nullptr;
+			}
 		}
 	}
 	else {
@@ -446,19 +456,6 @@ void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.depthEnable);
 	mDevice9->SetRenderState(D3DRS_ZFUNC, D3DEnumCT::d3d11To9(depthState.depthFunc));
 	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.depthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
-}
-
-bool TRenderSystem9::BeginScene()
-{
-	if (FAILED(mDevice9->BeginScene())) 
-		return false;
-	return true;
-}
-
-void TRenderSystem9::EndScene()
-{
-	mDevice9->EndScene();
-	mDevice9->Present(NULL, NULL, NULL, NULL);
 }
 
 void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
@@ -508,31 +505,32 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 	assert(FALSE);
 	return 0;
 }
-
 void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
 {
 	if (iterCnt >= 0) {
 		_PushRenderTarget(pass->mIterTargets[iterCnt]);
 	}
-	else {
-		if (pass->mRenderTarget)
-			_PushRenderTarget(pass->mRenderTarget);
+	else if (pass->mRenderTarget) {
+		_PushRenderTarget(pass->mRenderTarget);
 	}
 
 	if (iterCnt >= 0) {
 		if (iterCnt + 1 < pass->mIterTargets.size())
 			textures[0] = pass->mIterTargets[iterCnt + 1]->GetColorTexture();
 	}
-	else {
-		if (!pass->mIterTargets.empty())
-			textures[0] = pass->mIterTargets[0]->GetColorTexture();
+	else if (!pass->mIterTargets.empty()) {
+		textures[0] = pass->mIterTargets[0]->GetColorTexture();
 	}
 
 	{
-		if (textures.size() > 0) {
-			for (size_t i = 0; i < textures.size(); ++i) {
-				auto texture = textures[i] ? textures[i]->GetSRV9() : nullptr;
-				if (texture) mDevice9->SetTexture(i, texture);
+		for (size_t i = 0; i < textures.size(); ++i) {
+			if (textures[i]) {
+				IDirect3DTexture9* texture = textures[i]->GetSRV9();
+				IDirect3DCubeTexture9* textureCube = textures[i]->GetSRVCube9();
+				if (texture) 
+					mDevice9->SetTexture(i, texture);
+				else if (textureCube) 
+					mDevice9->SetTexture(i, textureCube);
 			}
 		}
 
@@ -561,9 +559,8 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 	if (iterCnt >= 0) {
 		_PopRenderTarget();
 	}
-	else {
-		if (pass->mRenderTarget)
-			_PopRenderTarget();
+	else if (pass->mRenderTarget) {
+		_PopRenderTarget();
 	}
 }
 
@@ -603,8 +600,6 @@ void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::stri
 	}
 }
 
-#define MKTRANSPOSE(M) globalParam.M = XMMatrixTranspose(globalParam.M);
-
 void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mDefCamera);
@@ -613,9 +608,9 @@ void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, con
 	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 
 	for (int i = 0; i < opQueue.size(); ++i)
-		if (opQueue[i].mMaterial->IsLoaded())
-		{
+		if (opQueue[i].mMaterial->IsLoaded()) {
 			globalParam.World = opQueue[i].mWorldTransform;
+			globalParam.WorldInv = XM::Inverse(globalParam.World);
 			RenderOperation(opQueue[i], lightMode, globalParam);
 		}
 }
@@ -664,4 +659,39 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 		IDirect3DTexture9* texViewNull = nullptr;
 		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, texViewNull);
 	}
+}
+
+void TRenderSystem9::_RenderSkyBox()
+{
+	if (mSkyBox) mSkyBox->Draw();
+}
+
+void TRenderSystem9::_DoPostProcess()
+{
+
+}
+
+bool TRenderSystem9::BeginScene()
+{
+	if (FAILED(mDevice9->BeginScene()))
+		return false;
+
+	mCastShdowFlag = false;
+
+	if (!mPostProcs.empty()) {
+		SetRenderTarget(mPostProcessRT);
+		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
+	}
+	_RenderSkyBox();
+	return true;
+}
+
+void TRenderSystem9::EndScene()
+{
+	if (!mPostProcs.empty()) {
+		SetRenderTarget(nullptr);
+		_DoPostProcess();
+	}
+	mDevice9->EndScene();
+	mDevice9->Present(NULL, NULL, NULL, NULL);
 }

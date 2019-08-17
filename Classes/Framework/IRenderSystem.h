@@ -84,12 +84,12 @@ public:
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc) = 0;
 	virtual void SetDepthState(const TDepthState& depthState) = 0;
 public:
-	ITexturePtr GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
+	ITexturePtr GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);
 public:
 	virtual bool BeginScene() = 0;
 	virtual void EndScene() = 0;
 	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) = 0;
 	void Draw(IRenderable* renderable);
 protected:
-	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = false) = 0;
+	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube) = 0;
 };

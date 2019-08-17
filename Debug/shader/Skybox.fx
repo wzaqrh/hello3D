@@ -1,6 +1,21 @@
 /********** Skybox **********/
 #include "Standard.h"
-TextureCube  txDiffuse : register(t0);
+
+#if SHADER_MODEL > 30000
+TextureCube tcubeSkybox : register(t0);
+#else
+texture  textureCubeSkybox : register(t0);
+samplerCUBE tcubeSkybox : register(s0) =
+sampler_state
+{
+    Texture = <textureCubeSkybox>;
+    MinFilter = LINEAR;
+    MagFilter = LINEAR;
+    MipFilter = LINEAR;
+	AddressU = Wrap;
+	AddressV = Wrap;
+};
+#endif
 
 struct VS_INPUT
 {
@@ -26,7 +41,7 @@ PS_INPUT VS(VS_INPUT input)
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor = 1.0;
-	finalColor.rgb = txDiffuse.Sample(samLinear, input.Tex);
+	finalColor.rgb = GetTextureCube(tcubeSkybox, samLinear, input.Tex);
 	return finalColor;
 }
 

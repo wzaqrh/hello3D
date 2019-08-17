@@ -21,7 +21,7 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	Vertexs[3].pos = XMFLOAT4(fHighW, fHighH, 1.0f, 1.0f);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(SKYBOX_VERTEX) * 4, sizeof(SKYBOX_VERTEX), 0, Vertexs);
 
-	mCubeSRV = mRenderSys->GetTexByPath(imgName, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	mCubeSRV = mRenderSys->GetTexByPath(imgName, DXGI_FORMAT_R16G16B16A16_FLOAT, true, true);
 #if 0
 	auto pCam1 = mRenderSys->mDefCamera;
 	XMFLOAT3 pos0 = pCam->CalNDC(XMFLOAT3(fLowW, fLowH, 1.0f));

@@ -53,6 +53,7 @@ Texture2D txDepthMap : register(t8);
 TextureCube txSkybox : register(t9);
 
 #define GetTexture2D(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
+#define GetTextureCube(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
 #else
 texture  textureMain : register(t0);
 sampler2D txMain : register(s0) =
@@ -74,7 +75,7 @@ sampler_state
 };
 
 texture  textureSkybox : register(t9);
-sampler2D txSkybox : register(s9) =
+samplerCUBE txSkybox : register(s9) =
 sampler_state
 {
     Texture = <textureSkybox>;
@@ -86,6 +87,7 @@ sampler_state
 };
 
 #define GetTexture2D(TEX, SAMPLER, COORD) tex2D(TEX, COORD)
+#define GetTextureCube(TEX, SAMPLER, COORD) texCUBE(TEX, COORD) 
 #endif
 float4 GetTextureMain(float2 inputTex) {
 	return GetTexture2D(txMain, samLinear, inputTex);

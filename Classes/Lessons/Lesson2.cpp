@@ -3,7 +3,7 @@
 void TAppLesson2::OnInitLight()
 {
 	auto light = mRenderSys->AddPointLight();
-	light->SetDiffuseColor(1, 0, 0, 1);
+	light->SetDiffuseColor(1, 1, 1, 1);
 	light->SetPosition(0, 0, -200);
 }
 

@@ -429,3 +429,9 @@ void __log(const D3DCAPS9& caps)
 	__log(ss.c_str());
 }
 
+XMMATRIX XM::Inverse(const XMMATRIX& m)
+{
+	XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(m));
+	XMMATRIX ret = COPY_TO_GPU(XMMatrixInverse(&det, m));
+	return ret;
+}

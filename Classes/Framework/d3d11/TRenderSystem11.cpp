@@ -595,7 +595,7 @@ void TRenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, in
 	mDeviceContext->UpdateSubresource(buffer->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
-ITexturePtr TRenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async)
+ITexturePtr TRenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
@@ -802,9 +802,9 @@ void TRenderSystem11::RenderLight(TDirectLight* light, enLightType lightType, co
 	cbGlobalParam globalParam;
 	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 	for (int i = 0; i < opQueue.size(); ++i)
-		if (opQueue[i].mMaterial->IsLoaded())
-		{
+		if (opQueue[i].mMaterial->IsLoaded()) {
 			globalParam.World = opQueue[i].mWorldTransform;
+			globalParam.WorldInv = XM::Inverse(globalParam.World);
 			RenderOperation(opQueue[i], lightMode, globalParam);
 		}
 }
@@ -855,13 +855,13 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 	}
 }
 
-void TRenderSystem11::RenderSkyBox()
+void TRenderSystem11::_RenderSkyBox()
 {
 	if (mSkyBox)
 		mSkyBox->Draw();
 }
 
-void TRenderSystem11::DoPostProcess()
+void TRenderSystem11::_DoPostProcess()
 {
 	TDepthState orgState = mCurDepthState;
 	SetDepthState(TDepthState(false));
@@ -882,7 +882,7 @@ bool TRenderSystem11::BeginScene()
 		SetRenderTarget(mPostProcessRT);
 		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
-	RenderSkyBox();
+	_RenderSkyBox();
 	return true;
 }
 
@@ -890,7 +890,7 @@ void TRenderSystem11::EndScene()
 {
 	if (!mPostProcs.empty()) {
 		SetRenderTarget(nullptr);
+		_DoPostProcess();
 	}
-	DoPostProcess();
 	mSwapChain->Present(0, 0);
 }

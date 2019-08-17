@@ -77,6 +77,10 @@ XMFLOAT3 operator+(XMFLOAT3 lhs, XMFLOAT3 rht);
 XMFLOAT3 operator*(XMFLOAT3 lhs, float d);
 XMFLOAT2 operator-(XMFLOAT2 lhs, XMFLOAT2 rht);
 
+struct XM {
+	static XMMATRIX Inverse(const XMMATRIX& m);
+};
+
 #define COPY_TO_GPU(M) (M)
 
 void OutPutMatrix(FILE* fd, const aiMatrix4x4& m);
