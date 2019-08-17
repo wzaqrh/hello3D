@@ -109,6 +109,7 @@ unsigned int TVertexBuffer9::GetOffset()
 TRenderTexture9::TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;
+	mColorTexture->SetLoaded();
 	mColorBuffer = nullptr;
 	mDepthStencilBuffer = depthStencilBuffer;
 }

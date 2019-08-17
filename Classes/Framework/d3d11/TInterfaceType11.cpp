@@ -257,6 +257,7 @@ bool TRenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 		return false;
 	}
 	mRenderTargetPtr = std::make_shared<TTexture11>(mRenderTargetSRV, "RenderTexture");
+	mRenderTargetPtr->SetLoaded();
 	return true;
 }
 

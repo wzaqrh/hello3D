@@ -31,4 +31,4 @@ void Lesson8::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson8>("Lesson8: PostProcess Bloom");
+auto reg = AppRegister<Lesson8>("Lesson8: PostProcess Bloom");

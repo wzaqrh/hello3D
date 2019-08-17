@@ -42,12 +42,7 @@ SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 	return output;
 }
 
-float4 PSShadowCaster(SHADOW_PS_INPUT i)
-#if SHADER_MODEL > 30000 
-: SV_Target
-#else
-: COLOR
-#endif
+float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
 {
 	float depthValue = i.Depth.z / i.Depth.w;
 	float4 finalColor = depthValue;

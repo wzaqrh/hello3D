@@ -1,5 +1,6 @@
 #include "TMaterialCB.h"
 
+/********** TConstBufferDeclElement **********/
 TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)
 	:name(__name)
 	,type(__type)
@@ -25,13 +26,9 @@ TConstBufferDeclElement& TConstBufferDecl::Last()
 	return elements.back();
 }
 
+/********** TConstBufferDeclBuilder **********/
 TConstBufferDeclBuilder::TConstBufferDeclBuilder(TConstBufferDecl& decl)
 	:mDecl(decl)
-{
-}
-
-TConstBufferDeclBuilder::TConstBufferDeclBuilder()
-	: mDecl(mDeclNative)
 {
 }
 
@@ -71,8 +68,7 @@ TConstBufferDecl& cbGlobalParam::GetDesc()
 
 TConstBufferDecl cbGlobalParam::MKDesc()
 {
-	TConstBufferDeclBuilder builder;
-	cbGlobalParam cb;
+	CBBEGIN(cbGlobalParam);
 	BUILD_ADD(World);
 	BUILD_ADD(View);
 	BUILD_ADD(Projection);
@@ -109,8 +105,7 @@ void TFogExp::SetExp(float exp)
 
 TConstBufferDecl& TFogExp::GetDesc()
 {
-	TConstBufferDeclBuilder builder;
-	TFogExp cb;
+	CBBEGIN(TFogExp);
 	BUILD_ADD(FogColorExp);
 	return builder.Build();
 }
@@ -124,8 +119,7 @@ TConstBufferDecl& cbWeightedSkin::GetDesc()
 
 TConstBufferDecl cbWeightedSkin::MKDesc()
 {
-	TConstBufferDeclBuilder builder;
-	cbWeightedSkin cb;
+	CBBEGIN(cbWeightedSkin);
 	BUILD_ADD(Model);
 	BUILD_ADDS(Models);
 	BUILD_ADD(hasNormal);
@@ -153,8 +147,7 @@ TConstBufferDecl& cbUnityMaterial::GetDesc()
 
 TConstBufferDecl cbUnityMaterial::MKDesc()
 {
-	TConstBufferDeclBuilder builder;
-	cbUnityMaterial cb;
+	CBBEGIN(cbUnityMaterial);
 	BUILD_ADD(_SpecColor);
 	BUILD_ADD(_Color);
 	BUILD_ADD(_GlossMapScale);
@@ -179,8 +172,7 @@ TConstBufferDecl& cbUnityGlobal::GetDesc()
 
 TConstBufferDecl cbUnityGlobal::MKDesc()
 {
-	TConstBufferDeclBuilder builder;
-	cbUnityGlobal cb;
+	CBBEGIN(cbUnityGlobal);
 	BUILD_ADD(_Unity_IndirectSpecColor);
 	BUILD_ADD(_AmbientOrLightmapUV);
 	BUILD_ADD(_Unity_SpecCube0_HDR);

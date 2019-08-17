@@ -182,8 +182,7 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 
 TConstBufferDecl& cbBloom::GetDesc()
 {
-	TConstBufferDeclBuilder builder;
-	cbBloom cb;
+	CBBEGIN(cbBloom);
 	builder.Add(CBELEMNTS(SampleOffsets));
 	builder.Add(CBELEMNTS(SampleWeights));
 	return builder.Build();

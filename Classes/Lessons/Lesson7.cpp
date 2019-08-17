@@ -84,4 +84,4 @@ void Lesson7::OnRender()
 #endif
 }
 
-auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");
+//auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");

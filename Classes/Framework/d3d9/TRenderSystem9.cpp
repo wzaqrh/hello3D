@@ -675,7 +675,15 @@ void TRenderSystem9::_RenderSkyBox()
 
 void TRenderSystem9::_DoPostProcess()
 {
+	TDepthState orgState = mCurDepthState;
+	SetDepthState(TDepthState(false));
 
+	TRenderOperationQueue opQue;
+	for (size_t i = 0; i < mPostProcs.size(); ++i)
+		mPostProcs[i]->GenRenderOperation(opQue);
+	RenderQueue(opQue, E_PASS_POSTPROCESS);
+
+	SetDepthState(orgState);
 }
 
 bool TRenderSystem9::BeginScene()

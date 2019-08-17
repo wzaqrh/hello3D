@@ -98,8 +98,8 @@ enum enTexturePbrType {
 	E_TEXTURE_PBR_ROUGHNESS,
 	E_TEXTURE_PBR_AO
 };
-#define E_TEXTURE_DEPTH_MAP 4
-#define E_TEXTURE_ENV 5
+#define E_TEXTURE_DEPTH_MAP 8
+#define E_TEXTURE_ENV 9
 
 struct ITexture : public IResource {
 	virtual void SetSRV11(ID3D11ShaderResourceView* __texture) {};
@@ -108,6 +108,8 @@ struct ITexture : public IResource {
 	virtual void SetSRV9(IDirect3DTexture9* __texture) {};
 	virtual IDirect3DTexture9*& GetSRV9();
 	virtual IDirect3DCubeTexture9*& GetSRVCube9();
+
+	bool HasSRV();
 
 	virtual const std::string& GetPath() const = 0;
 	virtual int GetWidth() = 0;

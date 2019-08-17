@@ -72,10 +72,9 @@ __declspec(align(16)) struct cbUnityGlobal
 };
 
 struct TConstBufferDeclBuilder {
-	TConstBufferDecl mDeclNative;
 	TConstBufferDecl& mDecl;
 public:
-	TConstBufferDeclBuilder();
+	//TConstBufferDeclBuilder();
 	TConstBufferDeclBuilder(TConstBufferDecl& decl);
 	TConstBufferDecl& Build();
 	TConstBufferDeclBuilder& Add(const TConstBufferDeclElement& elem);

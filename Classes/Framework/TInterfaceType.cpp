@@ -70,6 +70,11 @@ IDirect3DCubeTexture9*& ITexture::GetSRVCube9()
 	return srv;
 }
 
+bool ITexture::HasSRV()
+{
+	return GetSRV11() || GetSRV9() || GetSRVCube9();
+}
+
 /********** IHardwareBuffer **********/
 ID3D11Buffer*& IHardwareBuffer::GetBuffer11()
 {

@@ -61,7 +61,7 @@ void TTextureBySlot::Merge(const TTextureBySlot& other) {
 		textures.resize(other.textures.size());
 
 	for (size_t i = 0; i < other.textures.size(); ++i) {
-		if (other.textures[i]->GetSRV11()) {
+		if (other.textures[i] && other.textures[i]->HasSRV()) {
 			textures[i] = other.textures[i];
 		}
 	}

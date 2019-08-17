@@ -49,8 +49,8 @@ SamplerState samShadow : register(s3) {
 };
 
 Texture2D txMain : register(t0);
-Texture2D txDepthMap : register(t4);
-TextureCube txSkybox : register(t5);
+Texture2D txDepthMap : register(t8);
+TextureCube txSkybox : register(t9);
 
 #define GetTexture2D(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
 #define GetTextureCube(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
@@ -62,8 +62,8 @@ sampler_state
     Texture = <textureMain>;
 };
 
-texture  textureDepthMap : register(t4);
-sampler2D txDepthMap : register(s4) =
+texture  textureDepthMap : register(t8);
+sampler2D txDepthMap : register(s8) =
 sampler_state
 {
     Texture = <textureDepthMap>;
@@ -74,8 +74,8 @@ sampler_state
 	AddressV = Clamp;
 };
 
-texture  textureSkybox : register(t5);
-samplerCUBE txSkybox : register(s5) =
+texture  textureSkybox : register(t9);
+samplerCUBE txSkybox : register(s9) =
 sampler_state
 {
     Texture = <textureSkybox>;

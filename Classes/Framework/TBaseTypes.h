@@ -163,6 +163,8 @@ public:
 #define CBELEMNTS(CLS, N) TConstBufferDeclElement(#CLS, GetCBEType(cb.CLS[0]), sizeof(cb.CLS), ARRAYSIZE(cb.CLS))
 #define BUILD_ADDS(CLS) builder.Add(CBELEMNTS(CLS));
 
+#define CBBEGIN(CLS) static TConstBufferDecl decl; TConstBufferDeclBuilder builder(decl); CLS cb;
+
 struct TConstBufferDecl {
 	std::vector<TConstBufferDeclElement> elements;
 	std::map<std::string, TConstBufferDecl> subDecls;
