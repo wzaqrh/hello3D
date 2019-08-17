@@ -31,7 +31,7 @@ void Lesson7::OnPostInitDevice()
 #endif
 	
 	//std::string matName = E_MAT_MODEL_PBR;
-	std::string matName = E_MAT_MODEL_SHADOW;
+	std::string matName = E_MAT_MODEL;
 
 	auto move1 = std::make_shared<TMovable>();
 	move1->SetScale(SCALE_BASE);
@@ -84,4 +84,4 @@ void Lesson7::OnRender()
 #endif
 }
 
-//auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");
+auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");

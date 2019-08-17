@@ -25,40 +25,35 @@ void Lesson5::OnPostInitDevice()
 	mModel = new AssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	
-
 	mRendTexture = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
 
-
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
-	//mSprite->SetTexture(mRenderSys->CreateTexture("image\\smile.png"));
 	mSprite->SetTexture(mRendTexture->GetColorTexture());
 	mSprite->SetPosition(0, 0, 0);
 	mSprite->SetSize(5,5);
 
-
-	mLayerColor = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
+	/*mLayerColor = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
 	mLayerColor->SetPosition(-5, -5, 0);
-	mLayerColor->SetSize(5, 5);
+	mLayerColor->SetSize(5, 5);*/
 }
 
+//#define USE_RENDER_TARGET
 void Lesson5::OnRender()
 {
-	mRenderSys->SetRenderTarget(mRendTexture);
-	mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
-	{
-		mModel->Update(mTimer.mDeltaTime);
-#ifdef USE_RENDER_OP
-		//mRenderSys->SetWorldTransform(GetWorldTransform());
-#else
-		mRenderSys->ApplyMaterial(mModel->mMaterial, GetWorldTransform());
+	if (mRenderSys->BeginScene()) {
+#ifdef USE_RENDER_TARGET
+		mRenderSys->SetRenderTarget(mRendTexture);
+		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
 #endif
+		mModel->Update(mTimer.mDeltaTime);
 		mModel->Draw();
+#ifdef USE_RENDER_TARGET
+		mRenderSys->SetRenderTarget(nullptr);
+		if (mSprite) mSprite->Draw();
+		if (mLayerColor) mLayerColor->Draw();
+#endif
+		mRenderSys->EndScene();
 	}
-	mRenderSys->SetRenderTarget(nullptr);
-	
-	mSprite->Draw();
-
-	mLayerColor->Draw();
 }
 
 //auto reg = AppRegister<Lesson5>("TAppLesson5: RenderTarget");

@@ -690,8 +690,9 @@ void TRenderSystem9::EndScene()
 {
 	if (!mPostProcs.empty()) {
 		SetRenderTarget(nullptr);
-		_DoPostProcess();
 	}
+	_DoPostProcess();
+
 	mDevice9->EndScene();
 	mDevice9->Present(NULL, NULL, NULL, NULL);
 }

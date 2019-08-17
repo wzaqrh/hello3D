@@ -384,11 +384,26 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
+		//*//pass E_PASS_FORWARDBASE
+		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
 		SetCommonField(builder, mRenderSys);
 		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model")));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
+		//*//pass E_PASS_FORWARDADD
+		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model"), nullptr, "PSAdd"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+
 		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
+
+		//*//pass E_PASS_SHADOWCASTER
+		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
+		SetCommonField(builder, mRenderSys);
+		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model"), "VSShadowCaster", "PSShadowCaster"));
+		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
 	}
 	else if (name == E_MAT_MODEL_PBR) {
 		D3D11_INPUT_ELEMENT_DESC layout[] =

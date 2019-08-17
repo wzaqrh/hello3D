@@ -35,19 +35,6 @@ struct VS_INPUT
 	float3 BiTangent : NORMAL2;
 };
 
-struct PS_INPUT
-{
-    float4 Pos : SV_POSITION;
-	float2 Tex : TEXCOORD0;
-	float3 Normal : NORMAL;//world space
-	float3 Tangent : NORMAL1;//world space
-	float3 BiTangent : NORMAL2;//world space
-	float3 Eye : POSITION0;//world space
-	float3 SurfacePosition : POSITION1;//world space
-	float3x3 TangentBasis : TBASIS;
-	float4 PosInLight : POSITION2;//world space
-};
-
 /************ ShadowCaster ************/
 struct SHADOW_PS_INPUT
 {
@@ -74,6 +61,19 @@ float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
 }
 
 /************ ForwardBase ************/
+struct PS_INPUT
+{
+    float4 Pos : SV_POSITION;
+	float2 Tex : TEXCOORD0;
+	float3 Normal : NORMAL;//world space
+	float3 Tangent : NORMAL1;//world space
+	float3 BiTangent : NORMAL2;//world space
+	float3 Eye : POSITION0;//world space
+	float3 SurfacePosition : POSITION1;//world space
+	float3x3 TangentBasis : TBASIS;
+	float4 PosInLight : POSITION2;//world space
+};
+
 PS_INPUT VS(VS_INPUT i)
 {
 	PS_INPUT output = (PS_INPUT)0;
@@ -607,8 +607,8 @@ float4 PS(PS_INPUT input) : SV_Target
 
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
 
-    float2 projPosInLight = 0.5 * input.PosInLight.xy / input.PosInLight.w + float2(0.5, 0.5);
-    projPosInLight.y = 1.0f - input.PosInLight.y;
+    //float2 projPosInLight = 0.5 * input.PosInLight.xy / input.PosInLight.w + float2(0.5, 0.5);
+    //projPosInLight.y = 1.0f - input.PosInLight.y;
 	//finalColor.rgb = txDepthMap.Sample(samShadow, projPosInLight);
 	
 #if 0

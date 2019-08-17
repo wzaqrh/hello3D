@@ -2,9 +2,18 @@
 #include "Standard.h"
 #include "Skeleton.h"
 
-Texture2D txDiffuse : register(t0);
+#if SHADER_MODEL > 30000
 Texture2D txSpecular : register(t1);
 Texture2D txNormal : register(t2);
+#else
+texture  textureSpecular : register(t1);
+sampler2D txSpecular : register(s1) =
+sampler_state { Texture = <textureSpecular>; };
+
+texture  textureNormal : register(t2);
+sampler2D txNormal : register(s2) =
+sampler_state { Texture = <textureNormal>; };
+#endif
 
 struct VS_INPUT
 {
@@ -23,8 +32,8 @@ struct PS_INPUT
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL;//eye space
 	float3 Tangent : NORMAL1;//eye space
-	float3 Eye : POSITION0;//eye space
-	float3 SurfacePos : POSITION1;//eye space
+	float3 Eye : TEXCOORD1;//eye space
+	float3 SurfacePos : TEXCOORD2;//eye space
 };
 
 PS_INPUT VS(VS_INPUT i)
@@ -43,16 +52,15 @@ PS_INPUT VS(VS_INPUT i)
 	
     output.Pos = mul(Projection, output.Pos);
     
-	output.Tex = i.Tex;//float2(i.Tex.x, 1.0 - i.Tex.y);
+	output.Tex = i.Tex;
     return output;
 }
 
 float3 GetDiffuseBySampler(float3 normal, float3 light, float3 lightDiffuseColor, float2 texcoord) {
 	float diffuseFactor = saturate(dot(normal, light));
-	float3 diffuseMat = txDiffuse.Sample(samLinear, texcoord).xyz;
+	float3 diffuseMat = GetTexture2D(txMain, samLinear, texcoord).xyz;
 	return diffuseMat * diffuseFactor * lightDiffuseColor;
 }
-
 float3 GetSpecularByDef(float3 normal, float3 light, float3 eye, float4 SpecColorPower) {
 	float3 reflection = reflect(-light, normal);
 	float specularFactor = saturate(dot(reflection, eye));
@@ -60,7 +68,7 @@ float3 GetSpecularByDef(float3 normal, float3 light, float3 eye, float4 SpecColo
 	return specularFactor * SpecColorPower.xyz;
 }
 float3 GetSpecularBySampler(float3 normal, float3 light, float3 eye, float4 SpecColorPower, float2 texcoord) {
-	float3 specularMat = txSpecular.Sample(samLinear, texcoord).xyz;
+	float3 specularMat = GetTexture2D(txSpecular, samLinear, texcoord).xyz;
 	return GetSpecularByDef(normal, light, eye, SpecColorPower) * specularMat;
 }
 
@@ -73,21 +81,19 @@ float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 light, flo
 	}
 	return color;
 }
-
 float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance) {
-	float3 color = CalDirectLight(pointLight.L, normal, light, eye, texcoord);
+	float3 color = CalDirectLight(pointLight.Base, normal, light, eye, texcoord);
 	float Attenuation = pointLight.Attenuation.x 
 	+ pointLight.Attenuation.y * Distance 
 	+ pointLight.Attenuation.z * Distance * Distance;
 	return color / Attenuation;
 }
-
 float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance, float3 spotDirection) {
 	float3 color = 0.0;
 	float spotFactor = dot(light, spotDirection);
-	if (spotFactor > spotLight.Cutoff) {
+	if (spotFactor > spotLight.DirectionCutOff.w) {
 		color = CalPointLight(spotLight.Base, normal, light, eye, texcoord, Distance);
-        color = color * ((spotFactor - spotLight.Cutoff) / (1.0 - spotLight.Cutoff));
+        color = color * ((spotFactor - spotLight.DirectionCutOff.w) / (1.0 - spotLight.DirectionCutOff.w));
 	}
 	return color;
 }
@@ -99,52 +105,40 @@ float3x3 CalTBN(float3 normal, float3 tangent) {
 	return float3x3(t,b,n);
 }
 float3 GetBumpBySampler(float3x3 tbn, float2 texcoord) {
-	float3 bump = txNormal.Sample(samLinear, texcoord).xyz * 2.0 - 1.0;
+	float3 bump = GetTexture2D(txNormal, samLinear, texcoord).xyz * 2.0 - 1.0;
 	bump = mul(bump, tbn);
 	return bump;
 }
 
 float4 PS(PS_INPUT input) : SV_Target
 {	
-	float3 eye = normalize(input.Eye);
-	
-	//float3 normal = normalize(input.Normal);
+	float3 eye = normalize(input.Eye);	
+#if 0
+	float3 normal = normalize(input.Normal);
+#else
 	float3x3 tbn = CalTBN(input.Normal, input.Tangent);
 	float3 normal = GetBumpBySampler(tbn, input.Tex);
-	
+#endif
+
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	for (int i = 0; i < LightNum.x; ++i) {
-		float3 light = normalize(mul(View, float4(-DirectLights[i].LightPos.xyz,0.0)).xyz);
-		finalColor.xyz += CalDirectLight(DirectLights[i], normal, light, eye, input.Tex);
+	if (LightType == 1) {
+		float3 light = normalize(mul(View, float4(-Light.Base.Base.LightPos.xyz,0.0)).xyz);
+		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);
 	}
-	for (int i = 0; i < LightNum.y; ++i) {
-		float3 light = mul(View, float4(PointLights[i].L.LightPos.xyz,1.0)).xyz - input.SurfacePos.xyz;
+	else if (LightType == 2) {
+		float3 light = mul(View, float4(Light.Base.Base.LightPos.xyz,1.0)).xyz - input.SurfacePos.xyz;
 		float Distance = length(light);
 		light = normalize(light);
-		finalColor.xyz += CalPointLight(PointLights[i], normal, light, eye, input.Tex, Distance);
+		finalColor.xyz += CalPointLight(Light.Base, normal, light, eye, input.Tex, Distance);
 	}
-	for (int i = 0; i < LightNum.z; ++i) {
-		float3 light = mul(View, float4(SpotLights[i].Base.L.LightPos.xyz,1.0)).xyz - input.SurfacePos.xyz;
+	else if (LightType == 3) {
+		float3 light = mul(View, float4(Light.Base.Base.LightPos.xyz,1.0)).xyz - input.SurfacePos.xyz;
 		float Distance = length(light);
 		light = normalize(light);
 		
-		float3 spotDirection = normalize(mul(View, float4(-SpotLights[i].Direction,0.0)).xyz);
-		finalColor.xyz += CalSpotLight(SpotLights[i], normal, light, eye, input.Tex, Distance, spotDirection);
+		float3 spotDirection = normalize(mul(View, float4(-Light.DirectionCutOff.xyz,0.0)).xyz);
+		finalColor.xyz += CalSpotLight(Light, normal, light, eye, input.Tex, Distance, spotDirection);
 	}
-	
-	//float dir = -eye.z;
-	//float dir = -normal.z;
-	//float dir = -input.PointLights[0].z;
-	//finalColor = float4(dir, dir, dir, 1.0);
-	
-	//finalColor = float4(reflect(-input.PointLights[0], normal), 1.0);
-	//float a = dot(input.PointLights[0], normal);
-	//finalColor = float4(a, a, a, 1.0);
-	
-	//float3 tangent = normalize(input.Tangent);
-	//finalColor = float4(tangent.x, tangent.y, -tangent.z, 1.0);
-	//finalColor = float4(normal.x, normal.y, -normal.z, 1.0);
-	//finalColor = float4(input.PointLights[0].x, input.PointLights[0].y, -input.PointLights[0].z, 1.0);
 	
 	return finalColor;
 }

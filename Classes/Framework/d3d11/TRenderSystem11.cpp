@@ -113,7 +113,7 @@ HRESULT TRenderSystem11::_CreateBackRenderTargetView()
 	if (CheckHR(hr))
 		return hr;
 
-	hr = mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mBackRenderTargetView);
+	hr = mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mBackRenderTargetView); mCurRenderTargetView = mBackRenderTargetView;
 	pBackBuffer->Release();
 	return hr;
 }
@@ -145,7 +145,7 @@ HRESULT TRenderSystem11::_CreateBackDepthStencilView(int width, int height)
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
-	hr = mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mBackDepthStencilView);
+	hr = mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mBackDepthStencilView); mCurDepthStencilView = mBackDepthStencilView;
 	return hr;
 }
 
@@ -192,8 +192,8 @@ void TRenderSystem11::SetHandle(HINSTANCE hInstance, HWND hWnd)
 void TRenderSystem11::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
 {
 	float colorArr[4] = { color.x, color.y, color.z, color.w }; // red, green, blue, alpha
-	mDeviceContext->ClearRenderTargetView(mBackRenderTargetView, colorArr);
-	mDeviceContext->ClearDepthStencilView(mBackDepthStencilView, D3D11_CLEAR_DEPTH, Depth, Stencil);
+	mDeviceContext->ClearRenderTargetView(mCurRenderTargetView, colorArr);
+	mDeviceContext->ClearDepthStencilView(mCurDepthStencilView, D3D11_CLEAR_DEPTH, Depth, Stencil);
 }
 
 IRenderTexturePtr TRenderSystem11::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
@@ -857,8 +857,7 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 
 void TRenderSystem11::_RenderSkyBox()
 {
-	if (mSkyBox)
-		mSkyBox->Draw();
+	if (mSkyBox) mSkyBox->Draw();
 }
 
 void TRenderSystem11::_DoPostProcess()
@@ -890,7 +889,7 @@ void TRenderSystem11::EndScene()
 {
 	if (!mPostProcs.empty()) {
 		SetRenderTarget(nullptr);
-		_DoPostProcess();
 	}
+	_DoPostProcess();
 	mSwapChain->Present(0, 0);
 }
