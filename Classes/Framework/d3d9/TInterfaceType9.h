@@ -130,11 +130,11 @@ private:
 typedef std::shared_ptr<TTexture9> TTexture9Ptr;
 
 class TRenderTexture9 : public IRenderTexture {
-	IDirect3DSurface9* mColorBuffer;
 	IDirect3DSurface9* mDepthStencilBuffer;
+	IDirect3DSurface9* mColorBuffer;
 	TTexture9Ptr mColorTexture;
 public:
-	TRenderTexture9(IDirect3DSurface9* colorBuffer, IDirect3DSurface9* depthStencilBuffer);
+	TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
 	virtual ITexturePtr GetColorTexture() override;
 	virtual IDirect3DSurface9*& GetColorBuffer9() override;
 	virtual IDirect3DSurface9*& GetDepthStencilBuffer9() override;

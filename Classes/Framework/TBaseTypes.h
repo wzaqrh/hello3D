@@ -94,7 +94,6 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetAttenuation(float a, float b, float c);
 public:
-	TCameraBase GetLightCamera(TCamera& otherCam);
 	static TConstBufferDecl& GetDesc();
 };
 typedef std::shared_ptr<TPointLight> TPointLightPtr;

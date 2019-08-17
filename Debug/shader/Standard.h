@@ -27,13 +27,13 @@ cbuffer cbGlobalParam : register(b0)
 	matrix WorldInv;
 	matrix ViewInv;
 	matrix ProjectionInv;
-	
-	LIGHT_SPOT Light;
-	int LightType;
-	
-	int HasDepthMap;
+
 	matrix LightView;
-	matrix LightProjection;
+	matrix LightProjection;	
+	LIGHT_SPOT Light;
+
+	int LightType;
+	int HasDepthMap;
 }
 
 #if SHADER_MODEL > 30000
@@ -49,8 +49,8 @@ SamplerState samShadow : register(s3) {
 };
 
 Texture2D txMain : register(t0);
-Texture2D txDepthMap : register(t8);
-TextureCube txSkybox : register(t9);
+Texture2D txDepthMap : register(t4);
+TextureCube txSkybox : register(t5);
 
 #define GetTexture2D(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
 #define GetTextureCube(TEX, SAMPLER, COORD) TEX.Sample(SAMPLER, COORD)
@@ -62,20 +62,20 @@ sampler_state
     Texture = <textureMain>;
 };
 
-texture  textureDepthMap : register(t8);
-sampler2D txDepthMap : register(s8) =
+texture  textureDepthMap : register(t4);
+sampler2D txDepthMap : register(s4) =
 sampler_state
 {
     Texture = <textureDepthMap>;
     MinFilter = Point;
     MagFilter = Point;
     MipFilter = Point;
-	AddressU = Wrap;
-	AddressV = Wrap;
+	AddressU = Clamp;
+	AddressV = Clamp;
 };
 
-texture  textureSkybox : register(t9);
-samplerCUBE txSkybox : register(s9) =
+texture  textureSkybox : register(t5);
+samplerCUBE txSkybox : register(s5) =
 sampler_state
 {
     Texture = <textureSkybox>;
@@ -93,7 +93,7 @@ float4 GetTextureMain(float2 inputTex) {
 	return GetTexture2D(txMain, samLinear, inputTex);
 }
 float GetTextureDepthMap(float2 inputTex) {
-	return GetTexture2D(txDepthMap, samShadow, inputTex).r;
+	return GetTexture2D(txDepthMap, samShadow, inputTex);
 }
 
 //implements

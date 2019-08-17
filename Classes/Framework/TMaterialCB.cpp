@@ -81,12 +81,12 @@ TConstBufferDecl cbGlobalParam::MKDesc()
 	BUILD_ADD(ViewInv);
 	BUILD_ADD(ProjectionInv);
 
-	BUILD_ADDSUB(Light);
-	BUILD_ADD(LightType);
-	
-	BUILD_ADD(HasDepthMap);
 	BUILD_ADD(LightView);
 	BUILD_ADD(LightProjection);
+	BUILD_ADDSUB(Light);
+	
+	BUILD_ADD(LightType);
+	BUILD_ADD(HasDepthMap);
 	return builder.Build();
 }
 

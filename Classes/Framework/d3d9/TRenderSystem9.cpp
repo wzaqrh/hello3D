@@ -105,26 +105,27 @@ void TRenderSystem9::SetHandle(HINSTANCE hInstance, HWND hWnd)
 }
 
 static inline D3DCOLOR XMFLOAT2D3DCOLOR(XMFLOAT4 color) {
-	return D3DCOLOR_ARGB(int(color.w * 255), int(color.x * 255), int(color.y * 255), int(color.z * 255));
+	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x * 255), int(color.y * 255), int(color.z * 255), int(color.w * 255));
+	return dc;
 }
 void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
 {
+	if (mCurColorBuffer != mBackColorBuffer) {
+		//mDevice9->ColorFill(mCurColorBuffer, NULL, XMFLOAT2D3DCOLOR(color));
+	}
 	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), Depth, Stencil);
 }
 
 IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
-	IDirect3DTexture9 *pTextureColor = nullptr;
+	TTexture9Ptr pTextureRV = std::make_shared<TTexture9>("");
 	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
-	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureColor, NULL))) return nullptr;
-
-	IDirect3DSurface9 *pSurfaceColor = nullptr;
-	if (CheckHR(pTextureColor->GetSurfaceLevel(0, &pSurfaceColor))) return nullptr;
+	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
 	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
-	TRenderTexture9Ptr ret = std::make_shared<TRenderTexture9>(pSurfaceColor, pSurfaceDepthStencil);
+	TRenderTexture9Ptr ret = std::make_shared<TRenderTexture9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;
 }
 
@@ -527,10 +528,8 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 			if (textures[i]) {
 				IDirect3DTexture9* texture = textures[i]->GetSRV9();
 				IDirect3DCubeTexture9* textureCube = textures[i]->GetSRVCube9();
-				if (texture) 
-					mDevice9->SetTexture(i, texture);
-				else if (textureCube) 
-					mDevice9->SetTexture(i, textureCube);
+				if (texture) mDevice9->SetTexture(i, texture);
+				else if (textureCube) mDevice9->SetTexture(i, textureCube);
 			}
 		}
 
@@ -618,10 +617,14 @@ void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, con
 void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	mDrawCount = 0;
+	TDepthState orgState = mCurDepthState;
+	TBlendFunc orgBlend = mCurBlendFunc;
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowPassRT);
-		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1.0f), 1.0, 0);
+		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
+		SetDepthState(TDepthState(false));
+		SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
@@ -629,7 +632,7 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
 
 		if (mSkyBox && mSkyBox->mCubeSRV) {
-			IDirect3DTexture9* texture = mSkyBox->mCubeSRV->GetSRV9();
+			IDirect3DCubeTexture9* texture = mSkyBox->mCubeSRV->GetSRVCube9();
 			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
 		}
 	}
@@ -654,6 +657,10 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PopRenderTarget();
+		SetDepthState(orgState);
+		SetBlendFunc(orgBlend);
+
+		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		IDirect3DTexture9* texViewNull = nullptr;

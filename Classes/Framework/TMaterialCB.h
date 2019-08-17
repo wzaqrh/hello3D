@@ -12,12 +12,12 @@ __declspec(align(16)) struct cbGlobalParam
 	XMMATRIX ViewInv;
 	XMMATRIX ProjectionInv;
 
-	TSpotLight Light;
-	unsigned int LightType;//directional=1,point=2,spot=3
-	
-	unsigned int HasDepthMap;
 	XMMATRIX LightView;
 	XMMATRIX LightProjection;
+	TSpotLight Light;
+	
+	unsigned int LightType;//directional=1,point=2,spot=3
+	unsigned int HasDepthMap;
 public:
 	cbGlobalParam();
 	static TConstBufferDecl& GetDesc();

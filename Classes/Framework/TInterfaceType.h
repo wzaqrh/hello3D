@@ -98,8 +98,8 @@ enum enTexturePbrType {
 	E_TEXTURE_PBR_ROUGHNESS,
 	E_TEXTURE_PBR_AO
 };
-#define E_TEXTURE_DEPTH_MAP 8
-#define E_TEXTURE_ENV 9
+#define E_TEXTURE_DEPTH_MAP 4
+#define E_TEXTURE_ENV 5
 
 struct ITexture : public IResource {
 	virtual void SetSRV11(ID3D11ShaderResourceView* __texture) {};

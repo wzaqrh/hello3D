@@ -158,13 +158,6 @@ void TPointLight::SetAttenuation(float a, float b, float c)
 	Attenuation = XMFLOAT4(a, b, c, 0);
 }
 
-TCameraBase TPointLight::GetLightCamera(TCamera& otherCam)
-{
-	TCamera ret(otherCam);
-	ret.SetLookAt(XMFLOAT3(LightPos.x, LightPos.y, LightPos.z), ret.mAt);
-	return ret;
-}
-
 TConstBufferDecl& TPointLight::GetDesc()
 {
 	static TConstBufferDecl decl;

@@ -812,10 +812,14 @@ void TRenderSystem11::RenderLight(TDirectLight* light, enLightType lightType, co
 void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	mDrawCount = 0;
+	TDepthState orgState = mCurDepthState;
+	TBlendFunc orgBlend = mCurBlendFunc;
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowPassRT);
-		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1.0f), 1.0, 0);
+		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
+		SetDepthState(TDepthState(false));
+		SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
@@ -848,6 +852,8 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PopRenderTarget();
+		SetDepthState(orgState);
+		SetBlendFunc(orgBlend);
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* texViewNull = nullptr;

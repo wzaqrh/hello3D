@@ -42,7 +42,12 @@ SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 	return output;
 }
 
-float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
+float4 PSShadowCaster(SHADOW_PS_INPUT i)
+#if SHADER_MODEL > 30000 
+: SV_Target
+#else
+: COLOR
+#endif
 {
 	float depthValue = i.Depth.z / i.Depth.w;
 	float4 finalColor = depthValue;
@@ -157,7 +162,6 @@ float4 PS(PS_INPUT input) : SV_Target
 	}
 	
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
-	
 	return finalColor;
 }
 
@@ -186,6 +190,5 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 	}
 	
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
-	
 	return finalColor;
 }

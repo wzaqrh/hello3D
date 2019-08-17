@@ -106,16 +106,11 @@ unsigned int TVertexBuffer9::GetOffset()
 }
 
 /********** TRenderTexture9 **********/
-TRenderTexture9::TRenderTexture9(IDirect3DSurface9* colorBuffer, IDirect3DSurface9* depthStencilBuffer)
+TRenderTexture9::TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
-	mColorBuffer = colorBuffer;
+	mColorTexture = colorTexture;
+	mColorBuffer = nullptr;
 	mDepthStencilBuffer = depthStencilBuffer;
-
-	void *pContainer = NULL;
-	HRESULT hr = mColorBuffer->GetContainer(IID_IDirect3DTexture9, &pContainer);
-	if (SUCCEEDED(hr) && pContainer) {
-		mColorTexture = std::make_shared<TTexture9>((IDirect3DTexture9 *)pContainer, "");
-	}
 }
 
 ITexturePtr TRenderTexture9::GetColorTexture()
@@ -125,6 +120,8 @@ ITexturePtr TRenderTexture9::GetColorTexture()
 
 IDirect3DSurface9*& TRenderTexture9::GetColorBuffer9()
 {
+	mColorBuffer = nullptr;
+	if (CheckHR(mColorTexture->GetSRV9()->GetSurfaceLevel(0, &mColorBuffer))) return mColorBuffer;
 	return mColorBuffer;
 }
 
