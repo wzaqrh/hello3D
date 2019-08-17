@@ -68,10 +68,10 @@ struct PS_INPUT
 	float3 Normal : NORMAL;//world space
 	float3 Tangent : NORMAL1;//world space
 	float3 BiTangent : NORMAL2;//world space
-	float3 Eye : POSITION0;//world space
-	float3 SurfacePosition : POSITION1;//world space
-	float3x3 TangentBasis : TBASIS;
-	float4 PosInLight : POSITION2;//world space
+	float3 Eye : TEXCOORD1;//world space
+	float3 SurfacePosition : TEXCOORD2;//world space
+	float3x3 TangentBasis : TEXCOORD4;
+	float4 PosInLight : TEXCOORD3;//world space
 };
 
 PS_INPUT VS(VS_INPUT i)
@@ -124,8 +124,8 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 #ifdef _SPECGLOSSMAP//Shader='Standard(Specular setup)' -> 'Specular'=$texture
     #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     #else
-		sg.rgb = txMetalness.Sample(samLinear, uv).rgb;
-		sg.a = txSmoothness.Sample(samLinear, uv).r;
+		sg.rgb = GetTexture2D(txMetalness, samLinear, uv).rgb;
+		sg.a = GetTexture2D(txSmoothness, samLinear, uv).r;
     #endif
     sg.a *= _GlossMapScale;//Shader='Standard' -> 'Smoothness Scale'=[0,1]
 #else
@@ -134,7 +134,7 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 }
 float3 Albedo(float2 i_tex)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 {
-	return _Color.rgb * txAlbedo.Sample(samLinear, i_tex).rgb;
+	return _Color.rgb * GetTexture2D(txAlbedo, samLinear, i_tex).rgb;
 }
 float SpecularStrength(float3 specular)//max(specular.rgb)
 {
@@ -174,8 +174,8 @@ float2 MetallicGloss(float2 uv)
 	//_METALLICGLOSSMAP
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     #else
-        mg.x = txMetalness.Sample(samLinear, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
-		mg.y = txSmoothness.Sample(samLinear, uv).r;
+        mg.x = GetTexture2D(txMetalness, samLinear, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
+		mg.y = GetTexture2D(txSmoothness, samLinear, uv).r;
     #endif
 	mg.y *= _GlossMapScale;
 	//_METALLICGLOSSMAP
@@ -224,7 +224,7 @@ float Alpha(float2 uv)//_Color.a
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return _Color.a;
 #else
-    return txAlbedo.Sample(samLinear, uv).a * _Color.a;
+    return GetTexture2D(txAlbedo, samLinear, uv).a * _Color.a;
 #endif
 }
 float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivity, out float outModifiedAlpha)//diffColor*alpha,1-oneMinusReflectivity + alpha*oneMinusReflectivity
@@ -270,9 +270,9 @@ float LerpOneTo(float b, float t)
 float Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_OcclusionStrength
 {
 #if (SHADER_TARGET < 30)
-    return txAmbientOcclusion.Sample(samLinear, uv).g;
+    return GetTexture2D(txAmbientOcclusion, samLinear, uv).g;
 #else
-    float occ = txAmbientOcclusion.Sample(samLinear, uv).g;
+    float occ = GetTexture2D(txAmbientOcclusion, samLinear, uv).g;
     return LerpOneTo(occ, _OcclusionStrength);
 #endif
 }
@@ -362,7 +362,7 @@ float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
     float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
     float3 R = glossIn.reflUVW;
 	
-    float4 rgbm = txSkybox.SampleLevel(samLinear, R, mip);
+    float4 rgbm = GetTextureCubeLevel(txSkybox, samLinear, R, mip);
     //skybox tone mapping
 	rgbm.rgb *= (1.0f + rgbm.rgb/1.5f);
 	rgbm.rgb /= (1.0f + rgbm.rgb);
@@ -535,7 +535,7 @@ float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, f
 	return c;
 }
 float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, bool forwardAdd) {
-	float3 color = CalDirectLight(pointLight.L, normal, toLight, toEye, texcoord, forwardAdd);
+	float3 color = CalDirectLight(pointLight.Base, normal, toLight, toEye, texcoord, forwardAdd);
 	float Attenuation = pointLight.Attenuation.x 
 	+ pointLight.Attenuation.y * Distance 
 	+ pointLight.Attenuation.z * Distance * Distance;
@@ -544,9 +544,9 @@ float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 toLight, floa
 float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, float3 spotDirection, bool forwardAdd) {
 	float3 color = 0.0;
 	float spotFactor = dot(toLight, spotDirection);
-	if (spotFactor > spotLight.Cutoff) {
+	if (spotFactor > spotLight.DirectionCutOff.w) {
 		color = CalPointLight(spotLight.Base, normal, toLight, toEye, texcoord, Distance, forwardAdd);
-        color = color * ((spotFactor - spotLight.Cutoff) / (1.0 - spotLight.Cutoff));
+        color = color * ((spotFactor - spotLight.DirectionCutOff.w) / (1.0 - spotLight.DirectionCutOff.w));
 	}
 	return color;
 }
@@ -555,15 +555,13 @@ float3x3 CalTBN(float3 normal, float3 tangent, float3 bitangent) {
 	//float3 n = normalize(normal);
 	//float3 t = normalize(tangent - normal * dot(normal,tangent));
 	//float3 b = normalize(cross(n,t));
-	
 	float3 n = normalize(normal);
 	float3 t = normalize(tangent);
 	float3 b = normalize(bitangent);
-	
 	return float3x3(t,b,n);
 }
 float3 GetBumpBySampler(float3x3 tbn, float2 texcoord) {
-	float3 bump = txNormal.Sample(samLinear, texcoord).xyz * 2.0 - 1.0;
+	float3 bump = GetTexture2D(txNormal, samLinear, texcoord).xyz * 2.0 - 1.0;
 	bump = mul(bump, tbn);
 	return bump;
 }
@@ -571,13 +569,12 @@ float3 GetBumpBySampler(float3x3 tbn, float2 texcoord) {
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float3 toEye = normalize(input.Eye - input.SurfacePosition);
-	//float3 toEye = normalize(float3(0.0,0.0,-150.0) - input.SurfacePosition);
 	
 	float3 normal;
 	if (hasNormal > 0) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
-		float3 rawNormal = txNormal.Sample(samLinear, input.Tex).xyz;
+		float3 rawNormal = GetTexture2D(txNormal, samLinear, input.Tex).xyz;
 		normal = normalize(2.0 * rawNormal - 1.0);
 		normal = normalize(mul(input.TangentBasis, normal));
 	}
@@ -586,47 +583,45 @@ float4 PS(PS_INPUT input) : SV_Target
 	}
 	
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	for (int i = 0; i < LightNum.x; ++i) {//direction light
-		float3 toLight = normalize(-DirectLights[i].LightPos.xyz);
-		finalColor.xyz += CalDirectLight(DirectLights[i], normal, toLight, toEye, input.Tex, false);
+	if (LightType == 1) {
+		float3 toLight = normalize(-Light.Base.Base.LightPos.xyz);
+		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, toLight, toEye, input.Tex, false);
 	}
-	for (int i = 0; i < LightNum.y; ++i) {//point light
-		float3 toLight = PointLights[i].L.LightPos.xyz - input.SurfacePosition.xyz;
+	else if (LightType == 2) {
+		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
 		float Distance = length(toLight);
 		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(PointLights[i], normal, toLight, toEye, input.Tex, Distance, false);
+		finalColor.xyz += CalPointLight(Light.Base, normal, toLight, toEye, input.Tex, Distance, false);
 	}
-	for (int i = 0; i < LightNum.z; ++i) {//spot light
-		float3 toLight = SpotLights[i].Base.L.LightPos.xyz - input.SurfacePosition.xyz;
+	else if (LightType == 3) {
+		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
 		float Distance = length(toLight);
 		toLight = normalize(toLight);
-		
-		float3 spotDirection = -SpotLights[i].Direction.xyz;
-		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection, false);
+		float3 spotDirection = -Light.DirectionCutOff.xyz;
+		finalColor.xyz += CalSpotLight(Light, normal, toLight, toEye, input.Tex, Distance, spotDirection, false);
 	}
 
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
 
     //float2 projPosInLight = 0.5 * input.PosInLight.xy / input.PosInLight.w + float2(0.5, 0.5);
     //projPosInLight.y = 1.0f - input.PosInLight.y;
-	//finalColor.rgb = txDepthMap.Sample(samShadow, projPosInLight);
-	
+	//finalColor.rgb = GetTexture2D(txDepthMap, samShadow, projPosInLight);
 #if 0
 	{
 		float3 ao;
 		if (hasAO)
-			ao = txAmbientOcclusion.Sample(samLinear, input.Tex).xyz;
+			ao = GetTexture2D(txAmbientOcclusion, samLinear, input.Tex).xyz;
 		else
 			ao = 0.0;
 		
-		float3 albedo = txAlbedo.Sample(samLinear, input.Tex).rgb; 
+		float3 albedo = GetTexture2D(txAlbedo, samLinear, input.Tex).rgb; 
 		albedo = pow(albedo, 2.2);
 		
 		float3 ambient = albedo * ao * 0.03;
 		finalColor.xyz += ambient;
 	}
 #endif
-	//float4 c = txAlbedo.Sample(samLinear, input.Tex).rgba;
+	//float4 c = GetTexture2D(txAlbedo, samLinear, input.Tex).rgba;
 	//finalColor.rgb = float4(c.rgb * c.a,c.a);
 	
     //finalColor.xyz = finalColor.xyz / (finalColor.xyz + 1.0); // HDR tonemapping
@@ -644,7 +639,7 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 	if (hasNormal > 0) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
-		float3 rawNormal = txNormal.Sample(samLinear, input.Tex).xyz;
+		float3 rawNormal = GetTexture2D(txNormal, samLinear, input.Tex).xyz;
 		normal = normalize(2.0 * rawNormal - 1.0);
 		normal = normalize(mul(input.TangentBasis, normal));
 	}
@@ -653,23 +648,22 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 	}
 	
 	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	for (int i = 0; i < LightNum.x; ++i) {//direction light
-		float3 toLight = normalize(-DirectLights[i].LightPos.xyz);
-		finalColor.xyz += CalDirectLight(DirectLights[i], normal, toLight, toEye, input.Tex, true);
+	if (LightType == 1) {
+		float3 toLight = normalize(-Light.Base.Base.LightPos.xyz);
+		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, toLight, toEye, input.Tex, true);
 	}
-	for (int i = 0; i < LightNum.y; ++i) {//point light
-		float3 toLight = PointLights[i].L.LightPos.xyz - input.SurfacePosition.xyz;
+	else if (LightType == 2) {
+		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
 		float Distance = length(toLight);
 		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(PointLights[i], normal, toLight, toEye, input.Tex, Distance, true);
+		finalColor.xyz += CalPointLight(Light.Base, normal, toLight, toEye, input.Tex, Distance, true);
 	}
-	for (int i = 0; i < LightNum.z; ++i) {//spot light
-		float3 toLight = SpotLights[i].Base.L.LightPos.xyz - input.SurfacePosition.xyz;
+	else if (LightType == 3) {
+		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
 		float Distance = length(toLight);
 		toLight = normalize(toLight);
-		
-		float3 spotDirection = -SpotLights[i].Direction.xyz;
-		finalColor.xyz += CalSpotLight(SpotLights[i], normal, toLight, toEye, input.Tex, Distance, spotDirection, true);
+		float3 spotDirection = -Light.DirectionCutOff.xyz;
+		finalColor.xyz += CalSpotLight(Light, normal, toLight, toEye, input.Tex, Distance, spotDirection, true);
 	}
 	
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);	
