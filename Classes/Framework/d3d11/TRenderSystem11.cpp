@@ -11,6 +11,7 @@ TRenderSystem11::TRenderSystem11()
 {
 	mMaterialFac = std::make_shared<TMaterialFactory>(this);
 	mThreadPump = std::make_shared<TThreadPump>();
+	mFXCDir = "d3d11\\";
 }
 
 TRenderSystem11::~TRenderSystem11()

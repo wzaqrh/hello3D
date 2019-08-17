@@ -9,6 +9,7 @@
 TRenderSystem9::TRenderSystem9()
 {
 	mMaterialFac = std::make_shared<TMaterialFactory>(this);
+	mFXCDir = "d3d9\\";
 }
 
 TRenderSystem9::~TRenderSystem9()

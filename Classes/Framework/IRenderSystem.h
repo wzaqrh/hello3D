@@ -15,6 +15,7 @@ public:
 	TSkyBoxPtr mSkyBox;
 	TCameraPtr mDefCamera;
 protected:
+	std::string mFXCDir;
 	bool mCastShdowFlag = false;
 	TBlendFunc mCurBlendFunc;
 	TDepthState mCurDepthState;

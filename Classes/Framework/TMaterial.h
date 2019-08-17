@@ -124,7 +124,7 @@ typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;
 #define FILE_EXT_FX ".fx"
 
 #ifdef PRELOAD_SHADER
-#define MAKE_MAT_NAME(NAME) ("shader\\" NAME)
+#define MAKE_MAT_NAME(NAME) (NAME)
 #else
-#define MAKE_MAT_NAME(NAME) ("shader\\" NAME FILE_EXT_FX)
+#define MAKE_MAT_NAME(NAME) (NAME FILE_EXT_FX)
 #endif

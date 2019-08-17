@@ -97,10 +97,12 @@ TProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vs
 {
 	std::string ext = GetFileExt(name);
 	if (ext.empty()) {
-		return CreateProgramByFXC(name, vsEntry, psEntry);
+		std::string fullname = "shader\\" + mFXCDir + name;
+		return CreateProgramByFXC(fullname, vsEntry, psEntry);
 	}
 	else {
-		return CreateProgramByCompile(name.c_str(), name.c_str(), vsEntry, psEntry);
+		std::string fullname = "shader\\" + name;
+		return CreateProgramByCompile(fullname.c_str(), fullname.c_str(), vsEntry, psEntry);
 	}
 }
 
