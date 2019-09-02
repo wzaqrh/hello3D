@@ -63,13 +63,11 @@ void Lesson6::OnPostInitDevice()
 
 	mRenderSys->SetPerspectiveCamera(45, 30, 1000);
 
-#if 1
+#if 0
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
-	auto fileName = "Male02.FBX";//99ms,4688ms
-	//auto fileName = "Male02.assbin";//37ms,2823ms
-	//auto fileName = "Male02.dae";//37ms,2823ms
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
-
+	//auto fileName = "Male02.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
+	;// mMove->SetPosition(0, -5, 0);
+	
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures->empty() && (*iter->mTextures)[0]) {
 			std::string firstPostfix;
@@ -103,8 +101,9 @@ void Lesson6::OnPostInitDevice()
 	}
 #else
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL);
-	auto fileName = "Male02.FBX";//99ms,4688ms
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
+	//auto fileName = "Male02.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
+	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
+	auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
 #endif
 }
 

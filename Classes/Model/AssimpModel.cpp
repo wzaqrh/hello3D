@@ -478,7 +478,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			if (mesh->data->HasBones()) {
 				const auto& boneMats = GetBoneMatrices(node, i);
 				size_t boneSize = boneMats.size(); 
-				assert(boneSize <= MAX_MATRICES);
+				//assert(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
 					weightedSkin.Models[j] = ToXM(boneMats[j]);
 			}
