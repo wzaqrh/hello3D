@@ -10,3 +10,7 @@ D3DCREATE_MIXED_VERTEXPROCESSING是d3d9慢的原因
 画面有阵阵黑块，可能是depth buffer精度不够
 
 屏幕模糊还可能是因为 MVP精度或者数据有问题，导致NDC与屏幕相差0.5个像素，于是发生MIP_LINEAR插值,就模糊了
+
+预编译使用O2优化性能提升很大(能跟上fixed-function性能)
+
+好显卡不容易出现性能瓶颈，但好cpu还是很容易出现性能问题，尤其是DrawCall多的时候
