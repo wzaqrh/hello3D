@@ -14,3 +14,5 @@ D3DCREATE_MIXED_VERTEXPROCESSING是d3d9慢的原因
 预编译使用O2优化性能提升很大(能跟上fixed-function性能)
 
 好显卡不容易出现性能瓶颈，但好cpu还是很容易出现性能问题，尤其是DrawCall多的时候
+
+d3d9中D3DUSAGE_DYNAMIC会占用程序地址空间，尽管实际内存在显存中
