@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<!-- saved from url=(0068)https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>地形 - 地形绘制 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./地形 - 地形绘制 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./地形 - 地形绘制 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./地形 - 地形绘制 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./地形 - 地形绘制 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">地形 - 地形绘制</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="地形绘制">地形绘制</h1>
+<h2 id="地形细节层次技术简介">地形细节层次技术简介</h2>
+<p>在室外游戏场景中地形的绘制是一个经常绕不开的话题。如下图所示，地形高度数据附加在栅格点上，空间规模越大，采样精度越高，地形数据的数据量也就越大，如果每一帧都显示处理所有的数据，在现有的硬件实时漫游是不可能的。但是在漫游中，每一时刻只能观察到地形的一部分，而且较远的场景只需要用相对简单的数据表示。所以各种实时地形漫游算法一般采用视点相关的连续细节层次技术和裁剪来减少绘制的数据量，达到实时绘制要求。</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/表示法.png" alt="1541577648011"></p>
+<p>实时地形绘制算法根据其生成的网格可以分为基于规整网格的算法和基于不规则三角形网格的算法两大类。基于规整网格的方法从栅格数据出发按四叉分割（上图a)或者二叉分割（上图b）的方式生成规整的三角形网格（如上图b所示）。基于不规则三角形网格的方法则没有此种约束，直接用满足重要性条件的顶点生成网格（如上图c）。</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/规则分割方法.png" alt="1541580681157"></p>
+<p>基于不规则三角形网格的方法的优点是在同样的误差条件下生成的三角形网格的顶点数目比基于规整网格的方法要少的多，而网格的形状也可以得到优化，同时用不规则三角形网格进行预处理可以使原地形数据得到很大压缩。其缺点是与连续细节层次处理比较难结合，处理时需要占用较大内存，计算量较大，灵活性差，效率较低。用不规则三角形网格也很难进行地形跟随和碰撞检测。</p>
+<p>与基于不规则三角形网格的算法相比，基于规则网格的方法虽然生成网格中的顶点数目和三角形数目都较多，但是易于裁剪和自顶向下简化，也易于地形跟随和碰撞检测，对动态地形的处理也较方便。</p>
+<p>关于超大地形的实时绘制，前人已经做了很多研究，总结出了很多不同的算法。下面的参考链接中就对不同的算法做了个介绍，并总结了这些算法的优缺点，并给出了一种ChunkedLOD的实现方案：</p>
+<p><a href="https://wenku.baidu.com/view/0b200bccc77da26924c5b05e.html" target="_blank">https://wenku.baidu.com/view/0b200bccc77da26924c5b05e.html</a></p>
+<p>下面将介绍一种基于规则三角网格的实现方法ROAM。下图是ROAM算法生成的地形网格。</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/ROAM效果.png" alt="1541582986429"></p>
+<h3 id="roam算法介绍">ROAM算法介绍</h3>
+<p>本文重点介绍的是一种ROAM算法。关于ROAM算法，<a href="https://www.gamasutra.com/view/feature/3188/realtime_dynamic_level_of_detail_.php" target="_blank">这篇文章</a>介绍了具体的实现。</p>
+<p>ROAM算法没有存储大型的三角形坐标数组来代表一组地形网格，而是使用了一种叫二叉三角树的结构，这种结构可以被看做测量员把一组地形模型切割成三角块的结果。这些三角块逻辑上看就象一组相连的邻居一样（左右邻居）。</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/二叉三角.png" alt="1541059291480"></p>
+<p>首先要在网格近似值中定义一个可见错误的度量标准“Variance”。我们将需要这样的度量标准来决定什么时候分割一个节点（增加细节），以及需要分割到什么程度。ROAM论文使用了一个基于嵌套空间范围的方法（nested world- spacebounds），这种度量标准非常精确但很慢。</p>
+<p>Variance是以下两者高度的差异：二叉三角树节点中直角三角形斜边插值中点的高度，和那一点上实际高度域的样本高度。简单点说，就是从实际包含的高度域到当前二叉三角节点有多远。这种计算相对来讲比较快，而且只需要一个内存命令来查找高度域： </p>
+<p>triVariance= abs(centerZ - ((leftZ + rightZ) / 2) ); </p>
+<p>但是不能仅仅计算每一个Patch（一个独立的正方形的地形块）的两个根二叉三角树的Variance值，因为这样计算带来的误差太大了。因此还应该更加深入地对树进行计算，之后再取平均值备份来获得更佳的估计值。关于计算的深度可以在编辑时指定。</p>
+<p>通常， Variance计算每一帧都需要进行，除非高度区域发生变化，Variance一般不会发生变化。因此提出一个和二叉三角树一起工作的 Variance树。</p>
+<p>一个Variance树是一个全高度的二叉树，用一个连续的数组来表示。一些简单的宏可以让我们有效地操纵这个树，我们填充到里面的数据是每个不同节点的单字节值。下图是一个这种结构的参考，两个 Variance树被存储在Patch类中，左、右二叉三角各有一个Patch类。</p>
+<table>
+<thead>
+<tr>
+<th><img src="./地形 - 地形绘制 · GitBook_files/存储.gif" alt="ROAM实时动态细节层次地形渲染"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>隐式的二叉树结构</td>
+</tr>
+</tbody>
+</table>
+<p>现在可以重新去做建立近似网格的工作了。给定了我们的误差度量值（Variance）， 如果它的Variance非常大，我们将会把二叉三角树的节点分割成很小的三角块，这是指：如果当前地形下的三角形非常起伏不平，那么这样分割可以更好的模拟它。分割必须建立两个可以精确填充父三角形区域的子三角形。</p>
+<p>对于子三角形重复进行这样的操作，Variance每迭代一次大概就会降低一半，在一些点上或许发现一个单独的三角形已经足够光滑可以模拟地形或者我们的操作超过了预定的步数……但是无论如何，可能只能创建到高度域的分辨率，不能更多了。</p>
+<p>当分割两个独立的地形块时，由于不连续的分割就会出现裂缝。</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/裂缝.gif" alt="ROAM实时动态细节层次地形渲染"></p>
+<p>为了解决这个问题，ROAM使用了邻居指针和网格本身一个有趣的事实：一个细节节点和它的邻居节点只存在两种关系：共直角边关系（如左右邻节点）和共斜边关系（如下邻节点），可以在创建网格的时候应用这一条来让邻居树与我们同步。</p>
+<p>下面看一下如何使用这个简单的规则：对于一个节点，只在它与它的下邻节点呈相互下邻关系时才进行分割如图，这个关系可以把它当作一个“钻石”来看，这是一种特殊关系，因为在钻石上分割一个节点可以很容易地镜象到其他节点，同时在网格上不会出现裂缝。</p>
+<table>
+<thead>
+<tr>
+<th><img src="./地形 - 地形绘制 · GitBook_files/邻居分割.gif" alt="ROAM实时动态细节层次地形渲染"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图 钻石上的分割操作</td>
+</tr>
+</tbody>
+</table>
+<p>尝试分割一个节点有三种情况：</p>
+<ol>
+<li><p>节点是钻石的一部分——分割这个节点和其下邻节点。</p>
+</li>
+<li><p>节点在网格边上——不太重要，只分割这个节点。</p>
+</li>
+<li><p>节点不是钻石的一部分——强制分割下邻节点。 </p>
+</li>
+</ol>
+<p>强制分割指的是递归遍历整个网格直到找到钻石或一个边缘三角形。这里是它的工作流程：当分割一个节点时，首先查看它是不是钻石的一部分，如果不是，在下邻节点上调用第二个分割操作建立一个钻石，然后继续原始分割。第二个分割操作将做同样的工作，重复处理下一个节点，一旦一个节点被发现可以被合法地递归分割，就一直分割下去,如图：</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/钻石分割.jpg" alt="1541061242923"></p>
+<h2 id="手机上地形渲染">手机上地形渲染</h2>
+<p>由于以上介绍的算法会有很大的CPU消耗，所以在手机上要实现上述效果还是有一定难度。有一种可供选择的方案就是在编辑时用上述算法进行地形网格的生成，在完成编辑后按一定的LOD等级对地形进行简化，在运行时实际使用的模型是简化后的模型，并且不再进行网格LOD的渐进演算。这样能大致得到一个视觉上相对理想，而且顶点数据较少的模型。</p>
+<h2 id="地形编辑">地形编辑</h2>
+<ul>
+<li><p>可以按照上述算法，以编辑器中摄像机为视点进行网格的渐进生成和简化。在编辑网格时，根据笔刷的属性对笔刷范围内影响的顶点进行高度的修改，然后根据上述算法动态生成和删除顶点。</p>
+<p>笔刷一般有圆形笔刷，方形笔刷和自定义形状笔刷。笔刷的常用范围衰减有线性衰减和指数衰减等。</p>
+<p>关于自定义形状笔刷，一般用一张图片（可以指定选用哪个通道）来代表笔刷的形状。根据通道中颜色（或者透明度）的值来作为笔刷强度的乘数因子。笔刷的渲染可以用正交投影的方式把笔刷投影到地形上。</p>
+</li>
+<li><p>也可以通过高度图来生成地形数据。</p>
+<p>高度图其实就是一组连续的数组，这个数组中的元素与地形网格中的顶点一一对应，且每一个元素都指定了地形网格的某个顶点的高度值。高度图最常用的使用灰度图实现，灰度图中亮度越大对应的地形高度越高。起初地形用一个固定采样点的网格表示，应用高度图后每个采样点在高度图中采样高度，依据上面提到的算法，对采样点间过大或过小距离的采样点进行拆分或者合并，最终生成地形数据。下面是高度图及其生成的地形。</p>
+<p><img src="./地形 - 地形绘制 · GitBook_files/高度图.png" alt="1541588753759"></p>
+</li>
+</ul>
+<h2 id="延伸参考">延伸参考</h2>
+<p>关于其他地形的实现方法可以参考的有<a href="https://www.cnblogs.com/rainbow70626/p/5268770.html" target="_blank">基于四叉树（QuadTree）的LOD地形实现</a></p>
+<p>大的地形主要是为实现大地图服务的，<a href="http://gulu-dev.com/post/2014-11-16-open-world" target="_blank">这里</a>有关于大地图背后技术的一些探讨</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html" class="navigation navigation-prev " aria-label="Previous page: 算法 - 基础算法">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html" class="navigation navigation-next " aria-label="Next page: 寻路 - 导航网格寻路" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"地形 - 地形绘制","level":"1.10","depth":1,"next":{"title":"寻路 - 导航网格寻路","level":"1.11","depth":1,"path":"book/PathFinding.md","ref":"book/PathFinding.md","articles":[]},"previous":{"title":"算法 - 基础算法","level":"1.9","depth":1,"path":"book/Algorithm.md","ref":"book/Algorithm.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/TerrainRendering.md","mtime":"2019-05-05T03:07:43.025Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./地形 - 地形绘制 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./地形 - 地形绘制 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./地形 - 地形绘制 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./地形 - 地形绘制 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./地形 - 地形绘制 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./地形 - 地形绘制 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./地形 - 地形绘制 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./地形 - 地形绘制 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

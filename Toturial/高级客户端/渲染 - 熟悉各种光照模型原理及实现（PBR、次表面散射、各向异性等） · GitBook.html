@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="熟悉各种光照模型原理及实现（pbr、次表面散射、各向异性等）">熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）</h2>
+<p>对于图形学领域和图形学开发来说,实时渲染的光照模型是一个最最基础的问题,简单的来讲,光照模型就是用来描述在真实环境下,物体表面一点在在光照下的反射颜色值。有许许多多的光照模型试图用数学的公式来模拟这个问题,当然这即是一个物理问题,也是一个数学问题。</p>
+<p>其中一个模型被称为冯氏光照模型(Phong Lighting Model)。冯氏光照模型的主要结构由3个元素组成：环境(Ambient)、漫反射(Diffuse)和镜面(Specular)光照。这些光照元素看起来像下面这样：</p>
+<ul>
+<li>环境光照(Ambient Lighting)：即使在黑暗的情况下，世界上也仍然有一些光亮(月亮、一个来自远处的光)，所以物体永远不会是完全黑暗的。我们使用环境光照来模拟这种情况，也就是无论如何永远都给物体一些颜色。</li>
+<li>漫反射光照(Diffuse Lighting)：模拟一个发光物对物体的方向性影响(Directional Impact)。它是冯氏光照模型最显著的组成部分。面向光源的一面比其他面会更亮。</li>
+<li>镜面光照(Specular Lighting)：模拟有光泽物体上面出现的亮点。镜面光照的颜色，相比于物体的颜色更倾向于光的颜色。</li>
+</ul>
+<p>Blinn-Phong反射模型是Phong模型的变种，它们的区别在于在计算镜面反射项时，Phong采用的向量是R与V，而该模型采用的向量是H与N，H = V + L.</p>
+<p>Blinn-Phong模型以降低准确度来换取更高的性能，然而Blinn-Phong模型实际上模拟某些材质时，比Phong模型更加接近实验测量数据。Blinn-phong模型几乎是早起计算机游戏的唯一之选，并且以硬件形式入驻早起GPU固定管线。</p>
+<p>Phong与Blinn-Phong都是局部光照模型，所谓局部光照模型，就是不考虑渲染物体周围环境（环境光照为固定值，与所处环境无关），仅考虑物体材质特性和光源直接照射影响。而全局光照模型不仅考虑了光源直接照射的影响（直接光照），还考虑了物体所处环境反射光产生的间接光照。直接光照可分解为漫反射和高光反射，间接光照可分解为环境漫反射（AO）和环境反射。也就是说，全局光照模型一般可分为四部分：<strong>漫反射、高光反射、环境漫反射、环境反射</strong>。</p>
+<p> <strong>Physically Based Rendering(PBR)-基于物理的光照模型</strong></p>
+<p>简单来说基于物理的光照模型和传统的光照模型相比,传统模型做了大量的"假设",lambrt漫反射假设表面所有子表面的散射值简单的随入射角改变,并且和为一定值,而phong模型的高光则假设物体表面是绝对平滑的面,而基于物理的模型就是基于更加接近真实的"微表面理论",把物体还原成真实的大量连续的微表面,完整考虑光的直接表面反射,子表面散射和光被物体吸收这三个条件,而如果结合全局光照,则将带来更加照片化的真实感受。关于PBR的详细介绍，请参考下面的链接。</p>
+<ul>
+<li><a href="https://www.cnblogs.com/ghl_carmack/tag/PBR/" target="_blank">https://www.cnblogs.com/ghl_carmack/tag/PBR/</a></li>
+<li><a href="https://blog.csdn.net/leonwei/article/details/44539217" target="_blank">https://blog.csdn.net/leonwei/article/details/44539217</a> </li>
+<li><a href="https://zhuanlan.zhihu.com/p/20091064" target="_blank">https://zhuanlan.zhihu.com/p/20091064</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/25427105" target="_blank">https://zhuanlan.zhihu.com/p/25427105</a></li>
+<li><a href="https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf" target="_blank">https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf</a></li>
+</ul>
+<p><strong>Subsurface scattering(SSS)-次表面散射</strong></p>
+<p>次表面散射是光在传播时的一种现象，表现为光在穿过透明物体表面后，与材料之间发生交互作用而导致光被散射开来，光路也在其他的位置穿出物体。光一般会穿透物体的表面，在物体内部在不同的角度被反射若干次，最终穿出物体。次表面散射在三维计算机图形中十分重要，可用来渲染大理石、皮肤、树叶、蜡、牛奶等多种不同材料。与普通材料相比，这类物材料体一般有两个特殊表现，一个是由于光的散射原因，物体上不会有清晰的明暗交界；另一个是逆光观察时，薄的地方会有透光现象。</p>
+<blockquote>
+<p><img src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/6.jpg" alt="">
+没有清晰的明暗边界产生真实感</p>
+<p><img src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/5.jpg" alt="">
+逆光透射</p>
+</blockquote>
+<p>关于SSS的详细介绍，请参考下面的链接。</p>
+<ul>
+<li><a href="https://blog.uwa4d.com/archives/Usparkle_Skin.html" target="_blank">https://blog.uwa4d.com/archives/Usparkle_Skin.html</a></li>
+<li><a href="http://www.iryoku.com/sssss/" target="_blank">http://www.iryoku.com/sssss/</a></li>
+<li><a href="http://iryoku.com/separable-sss/" target="_blank">http://iryoku.com/separable-sss/</a></li>
+</ul>
+<p><strong>anisotropy-各向异性</strong></p>
+<p>各向异性 (anisotropy ) 与 均向性 相反，是指在不同方向具有不同行为的性质，也就是其行为与方向有关。如在物理学上，沿着材料做不同方向的量测，若会出现不同行为，通常称该材料具有某种 “ 各向异性 ” ，这样的材料表面称为各向异性表面（ anisotropic surface ）；</p>
+<p>特殊的晶体结构会导致各向异性，材质表面上存在有组织的细小凹凸槽也会导致各向异性。各向异性反射是指：各向异性表面反射光的一种现象。在生活中我们经常见到各向异性光照效果，例如光滑的炊具上的扇面光斑，头发等。</p>
+<p><img src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/7.jpg" alt=""></p>
+<p>关于各向异性的详细介绍，请参考下面的链接。</p>
+<ul>
+<li><a href="https://gitbook.corp.sdo.com/seniorlcient/book/Rendering/Scheuermann_HairRendering.pdf">Hair rendering</a></li>
+<li><a href="http://wiki.unity3d.com/index.php/Anisotropic_Highlight_Shader" target="_blank">http://wiki.unity3d.com/index.php/Anisotropic_Highlight_Shader</a></li>
+<li><a href="http://www.zwqxin.com/archives/shaderglsl/review-anisotropic-lighting.html" target="_blank">http://www.zwqxin.com/archives/shaderglsl/review-anisotropic-lighting.html</a></li>
+<li><a href="https://en.wikibooks.org/wiki/GLSL_Programming/Unity/Brushed_Metal" target="_blank">https://en.wikibooks.org/wiki/GLSL_Programming/Unity/Brushed_Metal</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html" class="navigation navigation-prev " aria-label="Previous page: 渲染 - 熟悉前向渲染、延迟渲染管线流程">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html" class="navigation navigation-next " aria-label="Next page: 渲染 - 熟悉各种后处理效果实现方法" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）","level":"1.3","depth":1,"next":{"title":"渲染 - 熟悉各种后处理效果实现方法","level":"1.4","depth":1,"path":"book/PostProcess.md","ref":"book/PostProcess.md","articles":[]},"previous":{"title":"渲染 - 熟悉前向渲染、延迟渲染管线流程","level":"1.2","depth":1,"path":"book/RenderPipeline.md","ref":"book/RenderPipeline.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/LightingModel.md","mtime":"2019-05-05T03:07:42.976Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/gitbook.js.下载"></script>
+    <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等） · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

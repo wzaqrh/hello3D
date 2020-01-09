@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<!-- saved from url=(0083)https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>3D数学基础 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./3D数学基础 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./3D数学基础 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./3D数学基础 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./3D数学基础 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><link rel="prev" href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html"><link rel="next" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dRendering.html"></head>
+    <body><div id="MathJax_Message" style="display: none;"></div>
+        
+<div class="book font-size-2 font-family-1 with-summary">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../programming-language.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/programming-language.html">
+            
+                    
+                    编程语言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../multithread.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/multithread.html">
+            
+                    
+                    多线程编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../network.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/network.html">
+            
+                    
+                    网络编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../unity.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity.html">
+            
+                    
+                    Unity基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../unity-editor.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html">
+            
+                    
+                    Unity Editor基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../ui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html">
+            
+                    
+                    UI基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.8" data-path="3dMath.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html">
+            
+                    
+                    3D数学基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="3dRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dRendering.html">
+            
+                    
+                    3D图形学基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="../camera.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/camera.html">
+            
+                    
+                    摄像机
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="../Unity3D_Animation/Unity3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Animation/Unity3D_Animation.html">
+            
+                    
+                    动画
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="../Unity3D_physics.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html">
+            
+                    
+                    物理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="../Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html">
+            
+                    
+                    资源管理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="../Unity3D_Rendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Rendering.html">
+            
+                    
+                    渲染
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="../Unity3D_Profile/Unity_Profiler_CPU_GPU.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Profile/Unity_Profiler_CPU_GPU.html">
+            
+                    
+                    Profile
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/intermediateclient/">3D数学基础</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="3d数学-图形学基础">3D数学: 图形学基础</h2>
+<p>[TOC]</p>
+<h3 id="向量vector">向量(Vector)</h3>
+<h4 id="数学定义">数学定义</h4>
+<p>向量就是一个数字列表，对于程序员来说一个向量就是一个数组。
+向量的维度就是向量包含的“数”的数目，向量可以有任意正数维，标量可以被认为是一维向量。</p>
+<h4 id="书写">书写</h4>
+<p>用方括号将一列数括起来，如[1,2,3] 水平书写的向量叫行向量 垂直书写的向量叫做列向量</p>
+<h4 id="几何意义">几何意义</h4>
+<p>向量是有大小和方向的有向线段。向量的大小就是向量的长度（模）向量有非负的长度。</p>
+<h4 id="图形形式">图形形式</h4>
+<p>向量定义的两大要素——大小和方向，有时候需要引用向量的头和尾，下图所示，箭头是向量的末端，箭尾是向量的开始
+<img src="./3D数学基础 · GitBook_files/vector_graph.png" alt=""></p>
+<h4 id="向量与点">向量与点</h4>
+<p>点”有位置，但没有实际的大小或厚度，“向量”有大小和方向，但没有位置。所以使用“点”和“向量”的目的完全不同。”点”描述位置，“向量”描述位移。任意一点都能用从原点开始的向量来表达。</p>
+<h4 id="向量运算">向量运算</h4>
+<p>零向量----零向量非常特殊，因为它是唯一大小为零的向量。对于其他任意数m,存在无数多个大小（模）为m的向量，他们构成一个圆。零向量也是唯一一个没有方向的向量。
+负向量----负运算符也能应用到向量上。每个向量v都有一个加性逆元-v，它的维数和v一样，满足v+(-v)=0。要得到任意维向量的负向量，只需要简单地将向量的每个分量都变负即可。向量变负，将得到一个和向量大小相等，方向相反的向量。</p>
+<h4 id="向量大小（模）">向量大小（模）</h4>
+<p>在线性代数中，向量的大小用向量两边加双竖线表示，向量的大小就是向量各分量平方和的平方根。即，(2D向量)   ||v||=√(x^2+y^2) ，（3D向量） ||v||=√(x^2+y^2+z^2)
+向量的模几何解释：在2D中的任意向量v，能构造一个以v为斜边的直接三角形，由勾股定理可知，对于任意直角三角形，斜边的长度平方等于两直角边长度的平方和。</p>
+<h4 id="标量与向量的乘法">标量与向量的乘法</h4>
+<ul>
+<li><p>虽然标量与向量不能相加，但它们可以相乘。结果将得到一个向量。与原向量平行，但长度不同或者方向相反。</p>
+</li>
+<li><p>标量与向量的乘法非常直接，将向量的每个分量都与标量相乘即可。如：$k[x,y,z] = [xk,yk,zk]$</p>
+</li>
+<li><p>向量也能除以非零向量，效果等同于乘以标量的倒数。如：$[x,y,z]/k = [x/k,y/k,z/k]$</p>
+</li>
+</ul>
+<ol>
+<li><p>标量与向量相乘时，不需要些乘号，将两个量挨着写即表示相乘。</p>
+</li>
+<li><p>标量与向量相乘时，不需要些乘号，将两个量挨着写即表示相乘</p>
+</li>
+<li><p>标量与向量的乘法和除法优先级高于加法和乘法</p>
+</li>
+<li><p>标量不能除以向量，并且向量不能除以另一个向量。</p>
+</li>
+<li><p>负向量能被认为是乘法的特殊情况，乘以标量-1。</p>
+<h5 id="几何解释">几何解释</h5>
+<p>向量乘以标量k的效果是以因子|k|缩放向量的长度，例如：为了使向量的长度加倍，应使向量乘以2.如果k&lt;0，则向量的方向被倒转。</p>
+</li>
+</ol>
+<h4 id="标准化normalize">标准化(Normalize)</h4>
+<ul>
+<li><p>对于许多向量，我们只关心向量的方向不在乎向量的大小，如：“我面向的是什么方向？”，在这样的情况下，使用单位向量非常方便，单位向量就是大小为1的向量，单位向量经常也被称作为标准化向量或者法线。</p>
+</li>
+<li><p>对于任意非零向量v，都能计算出一个和v方向相同的单位向量k,这个过程被称作向量的“标准化”，要标准化向量，将向量除以它的大小（模）即可。  $k=v/||v||,v!=0$</p>
+</li>
+<li><p>零向量不能被标准化，数学上这是不允许的，因为将导致除以零，几何上也没有意义，零向量没有方向。</p>
+<p>几何解释：2D环境中，如果以原点为尾画一个单位向量，那么向量的头将接触到圆心在原点的单位圆。3D环境中单位向量将接触单位球。</p>
+</li>
+</ul>
+<h4 id="向量的加法和减法">向量的加法和减法</h4>
+<ul>
+<li>两个向量的维数相同，那么它们能相加，或者相减。结果向量的维数与原向量相同。向量加减法的记发和标量加减法的记法相同。例如：$[x,y,z] + [a,b,c] = [x+a,y+b,z+c]$</li>
+<li>减法解释为加负向量，$a-b=a+(-b)$   例如：$ [x,y,z] – [a,b,c] = [x-a,y-b,c-z]$</li>
+<li>向量不能与标量或维数不同的向量相加减。</li>
+<li>和标量加法一样，向量加法满足交换律，但向量减法不满足交换律，永远有$a+b = b+a$,但$a-b=-(b-a)$,仅当$a=b$时，$a-b = b-a$</li>
+<li>几何解释：向量a和向量b相加的几何解释为：平移向量，使向量a的头连接向量b的尾，接着从a的尾向b的头画一个向量。这就是向量加法的“三角形法则”。</li>
+<li>计算一个点到另一个点的位移是一种非常普遍的需求，可以使用三角形法则和向量减法来解决这个问题，如： 下图  d-c 计算出 c 到 d 的位移向量。</li>
+</ul>
+<p><img src="./3D数学基础 · GitBook_files/vec_tri_rule.png" alt=""></p>
+<h4 id="距离公式">距离公式</h4>
+<p>用来计算两点之间的距离。从上面可以得知两点间的位移向量通过向量减法可以得知，既然得到了两点间的位移向量，那么求出位移向量的模，就能计算出两点间的位移。如下公式:</p>
+<p><script type="math/tex; "> distance(a,b) = \left|| b-a \right|| = \sqrt{ (b_{x}-a_{x})^2 + (b_{y}-a_{y})^2 + (b_{z}-a_{z})^2 } </script></p>
+<h4 id="向量点积">向量点积</h4>
+<p>标量和向量可以求积，向量和向量也可以求积。有两种不同类型的求法，点积、叉积
+点积的记法来至a·b中的点。与标量和向量的乘法一样，向量点积的优先级高于加法和减法。标量乘法和标量与向量的乘法可以省略乘号，但在向量点乘中不能省略点乘号。向量点乘就是对应分量乘积的和。其结果是一个标量，此标量是等于两个向量长度相乘结果乘以向量之间的夹角的余弦。当两个向量都为单位向量时，余弦的定义就表示为第一个向量在第二个向量上面的射影长度（或反之亦然 - 参数的顺序并不重要）。
+$[x,y,z] · [a,b,c] = ax+by+cz$</p>
+<p><img src="./3D数学基础 · GitBook_files/vecDot_as_Project.jpg" alt=""></p>
+<p>容易想像，在角度方面可以通过计算器计算余弦值。然而，下面图标中的一些主要的余弦值是会经常用到的。</p>
+<p><img src="./3D数学基础 · GitBook_files/used_Rad_byCos.jpg" alt=""></p>
+<p>几何解释：一般来说，点乘结果描述了两个向量的“相似”程度，点乘结果越大，两个向量越相近，点乘和向量间的夹角相关 计算两向量间的夹角    $θ = arccos(a·b)$</p>
+<h4 id="向量投影">向量投影</h4>
+<p>给定两个向量v和n,能够将v分解成两个分量， 它们分别垂直和平行于向量n，并且满足 两向量相加等于向量v，一般称平行分量为v在向量n上的投影。
+平行分量公式： 平行分量 $= n(v·n)/||n||^2$
+垂直分量公式:    垂直分量 $= ||v|| –  n(v·n)/||n||^2$</p>
+<h4 id="向量叉积">向量叉积</h4>
+<p>向量叉积得到一个向量，并且不满足交换律。  它满足反交换律 $ a × b =  -(b × a) $</p>
+<h5 id="叉积公式">叉积公式</h5>
+<p>$[x,y,z] × [a,b,c] = [yc-zb , za-xc , xb-ya]$</p>
+<p>当点积和叉积在一起时，叉积优先计算，$ a · b × c = a·(b×c) $ 因为点积返回一个标量，同时标量和向量间不能叉积。</p>
+<h5 id="几何解释">几何解释</h5>
+<p>叉积得到的向量垂直于原来的两个向量。在"左手坐标系"中，可以用来表示输入和输出的向量的方向。如果第一个参数匹配手的拇指和食指匹配第二个参数，结果将是中指的方向。如果参数的顺序是相反的结果向量将指向正好相反的方向，但将有相同长度。 如下图：</p>
+<p><img src="./3D数学基础 · GitBook_files/vec_cross_geom_def.jpg" alt=""></p>
+<p>$a × b $的长度等于向量的大小与向量夹角sin值的积，$||a × b|| = ||a|| ||b|| sinθ$</p>
+<p>$||a × b||$也等于以a和b为两边的平时四边形的面积。
+叉积最重要的应用就是创建垂直于平面、三角形、多边形的向量。</p>
+<h3 id="矩阵-matrix">矩阵 (Matrix)</h3>
+<h4 id="定义">定义</h4>
+<p>矩阵就是以行和列形式组织的矩形数字块。形式上，向量可以定义为一维数组，而矩阵则可以定义为二维数组。因此，矩阵可以理解为由多个向量组成，类似二维数组由多个一维数组组成一样。 矩阵的维度被定义为它包含了多少行和多少列。</p>
+<h4 id="写法">写法</h4>
+<p>一个r × c矩阵表示有r行，c列。矩阵的表示采用下标法，下标从1开始，这和数组下标从0开始不同，这也是我们代码不用数组表示矩阵的原因之一。表示如图：
+<img src="./3D数学基础 · GitBook_files/matrix_notation.png" alt=""></p>
+<p>方阵：行数和列数相同的矩阵称作方阵。方阵的对角线元素就是方阵中行号和列号相同的元素，其它则是非对角线元素。而如果一个矩阵的所有非对角线元素都为0，那么这种矩阵称为对角矩阵。单位矩阵是一种特殊的对角矩阵，即对角线元素为1，其它为0的矩阵，单位矩阵对矩阵的作用犹如1对标量的作用，任何一个矩阵乘以单位矩阵，都将得到原矩阵。表示如下图：
+<img src="./3D数学基础 · GitBook_files/quad_matrix.png" alt="">
+<img src="./3D数学基础 · GitBook_files/matrix_eg1.png" alt=""></p>
+<p>向量作为矩阵使用：一个向量也可以看做一个矩阵，行向量就是1×n的矩阵，列向量就是n×1的矩阵。人们通常偏向使用行向量，DirectX使用的就是行向量，而OpenGL使用的是列向量。不管是使用哪种向量，它们的几何意义是一样的，只不过向量与矩阵相乘，如果使用列向量，只有右乘才有意义，而使用行向量，就得左乘才有意义(这和矩阵相乘的运算规则有关)。</p>
+<h4 id="转置">转置</h4>
+<p>就是将矩阵的行向量变成列向量，将列向量变成行向量。如下图： 
+<img src="./3D数学基础 · GitBook_files/matrix_T.png" alt=""></p>
+<h4 id="标量和矩阵相乘">标量和矩阵相乘</h4>
+<p>其结果是一个和原矩阵维数一样的矩阵，元素的值为这个标量和原矩阵中每个元素相乘。如图：
+<img src="./3D数学基础 · GitBook_files/scalar_mul_matrix.png" alt=""></p>
+<h4 id="矩阵与矩阵相乘">矩阵与矩阵相乘</h4>
+<p>并不是所有的矩阵相乘都有意义，只有一个r × n矩阵A能够乘以一个n × c矩阵B，结果是一个r × c矩阵，记作：AB(即A的列数和B的行数必须相等，否则AB无意义)。结果AB矩阵中任意元素 ‘ij’ 等于A的第i行向量与B的第j列向量的点乘值。如图： 
+<img src="./3D数学基础 · GitBook_files/Mc_eq_Ma_mul_Mb.png" alt="">
+从这里可以看出，向量与矩阵相乘，行向量只有左乘矩阵才有意义，而且结果是行向量。列向量只有右乘矩阵才有意义，结果是列向量。如图所示： 
+<img src="./3D数学基础 · GitBook_files/def_matrix_mul.png" alt=""></p>
+<h4 id="矩阵是怎样变换向量的">矩阵是怎样变换向量的?</h4>
+<p>向量在几何上能被解释成一系列与轴平行的位移，一般来说，任意向量v都能写成“扩展”形式：
+<img src="./3D数学基础 · GitBook_files/o_vector_axis.jpg" alt="">
+另一种略有差别的形式为：
+<img src="./3D数学基础 · GitBook_files/o_vector_axis_another.jpg" alt="">
+注意右边的单位向量就是x，y，z轴，这里只是将概念数学化，向量的每个坐标都表明了平行于相应坐标轴的有向位移。</p>
+<p>让我们将上面的向量和重写一遍，这次分别将p、q、r定义为指向+x，+y和+z方向的单位向量，如下所示：</p>
+<p>$v = xp + yq + zr$</p>
+<p>现在，向量v就被表示成向量p，q，r的线性变换了，向量p，q，r称作基向量。这里基向量是笛卡尔坐标轴，但事实上，一个坐标系能用任意3个基向量定义，当然这三个基向量要线性无关（也就是不在同一平面上）。以p、q、r为行构建一个3 x 3矩阵M，可得到如下矩阵：
+<img src="./3D数学基础 · GitBook_files/o_matrix_basic_vector.jpg" alt="">
+用一个向量乘以该矩阵，得到：
+<img src="./3D数学基础 · GitBook_files/o_vector_matrix_multiple.jpg" alt="">
+如果把矩阵的行解释为坐标系的基向量，那么乘以该矩阵就相当于执行了一次坐标转换，如果aM=b，我们就可以说，M将a转换到b。</p>
+<p>从这点看，术语“转换”和“乘法”是等价的。</p>
+<p>坦率地说，矩阵并不神秘，它只是用一种紧凑的方式来表达坐标转换所需的数学运算。进一步，用线性代数操作矩阵，是一种进行简单转换或导出更复杂转换的简便方法。</p>
+<h4 id="矩阵的形式">矩阵的形式</h4>
+<p>设有3个基向量[1, 0, 0], [0, 1, 0], [0, 0, 1]，它们乘以任意矩阵M：
+<img src="./3D数学基础 · GitBook_files/o_basic_vector_mul_matrix.jpg" alt=""></p>
+<p>用基向量[1, 0, 0]乘以M时，结果是M的第1行。其他两行也有同样的结果，这是一个关键的发现：矩阵的每一行都能解释为转换后的基向量。</p>
+<p>这个强有力的概念有两条重要性质：</p>
+<ol>
+<li>有了一种简单的方法来形象化解释矩阵所代表的变换。</li>
+<li>有了反向建立矩阵的可能 ---- 给出一个期望的变换（如旋转、缩放等），能够构造一个矩阵代表此变换。我们所要做的一切就是计算基向量的变换，然后将变换后的基向量填入矩阵。</li>
+</ol>
+<p>首先来看看2D例子，一个2 x 2矩阵：
+<img src="./3D数学基础 · GitBook_files/o_matrix_m.jpg" alt="">
+这个矩阵代表的变换是什么？首先，从矩阵中抽出基向量p和q：
+$p = [2, 1]$
+$q = [-1, 2]$
+图7.1以“原”基向量（x轴，y轴）为参考，在笛卡尔平面中展示了这些向量。
+<img src="./3D数学基础 · GitBook_files/o_2d_vector_visualizing.jpg" alt=""></p>
+<p>如图7.1所示，x基向量变换至上面的p向量，y基向量变换至q向量。所以2D中想象矩阵的方法就是想象由行向量构成的“L”形状。这个例子中，能够很清楚的看到，M代表的部分变换是逆时针旋转26度。</p>
+<p>当然，所有向量都被线性变换所影响，不只是基向量，从“L”形状能够得到变换最直观的印象，把基向量构成的整个2D平行四边形画完整有助于进一步看到变换对其他向量的影响，如图7.2所示：
+<img src="./3D数学基础 · GitBook_files/o_2d_para_row.jpg" alt="">
+平行四边形称作“偏转盒”，在盒子中画一个物体有助于理解，如图 7.3 所示：
+<img src="./3D数学基础 · GitBook_files/o_visualize_transform.jpg" alt="">
+很明显，矩阵M不仅旋转坐标系，还会拉伸它。</p>
+<p>这种技术也能应用到3D转换中。2D中有两个基向量，构成"L"型；3D中有三个基向量，它们形成一个”三脚架“。首先，让我们展示出一个转换前的物品。图7.4展示了一个茶壶，一个立方体。基向量在”单位“向量处。
+<img src="./3D数学基础 · GitBook_files/o_teapot_before_trans.jpg" alt="">
+为了不使图形混乱，没有标出z轴基向量[0, 0, 1]，它被茶壶和立方体挡住了。）
+现在，考虑以下3D变换矩阵：
+<img src="./3D数学基础 · GitBook_files/o_3d_trans_matrix.jpg" alt="">
+矩阵的行中抽出基向量，能想象出该矩阵所代表的变换。变换后的基向量、立方体、茶壶如图7.5所示：
+<img src="./3D数学基础 · GitBook_files/o_teapot_after_trans.jpg" alt="">
+这个变换包含z轴顺时针旋转45度和不规则缩放，使得茶壶比以前”高“。注意，变换并没有影响到z轴，因为矩阵的第三行是$[0, 0 , 1]$。</p>
+<p>我们可以通过让比例因子k按比例放大或缩小来缩放物体。如果在各方向应用同比例的缩放，并且沿原点“膨胀”物体，那么就是均匀缩放。均匀缩放可以保持物体的角度和比例不变。如果长度增加或减小因子k，则面积增加或减小k^2。在3D中，体积将增加或减小$ k^3$。</p>
+<p>如果需要“挤压”或"拉伸"物体，在不同的方向应用不同的因子即可，这称作非均匀缩放。非均匀缩放时，物体角度将发生变化。视各方向缩放因子的不同，长度、面积、体积的变化因子也各不相同。</p>
+<p>如果$|k|&lt;1$，物体将“变短”；如果$|k|&gt;1$，物体将“变长”，如果$k = 0$，就是正交投影，如果k &lt; 0就是镜像。
+应用非均匀缩放的效果类似于切变，事实上，非均匀缩放和切变和很难区分的。<!--1$，物体将“变短”；如果$|k|--></p>
+<h4 id="沿坐标轴的缩放">沿坐标轴的缩放</h4>
+<p>最简单的缩放方法是沿着每个坐标轴应用单独的缩放因子，缩放是沿着垂直的轴（2D中）或平面（3D中）进行的。如果每个轴的缩放因子相同，就是均匀缩放，否则是非均匀缩放。
+2D中有两个不同的缩放因子，Kx和Ky，图8.13展示了应用不同缩放因子后的情况。
+<img src="./3D数学基础 · GitBook_files/o_scale_2d.jpg" alt="">
+凭直觉就可知道，基向量p，q由相应的缩放因子单独影响：
+$p' = Kxp = Kx [1   ,0] = [Kx   ,0]$
+$q' = Kyq = Ky [0,   1] = [0,   Ky]$
+用基向量构造矩阵，结果如公式8.6所示：
+<img src="./3D数学基础 · GitBook_files/o_2d_scale_matrix.jpg" alt="">
+对于3D，需要增加第三个缩放因子Kz，3D缩放矩阵如公式8.7所示：
+<img src="./3D数学基础 · GitBook_files/o_3d_scale_matrix.jpg" alt=""></p>
+<h4 id="沿任意方向缩放">沿任意方向缩放</h4>
+<p>我们可以不依赖于坐标系而沿任意方向进行缩放，设n为平行于缩放方向的单位向量，k为缩放因子，缩放沿穿过原点并平行于n的直线（2D中）或平面（3D中）进行。</p>
+<p>我们需要推导出一个表达式，给定向量v，可以通过v，n和k来计算v'。为了做到这一点，将v分解为两个分量，v||和v⊥，分别平行于n和垂直于n，并满足v =v|| + v⊥。v||是v在n上的投影，由 (v . n)n 可以得到 v||。因为v⊥垂直于n，它不会被缩放操作影响。因此，v' = v||' + v⊥，剩下的问题就是怎样得到v||'。由于v||平行于缩放方向，v||'可以由公式kv||得出，如图8.14所示：
+<img src="./3D数学基础 · GitBook_files/o_scale_Arbitrary.jpg" alt="">
+总结已知向量并进行代换，得到:
+<img src="./3D数学基础 · GitBook_files/o_scale_cal1.jpg" alt="">
+既然我们知道了怎样对任意向量进行缩放，当然也就可以计算缩放后的基向量。这里只详细列出2D中的一个基向量的求法，其余的基向量依次类推。我们只给出其结果（注意下面采用列向量形式只是为了使等式的形式好看一些。）
+<img src="./3D数学基础 · GitBook_files/o_scale_cal2.jpg" alt="">
+通过基向量构造矩阵，得到以单位向量n为缩放方向，k为因子的缩放矩阵，如公式8.8所示：
+<img src="./3D数学基础 · GitBook_files/o_2d_scale_arbitrary_matrix.jpg" alt="">
+3D中，基向量为：
+<img src="./3D数学基础 · GitBook_files/o_3d_scale_arbitrary_matrix.jpg" alt="">
+以单位向量n为缩放方向，k为因子的3D缩放矩阵如公式8.9所示：</p>
+<p>一般来说，投影意味着降维操作，有一种投影方法是在某个方向上用0作为缩放因子。这种情况下，所有点都被拉平至垂直的轴（2D）或平面（3D）上。这种类型的投影称作正交投影（或者平行投影），因为从原来的点到投影点的直线相互平行。</p>
+<h4 id="向坐标轴或平面投影">向坐标轴或平面投影</h4>
+<p>最简单的投影方式是向坐标轴（2D）或平面（3D）投影，如图8.15所示：
+<img src="./3D数学基础 · GitBook_files/o_project_into_plane.jpg" alt="">
+向坐标轴或平面投影在实际变换中不常发生，大多数情况是向低维的变换赋值，且要抛弃维数时。例如，将3D点赋值给2D点，抛弃z分量，只复制x和y。
+通过使垂直方向上的缩放因子为零，就能向坐标轴或平面投影。考虑到完整性，下面列出这些变换矩阵，见公式8.10 - 8.14。
+<img src="./3D数学基础 · GitBook_files/o_project_formula_along_axis.jpg" alt=""></p>
+<h4 id="向任意直线或平面投影">向任意直线或平面投影</h4>
+<p>也能向任意直线或平面投影，像往常一样，由于不考虑平移，这些直线或平面必须通过原点。投影由垂直于直线或平面的单位向量n定义。
+通过使该方向的缩放因子为0能够导出向任意方向投影的矩阵，2D中的情况如公式8.15所示：
+<img src="./3D数学基础 · GitBook_files/o_2d_project_matrix.jpg" alt="">
+记住这里n垂直于投影直线，而不是平行。3D中，向垂直于n的平面投影的矩阵如公式8.16所示：
+<img src="./3D数学基础 · GitBook_files/o_3d_project_matrix.jpg" alt=""></p>
+<h4 id="镜像">镜像</h4>
+<p>镜像（也叫做反射）是一种变换，其作用是将物体沿直线（2D中）或平面（3D中）“翻折”，图8.16展示了镜像的效果。
+<img src="./3D数学基础 · GitBook_files/o_reflection_along_axis.jpg" alt="">
+使缩放因子为-1能够很容易地实现镜像变换，设n为2D单位向量，公式8.17所示的矩阵将沿通过原点且垂直于n的反射轴来进行镜像变换。
+<img src="./3D数学基础 · GitBook_files/o_2d_reflect_matrix.jpg" alt="">
+3D中，用反射平面代替直线。公式8.18中的矩阵将沿通过原点且垂直于n的平面来进行镜像变换：
+<img src="./3D数学基础 · GitBook_files/o_3d_reflect_matrix.jpg" alt="">
+注意一个物体只能“镜像”一次，如果再次镜像（当沿不同的轴或平面的时候），物体将翻回“正面”（用一张纸来想象），这和在原位置旋转物体的效果一样。</p>
+<h4 id="切变">切变</h4>
+<p>切变是一种坐标系“扭曲”变换，非均匀地拉伸它。切变的时候角度会发生变化，但令人惊奇的是面积和体积却保持不变。基本思想是将某一坐标的乘积加到另一个上。例如，2D中将y乘以某个因子然后加到x上，得到$ x' = x + sy$，如图8.17所示：
+<img src="./3D数学基础 · GitBook_files/o_2d_shearing.jpg" alt="">
+实现这个切变变换的矩阵为：
+<img src="./3D数学基础 · GitBook_files/o_shearing.jpg" alt=""></p>
+<h4 id="变换的组合">变换的组合</h4>
+<p>设想世界中有一个任意方向、任意位置的物体，我们要把它渲染到任意方向、任意位置的摄像机中。为了做到这一点，必须将物体的所有顶点从物体坐标系变换到世界坐标系，接着再从世界坐标系变换到摄像机坐标系。其中的数学变换总结如下：
+<img src="./3D数学基础 · GitBook_files/o_transform_matrix.jpg" alt="">
+矩阵乘法满足结合律，所以我们能用一个矩阵直接从物体坐标系变换到摄像机坐标系：
+<img src="./3D数学基础 · GitBook_files/o_matrix_object_camera.jpg" alt="">
+这样就能在渲染的循环外先将所有矩阵组合起来，使循环内作矩阵乘法的时候只需要和一个矩阵相乘即可（物体有很多顶点，省一次矩阵乘法就会提高不少效率），如下:
+<img src="./3D数学基础 · GitBook_files/o_matrix_object_camera2.jpg" alt="">
+所以矩阵组合从代数角度看是利用了矩阵乘法的结合律。矩阵的行向量就是变换后的基向量，这在多个变换的情况下也是成立的。考虑矩阵乘法AB，结果中的每一行都是A中相应的行与矩阵B相乘的结果。换言之，设a1, a2, a3为A的行，矩阵乘法能够写为：
+<img src="./3D数学基础 · GitBook_files/o_matrix_multiple.jpg" alt="">
+这使得结论更加清晰，AB结果中的行向量确实是对A的基向量进行B变换的结果。</p>
+<h4 id="变换分类">变换分类</h4>
+<p>变换的类别并不是互斥的，也不存在一定的“次序”或“层次”使得某一类比另一类多或少一些限制。
+当讨论一般意义上的变换时，我们将使用类似的术语：映射或函数。在最一般的意义上，映射就是一种简单的规则，接受输入，产生输出。我们把从a到b的F映射记作F(a) = b。</p>
+<h5 id="线性变换">线性变换</h5>
+<p>在数学上，如果满足下式，那么映射F(a)就是线性的：
+$F(a + b) = F(a) + F(b)   以及  F(ka) = kF(a)$
+如果映射F保持了基本运算：加法和数量乘，那么就可以称该映射为线性的。在这种情况下，将两个向量相加然后再进行变换得到的结果和先分别进行变换再将变换后的向量相加得到的结果相同。同样，将一个向量数量乘再进行变换和先进行变换再数量乘的结果也是一样的。</p>
+<p>这个线性变换的定义有两条重要的引理：</p>
+<ol>
+<li><p>映射$F(a) = aM$，当M为任意方阵时，说映是一个线性变换，这是因为：</p>
+<p>$F(a + b) = (a + b)M = aM + bM = F(a) + F(b)$
+和
+$F(ka) = (ka)M = k(aM) = kF(a)$</p>
+</li>
+<li><p>零向量的任意线性变换的结果仍然是零向量。（如果$F(0) = a，a ≠ 0$。那么F不可能是线性变换。因为$F(k0) = a$，但$F(k0) ≠ kF(0)$），因此线性变换不会导致平移（原点位置上不会变化）。</p>
+</li>
+</ol>
+<p>在某些文献中，线性变换的定义是平行线变换后仍然是平行线。大多数情况下它是对的，但有一个小小的例外：投影（当一条直线投影后变成一个点，能认为这个点 平行于什么？）除了这点理论上的例外，这种定义是正确的。线性变换可能造成“拉伸”，但直线不会”弯折“，所以平行线仍然保持平行。</p>
+<h5 id="仿射变换">仿射变换</h5>
+<p>仿射变换是指线性变换后接着平移。因此仿射变换的集合是线性变换的超集，任何线性变换都是仿射变换，但不是所有仿射变换都是线性变换。
+任何具有形式$ v' = vM + b $的变换都是仿射变换。</p>
+<h5 id="可逆变换">可逆变换</h5>
+<p>如果存在一个逆变换可以”撤销“原变换，那么该变换是可逆的。换句话说，如果存在逆变换G，使得$G(F(a)) = a$，对于任意a，映射F(a)是可逆的。
+存在非仿射变换的可逆变换，但暂不考虑它们。现在，我们集中精力于检测一个仿射变换是否可逆。一个仿射变换就是一个线性变换加上平移，显然，可以用相反的量”撤销“平移部分，所以问题变为一个线性变换是否可逆。
+显然，除了投影以外，其他变换都能”撤销“。当物体被投影时，某一维有用的信息被抛弃了，而这些信息时不可能恢复的。因此，所有基本变换除了投影都是可逆的。
+因为任意线性变换都能表达为矩阵，所以求逆变换等价于求矩阵的逆。如果矩阵是奇异的，则变换不可逆；可逆矩阵的行列式不为0。</p>
+<h5 id="等角变换">等角变换</h5>
+<p>如果变换前后两向量夹角的大小和方向都不改变，该变换是等角的。只有平移，旋转和均匀缩放是等角变换。等角变换将会保持比例不变，镜像并不是等角变换，因为尽管两向量夹角的大小不变，但夹角的方向改变了。所有等角变换都是仿射和可逆的。</p>
+<h5 id="正交变换">正交变换</h5>
+<p>术语“正交”用来描述具有某种性质的矩阵。正交变换的基本思想是轴保持互相垂直，而且不进行缩放变换。
+平移、旋转和镜像是仅有的正交变换。长度、角度、面积和体积都保持不变。（尽管如此，但因为镜像变换被认为是正交变换，所以一定要密切注意角度、面积和体积的准确定义）。
+正交矩阵的行列式为1或者负1，所有正交矩阵都是仿射和可逆的。</p>
+<h5 id="刚体变换">刚体变换</h5>
+<p>刚体变换只改变物体的位置和方向，不包括形状。所有长度、角度、面积和体积都不变。平移和旋转是仅有的刚体变换，镜像并不被认为是刚体变换。刚体变换也被称作正规变换，所有刚体变换都是正交、等角、可逆和仿射的，某些刚体变换旋转矩阵的行列式为1。</p>
+<h3 id="角位移的矩阵表示、欧拉角和四元数quation">角位移的矩阵表示、欧拉角和四元数(Quation)</h3>
+<p>先来说说 方向、方位与角位移的区别。
+在现实生活中,我们很少区分"方向"和"方位"的区别(非路痴观点),比如一个朋友来看望你,但是他可能在某一个公交站下车了,你去接他,但是找不到他,你急忙给他来一个电话"兄弟,你在哪个方向呢?"或者说是"兄弟,你在哪个方位呢?",如果不细细品味这两句话,其实感觉差异不是太大.通过一痛电话的扯,然后你们成功的面基了,但是你们却并不会在意"方向"和"方位"的区别.那么在几何中,这两者到底有什么差异呢?</p>
+<p>比如一个向量如果沿着自己的方向选择是不会改变自身任何属性的,如下图所示,因为向量是只有方向没有方位的.
+<img src="./3D数学基础 · GitBook_files/arrow_in_3d.jpg" alt="">
+那么对于一个物体,情况却是不一样的,一个物体如果朝向某一个方向的时候,然后自转,那么这个物体是会发生空间上的改变的,如下图一个锥体的自转,那么它的空间位置是发生改变的,也就是锥体的方位发生了改变了.
+<img src="./3D数学基础 · GitBook_files/item_in_3d.jpg" alt="">
+上面让我们对物体的方向和方位的区别有了一个大体上的了解,那么我们在空间中如何描述一个方位呢?这就需要使用到角位移了.
+先说一个类似的例子,我们该如何描述空间中一个物体的位置呢?必须要把物体放在特定的坐标系中(好像很生涩).比如,如果我们说在一个坐标系中,有一个点是$[1,1,1]$,那么你会非常轻易的想到了这个点在空间中的位置.描述空间位置其实就是描述相对于给定参考点(坐标原点)的位移.
+其实,描述一个物体的方位是一样的,我们是不可能凭空描述一个物体的方位,我盟需要一个已知方位的参考量,通过这个参考量的旋转得到当前方位,那么旋转的量就叫做角位移.通过概念我们知道,角位移就是用来描述方位的,类似于速度就是用来描述物体运动快慢的一样.当然了,这里我要声明的一点就是虽然角位移是用来描述方位的,但是两者是不同的.例如,我们可以这么说,一个物体的方位是如何如何的;一个物体是通过某个已知方位经过角位移XXX旋转得到.所以说,方位是用来描述一个单一的"状态".但是角位移是用来描述两个状态之间的差异.
+那么,我们在实际中如何描述方位与角位移呢?具体而言,我们使用矩阵和四元数来表示"角位移",用欧拉角来表示方位.接下来,我们逐一介绍一下.</p>
+<h4 id="使用矩阵表示角位移">使用矩阵表示角位移</h4>
+<p>在3D环境中,描述坐标系中方位的方式就是列出这个坐标系的基向量,当然了,这些基向量是用其他表示的,并不是它本身的基向量,比如当前转换完成的坐标系的三个基向量$p [1,0,0]$,$ q[0,1,0]$,$ r[0,0,1]$,这是使用本身的坐标系表示,如果放在其他坐标系中表示当前的三个基向量可能就会发生改变.这是因为参照点选择的不同.至于基向量是如何改变的就需要在''3D数学:矩阵与线性变换''说过的旋转矩阵的相关知识了.这个就不过多的解释了.比如下图,由向量p,q,r组建的新的坐标系用原来的坐标系表示确实如图右边所示:
+<img src="./3D数学基础 · GitBook_files/pqr_in_3d.jpg" alt="">
+其实对于我们开发来说,我们只需要知道方位是可以使用3X3矩阵来表示的.矩阵表示的是转换后的基向量即可.接下来我们说一下使用矩阵来表示角位移有什么样的优势和缺点</p>
+<h5 id="使用矩阵表示角位移的优势">使用矩阵表示角位移的优势</h5>
+<p>可以立即进行向量的旋转.后面使用四元数进行空间变化其实是和使用对应的矩阵的空间变化的效果是一样的.</p>
+<ul>
+<li>矩阵的形式被图形API所使用.</li>
+<li>多个角位移连接.我们知道使用矩阵进行空间变换是可以连续进行多个的.那么角位移也是一样的.</li>
+<li><p>矩阵的逆.这个比较好理解,如果我们进行了一次旋转变换(也就是空间方位的变化),那么如何回到原来的方位呢,只要再乘上一次矩阵的逆即可,前面说过矩阵的逆是有这样的功能的</p>
+<p><strong>使用矩阵表示角位移的缺点</strong>
+矩阵可能占有更多内存.这其实是由比较性的,这种比较是要与欧拉角做比较,与欧拉角比较矩阵所占的内存将会更多
+难以使用.这个确实是,你想想,如果现在你要x轴旋转80°,你还要想想它对应的向量是多少.一痛计算之后,才能得到对用的值,后面直接看到这个矩阵的时候还要接着计算,看看它是如何变换的.这样使用起来是不是非常的恶心?
+并非所有矩阵都能描述方位.</p>
+<p><strong>欧拉角表示方位与万向锁问题</strong>
+用欧拉角表示方位将会比矩阵更加的直观而且易于使用，欧拉角的基本思想是将角位移分解为绕三个互相垂直轴的三个旋转组成的序列.那么这个三个互相垂直的轴是如何定义的呢?其实任意三个轴和任意顺序都是可以的,但是最常用的就是使用笛卡尔坐标系并且按照一定顺序组成的旋转序列.最常用的约定,就是所谓的"heading-pitch-bank"约定,在这个系统中,一个方位被定义为heading角,一个pitch角,一个bank角.其中,在左手坐标系中,我们把heading角定义为绕y轴旋转量,pitch角为绕x轴旋转量,bank角为绕z轴旋转量.旋转法则遵守左手法则，它的基本思想是让物体开始于"标准"方位,就是物体坐标轴和惯性坐标轴对齐.让物体做heading、pitch、bank旋转之后达到最终的空间方位.</p>
+<p>在Unity中，面板中Transform的Rotation就是使用这个约定。通常规定heading和bank范围在$[-180°,180°]$，pitch范围在$[-90°,90°]$。
+“roll-pitch-yaw”
+围绕轴分别代表：z、x、y，从物体坐标系到惯性坐标系。不同于上面那个y，这个yaw代表的是物体坐标系。
+heading 和 yaw的区别： 
+<img src="./3D数学基础 · GitBook_files/roll_pitch_yaw.png" alt=""></p>
+</li>
+</ul>
+<h5 id="万向锁问题">万向锁问题</h5>
+<p>如果pitch角为±90°，则第一次（y轴）和第三次（z轴）旋转轴相同。y是惯性坐标，一直向上，pitch转到±90°，bank轴就会和竖直轴平行。为了消除这种两个轴同时控制同一个方向的现象，规定在万向锁情况下，只使用heading来控制竖直轴，及pitch为±90°时，bank为0。</p>
+<h4 id="欧拉角">欧拉角</h4>
+<h5 id="欧拉角表示方位的优点">欧拉角表示方位的优点</h5>
+<p>欧拉角使用起来非常的简单方便,它比四元数以及矩阵更加的生动形象.因为欧拉角使用都是角度,对于人来说旋转还是使用角度比较直观.
+最简洁的表达方式.在3D中,欧拉角用3个数就可以表达方位,四元数则要用4个数,而矩阵是最多的,需要9个数.
+任意三个数都是合法的,任意的三个数都是能构成合法的欧拉角,矩阵和四元数可不一定是这样的</p>
+<h5 id="欧拉角表示方位的缺点">欧拉角表示方位的缺点</h5>
+<p>给定的方位表达方式不唯一.我们虽然说任意三个数组成的欧拉角都是合法的,但是比如heading旋转360°和选择720°,物体的方位是一直的,虽然欧拉角的数值是发生了改变的.
+两个角度求插值非常的困难.比如方位A的heading角度为720°,方位B的角度为45°.那么heading值差了多少呢?没错就是45°,因为720°就是旋转了两周而已,但是实际上我们操作的时候需要选择将近两周.如下图所示.
+<img src="./3D数学基础 · GitBook_files/eular_angle_missed.jpg" alt=""></p>
+<h4 id="四元数">四元数</h4>
+<p>它是什么？复数是由实数加上虚数单位 i 组成，其中 $ i²  = -1$
+相似地，四元数都是由实数加上三个元素 i、j、k 组成，而且它们有如下的关系：$i² = j² = k² = ijk = -1$
+每个四元数都是 1、i、j 和 k 的线性组合，即是四元数一般可表示为$a + bi + cj + dk$。</p>
+<h5 id="记法">记法</h5>
+<p>一个四元数包含一个标量分量和一个3D向量分量。经常记标量分量为w，记向量分量为单一的v或分开的x，y，z。两种记法分别如下：
+<script type="math/tex; "> [w,v] </script>
+<script type="math/tex; "> [w,(x,y,z)] </script></p>
+<p>看一下四元数是如何表示角位移的？
+如下所示.其中,θ代表着旋转角度,n代表着旋转轴.因此轴-角对$(n,θ$)定义了一个角位移:绕n指定的轴旋转θ角。
+<img src="./3D数学基础 · GitBook_files/angle_axis_quat.jpg" alt="">
+公式如下
+<img src="./3D数学基础 · GitBook_files/quat_foluma.jpg" alt="">
+四元数的解释其实就是角位移的轴-角对方式,但是呢,n和θ并不是直接放入到四元数中的.它们的形式如下所示.
+<img src="./3D数学基础 · GitBook_files/quat_n_theta.png" alt=""></p>
+<h5 id="负四元数">负四元数</h5>
+<p>q和-q代表的实际角位移是相同的。因为-q旋转轴倒置，同时转相反方向，就像正面的顺时针和反面的逆时针其实是一个结果。
+<img src="./3D数学基础 · GitBook_files/neg_quat.png" alt=""></p>
+<h5 id="单位四元数（identity）">单位四元数（Identity）</h5>
+<p>$[1, 0]$
+$[-1, 0]$虽然代表相同角位移，但是在数学上是不相同。</p>
+<h5 id="四元数的模">四元数的模</h5>
+<p>如果为了用四元数表示方位，就要符合这个规则的单位四元数。
+<img src="./3D数学基础 · GitBook_files/mag_quat.png" alt=""></p>
+<h5 id="四元数共轭">四元数共轭</h5>
+<p>即轴反向。
+<img src="./3D数学基础 · GitBook_files/conjure_quat.png" alt=""></p>
+<h5 id="四元数的逆">四元数的逆</h5>
+<p>q乘以q-1可以得到单位四元数$[1, 0]$。
+<img src="./3D数学基础 · GitBook_files/inverse_quat.png" alt=""></p>
+<h5 id="四元数的乘法（叉积）">四元数的乘法（叉积）</h5>
+<p>四元数乘法实际就是旋转。
+<img src="./3D数学基础 · GitBook_files/quat_mul.png" alt=""></p>
+<ul>
+<li>$(ab)c = a(bc)$</li>
+<li>$ab ≠ ba$</li>
+<li>$‖q1q2‖ = ‖q1‖‖q2‖$</li>
+<li>$(ab)-1 = b-1a-1 $（可扩展到多个四元数）</li>
+</ul>
+<p>实现点p绕n旋转，q为$[cos(θ/2), sin(θ/2)]$： 
+<script type="math/tex; "> p’ = qpq-1 </script></p>
+<p>先绕a旋转，后绕b旋转。要注意的是执行计算顺序是倒过来的：
+<img src="./3D数学基础 · GitBook_files/rot_quat.png" alt=""></p>
+<h5 id="四元数的差（角位移）">四元数的“差”（角位移）</h5>
+<p>一个方位（a）到另一个方位（b）的角位移（d），即da = b。执行顺序从右往左。</p>
+<p>推导过程，两边同时右乘$a^{-1}$：
+<img src="./3D数学基础 · GitBook_files/diff_quat.png" alt=""></p>
+<h5 id="四元数的点积">四元数的点积</h5>
+<p>类似与向量点乘，a·b越大，a和b代表的角位移就越相似。对于单位四元数a和b，有 $-1 ≤ a·b ≤ 1$。 
+<img src="./3D数学基础 · GitBook_files/dot_quat.png" alt=""></p>
+<h5 id="四元数的对数">四元数的对数</h5>
+<p>结果一般不是单位四元数。
+<img src="./3D数学基础 · GitBook_files/log_quat.png" alt=""></p>
+<h5 id="四元数的指数">四元数的指数</h5>
+<p>结果总是单位四元数。
+<img src="./3D数学基础 · GitBook_files/exp_quat.png" alt=""></p>
+<h5 id="四元数求幂">四元数求幂</h5>
+<p>可以理解为角度缩放。当t从0到1时，四元数q从[1, 0]变到q。q1/3表示q的三分之一个角位移，即如果q表示绕x轴绕90度，q1/3就表示绕x轴绕30度。不过一般的指数运算对四元数都不适用，如$(q4)1/2 ≠ q2，(qs)t ≠ qst$。 
+<img src="./3D数学基础 · GitBook_files/pow_quat.png" alt=""></p>
+<h5 id="四元数插值slerp（spherical-linear-interpolation）">四元数插值slerp（Spherical Linear Interpolation）</h5>
+<p>理论上计算过程： </p>
+<ol>
+<li>计算四元数的差：$\Delta{q} = q1q0-1 $</li>
+<li>计算差的一部分（求幂）：$(\Delta{q})t $</li>
+<li>最后从开始值加上这个部分（叉乘）：$(\Delta{q})tq0$
+<img src="./3D数学基础 · GitBook_files/slerp_quat.png" alt=""></li>
+</ol>
+<p>实际用更有效的方法： 
+即理解为两个向量之间求弧插值。投影到一个2D平面，即可方便推导出结果。角度w可以用点乘来算。
+<img src="./3D数学基础 · GitBook_files/used_slerp_quat.png" alt=""></p>
+<p>需要注意的是： </p>
+<ul>
+<li>因为q和-q虽然代表相同方位，但是计算的时候结果会不一样。解决方案是点乘结果如果为负就反转。 </li>
+<li>如果q0和q1非常接近（点乘接近1，sinθ非常小），除法可能会有问题。解决方案是直接用线性插值计算。</li>
+</ul>
+<h5 id="矩阵、欧拉角和四元数比较">矩阵、欧拉角和四元数比较</h5>
+<p><img src="./3D数学基础 · GitBook_files/matrix_euler_quat.png" alt=""></p>
+<ul>
+<li>坐标间转换向量，选择矩阵形式。</li>
+<li>需要大量保存方位数据（如动画）时，使用欧拉角或四元数。嵌套坐标系之间的连接，用四元数。</li>
+<li>平滑插值只能用四元数。</li>
+</ul>
+<h5 id="表达形式之间的转换">表达形式之间的转换</h5>
+<h6 id="欧拉角转换到矩阵">欧拉角转换到矩阵</h6>
+<p>HPB（heading pitch bank），可参考最上面欧拉角。 
+物体坐标到惯性坐标 
+<img src="./3D数学基础 · GitBook_files/euler_to_matrix_obj_inertia.png" alt="">
+惯性坐标到物体坐标 
+<img src="./3D数学基础 · GitBook_files/euler_to_matrix_inertia_obj.png" alt=""></p>
+<h6 id="矩阵转换到欧拉角">矩阵转换到欧拉角</h6>
+<p><img src="./3D数学基础 · GitBook_files/matrix_to_euler_to_generic.png" alt="">
+直接通过三角函数计算即可，不过注意一些特殊角度如90°等，需要判断和赋特殊值。 
+下面是物体到惯性坐标下hpb的计算（部分过程省略）：
+<img src="./3D数学基础 · GitBook_files/matrix_to_euler_to_spec_part.png" alt="">
+在$cosp = 0$时，$p = ±90°$，即面向上或向下，万向锁，设置b为0。p和h的值可以直接算出来了。
+<img src="./3D数学基础 · GitBook_files/matrix_to_euler_to_spec_part_range.png" alt=""></p>
+<h6 id="四元数转到矩阵">四元数转到矩阵</h6>
+<p><img src="./3D数学基础 · GitBook_files/quat_to_matrix.png" alt=""></p>
+<h6 id="矩阵转到四元数">矩阵转到四元数</h6>
+<p><img src="./3D数学基础 · GitBook_files/matrix_to_quat.png" alt="">
+下图方法计算都为正值，没有选择正根还是负根的依据。
+<img src="./3D数学基础 · GitBook_files/matrix_to_quat_select_pos.png" alt="">
+但是可以用任意一个非负根来计算另外三个分量的值。
+<img src="./3D数学基础 · GitBook_files/matrix_to_quat_select_pos3scalar.png" alt="">
+建议先判断w,x,y,z中最大一个，用矩阵的对角线来计算该元素，然后用上图计算其他三个。</p>
+<h6 id="欧拉角转四元数">欧拉角转四元数</h6>
+<p><img src="./3D数学基础 · GitBook_files/eular_to_quat.png" alt="">
+物体-惯性四元数 是 惯性-物体四元数的共轭。
+<img src="./3D数学基础 · GitBook_files/eular_to_quat_conjure_inertia.png" alt=""></p>
+<h6 id="四元数转欧拉角">四元数转欧拉角</h6>
+<p>先从四元数转矩阵，再从矩阵转到欧拉角。 
+<img src="./3D数学基础 · GitBook_files/quat_to_eular.png" alt=""></p>
+<h6 id="在unity中的应用">在Unity中的应用</h6>
+<p>对Vector3向量方向旋转方法：四元数 * 3D方向向量。（注意顺序）</p>
+<pre><code class="lang-C#">Quaternion rotation;    //旋转角度
+Vector3 direction;      //原始方向
+newDirection = rotation * direction;    //旋转后的方向
+</code></pre>
+<p>子物体旋转角转换到世界坐标下的旋转角：父对象旋转角 * 子对象旋转角。</p>
+<pre><code class="lang-C#">newRotation = transfrom.rotation * subRotation;
+</code></pre>
+<h3 id="参考链接：">参考链接：</h3>
+<p>Essential Math for Games Programmers: <a href="http://www.essentialmath.com/tutorial.htm" target="_blank">http://www.essentialmath.com/tutorial.htm</a></p>
+<p>3D Graphics Engine Basic Concepts: <a href="https://gamedevelopment.tutsplus.com/tutorials/lets-build-a-3d-graphics-engine-points-vectors-and-basic-concepts--gamedev-8143" target="_blank">https://gamedevelopment.tutsplus.com/tutorials/lets-build-a-3d-graphics-engine-points-vectors-and-basic-concepts--gamedev-8143</a></p>
+<p>3D Game Engine Programming Math: <a href="https://www.3dgep.com/category/math/" target="_blank">https://www.3dgep.com/category/math/</a></p>
+<script type="text/javascript">var targetUl = document.getElementsByClassName('page-inner')[0].getElementsByTagName('ul')[0];if(targetUl.getElementsByTagName('a').length>0){targetUl.className='toc';}</script>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html" class="navigation navigation-prev " aria-label="Previous page: UI基础">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dRendering.html" class="navigation navigation-next " aria-label="Next page: 3D图形学基础" style="margin-right: 0px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"3D数学基础","level":"1.8","depth":1,"next":{"title":"3D图形学基础","level":"1.9","depth":1,"path":"book/3dMathAndRendering/3dRendering.md","ref":"book/3dMathAndRendering/3dRendering.md","articles":[]},"previous":{"title":"UI基础","level":"1.7","depth":1,"path":"book/ui.md","ref":"book/ui.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","toc"],"pluginsConfig":{"toc":{"addClass":true,"className":"toc"},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/3dMathAndRendering/3dMath.md","mtime":"2019-05-05T03:07:15.814Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:39:59.338Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./3D数学基础 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./3D数学基础 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./3D数学基础 · GitBook_files/MathJax.js.下载" id=""></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/plugin.js.下载"></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./3D数学基础 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

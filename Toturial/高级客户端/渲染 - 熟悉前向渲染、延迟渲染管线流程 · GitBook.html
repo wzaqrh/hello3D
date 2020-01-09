@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<!-- saved from url=(0066)https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">渲染 - 熟悉前向渲染、延迟渲染管线流程</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="渲染">渲染</h1>
+<h2 id="熟悉前向、延迟渲染管线流程">熟悉前向、延迟渲染管线流程</h2>
+<p>如果你是一个游戏开发者，在你使用的图形引擎中或多或少都听说过forward rendering和deferred rendering。通常你必须在你的游戏中选择一种。但它们是什么，彼此之间有什么不同，我们又该如何选择呢？</p>
+<p>在开始之前，我们必须要知道一点现代可编程图形管线的一些知识。早些时候，我们被显卡的功能限制，不能去改变每个像素的绘制方式，除了发送一些不同的纹理外，不能去修改顶点的数据。现在时代已经改变，我们能够基于显卡的图形管线进行编程。我们能够发送代码到显卡去改变像素的外观（颜色），使用法线纹理(normal maps)改变它们外观使其变的突起，也可以添加反射（以及大量的现实主义）。</p>
+<blockquote>
+<p><img src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/0.jpg" alt="">
+可编程图形管道的简化视图</p>
+</blockquote>
+<h3 id="forward-rendering（正向渲染前向渲染）">Forward Rendering（正向渲染/前向渲染）</h3>
+<p>Forward Rendering 是大多数渲染引擎使用的渲染技术。你给显卡提供几何对象，它将几何对象分解成顶点送入顶点着色器，然后把这些顶点数据插值后分别送入片元/像素着色器，然后在它们被送入屏幕前做最终的渲染处理（模板测试，混合等）。这是一个线性的流程，每个几何对象分别通过渲染管线一步步的处理下去并产生最终的图像。</p>
+<blockquote>
+<p><img src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/1.png" alt="">
+前向渲染流程</p>
+</blockquote>
+<h3 id="deferred-rendering（延迟渲染）">Deferred Rendering（延迟渲染）</h3>
+<p>延迟渲染，从这个名字来看就意味着渲染是被延迟的，每个几何对象被渲染，但是没有使用光照，使用多目标渲染（multiple render targets），绘制出多个屏幕空间大小的Buffer,深度，法线和颜色等信息分别写入各自的buffers(图像),直到所有几何对象都已经通过渲染管线处理后，在最后才应用这些buffers进行着色（通过光照来决定最终的像素颜色）并产生最终的图像。</p>
+<blockquote>
+<p><img src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/2.jpg" alt="">
+延迟渲染流程</p>
+<p><img src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/3.jpg" alt="">
+MRT</p>
+<p><img src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/4.jpg" alt="">
+光照合成结果</p>
+</blockquote>
+<p>标准前向渲染（Forward Rendering）光照的性能消耗是为什么要另辟蹊径选择其他渲染方式的主要原因。在标准前向渲染（Forward Rendering）管线流程中，每个灯光都会在每个顶点/或片元上执行光照计算，这也就是常说的逐顶点光照和逐片元/像素光照。</p>
+<p>如果你在场景中有100个几何对象，并且每个几何对象有1000个顶点，你大约就有100000多变形（非常粗略的计算）。显卡还能够很轻松的处理，但是当这些多边形被发送到片元着色器时， 昂贵的对灯光消耗会使性能急剧下降。开发者可以尝试放置光照计算到顶点着色器减少片元着色器对光照的计算。</p>
+<p>不管它是不是此像素上最顶层的片元，还是被遮挡的片元，昂贵的光照计算都会在每个多边形的每个可见片元上执行。如果屏幕的分辨率是1024x768，你有将近800000个像素需要被渲染。你能很轻易的就达到每帧百万级的片元操作。并且大多数的片元还会被剔除（深度测试阶段），那么对于此片元的光照就算就白费了。</p>
+<p>如果你要对这样一个达到百万级片元的场景的每一灯光进行渲染，那么你在每一帧将跃升的一个灯光数量x1000000个片元的操作上！想象一下你有一个小镇的街道上面布满点光源！！！！！</p>
+<p>计算前向渲染（Forward Rendering）复杂度的公式：O(num_geometry_fragments * num_lights)。你能看到这里的复杂度是和几何对象数量和灯光数量直接相关的。</p>
+<p>片元是一个最终可能在屏幕上成为像素的一个”待转像素“，如果在深度测试阶段不被剔除的话，它将在屏幕上成为屏幕的最终像素。现在一些引擎通过其他的方式优化了光照计算，比如：剔除非常远的灯光，组合灯管或使用 Light maps(非常流行的，但是只能是静态的物体)。如果你有大量的灯光需要动态光照的话，我们需要一个更好的解决方案。延迟渲染（Deferred Rendering）是一个减少光照着色对象数量有趣的方法。尤其是对于总的片元对象来说，执行光照的片元数量直接由屏幕的分辨率决定。</p>
+<p>延迟渲染（Deferred Rendering）的复杂度公式：O(screen_resolution * num_lights)。</p>
+<p>选择哪一个呢？</p>
+<p>一个最简短的回答是：如果你使用了大量灯光那么你就该使用延迟渲染(Deferred Rendering)了。但是延迟渲染（Deferred Rendering）也有一些明显的缺点：</p>
+<p>•  这个处理需要显卡支持多目标渲染，老的显卡是不支持的。
+• 它需要高带宽的显卡，你要发送大的Buffer数据，老大的显卡可能处理不了。
+• 不能使用透明对象。（除非你联合 使用deferred rendering 和Forward Rendering ）。
+• 不支持硬件抗锯齿，需要相关的抗锯齿后处理。
+• 仅有一个类型的材质被允许，除非你使用了被叫做Deferred Lighting的延迟渲染修改。
+• 阴影依赖于光照的数量，延迟渲染没有解决任何阴影的问题。</p>
+<p>以上是对前向渲染和延迟渲染的简单介绍，请参考下列文档对前向和延迟渲染进行详细了解。当然，你还可以结合文档与unity framedebug工具，对unity内置管线流程进行梳理。</p>
+<ul>
+<li><a href="http://gad.qq.com/article/detail/39229" target="_blank">http://gad.qq.com/article/detail/39229</a></li>
+<li><a href="https://blog.csdn.net/noslopforever/article/details/3951273" target="_blank">https://blog.csdn.net/noslopforever/article/details/3951273</a></li>
+<li><a href="https://gamedevelopment.tutsplus.com/articles/forward-rendering-vs-deferred-rendering--gamedev-12342" target="_blank">https://gamedevelopment.tutsplus.com/articles/forward-rendering-vs-deferred-rendering--gamedev-12342</a></li>
+<li><a href="https://docs.unity3d.com/Manual/RenderTech-DeferredShading.html" target="_blank">https://docs.unity3d.com/Manual/RenderTech-DeferredShading.html</a></li>
+<li><a href="https://catlikecoding.com/unity/tutorials/rendering/part-13/" target="_blank">https://catlikecoding.com/unity/tutorials/rendering/part-13/</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/" class="navigation navigation-prev " aria-label="Previous page: 目录">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html" class="navigation navigation-next " aria-label="Next page: 渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"渲染 - 熟悉前向渲染、延迟渲染管线流程","level":"1.2","depth":1,"next":{"title":"渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）","level":"1.3","depth":1,"path":"book/LightingModel.md","ref":"book/LightingModel.md","articles":[]},"previous":{"title":"目录","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/RenderPipeline.md","mtime":"2019-05-05T03:07:42.990Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./渲染 - 熟悉前向渲染、延迟渲染管线流程 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

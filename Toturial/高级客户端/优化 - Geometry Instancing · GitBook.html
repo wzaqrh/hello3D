@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<!-- saved from url=(0070)https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>优化 - Geometry Instancing · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./优化 - Geometry Instancing · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./优化 - Geometry Instancing · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./优化 - Geometry Instancing · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./优化 - Geometry Instancing · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">优化 - Geometry Instancing</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="geometry-instancing">Geometry Instancing</h1>
+<p>在实时计算机图形学中，<a href="https://en.wikipedia.org/wiki/Geometry_instancing" target="_blank">geometry instancing</a>是渲染场景中同一个网格多份拷贝的方法。unity中叫GPU Instancing。</p>
+<p>在3D渲染中，尤其是现代3D游戏中，希望能够绘制越来越多的场景物体，这对于设备（尤其是移动端）的性能是个极大的考验，对于新一代的渲染api，都逐渐支持了Gpu Instancing技术，这对于大量相同物体的绘制提供了一个新的方案，unity从unity5开始也提供了对gpu instance 的支持。</p>
+<p>Gpu Instance是一种用来提高渲染大量物体效率的技术，随着手游游戏品质需求的提升，需要在场景里绘制越来越多的物体，这里面主要涉及两个方面的性能瓶颈，一是cpu对gpu提交数据的次数（包括设置数据buffer，渲染状态以及调用对渲染原语的绘制即drawcall），二是gpu上的绘制（包括顶点处理和像素绘制），随着场景物体的提升，cpu和gpu的压力都会上升。</p>
+<p>在Unity中为了解决场景绘制效率这个问题，主要有以下几种优化方案：</p>
+<ul>
+<li>static batching： 即静态合批，静态合批的原理即化整为零，将多个场景物体预先合成一个大的物体进行绘制，unity5的实现就是整合成一个大的vbo，而不整合IBO，一次性提交vbo给gpu，然后并不是把整个vbo都绘制，而是每次需要绘制其中某个某些物体时改变IBO，选择大vbo上的某一段进行绘制。静态合批可以将多个小物体的绘制合并成一个大物体的绘制，减少对渲染状态的改变，它一次并行绘制多个物体，理论上是最快的绘制方法，不过最大的缺点是因为合成新的大vbo需要耗费额外的大量内存，同时不能渲染动态物体，因为合并vbo的时候已经确定顶点数据了，顶点数据不能更改（例如unity5对LOD合批的实现也是将所有层次的lod都预先合并进去），另外一个vbo的大小是有限制的，如果物体数量过多，也会被拆成多个绘制。</li>
+<li>dynamic batching：动态合批，可以解决对顶点数据有变化的物体的合批，它动态的合并vbo进行提交，组建vbo的时间有消耗，为了减少这个消耗，unity对动态合批的vbo大小有限制，以致于很小顶点数的物体才有可能被动态合批。</li>
+<li>gpu instancing：这是Unity5.0后渲染api提供的一种技术，如果绘制1000个物体，它将一个模型的vbo提交给一次给显卡，至于1000个物体不同的位置，状态，颜色等等将他们整合成一个per instance attribute的buffer给gpu，在显卡上区别绘制，它大大减少提交次数，它在不同平台的实现有差异，例如gles是将per instance attribute也当成一个vbo提交，然后gles3.0支持一种per instance步进读取的vbo特性，来实现不同的instance得到不同的顶点数据，这种技术对于绘制大量的相同模型的物体由于有硬件实现，所以效率最高，最为灵活，避免合批的内存浪费。</li>
+</ul>
+<p>基于以上几种方案的分析，对于大量的基于相同模型的动态物体（树和植被等）用gpu instancing的方式进行渲染会大大提升效率。</p>
+<h2 id="unity-gpu-instance技术使用方法">Unity GPU Instance技术使用方法</h2>
+<p>Unity也在引擎层面给出了Instancing的几种使用方法。下面<a href="https://docs.unity3d.com/2018.2/Documentation/Manual/GPUInstancing.html" target="_blank">介绍Unity3D关于GPU instancing的使用方法</a>。</p>
+<p>目前Unity2018中有三种Instancing的使用方法：</p>
+<ul>
+<li>自动使用Instancing，在shader中加入Instancing的功能，在material中勾选使用Instancing，场景中使用改materail的对象会在条件合适的情况下自动instance。这种方式可以被摄像机进行裁剪，但不能指定为static batch,不能改变材质，深度排序也会破坏instance(Some factors can prevent GameObjects from being instanced together automatically. These factors include Material changes and depth sorting.)</li>
+<li>手动调用API  <a href="https://docs.unity3d.com/2018.2/Documentation/ScriptReference/Graphics.DrawMeshInstanced.html" target="_blank">Graphics.DrawMeshInstanced</a>。这是最早加入的API，不需要创建任何对象，在调用时对指定mesh采用指定material进行绘制，可以使用materialblock的方式传递参数来改变材质。但该方法不支持默认的摄像机裁剪，一次调用也有最大绘制数量的限制，但对硬件要求较低。</li>
+<li>手动调用API <a href="https://docs.unity3d.com/2018.2/Documentation/ScriptReference/Graphics.DrawMeshInstancedIndirect.html" target="_blank">Graphics.DrawMeshInstancedIndirect</a>。这是后来加入的API，和Graphics.DrawMeshInstanced一样也是不需要创建任何对象，但没有最大绘制数量的限制，但要使用<a href="https://docs.unity3d.com/2018.2/Documentation/ScriptReference/ComputeBuffer.html" target="_blank">ComputeBuffer</a> ，对shader和硬件要求较高。</li>
+</ul>
+<p>项目可以根据需求选择上面的三种方法来使用。更多的内容可以参考<a href="https://docs.unity3d.com/2018.2/Documentation/Manual/GPUInstancing.html" target="_blank">官方文档</a>。</p>
+<p>对于两种API调用时不能被摄像机裁剪而使渲染数量增加的情况，可以使用unity的底层culling api即<a href="https://docs.unity3d.com/2018.2/Documentation/ScriptReference/CullingGroup.html" target="_blank">CullingGroup</a>，为每个（也可以把几个组合作为一个单位）instance绘制的对象抽象成一个包围盒，传递给culling group，就会从unity得到这个物体当前可视情况的通知，在通知中做相应的显示隐藏操作。关于CullingGroup的使用可以参考<a href="https://github.com/tsubaki/CullingGroup_Sample" target="_blank">例子</a>。</p>
+<p>Instace方法是不支持LOD的，但一般会需要LOD的支持，这个就要自己来实现了，可以按距离来自己控制LOD等级的使用，也可以结合CullingGroup传过来的距离来实现LOD的支持。</p>
+<p><img src="./优化 - Geometry Instancing · GitBook_files/草地.png" alt="草地"></p>
+<p>上图就是用Graphics.DrawMeshInstanced方法，结合CullingGroup和LOD进行的草地渲染，图中的几丛灌木是使用的自动instancing方式渲染的（有实体对象）。</p>
+<p><a href="https://blog.csdn.net/leonwei/article/details/73274808" target="_blank">这篇文章</a>介绍了基于Unity5的GPU Instance来实现的大量物体的渲染实践，并给出了GPU Instance的性能测试。</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html" class="navigation navigation-prev " aria-label="Previous page: 渲染 - 了解全局光照">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96" class="navigation navigation-next " aria-label="Next page: 优化 - GPU优化" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"优化 - Geometry Instancing","level":"1.6","depth":1,"next":{"title":"优化 - GPU优化","level":"1.7","depth":1,"anchor":"#gpu优化","path":"book/Profiling.md","ref":"book/Profiling.md#gpu优化","articles":[]},"previous":{"title":"渲染 - 了解全局光照","level":"1.5","depth":1,"path":"book/GI.md","ref":"book/GI.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/GeometryInstancing.md","mtime":"2019-05-05T03:07:42.959Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./优化 - Geometry Instancing · GitBook_files/gitbook.js.下载"></script>
+    <script src="./优化 - Geometry Instancing · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./优化 - Geometry Instancing · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./优化 - Geometry Instancing · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./优化 - Geometry Instancing · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./优化 - Geometry Instancing · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./优化 - Geometry Instancing · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./优化 - Geometry Instancing · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

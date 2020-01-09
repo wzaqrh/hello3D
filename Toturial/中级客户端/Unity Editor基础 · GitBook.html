@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<!-- saved from url=(0070)https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>Unity Editor基础 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./Unity Editor基础 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./Unity Editor基础 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./Unity Editor基础 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./Unity Editor基础 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/intermediateclient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/intermediateclient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><link rel="prev" href="https://gitbook.corp.sdo.com/intermediateclient/book/unity.html"><link rel="next" href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html"></head>
+    <body><div id="MathJax_Message" style="display: none;"></div>
+        
+<div class="book font-size-2 font-family-1 with-summary">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="programming-language.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/programming-language.html">
+            
+                    
+                    编程语言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="multithread.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/multithread.html">
+            
+                    
+                    多线程编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="network.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/network.html">
+            
+                    
+                    网络编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="unity.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity.html">
+            
+                    
+                    Unity基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.6" data-path="unity-editor.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html">
+            
+                    
+                    Unity Editor基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="ui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html">
+            
+                    
+                    UI基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="3dMathAndRendering/3dMath.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html">
+            
+                    
+                    3D数学基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="3dMathAndRendering/3dRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dRendering.html">
+            
+                    
+                    3D图形学基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="camera.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/camera.html">
+            
+                    
+                    摄像机
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="Unity3D_Animation/Unity3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Animation/Unity3D_Animation.html">
+            
+                    
+                    动画
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="Unity3D_physics.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html">
+            
+                    
+                    物理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html">
+            
+                    
+                    资源管理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Unity3D_Rendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Rendering.html">
+            
+                    
+                    渲染
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Unity3D_Profile/Unity_Profiler_CPU_GPU.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Profile/Unity_Profiler_CPU_GPU.html">
+            
+                    
+                    Profile
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/intermediateclient/">Unity Editor基础</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <p>[TOC]</p>
+<h1 id="unity-editor扩展概览">Unity Editor扩展概览</h1>
+<p>​    unity editor是一个通用的编辑器，提供了unity内部对象的创建，预览，编辑的功能及可视化界面。但对于特定类型的游戏开发可能还不能完全满足需求，还要根据程序，策划和美术的需求来进行扩展。常用的一些扩展包括打包界面，特定游戏对象的编辑界面，技能编辑器界面，自定义的场景编辑界面，美术资源导入批量设置等等。unity提供了丰富的接口来帮助开发者定制需求的功能。</p>
+<p>​    用于扩展editor的类需要放到名字为“<strong>Editor</strong>"的文件夹中，这个文件夹可以直接放到”Assets“文件夹下，也可以是项目目录任何文件夹下的子文件夹，比如”Assets/BigWorld/Editor"。</p>
+<h1 id="几种类型的扩展">几种类型的扩展</h1>
+<p>​    unity提供了由简单到复制的多种编辑器扩展功能，下面给大家进行介绍常用的4种。</p>
+<h2 id="扩展工具栏菜单">扩展工具栏菜单</h2>
+<p>​    使用<a href="https://docs.unity3d.com/ScriptReference/MenuItem.html" target="_blank">MenuItem</a>特性扩展工具栏菜单。此扩展方法可以单独使用执行某些功能，也可以和其他窗口扩展功能一起使用，打开其他窗口。</p>
+<pre><code class="lang-c#">using UnityEngine;
+using System.Collections;
+using UnityEditor;
+
+public class ArtResChecker
+{
+
+    [MenuItem("ArtResChecker/CheckArtRes")]
+    static public void ATestCheckArtResFunction()
+    {
+        CheckTextures();
+          CheckMeshes();
+          ...
+    }
+}
+</code></pre>
+<p>​                                            代码1-1</p>
+<p>​    代码1-1是一个简单的示例。使用"MenuItem"需要引入"UnityEditor"命名空间。这样会在菜单栏中出现"ArtResChecker"菜单，点击下拉菜单中的"CheckArtRes"项，会执行”ATestCheckArtResFunction"函数。</p>
+<p>​    也可以扩展在已有的菜单中进行扩展，如代码1-2所示在“GameObject"菜单中增加了一项"AddChild"。</p>
+<pre><code>using UnityEngine;
+using System.Collections;
+using UnityEditor;
+
+public class ArtResChecker
+{
+    [MenuItem("GameObject/AddChild")]
+    static void ATestAddChildFunction()
+    {
+        Transform[] transforms = Selection.GetTransforms(SelectionMode.Unfiltered);
+        foreach(var tf in transforms)
+        {
+            GameObject newGo = new GameObject("_Child");
+            newGo.transform.parent = tf;
+        }
+    }
+}
+</code></pre><p>​                                        代码1-2</p>
+<p>​    这个扩展脚本从菜单的“GameObject-&gt;Add Child”启动，功能是给Hierarchy窗口中选中的对GameObject添加一个名字为“_Child”的子GameObject，这样可以免去从Hierarchy窗口的根节点拖拽新创建的GameObject到当前选中节点的麻烦，因为在Unity3D编辑器中，创建一个EmptyObject会在Hierarchy窗口的根节点出现，无论当前选中的节点对象是哪个。</p>
+<h2 id="使用scriptablewizard类进行扩展">使用<a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.html" target="_blank">ScriptableWizard</a>类进行扩展</h2>
+<p>​    unity提供的一个编辑器向导窗口扩展模板，继承这个类并重写里面的几个消息响应函数就可以快速创建一个编辑器窗口类。通过<a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.html" target="_blank">ScriptableWizard</a>.DisplayWizard函数可以快速创建这个向导窗口。</p>
+<p>​    这个向导窗口只支持小于或等于两个按钮的定制（即提供的消息响应函数只有两个按钮的）。显示的按钮名字通过<a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.DisplayWizard.html" target="_blank">ScriptableWizard.DisplayWizard</a>函数传入。下面介绍API中的消息响应函数：</p>
+<ul class="toc">
+<li><p><a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.OnWizardCreate.html" target="_blank">OnWizardCreate</a> 两个按钮事件中的一个，当传入ScriptableWizard.DisplayWizard函数中"createButtonName"参数对应的按钮被点击时调用。</p>
+</li>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.OnWizardOtherButton.html" target="_blank">OnWizardOtherButton</a> 两个按钮事件中的一个，当传入ScriptableWizard.DisplayWizard函数中"otherButtonName"参数对应的按钮被点击时调用。</p>
+</li>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.OnWizardUpdate.html" target="_blank">OnWizardUpdate</a> 当向导窗口打开时或者用户改变窗口内容时都会被调用。一般会在这里显示帮助文字和进行内容有效性验证。也可以动态改变按钮状态。</p>
+<p>还有一个可能被复写的函数是<a href="https://docs.unity3d.com/ScriptReference/ScriptableWizard.DrawWizardGUI.html" target="_blank">DrawWizardGUI</a>当向导窗口需要更新用户界面时会被调用来绘制内容。</p>
+<p>下面看一个使用ScriptableWizard类进行扩展的例子：</p>
+<pre><code>// 当点击"Info"按钮时显示两个对象的距离，当点击"Finish!"按钮时关闭窗口
+
+using UnityEngine;
+using UnityEditor;
+
+public class ScriptableWizardOnWizardOtherButton : ScriptableWizard
+{
+    public Transform firstObject = null;
+    public Transform secondObject = null;
+
+    [MenuItem("Example/Show OnWizardOtherButton Usage")]
+    static void CreateWindow()
+    {
+        ScriptableWizard.DisplayWizard("Click info to know the distance between the objects",
+            typeof(ScriptableWizardOnWizardOtherButton), "Finish!", "Info");
+    }
+
+    void OnWizardUpdate()
+    {
+        if (firstObject == null || secondObject == null)
+        {
+            isValid = false;
+            errorString = "Select the objects you want to measure";
+        }
+        else
+        {
+            isValid = true;
+            errorString = "";
+        }
+    }
+
+    // Called when you press the "Info" button.
+    void OnWizardOtherButton()
+    {
+        float distanceObjs = Vector3.Distance(firstObject.position, secondObject.position);
+        EditorUtility.DisplayDialog(
+            "The distance between the objects is: " + distanceObjs + " Units",
+            "",
+            "Ok");
+    }
+
+    // Called when you press the "Finish!" button.
+    void OnWizardCreate()
+    {
+    }
+}
+</code></pre><p>​                                    代码1-3</p>
+<p>运行时窗口如图1-1所示：</p>
+<p><img src="./Unity Editor基础 · GitBook_files/1527579366428.png" alt="图1-1"></p>
+<p>​                                        图1-1</p>
+</li>
+</ul>
+<h2 id="使用editor-windows类进行扩展">使用<a href="https://docs.unity3d.com/Manual/editor-EditorWindows.html" target="_blank">Editor Windows</a>类进行扩展</h2>
+<p>​    完全自定义窗口，根据需求定义窗口内容和布局。使用时继承<a href="https://docs.unity3d.com/ScriptReference/EditorWindow.html" target="_blank">EditorWindow</a>类，重写“OnGUI”函数。例子如代码1-4</p>
+<pre><code>using UnityEngine;
+using UnityEditor;
+
+public class MyWindow : EditorWindow
+{
+    string myString = "Hello World";
+    bool groupEnabled;
+    bool myBool = true;
+    float myFloat = 1.23f;
+
+    // Add menu named "My Window" to the Window menu
+    [MenuItem("Window/My Window")]
+    static void Init()
+    {
+        // Get existing open window or if none, make a new one:
+        MyWindow window = (MyWindow)EditorWindow.GetWindow(typeof(MyWindow));
+        window.Show();
+    }
+
+    void OnGUI()
+    {
+        GUILayout.Label("Base Settings", EditorStyles.boldLabel);
+        myString = EditorGUILayout.TextField("Text Field", myString);
+
+        groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Settings", groupEnabled);
+        myBool = EditorGUILayout.Toggle("Toggle", myBool);
+        myFloat = EditorGUILayout.Slider("Slider", myFloat, -3, 3);
+        EditorGUILayout.EndToggleGroup();
+    }
+}
+</code></pre><p>​                                        代码1-4</p>
+<p>窗口打开是如图1-2所示：</p>
+<p><img src="./Unity Editor基础 · GitBook_files/1527660185077.png" alt="图1-2"></p>
+<p>​                                                图1-2</p>
+<h2 id="扩展自定义组件的inspector窗口">扩展自定义组件的Inspector窗口</h2>
+<p>​    自己写的继承于"MonoBehaviour"的类，在Inspector窗口中有默认的显示方式，但有些情况下不直观，也无法满足编辑的需求，需要显示上进一步。这是可以继承<a href="https://docs.unity3d.com/ScriptReference/Editor.html" target="_blank">Editor</a>类，对自己扩展的组件的编辑界面进行定制。</p>
+<pre><code>using UnityEngine;
+using System.Collections;
+
+// This is not an editor script.
+public class MyPlayer : MonoBehaviour
+{
+    public int armor = 75;
+    public int damage = 25;
+    public GameObject gun;
+
+    void Update()
+    {
+        // Update logic here...
+    }
+}
+</code></pre><p>​                                        代码1-5</p>
+<p>​    比如代码1-5所示定义了一个组件，其显示方式默认如图1-3所示，但如果想要显示如果1-4所示就要对其进行扩展。如代码1-6所示</p>
+<p><img src="./Unity Editor基础 · GitBook_files/1527664110429.png" alt="图1-3"></p>
+<p>​                                        图1-3</p>
+<p><img src="./Unity Editor基础 · GitBook_files/1527664284109.png" alt="图1-4"></p>
+<p>​                                        图1-4</p>
+<pre><code>using UnityEditor;
+using UnityEngine;
+using System.Collections;
+
+// Custom Editor using SerializedProperties.
+// Automatic handling of multi-object editing, undo, and prefab overrides.
+[CustomEditor(typeof(MyPlayer))]
+[CanEditMultipleObjects]
+public class MyPlayerEditor : Editor
+{
+    SerializedProperty damageProp;
+    SerializedProperty armorProp;
+    SerializedProperty gunProp;
+
+    void OnEnable()
+    {
+        // Setup the SerializedProperties.
+        damageProp = serializedObject.FindProperty("damage");
+        armorProp = serializedObject.FindProperty("armor");
+        gunProp = serializedObject.FindProperty("gun");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        // Update the serializedProperty - always do this in the beginning of OnInspectorGUI.
+        serializedObject.Update();
+
+        // Show the custom GUI controls.
+        EditorGUILayout.IntSlider(damageProp, 0, 100, new GUIContent("Damage"));
+
+        // Only show the damage progress bar if all the objects have the same damage value:
+        if (!damageProp.hasMultipleDifferentValues)
+            ProgressBar(damageProp.intValue / 100.0f, "Damage");
+
+        EditorGUILayout.IntSlider(armorProp, 0, 100, new GUIContent("Armor"));
+
+        // Only show the armor progress bar if all the objects have the same armor value:
+        if (!armorProp.hasMultipleDifferentValues)
+            ProgressBar(armorProp.intValue / 100.0f, "Armor");
+
+        EditorGUILayout.PropertyField(gunProp, new GUIContent("Gun Object"));
+
+        // Apply changes to the serializedProperty - always do this in the end of OnInspectorGUI.
+        serializedObject.ApplyModifiedProperties();
+    }
+
+    // Custom GUILayout progress bar.
+    void ProgressBar(float value, string label)
+    {
+        // Get a rect for the progress bar using the same margins as a textfield:
+        Rect rect = GUILayoutUtility.GetRect(18, 18, "TextField");
+        EditorGUI.ProgressBar(rect, value, label);
+        EditorGUILayout.Space();
+    }
+}
+</code></pre><p>​                                        代码1-6</p>
+<p>​    使用<a href="https://docs.unity3d.com/ScriptReference/CustomEditor.html" target="_blank">CustomEditor</a>特性把继承于<a href="https://docs.unity3d.com/ScriptReference/Editor.html" target="_blank">Editor</a>的类绑定到自己定义的组件类上。并重写"OnInspectorGUI"函数。如果需要自动处理多个对象的编辑，undo和prefab的覆盖，可以用<a href="https://docs.unity3d.com/ScriptReference/SerializedObject.html" target="_blank">SerializedObject</a>和<a href="https://docs.unity3d.com/ScriptReference/SerializedProperty.html" target="_blank">SerializedProperty</a>来关联原来类中的要进行编辑的成员。如果不需要上面说的自动处理功能也可以不用关联而直接用自定义组件中的成员变量。</p>
+<p>​    如果需要在"Scene"视图中显示相应内容，需要重写<a href="https://docs.unity3d.com/ScriptReference/Editor.OnSceneGUI.html" target="_blank">OnSceneGUI</a>。可以参考<a href="https://docs.unity3d.com/Manual/editor-CustomEditors.html" target="_blank">Unity Manual Custom Editors</a>中“Scene View Additions”。</p>
+<p>​    如果组件中用到了自定义的C#类，也可以自定义其在组件中的显示方式，这时就用到了<a href="https://docs.unity3d.com/Manual/editor-PropertyDrawers.html" target="_blank">Property Drawers</a>。具体使用方法也可以参考<a href="https://docs.unity3d.com/Manual/editor-PropertyDrawers.html" target="_blank">Unity Manual Property Drawers</a>。</p>
+<h1 id="常用布局api">常用布局API</h1>
+<p>​    在上面的介绍中介绍了几种扩展编辑器的方法，有的有窗口显示，有的没有。在有窗口显示的扩展方法中，又要如何定义自己的窗口布局呢？下面介绍两个常用的类：<a href="https://docs.unity3d.com/ScriptReference/EditorGUI.html" target="_blank">EditorGUI</a>和<a href="https://docs.unity3d.com/ScriptReference/EditorGUILayout.html" target="_blank">EditorGUILayout</a>类。<a href="https://docs.unity3d.com/ScriptReference/EditorGUILayout.html" target="_blank">EditorGUILayout</a>类是自动布局的<a href="https://docs.unity3d.com/ScriptReference/EditorGUI.html" target="_blank">EditorGUI</a>类。<a href="https://docs.unity3d.com/ScriptReference/EditorGUI.html" target="_blank">EditorGUI</a>类的API都需要传入<a href="https://docs.unity3d.com/ScriptReference/Rect.html" target="_blank">Rect</a>参数来定义控件的显示范围，<a href="https://docs.unity3d.com/ScriptReference/EditorGUILayout.html" target="_blank">EditorGUILayout</a>类会根据样式来自动对齐控件。具体的API请自行查阅unity文档，<a href="https://www.cnblogs.com/caymanlu/p/5722549.html" target="_blank">这里</a>汇总了一些控件的API和其功能。</p>
+<h1 id="其他编辑器api">其他编辑器API</h1>
+<p>​    上面介绍了编辑器如何扩展，下面介绍在编辑器扩展过程中经常会用到的一些类。</p>
+<ul>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/Undo.html" target="_blank">Undo</a></p>
+<p>​    我们在做编辑器时常用到"Undo"和"Redo"功能。<a href="https://docs.unity3d.com/ScriptReference/Undo.html" target="_blank">Undo</a>类提供了给特定对象注册"undo"操作。</p>
+</li>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/ShaderGUI.html" target="_blank">ShaderGUI</a></p>
+<p>​    unity中的shader都有自己的默认显示界面，如果想自定义shader的显示界面，可以继承<a href="https://docs.unity3d.com/ScriptReference/ShaderGUI.html" target="_blank">ShaderGUI</a>并重写"OnGUI"函数。具体用法详见<a href="https://docs.unity3d.com/ScriptReference/ShaderGUI.html" target="_blank">ShaderGUI</a> 。</p>
+</li>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/PrefabUtility.html" target="_blank">PrefabUtility</a></p>
+<p>​    Prefab是unity中经常用到的资源，用<a href="https://docs.unity3d.com/ScriptReference/PrefabUtility.html" target="_blank">PrefabUtility</a>可以方便的对其进行创建，修改及其他常用操作。</p>
+</li>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/SceneManagement.EditorSceneManager.html" target="_blank">EditorSceneManager</a></p>
+<p>​    编辑器中也常对场景进行操作，<a href="https://docs.unity3d.com/ScriptReference/SceneManagement.EditorSceneManager.html" target="_blank">EditorSceneManager</a>提供了常用的打开，关闭，保存，设置成未保存状态，合并场景等一系列对场景的操作。</p>
+</li>
+<li><p><a href="https://docs.unity3d.com/ScriptReference/Selection.html" target="_blank">Selection</a> </p>
+<p>​    当想获得当前选中对象时可以用<a href="https://docs.unity3d.com/ScriptReference/Selection.html" target="_blank">Selection</a> </p>
+</li>
+</ul>
+<h3 id="视频-基础知识相关"><a href="https://gitbook.corp.sdo.com/intermediateclient/video_Basic.html">视频-基础知识相关</a></h3>
+<script type="text/javascript">var targetUl = document.getElementsByClassName('page-inner')[0].getElementsByTagName('ul')[0];if(targetUl.getElementsByTagName('a').length>0){targetUl.className='toc';}</script>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity.html" class="navigation navigation-prev " aria-label="Previous page: Unity基础">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html" class="navigation navigation-next " aria-label="Next page: UI基础" style="margin-right: 0px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"typora-copy-images-to":"unity-editor","title":"Unity Editor基础","level":"1.6","depth":1,"next":{"title":"UI基础","level":"1.7","depth":1,"path":"book/ui.md","ref":"book/ui.md","articles":[]},"previous":{"title":"Unity基础","level":"1.5","depth":1,"path":"book/unity.md","ref":"book/unity.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","toc"],"pluginsConfig":{"toc":{"addClass":true,"className":"toc"},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/unity-editor.md","mtime":"2019-05-05T03:07:15.846Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:39:59.338Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./Unity Editor基础 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./Unity Editor基础 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/MathJax.js.下载" id=""></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/plugin.js.下载"></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./Unity Editor基础 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

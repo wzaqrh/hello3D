@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<!-- saved from url=(0076)https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>UI - FairlyGUI简介 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./UI - FairlyGUI简介 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./UI - FairlyGUI简介 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./UI - FairlyGUI简介 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./UI - FairlyGUI简介 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="../Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="../TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="../PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="../QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="../3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="../Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="../Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.18" data-path="fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="../Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="../Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">UI - FairlyGUI简介</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h4 id="fairygui文档"><center>FairyGUI文档</center></h4>
+<h3 id="一、fairygui简介">一、FairyGUI简介</h3>
+<p>​    FairyGUI（以下简称FGUI）与UGUI和NGUI一样，都是一种游戏开发的UI方案，FGUI提供了一个强大的UI编辑器，使用习惯与Adobe系列软件保持一致，美术设计师和策划都可以轻松上手。与市场上其他UI编辑器不同，FairyGUI编辑器重视设计师体验，摒弃了脚本和配置文件这些需要代码思维的操作。借助FairyGUI提供的组件、关联、控制器以及动效，我们可以在不写代码的情况下使用编辑器轻松地制作大量复杂的带有动画效果的自动布局的UI。且FGUI支持多种主流游戏引擎，它的完整介绍见<a href="http://www.fairygui.com/guide/index.html" target="_blank">FairyGUI介绍</a>，本文将对FGUI与UGUI、NGUI进行一些比较，以及简单介绍一下FGUI所特有的一些功能，并讲解一下FGUI的Unity SDK部分核心源码。</p>
+<hr>
+<h3 id="二、常用ui方案的对比">二、常用UI方案的对比</h3>
+<p>​    本节对三种常用的Unity的UI方案进行比较：FGUI、UGUI、NGUI等，三种方案的大致比较如下表<sup><a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#fn_1" id="reffn_1">1</a></sup>：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>FairyGUI</th>
+<th>UGUI</th>
+<th>NGUI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图集管理</td>
+<td>自动/半自动</td>
+<td>自动/半自动</td>
+<td>手动</td>
+</tr>
+<tr>
+<td>编辑器</td>
+<td>外部编辑器</td>
+<td>Unity内</td>
+<td>Unity内</td>
+</tr>
+<tr>
+<td>功能封装度</td>
+<td>基础控件、常用高级控件</td>
+<td>基础控件</td>
+<td>基础控件</td>
+</tr>
+<tr>
+<td>灵活性</td>
+<td>较为灵活</td>
+<td>一般</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>维护成本</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>扩展性</td>
+<td>低</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>是否开源</td>
+<td>开源免费（编辑器源码收费）</td>
+<td>不开源</td>
+<td>开源</td>
+</tr>
+<tr>
+<td>渲染效率</td>
+<td>高（且制作方便）</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>多语言</td>
+<td>支持</td>
+<td>不支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>热更新</td>
+<td>支持</td>
+<td>不支持</td>
+<td>不支持</td>
+</tr>
+</tbody>
+</table>
+<h4 id="21-使用方法对比">2.1 使用方法对比</h4>
+<p>​    在查找网络资料以及走访工作室的过程中了解到，很多使用UGUI、NGUI的项目中使用了psd转prefab的工具，这类工具的思想与FGUI类似，就是把PS当作一个外部的UI编辑器，制作完UI导出为Unity可用的文件格式，并在Unity中修改使其符合项目需求。而FGUI本身提供一个专门的编辑器，且功能相对完善。对比两种使用方法可以发现：</p>
+<p>​    1. psd转prefab的方式，如果后期改动量稍大，<strong>需要重新调整对应的prefab（也需要每次都打开Unity）</strong>，对UI设计人员并不是很友好；而使用FGUI只需要<strong>在编辑器里修改好，然后重新导出即可（编辑器与Unity相比很轻量）</strong>；</p>
+<pre><code>2. UGUI与NGUI的项目均是基于Unity项目进行修改，因此在修改过程中很难避免在同一WorkSpace（或相同的版本管理仓库）内工作，多次修改容易导致**版本管理**出问题；而FGUI**将UI设计与逻辑编写分离**，程序与美术可以在不同的WorkSpace内工作，导出时整合即可，因此基本可以规避前述问题；
+3. psd转prefab的方式要求美术先出图，即使只是策划先出原型案的psd，用PS的**图层管理也比较难以操作**。或者可以使用其他现有的原型案设计软件设计，但这样就会设计多种软件协同工作可能会出现兼容性错误等问题；而FGUI提供一个专门的UI编辑器，可以方便地制作UI原型案以及最终要使用的UI；
+4. NGUI是三者中唯一需要**纯手动**管理图集的UI方案，UGUI可以设置Packing Tag来手动配置图集，FGUI可以自定义纹理集来管理，且后两者只需配置而无须手动管理；
+5. 由于UGUI不开源（虽然项目代码是开源的，但想要把源码应用到自己的项目中需要做一些特殊处理，而且也不是完全开源，因此本文认为是不开源），因此其扩展的成本稍高，但也是有一定扩展空间的，只是很多代码都需要自己手动写；NGUI完全开源，因此扩展性较高，基于现有源码什么都可以做；FGUI的SDK是开源的，提供一些扩展空间，但编辑器不开源（只能使用它提供的控件编辑，如果需要扩展只能在unity中进行扩展，编辑器只提供较少的插件扩展，如果需要自行开发插件还需要掌握Adobe Air开发技术）；
+</code></pre><p>​    6. UGUI渲染以Canvas为单位，渲染的时候会把那些材质相同的内容合并到一起，当元素进行了修改（比如移动等），则会进行重新合并，因此在制作的过程中需要通过把经常改变的ui和不经常改变的ui分开等手段来避免出现渲染问题。而在FGUI中，使用者几乎<strong>无需关心UI层次结构等对渲染的影响</strong>，因为FairyBatching可以在运行时自动调整渲染顺序，可以任意地组合各种ui元素；</p>
+<p>​    7. 再说一个FGUI编辑器很好的地方，就是在编辑的时候可以放一些设计参考图、模拟数据来<strong>看设计效果</strong>，而在发布的时候自动清除这些数据（当然也可以选择不清除）；</p>
+<p>​    8. 最后再说一个FGUI的缺点，就是FGUI为了实现自己完全的管理，不会在GameObject上绑脚本（即非MonoBehaviour ），而是在FGUI的脚本中保存一个对应的GameObject对象，这样在<strong>调试的时候是看不到ui的相关参数的</strong>，如果遇到奇怪的问题需要一定的经验和想象力（当然也可以从问答社区和官方交流QQ群中寻求帮助，如果是常见的问题都能找到答案）。</p>
+<h4 id="22-fgui特有功能">2.2 FGUI特有功能</h4>
+<p>​    本节说明一下FGUI特有的功能（可能其他UI方案有类似的功能，但不如FGUI的灵活好用）：</p>
+<p>​    1. 首先当然要吹爆FGUI的编辑器了，在和美术交流过后，美术表示很容易上手，简单介绍了一下便能很快地做出一套基本符合需求的UI，而且因为功能专一（只能做UI或者说只能做2D）因此要比unity方便很多；</p>
+<pre><code>2. FGUI中的关联系统，是可以设置当前元件和任意若干个元件关联的，而不仅仅是子节点与父节点之间的关系（当然也可以是父子关系），因此更加灵活（下文将会简单讲解）；
+3. FGUI支持gif、flash等动画直接导入为序列帧，并自带序列帧编辑器；
+4. FGUI封装好多种UI常用高级控件：支持图文混排的文本控件、虚拟循环列表（支持多种item混排）、表格与树视图等等，并且支持在UI上显示3D的GameObject而不需要手动调整显示层级；
+5. 内置窗口管理器，弹出窗口管理器，拖放管理器。  
+</code></pre><h4 id="23-运行效率对比">2.3 运行效率对比</h4>
+<p>​    1. 渲染效率：</p>
+<p>​    在 UGUI 中，Batch是以Canvas为单位的，即在同一个Canvas下的UI元素最终都会被Batch到同一个Mesh中。而在Batch前，UGUI会根据这些UI元素的材质（通常就是Atlas）以及渲染顺序进行重排，在不改变渲染结果的前提下，尽可能将相同材质的UI元素合并在同一个SubMesh中，从而把DrawCall降到最低。因此，我们建议尽可能把频繁变化（位置，颜色，长宽等）的UI元素从复杂的Canvas中分离出来，从而避免复杂的Canvas频繁重建。</p>
+<p>​    FGUI的渲染原理与UGUI类似，Batch以Container为单位，在Batch之前FGUI也会根据UI元素的材质以及渲染顺序进行重排，重排原理与UGUI基本相同，但重排后的ui mesh不会合并，而是使用unity的Dynamic Batching，从而把DrawCall降到最低。而NGUI渲染时只是把连续相同材质的UI元素合并，但并不会像前两中方案中那样进行重排（当然由于NGUI的开源性可以手动优化掉），因此仍然会产生较多drawCall。</p>
+<p>​    因此三种UI方案的渲染效率可以概括为：UGUI = FGUI &gt;= NGUI。</p>
+<p>​    2. CPU与内存占用：</p>
+<p>​    NGUI从使用方法和渲染效率来看，都弱于UGUI和FGUI，因此这里只比较后两者。用后两种方法制作相同的UI（元素较多），可以看到CPU和内存占用上FGUI较UGUI都要稍微高一点点，原因大概是FGUI创建了更多mesh以及辅助对象（除了要显示的UI元素外）。</p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/cpu_check.jpg" alt="cpu_check"></p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/memory_check.jpg" alt="memory_check"></p>
+<p>​    总结以上对比，我们还是强烈推荐项目中能够尝试一下使用FGUI进行UI的开发。有些项目组认为目前使用FGUI的成功项目比较少，且使用起来需要一定的学习成本，知名度也远远不如UGUI，建议大家花点时间调研了解一下，真实感受一下使用FGUI开发的高效率与便捷性。</p>
+<hr>
+<h3 id="三、fgui特色功能简介">三、FGUI特色功能简介</h3>
+<p>​    本节不会对那些基础内容或者各种UI方案都有的功能（比如图集及图片、文本等），而只会对FGUI中的一些特色功能进行简单的介绍，需要了解或学习完整的使用方法，请移步<a href="http://www.fairygui.com/guide/editor/index.html" target="_blank">FGUI官方教程</a>。使用编辑器制作ui的一项原则就是：尽量不要把显示层能用编辑器做出来的效果放到代码里去控制，这样程序只用考虑业务逻辑部分的实现，且后面维护的成本也会比较低。下面对控制器、关联系统、窗口系统、虚拟列表进行简单的介绍，并简要说明在结合unity使用时的一些注意点。</p>
+<h4 id="31-控制器">3.1 控制器</h4>
+<p>​    FGUI中的<a href="http://www.fairygui.com/guide/editor/controller.html" target="_blank">控制器</a>可以实现一些ui的状态切换，这个概念在其他ui方案中也是有的，那就是按钮的normal、pressed等状态。而FGUI对这个概念进行了扩展，使得任何元件的几乎任何属性都可以由控制器来控制，并且控制器中的状态可以自己手动编辑。下图展示了控制器的使用效果，当我点击按钮，按钮自身状态变化，并且控制着左下白色矩形的显示状态、右下紫色矩形的缩放状态，以及右下文字的内容。</p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/controller1.gif" alt="controller1"></p>
+<h4 id="32-关联系统">3.2 关联系统</h4>
+<p>​    <a href="http://www.fairygui.com/guide/editor/relation.html" target="_blank">关联系统</a>是FGUI的一大特色，初学者乍一看会觉得有点懵逼，但稍加学习就可以用这套机制做出很多其他方案中通过很多代码才能实现的一些功能。关联系统使得一个元件在位置上、或者在尺寸上可以和其他若干元件相联系，即前者的位置或者尺寸是由其原始状态及后者的状态共同作用所决定的。如下左图，绿色方块（简称b）绑定了和白色方块（简称a）的”左-&gt;左“、”顶-&gt;顶“关联，就是说，无论a在什么地方，b的左边距离a的左边的距离都是这个初始距离，b的顶部距离a的顶部也是；而如下右图，绿色方块（简称b）绑定了和白色方块（简称a）的”宽-&gt;宽“、”高-&gt;高“关联，就是说无论a的宽高怎么变化，b的宽高也会相对地进行相同的变化。</p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/relation0.gif" alt=""></p>
+<p>​    如下左图，绿色方块（简称b）绑定了和白色方块（简称a）的”左延展-&gt;右“关联，就是说b的左边到a的右边的距离保持不变，但不是通过修改b的位置，而是可以修改b的宽度来保证这个不变。而如下右图，绿色方块绑定了和红色方块和白色方块的”左-&gt;左“、”顶-&gt;顶“关联，则无论白色还是红色方块位置改变了，绿色方块都会相应地改变（实际程序中白色和红色可能同时移动，此时绿色方块的位置将会是一个共同作用的结果）。</p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/relation3.gif" alt=""><img src="./UI - FairlyGUI简介 · GitBook_files/relation1.gif" alt=""></p>
+<p>​    其他关联万变不离其宗，这里就不再详述，大家可以自行尝试一下，可以发挥一下想象力比如制作一个文字背景框随着文本内容的增加而自动设置其大小的功能。</p>
+<h4 id="33-窗口系统">3.3 窗口系统</h4>
+<p>​    FGUI实现好了一套<a href="http://www.fairygui.com/guide/editor/window.html" target="_blank">窗口系统</a>，在实际开发过程中我们建议大家对所有的ui（或绝大多数ui）都通过窗口系统来进行管理。在其他UI方案中，ui元素都是通过层级关系来进行管理的，比如放一个空节点，然后这个节点下放置各种ui控件，并且在根节点上绑窗口脚本。而FGUI实现好一套窗口系统，策划或者美术只需要在编辑器内按窗口来制作ui，程序在编写逻辑的时候使用窗口管理把ui内容添加到一个窗口中就可以了。窗口系统已经实现好了一些窗口生命周期函数（比如<code>DoShowAnimation</code> ）和一系列窗口管理函数（比如<code>win.Show</code>、<code>win.BringToFront</code>）。开发者也可以基于这套系统进行扩展，快速地实现自己的UI管理框架。</p>
+<h4 id="34-虚拟列表">3.4 虚拟列表</h4>
+<p>​     <a href="http://www.fairygui.com/guide/editor/list.html#%E8%99%9A%E6%8B%9F%E5%88%97%E8%A1%A8" target="_blank">虚拟列表和循环列表</a>是很常用的控件了，虚拟列表适用于那些列表元素很多的应用场景（之前笔者同事用UGUI实现了一个调试的输出控制台，据说写了比较多的代码而且最多也不能放太多item）。FGUI的虚拟列表就是在item即将显示的时候根据数据来动态修改显示的列表项，其本质类似于一个对象池，可以有效降低GC、加快显示速度而不占用额外内存。</p>
+<p>​    循环列表也是很多游戏中经常使用到的控件，比如在角色选择页面左右滑动的panel，当滑动到最右边能够继续滑动，而基于虚拟列表可以很方便的实现循环列表。通过虚拟列表还可以实现很多其他的高级列表，同时FGUI还支持不等高item、树、表格等多种高级的列表。</p>
+<h4 id="35-与unity结合使用的注意点（或小技巧）">3.5 与Unity结合使用的注意点（或小技巧）</h4>
+<p>​    1. 在设计过程中，我们发现美术对”复用“的理解还是比较偏向于PS的组，比如一个页签的Window中，有两个页面都有一个列表，而两外两个页面是其他元件。美术制作的第一版是将每个页面做成一个组，并通过控制器切换页面。乍一看好像没什么问题，但仔细考虑一下，这样十个页面就要十个列表，同一时间只显示一个（另外九个隐藏），增加了命名的难度也增加了代码编写的成本，还增加了内存。因此对于这种复用思想还是需要对美术进行一定的培训，并且避免不了要程序检查。</p>
+<p>​    2. 控制器中的”导出为组件属性“可以把控制器显示在组件的属性面板中，但是并不能在代码中获得该属性，这点需要注意！</p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/cont_prop.jpg" alt="1538123000867"></p>
+<p>​    3. 舞台中元件的显示顺序是按照”显示列表“中从上到下的顺序显示的，这一点和unity类似，而和PS之类的设计软件不一样，需要注意。</p>
+<p>​    4. 在UI的实际制作中，设计者可以把鼠标放在右边属性设置面板中的”制作说明“这里，查看与当前组件相关的命名约定，充分利用已经实现的效果而不要程序再额外编写逻辑代码。并且制定一套自己的命名规则，便于美术程序协同工作。</p>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/1538122673241.png" alt="1538122673241"></p>
+<p><em>这里的使用注意点和小技巧可能会在使用过程中不断补充</em></p>
+<hr>
+<h3 id="四、fgui核心源码的简介">四、FGUI核心源码的简介</h3>
+<h4 id="41-核心结构">4.1 核心结构</h4>
+<p><img src="./UI - FairlyGUI简介 · GitBook_files/1541048698888.png" alt="1541048698888"></p>
+<p>​    FGUI的Unity SDK的UI逻辑部分的核心结构如上图所示（资源管理部分未列出），整个SDK的入口是StageEngine，并利用StageCamera来渲染所有要显示的元素。Stage是所有UI元素的root容器，而这些UI元素都是直接或者间接通过GRoot来进行管理（使用UIPanel显示的UI除外，且笔者建议除了那些在场景中要一直显示的UI可以使用UIPanel，其他UI均通过窗口来动态管理，或者直接全部使用动态加载的方法，否则会需要用户特殊处理这部分资源）。</p>
+<p>​    整个底层很简单，只有一个Container（容器类，可以存放其他Container和GObject）和一个GObject（继承自EventDispatcher，可以接收并处理系统事件）。上层的各种元件都继承自GObject（编辑器中不可设置为可触摸，如GImage、GLabel、GGroup等）或GComponent（编辑器中可设置为可触摸，如GButton、GTextInput等），如果元件本身也是个容器（如GList），则在内部维护一个Container而不是直接继承它。每个GObject对应一个DisplayObject，而一个DisplayObject又对应一个Unity的GameObject，从而能够实现修改数据即可变更对应的显示。</p>
+<p>​    FGUI的事件系统和UGUI的极其相似，其中用户输入事件的分发入口是Stage中的<code>HandleEvents()</code>，先检测用户输入，根据输入找到输入作用的target，然后传递事件给该target，并bubble向上层传递直到截断。FGUI也提供了一些现成的Hit检测（如BoxColliderHit、RectHit等），和UGUI中的Raycaster的作用类似，并且提供了基于像素的PixelHit，如果还需要其他你可以手动实现IHitTest。</p>
+<h4 id="42-fairybatching">4.2 FairyBatching</h4>
+<p>​    上文提到的FairyBatching技术，其本质就类似于一个插入排序：遍历要调整渲染顺序的DisplayObject列表，把当前的节点插入（这里的插入只会影响渲染而不会修改真实的顺序层级关系）到上一个材质相同且不相交的位置（如果相交可能会影响显示顺序，而这里的判断不相交是通过矩形框来判断的，计算量很小但是对于那些透明部分比较多的图会有较大的误差），然后按顺序提交给渲染组件。它的关键代码在Container.cs中的<code>DoFairyBatching ()</code>中，原代码用的是List来存储要排序的DisplayObject，而通过原理我们可以知道需要经常进行“插入“的操作，因此笔者利用LinkedList将其二次优化了：</p>
+<pre><code class="lang-c#">private void DoFairyBatching()
+{
+    _fBatchingRequested = false;
+
+    if (_descendants == null)
+        _descendants = new LinkedList&lt;DisplayObject&gt;();
+    else
+        _descendants.Clear();
+    CollectChildren(this, false);
+
+    if (_descendants.Count &gt; 1)
+    {
+        object curMat, testMat;
+        DisplayObject current, test;
+        float[] bound;
+        var curNode = _descendants.First.Next;
+        var nextNode = curNode.Next;
+        for (; curNode != null; curNode = nextNode)
+        {
+            nextNode = curNode.Next;
+            current = curNode.Value;
+            bound = current._internal_bounds;
+            curMat = current.material;
+
+            if (current._skipInFairyBatching || curMat == null)
+                continue;
+
+            LinkedListNode&lt;DisplayObject&gt; destNode = null;
+            for (var testNode = curNode.Previous; testNode != null; testNode = testNode.Previous)
+            {
+                test = testNode.Value;
+                if (test._skipInFairyBatching)
+                    break;
+
+                testMat = test.material;
+                if (testMat != null)
+                {
+                    if (curMat == testMat)
+                    {
+                        destNode = testNode;
+                        break;
+                    }
+                }
+                //矩形是否相交，略
+                if (...)
+                    break;
+            }
+            if (destNode != null &amp;&amp; destNode != curNode)
+            {
+                _descendants.Remove(curNode);
+                _descendants.AddAfter(destNode, curNode);
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="参考资料：">参考资料：</h3>
+<p><strong><a href="http://www.fairygui.com/guide/" target="_blank">http://www.fairygui.com/guide/</a></strong></p>
+<p><a href="https://blog.csdn.net/qq_39718162/article/details/78951162" target="_blank">https://blog.csdn.net/qq_39718162/article/details/78951162</a></p>
+<p><a href="https://www.cnblogs.com/damumu/p/7320703.html" target="_blank">https://www.cnblogs.com/damumu/p/7320703.html</a></p>
+<p><a href="https://mp.weixin.qq.com/s/Q1pAiGu0B2tM0kb5AzLm0w" target="_blank">https://mp.weixin.qq.com/s/Q1pAiGu0B2tM0kb5AzLm0w</a></p>
+<p><a href="https://blog.csdn.net/andyqingliu/article/details/54706298" target="_blank">https://blog.csdn.net/andyqingliu/article/details/54706298</a></p>
+<p><a href="https://blog.csdn.net/yangxun983323204/article/details/78490097" target="_blank">https://blog.csdn.net/yangxun983323204/article/details/78490097</a></p>
+<p><a href="https://mp.weixin.qq.com/s/koBu2zG1AHzY-B6tL1Pcgg" target="_blank">https://mp.weixin.qq.com/s/koBu2zG1AHzY-B6tL1Pcgg</a></p>
+<hr>
+<blockquote id="fn_1">
+<sup>1</sup>. 以下比较均基于原生UI方案，即未经二次开发<a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html#reffn_1" title="Jump back to footnote [1] in the text."> ↩</a>
+</blockquote>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html" class="navigation navigation-prev " aria-label="Previous page: UI - 主流技术概述">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html" class="navigation navigation-next " aria-label="Next page: 脚本语言简介及应用" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"UI - FairlyGUI简介","level":"1.18","depth":1,"next":{"title":"脚本语言简介及应用","level":"1.19","depth":1,"path":"book/Lua.md","ref":"book/Lua.md","articles":[]},"previous":{"title":"UI - 主流技术概述","level":"1.17","depth":1,"path":"book/User_Interface/MainstreamTechnology.md","ref":"book/User_Interface/MainstreamTechnology.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/User_Interface/fairy_gui.md","mtime":"2019-05-05T03:07:43.033Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./UI - FairlyGUI简介 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./UI - FairlyGUI简介 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./UI - FairlyGUI简介 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./UI - FairlyGUI简介 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./UI - FairlyGUI简介 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./UI - FairlyGUI简介 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./UI - FairlyGUI简介 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./UI - FairlyGUI简介 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

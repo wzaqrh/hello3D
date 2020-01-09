@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>寻路 - 导航网格寻路 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./寻路 - 导航网格寻路 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./寻路 - 导航网格寻路 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./寻路 - 导航网格寻路 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./寻路 - 导航网格寻路 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">寻路 - 导航网格寻路</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="寻路">寻路</h1>
+<p>游戏中我们经常要查找从一个位置通往另一个位置的路径。我们可以用图搜索算法来找到一条这样的路径。A*是一个比较出名的寻路算法。</p>
+<p>参考链接：<a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html" target="_blank">https://www.redblobgames.com/pathfinding/a-star/introduction.html</a></p>
+<p>上面的链接比较详细的介绍了路径搜索算法。我们这里再对A*的算法做一些介绍。</p>
+<h2 id="a">A*</h2>
+<p>和其它的图搜索算法一样，A*潜在地搜索图中一个很大的区域。和Dijkstra一样，A*能用于搜索最短路径。和BFS（Breadth First Search）一样，A*能用启发式函数引导它自己。在简单的情况中，它和BFS一样快。所有基于图拓扑的结构都可以使用A*算法。</p>
+<p>成功的秘决在于，它把Dijkstra算法（靠近初始点的结点）和BFS算法（靠近目标点的结点）的信息块结合起来。在讨论A<em>的标准术语中，g(n)表示从初始结点到任意结点n的代价，h(n)表示从结点n到目标点的启发式评估代价。当从初始点向目标点移动时，A\</em>权衡这两者。每次进行主循环时，它检查f(n)最小的结点n，其中f(n) = g(n) + h(n)。</p>
+<p>如果不考虑具体实现代码，A*算法是相当简单的。有两个集合，OPEN集和CLOSED集。其中OPEN集保存待考查的结点。开始时，OPEN集只包含一个元素：初始结点。CLOSED集保存已考查过的结点。开始时，CLOSED集是空的。如果绘成图，OPEN集就是被访问区域的边境（frontier）而CLOSED集则是被访问区域的内部（interior）。每个结点同时保存其父结点的指针因此我们可以知道它是如何被找到的。</p>
+<p>在主循环中重复地从OPEN集中取出最好的结点n（f值最小的结点）并检查之。如果n是目标结点，则我们的任务完成了，从目标节点反向遍历生成路径。否则，结点n被从OPEN集中删除并加入CLOSED集。然后检查它的邻居n’。计算到达n’的路径的代价g(n’)，设定为g(n) + movementcost(n, n’)。如果n’在OPEN集中，并且新计算的g值大于或等于原先存储的g值，那么它是以后肯定会被检查的，现在不需要考虑，但如果新计算的g值比原先存储的小就说明新的路径比原来的好，就要把这个邻居n'从OPEN集中删除，并重新添加到OPEN集中（可以通过用新的g值替换老的g值并用节点n带他原来的父节点的方式把两步合为一步）。如果邻居n’在CLOSED集中，那么它是已经被检查过的,如果它的新计算的g值更小，把这个邻居n’从CLOSED集中删除。否则，把它加入OPEN集，把它的父节点设为n。</p>
+<p>下面用伪代码的形式实现A*算法。</p>
+<p>首选是节点，前面说了，不只是二维的网格，所有是用图的方式组织的地图数据都可以用A*算法来实现寻路。所以这里介绍的节点是一个通用节点，不同的数据可以用具体的节点实现方法。</p>
+<pre><code>class AStarNode
+    {
+        //这个节点的父节点
+        AStarNode Parent;
+        ///到目前为止的累计消耗
+        double GCost;
+        ///到目标点的预估消耗
+        double HGoalEstimate;
+        /// 从起始点到当前点的消耗+从当前点到目标点的预估消耗
+        double GetTotalCost();
+
+        /// 目标节点.
+        AStarNode GoalNode;
+        /// 判断当前点是否是目标点
+        bool IsGoal();
+
+        // 估算从当前点到目标点的消耗
+        double Calculate();
+        // 获得和当前节点邻接的所有节点，获得节点时计算总消耗
+        void GetSuccessors(ArrayList ASuccessors);
+    }
+</code></pre><p>接下来是实现OPEN集和CLOSED集所用到的类，这个数据结构有很多的实现方法，也是影响算法速度的关键因素之一。这里只写一个抽象的实现，具体的实现方法会在后面进一步讨论。</p>
+<pre><code>class DataHolder
+{
+    //返回集合中总消耗最小的节点并从集合中删除
+    AStarNode Pop();
+    //把一个节点加入到集合中
+    void Push(AStarNode)；
+    //检查集合中是否包含该节点
+    bool Contains(AStarNode);
+    //获得集合中的该节点
+    AStarNode GetNode(AStarNode);
+    //删除集合中指定节点
+    void Remove(AStarNode);
+    //集合中元素数量
+    int Count;
+}
+</code></pre><p>最后是算法类,此类中把寻路的实现代码也加进来</p>
+<pre><code>class AStar
+{
+    //寻路的起点
+    AStarNode StartNode;
+    //寻路终点
+    AStarNode GoalNode;
+    //OPEN LIst
+    DataHolder OpenList;
+    //CLOSED LIST
+    DataHolder ClosedList;
+    //邻居节点
+    ArrayList Successors;
+    //最终路径
+    ArrayList Path;
+
+    //寻路实现
+    void FindPath(AStarNode startNode, AStarNode goalNode)
+    {
+        StartNode = startNode;
+        GoalNode = goalNode;
+
+        OpenList.Push(StartNode); //把起点加入到OPENLIST中
+        while(OpenList.Count &gt; 0)
+        {
+            //获得OPENLIST集合中总消耗最小的节点
+            AStarNode currentNode = OpenList.Pop();
+            //如果这个节点就是目标点，反向查找生成路径
+            if (currentNode.IsGoal())
+            {
+                while (currentNode != null)
+                {
+                    Path.Insert(0, currentNode);
+                    currentNode = currentNode.Parent;
+                }
+                break;
+            }
+            //获得当前节点的所有邻居节点
+            currentNode.GetSuccessors(Successors);
+            foreach (AStarNode node in Successors)
+            {
+                //测试这个节点是否在OPEN LIST中，
+                //如果在并且总的消耗值比新计算的节点的大,
+                //就把节点从OPENLIST集合中删除
+                //这里的实现方案会依据集合的实现方式不同而不同，这里默认集合内是已经排序好的，每次添加新元素都进行排序，所以这里的实现是先删除再添加，而没有直接改变已有元素的状态
+                AStarNode nodeOpen = null;
+                if (OpenList.Contains(node))
+                {
+                    nodeOpen = OpenList.GetNode(node);
+                }    
+                if (nodeOpen != null &amp;&amp; node.GetTotalCost() &gt; nodeOpen.GetTotalCost())
+                    continue;
+                //测试这个节点是否在CLOSED LIST中
+                //如果在的话并且总的消耗比新计算的节点的总消耗大
+                //就把节点从CLOSED LIST集合中删除
+                AStarNode nodeClosed = null;
+                if (ClosedList.Contains(node))
+                {
+                    nodeClosed = ClosedList.GetNode(node);
+                }
+                if (nodeClosed != null &amp;&amp; node.GetTotalCost() &gt; nodeClosed.GetTotalCost())
+                    continues;
+                //从OPENLIST中删除老的节点
+                OpenList.Remove(nodeOpen);
+                //从CLOSEDLIST中删除老的节点
+                ClosedList.Remove(nodeClosed);
+                //把新节点加入到OPEN LIST
+                OpenList.Push(node);
+            }
+            ClosedList.Push(currentNode);
+        }
+    }
+}
+</code></pre><p>以上就是A*算法的实现。当然还有很多变种和优化的方法。这里就不做过多介绍了，下面的参考链接里有对于OPENLIST和CLOSEDLIST集合的实现方式的介绍：</p>
+<p><a href="http://theory.stanford.edu/~amitp/GameProgramming/ImplementationNotes.html" target="_blank">http://theory.stanford.edu/~amitp/GameProgramming/ImplementationNotes.html</a></p>
+<h2 id="导航网格寻路">导航网格寻路</h2>
+<h4 id="waypoint寻路与nav寻路">WayPoint寻路与Nav寻路</h4>
+<p>下图是一个典型的WayPoint路点寻路</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav01.jpg" alt="Nav01"></p>
+<p>另一种方法是使用多边形来记录路径信息，它可以提供更多的信息给ai角色使用。下图就是一个navigation mesh。</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav02.jpg" alt="Nav02"></p>
+<p>以下列出几个WayPoint的不足之处：</p>
+<ol>
+<li><strong>一些复杂的游戏地图需要的WayPoint数量过于庞大</strong></li>
+<li><strong>有时会使角色走“Z”型路径</strong></li>
+</ol>
+<p>如下图A点和B点之间的路径</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav03.jpg" alt="Nav03"></p>
+<p>NAV寻路如下图</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav04.jpg" alt="Nav04"></p>
+<p>下图是路点寻路，如黄线，会产生“Z”字形</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav05.jpg" alt="Nav05"></p>
+<p>下图为文章开始时展示的地图的比较，红线是wayPoint寻路，兰线是nav。</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav06.jpg" alt="Nav06"></p>
+<p><strong>3. 不能进行动态修正，如果地图中有动态障碍，处理起来会很困难</strong></p>
+<p>​     如要实现即时战略游戏中，一辆在路上行走的坦克会挡住你军队的去路，这个移动的坦克就是一个动态障碍。</p>
+<p><strong>4. 不能根据角色的特性（不同宽度、高度等）改变路径</strong></p>
+<p>​    如一个狭窄的通道，普通的人能够通过，而一辆马车的宽度超过通道宽度，应该不能通过。</p>
+<p> <strong>5. 不能保存地形的附加信息，如地表高度、地面特征（水面、沙地等）</strong></p>
+<p>​     比如一个游戏中的角色在走到沙地上时会降低移动速度，或走在一个斜坡上时人物会发生倾斜等。</p>
+<h4 id="nav网格生成">Nav网格生成</h4>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav07.jpg" alt="Nav07"></p>
+<p>假设上图是一个游戏地图，红色的区域是不可行走的区域，浅灰色区域是可行走区域，要想在游戏中实现nav寻路，必须将可行走区域转化为nav网格并保存为一种固定形式的数据，如下图浅红色的三角形。</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/nav08.jpg" alt="Nav08"></p>
+<p>nav网格必须是凸多边形，这里使用三角型，当然也可以使用四边形。使用<a href="https://baike.baidu.com/item/Delaunay%E4%B8%89%E8%A7%92%E5%89%96%E5%88%86%E7%AE%97%E6%B3%95/3779918" target="_blank">Delaunay三角剖分算法</a>可以生成Nav网格。</p>
+<h4 id="nav网格寻路">Nav网格寻路</h4>
+<p>上面已经介绍过：所有是用图的方式组织的地图数据都可以用A<em>算法来实现寻路。只要把三维的网格结果组织成图的形式就能用A\</em>算法。另一个就是消耗的算法。</p>
+<p><img src="./寻路 - 导航网格寻路 · GitBook_files/导航网格寻路.png" alt="1540968251363">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </p>
+<p>绿色直线代表最终路径和方向，路径线进入三角形的边称为穿入边，路径线出去的边称为穿出边。每个三角形的花费采用穿入边和穿出边的中点的距离（图中红线）。H值为穿出边中点到寻路目标点的距离。这是一种常用的计算消耗的算法，当然也有其他改进算法。</p>
+<p>更多关于导航网格的生成，寻路原理及实现可以参考下面的链接：</p>
+<p><a href="https://github.com/recastnavigation/recastnavigation" target="_blank">https://</a><a href="https://github.com/recastnavigation/recastnavigation" target="_blank">github.com/recastnavigation/recastnavigation</a></p>
+<p><a href="http://www.critterai.org/projects/nmgen_study/" target="_blank">http://www.critterai.org/projects/nmgen_study</a><a href="http://www.critterai.org/projects/nmgen_study/" target="_blank">/</a></p>
+<p><a href="https://blog.csdn.net/you_lan_hai/article/details/77428858" target="_blank">https://blog.csdn.net/you_lan_hai/article/details/77428858</a></p>
+<p><a href="https://blog.csdn.net/ynnmnm/article/details/44833007" target="_blank">https://</a><a href="https://blog.csdn.net/ynnmnm/article/details/44833007" target="_blank">blog.csdn.net/ynnmnm/article/details/44833007</a></p>
+<p><a href="http://digestingduck.blogspot.com/2010/08/visibility-optimized-graph-experiment.html" target="_blank">http://</a><a href="http://digestingduck.blogspot.com/2010/08/visibility-optimized-graph-experiment.html" target="_blank">digestingduck.blogspot.com/2010/08/visibility-optimized-graph-experiment.html</a></p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html" class="navigation navigation-prev " aria-label="Previous page: 地形 - 地形绘制">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html" class="navigation navigation-next " aria-label="Next page: 场景管理 - 四叉树、八叉树" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"寻路 - 导航网格寻路","level":"1.11","depth":1,"next":{"title":"场景管理 - 四叉树、八叉树","level":"1.12","depth":1,"path":"book/QuadtreeAndOctreeSceneManagent.md","ref":"book/QuadtreeAndOctreeSceneManagent.md","articles":[]},"previous":{"title":"地形 - 地形绘制","level":"1.10","depth":1,"path":"book/TerrainRendering.md","ref":"book/TerrainRendering.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/PathFinding.md","mtime":"2019-05-05T03:07:42.977Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./寻路 - 导航网格寻路 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./寻路 - 导航网格寻路 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./寻路 - 导航网格寻路 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./寻路 - 导航网格寻路 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./寻路 - 导航网格寻路 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./寻路 - 导航网格寻路 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./寻路 - 导航网格寻路 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./寻路 - 导航网格寻路 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>
