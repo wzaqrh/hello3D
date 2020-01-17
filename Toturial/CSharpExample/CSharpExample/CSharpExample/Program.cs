@@ -15,6 +15,8 @@ namespace CSharpExample
             samGen.TestQueue();
             samGen.TestStack();
 
+            MyTestThread testThread = new MyTestThread();
+            testThread.TestAll();
             while (true)
             {
 

@@ -253,17 +253,18 @@ namespace CSharpExample
         public class AsyncDemo
         {
             // The method to be executed asynchronously.
-            public string TestMethod(int callDuration, out int threadId)
+            public string TestMethod(int callDuration, out int outVal, out int threadId)
             {
                 Console.WriteLine("Test method begins.");
                 Thread.Sleep(callDuration);
                 threadId = Thread.CurrentThread.ManagedThreadId;
+                outVal = 0;
                 return String.Format("My call time was {0}.", callDuration.ToString());
             }
         }
         // The delegate must have the same signature as the method
         // it will call asynchronously.
-        public delegate string AsyncMethodCaller(int callDuration, out int threadId);
+        public delegate string AsyncMethodCaller(int callDuration, out int outVal, out int threadId);
 
         public void TestAPM_AsyncDemo()
         {
@@ -271,7 +272,9 @@ namespace CSharpExample
             var caller = new AsyncMethodCaller(demo.TestMethod);
 
             int threadId;
-            IAsyncResult result = caller.BeginInvoke(3000, out threadId, null, null);
+            int outValue;
+            IAsyncResult result = caller.BeginInvoke(3000, out outValue, out threadId, null, null);
+
             {
                 Thread.Sleep(0);
                 Console.WriteLine("Main thread {0} does some work.", Thread.CurrentThread.ManagedThreadId);
@@ -282,7 +285,8 @@ namespace CSharpExample
                 Thread.Sleep(250);
                 Console.Write(".");
             }*/
-            string returnValue = caller.EndInvoke(out threadId, result);
+
+            string returnValue = caller.EndInvoke(out outValue, out threadId, result);
             Console.WriteLine("The call executed on thread {0}, with return value \"{1}\".", threadId, returnValue);
         }
     };
@@ -290,5 +294,159 @@ namespace CSharpExample
     public class MyAsyncEAP
     {
 
+    }
+
+    public class MyTestThread
+    {
+        public class ThreadObject
+        {
+            public object SyncLock = new object();
+            public long SyncInterLock = 0;
+            public Mutex SyncMutex = new Mutex(false, "ThreadObject Mutex");
+            public SemaphoreSlim SynSem = new SemaphoreSlim(1);
+
+            public AutoResetEvent EventProduce = new AutoResetEvent(true);
+            public AutoResetEvent EventComsumer = new AutoResetEvent(false);
+            public ManualResetEventSlim EventProduceMan = new ManualResetEventSlim(true);
+            public ManualResetEventSlim EventComsumerMan = new ManualResetEventSlim(false);
+
+            public void Producer(object param)
+            {
+                Console.WriteLine("Producer: Start");
+
+                Queue<int> que = (Queue<int>)param;
+                int startValue = 5;
+                try
+                {
+                    while (startValue-- > 0)
+                    {
+                        //EventProduce.WaitOne();
+                        EventProduceMan.Wait();
+                        EventProduceMan.Reset();
+                        //lock (SyncLock)
+                        //{
+                        //    if (que.Count == 0)
+                        //    {
+                        //        que.Enqueue(startValue);
+                        //        Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                        //    }
+                        //}
+
+                        //while (Interlocked.CompareExchange(ref SyncInterLock, 1, 0) != 0)
+                        //    ;
+                        //que.Enqueue(startValue);
+                        //Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                        //Interlocked.Decrement(ref SyncInterLock);
+
+                        //if (SyncMutex.WaitOne())
+                        //{
+                        //    que.Enqueue(startValue);
+                        //    Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                        //    SyncMutex.ReleaseMutex();
+                        //}
+
+                        SynSem.Wait();
+                        if (que.Count == 0)
+                        {
+                            que.Enqueue(startValue);
+                            Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                            //EventComsumer.Set();
+                            EventComsumerMan.Set();
+                        }
+                        SynSem.Release();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ThreadFunc1 Exception handled: {0:D}", e.Message);
+                }
+
+                Console.WriteLine("Producer: Finish");
+            }
+
+            public void Comsumer(object param)
+            {
+                Console.WriteLine("Comsumer: Start");
+
+                Queue<int> que = (Queue<int>)param;
+                while (true)
+                {
+                    //EventComsumer.WaitOne();
+                    EventComsumerMan.Wait();
+                    EventComsumerMan.Reset();
+
+                    //lock (SyncLock)
+                    //{
+                    //    if (que.Count > 0)
+                    //    {
+                    //        int startValue = que.Dequeue();
+                    //        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                    //    }
+                    //}
+
+                    //while (Interlocked.CompareExchange(ref SyncInterLock, 1, 0) != 0)
+                    //    ;
+                    //if (que.Count > 0)
+                    //{
+                    //    int startValue = que.Dequeue();
+                    //    Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                    //}
+                    //Interlocked.Decrement(ref SyncInterLock);
+
+                    //if (SyncMutex.WaitOne())
+                    //{
+                    //    if (que.Count > 0)
+                    //    {
+                    //        int startValue = que.Dequeue();
+                    //        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                    //    }
+                    //    SyncMutex.ReleaseMutex();
+                    //}
+
+                    SynSem.Wait();
+                    if (que.Count > 0)
+                    {
+                        int startValue = que.Dequeue();
+                        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                        if (que.Count == 0)
+                            //EventProduce.Set();
+                            EventProduceMan.Set();
+                    }
+                    SynSem.Release();
+                }
+
+                Console.WriteLine("Comsumer: Finish");
+            }
+        }
+
+        void Case1()
+        {
+            Queue<int> que = new Queue<int>();
+
+            ThreadObject tobj = new ThreadObject();
+
+            Thread tComsumer = new Thread(tobj.Comsumer);
+
+            Thread tProducer = new Thread(tobj.Producer);
+            tProducer.IsBackground = true;
+
+            tComsumer.Start(que);
+            tProducer.Start(que);
+        }
+
+        public void TestAll()
+        {
+            Case1();
+        }
+    }
+
+    public class MyTestIO
+    {
+        public void TestConsole()
+        {
+            int kvalue = 50;
+            Console.WriteLine($"kvalue={kvalue}");
+            Console.WriteLine("kvalue={%d}", kvalue);
+        }
     }
 }
