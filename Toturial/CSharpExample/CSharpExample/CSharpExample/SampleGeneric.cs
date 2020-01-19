@@ -305,55 +305,62 @@ namespace CSharpExample
             public Mutex SyncMutex = new Mutex(false, "ThreadObject Mutex");
             public SemaphoreSlim SynSem = new SemaphoreSlim(1);
 
-            public AutoResetEvent EventProduce = new AutoResetEvent(true);
-            public AutoResetEvent EventComsumer = new AutoResetEvent(false);
-            public ManualResetEventSlim EventProduceMan = new ManualResetEventSlim(true);
-            public ManualResetEventSlim EventComsumerMan = new ManualResetEventSlim(false);
+            public AutoResetEvent EventProduce = new AutoResetEvent(true), EventComsumer = new AutoResetEvent(false);
+            public ManualResetEventSlim EventProduceMan = new ManualResetEventSlim(true), EventComsumerMan = new ManualResetEventSlim(false);
+            public CountdownEvent EventCD = new CountdownEvent(2);
 
             public void Producer(object param)
             {
                 Console.WriteLine("Producer: Start");
 
                 Queue<int> que = (Queue<int>)param;
-                int startValue = 5;
+                int startValue = 6;
                 try
                 {
                     while (startValue-- > 0)
                     {
+#if USE_LOCK
+                        lock (SyncLock)
+                        {
+                            if (que.Count == 0)
+                            {
+                                que.Enqueue(startValue);
+                                Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                            }
+                        }
+#elif USE_INTER_LOCK
+                        while (Interlocked.CompareExchange(ref SyncInterLock, 1, 0) != 0)
+                            ;
+                        que.Enqueue(startValue);
+                        Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                        Interlocked.Decrement(ref SyncInterLock);
+#elif USE_MUTEX
+                        if (SyncMutex.WaitOne())
+                        {
+                            que.Enqueue(startValue);
+                            Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                            SyncMutex.ReleaseMutex();
+                        }        
+#elif USE_EVENT_SEMSLIM
                         //EventProduce.WaitOne();
                         EventProduceMan.Wait();
                         EventProduceMan.Reset();
-                        //lock (SyncLock)
-                        //{
-                        //    if (que.Count == 0)
-                        //    {
-                        //        que.Enqueue(startValue);
-                        //        Console.WriteLine("Producer: Enqueue {0:D}", startValue);
-                        //    }
-                        //}
-
-                        //while (Interlocked.CompareExchange(ref SyncInterLock, 1, 0) != 0)
-                        //    ;
-                        //que.Enqueue(startValue);
-                        //Console.WriteLine("Producer: Enqueue {0:D}", startValue);
-                        //Interlocked.Decrement(ref SyncInterLock);
-
-                        //if (SyncMutex.WaitOne())
-                        //{
-                        //    que.Enqueue(startValue);
-                        //    Console.WriteLine("Producer: Enqueue {0:D}", startValue);
-                        //    SyncMutex.ReleaseMutex();
-                        //}
 
                         SynSem.Wait();
                         if (que.Count == 0)
                         {
                             que.Enqueue(startValue);
                             Console.WriteLine("Producer: Enqueue {0:D}", startValue);
-                            //EventComsumer.Set();
+                            EventComsumer.Set();
                             EventComsumerMan.Set();
                         }
                         SynSem.Release();
+#endif
+                        que.Enqueue(startValue);
+                        Console.WriteLine("Producer: Enqueue {0:D}", startValue);
+                        EventCD.Signal();
+
+                        Thread.Sleep(100);
                     }
                 }
                 catch (Exception e)
@@ -371,37 +378,38 @@ namespace CSharpExample
                 Queue<int> que = (Queue<int>)param;
                 while (true)
                 {
+#if USE_LOCK
+                    lock (SyncLock)
+                    {
+                        if (que.Count > 0)
+                        {
+                            int startValue = que.Dequeue();
+                            Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                        }
+                    }
+#elif USE_INTER_LOCK
+                    while (Interlocked.CompareExchange(ref SyncInterLock, 1, 0) != 0)
+                        ;
+                    if (que.Count > 0)
+                    {
+                        int startValue = que.Dequeue();
+                        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                    }
+                    Interlocked.Decrement(ref SyncInterLock);
+#elif USE_MUTEX
+                    if (SyncMutex.WaitOne())
+                    {
+                        if (que.Count > 0)
+                        {
+                            int startValue = que.Dequeue();
+                            Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                        }
+                        SyncMutex.ReleaseMutex();
+                    }
+#elif USE_EVENT_SEMSLIM
                     //EventComsumer.WaitOne();
                     EventComsumerMan.Wait();
                     EventComsumerMan.Reset();
-
-                    //lock (SyncLock)
-                    //{
-                    //    if (que.Count > 0)
-                    //    {
-                    //        int startValue = que.Dequeue();
-                    //        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
-                    //    }
-                    //}
-
-                    //while (Interlocked.CompareExchange(ref SyncInterLock, 1, 0) != 0)
-                    //    ;
-                    //if (que.Count > 0)
-                    //{
-                    //    int startValue = que.Dequeue();
-                    //    Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
-                    //}
-                    //Interlocked.Decrement(ref SyncInterLock);
-
-                    //if (SyncMutex.WaitOne())
-                    //{
-                    //    if (que.Count > 0)
-                    //    {
-                    //        int startValue = que.Dequeue();
-                    //        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
-                    //    }
-                    //    SyncMutex.ReleaseMutex();
-                    //}
 
                     SynSem.Wait();
                     if (que.Count > 0)
@@ -413,13 +421,21 @@ namespace CSharpExample
                             EventProduceMan.Set();
                     }
                     SynSem.Release();
+#endif
+                    EventCD.Wait();
+                    while(que.Count > 0)
+                    {
+                        int startValue = que.Dequeue();
+                        Console.WriteLine("Comsumer: Dequeue {0:D}", startValue);
+                    }
+                    EventCD.Reset();
                 }
 
                 Console.WriteLine("Comsumer: Finish");
             }
         }
 
-        void Case1()
+        void Case10()
         {
             Queue<int> que = new Queue<int>();
 
@@ -434,9 +450,156 @@ namespace CSharpExample
             tProducer.Start(que);
         }
 
+        void Case1()
+        {
+            Barrier bar = new Barrier(2, b => Console.WriteLine("End of phase {0}", b.CurrentPhaseNumber + 1));
+            ThreadStart func = () =>
+            {
+                Console.WriteLine("----------------------------------------------");
+                bar.SignalAndWait();
+            };
+            new Thread(func).Start();
+            new Thread(func).Start();
+        }
+
+        void Case2()
+        {
+            ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+
+            ThreadStart reader = () =>
+            {
+                bool readFalg = false;
+                while (!readFalg)
+                {
+                    rwLock.EnterReadLock();
+                    if (dic.ContainsKey("name"))
+                    {
+                        Console.WriteLine("read name={0}", dic["name"]);
+                        readFalg = true;
+                    }
+                    rwLock.ExitReadLock();
+                    Thread.Sleep(100);
+                }
+
+            };
+            new Thread(reader).Start();
+            new Thread(reader).Start();
+
+            new Thread(()=> {
+                try
+                {
+                    rwLock.EnterUpgradeableReadLock();
+                    if (!dic.ContainsKey("name"))
+                    {
+                        try
+                        {
+                            rwLock.EnterWriteLock();
+                            dic["name"] = "guts";
+                        }
+                        finally
+                        {
+                            rwLock.ExitWriteLock();
+                        }
+                        Console.WriteLine("write name={0}", dic["name"]);
+                    }
+                }
+                finally
+                {
+                    rwLock.ExitUpgradeableReadLock();
+                }
+            }).Start();
+        }
+
+        static volatile int synInt = 0;
+
+        void Case3()
+        {
+            new Thread(()=> {
+                var w = new SpinWait();
+                while (synInt < 20)
+                {
+                    w.SpinOnce();
+                }
+            }).Start();
+
+            new Thread(()=> {
+                while (++synInt < 20)
+                    Thread.Sleep(1);
+            }).Start();
+        }
+
+        void Case4()
+        {
+            using (var cts = new CancellationTokenSource())
+            {
+                ThreadPool.QueueUserWorkItem((object token_) =>
+                {
+                    CancellationToken token = (CancellationToken)token_;
+                    while (!token.IsCancellationRequested)
+                    {
+                        Console.WriteLine("wait cancel");
+                        Thread.Sleep(TimeSpan.FromSeconds(0.1));
+                    }
+                }, cts.Token);
+                Thread.Sleep(TimeSpan.FromSeconds(0.5));
+                cts.Cancel();
+            }
+
+            using (var evt = new ManualResetEvent(false))
+            using (var cts = new CancellationTokenSource())
+            {
+                var worker = ThreadPool.RegisterWaitForSingleObject(evt,
+                    (param, isTimedOut) => {//wait
+                        if (isTimedOut)
+                            cts.Cancel();
+                        else
+                            Console.WriteLine("Worker operation success param={0}", param);
+                    }, 
+                    1024, TimeSpan.FromSeconds(0.1), true);
+
+                ThreadPool.QueueUserWorkItem(_ => {//work
+                    for (int i = 0; i < 6; i++)
+                    {
+                        if (cts.Token.IsCancellationRequested)
+                            return;
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                    }
+                    evt.Set();
+                });
+
+                Thread.Sleep(TimeSpan.FromSeconds(0.1).Add(TimeSpan.FromSeconds(2)));
+                worker.Unregister(evt);
+            }
+        }
+
+        void Case5()
+        {
+            Action<string> TaskMethod = (string name) =>
+            {
+                Console.WriteLine("Task {0} is running on a thread id {1}. Is thread pool thread: {2}", name, Thread.CurrentThread.ManagedThreadId, Thread.CurrentThread.IsThreadPoolThread);
+            };
+
+            var t1 = new Task(() => TaskMethod("Task 1"));
+            var t2 = new Task(() => TaskMethod("Task 2"));
+            t2.Start();
+            t1.Start();
+
+            Task.Run(() => TaskMethod("Task 3"));
+
+            Task.Factory.StartNew(() => TaskMethod("Task 4"));
+            Task.Factory.StartNew(() => TaskMethod("Task 5"), TaskCreationOptions.LongRunning);
+
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+        }
+
         public void TestAll()
         {
             Case1();
+            Case2();
+            Case3();
+            Case4();
+            Case10();
         }
     }
 
