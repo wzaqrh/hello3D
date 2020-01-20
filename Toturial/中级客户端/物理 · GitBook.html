@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>物理 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./物理 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./物理 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./物理 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./物理 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/intermediateclient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/intermediateclient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><link rel="prev" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Animation/Unity3D_Animation.html"><link rel="next" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html"></head>
+    <body><div id="MathJax_Message" style="display: none;"></div>
+        
+<div class="book font-size-2 font-family-1 with-summary">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="programming-language.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/programming-language.html">
+            
+                    
+                    编程语言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="multithread.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/multithread.html">
+            
+                    
+                    多线程编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="network.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/network.html">
+            
+                    
+                    网络编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="unity.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity.html">
+            
+                    
+                    Unity基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="unity-editor.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/unity-editor.html">
+            
+                    
+                    Unity Editor基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="ui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/ui.html">
+            
+                    
+                    UI基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="3dMathAndRendering/3dMath.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dMath.html">
+            
+                    
+                    3D数学基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="3dMathAndRendering/3dRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/3dMathAndRendering/3dRendering.html">
+            
+                    
+                    3D图形学基础
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="camera.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/camera.html">
+            
+                    
+                    摄像机
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="Unity3D_Animation/Unity3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Animation/Unity3D_Animation.html">
+            
+                    
+                    动画
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.12" data-path="Unity3D_physics.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html">
+            
+                    
+                    物理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html">
+            
+                    
+                    资源管理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Unity3D_Rendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Rendering.html">
+            
+                    
+                    渲染
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Unity3D_Profile/Unity_Profiler_CPU_GPU.html">
+            
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Profile/Unity_Profiler_CPU_GPU.html">
+            
+                    
+                    Profile
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_physics.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/intermediateclient/">物理</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="unity3d-物理">Unity3D 物理</h1>
+<p>Unity集成<a href="https://developer.nvidia.com/physx-sdk" target="_blank">NVIDIA PhysX</a>物理引擎作为其物理模块，并在内部维护了物理世界的创建更新销毁，碰撞体的碰撞检测，刚体更新等逻辑，并封装一系列物理相关上层接口。Physx是目前使用最为广泛的物理引擎，被很多游戏大作所采用，开发者可以通过物理引擎高效、逼真地模拟刚体碰撞、车辆驾驶、布料、重力等物理效果，使游戏画面更加真实而生动</p>
+<blockquote>
+<p>Unity 5.0之前使用的PhysX版本为PhysX 2.8.3，5.0之后升级到PhysX 3.3</p>
+</blockquote>
+<h3 id="刚体rigidbody">刚体(Rigidbody)</h3>
+<p>刚体是物理引擎中重要的基本概念。刚体是指运动中和受力作用后，形状和大小不变，而且内部各点的相对位置不变的物体。绝对刚体实际上是不存在的，只是一种理想模型。这种假设模型能良好的配合碰撞检测系统，且能大幅简化模拟固体动力学所需的数学，并能在工程上能有足够的准确度。</p>
+<p>GameObject添加Rigidbody组件之后物体将能受到物理作用的影响，物体将在物理引擎的驱动下运动，能和带有碰撞体的对象做出物理碰撞等交互并做出反映，并受到重力等因素的影响。</p>
+<p><img src="./物理 · GitBook_files/Inspector-Rigidbody.png" alt="image"></p>
+<p>详细属性和方法参见官方文档:</p>
+<blockquote>
+<ul class="toc">
+<li><a href="https://docs.unity3d.com/Manual/class-Rigidbody.html" target="_blank"><strong>Rigidbody  Manual</strong></a></li>
+<li><a href="https://docs.unity3d.com/ScriptReference/Rigidbody.html" target="_blank"><strong>ScriptReference</strong></a></li>
+</ul>
+</blockquote>
+<h4 id="重要属性说明：">重要属性说明：</h4>
+<ul>
+<li>Mass：质量，单位为千克。</li>
+<li>Drag：线速度阻尼参数，模拟空气阻力，默认为0。</li>
+<li>Angular Drag：角速度阻尼参数，默认值为0.05。设置了Angular Drag大小之后，物体在任何方向上的旋转运动都将会受到影响。 </li>
+<li>Velocity：刚体线速度。</li>
+<li>AngularVelocity：刚体角速度。</li>
+<li>position:刚体位置，会在物理更新完成后应用到Transform.position</li>
+<li>rotation:刚体旋转，会在物理更新完成后应用到Transform.rotation</li>
+<li>Use Gravity：刚体是否受重力影响,模拟现实世界中的自由落体状态等。</li>
+<li>Is Kinematic：开启之后物体运动将不再受刚体模拟，而是由Transform来控制，但其他刚体任然会对其有碰撞响应。常常用在玩家控制运动的主角物体等。</li>
+<li>Continuous Dynamic：CCD检测，物理模拟默认以离散的时间步来模拟的，简单的每个时间步中每个刚体的位置被当成是静止的，然后碰撞检测发生与这些碰撞世界的“快照”中，对于移动速度相对其尺寸不大的的物体来说方法可行，但对于一些尺度较小但运动速度很快的物体模拟就会产生“Tunneling”的隧穿现象。CCD就是处理隧穿的方法之一。其算法一般使用迭代式计算，因此对计算效率由很大影响，需要谨慎使用，或者使用其他方法来解决，如简单的射线碰撞检测或简单碰撞体的swept test。</li>
+<li>Interpolate：运动插值，由于刚体运动和渲染更新并非完全同步，比如对于相机跟随的主角物体，其物理更新和相机更新、渲染不在同一个Update逻辑中，这样可能对出现可见的抖动现象，可以开启插值来解决。</li>
+<li>Constraints：约束条件用来设置物体在哪一个方向上运动或旋转将受到的限制。例如在主角控制中约束X,Z方向的旋转防止角色的倾倒。</li>
+<li>sleepThreshold：刚体进入休眠状态的阈值，为了提高效率物理引擎中当刚体的运动速度小于一定阈值一段时间后，刚体将进入休眠状态以减少一些不必要的模拟计算。刚体的很多方法比如设置重力线速度角速度，addForce，addTorque都会使得刚体离开休眠状态。</li>
+</ul>
+<blockquote>
+<ul>
+<li><a href="https://www.zhihu.com/question/39177106" target="_blank">unity 中，物体快速移动，可能会导致一帧位移过大从而穿过物体，使得碰撞器检测失效，有什么好办法吗？</a></li>
+<li><a href="https://www.unity3dtips.com/unity-fix-movement-stutter/" target="_blank">Unity How to Fix Movement Stutter</a></li>
+</ul>
+</blockquote>
+<h4 id="重要方法说明：">重要方法说明：</h4>
+<ul>
+<li>AddForce：对刚体施加一个指定方向的力，作用于刚体使其发生移动。</li>
+<li>AddTorque：给刚体施加一个力矩，使得刚体绕torque轴旋转</li>
+<li>MovePosition：用来将刚体移动到position位置</li>
+<li>MoveRotation：用来刚体旋转到rot。rot为Quaternion（四元数）会返回刚体需要旋转的角度。</li>
+</ul>
+<p>经典力学：f = m<em>a (force = mass </em> acceleration)</p>
+<p>通常情况下最好不要直接对刚体速度进行修改，而是通过AddForce之类的操作间接的对速度进行操作。因为物理引擎内部很多模拟计算是以“当前”速度为基准进行的，如果直接进行速度的设置，可能会导致一些计算的结果不太真实。而AddForce的话就可以将加速度等计算交由物理引擎自行处理。</p>
+<blockquote>
+<ul>
+<li><a href="https://unity3d.com/cn/learn/tutorials/topics/physics/adding-physics-forces?playlist=17120" target="_blank">Adding Physics Forces</a> AddForce函数视频讲解</li>
+<li><a href="https://unity3d.com/cn/learn/tutorials/topics/physics/adding-physics-torque?playlist=17120" target="_blank">Adding Physics Torque</a> AddTorque函数视频讲解</li>
+<li><a href="https://blog.csdn.net/qian998/article/details/52185092" target="_blank">unity中关于rigidbody成员AddForce方法和AddTorque方法介绍</a></li>
+</ul>
+</blockquote>
+<h4 id="fixedupdate">FixedUpdate</h4>
+<p>物理部分的计算应该是与帧速率无关的，因此其模拟往往需要使用固定的步长，因此其计算往往放在FixedUpdate中，按照固定间隔执行。</p>
+<blockquote>
+<ul>
+<li><a href="https://www.cnblogs.com/murongxiaopifu/p/7683140.html" target="_blank">FixedUpdate真的是固定的时间间隔执行吗？聊聊游戏定时器</a></li>
+<li><a href="https://answers.unity.com/questions/10993/whats-the-difference-between-update-and-fixedupdat.html" target="_blank">What's the difference between Update and FixedUpdate? When are they called?</a></li>
+</ul>
+</blockquote>
+<h4 id="constant-force组件">Constant Force组件</h4>
+<p>AddForce/AddTorque仅是单施力影响刚体速度或加速度，要是向持续施加恒定力可以使用<a href="https://docs.unity3d.com/Manual/class-ConstantForce.html" target="_blank">Constant Force</a>组件</p>
+<blockquote>
+<ul>
+<li><a href="http://www.cnblogs.com/rainmj/p/5453288.html" target="_blank">恒定力 (Constant Force)</a> 说明与使用技巧</li>
+</ul>
+</blockquote>
+<h4 id="rigidbody学习参考教程：">Rigidbody学习参考教程：</h4>
+<ol>
+<li>基础：<blockquote>
+<ul>
+<li><a href="https://docs.unity3d.com/Manual/RigidbodiesOverview.html" target="_blank">Unity Rigidybody 官方文档</a> Rigbody概述</li>
+<li><a href="https://unity3d.com/cn/learn/tutorials/topics/physics/rigidbodies?playlist=17120" target="_blank">Unity Rigidybody 官方视频</a> 介绍了刚体组件的简单使用方法</li>
+<li><a href="http://www.cnblogs.com/rainmj/p/5453264.html" target="_blank">刚体组件介绍</a></li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<ol>
+<li>进阶：<blockquote>
+<ul>
+<li><a href="http://download.nvidia.com/developer/cuda/seminar/TDCI_PhysX.pdf" target="_blank">PhysX SDK Introduction</a> PhysX SDK介绍</li>
+<li><a href="https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/RigidBodyDynamics.html" target="_blank">PhysX Guide - Rigid Body Dynamics</a> PhysX中PxRigidDynamic类帮助文档，Unity刚体组件实际是对PhysX中PxRigidDynamic类的封装，Unity API中相关函数都能在PxRigidDynamic找到相关原型</li>
+<li><a href="https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/apireference/files/index.html" target="_blank">NVIDIA(R) PhysX(R) SDK 3.4 API Reference Documentation - PxRigidBody </a> PhysX API说明</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h3 id="碰撞体collider">碰撞体(Collider)</h3>
+<p>碰撞体(Collider):描述了一个物理世界中物体的形状。物理引擎基于这些形状来计算物理体的碰撞检测。碰撞只会发生在两个物体都带有Collider组件时。只有Collider组件而没有Rigidbody的GameObject自己不会响应物理行为的，可以归为静态碰撞体，适合与场景中不动的物体如地面、墙面、空气墙等。</p>
+<p>触发器(Trigger):当Collider组件Inspect面板的中IsTrigger属性为true时，将成为触发器。与触发器产生碰撞的刚体不会造成碰撞响应，只会触发碰撞事件。
+Unity按照Collider的形状和作用分为<a href="https://docs.unity3d.com/Manual/class-BoxCollider.html" target="_blank">Box Collider</a>，<a href="https://docs.unity3d.com/Manual/class-CapsuleCollider.html" target="_blank">Capsule Collider</a>，<a href="https://docs.unity3d.com/Manual/class-SphereCollider.html" target="_blank">Sphere Collider</a>，<a href="https://docs.unity3d.com/Manual/class-MeshCollider.html" target="_blank">Mesh Collider</a>,<a href="https://docs.unity3d.com/Manual/class-WheelCollider.html" target="_blank">Wheel Collider</a>,<a href="https://docs.unity3d.com/Manual/class-TerrainCollider.html" target="_blank">Terrain Collider</a>。</p>
+<p>车轮碰撞器（Wheel Collider）是一种特殊的碰撞器，它并不是特指某一种碰撞形状，而是一种包含碰撞检测、车轮物理引擎和基于滑动的轮胎摩擦的物理模型。很多车辆物理的插件都是基于Wheel Collider开发。如<a href="https://forum.unity.com/threads/how-to-make-a-physically-real-stable-car-with-wheelcolliders.50643/" target="_blank">Edy’s Vehicle Physics</a></p>
+<p>下图是物理引擎常见的基本计算模拟流程：
+<img src="./物理 · GitBook_files/gs4150-bullet-3-opencl-rigid-body-simulation-by-erwin-coumans-16-638.jpg" alt="image"></p>
+<p>其中Board Phase，Mid Phase，Narrow Phase中碰撞检测部分根据不同的碰撞体之间的形状使用不同算法来计算。</p>
+<p>碰撞体效率一般是： Sphere &gt; Capsule &gt; Box &gt; Convex。</p>
+<h4 id="collider学习参考教程：">Collider学习参考教程：</h4>
+<ol>
+<li><p>基础：</p>
+<blockquote>
+<ul>
+<li><a href="https://docs.unity3d.com/Manual/CollidersOverview.html" target="_blank">Unity Collider 官方文档</a> Collider概述</li>
+<li><a href="https://unity3d.com/cn/learn/tutorials/topics/physics/colliders?playlist=17120" target="_blank">Unity Collider 官方视频</a> 介绍了Collider组件的简单使用方法</li>
+<li><a href="http://www.cnblogs.com/rainmj/p/5453274.html" target="_blank">基本碰撞体介绍</a></li>
+<li><a href="https://www.codemahal.com/video/collision-detection-in-unity/" target="_blank">COLLISION DETECTION IN UNITY</a></li>
+<li><a href="https://www.jianshu.com/p/f99463f0578d" target="_blank">Unity3D-Collider(碰撞器)与Tirgger(触发器)--详解</a> 介绍了Collider的简单使用方法</li>
+</ul>
+</blockquote>
+</li>
+<li><p>进阶</p>
+<blockquote>
+<ul>
+<li><a href="https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/Geometry.html#geometry-types" target="_blank">PhysX中Collder Geomety详解</a> Unity中不同类型Collider对应PhysX中对应PxGeometry</li>
+<li><a href="http://www.realtimerendering.com/intersections.html" target="_blank">Object/Object Intersection</a> 介绍了不同形状的碰撞体之间使用的碰撞检测算法</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h3 id="物理管理器">物理管理器</h3>
+<p><img src="./物理 · GitBook_files/PhysicsSet.png" alt="image"></p>
+<blockquote>
+<p><a href="https://docs.unity3d.com/Manual/class-PhysicsManager.html" target="_blank">Unity Manual - PhysicsManager</a></p>
+</blockquote>
+<p>物理管理器通过Edit→Project Settings→Physics来打开</p>
+<ul>
+<li>Gravity（重力）：在Unity中默认的重力的方向为Y轴的负方向，大小为9.81N。</li>
+<li>Default Material（默认材质）：全局管理器中默认没有使用任何物理材质，在其中开发人员可以为其添加物理材质。</li>
+<li>Bounce Threshold（反弹阈值）：在两个相互碰撞的刚体间的相对速度小于阈值时，就不会再进行反弹计算，这样会有效的减少模拟物理过程中物体的抖动与物理计算。 </li>
+<li>Raycasts Hit Triggers（射线检测触发器）：Unity集成开发环境的物理引擎中3D射线拾取功能需要和碰撞器相互配合使用，即射线命中碰撞器之后会返回命中信息，被开发人员捕获后可以实现特定的功能。 </li>
+<li>Layer Collision Matrix（层碰撞矩阵）：Unity集成开发环境中可开发人员可以对场景中的物体进行分层，将不同功能或类型的物体区分开来。在物理管理器中，可以使用层碰撞矩阵来设置不同层的物体间的碰撞计算。两个层的交叉处就是设置碰撞检测的标志位。 </li>
+</ul>
+<h3 id="physics类基本函数">Physics类基本函数</h3>
+<h4 id="raycasts：">Raycasts：</h4>
+<p><a href="https://docs.unity3d.com/ScriptReference/Physics.Raycast.html" target="_blank">射线检测</a>，从起点朝某一方向发射一条射线，来检测射线与场景中Collider相交性。常用来进行鼠标点选，触地检测等功能。相关API：</p>
+<ul>
+<li>Ray Camera.main.ScreenPointToRay(Vector3 pos)   返回一条射线Ray从摄像机到屏幕指定一个点</li>
+<li>Ray Camera.main.ViewportPointToRay(Vector3 pos)  返回一条射线Ray从摄像机到视口（视口之外无效）指定一个点</li>
+<li>Ray 射线类 </li>
+<li>RaycastHit 射线投射碰撞信息</li>
+<li>bool Physics.Raycast(Vector3 origin, Vector3 direction, float distance, int layerMask) 当射线投射与任何碰撞器交叉时为真，否则为假。</li>
+<li>bool Physics.Raycast(Ray ray, Vector3 direction, RaycastHit out hit, float distance, int layerMask) 在场景中投下可与所有碰撞器碰撞的一条射线，并返回碰撞的详细信息。</li>
+<li>bool Physics.Raycast(Ray ray, float distance, int layerMask) 当射线投射与任何碰撞器交叉时为真，否则为假。</li>
+<li>bool Physics.Raycast(Vector3 origin, Vector3 direction, RaycastHit out hit,float distance, int layerMask)当射线投射与任何碰撞器交叉时为真，否则为假。</li>
+<li>RaycastHit[] RaycastAll(Ray ray, float distance, int layerMask) 投射一条光线并返回所有碰撞，也就是投射光线并返回一个RaycastHit[]结构体。</li>
+</ul>
+<h4 id="overlaps：">Overlaps：</h4>
+<p>检测场景中与某一类型碰撞几何体相交的Collider，常用来进行范围相交判定如攻击判定等场景。相关API：</p>
+<ul>
+<li>Physics.OverlapBox/OverlapBoxNonAlloc：检测几何体形状为Box</li>
+<li>Physics.OverlapCapsule/OverlapCapsuleNonAlloc:检测几何体形状为Capsule</li>
+<li>Physics.OverlapSphere/OverlapSphereNonAlloc:检测几何体相撞为Sphere</li>
+</ul>
+<h4 id="sweeps：">Sweeps：</h4>
+<p>类似RayCast，投射的不是射线而是给定的形状，常用在计算检测运动物体前后帧之间发生的碰撞行为。相关API：</p>
+<ul>
+<li>Physics.BoxCast/BoxCastAll/BoxCastNonAlloc:投射体为Box</li>
+<li>Physics.CapsuleCast/CapsuleCastAll/CapsuleCastNonAlloc:投射体为Capsule</li>
+<li>Physics.SphereCast/SphereCastAll/SphereCastNonAlloc:投射体为Sphere</li>
+</ul>
+<h4 id="penetration-depth">Penetration Depth:</h4>
+<p>计算两个给定的Collider在特定的位置旋转上的穿插渗透情况，常用在实现自定义的角色控制器上。相关API：</p>
+<ul>
+<li>Physics.ComputePenetration：计算两个Collider穿插情况</li>
+<li>Physics.ClosestPoint：计算特定位置离Collider上最近点</li>
+</ul>
+<h4 id="参考学习链接">参考学习链接:</h4>
+<ol>
+<li>基础：<blockquote>
+<ul>
+<li><a href="https://blog.csdn.net/ElyXiao/article/details/50866130" target="_blank">Physics.Raycast和Ray（射线）的理解</a></li>
+<li><a href="http://gad.qq.com/article/detail/45583" target="_blank">[Unity]Ray射线物理检测碰撞和LayerMask的使用</a></li>
+<li><a href="https://blog.csdn.net/u013700908/article/details/52888792" target="_blank">浅析UnityAPI【Physics.OverlapSphere】及其技巧</a></li>
+<li><a href="https://www.cnblogs.com/hont/p/6180822.html" target="_blank">Unity中各类物理投射性能横向比较</a></li>
+<li><a href="https://www.cnblogs.com/yuge790615/p/5591160.html" target="_blank">Unity3d--物体移动到鼠标点击位置</a></li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<ol>
+<li>进阶<blockquote>
+<ul>
+<li><a href="https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/GeometryQueries.html" target="_blank">PhysX中的Geometry Queries</a></li>
+<li><a href="https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/SceneQueries.html#introduction" target="_blank">SceneQueries in PhysX</a></li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h3 id="物理进阶部分">物理进阶部分</h3>
+<blockquote>
+<ul>
+<li><a href="https://www.packtpub.com/game-development/learning-physics-modeling-physx" target="_blank">Learning Physics Modeling 
+with PhysX</a></li>
+<li><a href="https://www.cnblogs.com/msxh/p/6128851.html" target="_blank">Unity3D中常用的物理学公式</a></li>
+<li><a href="https://unity3d.com/cn/learn/tutorials/topics/physics/physics-best-practices?playlist=17120" target="_blank">Unity 3D Best Practices: Physics</a></li>
+<li><a href="http://gad.qq.com/program/translateview/7165587" target="_blank">学习如何在Unity中进行物理部分的优化</a></li>
+<li><a href="https://gafferongames.com/post/introduction_to_networked_physics/" target="_blank">Networked Physics.</a> 讲述了物理模块实现网络同步的方法</li>
+</ul>
+</blockquote>
+<script type="text/javascript">var targetUl = document.getElementsByClassName('page-inner')[0].getElementsByTagName('ul')[0];if(targetUl.getElementsByTagName('a').length>0){targetUl.className='toc';}</script>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_Animation/Unity3D_Animation.html" class="navigation navigation-prev " aria-label="Previous page: 动画">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/intermediateclient/book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.html" class="navigation navigation-next " aria-label="Next page: 资源管理" style="margin-right: 0px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"物理","level":"1.12","depth":1,"next":{"title":"资源管理","level":"1.13","depth":1,"path":"book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.md","ref":"book/Unity3D_ResourcesMgr/Unity3D_ResourcesMgr.md","articles":[]},"previous":{"title":"动画","level":"1.11","depth":1,"path":"book/Unity3D_Animation/Unity3D_Animation.md","ref":"book/Unity3D_Animation/Unity3D_Animation.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","toc"],"pluginsConfig":{"toc":{"addClass":true,"className":"toc"},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/Unity3D_physics.md","mtime":"2019-05-05T03:07:15.844Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:39:59.338Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./物理 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./物理 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./物理 · GitBook_files/MathJax.js.下载" id=""></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/plugin.js.下载"></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./物理 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

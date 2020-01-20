@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<!-- saved from url=(0082)https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>场景管理 - 四叉树、八叉树 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./场景管理 - 四叉树、八叉树 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./场景管理 - 四叉树、八叉树 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./场景管理 - 四叉树、八叉树 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./场景管理 - 四叉树、八叉树 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">场景管理 - 四叉树、八叉树</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="四叉树和八叉树">四叉树和八叉树</h1>
+<p>[TOC]</p>
+<h1 id="四叉树">四叉树</h1>
+<h2 id="什么是四叉树">什么是四叉树</h2>
+<p>四元树又称为四叉树，是一种树状数据结构，在每一个节点上会有四个子区块。四元树常应用于二维空间数据的分析与分类。 它将数据区分成为四个象限。数据范围可以是方形或矩形或其他任意形状。</p>
+<p>对于游戏来说，四叉树有很多应用场景，比如场景静态物件的动态加载，场景中动态对象的管理，加速碰撞检测的预处理，可视化距离外的物体快速剔除，地形的渲染等等。</p>
+<p>无论对于2D游戏还是3D游戏（忽略高度的影响）都可以用四元树来对场景进行剖分，它将已知的空间分成四个子空间作为节点，每个节点又划分为四个子空间，以此递归，直到达到指定的停止标准。常见的停止标准有：</p>
+<ul>
+<li>节点到达最大深度</li>
+<li>节点的范围小于指定范围</li>
+<li>节点内包含的对象数目不超过指定的最大值</li>
+</ul>
+<h2 id="原理">原理</h2>
+<p>四叉树有很多种实现方法，包括不同的场景剖分方式，数据记录的方式等。</p>
+<p>对于场景的剖分，最简单的有直接按层次或大小自顶向下把场景平均划分成大小相同的格子，每个节点下都有4个子节点，如下图所示。</p>
+<p><img src="./场景管理 - 四叉树、八叉树 · GitBook_files/简单全空间划分.png" alt="1540523722149"></p>
+<p>但全部划分的话有些节点下是空的造成内存的浪费，所以可以按一定规则进行不全面的划分，如下图所示：</p>
+<p><img src="./场景管理 - 四叉树、八叉树 · GitBook_files/部分空间划分.png" alt="1540537583499"></p>
+<p>数据的记录方式也有不同的变体：可以只在叶子节点记录数据，非叶子节点不能保存数据，跨节点的数据可以记录在一个叶子节点中也可以每个相交的叶子节点都记录同一个数据。如果只在一个叶子节点中记录的话就会出现本来应该进行检查的却因为不在要检测的节点中而忽略检测的情况。如果在多个叶子节点中都保存的话有可能会出现覆盖多个节点的时候在各个节点中都要进行保存从而增加开销并且不容易管理。也可以选择在非叶子节点中保存数据，这样跨节点的数据就可以保存在父节点中。但这样会出现一些很小的物体可能没插入到叶子节点而导致检测范围过大，特别是如果该物体恰巧位于四叉树区域的正中心，其只能被四叉树的根节点所包含。</p>
+<p><img src="./场景管理 - 四叉树、八叉树 · GitBook_files/跨节点.png" alt="1540540712919"></p>
+<p>综上所述，四叉树的具体实现方式要根据所需做一些权衡和取舍。</p>
+<h2 id="实现：">实现：</h2>
+<p>依前所述，四叉树具体的实现会依据使用场景的不同而不同。我们这里用伪代码介绍下一般的实现方法。</p>
+<p>一定会有一个定义四叉树的类<code>QuadTree</code></p>
+<pre><code>class QuadTree
+{
+    //根节点
+    QuadNode root;
+    //最大层次或者最小区域
+    int maxDepth;
+    float minSize;
+    //剖分前节点可以存储的数据量
+    int MaxItemNum;
+    //最大范围
+    Bounds bounds;
+
+    //向四叉树中添加对象
+    void AddItem(UserData);
+    //删除四叉树中的对象
+    void RemoveItem(UserData);
+}
+</code></pre><p>定义四叉树节点的类<code>QuadTreeNode</code></p>
+<pre><code>class QuadTreeNode
+{
+    //节点范围
+    Bounds bounds;
+    //子节点，索引0,1,2,3分别对应左下，右下，左上，右上各节点
+    QuadTreeNode[4] childNode;
+
+    //向节点中添加数据
+    void AddItem(UserData);
+    //删除节点中的数据
+    void RemoveItem(UserData);
+    //分割节点
+    void Partition();
+
+    //依据使用场景不同可选内容
+    //如果非叶子节点也可以保存数据的话
+    List&lt;UserData&gt; allData;
+
+    //获得节点下的数据
+    void GetAllItem(ref List&lt;UserData&gt;);
+    //获得指定范围内的数据
+    void GetAllItem(Bounds, ref List&lt;UserData&gt;);
+
+    //如果保存的是可以移动的物体，有可能还要提供向上和向下移动数据的接口
+    void PushItemUp(int index);
+    void PushItemDown(int index);
+}
+</code></pre><p>如果非叶子节点不能保存数据的话还要定义一个叶子节点类</p>
+<pre><code>class QuadTreeLeaf : QuadTreeNode
+{
+    //保存数据
+    List&lt;UserData&gt; allData;
+}
+</code></pre><p>如果非叶子节点可以保存数据的话这个类也就不需要了</p>
+<p>上面代码中的<code>UserData</code>是自定义的包含相应功能的要添加到四叉树中的数据</p>
+<pre><code>class UserData
+{
+    //位置
+    Vector2 position;
+    //范围
+    Bounds bounds;
+
+    //其他需要实现的功能
+}
+</code></pre><p><code>Bounds</code>是一个表示边界的类，需要定义一些检查是否完全包含另一个边界或者边界是否相交类似的函数。</p>
+<h1 id="八叉树">八叉树</h1>
+<p>八叉树和四叉树类似，只是在y方向也进行空间的剖分，把空间剖分成八个子空间作为节点，每个节点又划分成八个子空间，依次递归。</p>
+<p><img src="./场景管理 - 四叉树、八叉树 · GitBook_files/八叉树.png" alt="1540554510339"></p>
+<p>八叉树和四叉树的实现也是类似的，只是把节点数量变为8个，剖分函数也在y周方向进行剖分。这里就不列出伪代码了。</p>
+<h2 id="传统四叉树和八叉树的缺点">传统四叉树和八叉树的缺点</h2>
+<ul>
+<li>对于很小的物体，如果处在世界空间的中心，则只能分配到根节点中。</li>
+<li>应用于动态场景时，节点在需要分割时才进行分割（不需要时也可以删除节点），虽然节省内存，但是需要经常性的开辟和释放内存，影响性能。</li>
+<li>应用于动态场景时，需要在对象的位置时刻在变化，对象可能随时切换在树中的节点。而且这些节点并不是在同一层级（可能引起树结构的改变），影响性能。</li>
+</ul>
+<h1 id="松散四叉树">松散四叉树</h1>
+<p>对于前面提到的传统四叉树中跨边界的小节点没有被分割而是放到父节点的情况，可以用把节点的边界适当放宽松的方式来解决，这就是松散四叉树。松散四叉树的松散是指调整节点的包围体大小，“放松”包围体，但是同时节点的层次和节点的中心不变。如果四叉树是完全按照正方形来划分的话，传统四叉树节点正方形的边长是和节点间间距为：</p>
+<p>$$
+L(depth)=W/(2depth)</p>
+<p>$$</p>
+<p>$$
+S(depth)=W/(2depth)</p>
+<p>$$</p>
+<p>$$
+W:worldsize</p>
+<p>$$</p>
+<p>$$
+depth:depth(root)=0</p>
+<p>$$</p>
+<p>松散四叉树边长的公式修改为：</p>
+<p>$$
+L(depth)=k∗W/(2depth)</p>
+<p>$$
+节点的间距依旧与传统四叉树保持一致。这意味着同层节点的包围盒会相互重叠，如图所示：</p>
+<p><img src="./场景管理 - 四叉树、八叉树 · GitBook_files/松散四叉树交叠.png" alt="1540611312014"></p>
+<p>而k值的选择就是一个比较重要的问题，k值过小则无法体现松散四叉树减少粘性区域的优势，k值过大则会导致包围体过于松散。一般k值等于2。这样可以有个重要性质：如果一个对象的大小小于等于一个节点的大小（内边界），那这个对象的中心点在这个节点内边界范围内，就能保证这个对象是在这个节点的松散包围体内。</p>
+<p><img src="./场景管理 - 四叉树、八叉树 · GitBook_files/节点在松散四叉树内.png" alt="1540611916692"></p>
+<p>松散四叉树在查询上比传统四叉树较复杂，要查询所有与之相交的松散包围盒的节点。</p>
+<p>松散八叉树和松散四叉树原理一样。</p>
+<h1 id="参考">参考</h1>
+<p>关于四叉树和八叉树的原理及一些应用可以参考下面的链接</p>
+<p><a href="https://www.cnblogs.com/tangzhenqiang/p/8459681.html" target="_blank">https://www.cnblogs.com/tangzhenqiang/p/8459681.html</a></p>
+<p><a href="http://cloudgrassland.com/2015/12/162-2/" target="_blank">http://cloudgrassland.com/2015/12/162-2/</a></p>
+<p><a href="https://blog.csdn.net/mobilebbki399/article/details/79491544" target="_blank">https://blog.csdn.net/mobilebbki399/article/details/79491544</a></p>
+<p><a href="http://gulu-dev.com/post/2015-07-11-uquadtree" target="_blank">http://gulu-dev.com/post/2015-07-11-uquadtree</a></p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html" class="navigation navigation-prev " aria-label="Previous page: 寻路 - 导航网格寻路">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html" class="navigation navigation-next " aria-label="Next page: 动画 - 骨骼动画及其优化" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"场景管理 - 四叉树、八叉树","level":"1.12","depth":1,"next":{"title":"动画 - 骨骼动画及其优化","level":"1.13","depth":1,"path":"book/3D_Animation.md","ref":"book/3D_Animation.md","articles":[]},"previous":{"title":"寻路 - 导航网格寻路","level":"1.11","depth":1,"path":"book/PathFinding.md","ref":"book/PathFinding.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/QuadtreeAndOctreeSceneManagent.md","mtime":"2019-05-05T03:07:42.988Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./场景管理 - 四叉树、八叉树 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

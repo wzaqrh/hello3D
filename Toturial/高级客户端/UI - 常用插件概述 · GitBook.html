@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>UI - 常用插件概述 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./UI - 常用插件概述 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./UI - 常用插件概述 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./UI - 常用插件概述 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./UI - 常用插件概述 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="../Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="../TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="../PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="../QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="../3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="../Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="../Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.16" data-path="PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="../Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="../Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">UI - 常用插件概述</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <p>[TOC]</p>
+<h3 id="常用插件介绍">常用插件介绍</h3>
+<p>​    自Unity出现至今, 已历经14来年(2004~2018). 下面将纵览介绍相关Unity这些年UI开发的历程演变, 主流技术及趋势;</p>
+<p>​    Unity UI 制作的主流方式有很多, 同类产品的选择取决于项目的需求及研发团队的能力, 但不同产品的迭代取决于各类UI研发方式的效能. </p>
+<h4 id="gui-（0418）">GUI （04~18）</h4>
+<p>​    GUI为Unity 早期内置原生UI. 汲取C及Java部分UI开发模式.  至今Unity的编辑器拓展任延续GUI的方式. </p>
+<p>适用范围</p>
+<p>​    编辑器及运行时.</p>
+<p>特色</p>
+<p>​    Skin/Style 支持皮肤与风格预置及Layout布局.</p>
+<p>弊端</p>
+<p>​    当时主要弊端为运行时OnGUI绘制压力过大. UI的表现形式过于单一及开发步骤反复, 二次开发及维护复杂度高.</p>
+<p>研发步骤</p>
+<p>​    以面向过程的方式设计并实现UI. 早期需要实现一些基础的功能，类似双缓冲, 控制不同控件的刷新率等.</p>
+<p>​    划分UI开发中Layout及GUI部分. 结合分辨率策略及模块逻辑编写顺序UI绘制逻辑.</p>
+<p>消息分发方式</p>
+<p>​    主要为三种, 回调函数式,  Property, SendMessage. </p>
+<p>参考资料</p>
+<p>​    GUI 官方文档: <a href="https://docs.unity3d.com/ScriptReference/GUI.html" target="_blank">https://docs.unity3d.com/ScriptReference/GUI.html</a></p>
+<p>​    Unity中的GUI编程: <a href="https://blog.csdn.net/aisajiajiao/article/details/17472503" target="_blank">https://blog.csdn.net/aisajiajiao/article/details/17472503</a></p>
+<h4 id="ezgui-（11--13）">EZGUI （11 ~ 13）</h4>
+<p>​    革命性的UI插件. Unity早期最优秀插件没有之一. 颠覆了Override像素填充模式. 利用Mesh构建基础结构. 并在开发及维护过程中提出了Atlas概念并有效的提供了UI开发非专业程序制作的可能性.</p>
+<p>​    当时主流的开发引擎有UE3, Ogre, CryEngine， Gb, 还有一些脱胎于DX9,10的自研引擎. 但面向市场主要为端游及3A.  而U3D从起初的战略重心为Web, 并由此设计的sence及Assetbundel模块来加以支持.  11年Web市场迎来了春天, 而U3D因此的占有量大幅提升, 而EZGUI也被广大的开发者所接受. </p>
+<p>使用范围</p>
+<p>​    运行时</p>
+<p>特色</p>
+<p>​    Mesh话UI控件, Atlas概念, 内置消息分发控件, 支持托管3DUI实现.</p>
+<p>​    目前我们使用的NGUI或UGUI绝大多数概念的提出源于EZGUI, 其中, 控件的参数设置及消息分发封装到了控件之中, 使UI开发实现了分层逻辑设计模式, 让大多数非程序开发者也能参与UI的设计及开发中去. 从表现上来说, 实现了所见即所得, 大幅度提升了游戏研发的乐趣. </p>
+<p>弊端</p>
+<p>​    正如大部分开发者诟病GUI的各种反人性设计点时, EZGUI从早期的简单页游逐步随着市场的变化, 转变为复杂化, 移动化. 各种开发上的不友善也逐渐暴露出来, 而更糟糕的是EZGUI在早期跟新2个版本后, 长期不进行版本迭代. 并出现了各种无法解决的问题 (例如, 不支IME, 导致无法切换语言. 不支持动态字体, 导致类似中文常用字4M左右内存占用量. 相对早期36M左右总内存空间简直噩梦. Atlas 维护反人性(虽然远好于GUI地狱维护模式), 层级管理简直可怕等等之类)</p>
+<p>研发步骤</p>
+<p>​    根据Art设计的概念图进行图片单元化并制作图集. 根据UI表现形式划分UI界面. 并制作相关界面控件及编写响应逻辑.</p>
+<p>消息分发方式</p>
+<p>​    主要为SendMessage模式</p>
+<p>参考资料</p>
+<p>​    EZ GUI 官方文档: <a href="http://www.anbsoft.com/middleware/ezgui/" target="_blank">http://www.anbsoft.com/middleware/ezgui/</a></p>
+<p>​    EZ / NGUI 对比: <a href="https://blog.csdn.net/u013100250/article/details/46308539" target="_blank">https://blog.csdn.net/u013100250/article/details/46308539</a></p>
+<h4 id="ngui-（12--18）">NGUI （12 ~ 18）</h4>
+<p>​    在EZGUI诞生不久, NGUI就随之降临. 但由于前期的市场占有率及开发习惯. NGUI一直被开发者摒弃. 但NGUI不断剖析自身问题. 频繁更新版本. 并先后提出Atlas的改进方案, 提供了各种EZGUI不支持的功能, 及最后性能大幅度碾压EZGUI. 在移动市场兴起初期, 替代了EZGUI， 成为了主流UI研发工具. </p>
+<p>使用范围</p>
+<p>​    运行时</p>
+<p>特色</p>
+<p>​    改良了Atlas制作复杂度, 拓展了EZGUI的Sprite变化方式, 提供了IME, 动态字体等解决方案(不同版本), 消息机制有自身EventSystem,  提出了层级管理概念, 完爆Z轴的EZGUI.(虽然原理仍旧是Z轴, 但由于封装后使开发模式明确了很多) 锚点及在Rebuild及ReBatch中建立了ChangeList， 有效减低了合批产生的消耗. </p>
+<p>弊端</p>
+<p>​    仍需要开发者对Atlas进行对应工具拓展. 字体能耗过大, 锚点概念模糊, 在做自适应时存在短板. HUD合批效能不高. 粒子及3DUI混合, 音效需要二次开发等等.</p>
+<p>研发步骤</p>
+<p>​    基本与EZGUI保持一致.</p>
+<p>消息分发方式</p>
+<p>​    EventSystem</p>
+<p>参考资料</p>
+<p>​    官方文档: <a href="http://www.tasharen.com/?page_id=140" target="_blank">http://www.tasharen.com/?page_id=140</a></p>
+<p>​    控件使用简介: <a href="https://www.jianshu.com/p/98541f18999c" target="_blank">https://www.jianshu.com/p/98541f18999c</a></p>
+<h4 id="scaleform-0418">Scaleform (04~18)</h4>
+<p>​    跨平台UI可视化制作的一种解决方案. 结合Adobe flash的制作流程, 提供可编辑空间模组, 进行开发. 很多3A主机游戏采用的UI制作解决方案. 之所以使用有很重要的一个原因为, 希望美术能通过自身制作或调整UI时, 能有效把控UI的美观和风格, 不假借他人之手. 使游戏的艺术性上生一个层次.</p>
+<p>使用范围</p>
+<p>​    运行时</p>
+<p>特色</p>
+<p>​    利用Flash相对明确的逻辑编辑模式进行UI研发. 为当时相对主流的NGUI替代方案之一.</p>
+<p>​    可以利用用来多次设计和测试迭代的全套 Adobe 工具，快速进行 UI 原型设计和皮肤设计。
+　　·由于包含一个用于组件和游戏的灵活的双向通信机制，使其非常容易将 UI 交互与游戏逻辑连接起来，反之亦然。
+　　·组件包含一个智能化和灵活的输入和焦点路由系统，使您免于从头创建一个系统。    </p>
+<p>弊端</p>
+<p>​    后期出现官方Flash不支持后的窘境.</p>
+<p>研发步骤</p>
+<p>​    无太大差异, 制作完成生成对应目标文件, 运行时解析</p>
+<h4 id="ps2gui">PS2GUI</h4>
+<p>​    另一种托管于美术的UI解决方案, 存在明显及严重漏洞. 以至于如今发展到PS2UGUI都使用者寥寥无几.</p>
+<p>使用范围</p>
+<p>​    运行时</p>
+<p>特色</p>
+<p>​    结合Adobe PS的制作流程, 能使美术通过PS的文件命名来实现UI结构的生成及简单逻辑的调用.</p>
+<p>弊端</p>
+<p>​    复杂UI中逆天的文件命名,  维护管理中的无序. 极大增加了项目的开发难度.</p>
+<p>研发步骤</p>
+<p>​    PS中制作对应UI, 通过对象命名来确认逻辑结构关系. </p>
+<p>参考资料:</p>
+<p>​    官方文档:     <a href="https://gamedev.autodesk.com/" target="_blank">https://gamedev.autodesk.com/</a></p>
+<p>​    Unity 使用步骤: <a href="http://www.jjtao.me/unity3d-%E4%B8%ADscaleform%E4%BD%BF%E7%94%A8/" target="_blank">http://www.jjtao.me/unity3d-%E4%B8%ADscaleform%E4%BD%BF%E7%94%A8/</a></p>
+<h4 id="ugui-1518">UGUI (15~18)</h4>
+<p>​    UGUI 是由NGUI的作者开发, 自U3D4.6版本推出. 提供源码, 通过编译DLL进行Unity引用. 逐渐占据了目前的主流. </p>
+<p>使用范围</p>
+<p>​    运行时</p>
+<p>特色</p>
+<p>​    主打的还是运行时效率对比, 由于Transform不再单独运算，参与3D合批及C++ 顾能提升一定的运行时效率. 此外降低了图集开发的复杂度(有待商榷的解决方案, 并埋下了后续各个模块开发的隐患和复杂度. 提供更全面的锚点选择,支持主机按键导航(主要为引擎的侧重点再次从移动设备回归主机, 农村包围城市战术奏效) , 绘制模式及组织结构更多样, 使开发中优化可能性更广.  相对主要对手NGUI, 堆内存使用有明显优势.</p>
+<p>弊端</p>
+<p>​    这里我主要表达的是个人观点. 仅做参考:</p>
+<p>​    UGUI目前的主要对手NGUI也逐步被蚕食, 相对于技术上的问题, 我更在意的下一个趋势的偏差. UGUI并没有明确指出什么样的趋势或观点是相当不可取的.</p>
+<p>​    由于热更新的优势体现, 越来越多的项目组提出了UI逻辑脚本化及游戏开发者越来越不愿意制作UI. 这一点我不是很认同.  我们参与游戏研发的原动力是什么？ 是对游戏制作的热爱, 执着及兴趣, 制作UI是一个很有趣的过程, 哪怕简简单单一个工作，我们都在尽可能使它更加完美, 创造更多的可能性. 而不是轻视UI的工作, 尽可能想把UI的工作转移给脚本程序员及美术去完成. 不说最后实现的绝对能耗, 光是这个想法就是可怕的, 是违背了UI制作的初衷的. 我们可以提供一种可能性，让非专业程式设计也能参与UI的开发中去, 让更多的开发者体会到UI制作的乐趣, 而不是全盘推出. </p>
+<p>​    脚本化, 脚本化的初衷我认为是一个应急的措施. 而并非制作趋势. 全逻辑脚本化的项目, 我个人认为是发指的. 乐趣何在？ 面对越来越胧长的脚本文件, 至少我体会不到. </p>
+<p>​    故, UI的趋势我认为UGUI有责任要明确下来, 海纳百川固然可贵，但一意孤行又不知甚解着实可悲.  </p>
+<p>研发步骤</p>
+<p>​    总体类似NGUI.</p>
+<p>消息分发方式</p>
+<p>​    EventSystem &amp; Wiget Event (部分控件需要二者联用, 来避免消息被覆盖)</p>
+<h4 id="fairygui-1518">FairyGUI (15~18)</h4>
+<p>​    FairyGUI由个人开发，提供一个专门的UI编辑器并支持多引擎，目前仍在更新中。</p>
+<p>特色</p>
+<p>​    封装程度高，已经实现好了一些常用的高级控件；提供一个专门的UI编辑器，能够用最少的代码实现相同或者更佳的效果，且重构方便成本低；支持UI热更新（因为UI只是编辑器导出的资源文件）；运行时优化，制作UI时可以不那么考虑优化问题。</p>
+<p>弊端</p>
+<p>​    推出时间晚，成功案例少，且由个人开发，是否经得住大项目的使用有待考证；与主流的UGUI和NGUI概念的不同点较多，需要一定的学习成本，而且学习资料比较集中，不像其他方案教程满天飞；Unity中看不到UI元件的具体参数，调试的时候如果遇到奇怪的问题需要一定的经验和想象力。</p>
+<p>研发步骤</p>
+<p>​    编辑器制作原型导出，美术制作图片填充，同时程序编写代码逻辑，定期重新导出整合及测试效果。</p>
+<p>消息分发方式</p>
+<p>​    EventListener</p>
+<p>参考资料</p>
+<p>​    源码: <a href="https://bitbucket.org/Unity-Technologies/ui/src" target="_blank">https://bitbucket.org/Unity-Technologies/ui/src</a></p>
+<p>​    官方文档查看说明: <a href="https://www.jianshu.com/p/36775832a981" target="_blank">https://www.jianshu.com/p/36775832a981</a></p>
+<p>​    基础教程: <a href="http://www.cnblogs.com/C-9925/archive/2017/08/11/7348212.html" target="_blank">http://www.cnblogs.com/C-9925/archive/2017/08/11/7348212.html</a></p>
+<p>​    </p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html" class="navigation navigation-prev " aria-label="Previous page: 资源管理 - AssetBundle 的使用">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html" class="navigation navigation-next " aria-label="Next page: UI - 主流技术概述" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"UI - 常用插件概述","level":"1.16","depth":1,"next":{"title":"UI - 主流技术概述","level":"1.17","depth":1,"path":"book/User_Interface/MainstreamTechnology.md","ref":"book/User_Interface/MainstreamTechnology.md","articles":[]},"previous":{"title":"资源管理 - AssetBundle 的使用","level":"1.15","depth":1,"path":"book/Asset_Bundle.md","ref":"book/Asset_Bundle.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/User_Interface/PlugIn.md","mtime":"2019-05-05T03:07:43.033Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./UI - 常用插件概述 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./UI - 常用插件概述 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./UI - 常用插件概述 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./UI - 常用插件概述 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./UI - 常用插件概述 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./UI - 常用插件概述 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./UI - 常用插件概述 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./UI - 常用插件概述 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

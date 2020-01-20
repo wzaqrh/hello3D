@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>SQL CREATE INDEX 语句 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./SQL CREATE INDEX 语句 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./SQL CREATE INDEX 语句 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./SQL CREATE INDEX 语句 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./SQL CREATE INDEX 语句 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/serverbook/mysql/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/serverbook/mysql/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_default.html"><link rel="next" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_alter_tb.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.1" data-path="../linux.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/linux.html">
+            
+                    
+                    Linux使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.2" data-path="../gdb.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/gdb.html">
+            
+                    
+                    gdb使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.3" data-path="../programming.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/programming.html">
+            
+                    
+                    编程语言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.4" data-path="../stl.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/stl.html">
+            
+                    
+                    STL
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.5" data-path="../multi-thread.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/multi-thread.html">
+            
+                    
+                    多线程编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.6" data-path="../data-structure.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/data-structure.html">
+            
+                    
+                    数据结构
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7" data-path="./">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/">
+            
+                    
+                    数据库
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.7.1" data-path="2nf.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/2nf.html">
+            
+                    
+                    第二范式
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.2" data-path="introduction.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/introduction.html">
+            
+                    
+                    mysql 数据类型
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3" data-path="sql_README.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_README.html">
+            
+                    
+                    基本 sql 语句
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.7.3.1" data-path="sql_select.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_select.html">
+            
+                    
+                    SQL SELECT 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.2" data-path="sql_where.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_where.html">
+            
+                    
+                    SQL WHERE 子句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.3" data-path="sql_and_or.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_and_or.html">
+            
+                    
+                    SQL AND &amp; OR 运算符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.4" data-path="sql_order_by.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_order_by.html">
+            
+                    
+                    SQL ORDER BY 子句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.5" data-path="sql_insert.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_insert.html">
+            
+                    
+                    SQL INSERT INTO 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.6" data-path="sql_update.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_update.html">
+            
+                    
+                    SQL UPDATE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.7" data-path="sql_delete.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_delete.html">
+            
+                    
+                    SQL DELETE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.8" data-path="sql_like.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_like.html">
+            
+                    
+                    SQL LIKE 操作符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.9" data-path="sql_wildcard.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_wildcard.html">
+            
+                    
+                    SQL 通配符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.10" data-path="sql_between.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_between.html">
+            
+                    
+                    SQL BETWEEN 操作符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.11" data-path="sql_create_db.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_db.html">
+            
+                    
+                    SQL CREATE DATABASE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.12" data-path="sql_create_tb.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_tb.html">
+            
+                    
+                    SQL CREATE TABLE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.13" data-path="sql_not_null.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_not_null.html">
+            
+                    
+                    SQL NOT NULL 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.14" data-path="sql_unique.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_unique.html">
+            
+                    
+                    SQL UNIQUE 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.15" data-path="sql_primary_key.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_primary_key.html">
+            
+                    
+                    SQL PRIMARY KEY 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.16" data-path="sql_default.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_default.html">
+            
+                    
+                    SQL DEFAULT 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.1.7.3.17" data-path="sql_create_idx.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html">
+            
+                    
+                    SQL CREATE INDEX 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.18" data-path="sql_alter_tb.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_alter_tb.html">
+            
+                    
+                    SQL ALTER TABLE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.19" data-path="sql_auto_incr.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_auto_incr.html">
+            
+                    
+                    SQL AUTO INCREMENT 字段
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.20" data-path="sql_group_by.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_group_by.html">
+            
+                    
+                    SQL GROUP BY 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.8" data-path="../networking-programming.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/networking-programming.html">
+            
+                    
+                    网络编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.9" data-path="../game-programming.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/game-programming.html">
+            
+                    
+                    游戏编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.10" data-path="../cmake.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/cmake.html">
+            
+                    
+                    CMake使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/serverbook/">SQL CREATE INDEX 语句</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="sql-create-index-语句">SQL CREATE INDEX 语句</h1>
+<p><strong>CREATE INDEX 语句用于在表中创建索引。</strong></p>
+<p><strong>在不读取整个表的情况下，索引使数据库应用程序可以更快地查找数据。</strong></p>
+<h2 id="索引">索引</h2>
+<p>您可以在表中创建索引，以便更加快速高效地查询数据。</p>
+<p>用户无法看到索引，它们只能被用来加速搜索/查询。</p>
+<p>注释：更新一个包含索引的表需要比更新一个没有索引的表更多的时间，这是由于索引本身也需要更新。因此，理想的做法是仅仅在常常被搜索的列（以及表）上面创建索引。</p>
+<h3 id="sql-create-index-语法">SQL CREATE INDEX 语法</h3>
+<p>在表上创建一个简单的索引。允许使用重复的值：</p>
+<pre><code>CREATE INDEX index_name
+ON table_name (column_name)
+</code></pre><p>注释："column_name" 规定需要索引的列。</p>
+<h3 id="sql-create-unique-index-语法">SQL CREATE UNIQUE INDEX 语法</h3>
+<p>在表上创建一个唯一的索引。唯一的索引意味着两个行不能拥有相同的索引值。</p>
+<pre><code>CREATE UNIQUE INDEX index_name
+ON table_name (column_name)
+</code></pre><h2 id="create-index-实例">CREATE INDEX 实例</h2>
+<p>本例会创建一个简单的索引，名为 "PersonIndex"，在 Person 表的 LastName 列：</p>
+<pre><code>CREATE INDEX PersonIndex
+ON Person (LastName)
+</code></pre><p>如果您希望以<em>降序</em>索引某个列中的值，您可以在列名称之后添加保留字 <em>DESC</em>：</p>
+<pre><code>CREATE INDEX PersonIndex
+ON Person (LastName DESC)
+</code></pre><p>假如您希望索引不止一个列，您可以在括号中列出这些列的名称，用逗号隔开：</p>
+<pre><code>CREATE INDEX PersonIndex
+ON Person (LastName, FirstName)
+</code></pre>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_default.html" class="navigation navigation-prev " aria-label="Previous page: SQL DEFAULT 约束">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_alter_tb.html" class="navigation navigation-next " aria-label="Next page: SQL ALTER TABLE 语句" style="margin-right: 0px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"SQL CREATE INDEX 语句","level":"1.1.7.3.17","depth":4,"next":{"title":"SQL ALTER TABLE 语句","level":"1.1.7.3.18","depth":4,"path":"mysql/sql_alter_tb.md","ref":"mysql/sql_alter_tb.md","articles":[]},"previous":{"title":"SQL DEFAULT 约束","level":"1.1.7.3.16","depth":4,"path":"mysql/sql_default.md","ref":"mysql/sql_default.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"mysql/sql_create_idx.md","mtime":"2019-04-24T05:51:13.432Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:26.755Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./SQL CREATE INDEX 语句 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./SQL CREATE INDEX 语句 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./SQL CREATE INDEX 语句 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./SQL CREATE INDEX 语句 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./SQL CREATE INDEX 语句 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./SQL CREATE INDEX 语句 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./SQL CREATE INDEX 语句 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./SQL CREATE INDEX 语句 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

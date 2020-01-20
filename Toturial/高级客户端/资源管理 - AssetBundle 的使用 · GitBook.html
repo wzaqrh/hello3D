@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>资源管理 - AssetBundle 的使用 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./资源管理 - AssetBundle 的使用 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./资源管理 - AssetBundle 的使用 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./资源管理 - AssetBundle 的使用 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./资源管理 - AssetBundle 的使用 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">资源管理 - AssetBundle 的使用</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="assetbundle-的理解和使用">AssetBundle 的理解和使用</h1>
+<p>AssetBundle 是 Unity 资源动态处理的主要载体，理解 AssetBunle 需要同时理解 Asset 以及 Object 的生命周期。本节就 Asset 、 Object 以及 AssetBundle 的概念以及生命周期进行解析，来进行 AssetBundle 的理解和使用。</p>
+<p><img src="./资源管理 - AssetBundle 的使用 · GitBook_files/Unity的处理机制.png" alt="Unity的处理机制"></p>
+<h2 id="asset--object-以及序列化">Asset , Object 以及序列化</h2>
+<p>在理解 AssetBundle 之前，理解 Unity 是如何处理资源以及序列化是很有必要的事情。</p>
+<p>对于 Unity 来说，Asset 是硬盘上的一个文件，所有导入到 Assets 文件夹下的东西都是一个 Asset。这包括 Unity 内部的原生类型的 Asset，比如 场景、预制件、ScriptableObjects 、 Sprite 等等。还有一些 Asset 属于 Unity 外部的 Asset，比如模型、图片、脚本等等。外部 Asset 需要使用导入器来导入，大部分外部 Asset 可以使用 Unity 自带的各种 Asset 的导入器来导入，如果某种 Asset 不受 Unity 的支持，那么可以使用自定义的导入器导入。</p>
+<p>对于 Unity 来说， UnityEngine.Object（在后面简称为 Object）是一组序列化的数据集，它描述了一个资源的特定实例。比如 <code>Mesh</code> <code>Spirte</code> 等等。一个 Asset 可以包含多个 Object ，也就是 Asset 和 Object 是一对多的关系。在导入资源时，一个资源会转换为一个或者多个 Object （注意这里和实例化游戏对象是有区别的，比如说一个图集里面可以包含多个 Object ，这里的 Object 指的是已经序列化的 Object）。所有的 Object 都可以引用其它的 Object 。</p>
+<p>Asset 是 Unity 对于游戏资源的一个抽象，在设计资源系统时，Unity 希望该系统至少可以做到如下的事情：</p>
+<ul>
+<li>在一个 Asset 被移动的情况下，引用该 Asset 的游戏对象的引用不需要更新。</li>
+<li>Asset 可以在不同的平台下正常使用。</li>
+</ul>
+<p>对于上面的两条基本要求，Unity 使用了 <code>(GUID,LocalID,InstanceID)</code> 的概念来实现。Unity 内部会使用一个叫 <code>PersistentManager</code> 的缓存来维护这个内容。</p>
+<p>GUID 是对 Asset 位置的抽象。在导入一个资源的时候，Unity 会在资源所处的文件夹中创建一个同名的 <code>.meta</code> 文件（后面简称为元文件）。这个文件内部就保存了这个资源的 GUID 。可以使用编辑器来查看这个元文件的内容。在导入资源后，除了生成对应的元文件， Unity 还会在 <code>Library/metadata/</code> 文件夹下将这个 GUID 代表的内容存到这个 GUID 的同名文件中。如果你在 Unity 的项目文件夹中移动了一个 Asset ，那么 Unity 会维护这个 GUID 的一致性，保证引用这个 Asset 内 Object 的其它 Object 的引用不会被破坏。在单纯删除一个资源后，如果再次在同样的目录下导入同样的资源，那么 Unity 会保证这个资源的 GUID 同样是不变的。metadata 文件夹下文件的内容是二进制流无法直接通过编辑器来查看，但是你可以使用 Unity 的命令行工具 binary2text 来将对应的二进制流转换成可读的文本。在对应的文本中你可以找到这个 GUID 所存储的实际路径。所以实际上 Unity 使用了两层抽象层来保证资源路径和引用的无关性。</p>
+<p>LocalID 是对 Object 的抽象。前面说过，一个 Asset 内部可能会有多个 Object 。 LocalID 用于标识这些 Object ，这个是很简单的概念。</p>
+<p>InstanceID 是对引用的抽象。虽然引用一个 Object 理论上可以直接使用 <code>(GUID, LocalID)</code> 来引用，但是比较这个二元组的时间是很长的，效率并不高。因此 Unity 内部的 <code>PersistentManager</code> 会在导入时将 <code>(GUID, LocalID)</code> 转换为一个单一的整数，这个整数就是 <code>InstanceID</code> 。这允许 Unity 可以快速根据 <code>(GUID, LocalID, InstanceID)</code> 来定位一个 Object 。解析一个 InstanceID 可以快速定位一个已经被载入内存的 Object 。而如果这个 Object 没有被载入内存，那么可以通过 <code>InstanceID</code> 定位 <code>(GUID, LocalID)</code> ，然后定位对应的 Asset ，从而快速将 Object 载入内存。</p>
+<p>在启动时，Unity 的缓存会初始化，项目中立即需要的所有 Object 的数据（也就是初始场景中的所有引用）以及 Resource 文件夹内的所有 Object 都会在这个缓存中过一遍。在运行时从导入的 Asset 中加载 Object 时，会更新 Unity 缓存中的条目。</p>
+<h2 id="object-的生命周期">Object 的生命周期</h2>
+<p>Object 载入周期可以说和间接引用是有很大关系的。当一个 InstanceID 被间接引用时， Unity 首先会去缓存中查找这个 InstanceID ，如果找到了（此时是包含有 <code>(GUID, localID)</code> 的），并且这个 InstanceID 所代表的 Object 没有载入内存，那么 Unity 就会将其自动载入内存。如果在缓存中没有找到对应的 InstanceID ，那么这代表 Unity 目前不知道这个 Object 位于何处（可能位于一个 AssetBundle 中，但是并没有载入）。此时这个引用会保留，但是不会加载实际的对象。在编辑器里面会显示这个引用是 <code>(Missing)</code> 的。</p>
+<p>Object 的卸载分为几种情况。首先，在对未使用的 Asset 进行清理时，会对所有这个 Asset 内的 Object 进行卸载。一般这发生在场景切换，以及使用 <code>Resources.UnloadUnusedAssets</code> 这个 API 手动触发时发生。如果 Object 标有 <code>HideFlags.DontUnloadUnusedAsset</code> 或者 <code>HideFlags.HideAndDontSave</code> ，那么这个 Object 也不会被卸载。再者，<code>Resources</code> 文件夹内的 Object 可以使用 <code>Resources.UnloadAsset</code> 手动卸载，但是这只是将这个 Object 从内存中卸载，不会破坏缓存中的 <code>(GUID, LocalID, InstanceID)</code> 。最后，如果一个 Object 是从 AssetBundle 中载入的，那么如果调用了 <code>AssetBundle.Unload</code> ，那么此 Object 的 InstanceID 还是有效的，但是 LocalID 和 GUID 会被破坏掉。</p>
+<h2 id="resources-文件夹">Resources 文件夹</h2>
+<p>Unity 告诫我们尽量不使用 Resources 文件夹。其中一个重要的理由就是，Resources 文件夹内的所有文件的元数据在启动时都会被载入一遍，此过程是不可跳过的。在构建项目时，Resources 文件夹内的所有 Object 会被序列化到一个单独的文件中，在游戏启动过程中，会通过这个文件内的元数据来构建查找树，这个构建过程是超过线性时间的。如果将大量资源放置在 Resources 文件夹中，在低端设备上，构建这个查找树的时间将超过数秒。同时，因为 Resources 文件夹内的 Object 的 <code>(GUID, LocalID, InstanceID)</code> 会常驻在缓存中，即使卸载 Object 也不会移除这个条目。另外，Resources 文件夹内的内容不容易更新，因此在实际项目中只会将内容固定的少量配置内容放置在 Resource 文件夹中。</p>
+<h2 id="assetbundle">AssetBundle</h2>
+<p>AssetBundle实际上是一个资源管理包，Unity 可以使用 AssetBundle 来动态地进行资源的加载和释放。AssetBundle 具有如下优点：</p>
+<ul>
+<li>可以按需加载和释放 Asset 。</li>
+<li>自带压缩算法，可以按需定制，减少包体容量。</li>
+<li>自带版本更新内容，可以进行增量更新。</li>
+<li>内部包含了对 Object 的引用关系。</li>
+</ul>
+<p>AssetBundle 包含了两个部分：数据头以及数据段。数据头内包含了 AssetBundle 的元数据信息，比如它的标识符、压缩类型、manifest 等等。这里的 manifest 是一个以 Object 名称作为键的查找表，用以指定 AssetBundle 中给定 Object 的位置。数据段内包含了序列化 Asset 生成的原始数据，内容会依据压缩算法变化。</p>
+<h3 id="assetbundle-压缩方法">AssetBundle 压缩方法</h3>
+<p>AssetBundle 支持的压缩方法包括 LZMA 压缩、LZ4 压缩和不压缩。如果你指定了 LZMA 作为压缩方法，那么 Unity 会压缩 AssetBundle 内部所有的序列化资源为字节流，这是 Unity 内部支持的最省空间的压缩方式，但是在解压时需要将这个 AssetBundle 整个解压一次，在运行时获取资源的效率较低。如果你指定了 LZ4 作为压缩方法，那么它的压缩后的大小会较 LZMA 稍微大一些，但是在解压缩时不需要将整个 AssetBundle 解压缩。因为 LZ4 是基于块的压缩方法，在解压时只需要解压包含想要提取的 Object 所在的块即可。这让使用 LZ4 的压缩方法的 AssetBundle 可以在较小包大小的情况下加快对资源的读取顺序。</p>
+<h3 id="载入-assetbundle">载入 AssetBundle</h3>
+<p>AssetBundle 可以使用如下的 API 进行加载：</p>
+<ul>
+<li><code>AssetBundle.LoadFromMemory</code></li>
+<li><code>AssetBundle.LoadFromFile</code></li>
+<li><code>UnityWebRequest</code> 以及 <code>DownloadHandlerAssetBundle</code></li>
+<li><code>WWW.LoadFromCacheOrDownload</code></li>
+</ul>
+<p>前两个是本地读取用的，后两个是网络读取用的。因为项目一般会使用自定义的下载程序来进行资源的增量更新，因此后两个 API 的使用范围不多。这里重点关注本地的两个读取 AssetBundle 用 API 。<code>LoadFromMemory</code> 会读取 AssetBundle 到用户指定的字节数组中，这会导致同一份 Object 的字节流反复读取三次，一次是调用这个方法时方法内的一个缓存，一次是将缓存内的字节流复制到用户自定的字节数组中，还有一次是将 Object 读取到内存中使用。因为有额外的内存消耗，所以一般不推荐使用这个方法读取 AssetBundle 。但是，如果需要加密 AssetBundle，那么可以考虑使用 <code>LoadFromMemory</code> 来进行解密。这样可以将加密后的 AssetBundle 的二进制流经过解密处理后，再使用 <code>LoadFromMemory</code> 将其转换为 AssetBundle 。 <code>LoadFromFile</code> 用于从本地读取一个 AssetBundle 文件。因为这个方法仅会将 AssetBundle 的数据头加载到内存中，因此在调用方法读取这个 AssetBundle 内的 Object 时，Object 会按需加载，不会消耗多余的内存。需要注意的是，在 Unity Editor 中，使用 <code>LoadFromFile</code> 会将整个 AssetBundle 加载到内存中，这可能会对项目的性能分析带来错误的影响，比如误出现内存峰值。就速度和内存使用来说， <code>LoadFromFile</code> 是最有效的。</p>
+<p>从 AssetBundle 载入 Object 的方法详见 AssetBundle 的脚本参考，这里不再赘述。在异步载入 Object 时，Unity 会在工作线程中并行进行反序列化和处理，然后调用这个 Object 的 <code>Awake</code> 方法，此 Object 会在下一帧后被其它 Object 使用。</p>
+<h3 id="assetbundle-的依赖关系">AssetBundle 的依赖关系</h3>
+<p>在编辑阶段，AssetBundle 之间的依赖关系是通过 <code>AssetDatabase</code> 和 <code>AssetImporter</code> 来管理的。其中 <code>AssetDatabase</code> 可以用来查询 AssetBundle 的依赖项， <code>AssetImporter</code> 可以用来访问和修改依赖项。在运行时，Unity 可以使用基于 <code>ScriptableObject</code> 的 <code>AssetBundleManifest</code> 来加载 AssetBundle 的依赖关系。</p>
+<p>前面说过，Object 的载入和 InstanceID 是密切相关的，只要 <code>(GUID, LocalID, InstanceID)</code> 存在于 <code>PersistentManager</code> 中，那么 Object 就可以被按需载入。因此 Object 的载入顺序不重要。但是如果你没有载入 AssetBundle ，那么对应的 Object 的 InstanceID 就不会存在于缓存中，此时 Object 是无法按需载入的。因此，在载入一个 Object 之前，需要保证它所依赖的其它 Object 也位于缓存记录中。当这些被依赖的 Object 位于 AssetBundle 中时， AssetBundle 之间就产生了依赖关系。你需要保证的是，在正式间接引用一个 Object 时，它所依赖的 Object 所处的 AssetBundle 已经被载入。 AssetBundle 并不会主动载入依赖的 AssetBundle ，这需要你手动来管理载入顺序。</p>
+<h3 id="assetbundle-的卸载">AssetBundle 的卸载</h3>
+<p>在使用 <code>AssetBundle.Unload</code> 时，参数列表中会有一个布尔值 <code>unloadAllLoadedObject</code> ，该值决定了 AssetBundle 在卸载时对于已经载入内存的 Object 的行为。 <code>true</code> 代表卸载 AssetBundle 内所有的 Object，这会破坏 <code>PersistentManager</code> 里面的对应记录，并删除当前这个 AssetBundle 包含的所有 Object ，即使它被载入了内存。<code>false</code> 的话则是会保留 <code>PersistentManager</code> 里面对应于 Object 的 InstanceID ，并保留当前已经被载入内存的 Object 。<code>AssetBundle.Unload(false)</code> 会导致在下一次载入这个 AssetBundle 时，对应的 Object 会生成新的 InstanceID ，与驻留在内存中的 Object 副本的 InstanceID 不同，这样就造成了在内存中同一份 Object 具有两个不同的副本，这一般是错误的行为。一般来说，项目应该使用 <code>AssetBundle.Unload(true)</code> 来避免重复。你可以：</p>
+<ul>
+<li>在项目的某些明确定义的时间点来卸载 AssetBundle ，比如在进入另一个关卡时、载入地图时。</li>
+<li>维护对 Object 的引用计数，仅在 AssetBundle 内所有 Object 都处于未使用的状态下卸载 AssetBundle 。</li>
+</ul>
+<p>如果一定要使用 <code>AssetBundle.Unload(false)</code> ，那么你需要以下面的方式来卸载 Object ：</p>
+<ul>
+<li>消除场景中对不需要的 Object 的所有引用，然后销毁所有未使用的对象。</li>
+<li>以非叠加的方式加载场景。这会立即销毁当前场景内使用的所有 Object 。</li>
+</ul>
+<p>下面这两个图比较形象地解释了 AssetBundle 的加载和卸载。图比较老，<code>AssetBundle.CreateFromMemory</code> 在 Unity 5.3.3 之后被更改为 <code>AssetBundle.LoadFromMemory</code> 系列，但是不影响理解。</p>
+<p><img src="./资源管理 - AssetBundle 的使用 · GitBook_files/AssetBundle的加载与卸载01.jpg" alt="AssetBundle的加载与卸载01"></p>
+<p><img src="./资源管理 - AssetBundle 的使用 · GitBook_files/AssetBundle的加载与卸载02.jpg" alt="AssetBundle的加载与卸载02"></p>
+<h3 id="assetbundle-name-与-assetbundle-variant">AssetBundle Name 与 AssetBundle Variant</h3>
+<p>在打包 AssetBundle 时，AssetBundle 会找到 Object 的所有依赖关系，以确定需要包含到 AssetBundle 的 Object 的集合。如果一个 Object O没有显式指定它需要被打包进的 AssetBundle （这里指指定 AssetBundle Name），那么在打包依赖这个 Object 的 Object A 以及 Object B 时，就会同时将 Oject O 的两个副本拷贝到 Object A 以及 Object B 分别所在的 AssetBundle 中。这会导致 AssetBundle 包含多余的 Object ，包体变大。所以在打包Object 到 AssetBundle 前需要显式指定 AssetBundle Name 。这给系统带来一定的复杂性，需要手动维护 AssetBundle 之间的依赖关系。</p>
+<p>创建 AssetBundle Variant 的目的是让应用程序可以根据运行环境调整自己的内容。AssetBundle Variant 允许在不同的 AssetBundle 中的两个不同的 Object 在载入和使用时显示为“相同”的Object，概念上可以理解为通过让两个 Object 共享 GUID 和 LocalID 来实现引用的统一性。在运行时，通过加载适当的 AssetBundle Variant ，可以让 Object 被跨平台引用时保证 Object 可以针对不同平台进行配置，而在引用时保持资源的一致性。</p>
+<p>AssetBundle Variant 的局限性在于，它要求 Variant 从不同的 Asset 中构建，即使这些 Asset 之间只相差一些导入设置，比如纹理的压缩算法等。两个具有不同的 Variant 的 Asset 必须是两个完全不同的 Asset ，序列化到磁盘上后就是两个文件。这会让大型项目的管理变得复杂，因为你需要保存同一资源的多个副本。在你修改资源的内容时，你也要同步更新该资源的所有副本，目前这个问题 Unity 没有内置的解决方法。这个问题可以这样得到处理：构建 AssetBundle 后，添加 AssetBundle 的后缀来模拟 AssetBundle Variant ，在下载和载入时根据后缀来载入不同的 AssetBundle 。在构建 AssetBundle 时，需要使用代码程序式地改变对应 Asset 的导入器设置。</p>
+<h2 id="重点总结">重点总结</h2>
+<ul>
+<li>AssetBundle 内包含对 Object 的依赖关系，可以内部维护对 Object 的引用。</li>
+<li>Object 在内部被映射为 <code>(GUID,LocalID,InstanceID)</code> 。在引用时使用的是 <code>InstanceID</code> 。Object 在被间接引用或者手动载入时会查询内部映射，如果存在对应的映射且 Object 没有载入内存，那么 Unity 会自动载入此 Object 。如果没有内部映射，那么Unity不会载入，编辑器显示 Missing ，强行引用会出错。因此 Object 可以通过 InstanceID 来按需加载。</li>
+<li>AssetBundle 和 Resources 文件夹下的资源包在载入时实际上就是构建 <code>(GUID,LocalID,InstanceID)</code> 的过程。根据需要，在卸载对应 AssetBundle 时可能会导致映射断开（在要求 Object 继续保持在内存中时），此时再次载入 AssetBundle 会造成资源出现无用的内存拷贝。</li>
+<li>AssetBundle 的载入方法重要的有 <code>AssetBundle.LoadFromMemory</code> 和 <code>AssetBundle.LoadFromFile</code> 。其中 <code>LoadFromMemory</code> 会造成多次内存拷贝，效率较低。 <code>LoadFromFile</code> 则只载入 AssetBundle 的数据头，可以按需载入，效率最高。<code>LoadFromMemory</code> 的用处是可以自定义 Asset 或者 AssetBundle 的加密方法。</li>
+<li>在导入 Asset 到 AssetBundle 时，需要指定这个 Asset 的 AssetBundle 的名字。这样的显式指定可以完全避免资源在不同 AssetBundle 的重复拷贝。</li>
+<li>AssetBundle Variant 可以很方便地让资源在不同的架构、平台下显现不同的效果。比如多语言支持、平台特定的资源。但是缺陷是 AssetBundle Variant 会造成对同一份源资源文件的多次构造，这可以通过自定义构建方法来避免。</li>
+<li>Resources 文件夹内存放过多资源会造成应用程序在启动时卡顿数秒。这个无法绕过，因此尽量不要将资源存放在 Resources 文件夹中。</li>
+</ul>
+<h2 id="assetbundle-压缩方法参考链接">AssetBundle 压缩方法参考链接</h2>
+<p>这里添加一些关于描述 AssetBundle 官方支持的压缩方法以的讲解的文档。由于 AssetBundle 支持使用未压缩方法读取到内存，因此这意味着可以使用自定义压缩方法和加密方法来对 AssetBundle 进行压缩（而官方API 支持的两种压缩格式不能直接加密）。这里主要提及了 GZIP 压缩方法以及应用的链接。还提及了一些网上针对 AssetBundle 压缩取舍的讨论的链接。</p>
+<ul>
+<li><a href="https://blog.csdn.net/tc3819171/article/details/80317113" target="_blank">Assetbundle使用LAMA还是LZ4的一些注意事项</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/37258259" target="_blank">关于 LZMA 和 LZ4 压缩的疑惑解析</a></li>
+<li><a href="https://forum.unity.com/threads/choosing-the-right-asset-bundle-compression.389650/" target="_blank">选择正确的 AssetBundle 压缩方法</a></li>
+<li><a href="https://gamedev.stackexchange.com/questions/35812/how-do-you-pack-resources-in-a-game-when-you-have-too-many-of-them" target="_blank">如何打包资源（包含对资源压缩的讨论）</a></li>
+<li><a href="https://yq.aliyun.com/articles/347982" target="_blank">gzip探索</a></li>
+<li><a href="http://gad.qq.com/article/detail/35193" target="_blank">使用GZIP压缩、解压文件和打包文件夹</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html" class="navigation navigation-prev " aria-label="Previous page: 动画 - UV 动画、顶点动画的原理与应用">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html" class="navigation navigation-next " aria-label="Next page: UI - 常用插件概述" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"资源管理 - AssetBundle 的使用","level":"1.15","depth":1,"next":{"title":"UI - 常用插件概述","level":"1.16","depth":1,"path":"book/User_Interface/PlugIn.md","ref":"book/User_Interface/PlugIn.md","articles":[]},"previous":{"title":"动画 - UV 动画、顶点动画的原理与应用","level":"1.14","depth":1,"path":"book/Grass_Animation.md","ref":"book/Grass_Animation.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/Asset_Bundle.md","mtime":"2019-05-05T03:07:42.956Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./资源管理 - AssetBundle 的使用 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

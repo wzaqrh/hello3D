@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>动画 - UV 动画、顶点动画的原理与应用 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/seniorlcient/book/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html"><link rel="next" href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="RenderPipeline.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/RenderPipeline.html">
+            
+                    
+                    渲染 - 熟悉前向渲染、延迟渲染管线流程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="LightingModel.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/LightingModel.html">
+            
+                    
+                    渲染 - 熟悉各种光照模型原理及实现（PBR、次表面散射、各向异性等）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="PostProcess.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PostProcess.html">
+            
+                    
+                    渲染 - 熟悉各种后处理效果实现方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="GI.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GI.html">
+            
+                    
+                    渲染 - 了解全局光照
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="GeometryInstancing.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/GeometryInstancing.html">
+            
+                    
+                    优化 - Geometry Instancing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#gpu%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - GPU优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="Profiling.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Profiling.html#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96">
+            
+                    
+                    优化 - 其他优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Algorithm.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Algorithm.html">
+            
+                    
+                    算法 - 基础算法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="TerrainRendering.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/TerrainRendering.html">
+            
+                    
+                    地形 - 地形绘制
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.11" data-path="PathFinding.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/PathFinding.html">
+            
+                    
+                    寻路 - 导航网格寻路
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.12" data-path="QuadtreeAndOctreeSceneManagent.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/QuadtreeAndOctreeSceneManagent.html">
+            
+                    
+                    场景管理 - 四叉树、八叉树
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.13" data-path="3D_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html">
+            
+                    
+                    动画 - 骨骼动画及其优化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.14" data-path="Grass_Animation.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html">
+            
+                    
+                    动画 - UV 动画、顶点动画的原理与应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.15" data-path="Asset_Bundle.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html">
+            
+                    
+                    资源管理 - AssetBundle 的使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.16" data-path="User_Interface/PlugIn.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/PlugIn.html">
+            
+                    
+                    UI - 常用插件概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.17" data-path="User_Interface/MainstreamTechnology.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/MainstreamTechnology.html">
+            
+                    
+                    UI - 主流技术概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.18" data-path="User_Interface/fairy_gui.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/User_Interface/fairy_gui.html">
+            
+                    
+                    UI - FairlyGUI简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.19" data-path="Lua.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Lua.html">
+            
+                    
+                    脚本语言简介及应用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.20" data-path="Architecture.html">
+            
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Architecture.html">
+            
+                    
+                    架构设计模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/seniorlcient/book/Grass_Animation.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/seniorlcient/">动画 - UV 动画、顶点动画的原理与应用</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="《uv动画、顶点动画的原理与应用》">《UV动画、顶点动画的原理与应用》</h1>
+<h3 id="3d动画的两种常用实现方式的原理">3D动画的两种常用实现方式的原理</h3>
+<p>3D模型的顶点格式中一般包含两部分信息：贴图数据，顶点数据。贴图数据一般是通过UV进行描述的，而顶点数据则通过三维坐标进行描述。因此，不难得出3D中最基础的两种动画实现方式，UV动画与顶点动画。</p>
+<h4 id="uv动画——本质通过改变贴图">UV动画——本质通过改变贴图</h4>
+<p>UV动画，主要用于序列帧、模拟无限重复的背景让模型顶点对应的UV随时间变化，使其对应纹理像素不断随时间变化但是无法达到让物体“变形”的效果。UV动画是一种常用的渲染技巧，经常用来描述水的流动、霓虹灯的闪烁等。实现的原理就是动态修改贴图的UV坐标，使物体表面产生变化。</p>
+<p>说到UV动画就不得不多说一点贴图了。我们知道，贴图是覆盖在模型表面用来描述模型表面细节的2D图片，那么贴图是怎么覆盖到模型上的呢？我们知道模型是由很多顶点组成的，这些顶点，三个一个组组成了若干三角形，正是这些三角形构成了模型的表面(三个点确定一个面嘛)，这样的三个点每一个都有一组贴图坐标，表示贴图上的某个点，这样三组贴图坐标就可以贴图上的一个区域，这个区域就是将来贴在这个三角形的部分。这里的贴图坐标也叫UV坐标，是一组[0,1]之间的二维向量，以贴图左上角为(0,0)点，水平方向向右，水平方向向下增长。</p>
+<h4 id="顶点动画——本质通过改变顶点坐标">顶点动画——本质通过改变顶点坐标</h4>
+<p>顶点动画，原理和UV动画有相同的地方，但是顶点动画可以让物体动起来的同时，达到变形的效果其主要原理是在 顶点着色器中对模型的顶点进行偏移，再将偏移后的顶点位置输出到片元着色器中。与改变mesh顶点不同的是，在gpu中更改顶点信息的效率远高于在cpu中改变mesh的数据。这种渲染技巧普遍用于模拟自然界物体波动，如水流、草地、火焰等效果。</p>
+<h4 id="uv动画顶点动画">UV动画+顶点动画</h4>
+<p>两种动画的同时使用，在粒子特效系统中大量存在。很多特效都是控制基础面片在改变UV的同时拉升、缩放顶点。当这样的基础片面（粒子）很多时，表现出的效果是惊人的。</p>
+<h4 id="变形目标动画（morph-target-animation）——本质还是在控制顶点">变形目标动画（Morph Target Animation）——本质还是在控制顶点</h4>
+<p>仅制作相对较少的固定极端姿势（Extream Pose）。在运行时把两个或以上的这些姿势混合，就能生成动画。变形目标技术通常用于面部动画（Facial Animation），因为人脸具有非常复杂的解剖结构。</p>
+<h3 id="uv动画与顶点动画的应用">UV动画与顶点动画的应用</h3>
+<p>​    下面我们通过一个具体的应用（草原效果）（图1），目的是通过uv动画与顶点动画，使高密度的草地配合适当的“风”在视觉效果上营造“风吹麦浪”的效果，使草地更具整体感。</p>
+<p><img src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/2.jpg" alt=""></p>
+<p>草原系统（图1）</p>
+<h3 id="草块的产生（顶点生成）">草块的产生（顶点生成）</h3>
+<p><img src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/7.png" alt=""></p>
+<p>​    在每个草块刷新时，遍历所属该草块的采样点（通过预设的高度值和密度值）。在每个采样点<strong><em>圆形范围</em></strong>（配置radius，radius的大小会决定与相邻采样点交叉范围，越小则草地越规则）内生成相应<strong><em>数量</em></strong>（密度因数 <em> 配置数量 </em> 渲染质量等级因数 + 随机值）个不同<strong><em>大小</em></strong>（密度因数 = clamp(密度/密度百分比，配置草体最小值，float.MaxValue))的草个体mesh。这种大小设置的原因是在草地与非草地边缘，草体的大小会随<strong><em>权重图通道过度</em></strong>而变化，自然的形成地貌分割。设置的最小值则为了不让草体过小。</p>
+<p>​    上面的过程可以获得草体的生成数量、大小。接下来生成mesh的同时我们则在采样点的radius范围内随机草体位置，并加上采样点的世界坐标，来获得草体mesh生成时所需的<strong><em>世界坐标偏移量</em></strong>（worldOffset）。生成草体的mesh时我们以quad为例：</p>
+<p><img src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/8.png" alt=""></p>
+<p>​    草体4个顶点在采样点坐标系的坐标应该是：</p>
+<p>​                                     (-width,height)                (width,height) </p>
+<p>​                                     (-width,0)                          (width,0)</p>
+<p>​         我们需要对草体的方向进行随机，所以我们对向量Dir = -width进行旋转。形成随机方向： </p>
+<p>NewDir = Vector3.SlerpUnclamped(new Vector3(-width,0,0), new Vector3(width,0,0),Random.Range(-1f,1f));</p>
+<p>​         <em>则新的顶点世界坐标为：</em></p>
+<p>​                   <em>a:      v3(-dir.x,height,-dir.z) + worldOffset       b:      v3(dir.x,height,dir.z) + worldOffset</em></p>
+<p>​                   <em>c:      v3(-dir.x, 0f, -dir.z) +</em> worldOffset           d:      v3(dir.x,0f,dir.z) + worldOffset</p>
+<p>​         1、按照顺序（c,a,b,d）将顶点坐标添加到mesh的顶点List中。</p>
+<p>​         2、给mesh添加顶点索引(m_Mesh.SetIndices(indexList.ToArray(),<strong><em>MeshTopology.Quads</em></strong>,0);)。使用<strong><em>MeshTopology.Quads</em></strong>类型的拓扑结构可以不用自己计算索引顺序，这也是上面添加顶点时候使用顺时针顺序（c,a,b,d）的原因。</p>
+<p>​         3、添加草体顶点法线方向，这里默认可以用（Vector3.up）。</p>
+<p>​         4、添加顶点色（从预设置的颜色数组中选取一种颜色，如果设置了特殊区域颜色，可以在这里进行区域判定，是否使用特殊颜色）。这里我们设置草体颜色的时候alpha通道没有用，那么正好存储一个<strong><em>随机种子</em></strong>在alpha上，这个种子不参与颜色计算，用来在shader计算中当做随机值使用（风力作用大小，力场作用大小等需要随机数的地方，来<strong><em>减小gpu开销</em></strong>）。每个草体的世界偏移量都是随机的，那么我们就用这个特性来生成草体种子：</p>
+<pre><code class="lang-c#">Color c = GetColor(SpecRange(worldPos));
+float alpha = vertsList[i].x * 100.0f + vertsList[i].z;
+color.a = alpha – Mathf.Floor(alpha);
+Color32 c32 = c;
+colors32.Add(c32);
+m_Mesh.color32 = colors32.ToArray();
+</code></pre>
+<p>5、设置顶点uv，由于面片为quad，所以顺序添加（0,0）、（0,1）、（1,1）、（1,0）即可。</p>
+<p>6、将新的mesh设置给草块的MeshFilter即可。（记得Destroy原来的meshFilter.mesh）</p>
+<h4 id="麦浪效果（顶点动画的控制方法）">麦浪效果（顶点动画的控制方法）</h4>
+<p>思路：在顶点着色器中对顶点的世界坐标进行偏移，制造风吹的效果。</p>
+<p>​        提到“浪”则需要函数的波形来模拟该现象，由于没有海浪那么复杂。那么我们可以通过一个<strong>sin</strong>函数来解决这个问题，如果设备性能允许，也可以考虑用更复杂的波形来模拟，在此只介绍一个简单的sin函数。</p>
+<p>​         <strong><em>经验公式:</em></strong></p>
+<pre><code class="lang-c#">//取得顶点的世界坐标
+float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
+//计算x轴偏移值
+float xOffset = (pow(sin(_Time.y * 1.5f + pos.x / 6.0f), 3) / 1.5f – 0.3f) * _GrassWindFactor                    * uv.y * uv.y;
+//改变y轴高度，避免草被拉长
+float yOffset = sqrt(y * y – xOffset * xOffset);
+//计算位移后结果
+float3 p = float3(xOffset, (yOffset – y) * 0.75f , 0);
+//转换到齐次坐标
+o.pos = mul(UNITY_MATRIX_VP,float4(p,1));
+</code></pre>
+<p>​    首选要计算顶点的<strong>xOffset</strong>，<strong>sin</strong>基本波形的基础上，由时间<strong>_Time.y</strong>驱动，顶点的坐标<strong>(pos.x)</strong>影响函数的周期内阶段，这样同一时间内不同位置的草处于不同的波形阶段。<strong>3</strong>次方是为了将函数图像变得陡峭的同时又不影响朝向。除以<strong>1.5</strong>使函数范围变小并减去<strong>0.3</strong>使得函数图像整体向<strong>y</strong>轴反方向偏移，造成草在摆动过程中的不对称，最后乘以风力因数和<strong>uv.y^2</strong>，这样做要建立在草的贴图是由下到上的基础上，意思是越靠近草的顶端则风力影响越大，平方处理使得影响非线性。最后根据勾股定理求得<strong>yOffset</strong>的高度变化，保持草整体长度不变。</p>
+<p>​    <strong><em>xOffset</em></strong>由时间变化驱动的函数图像：    </p>
+<p><img src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/9.png" alt=""></p>
+<p>​    将图像旋转90度则更好理解草“左右”摆动的样子：</p>
+<p><img src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/10.png" alt=""></p>
+<p>​    公式中只模拟了<strong>x</strong>轴方向的风，如果有风向需求可以将点<strong>p</strong>与原始位置构成的向量做空间变换，对矢量进行旋转后叠加到其他波动结果中。建议将代码封装到<strong>cginc</strong>或者<strong>cg</strong>文件中，方便波形被其他类型渲染复用。</p>
+<h4 id="草地生长过渡（顶点生成的细节控制）">草地生长过渡（顶点生成的细节控制）</h4>
+<p>​    向<strong>shader</strong>中传入摄像机或者主角的世界坐标，计算草与玩家距离后在接近可视边缘一定范围内做草地高度的差值运算，如下图所示绿色为正常渲染的草地范围，红色为过度差值范围，红色以外为不可见范围。在红色范围内随着远离摄像机坐标，草的高度逐渐降低。这种做法是为了草在视野内的自然出现，不会闪现出来。</p>
+<p>​    具体做法则是设置一个过渡范围dis，dis应小于草地的边长/2。在草地的顶点渲染中计算顶点与人物（或摄像机）的距离，然后与设置的dis范围对比，如果在范围内，则差值出当前顶点的应有高度：lerp（0， 草体高度， curDis/dis）。实现草地边缘的高度过渡，营造出草地逐渐生长出来的效果。</p>
+<p><img src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/11.png" alt=""></p>
+<h3 id="uv动画控制细节">UV动画控制细节</h3>
+<p>UV动画在渲染中有多重用途，我们这里主要使用的是帧动画，下面介绍一下使用目的。支持uv动画的功能后，草片内部的摆动以及每根草之间的交互可以由美术来完成，整体来看草原受到风的影响，同时局部范围内每根草之间还有交互，效果看起来很好，同时性能开销不大。</p>
+<p>实现上的一点技巧就是之前我们在设置顶点颜色的时候，在<strong>alpha</strong>通道上设置了一个随机值，将这个随机值运用到帧动画里，这样每个草就会处于<strong>uv</strong>动画的不同阶段，使整片草原看起来无序且自然。</p>
+<p>具体实现：</p>
+<p>在草片对贴图的采样过程中，通过设置的序列帧行数、列数、频率、初始帧（通过alpha的通道的随机值生成）等因素，并由时间作为驱动计算出uv的采样区间。建议设置帧率为24，会比较流程，又不会过多的浪费贴图空间。</p>
+<h3 id="参考资料链接">参考资料链接</h3>
+<p>海底水草动画：<a href="https://blog.csdn.net/shenmifangke/article/details/70768092" target="_blank">https://blog.csdn.net/shenmifangke/article/details/70768092</a></p>
+<p>Unity Mesh：<a href="https://docs.unity3d.com/Manual/class-Mesh.html" target="_blank">https://docs.unity3d.com/Manual/class-Mesh.html</a></p>
+<p>Unity Blend Shape：<a href="https://docs.unity3d.com/Manual/BlendShapes.html" target="_blank">https://docs.unity3d.com/Manual/BlendShapes.html</a></p>
+<p>Particle System：<a href="https://en.wikipedia.org/wiki/Particle_system" target="_blank">https://en.wikipedia.org/wiki/Particle_system</a></p>
+<p>Unity Particle System：<a href="https://docs.unity3d.com/Manual/PartSysWhatIs.html" target="_blank">https://docs.unity3d.com/Manual/PartSysWhatIs.html</a></p>
+<p>Skinned Morph Targets：<a href="http://wiki.unity3d.com/index.php/Skinned_Morph_Targets" target="_blank">http://wiki.unity3d.com/index.php/Skinned_Morph_Targets</a></p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/3D_Animation.html" class="navigation navigation-prev " aria-label="Previous page: 动画 - 骨骼动画及其优化">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/seniorlcient/book/Asset_Bundle.html" class="navigation navigation-next " aria-label="Next page: 资源管理 - AssetBundle 的使用" style="margin-right: 17px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"动画 - UV 动画、顶点动画的原理与应用","level":"1.14","depth":1,"next":{"title":"资源管理 - AssetBundle 的使用","level":"1.15","depth":1,"path":"book/Asset_Bundle.md","ref":"book/Asset_Bundle.md","articles":[]},"previous":{"title":"动画 - 骨骼动画及其优化","level":"1.13","depth":1,"path":"book/3D_Animation.md","ref":"book/3D_Animation.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"book/Grass_Animation.md","mtime":"2019-05-05T03:07:42.961Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:09.001Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./动画 - UV 动画、顶点动画的原理与应用 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>

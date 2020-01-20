@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)https://gitbook.corp.sdo.com/serverbook/data-structure.html -->
+<html lang=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+        <title>数据结构 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="./数据结构 · GitBook_files/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="./数据结构 · GitBook_files/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="./数据结构 · GitBook_files/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="./数据结构 · GitBook_files/website(1).css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://gitbook.corp.sdo.com/serverbook/gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="https://gitbook.corp.sdo.com/serverbook/gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    
+    
+
+    <style></style><link rel="prev" href="https://gitbook.corp.sdo.com/serverbook/multi-thread.html"><link rel="next" href="https://gitbook.corp.sdo.com/serverbook/mysql/"></head>
+    <body>
+        
+<div class="book without-animation with-summary font-size-2 font-family-1">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search">
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/">
+            
+                    
+                    目录
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.1" data-path="linux.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/linux.html">
+            
+                    
+                    Linux使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.2" data-path="gdb.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/gdb.html">
+            
+                    
+                    gdb使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.3" data-path="programming.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/programming.html">
+            
+                    
+                    编程语言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.4" data-path="stl.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/stl.html">
+            
+                    
+                    STL
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.5" data-path="multi-thread.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/multi-thread.html">
+            
+                    
+                    多线程编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.1.6" data-path="data-structure.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/data-structure.html">
+            
+                    
+                    数据结构
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7" data-path="mysql/">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/">
+            
+                    
+                    数据库
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.7.1" data-path="mysql/2nf.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/2nf.html">
+            
+                    
+                    第二范式
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.2" data-path="mysql/introduction.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/introduction.html">
+            
+                    
+                    mysql 数据类型
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3" data-path="mysql/sql_README.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_README.html">
+            
+                    
+                    基本 sql 语句
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.7.3.1" data-path="mysql/sql_select.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_select.html">
+            
+                    
+                    SQL SELECT 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.2" data-path="mysql/sql_where.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_where.html">
+            
+                    
+                    SQL WHERE 子句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.3" data-path="mysql/sql_and_or.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_and_or.html">
+            
+                    
+                    SQL AND &amp; OR 运算符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.4" data-path="mysql/sql_order_by.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_order_by.html">
+            
+                    
+                    SQL ORDER BY 子句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.5" data-path="mysql/sql_insert.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_insert.html">
+            
+                    
+                    SQL INSERT INTO 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.6" data-path="mysql/sql_update.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_update.html">
+            
+                    
+                    SQL UPDATE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.7" data-path="mysql/sql_delete.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_delete.html">
+            
+                    
+                    SQL DELETE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.8" data-path="mysql/sql_like.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_like.html">
+            
+                    
+                    SQL LIKE 操作符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.9" data-path="mysql/sql_wildcard.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_wildcard.html">
+            
+                    
+                    SQL 通配符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.10" data-path="mysql/sql_between.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_between.html">
+            
+                    
+                    SQL BETWEEN 操作符
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.11" data-path="mysql/sql_create_db.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_db.html">
+            
+                    
+                    SQL CREATE DATABASE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.12" data-path="mysql/sql_create_tb.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_tb.html">
+            
+                    
+                    SQL CREATE TABLE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.13" data-path="mysql/sql_not_null.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_not_null.html">
+            
+                    
+                    SQL NOT NULL 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.14" data-path="mysql/sql_unique.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_unique.html">
+            
+                    
+                    SQL UNIQUE 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.15" data-path="mysql/sql_primary_key.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_primary_key.html">
+            
+                    
+                    SQL PRIMARY KEY 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.16" data-path="mysql/sql_default.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_default.html">
+            
+                    
+                    SQL DEFAULT 约束
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.17" data-path="mysql/sql_create_idx.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_create_idx.html">
+            
+                    
+                    SQL CREATE INDEX 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.18" data-path="mysql/sql_alter_tb.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_alter_tb.html">
+            
+                    
+                    SQL ALTER TABLE 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.19" data-path="mysql/sql_auto_incr.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_auto_incr.html">
+            
+                    
+                    SQL AUTO INCREMENT 字段
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.7.3.20" data-path="mysql/sql_group_by.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/sql_group_by.html">
+            
+                    
+                    SQL GROUP BY 语句
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.8" data-path="networking-programming.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/networking-programming.html">
+            
+                    
+                    网络编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.9" data-path="game-programming.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/game-programming.html">
+            
+                    
+                    游戏编程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.10" data-path="cmake.html">
+            
+                <a href="https://gitbook.corp.sdo.com/serverbook/cmake.html">
+            
+                    
+                    CMake使用
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com/" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <a class="btn pull-left js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/serverbook/data-structure.html#"><i class="fa fa-align-justify"></i></a><div class="dropdown pull-right js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Share" href="https://gitbook.corp.sdo.com/serverbook/data-structure.html#"><i class="fa fa-share-alt"></i></a><div class="dropdown-menu dropdown-left"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-5 ">Facebook</button><button class="button size-5 ">Google+</button><button class="button size-5 ">Twitter</button><button class="button size-5 ">Weibo</button><button class="button size-5 ">Instapaper</button></div></div></div><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/serverbook/data-structure.html#"><i class="fa fa-facebook"></i></a><a class="btn pull-right js-toolbar-action" aria-label="" href="https://gitbook.corp.sdo.com/serverbook/data-structure.html#"><i class="fa fa-twitter"></i></a><div class="dropdown pull-left font-settings js-toolbar-action"><a class="btn toggle-dropdown" aria-label="Font Settings" href="https://gitbook.corp.sdo.com/serverbook/data-structure.html#"><i class="fa fa-font"></i></a><div class="dropdown-menu dropdown-right"><div class="dropdown-caret"><span class="caret-outer"></span><span class="caret-inner"></span></div><div class="buttons"><button class="button size-2 font-reduce">A</button><button class="button size-2 font-enlarge">A</button></div><div class="buttons"><button class="button size-2 ">Serif</button><button class="button size-2 ">Sans</button></div><div class="buttons"><button class="button size-3 ">White</button><button class="button size-3 ">Sepia</button><button class="button size-3 ">Night</button></div></div></div><h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="https://gitbook.corp.sdo.com/serverbook/">数据结构</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="常见数据结构和算法">常见数据结构和算法</h2>
+<h3 id="数据结构">数据结构</h3>
+<h4 id="序列">序列</h4>
+<p>数学上，序列是被排成一列的对象。在计算机中，一般指一块连续的内存。std::array和std::vector都属于序列。</p>
+<h4 id="栈">栈</h4>
+<p>栈（stack）又名堆栈，它是一种运算受限的线性表。其限制是仅允许在表的一端进行插入和删除运算。这一端被称为栈顶，相对地，把另一端称为栈底。向一个栈插入新元素又称作进栈、入栈或压栈，它是把新元素放到栈顶元素的上面，使之成为新的栈顶元素；从一个栈删除元素又称作出栈或退栈，它是把栈顶元素删除掉，使其相邻的元素成为新的栈顶元素。</p>
+<h4 id="队列">队列</h4>
+<p>队列（queue）是一种特殊的<a href="https://baike.baidu.com/item/%E7%BA%BF%E6%80%A7%E8%A1%A8" target="_blank">线性表</a>，特殊之处在于它只允许在表的前端（front）进行删除操作，而在表的后端（rear）进行插入操作，和栈一样，队列是一种操作受限制的线性表。进行插入操作的端称为队尾，进行删除操作的端称为队头。</p>
+<h4 id="链表">链表</h4>
+<p>链表是一种物理<a href="https://baike.baidu.com/item/%E5%AD%98%E5%82%A8%E5%8D%95%E5%85%83" target="_blank">存储单元</a>上非连续、非顺序的<a href="https://baike.baidu.com/item/%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84" target="_blank">存储结构</a>，<a href="https://baike.baidu.com/item/%E6%95%B0%E6%8D%AE%E5%85%83%E7%B4%A0" target="_blank">数据元素</a>的逻辑顺序是通过链表中的<a href="https://baike.baidu.com/item/%E6%8C%87%E9%92%88" target="_blank">指针</a>链接次序实现的。链表由一系列结点（链表中每一个元素称为结点）组成，结点可以在运行时动态生成。每个结点包括两个部分：一个是存储<a href="https://baike.baidu.com/item/%E6%95%B0%E6%8D%AE%E5%85%83%E7%B4%A0" target="_blank">数据元素</a>的数据域，另一个是存储下一个结点地址的<a href="https://baike.baidu.com/item/%E6%8C%87%E9%92%88" target="_blank">指针</a>域。 相比于<a href="https://baike.baidu.com/item/%E7%BA%BF%E6%80%A7%E8%A1%A8" target="_blank">线性表</a><a href="https://baike.baidu.com/item/%E9%A1%BA%E5%BA%8F%E7%BB%93%E6%9E%84" target="_blank">顺序结构</a>，操作复杂。由于不必须按顺序存储，链表在插入的时候可以达到O(1)的复杂度，比另一种线性表顺序表快得多，但是查找一个节点或者访问特定编号的节点则需要O(n)的时间，而线性表和顺序表相应的时间复杂度分别是O(logn)和O(1)。</p>
+<h4 id="哈希表">哈希表</h4>
+<p><a href="https://baike.baidu.com/item/%E6%95%A3%E5%88%97%E8%A1%A8" target="_blank">散列表</a>（Hash table，也叫哈希表），是根据关键码值(Key value)而直接进行访问的<a href="https://baike.baidu.com/item/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/1450" target="_blank">数据结构</a>。也就是说，它通过把关键码值映射到表中一个位置来访问记录，以加快查找的速度。这个映射函数叫做<a href="https://baike.baidu.com/item/%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0" target="_blank">散列函数</a>，存放记录的<a href="https://baike.baidu.com/item/%E6%95%B0%E7%BB%84" target="_blank">数组</a>叫做<a href="https://baike.baidu.com/item/%E6%95%A3%E5%88%97%E8%A1%A8" target="_blank">散列表</a>。</p>
+<p>给定表M，存在函数f(key)，对任意给定的关键字值key，代入函数后若能得到包含该关键字的记录在表中的地址，则称表M为哈希(Hash）表，函数f(key)为哈希(Hash) 函数。</p>
+<h4 id="堆">堆</h4>
+<p>堆（英语：heap)是计算机科学中一类特殊的数据结构的统称。堆通常是一个可以被看做一棵树的数组对象。堆总是满足下列性质：</p>
+<ul>
+<li>堆中某个节点的值总是不大于或不小于其父节点的值；</li>
+<li>堆总是一棵完全二叉树。</li>
+</ul>
+<p>将根节点最大的堆叫做最大堆或大根堆，根节点最小的堆叫做最小堆或小根堆。常见的堆有二叉堆、斐波那契堆等。</p>
+<h4 id="优先队列">优先队列</h4>
+<p>普通的队列是一种先进先出的数据结构，元素在队列尾追加，而从队列头删除。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高级先出 （first in, largest out）的行为特征。通常采用堆数据结构来实现。</p>
+<h4 id="平衡二叉树">平衡二叉树</h4>
+<p>平衡二叉搜索树（Self-balancing binary search tree）又被称为AVL树（有别于AVL算法），且具有以下性质：它是一 棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树。平衡二叉树的常用实现方法有<a href="https://baike.baidu.com/item/%E7%BA%A2%E9%BB%91%E6%A0%91" target="_blank">红黑树</a>、<a href="https://baike.baidu.com/item/AVL/7543015" target="_blank">AVL</a>、<a href="https://baike.baidu.com/item/%E6%9B%BF%E7%BD%AA%E7%BE%8A%E6%A0%91" target="_blank">替罪羊树</a>、<a href="https://baike.baidu.com/item/Treap" target="_blank">Treap</a>、<a href="https://baike.baidu.com/item/%E4%BC%B8%E5%B1%95%E6%A0%91" target="_blank">伸展树</a>等。 最小二叉平衡树的节点的公式如下 F(n)=F(n-1)+F(n-2)+1 这个类似于一个递归的<a href="https://baike.baidu.com/item/%E6%95%B0%E5%88%97" target="_blank">数列</a>，可以参考Fibonacci(斐波那契)数列，1是根节点，F(n-1)是左子树的节点数量，F(n-2)是右子树的节点数量。</p>
+<h3 id="算法">算法</h3>
+<h4 id="二分查找">二分查找</h4>
+<p>二分查找也称折半查找（Binary Search），它是一种效率较高的查找方法。但是，折半查找要求线性表必须采用顺序存储结构，而且表中元素按关键字有序排列。</p>
+<p>搜索过程从数组的中间元素开始，如果中间元素正好是要查找的元素，则搜索过程结束；如果某一特定元素大于或者小于中间元素，则在数组大于或小于中间元素的那一半中查找，而且跟开始一样从中间元素开始比较。如果在某一步骤数组为空，则代表找不到。这种搜索算法每一次比较都使搜索范围缩小一半。</p>
+<h4 id="排序">排序</h4>
+<p>我们通常所说的排序算法往往指的是<strong>内部排序算法</strong>，即数据记录在内存中进行排序。排序算法大体可分为两种：</p>
+<ul>
+<li>一种是<strong>比较排序</strong>，时间复杂度O(nlogn) ~ O(n^2)，主要有：<strong>冒泡排序</strong>，<strong>选择排序</strong>，<strong>插入排序</strong>，<strong>归并排序</strong>，<strong>堆排序</strong>，<strong>快速排序</strong>等。</li>
+<li>另一种是<strong>非比较排序</strong>，时间复杂度可以达到O(n)，主要有：<strong>计数排序</strong>，<strong>基数排序</strong>，<strong>桶排序</strong>等。下</li>
+</ul>
+<p>下表给出了常见比较排序算法的性能：</p>
+<p><img src="./数据结构 · GitBook_files/739525-20160503202729044-614991035.jpg" alt="img"></p>
+<h2 id="参考资料">参考资料</h2>
+<ol>
+<li>百度百科</li>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%88%86%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95" target="_blank">二分搜索算法wiki</a></li>
+<li><a href="http://www.cnblogs.com/eniac12/p/5329396.html" target="_blank">http://www.cnblogs.com/eniac12/p/5329396.html</a></li>
+<li><a href="https://item.jd.com/11144230.html" target="_blank">《算法导论》</a></li>
+</ol>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class="search-results-count"></span> results matching "<span class="search-query"></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class="search-query"></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="https://gitbook.corp.sdo.com/serverbook/multi-thread.html" class="navigation navigation-prev " aria-label="Previous page: 多线程编程">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="https://gitbook.corp.sdo.com/serverbook/mysql/" class="navigation navigation-next " aria-label="Next page: 数据库" style="margin-right: 0px;">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"数据结构","level":"1.1.6","depth":2,"next":{"title":"数据库","level":"1.1.7","depth":2,"path":"mysql/README.md","ref":"mysql/README.md","articles":[{"title":"第二范式","level":"1.1.7.1","depth":3,"path":"mysql/2nf.md","ref":"mysql/2nf.md","articles":[]},{"title":"mysql 数据类型","level":"1.1.7.2","depth":3,"path":"mysql/introduction.md","ref":"mysql/introduction.md","articles":[]},{"title":"基本 sql 语句","level":"1.1.7.3","depth":3,"path":"mysql/sql_README.md","ref":"mysql/sql_README.md","articles":[{"title":"SQL SELECT 语句","level":"1.1.7.3.1","depth":4,"path":"mysql/sql_select.md","ref":"mysql/sql_select.md","articles":[]},{"title":"SQL WHERE 子句","level":"1.1.7.3.2","depth":4,"path":"mysql/sql_where.md","ref":"mysql/sql_where.md","articles":[]},{"title":"SQL AND & OR 运算符","level":"1.1.7.3.3","depth":4,"path":"mysql/sql_and_or.md","ref":"mysql/sql_and_or.md","articles":[]},{"title":"SQL ORDER BY 子句","level":"1.1.7.3.4","depth":4,"path":"mysql/sql_order_by.md","ref":"mysql/sql_order_by.md","articles":[]},{"title":"SQL INSERT INTO 语句","level":"1.1.7.3.5","depth":4,"path":"mysql/sql_insert.md","ref":"mysql/sql_insert.md","articles":[]},{"title":"SQL UPDATE 语句","level":"1.1.7.3.6","depth":4,"path":"mysql/sql_update.md","ref":"mysql/sql_update.md","articles":[]},{"title":"SQL DELETE 语句","level":"1.1.7.3.7","depth":4,"path":"mysql/sql_delete.md","ref":"mysql/sql_delete.md","articles":[]},{"title":"SQL LIKE 操作符","level":"1.1.7.3.8","depth":4,"path":"mysql/sql_like.md","ref":"mysql/sql_like.md","articles":[]},{"title":"SQL 通配符","level":"1.1.7.3.9","depth":4,"path":"mysql/sql_wildcard.md","ref":"mysql/sql_wildcard.md","articles":[]},{"title":"SQL BETWEEN 操作符","level":"1.1.7.3.10","depth":4,"path":"mysql/sql_between.md","ref":"mysql/sql_between.md","articles":[]},{"title":"SQL CREATE DATABASE 语句","level":"1.1.7.3.11","depth":4,"path":"mysql/sql_create_db.md","ref":"mysql/sql_create_db.md","articles":[]},{"title":"SQL CREATE TABLE 语句","level":"1.1.7.3.12","depth":4,"path":"mysql/sql_create_tb.md","ref":"mysql/sql_create_tb.md","articles":[]},{"title":"SQL NOT NULL 约束","level":"1.1.7.3.13","depth":4,"path":"mysql/sql_not_null.md","ref":"mysql/sql_not_null.md","articles":[]},{"title":"SQL UNIQUE 约束","level":"1.1.7.3.14","depth":4,"path":"mysql/sql_unique.md","ref":"mysql/sql_unique.md","articles":[]},{"title":"SQL PRIMARY KEY 约束","level":"1.1.7.3.15","depth":4,"path":"mysql/sql_primary_key.md","ref":"mysql/sql_primary_key.md","articles":[]},{"title":"SQL DEFAULT 约束","level":"1.1.7.3.16","depth":4,"path":"mysql/sql_default.md","ref":"mysql/sql_default.md","articles":[]},{"title":"SQL CREATE INDEX 语句","level":"1.1.7.3.17","depth":4,"path":"mysql/sql_create_idx.md","ref":"mysql/sql_create_idx.md","articles":[]},{"title":"SQL ALTER TABLE 语句","level":"1.1.7.3.18","depth":4,"path":"mysql/sql_alter_tb.md","ref":"mysql/sql_alter_tb.md","articles":[]},{"title":"SQL AUTO INCREMENT 字段","level":"1.1.7.3.19","depth":4,"path":"mysql/sql_auto_incr.md","ref":"mysql/sql_auto_incr.md","articles":[]},{"title":"SQL GROUP BY 语句","level":"1.1.7.3.20","depth":4,"path":"mysql/sql_group_by.md","ref":"mysql/sql_group_by.md","articles":[]}]}]},"previous":{"title":"多线程编程","level":"1.1.5","depth":2,"path":"multi-thread.md","ref":"multi-thread.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"data-structure.md","mtime":"2019-04-24T05:51:13.431Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-22T03:40:26.755Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="./数据结构 · GitBook_files/gitbook.js.下载"></script>
+    <script src="./数据结构 · GitBook_files/theme.js.下载"></script>
+    
+        
+        <script src="./数据结构 · GitBook_files/search-engine.js.下载"></script>
+        
+    
+        
+        <script src="./数据结构 · GitBook_files/search.js.下载"></script>
+        
+    
+        
+        <script src="./数据结构 · GitBook_files/lunr.min.js.下载"></script>
+        
+    
+        
+        <script src="./数据结构 · GitBook_files/search-lunr.js.下载"></script>
+        
+    
+        
+        <script src="./数据结构 · GitBook_files/buttons.js.下载"></script>
+        
+    
+        
+        <script src="./数据结构 · GitBook_files/fontsettings.js.下载"></script>
+        
+    
+
+    
+
+
+</body></html>
