@@ -23,7 +23,7 @@ struct TPass {
 	IInputLayoutPtr mInputLayout;
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
 	
-	TProgramPtr mProgram;
+	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
 
 	std::vector<TContantBufferInfo> mConstantBuffers;
@@ -65,7 +65,8 @@ public:
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
-struct TMaterial : public IResource {
+struct INHERIT_COM("04059656-CA19-432B-BBEC-41E46EFB8CCD")
+TMaterial : public TResource {
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
@@ -95,7 +96,7 @@ public:
 
 	TMaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout);
 	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
-	TProgramPtr SetProgram(TProgramPtr program);
+	IProgramPtr SetProgram(IProgramPtr program);
 	TMaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1);
 	TMaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1);
 	TMaterialBuilder& ClearSamplersToTech();

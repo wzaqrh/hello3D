@@ -1,0 +1,15 @@
+https://zh.wikipedia.org/wiki/%E8%B2%9D%E8%8C%B2%E6%9B%B2%E7%B7%9A 贝塞尔曲线
+https://en.wikipedia.org/wiki/Continuous_function 连续函数
+https://en.wikipedia.org/wiki/Homeomorphism  【topological isomorphism】 【bicontinuous function】 同胚
+https://en.wikipedia.org/wiki/Injective_function 单射
+https://en.wikipedia.org/wiki/Surjective_function 满射
+https://en.wikipedia.org/wiki/Trefoil_knot 三叶节
+https://en.wikipedia.org/wiki/Deformation_theory 变形
+https://en.wikipedia.org/wiki/Topology 拓扑
+https://en.wikipedia.org/wiki/Infimum_and_supremum 集合下界与上界
+https://en.wikipedia.org/wiki/Limit-preserving_function_(order_theory) 极限保持函数
+https://en.wikipedia.org/wiki/Directed_set 有向集合
+https://en.wikipedia.org/wiki/Image_(mathematics)  像
+https://en.wikipedia.org/wiki/Upper_set 上闭集合
+https://en.wikipedia.org/wiki/Partially_ordered_set 偏序集合 (S,≤)
+https://en.wikipedia.org/wiki/Scott_continuity 斯科特连续性

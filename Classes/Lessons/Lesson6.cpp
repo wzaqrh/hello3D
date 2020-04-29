@@ -71,7 +71,7 @@ void Lesson6::OnPostInitDevice()
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures->empty() && (*iter->mTextures)[0]) {
 			std::string firstPostfix;
-			auto prefix = ((*iter->mTextures)[0])->GetPath();
+			std::string prefix = ((*iter->mTextures)[0])->GetPath();
 			auto pos = prefix.find_last_of("_");
 			if (pos != std::string::npos) {
 				firstPostfix = prefix.substr(pos + 1, std::string::npos);

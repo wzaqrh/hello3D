@@ -46,16 +46,6 @@ ITexturePtr& TTextureBySlot::operator[](size_t pos) {
 	return At(pos);
 }
 
-std::vector<ID3D11ShaderResourceView*> TTextureBySlot::GetTextureViews11() const {
-	std::vector<ID3D11ShaderResourceView*> views(textures.size());
-	for (int i = 0; i < views.size(); ++i) {
-		if (textures[i]) {
-			views[i] = textures[i]->GetSRV11();
-		}
-	}
-	return views;
-}
-
 void TTextureBySlot::Merge(const TTextureBySlot& other) {
 	if (textures.size() < other.textures.size())
 		textures.resize(other.textures.size());

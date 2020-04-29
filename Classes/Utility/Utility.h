@@ -13,6 +13,10 @@ std::string GetFileExt(const std::string& fileName);
 
 bool IsFileExist(const std::string& fileName);
 
+struct TINT4 {
+	int x, y, z, w;
+};
+
 class TD3DInputImpl;
 class TD3DInput {
 public:

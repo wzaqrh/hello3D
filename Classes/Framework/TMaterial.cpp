@@ -264,7 +264,7 @@ TMaterialBuilder& TMaterialBuilder::SetPassName(const std::string& lightMode, co
 TMaterialBuilder& TMaterialBuilder::SetInputLayout(IInputLayoutPtr inputLayout)
 {
 	mCurPass->mInputLayout = inputLayout;
-	mMaterial->AddDependency(inputLayout);
+	mMaterial->AddDependency(inputLayout->AsRes());
 	return *this;
 }
 
@@ -274,10 +274,10 @@ TMaterialBuilder& TMaterialBuilder::SetTopology(D3D11_PRIMITIVE_TOPOLOGY topolog
 	return *this;
 }
 
-TProgramPtr TMaterialBuilder::SetProgram(TProgramPtr program)
+IProgramPtr TMaterialBuilder::SetProgram(IProgramPtr program)
 {
 	mCurPass->mProgram = program;
-	mMaterial->AddDependency(program);
+	mMaterial->AddDependency(program->AsRes());
 	return program;
 }
 
@@ -328,7 +328,7 @@ TMaterialBuilder& TMaterialBuilder::AddIterTarget(IRenderTexturePtr target)
 TMaterialBuilder& TMaterialBuilder::SetTexture(size_t slot, ITexturePtr texture)
 {
 	mCurPass->mTextures[slot] = texture;
-	mMaterial->AddDependency(texture);
+	mMaterial->AddDependency(texture->AsRes());
 	return *this;
 }
 

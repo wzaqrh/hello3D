@@ -1,5 +1,6 @@
 #pragma once
 #include "IRenderSystem.h"
+#include "TInterfaceType11.h"
 
 class TRenderSystem11 
 	: public IRenderSystem
@@ -50,14 +51,14 @@ public:
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
 
-	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize);
+	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize);
 	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize);
 
-	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
-	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	virtual IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	virtual IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 
 	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
-	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	virtual IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc);
 	virtual void SetDepthState(const TDepthState& depthState);
@@ -77,12 +78,12 @@ protected:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 
-	IVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
-	IVertexShaderPtr _CreateVSByFXC(const char* filename);
-	IPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
-	IPixelShaderPtr _CreatePSByFXC(const char* filename);
+	TVertexShader11Ptr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
+	TVertexShader11Ptr _CreateVSByFXC(const char* filename);
+	TPixelShader11Ptr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
+	TPixelShader11Ptr _CreatePSByFXC(const char* filename);
 
-	ID3D11InputLayout* _CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
+	ID3D11InputLayout* _CreateInputLayout(TProgram11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 protected:
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
 	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);

@@ -1,18 +1,15 @@
+#include "TPredefine.h"
 #include "TInterfaceType9.h"
 #include "IRenderSystem.h"
 #include "Utility.h"
 
-template<class T>
-static IUnknown*& MakeDeviceObjectRef(T*& ref) {
-	IUnknown** ppDeviceObj = (IUnknown**)&ref;
-	return *ppDeviceObj;
-}
 /********** TTexture9 **********/
 TTexture9::TTexture9(const std::string& __path)
 	:texture(nullptr)
 	, textureCube(nullptr)
 	, path(__path)
 {
+	mRes = MakePtr<TResource>((IUnknown**)&texture);
 }
 
 TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
@@ -20,29 +17,12 @@ TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
 	, textureCube(nullptr)
 	, path(__path)
 {
+	mRes = MakePtr<TResource>((IUnknown**)&texture);
 }
 
-IUnknown*& TTexture9::GetDeviceObject()
+const char* TTexture9::GetPath()
 {
-	return MakeDeviceObjectRef(texture);
-}
-void TTexture9::SetSRV9(IDirect3DTexture9* __texture)
-{
-	texture = __texture;
-}
-IDirect3DTexture9*& TTexture9::GetSRV9()
-{
-	return texture;
-}
-
-IDirect3DCubeTexture9*& TTexture9::GetSRVCube9()
-{
-	return textureCube;
-}
-
-const std::string& TTexture9::GetPath() const
-{
-	return path;
+	return path.c_str();
 }
 int TTexture9::GetWidth()
 {
@@ -109,7 +89,7 @@ unsigned int TVertexBuffer9::GetOffset()
 TRenderTexture9::TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;
-	mColorTexture->SetLoaded();
+	mColorTexture->AsRes()->SetLoaded();
 	mColorBuffer = nullptr;
 	mDepthStencilBuffer = depthStencilBuffer;
 }
@@ -132,6 +112,11 @@ IDirect3DSurface9*& TRenderTexture9::GetDepthStencilBuffer9()
 }
 
 /********** TInputLayout9 **********/
+TInputLayout9::TInputLayout9()
+{
+	mRes = MakePtr<TResource>((IUnknown**)&mLayout);
+}
+
 IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
 {
 	return mLayout;
@@ -212,7 +197,6 @@ void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBuf
 {
 	for (size_t j = 0; j < decl.elements.size(); ++j) {
 		TConstBufferDeclElement& elem = decl.elements[j];
-		const char* pName = elem.name.c_str();
 #if 0
 		auto iter = decl.subDecls.find(elem.name);
 		if (iter != decl.subDecls.end()) {
@@ -258,6 +242,11 @@ void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBuf
 }
 
 /********** TPixelShader9 **********/
+TPixelShader9::TPixelShader9()
+{
+	mRes = MakePtr<TResource>((IUnknown**)&mShader);
+}
+
 IBlobDataPtr TPixelShader9::GetBlob()
 {
 	return mBlob;
@@ -274,6 +263,11 @@ void TPixelShader9::SetConstTable(ID3DXConstantTable* constTable)
 }
 
 /********** TVertexShader9 **********/
+TVertexShader9::TVertexShader9()
+{
+	mRes = MakePtr<TResource>((IUnknown**)&mShader);
+}
+
 IBlobDataPtr TVertexShader9::GetBlob()
 {
 	return mBlob;
@@ -295,9 +289,9 @@ TBlobDataD3d9::TBlobDataD3d9(ID3DXBuffer* pBlob)
 {
 }
 
-void* TBlobDataD3d9::GetBufferPointer()
+char* TBlobDataD3d9::GetBufferPointer()
 {
-	return mBlob->GetBufferPointer();
+	return (char*)mBlob->GetBufferPointer();
 }
 
 size_t TBlobDataD3d9::GetBufferSize()
@@ -315,6 +309,7 @@ std::map<D3DSAMPLERSTATETYPE, DWORD>& TSamplerState9::GetSampler9()
 TContantBuffer9::TContantBuffer9(TConstBufferDeclPtr decl)
 	:mDecl(decl)
 {
+	assert(mDecl != nullptr);
 	mBuffer9.resize(mDecl->bufferSize);
 }
 
@@ -328,7 +323,18 @@ unsigned int TContantBuffer9::GetBufferSize()
 	return mDecl->bufferSize;
 }
 
-void* TContantBuffer9::GetBuffer9()
+char* TContantBuffer9::GetBuffer9()
 {
 	return mBuffer9.empty() ? nullptr : &mBuffer9[0];
+}
+
+void TContantBuffer9::SetBuffer9(char* data, int dataSize)
+{
+	mBuffer9.assign((char*)data, (char*)data + dataSize);
+}
+
+/********** TProgram9 **********/
+TProgram9::TProgram9()
+{
+	mRes = MakePtr<TResource>((IUnknown**)0);
 }

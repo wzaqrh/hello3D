@@ -93,7 +93,7 @@ TPostProcessPtr IRenderSystem::AddPostProcess(const std::string& name)
 }
 
 
-TProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	std::string ext = GetFileExt(name);
 	if (ext.empty()) {

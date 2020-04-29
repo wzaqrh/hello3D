@@ -22,6 +22,7 @@
 
 #include "stddx9.h"
 #include "stddx11.h"
+#include "ComBase.h"
 
 typedef struct _XMINT4 {
 	int x, y, z, w;

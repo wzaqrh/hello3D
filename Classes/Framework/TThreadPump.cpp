@@ -120,7 +120,7 @@ void TThreadPump::Update(float dt)
 				entry->Clear();
 
 				if (callback) 
-					callback(res.get(), hr);
+					callback(res.Get(), hr);
 			}
 		}
 	}
@@ -134,7 +134,7 @@ void TThreadPump::Update(float dt)
 				entry->Clear();
 
 				if (callback)
-					callback(entry->res.get(), hr);
+					callback(entry->res.Get(), hr);
 			}
 		}
 	}

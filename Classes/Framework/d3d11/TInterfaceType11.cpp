@@ -14,9 +14,9 @@ TBlobDataD3d11::TBlobDataD3d11(ID3DBlob* pBlob)
 {
 }
 
-void* TBlobDataD3d11::GetBufferPointer()
+char* TBlobDataD3d11::GetBufferPointer()
 {
-	return mBlob->GetBufferPointer();
+	return (char*)mBlob->GetBufferPointer();
 }
 
 size_t TBlobDataD3d11::GetBufferSize()
@@ -25,6 +25,11 @@ size_t TBlobDataD3d11::GetBufferSize()
 }
 
 /********** TInputLayout11 **********/
+TInputLayout11::TInputLayout11()
+{
+	mRes = MakePtr<TResource>((IUnknown**)&mLayout);
+}
+
 ID3D11InputLayout*& TInputLayout11::GetLayout11()
 {
 	return mLayout;
@@ -34,10 +39,7 @@ ID3D11InputLayout*& TInputLayout11::GetLayout11()
 TVertexShader11::TVertexShader11(IBlobDataPtr pBlob)
 	:mBlob(pBlob)
 {
-}
-IUnknown*& TVertexShader11::GetDeviceObject()
-{
-	return MakeDeviceObjectRef(mErrBlob);
+	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
 }
 
 IBlobDataPtr TVertexShader11::GetBlob()
@@ -54,10 +56,7 @@ ID3D11VertexShader*& TVertexShader11::GetShader11()
 TPixelShader11::TPixelShader11(IBlobDataPtr pBlob)
 	: mBlob(pBlob)
 {
-}
-IUnknown*& TPixelShader11::GetDeviceObject()
-{
-	return MakeDeviceObjectRef(mErrBlob);
+	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
 }
 
 IBlobDataPtr TPixelShader11::GetBlob()
@@ -75,6 +74,7 @@ TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, std::string __path)
 {
 	path = __path;
 	texture = __texture;
+	mRes = MakePtr<TResource>((IUnknown**)&texture);
 }
 
 void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture)
@@ -82,14 +82,9 @@ void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture)
 	texture = __texture;
 }
 
-IUnknown*& TTexture11::GetDeviceObject()
+const char* TTexture11::GetPath()
 {
-	return MakeDeviceObjectRef(texture);
-}
-
-const std::string& TTexture11::GetPath() const
-{
-	return path;
+	return path.c_str();
 }
 
 ID3D11ShaderResourceView*& TTexture11::GetSRV11()
@@ -126,17 +121,17 @@ DXGI_FORMAT TTexture11::GetFormat()
 /********** TVertex11Buffer **********/
 int TVertexBuffer11::GetCount()
 {
-	return bufferSize / stride;
+	return hd.bufferSize / stride;
 }
 
 ID3D11Buffer*& TVertexBuffer11::GetBuffer11()
 {
-	return buffer;
+	return hd.buffer;
 }
 
 unsigned int TVertexBuffer11::GetBufferSize()
 {
-	return bufferSize;
+	return hd.bufferSize;
 }
 
 unsigned int TVertexBuffer11::GetStride()
@@ -152,12 +147,12 @@ unsigned int TVertexBuffer11::GetOffset()
 /********** TIndexBuffer **********/
 ID3D11Buffer*& TIndexBuffer11::GetBuffer11()
 {
-	return buffer;
+	return hd.buffer;
 }
 
 unsigned int TIndexBuffer11::GetBufferSize()
 {
-	return bufferSize;
+	return hd.bufferSize;
 }
 
 int TIndexBuffer11::GetWidth()
@@ -172,7 +167,7 @@ DXGI_FORMAT TIndexBuffer11::GetFormat()
 
 /********** TContantBuffer11 **********/
 TContantBuffer11::TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl)
-	: THardwareBuffer(__buffer, decl->bufferSize)
+	: hd(__buffer, decl->bufferSize)
 	, mDecl(decl)
 {
 }
@@ -184,12 +179,12 @@ TConstBufferDeclPtr TContantBuffer11::GetDecl()
 
 ID3D11Buffer*& TContantBuffer11::GetBuffer11()
 {
-	return buffer;
+	return hd.buffer;
 }
 
 unsigned int TContantBuffer11::GetBufferSize()
 {
-	return bufferSize;
+	return hd.bufferSize;
 }
 
 /********** TRenderTexture11 **********/
@@ -256,8 +251,8 @@ bool TRenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 	if (FAILED(result)) {
 		return false;
 	}
-	mRenderTargetPtr = std::make_shared<TTexture11>(mRenderTargetSRV, "RenderTexture");
-	mRenderTargetPtr->SetLoaded();
+	mRenderTargetPtr = MakePtr<TTexture11>(mRenderTargetSRV, "RenderTexture");
+	mRenderTargetPtr->AsRes()->SetLoaded();
 	return true;
 }
 
@@ -322,4 +317,10 @@ ID3D11DepthStencilView*& TRenderTexture11::GetDepthStencilBuffer11()
 ID3D11SamplerState*& TSamplerState11::GetSampler11()
 {
 	return mSampler;
+}
+
+/********** TProgram11 **********/
+TProgram11::TProgram11()
+{
+	mRes = MakePtr<TResource>((IUnknown**)0);
 }

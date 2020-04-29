@@ -2,6 +2,7 @@
 #include "TPredefine.h"
 #include "IRenderSystem.h"
 #include "TMovable.h"
+#include "TInterfaceType.h"
 #include "TMaterial.h"
 #include "Utility.h"
 

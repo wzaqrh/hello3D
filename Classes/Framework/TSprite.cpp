@@ -77,7 +77,7 @@ void TSprite::SetPosition(float x, float y, float z)
 	mQuad.SetZ(z);
 	mQuad.SetFlipY(mFlipY);
 
-	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
+	mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetSize(float w, float h)
@@ -86,7 +86,7 @@ void TSprite::SetSize(float w, float h)
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetFlipY(mFlipY);
 
-	mRenderSys->UpdateBuffer(mVertexBuffer.get(), &mQuad, sizeof(mQuad));
+	mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetFlipY(bool flipY)

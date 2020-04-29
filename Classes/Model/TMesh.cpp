@@ -35,5 +35,5 @@ bool TMesh::HasTexture(int slot)
 {
 	return (slot < mTextures->size()) 
 		&& mTextures->At(slot)
-		&& mTextures->At(slot)->GetSRV11() != nullptr;
+		&& mTextures->At(slot)->HasSRV();
 }

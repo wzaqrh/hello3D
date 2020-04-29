@@ -2,8 +2,16 @@
 #include "TBaseTypes.h"
 #include "TPredefine.h"
 
+//MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
+//IRenderSystem
+//{
+//
+//};
+
 class TD3DInput;
-__declspec(align(16)) class IRenderSystem
+__declspec(align(16)) 
+MIDL_INTERFACE("BF1920DB-54DB-42D2-AAA5-8E2F91482B7B") 
+IRenderSystem
 {
 protected:
 	std::map<std::string, ITexturePtr> mTexByPath;
@@ -72,15 +80,15 @@ public:
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) = 0;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
 
-	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize) = 0;
+	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
 	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
 
-	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
-	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
-	TProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	virtual IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
+	virtual IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
+	IProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 
 	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) = 0;
-	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
+	virtual IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
 
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc) = 0;
 	virtual void SetDepthState(const TDepthState& depthState) = 0;
