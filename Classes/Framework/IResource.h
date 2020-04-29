@@ -8,26 +8,48 @@ enum enResourceState {
 	E_RES_STATE_LOADED,
 	E_RES_STATE_UNLOADING
 };
+
 MIDL_INTERFACE("14542070-5390-402A-9655-0F162D1C6A74") 
 IResource : public IUnknown {
-	typedef std::function<void(IResource*)> Listener;
-	enResourceState mCurState;
-	std::vector<Listener> OnLoadeds;
-	std::vector<ComPtr<IResource>> mDepends;
 public:
-	IResource();
-	bool IsLoaded() const { return mCurState == E_RES_STATE_LOADED; }
-	bool IsLoading() const { return mCurState == E_RES_STATE_LOADING; }
-	bool IsPrepared() const { return mCurState >= E_RES_STATE_PREPARED; }
-	void SetLoaded();
+	bool IsLoaded() { return GetCurState() == E_RES_STATE_LOADED; }
+	bool IsLoading() { return GetCurState() == E_RES_STATE_LOADING; }
+	bool IsPrepared() { return GetCurState() >= E_RES_STATE_PREPARED; }
 public:
-	void SetCurState(enResourceState state);
-	
-	virtual IUnknown*& GetDeviceObject();
+	virtual STDMETHODIMP_(enResourceState) GetCurState() = 0;
+	virtual STDMETHODIMP_(void) SetCurState(enResourceState state) = 0;
 
-	void AddOnLoadedListener(Listener lis);
-	virtual bool CheckLoaded() const;
-	void CheckAndSetLoaded();
-	void AddDependency(ComPtr<IResource> res);
+	virtual STDMETHODIMP_(void) SetLoaded() = 0;
+	virtual STDMETHODIMP_(IUnknown**) GetDeviceObject() = 0;
+
+	virtual STDMETHODIMP_(void) AddOnLoadedListener(std::function<void(IResource*)> cb) = 0;
+	virtual STDMETHODIMP_(void) CheckAndSetLoaded() = 0;
+	virtual STDMETHODIMP_(void) AddDependency(ComPtr<IResource> res) = 0;
+
 };
 typedef ComPtr<IResource> IResourcePtr;
+
+struct INHERIT_COM("20FB61DE-C191-489C-972E-D12D01A82ECF")
+TResource : public ComBase<IResource> {
+	IUnknown** mDeviceObj;
+	enResourceState mCurState;
+	std::vector<std::function<void(IResource*)>> OnLoadeds;
+	std::vector<ComPtr<TResource>> mDepends;
+public:
+	TResource() :mCurState(E_RES_STATE_NONE),mDeviceObj(nullptr) {}
+	TResource(IUnknown** deviceObj);
+	STDMETHODIMP_(enResourceState) GetCurState() override {
+		return mCurState;
+	}
+	STDMETHODIMP_(void) SetCurState(enResourceState state) override;
+
+	STDMETHODIMP_(void) SetLoaded() override;
+	STDMETHODIMP_(IUnknown**) GetDeviceObject() override;
+
+	STDMETHODIMP_(void) AddOnLoadedListener(std::function<void(IResource*)> cb) override;
+	STDMETHODIMP_(void) CheckAndSetLoaded() override;
+	STDMETHODIMP_(void) AddDependency(ComPtr<IResource> res) override;
+protected:
+	virtual bool CheckLoaded() const;
+};
+typedef ComPtr<TResource> TResourcePtr;

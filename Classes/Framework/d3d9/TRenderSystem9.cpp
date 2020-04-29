@@ -148,8 +148,8 @@ IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXG
 void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = rendTarget->GetColorBuffer9();
-		mCurDepthStencilBuffer = rendTarget->GetDepthStencilBuffer9();
+		mCurColorBuffer = PtrCast(rendTarget).As<TRenderTexture9>()->GetColorBuffer9();
+		mCurDepthStencilBuffer = PtrCast(rendTarget).As<TRenderTexture9>()->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;
@@ -193,7 +193,7 @@ IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 
 void TRenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-	mDevice9->SetIndices(indexBuffer ? indexBuffer->GetBuffer9() : nullptr);
+	mDevice9->SetIndices(indexBuffer ? PtrCast(indexBuffer).As<TIndexBuffer9>()->GetBuffer9() : nullptr);
 }
 
 IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
@@ -211,27 +211,31 @@ void TRenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 {
 	UINT offset = vertexBuffer->GetOffset();
 	UINT stride = vertexBuffer->GetStride();
-	IDirect3DVertexBuffer9* buffer = vertexBuffer->GetBuffer9();
+	IDirect3DVertexBuffer9* buffer = PtrCast(vertexBuffer).As<TVertexBuffer9>()->GetBuffer9();
 	mDevice9->SetStreamSource(0, buffer, offset, stride);
 }
 
-bool TRenderSystem9::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize)
+bool TRenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
 {
+	assert(buffer != nullptr);
 	enHardwareBufferType bufferType = buffer->GetType();
 	switch (bufferType)
 	{
 	case E_HWBUFFER_CONSTANT: {
-		static_cast<TContantBuffer9*>(buffer)->mBuffer9.assign((char*)data, (char*)data + dataSize);
+		IContantBufferPtr cbuffer = PtrCast(buffer).Cast<IContantBuffer>();
+		PtrCast(cbuffer).As<TContantBuffer9>()->SetBuffer9((char*)data, dataSize);
 	}break;
 	case E_HWBUFFER_VERTEX: {
-		IDirect3DVertexBuffer9* buffer9 = static_cast<IVertexBuffer*>(buffer)->GetBuffer9();
+		IVertexBufferPtr vbuffer = PtrCast(buffer).Cast<IVertexBuffer>();
+		IDirect3DVertexBuffer9* buffer9 = PtrCast(vbuffer).As<TVertexBuffer9>()->GetBuffer9();
 		void* pByteDest = nullptr;
 		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
 		memcpy(pByteDest, data, dataSize);
 		if (CheckHR(buffer9->Unlock())) return false;
 	}break;
 	case E_HWBUFFER_INDEX: {
-		IDirect3DIndexBuffer9* buffer9 = static_cast<IIndexBuffer*>(buffer)->GetBuffer9();
+		IIndexBufferPtr ibuffer = PtrCast(buffer).Cast<IIndexBuffer>();
+		IDirect3DIndexBuffer9* buffer9 = PtrCast(ibuffer).As<TIndexBuffer9>()->GetBuffer9();
 		void* pByteDest = nullptr;
 		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
 		memcpy(pByteDest, data, dataSize);
@@ -258,10 +262,10 @@ static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPt
 	ret->SetConstTable(constTable);
 
 	ret->mBlob = pBlob;
-	ret->SetLoaded();
+	ret->AsRes()->SetLoaded();
 	return ret;
 }
-IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
+TVertexShader9Ptr TRenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
@@ -280,7 +284,7 @@ IVertexShaderPtr TRenderSystem9::_CreateVS(const char* filename, const char* ent
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-IVertexShaderPtr TRenderSystem9::_CreateVSByFXC(const char* filename)
+TVertexShader9Ptr TRenderSystem9::_CreateVSByFXC(const char* filename)
 {
 	TVertexShader9Ptr ret;
 	std::vector<char> buffer = ReadFile(filename, "rb");
@@ -300,10 +304,10 @@ static TPixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr
 	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)pBlob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
 	ret->SetConstTable(constTable);
 
-	ret->SetLoaded();
+	ret->AsRes()->SetLoaded();
 	return ret;
 }
-IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
+TPixelShader9Ptr TRenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
@@ -322,7 +326,7 @@ IPixelShaderPtr TRenderSystem9::_CreatePS(const char* filename, const char* entr
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-IPixelShaderPtr TRenderSystem9::_CreatePSByFXC(const char* filename)
+TPixelShader9Ptr TRenderSystem9::_CreatePSByFXC(const char* filename)
 {
 	TPixelShader9Ptr ret;
 	std::vector<char> buffer = ReadFile(filename, "rb");
@@ -332,21 +336,21 @@ IPixelShaderPtr TRenderSystem9::_CreatePSByFXC(const char* filename)
 	return ret;
 }
 
-TProgramPtr TRenderSystem9::CreateProgramByCompile(const char* vsPath, const char* psPath /*= nullptr*/, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr TRenderSystem9::CreateProgramByCompile(const char* vsPath, const char* psPath /*= nullptr*/, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
-	TProgramPtr program = MakePtr<TProgram>();
+	TProgram9Ptr program = MakePtr<TProgram9>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
 	program->SetPixel(_CreatePS(psPath, psEntry));
-	program->CheckAndSetLoaded();
+	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
-TProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
-	TProgramPtr program = MakePtr<TProgram>();
+	TProgram9Ptr program = MakePtr<TProgram9>();
 
 	vsEntry = vsEntry ? vsEntry : "VS";
 	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
@@ -356,7 +360,7 @@ TProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const ch
 	std::string psName = (name)+"_" + psEntry + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
-	program->CheckAndSetLoaded();
+	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
@@ -380,28 +384,29 @@ ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FIL
 	return ret;
 }
 
-IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr)
+IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr)
 {
 	IDirect3DVertexDeclaration9* ret = nullptr;
 	if (CheckHR(mDevice9->CreateVertexDeclaration(&descArr[0], &ret))) return nullptr;
 	return ret;
 }
 
-IInputLayoutPtr TRenderSystem9::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+IInputLayoutPtr TRenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	TInputLayout9Ptr ret = MakePtr<TInputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)
 		ret->mInputDescs.push_back(D3DEnumCT::d3d11To9(descArray[i]));
 	ret->mInputDescs.push_back(D3DDECL_END());
 
-	if (pProgram->IsLoaded()) {
-		ret->mLayout = _CreateInputLayout(pProgram.Get(), ret->mInputDescs);
-		ret->SetLoaded();
+	auto resource = pProgram->AsRes();
+	if (resource->IsLoaded()) {
+		ret->mLayout = _CreateInputLayout(PtrCast(pProgram).As<TProgram9>(), ret->mInputDescs);
+		resource->SetLoaded();
 	}
 	else {
-		pProgram->AddOnLoadedListener([=](IResource* program) {
-			ret->mLayout = _CreateInputLayout(static_cast<TProgram*>(program), ret->mInputDescs);
-			ret->SetLoaded();
+		resource->AddOnLoadedListener([=](IResource* res) {
+			ret->mLayout = _CreateInputLayout(static_cast<TProgram9*>(PtrCast<IResource, IProgram>(res)), ret->mInputDescs);
+			res->SetLoaded();
 		});
 	}
 	return ret;
@@ -464,8 +469,9 @@ void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 
 void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	TPixelShader9* ps = static_cast<TPixelShader9*>(pass->mProgram->mPixel.Get());
-	TVertexShader9* vs = static_cast<TVertexShader9*>(pass->mProgram->mVertex.Get());
+	TProgram9Ptr program = PtrCast(pass->mProgram).As<TProgram9>();
+	TPixelShader9* ps = static_cast<TPixelShader9*>(program->mPixel.Get());
+	TVertexShader9* vs = static_cast<TVertexShader9*>(program->mVertex.Get());
 
 	if (pass->mConstantBuffers.size() > 0) {
 		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
@@ -473,7 +479,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
-		char* buffer9 = (char*)buffer->GetBuffer9();
+		char* buffer9 = (char*)PtrCast(buffer).As<TContantBuffer9>()->GetBuffer9();
 		TConstBufferDeclPtr decl = buffer->GetDecl();
 		vs->mConstTable.SetValue(mDevice9, buffer9, *decl);
 		ps->mConstTable.SetValue(mDevice9, buffer9, *decl);
@@ -486,7 +492,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	if (!pass->mSamplers.empty()) {
 		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
 			ISamplerStatePtr sampler = pass->mSamplers[i];
-			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = sampler->GetSampler9();
+			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = PtrCast(sampler).As<TSamplerState9>()->GetSampler9();
 			for (auto& pair : states) {
 				mDevice9->SetSamplerState(i, pair.first, pair.second);
 			}
@@ -538,9 +544,10 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 
 	{
 		for (size_t i = 0; i < textures.size(); ++i) {
-			if (textures[i]) {
-				IDirect3DTexture9* texture = textures[i]->GetSRV9();
-				IDirect3DCubeTexture9* textureCube = textures[i]->GetSRVCube9();
+			auto iTex = PtrCast(textures[i]).As<TTexture9>();
+			if (iTex) {
+				IDirect3DTexture9* texture = iTex->GetSRV9();
+				IDirect3DCubeTexture9* textureCube = iTex->GetSRVCube9();
 				if (texture) mDevice9->SetTexture(i, texture);
 				else if (textureCube) mDevice9->SetTexture(i, textureCube);
 			}
@@ -641,16 +648,16 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		IDirect3DTexture9* depthMapView = mShadowPassRT->GetColorTexture()->GetSRV9();
+		IDirect3DTexture9* depthMapView = PtrCast(mShadowPassRT->GetColorTexture()).As<TTexture9>()->GetSRV9();
 		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
 
 		if (mSkyBox && mSkyBox->mCubeSRV) {
-			IDirect3DCubeTexture9* texture = mSkyBox->mCubeSRV->GetSRVCube9();
+			IDirect3DCubeTexture9* texture = PtrCast(mSkyBox->mCubeSRV).As<TTexture9>()->GetSRVCube9();
 			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
 		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		IDirect3DTexture9* pSRV = mPostProcessRT->GetColorTexture()->GetSRV9();
+		IDirect3DTexture9* pSRV = PtrCast(mPostProcessRT->GetColorTexture()).As<TTexture9>()->GetSRV9();
 		mDevice9->SetTexture(0, pSRV);
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "IRenderSystem.h"
+#include "TInterfaceType9.h"
 
 class TRenderSystem9
 	: public IRenderSystem
@@ -39,14 +40,14 @@ public:
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) override;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
-	virtual bool UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize) override;
+	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
 	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 
-	virtual TProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
-	virtual TProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
+	virtual IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
+	virtual IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 
 	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
-	virtual IInputLayoutPtr CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
+	virtual IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
 
 	virtual void SetBlendFunc(const TBlendFunc& blendFunc) override;
 	virtual void SetDepthState(const TDepthState& depthState) override;
@@ -63,11 +64,11 @@ protected:
 	void _DoPostProcess();
 
 	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
-	IVertexShaderPtr _CreateVS(const char* filename, const char* entry = nullptr);
-	IPixelShaderPtr _CreatePS(const char* filename, const char* entry = nullptr);
-	IVertexShaderPtr _CreateVSByFXC(const char* filename);
-	IPixelShaderPtr _CreatePSByFXC(const char* filename);
-	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
+	TVertexShader9Ptr _CreateVS(const char* filename, const char* entry = nullptr);
+	TPixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);
+	TVertexShader9Ptr _CreateVSByFXC(const char* filename);
+	TPixelShader9Ptr _CreatePSByFXC(const char* filename);
+	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:
 	bool _GetDeviceCaps();
 	void _SetRasterizerState();

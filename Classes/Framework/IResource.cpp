@@ -1,13 +1,13 @@
 #include "IResource.h"
 
 /********** IResource **********/
-IResource::IResource()
+TResource::TResource(IUnknown** deviceObj)
 	:mCurState(E_RES_STATE_NONE)
-	//:mCurState(E_RES_STATE_LOADED)
+	,mDeviceObj(deviceObj)
 {
 }
 
-void IResource::SetCurState(enResourceState state)
+void TResource::SetCurState(enResourceState state)
 {
 	if (mCurState != state) {
 		mCurState = state;
@@ -16,28 +16,27 @@ void IResource::SetCurState(enResourceState state)
 	}
 }
 
-IUnknown* gDeviceObject;
-IUnknown*& IResource::GetDeviceObject()
+IUnknown** TResource::GetDeviceObject()
 {
-	return gDeviceObject;
+	return nullptr;
 }
 
-void IResource::AddOnLoadedListener(Listener lis)
+void TResource::AddOnLoadedListener(std::function<void(IResource*)> lis)
 {
 	OnLoadeds.push_back(lis);
 }
 
-void IResource::SetLoaded()
+void TResource::SetLoaded()
 {
 	mCurState = E_RES_STATE_LOADED;
 
-	std::vector<Listener> cbs; 
+	std::vector<std::function<void(IResource*)>> cbs;
 	cbs.swap(OnLoadeds);
 	for (auto& cb : cbs)
 		cb(this);
 }
 
-bool IResource::CheckLoaded() const
+bool TResource::CheckLoaded() const
 {
 	if (!mDepends.empty()) {
 		for (auto& depent : mDepends)
@@ -50,16 +49,16 @@ bool IResource::CheckLoaded() const
 	}
 }
 
-void IResource::CheckAndSetLoaded()
+void TResource::CheckAndSetLoaded()
 {
 	if (!IsLoaded() && CheckLoaded()) {
 		SetLoaded();
 	}
 }
 
-void IResource::AddDependency(ComPtr<IResource> res)
+void TResource::AddDependency(ComPtr<IResource> res)
 {
-	mDepends.push_back(res);
+	mDepends.push_back(PtrCast(res).As<TResource>());
 	res->AddOnLoadedListener([=](IResource* res) {
 		CheckAndSetLoaded();
 	});
