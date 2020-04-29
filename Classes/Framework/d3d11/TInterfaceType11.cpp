@@ -14,9 +14,9 @@ TBlobDataD3d11::TBlobDataD3d11(ID3DBlob* pBlob)
 {
 }
 
-void* TBlobDataD3d11::GetBufferPointer()
+char* TBlobDataD3d11::GetBufferPointer()
 {
-	return mBlob->GetBufferPointer();
+	return (char*)mBlob->GetBufferPointer();
 }
 
 size_t TBlobDataD3d11::GetBufferSize()
@@ -126,17 +126,17 @@ DXGI_FORMAT TTexture11::GetFormat()
 /********** TVertex11Buffer **********/
 int TVertexBuffer11::GetCount()
 {
-	return bufferSize / stride;
+	return hd.bufferSize / stride;
 }
 
 ID3D11Buffer*& TVertexBuffer11::GetBuffer11()
 {
-	return buffer;
+	return hd.buffer;
 }
 
 unsigned int TVertexBuffer11::GetBufferSize()
 {
-	return bufferSize;
+	return hd.bufferSize;
 }
 
 unsigned int TVertexBuffer11::GetStride()
@@ -152,12 +152,12 @@ unsigned int TVertexBuffer11::GetOffset()
 /********** TIndexBuffer **********/
 ID3D11Buffer*& TIndexBuffer11::GetBuffer11()
 {
-	return buffer;
+	return hd.buffer;
 }
 
 unsigned int TIndexBuffer11::GetBufferSize()
 {
-	return bufferSize;
+	return hd.bufferSize;
 }
 
 int TIndexBuffer11::GetWidth()
@@ -172,7 +172,7 @@ DXGI_FORMAT TIndexBuffer11::GetFormat()
 
 /********** TContantBuffer11 **********/
 TContantBuffer11::TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl)
-	: THardwareBuffer(__buffer, decl->bufferSize)
+	: hd(__buffer, decl->bufferSize)
 	, mDecl(decl)
 {
 }
@@ -184,12 +184,12 @@ TConstBufferDeclPtr TContantBuffer11::GetDecl()
 
 ID3D11Buffer*& TContantBuffer11::GetBuffer11()
 {
-	return buffer;
+	return hd.buffer;
 }
 
 unsigned int TContantBuffer11::GetBufferSize()
 {
-	return bufferSize;
+	return hd.bufferSize;
 }
 
 /********** TRenderTexture11 **********/
@@ -256,7 +256,7 @@ bool TRenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 	if (FAILED(result)) {
 		return false;
 	}
-	mRenderTargetPtr = std::make_shared<TTexture11>(mRenderTargetSRV, "RenderTexture");
+	mRenderTargetPtr = MakePtr<TTexture11>(mRenderTargetSRV, "RenderTexture");
 	mRenderTargetPtr->SetLoaded();
 	return true;
 }

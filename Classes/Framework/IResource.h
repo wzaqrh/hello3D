@@ -8,22 +8,17 @@ enum enResourceState {
 	E_RES_STATE_LOADED,
 	E_RES_STATE_UNLOADING
 };
-struct IResource {
+MIDL_INTERFACE("14542070-5390-402A-9655-0F162D1C6A74") 
+IResource : public IUnknown {
 	typedef std::function<void(IResource*)> Listener;
 	enResourceState mCurState;
 	std::vector<Listener> OnLoadeds;
-	std::vector<std::shared_ptr<IResource>> mDepends;
+	std::vector<ComPtr<IResource>> mDepends;
 public:
 	IResource();
-	bool IsLoaded() const {
-		return mCurState == E_RES_STATE_LOADED;
-	}
-	bool IsLoading() const {
-		return mCurState == E_RES_STATE_LOADING;
-	}
-	bool IsPrepared() const {
-		return mCurState >= E_RES_STATE_PREPARED;
-	}
+	bool IsLoaded() const { return mCurState == E_RES_STATE_LOADED; }
+	bool IsLoading() const { return mCurState == E_RES_STATE_LOADING; }
+	bool IsPrepared() const { return mCurState >= E_RES_STATE_PREPARED; }
 	void SetLoaded();
 public:
 	void SetCurState(enResourceState state);
@@ -33,6 +28,6 @@ public:
 	void AddOnLoadedListener(Listener lis);
 	virtual bool CheckLoaded() const;
 	void CheckAndSetLoaded();
-	void AddDependency(std::shared_ptr<IResource> res);
+	void AddDependency(ComPtr<IResource> res);
 };
-typedef std::shared_ptr<IResource> IResourcePtr;
+typedef ComPtr<IResource> IResourcePtr;

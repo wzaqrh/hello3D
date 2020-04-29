@@ -57,7 +57,7 @@ void IResource::CheckAndSetLoaded()
 	}
 }
 
-void IResource::AddDependency(std::shared_ptr<IResource> res)
+void IResource::AddDependency(ComPtr<IResource> res)
 {
 	mDepends.push_back(res);
 	res->AddOnLoadedListener([=](IResource* res) {

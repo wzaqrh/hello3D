@@ -13,7 +13,7 @@ TBlobDataStd::TBlobDataStd(const std::vector<char>& buffer)
 {
 }
 
-void* TBlobDataStd::GetBufferPointer()
+char* TBlobDataStd::GetBufferPointer()
 {
 	return mBuffer.empty() ? nullptr : &mBuffer[0];
 }
@@ -36,19 +36,6 @@ void TProgram::SetPixel(IPixelShaderPtr pPixel)
 	assert(pPixel);
 	mPixel = pPixel;
 	AddDependency(pPixel);
-}
-
-/********** IInputLayout **********/
-ID3D11InputLayout*& IInputLayout::GetLayout11()
-{
-	static ID3D11InputLayout* layout;
-	return layout;
-}
-
-IDirect3DVertexDeclaration9*& IInputLayout::GetLayout9()
-{
-	static IDirect3DVertexDeclaration9* layout;
-	return layout;
 }
 
 /********** ITexture **********/

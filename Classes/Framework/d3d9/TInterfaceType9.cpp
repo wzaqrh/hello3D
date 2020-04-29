@@ -1,3 +1,4 @@
+#include "TPredefine.h"
 #include "TInterfaceType9.h"
 #include "IRenderSystem.h"
 #include "Utility.h"
@@ -212,7 +213,6 @@ void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBuf
 {
 	for (size_t j = 0; j < decl.elements.size(); ++j) {
 		TConstBufferDeclElement& elem = decl.elements[j];
-		const char* pName = elem.name.c_str();
 #if 0
 		auto iter = decl.subDecls.find(elem.name);
 		if (iter != decl.subDecls.end()) {
@@ -295,9 +295,9 @@ TBlobDataD3d9::TBlobDataD3d9(ID3DXBuffer* pBlob)
 {
 }
 
-void* TBlobDataD3d9::GetBufferPointer()
+char* TBlobDataD3d9::GetBufferPointer()
 {
-	return mBlob->GetBufferPointer();
+	return (char*)mBlob->GetBufferPointer();
 }
 
 size_t TBlobDataD3d9::GetBufferSize()

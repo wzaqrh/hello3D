@@ -2,36 +2,23 @@
 #include "std.h"
 #include "TPredefine.h"
 
-template<class T>
-T clamp(T minVal, T maxVal, T v) {
-	return min(max(v, minVal),maxVal);
-}
-
-struct TINT4 {
-	int x, y, z, w;
-};
+template<class T> T clamp(T minVal, T maxVal, T v) { return min(max(v, minVal),maxVal); }
 
 struct TData {
 	void* data;
 	unsigned int dataSize;
 	TData(void* __data, unsigned int __dataSize);
 };
-template <class T>
-inline TData make_data(const T& v) {
-	return TData((void*)&v, sizeof(v));
-}
+template <class T> inline TData make_data(const T& v) { return TData((void*)&v, sizeof(v)); }
 
-__declspec(align(16)) struct TCameraBase {
+__declspec(align(16)) 
+struct TCameraBase {
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 public:
-	void* operator new(size_t i){
-		return _mm_malloc(i,16);
-	}
-	void operator delete(void* p) {
-		_mm_free(p);
-	}
+	void* operator new(size_t i){ return _mm_malloc(i,16); }
+	void operator delete(void* p) { _mm_free(p); }
 	TCameraBase();
 public:
 	XMFLOAT3 CalNDC(XMFLOAT3 pos);
@@ -177,5 +164,3 @@ public:
 typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
 
 #include "TPredefine.h"
-//#include "TInterfaceType.h"
-//#include "TMaterial.h"

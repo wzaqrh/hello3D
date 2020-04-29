@@ -4,9 +4,6 @@
     <ClCompile Include="Classes\Framework\TApp.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Framework\TBaseTypes.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Model\TMesh.cpp">
       <Filter>Classes\Model</Filter>
     </ClCompile>
@@ -37,9 +34,6 @@
     <ClCompile Include="Classes\Lessons\Lesson7.cpp">
       <Filter>Classes\Lessons</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Framework\TInterfaceType.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Framework\TMovable.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
@@ -51,9 +45,6 @@
     </ClCompile>
     <ClCompile Include="Classes\Framework\d3d11\TRenderSystem11.cpp">
       <Filter>Classes\Framework\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\IRenderSystem.cpp">
-      <Filter>Classes\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Classes\Framework\d3d9\TRenderSystem9.cpp">
       <Filter>Classes\Framework\d3d9</Filter>
@@ -97,12 +88,18 @@
     <ClCompile Include="Classes\Lessons\Lesson0_1.cpp">
       <Filter>Classes\Lessons</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Framework\IRenderSystem.cpp">
+      <Filter>Classes\Framework\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TInterfaceType.cpp">
+      <Filter>Classes\Framework\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Framework\TBaseTypes.cpp">
+      <Filter>Classes\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TBaseTypes.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Framework\std.h">
@@ -135,9 +132,6 @@
     <ClInclude Include="Classes\Lessons\Lesson7.h">
       <Filter>Classes\Lessons</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Framework\TInterfaceType.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Framework\TMovable.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
@@ -147,14 +141,8 @@
     <ClInclude Include="Classes\Framework\TThreadPump.h">
       <Filter>Classes\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Framework\TPredefine.h">
-      <Filter>Classes</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Framework\d3d11\TRenderSystem11.h">
       <Filter>Classes\Framework\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\IRenderSystem.h">
-      <Filter>Classes\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Framework\d3d9\TRenderSystem9.h">
       <Filter>Classes\Framework\d3d9</Filter>
@@ -204,6 +192,21 @@
     <ClInclude Include="Classes\Lessons\Lesson0_1.h">
       <Filter>Classes\Lessons</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\Framework\IRenderSystem.h">
+      <Filter>Classes\Framework\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TInterfaceType.h">
+      <Filter>Classes\Framework\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TBaseTypes.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\TPredefine.h">
+      <Filter>Classes\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Framework\ComBase.h">
+      <Filter>Classes\Framework\interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Classes">
@@ -238,6 +241,9 @@
     </Filter>
     <Filter Include="Classes\Utility">
       <UniqueIdentifier>{af3d38b9-c3eb-47d9-932c-8e801eb59167}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Framework\interface">
+      <UniqueIdentifier>{b02729df-1074-414c-9d44-45b12a062288}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

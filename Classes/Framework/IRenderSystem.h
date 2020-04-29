@@ -2,8 +2,16 @@
 #include "TBaseTypes.h"
 #include "TPredefine.h"
 
+//MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
+//IRenderSystem
+//{
+//
+//};
+
 class TD3DInput;
-__declspec(align(16)) class IRenderSystem
+__declspec(align(16)) 
+MIDL_INTERFACE("BF1920DB-54DB-42D2-AAA5-8E2F91482B7B") 
+IRenderSystem
 {
 protected:
 	std::map<std::string, ITexturePtr> mTexByPath;

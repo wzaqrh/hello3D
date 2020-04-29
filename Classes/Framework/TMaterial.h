@@ -65,7 +65,8 @@ public:
 };
 typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
-struct TMaterial : public IResource {
+struct INHERIT_COM("04059656-CA19-432B-BBEC-41E46EFB8CCD")
+TMaterial : public ComBase<IResource> {
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:

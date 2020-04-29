@@ -26,92 +26,46 @@ struct cbGlobalParam;
 struct TConstBufferDeclElement;
 struct TConstBufferDecl;
 typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
+
 //TInterfaceType.h
 struct IResource;
 
 struct IVertexShader;
-typedef std::shared_ptr<IVertexShader> IVertexShaderPtr;
-
-struct TVertexShader9;
-typedef std::shared_ptr<TVertexShader9> TVertexShader9Ptr;
-
-struct TVertexShader11;
-typedef std::shared_ptr<TVertexShader11> TVertexShader11Ptr;
+typedef ComPtr<IVertexShader> IVertexShaderPtr;
 
 struct IPixelShader;
-typedef std::shared_ptr<IPixelShader> IPixelShaderPtr;
-
-struct TPixelShader9;
-typedef std::shared_ptr<TPixelShader9> TPixelShader9Ptr;
-
-struct TPixelShader11;
-typedef std::shared_ptr<TPixelShader11> TPixelShader11Ptr;
+typedef ComPtr<IPixelShader> IPixelShaderPtr;
 
 struct TProgram;
-typedef std::shared_ptr<TProgram> TProgramPtr;
+typedef ComPtr<TProgram> TProgramPtr;
 
 struct IInputLayout;
-typedef std::shared_ptr<IInputLayout> IInputLayoutPtr;
-
-struct TInputLayout9;
-typedef std::shared_ptr<TInputLayout9> TInputLayout9Ptr;
-
-struct TInputLayout11;
-typedef std::shared_ptr<TInputLayout11> TInputLayoutPtr;
+typedef ComPtr<IInputLayout> IInputLayoutPtr;
 
 struct IHardwareBuffer;
 struct THardwareBuffer;
 
 struct IVertexBuffer;
-typedef std::shared_ptr<IVertexBuffer> IVertexBufferPtr;
-
-struct TVertexBuffer9;
-typedef std::shared_ptr<TVertexBuffer9> TVertexBuffer9Ptr;
-
-struct TVertexBuffer11;
-typedef std::shared_ptr<TVertexBuffer11> TVertexBuffer11Ptr;
+typedef ComPtr<IVertexBuffer> IVertexBufferPtr;
 
 struct IIndexBuffer;
-typedef std::shared_ptr<IIndexBuffer> IIndexBufferPtr;
-
-struct TIndexBuffer11;
-typedef std::shared_ptr<TIndexBuffer11> TIndexBufferPtr;
+typedef ComPtr<IIndexBuffer> IIndexBufferPtr;
 
 struct IContantBuffer;
-typedef std::shared_ptr<IContantBuffer> IContantBufferPtr;
-
-struct TContantBuffer9;
-typedef std::shared_ptr<TContantBuffer9> TContantBuffer9Ptr;
-
-struct TContantBuffer11;
-typedef std::shared_ptr<TContantBuffer11> TContantBuffer11Ptr;
+typedef ComPtr<IContantBuffer> IContantBufferPtr;
 
 struct ITexture;
-typedef std::shared_ptr<ITexture> ITexturePtr;
-
-struct TTexture11;
-typedef std::shared_ptr<TTexture11> TTexture11Ptr;
-
-struct TTextureBySlot;
-typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
+typedef ComPtr<ITexture> ITexturePtr;
 
 struct IRenderTexture;
-typedef std::shared_ptr<IRenderTexture> IRenderTexturePtr;
-
-class TRenderTexture11;
-typedef std::shared_ptr<TRenderTexture11> TRenderTexturePtr;
-
-class TRenderTexture9;
-typedef std::shared_ptr<TRenderTexture9> TRenderTexture9Ptr;
+typedef ComPtr<IRenderTexture> IRenderTexturePtr;
 
 struct ISamplerState;
-typedef std::shared_ptr<ISamplerState> ISamplerStatePtr;
+typedef ComPtr<ISamplerState> ISamplerStatePtr;
 
-struct TSamplerState9;
-typedef std::shared_ptr<TSamplerState9> TSamplerState9Ptr;
-
-struct TSamplerState11;
-typedef std::shared_ptr<TSamplerState11> TSamplerState11Ptr;
+/////
+struct TTextureBySlot;
+typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
 
 struct TRenderOperation;
 struct TRenderOperationQueue;
