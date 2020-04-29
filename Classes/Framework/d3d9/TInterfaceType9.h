@@ -91,12 +91,8 @@ public:
 	STDMETHODIMP_(IResourcePtr) AsRes() override {
 		return mRes;
 	}
-	void SetVertex(TVertexShader9Ptr pVertex) {
-		mVertex = pVertex;
-	}
-	void SetPixel(TPixelShader9Ptr pPixel) {
-		mPixel = pPixel;
-	}
+	void SetVertex(TVertexShader9Ptr pVertex);
+	void SetPixel(TPixelShader9Ptr pPixel);
 	STDMETHODIMP_(IVertexShaderPtr) GetVertex() override {
 		return mVertex;
 	}

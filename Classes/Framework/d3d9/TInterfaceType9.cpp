@@ -338,3 +338,12 @@ TProgram9::TProgram9()
 {
 	mRes = MakePtr<TResource>((IUnknown**)0);
 }
+
+void TProgram9::SetVertex(TVertexShader9Ptr pVertex) {
+	mVertex = pVertex;
+	mRes->AddDependency(pVertex->AsRes());
+}
+void TProgram9::SetPixel(TPixelShader9Ptr pPixel) {
+	mPixel = pPixel;
+	mRes->AddDependency(pPixel->AsRes());
+}

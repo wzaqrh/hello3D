@@ -470,8 +470,8 @@ void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
 	TProgram9Ptr program = PtrCast(pass->mProgram).As<TProgram9>();
-	TPixelShader9* ps = static_cast<TPixelShader9*>(program->mPixel.Get());
-	TVertexShader9* vs = static_cast<TVertexShader9*>(program->mVertex.Get());
+	TPixelShader9* ps = program->mPixel.Get();
+	TVertexShader9* vs = program->mVertex.Get();
 
 	if (pass->mConstantBuffers.size() > 0) {
 		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
