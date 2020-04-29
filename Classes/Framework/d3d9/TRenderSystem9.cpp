@@ -384,7 +384,7 @@ ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FIL
 	return ret;
 }
 
-IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr)
+IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram9* _, const std::vector<D3DVERTEXELEMENT9>& descArr)
 {
 	IDirect3DVertexDeclaration9* ret = nullptr;
 	if (CheckHR(mDevice9->CreateVertexDeclaration(&descArr[0], &ret))) return nullptr;
@@ -405,7 +405,7 @@ IInputLayoutPtr TRenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_E
 	}
 	else {
 		resource->AddOnLoadedListener([=](IResource* res) {
-			ret->mLayout = _CreateInputLayout(static_cast<TProgram9*>(PtrCast<IResource, IProgram>(res)), ret->mInputDescs);
+			ret->mLayout = _CreateInputLayout(PtrCast(pProgram).As<TProgram9>(), ret->mInputDescs);
 			res->SetLoaded();
 		});
 	}

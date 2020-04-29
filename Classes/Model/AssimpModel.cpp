@@ -175,6 +175,7 @@ void AssimpModel::LoadModel(const std::string& imgPath)
 		mScene = mImporter->ReadFile(imgPath, ImportFlags);
 	}
 
+	assert(mScene != nullptr);
 	for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
 		const aiMesh* mesh = mScene->mMeshes[i];
 		for (unsigned int n = 0; n < mesh->mNumBones; ++n) {

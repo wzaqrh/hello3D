@@ -248,7 +248,7 @@ IInputLayoutPtr TRenderSystem11::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_
 	}
 	else {
 		resource->AddOnLoadedListener([=](IResource* res) {
-			ret->mLayout = _CreateInputLayout(static_cast<TProgram11*>(PtrCast<IResource, IProgram>(res)), ret->mInputDescs);
+			ret->mLayout = _CreateInputLayout(PtrCast(pProgram).As<TProgram11>(), ret->mInputDescs);
 			res->SetLoaded();
 		});
 	}

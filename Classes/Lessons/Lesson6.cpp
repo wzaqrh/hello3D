@@ -101,9 +101,9 @@ void Lesson6::OnPostInitDevice()
 	}
 #else
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL);
-	//auto fileName = "Male02.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
+	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
-	auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
+	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
 #endif
 }
 

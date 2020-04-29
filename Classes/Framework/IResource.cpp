@@ -18,7 +18,7 @@ void TResource::SetCurState(enResourceState state)
 
 IUnknown** TResource::GetDeviceObject()
 {
-	return nullptr;
+	return mDeviceObj;
 }
 
 void TResource::AddOnLoadedListener(std::function<void(IResource*)> lis)
