@@ -18,8 +18,6 @@ public:
 	ITexturePtr& operator[](size_t pos);
 public:
 	void Merge(const TTextureBySlot& other);
-
-	std::vector<ID3D11ShaderResourceView*> GetTextureViews11() const;
 };
 typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
 

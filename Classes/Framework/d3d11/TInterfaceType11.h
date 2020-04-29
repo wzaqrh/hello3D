@@ -17,8 +17,13 @@ TInputLayout11 : public ComBase<IInputLayout>{
 public:
 	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
 	ID3D11InputLayout* mLayout = nullptr;
+	TResourcePtr mRes;
 public:
+	TInputLayout11();
 	ID3D11InputLayout*& GetLayout11();
+	STDMETHODIMP_(IResourcePtr) AsRes() override {
+		return mRes;
+	}
 };
 typedef ComPtr<TInputLayout11> TInputLayout11Ptr;
 
@@ -27,12 +32,15 @@ TVertexShader11 : public ComBase<IVertexShader>{
 	ID3D11VertexShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
+	TResourcePtr mRes;
 public:
 	TVertexShader11(IBlobDataPtr pBlob);
-	virtual IUnknown*& GetDeviceObject() override;
+	STDMETHODIMP_(IResourcePtr) AsRes() override {
+		return mRes;
+	}
 
-	virtual IBlobDataPtr GetBlob();
-	virtual ID3D11VertexShader*& GetShader11();
+	STDMETHODIMP_(IBlobDataPtr) GetBlob() override;
+	ID3D11VertexShader*& GetShader11();
 };
 typedef ComPtr<TVertexShader11> TVertexShader11Ptr;
 
@@ -41,14 +49,42 @@ TPixelShader11 : public ComBase<IPixelShader> {
 	ID3D11PixelShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
+	TResourcePtr mRes;
 public:
 	TPixelShader11(IBlobDataPtr pBlob);
-	virtual IUnknown*& GetDeviceObject() override;
+	STDMETHODIMP_(IResourcePtr) AsRes() override {
+		return mRes;
+	}
 
-	virtual IBlobDataPtr GetBlob() override;
-	virtual ID3D11PixelShader*& GetShader11() override;
+	STDMETHODIMP_(IBlobDataPtr) GetBlob() override;
+	ID3D11PixelShader*& GetShader11();
 };
 typedef ComPtr<TPixelShader11> TPixelShader11Ptr;
+
+struct INHERIT_COM("9D141D12-7F62-4EB5-9C65-07E42DB96408")
+TProgram11 : public ComBase<IProgram> {
+	TVertexShader11Ptr mVertex;
+	TPixelShader11Ptr mPixel;
+	TResourcePtr mRes;
+public:
+	TProgram11();
+	STDMETHODIMP_(IResourcePtr) AsRes() override {
+		return mRes;
+	}
+	void SetVertex(TVertexShader11Ptr pVertex) {
+		mVertex = pVertex;
+	}
+	void SetPixel(TPixelShader11Ptr pPixel) {
+		mPixel = pPixel;
+	}
+	STDMETHODIMP_(IVertexShaderPtr) GetVertex() override {
+		return mVertex;
+	}
+	STDMETHODIMP_(IPixelShaderPtr) GetPixel() override {
+		return mPixel;
+	}
+};
+typedef ComPtr<TProgram11> TProgram11Ptr;
 
 /********** HardwareBuffer **********/
 struct THardwareBuffer {
@@ -69,11 +105,14 @@ public:
 	TVertexBuffer11() :stride(0), offset(0) {};
 	int GetCount();
 public:
-	virtual ID3D11Buffer*& GetBuffer11() override;
-	virtual unsigned int GetBufferSize() override;
+	ID3D11Buffer*& GetBuffer11();
+	STDMETHODIMP_(unsigned int) GetBufferSize() override;
+	STDMETHODIMP_(enHardwareBufferType) GetType() override {
+		return E_HWBUFFER_VERTEX;
+	}
 
-	virtual unsigned int GetStride() override;
-	virtual unsigned int GetOffset() override;
+	STDMETHODIMP_(unsigned int) GetStride() override;
+	STDMETHODIMP_(unsigned int) GetOffset() override;
 };
 typedef ComPtr<TVertexBuffer11> TVertexBuffer11Ptr;
 
@@ -86,11 +125,14 @@ public:
 		:hd(__buffer, __bufferSize), format(__format) {};
 	TIndexBuffer11() :format(DXGI_FORMAT_UNKNOWN) {};
 public:
-	virtual ID3D11Buffer*& GetBuffer11() override;
-	virtual unsigned int GetBufferSize() override;
+	ID3D11Buffer*& GetBuffer11();
+	STDMETHODIMP_(unsigned int) GetBufferSize() override;
+	STDMETHODIMP_(enHardwareBufferType) GetType() override {
+		return E_HWBUFFER_INDEX;
+	}
 
-	virtual int GetWidth() override;
-	virtual DXGI_FORMAT GetFormat() override;
+	STDMETHODIMP_(int) GetWidth() override;
+	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
 };
 typedef ComPtr<TIndexBuffer11> TIndexBuffer11Ptr;
 
@@ -102,10 +144,13 @@ public:
 	TContantBuffer11() {}
 	TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl);
 public:
-	virtual TConstBufferDeclPtr GetDecl();
+	STDMETHODIMP_(TConstBufferDeclPtr) GetDecl() override;
+	STDMETHODIMP_(enHardwareBufferType) GetType() override {
+		return E_HWBUFFER_CONSTANT;
+	}
 
-	virtual ID3D11Buffer*& GetBuffer11() override;
-	virtual unsigned int GetBufferSize() override;
+	ID3D11Buffer*& GetBuffer11();
+	STDMETHODIMP_(unsigned int) GetBufferSize() override;
 };
 typedef ComPtr<TContantBuffer11> TContantBuffer11Ptr;
 
@@ -115,17 +160,23 @@ TTexture11 : public ComBase<ITexture> {
 private:
 	std::string path;
 	ID3D11ShaderResourceView *texture;
+	IResourcePtr mRes;
 public:
 	TTexture11(ID3D11ShaderResourceView* __texture, std::string __path);
-	virtual IUnknown*& GetDeviceObject() override;
+	STDMETHODIMP_(IResourcePtr) AsRes() override {
+		return mRes;
+	}
 
+	STDMETHODIMP_(bool) HasSRV() override {
+		return texture != nullptr;
+	}
 	void SetSRV11(ID3D11ShaderResourceView* __texture);
 	ID3D11ShaderResourceView*& GetSRV11();
 
-	const std::string& GetPath() const;
-	int GetWidth();
-	int GetHeight();
-	DXGI_FORMAT GetFormat();
+	STDMETHODIMP_(const char*) GetPath() override;
+	STDMETHODIMP_(int) GetWidth() override;
+	STDMETHODIMP_(int) GetHeight() override;
+	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 };
@@ -145,10 +196,10 @@ private:
 	DXGI_FORMAT mFormat;
 public:
 	TRenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-	virtual ITexturePtr GetColorTexture() override;
+	STDMETHODIMP_(ITexturePtr) GetColorTexture() override;
 
-	virtual ID3D11RenderTargetView*& GetColorBuffer11() override;
-	virtual ID3D11DepthStencilView*& GetDepthStencilBuffer11() override;
+	ID3D11RenderTargetView*& GetColorBuffer11();
+	ID3D11DepthStencilView*& GetDepthStencilBuffer11();
 private:
 	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
 	bool InitRenderTextureView(ID3D11Device* pDevice);
@@ -164,6 +215,6 @@ TSamplerState11 : public ComBase<ISamplerState> {
 	ID3D11SamplerState* mSampler = nullptr;
 public:
 	TSamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
-	virtual ID3D11SamplerState*& GetSampler11() override;
+	ID3D11SamplerState*& GetSampler11();
 };
 typedef ComPtr<TSamplerState11> TSamplerState11Ptr;

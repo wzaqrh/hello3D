@@ -204,8 +204,9 @@ IRenderTexturePtr TRenderSystem11::CreateRenderTexture(int width, int height, DX
 
 void TRenderSystem11::_ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
 {
-	mDeviceContext->ClearRenderTargetView(rendTarget->GetColorBuffer11(), (const float*)&color);
-	mDeviceContext->ClearDepthStencilView(rendTarget->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, Depth, Stencil);
+	auto target11 = PtrCast(rendTarget).As<TRenderTexture11>();
+	mDeviceContext->ClearRenderTargetView(target11->GetColorBuffer11(), (const float*)&color);
+	mDeviceContext->ClearDepthStencilView(target11->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, Depth, Stencil);
 }
 
 void TRenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
@@ -213,9 +214,9 @@ void TRenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
 	ID3D11ShaderResourceView* TextureNull = nullptr;
 	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
 
-	//ID3D11RenderTargetView* renderTargetView = mRenderTargetView;
-	mCurRenderTargetView = rendTarget != nullptr ? rendTarget->GetColorBuffer11() : mBackRenderTargetView;
-	mCurDepthStencilView = rendTarget != nullptr ? rendTarget->GetDepthStencilBuffer11() : mBackDepthStencilView;
+	auto target11 = PtrCast(rendTarget).As<TRenderTexture11>();
+	mCurRenderTargetView = target11 != nullptr ? target11->GetColorBuffer11() : mBackRenderTargetView;
+	mCurDepthStencilView = target11 != nullptr ? target11->GetDepthStencilBuffer11() : mBackDepthStencilView;
 	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
 }
 
@@ -224,7 +225,7 @@ TMaterialPtr TRenderSystem11::CreateMaterial(std::string name, std::function<voi
 	return mMaterialFac->GetMaterial(name, callback);
 }
 
-ID3D11InputLayout* TRenderSystem11::_CreateInputLayout(TProgram* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr)
+ID3D11InputLayout* TRenderSystem11::_CreateInputLayout(TProgram11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr)
 {
 	ID3D11InputLayout* pVertexLayout;
 	auto blob = pProgram->mVertex->GetBlob();
@@ -235,33 +236,37 @@ ID3D11InputLayout* TRenderSystem11::_CreateInputLayout(TProgram* pProgram, const
 	}
 	return pVertexLayout;
 }
-IInputLayoutPtr TRenderSystem11::CreateLayout(TProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+IInputLayoutPtr TRenderSystem11::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
 	TInputLayout11Ptr ret = new TInputLayout11;
 	ret->mInputDescs.assign(descArray, descArray + descCount);
-	if (pProgram->IsLoaded()) {
-		ret->mLayout = _CreateInputLayout(pProgram.Get(), ret->mInputDescs);
-		ret->SetLoaded();
+
+	auto resource = pProgram->AsRes();
+	if (resource->IsLoaded()) {
+		ret->mLayout = _CreateInputLayout(PtrCast(pProgram).As<TProgram11>(), ret->mInputDescs);
+		resource->SetLoaded();
 	}
 	else {
-		pProgram->AddOnLoadedListener([=](IResource* program) {
-			ret->mLayout = _CreateInputLayout(static_cast<TProgram*>(program), ret->mInputDescs);
-			ret->SetLoaded();
+		resource->AddOnLoadedListener([=](IResource* res) {
+			ret->mLayout = _CreateInputLayout(static_cast<TProgram11*>(PtrCast<IResource, IProgram>(res)), ret->mInputDescs);
+			res->SetLoaded();
 		});
 	}
 	return ret;
 }
 
-bool TRenderSystem11::UpdateBuffer(IHardwareBuffer* buffer, void* data, int dataSize)
+bool TRenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
 {
-	assert(buffer);
+	assert(buffer != nullptr);
 	HRESULT hr = S_OK;
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	hr = (mDeviceContext->Map(buffer->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+	IContantBufferPtr cbuffer = PtrCast(buffer).Cast<IContantBuffer>();
+	TContantBuffer11Ptr cbuffer11 = PtrCast(cbuffer).As<TContantBuffer11>();
+	hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
 	if (CheckHR(hr))
 		return false;
 	memcpy(MappedResource.pData, data, dataSize);
-	mDeviceContext->Unmap(buffer->GetBuffer11(), 0);
+	mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
 	return true;
 }
 
@@ -311,7 +316,7 @@ bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
 	}
 	return ret;
 }
-IPixelShaderPtr TRenderSystem11::_CreatePS(const char* filename, const char* szEntry, bool async)
+TPixelShader11Ptr TRenderSystem11::_CreatePS(const char* filename, const char* szEntry, bool async)
 {
 	TPixelShader11Ptr ret = new TPixelShader11(ComPtr<TBlobDataD3d11>(new TBlobDataD3d11(nullptr)));
 	szEntry = szEntry ? szEntry : "PS";
@@ -320,17 +325,17 @@ IPixelShaderPtr TRenderSystem11::_CreatePS(const char* filename, const char* szE
 
 	HRESULT hr;
 	if (async) {
-		hr = mThreadPump->AddWorkItem(ret, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
+		hr = mThreadPump->AddWorkItem(ret->AsRes(), [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
 			const D3D10_SHADER_MACRO* pDefines = nullptr;
 			LPD3D10INCLUDE pInclude = new TIncludeStdio("shader\\");
 			return D3DX11CompileFromFileA(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, pump,
 				&static_cast<TBlobDataD3d11*>(ret->mBlob.Get())->mBlob, &ret->mErrBlob, (HRESULT*)&entry->hr);
 		}, [=](IResource* res, HRESULT hr) {
 			if (!FAILED(hr)) {
-				TPixelShader11* ret = static_cast<TPixelShader11*>(res);
+				//TPixelShader11* ret = static_cast<TPixelShader11*>(res);
 				assert(dynamic_cast<TVertexShader11*>(res) && ret->mBlob);
 				if (!CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
-					ret->SetLoaded();
+					res->SetLoaded();
 				}
 			}
 			else {
@@ -344,7 +349,7 @@ IPixelShaderPtr TRenderSystem11::_CreatePS(const char* filename, const char* szE
 			&static_cast<TBlobDataD3d11*>(ret->mBlob.Get())->mBlob, &ret->mErrBlob, NULL);
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
-			ret->SetLoaded();
+			ret->AsRes()->SetLoaded();
 		}
 		else {
 			ret = nullptr;
@@ -353,7 +358,7 @@ IPixelShaderPtr TRenderSystem11::_CreatePS(const char* filename, const char* szE
 	return ret;
 }
 
-IPixelShaderPtr TRenderSystem11::_CreatePSByFXC(const char* filename)
+TPixelShader11Ptr TRenderSystem11::_CreatePSByFXC(const char* filename)
 {
 	TPixelShader11Ptr ret = MakePtr<TPixelShader11>(nullptr);
 	std::vector<char> buffer = ReadFile(filename, "rb");
@@ -361,7 +366,7 @@ IPixelShaderPtr TRenderSystem11::_CreatePSByFXC(const char* filename)
 		ret->mBlob = ComPtr<IBlobData>(new TBlobDataStd(buffer));
 		HRESULT hr = mDevice->CreatePixelShader(&buffer[0], buffer.size(), NULL, &ret->mShader);
 		if (!FAILED(hr)) {
-			ret->SetLoaded();
+			ret->AsRes()->SetLoaded();
 		}
 		else {
 			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
@@ -375,7 +380,7 @@ IPixelShaderPtr TRenderSystem11::_CreatePSByFXC(const char* filename)
 	return ret;
 }
 
-IVertexShaderPtr TRenderSystem11::_CreateVS(const char* filename, const char* szEntry, bool async)
+TVertexShader11Ptr TRenderSystem11::_CreateVS(const char* filename, const char* szEntry, bool async)
 {
 	TVertexShader11Ptr ret = MakePtr<TVertexShader11>(MakePtr<TBlobDataD3d11>(nullptr));
 	szEntry = szEntry ? szEntry : "VS";
@@ -391,12 +396,12 @@ IVertexShaderPtr TRenderSystem11::_CreateVS(const char* filename, const char* sz
 		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0,
 			&PtrCast(ret->mBlob).As<TBlobDataD3d11>()->mBlob, &ret->mErrBlob, &pProcessor))
 			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename, &pDataLoader))) {
-			hr = mThreadPump->AddWorkItem(ret, pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
+			hr = mThreadPump->AddWorkItem(ret->AsRes(), pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
 				if (!FAILED(hr))  {
-					TVertexShader11* ret = static_cast<TVertexShader11*>(res);
+					//TVertexShader11* ret = static_cast<TVertexShader11*>(res);
 					assert(dynamic_cast<TVertexShader11*>(res) && ret->mBlob);
 					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
-						ret->SetLoaded();
+						res->SetLoaded();
 					}
 				}
 				else {
@@ -411,7 +416,7 @@ IVertexShaderPtr TRenderSystem11::_CreateVS(const char* filename, const char* sz
 			&PtrCast(ret->mBlob).As<TBlobDataD3d11>()->mBlob, &ret->mErrBlob, NULL);
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
-			ret->SetLoaded();
+			ret->AsRes()->SetLoaded();
 		}
 		else {
 			ret = nullptr;
@@ -420,7 +425,7 @@ IVertexShaderPtr TRenderSystem11::_CreateVS(const char* filename, const char* sz
 	return ret;
 }
 
-IVertexShaderPtr TRenderSystem11::_CreateVSByFXC(const char* filename)
+TVertexShader11Ptr TRenderSystem11::_CreateVSByFXC(const char* filename)
 {
 	TVertexShader11Ptr ret = MakePtr<TVertexShader11>(nullptr);
 	std::vector<char> buffer = ReadFile(filename, "rb");
@@ -429,7 +434,7 @@ IVertexShaderPtr TRenderSystem11::_CreateVSByFXC(const char* filename)
 		auto buffer_size = buffer.size();
 		HRESULT hr = mDevice->CreateVertexShader(&buffer[0], buffer_size, NULL, &ret->mShader);
 		if (!FAILED(hr)) {
-			ret->SetLoaded();
+			ret->AsRes()->SetLoaded();
 		}
 		else {
 			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
@@ -443,21 +448,21 @@ IVertexShaderPtr TRenderSystem11::_CreateVSByFXC(const char* filename)
 	return ret;
 }
 
-TProgramPtr TRenderSystem11::CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
+IProgramPtr TRenderSystem11::CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
 {
 	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
-	TProgramPtr program = MakePtr<TProgram>();
+	TProgram11Ptr program = MakePtr<TProgram11>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry, false));
 	program->SetPixel(_CreatePS(psPath, psEntry, false));
-	program->CheckAndSetLoaded();
+	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
-TProgramPtr TRenderSystem11::CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry)
+IProgramPtr TRenderSystem11::CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
-	TProgramPtr program = MakePtr<TProgram>();
+	TProgram11Ptr program = MakePtr<TProgram11>();
 
 	vsEntry = vsEntry ? vsEntry : "VS";
 	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
@@ -467,7 +472,7 @@ TProgramPtr TRenderSystem11::CreateProgramByFXC(const std::string& name, const c
 	std::string psName = (name)+"_" + psEntry + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
-	program->CheckAndSetLoaded();
+	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
@@ -527,7 +532,7 @@ void TRenderSystem11::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 {
 	UINT stride = vertexBuffer->GetStride();
 	UINT offset = vertexBuffer->GetOffset();
-	mDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer->GetBuffer11(), &stride, &offset);
+	mDeviceContext->IASetVertexBuffers(0, 1, &PtrCast(vertexBuffer).As<TVertexBuffer11>()->GetBuffer11(), &stride, &offset);
 }
 
 IIndexBufferPtr TRenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
@@ -557,7 +562,7 @@ IIndexBufferPtr TRenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT f
 void TRenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
 	if (indexBuffer) {
-		mDeviceContext->IASetIndexBuffer(indexBuffer->GetBuffer11(), indexBuffer->GetFormat(), 0);
+		mDeviceContext->IASetIndexBuffer(PtrCast(indexBuffer).As<TIndexBuffer11>()->GetBuffer11(), indexBuffer->GetFormat(), 0);
 	}
 	else {
 		mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
@@ -593,7 +598,7 @@ IContantBufferPtr TRenderSystem11::CloneConstBuffer(IContantBufferPtr buffer)
 
 void TRenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
 {
-	mDeviceContext->UpdateSubresource(buffer->GetBuffer11(), 0, NULL, data, 0, 0);
+	mDeviceContext->UpdateSubresource(PtrCast(buffer).As<TContantBuffer11>()->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
 ITexturePtr TRenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
@@ -618,15 +623,16 @@ ITexturePtr TRenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT fo
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != DXGI_FORMAT_UNKNOWN ? &LoadInfo : nullptr;
 
 		pTextureRV = MakePtr<TTexture11>(nullptr, imgPath);
+		IResourcePtr resource = pTextureRV->AsRes();
 		HRESULT hr;
 		if (async) {
-			hr = mThreadPump->AddWorkItem(pTextureRV, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
-				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, &pTextureRV->GetSRV11(), NULL);
+			hr = mThreadPump->AddWorkItem(resource, [&](ID3DX11ThreadPump* pump, TThreadPumpEntryPtr entry)->HRESULT {
+				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, &PtrCast(pTextureRV).As<TTexture11>()->GetSRV11(), NULL);
 			}, ResourceSetLoaded);
 		}
 		else {
-			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, nullptr, &pTextureRV->GetSRV11(), NULL);
-			pTextureRV->SetLoaded();
+			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, nullptr, &PtrCast(pTextureRV).As<TTexture11>()->GetSRV11(), NULL);
+			resource->SetLoaded();
 		}
 		if (CheckHR(hr)) {
 			pTextureRV = nullptr;
@@ -680,13 +686,13 @@ void TRenderSystem11::SetDepthState(const TDepthState& depthState)
 static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<TContantBufferInfo>& bufferInfos) {
 	std::vector<ID3D11Buffer*> ret;
 	for (auto& iter : bufferInfos)
-		ret.push_back(iter.buffer->GetBuffer11());
+		ret.push_back(PtrCast(iter.buffer).As<TContantBuffer11>()->GetBuffer11());
 	return ret;
 }
 static std::vector<ID3D11SamplerState*> GetSampler11List(const std::vector<ISamplerStatePtr>& samplers) {
 	std::vector<ID3D11SamplerState*> ret;
 	for (auto& iter : samplers)
-		ret.push_back(iter->GetSampler11());
+		ret.push_back(PtrCast(iter).As<TSamplerState11>()->GetSampler11());
 	return ret;
 }
 
@@ -695,8 +701,8 @@ void TRenderSystem11::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
 	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
 
-	mDeviceContext->VSSetShader(pass->mProgram->mVertex->GetShader11(), NULL, 0);
-	mDeviceContext->PSSetShader(pass->mProgram->mPixel->GetShader11(), NULL, 0);
+	mDeviceContext->VSSetShader(PtrCast(pass->mProgram->GetVertex()).As<TVertexShader11>()->GetShader11(), NULL, 0);
+	mDeviceContext->PSSetShader(PtrCast(pass->mProgram->GetPixel()).As<TPixelShader11>()->GetShader11(), NULL, 0);
 
 	mDeviceContext->VSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
 	mDeviceContext->PSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
@@ -708,6 +714,17 @@ void TRenderSystem11::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 		std::vector<ID3D11SamplerState*> passSamplers = GetSampler11List(pass->mSamplers);
 		mDeviceContext->PSSetSamplers(0, passSamplers.size(), &passSamplers[0]);
 	}
+}
+
+std::vector<ID3D11ShaderResourceView*> GetTextureViews11(std::vector<ITexturePtr>& textures) {
+	std::vector<ID3D11ShaderResourceView*> views(textures.size());
+	for (int i = 0; i < views.size(); ++i) {
+		auto iTex = PtrCast(textures[i]).As<TTexture11>();
+		if (iTex != nullptr) {
+			views[i] = iTex->GetSRV11();
+		}
+	}
+	return views;
 }
 
 void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
@@ -731,7 +748,7 @@ void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int it
 
 	{
 		if (textures.size() > 0) {
-			std::vector<ID3D11ShaderResourceView*> texViews = textures.GetTextureViews11();
+			std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures.textures);
 			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 		}
 
@@ -824,16 +841,16 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		ID3D11ShaderResourceView* depthMapView = mShadowPassRT->GetColorTexture()->GetSRV11();
+		ID3D11ShaderResourceView* depthMapView = PtrCast(mShadowPassRT->GetColorTexture()).As<TTexture11>()->GetSRV11();
 		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
 
 		if (mSkyBox && mSkyBox->mCubeSRV) {
-			auto texture = mSkyBox->mCubeSRV->GetSRV11();
+			auto texture = PtrCast(mSkyBox->mCubeSRV).As<TTexture11>()->GetSRV11();
 			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &texture);
 		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		ID3D11ShaderResourceView* pSRV = mPostProcessRT->GetColorTexture()->GetSRV11();
+		ID3D11ShaderResourceView* pSRV = PtrCast(mPostProcessRT->GetColorTexture()).As<TTexture11>()->GetSRV11();
 		mDeviceContext->PSSetShaderResources(0, 1, &pSRV);
 	}
 

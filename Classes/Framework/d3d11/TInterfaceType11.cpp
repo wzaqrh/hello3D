@@ -25,6 +25,11 @@ size_t TBlobDataD3d11::GetBufferSize()
 }
 
 /********** TInputLayout11 **********/
+TInputLayout11::TInputLayout11()
+{
+	mRes = MakePtr<TResource>((IUnknown**)&mLayout);
+}
+
 ID3D11InputLayout*& TInputLayout11::GetLayout11()
 {
 	return mLayout;
@@ -34,10 +39,7 @@ ID3D11InputLayout*& TInputLayout11::GetLayout11()
 TVertexShader11::TVertexShader11(IBlobDataPtr pBlob)
 	:mBlob(pBlob)
 {
-}
-IUnknown*& TVertexShader11::GetDeviceObject()
-{
-	return MakeDeviceObjectRef(mErrBlob);
+	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
 }
 
 IBlobDataPtr TVertexShader11::GetBlob()
@@ -54,10 +56,7 @@ ID3D11VertexShader*& TVertexShader11::GetShader11()
 TPixelShader11::TPixelShader11(IBlobDataPtr pBlob)
 	: mBlob(pBlob)
 {
-}
-IUnknown*& TPixelShader11::GetDeviceObject()
-{
-	return MakeDeviceObjectRef(mErrBlob);
+	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
 }
 
 IBlobDataPtr TPixelShader11::GetBlob()
@@ -75,6 +74,7 @@ TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, std::string __path)
 {
 	path = __path;
 	texture = __texture;
+	mRes = MakePtr<TResource>((IUnknown**)&texture);
 }
 
 void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture)
@@ -82,14 +82,9 @@ void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture)
 	texture = __texture;
 }
 
-IUnknown*& TTexture11::GetDeviceObject()
+const char* TTexture11::GetPath()
 {
-	return MakeDeviceObjectRef(texture);
-}
-
-const std::string& TTexture11::GetPath() const
-{
-	return path;
+	return path.c_str();
 }
 
 ID3D11ShaderResourceView*& TTexture11::GetSRV11()
@@ -257,7 +252,7 @@ bool TRenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 		return false;
 	}
 	mRenderTargetPtr = MakePtr<TTexture11>(mRenderTargetSRV, "RenderTexture");
-	mRenderTargetPtr->SetLoaded();
+	mRenderTargetPtr->AsRes()->SetLoaded();
 	return true;
 }
 
@@ -322,4 +317,10 @@ ID3D11DepthStencilView*& TRenderTexture11::GetDepthStencilBuffer11()
 ID3D11SamplerState*& TSamplerState11::GetSampler11()
 {
 	return mSampler;
+}
+
+/********** TProgram11 **********/
+TProgram11::TProgram11()
+{
+	mRes = MakePtr<TResource>((IUnknown**)0);
 }

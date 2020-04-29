@@ -36,14 +36,14 @@ typedef ComPtr<IVertexShader> IVertexShaderPtr;
 struct IPixelShader;
 typedef ComPtr<IPixelShader> IPixelShaderPtr;
 
-struct TProgram;
-typedef ComPtr<TProgram> TProgramPtr;
+struct IProgram;
+typedef ComPtr<IProgram> IProgramPtr;
 
 struct IInputLayout;
 typedef ComPtr<IInputLayout> IInputLayoutPtr;
 
 struct IHardwareBuffer;
-struct THardwareBuffer;
+typedef ComPtr<IHardwareBuffer> IHardwareBufferPtr;
 
 struct IVertexBuffer;
 typedef ComPtr<IVertexBuffer> IVertexBufferPtr;
