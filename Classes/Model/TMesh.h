@@ -17,7 +17,7 @@ struct MeshVertex
 #endif
 };
 
-class IRenderSystem;
+struct IRenderSystem;
 class TMesh {
 public:
 	const aiMesh* data = nullptr;

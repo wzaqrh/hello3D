@@ -8,6 +8,8 @@
 #define E_PASS_FORWARDADD "ForwardAdd"
 #define E_PASS_POSTPROCESS "PostProcess"
 
+class TRenderSystem;
+
 struct TContantBufferInfo {
 	IContantBufferPtr buffer;
 	bool isUnique;
@@ -32,8 +34,8 @@ struct TPass {
 	std::vector<IRenderTexturePtr> mIterTargets;
 	TTextureBySlot mTextures;
 
-	std::function<void(TPass*,IRenderSystem*,TTextureBySlot&)> OnBind;
-	std::function<void(TPass*,IRenderSystem*,TTextureBySlot&)> OnUnbind;
+	std::function<void(TPass*, IRenderSystem*, TTextureBySlot&)> OnBind;
+	std::function<void(TPass*, IRenderSystem*, TTextureBySlot&)> OnUnbind;
 public:
 	TPass(const std::string& lightMode, const std::string& name);
 	std::shared_ptr<TPass> Clone(IRenderSystem* pRenderSys);
@@ -117,10 +119,10 @@ public:
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
 struct TMaterialFactory {
-	IRenderSystem* mRenderSys;
+	TRenderSystem* mRenderSys;
 	std::map<std::string, TMaterialPtr> mMaterials;
 public:
-	TMaterialFactory(IRenderSystem* pRenderSys);
+	TMaterialFactory(TRenderSystem* pRenderSys);
 	TMaterialPtr GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly=false);
 private:
 	TMaterialPtr CreateStdMaterial(std::string name);

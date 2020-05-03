@@ -2,23 +2,74 @@
 #include "TBaseTypes.h"
 #include "TPredefine.h"
 
-//MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
-//IRenderSystem
-//{
-//
-//};
+MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
+IRenderSystem : public IUnknown
+{
+	virtual STDMETHODIMP_(bool) Initialize() = 0;
+	virtual STDMETHODIMP_(void) Update(float dt) = 0;
+	virtual STDMETHODIMP_(void) CleanUp() = 0;
+	
+	virtual STDMETHODIMP_(XMINT4) GetWinSize() = 0;
+	virtual STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() = 0;
+	virtual STDMETHODIMP_(TCameraPtr) GetDefCamera() = 0;
 
-class TD3DInput;
+	virtual STDMETHODIMP_(TSpotLightPtr) AddSpotLight() = 0;
+	virtual STDMETHODIMP_(TPointLightPtr) AddPointLight() = 0;
+	virtual STDMETHODIMP_(TDirectLightPtr) AddDirectLight() = 0;
+	virtual STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) = 0;
+	virtual STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) = 0;
+	virtual STDMETHODIMP_(TSkyBoxPtr) SetSkyBox(const std::string& imgName) = 0;
+	virtual STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) = 0;
+
+
+	virtual STDMETHODIMP_(void) SetHandle(HINSTANCE hInstance, HWND hWnd) = 0;
+	virtual STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
+
+	virtual STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
+	virtual STDMETHODIMP_(void) SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
+
+	virtual STDMETHODIMP_(TMaterialPtr) CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
+
+	virtual STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer) = 0;
+	virtual STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) = 0;
+	virtual STDMETHODIMP_(IIndexBufferPtr) CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
+	virtual STDMETHODIMP_(void) SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
+
+	virtual STDMETHODIMP_(IVertexBufferPtr) CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr) = 0;
+	virtual STDMETHODIMP_(void) SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
+
+	virtual STDMETHODIMP_(bool) UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
+	virtual STDMETHODIMP_(void) UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
+
+	virtual STDMETHODIMP_(IProgramPtr) CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
+	virtual STDMETHODIMP_(IProgramPtr) CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
+	virtual STDMETHODIMP_(IProgramPtr) CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
+
+	virtual STDMETHODIMP_(ISamplerStatePtr) CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) = 0;
+	virtual STDMETHODIMP_(IInputLayoutPtr) CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
+
+	virtual STDMETHODIMP_(void) SetBlendFunc(const TBlendFunc& blendFunc) = 0;
+	virtual STDMETHODIMP_(void) SetDepthState(const TDepthState& depthState) = 0;
+
+
+	virtual STDMETHODIMP_(ITexturePtr) GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false)= 0;
+
+
+	virtual STDMETHODIMP_(bool) BeginScene() = 0;
+	virtual STDMETHODIMP_(void) EndScene() = 0;
+	virtual STDMETHODIMP_(void) RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) = 0;
+	virtual STDMETHODIMP_(void) Draw(IRenderable* renderable) = 0;
+};
+
+struct INHERIT_COM("BF1920DB-54DB-42D2-AAA5-8E2F91482B7B")
 __declspec(align(16)) 
-MIDL_INTERFACE("BF1920DB-54DB-42D2-AAA5-8E2F91482B7B") 
-IRenderSystem
+TRenderSystem : ComBase<IRenderSystem>
 {
 protected:
 	std::map<std::string, ITexturePtr> mTexByPath;
 public:
 	int mScreenWidth;
 	int mScreenHeight;
-	TD3DInput* mInput = nullptr;
 public:
 	TSkyBoxPtr mSkyBox;
 	TCameraPtr mDefCamera;
@@ -43,62 +94,37 @@ protected:
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
-	IRenderSystem();
-	virtual ~IRenderSystem();
-
-	virtual bool Initialize() = 0;
-	virtual void Update(float dt) = 0;
-	virtual void CleanUp() = 0;
+	TRenderSystem();
+	virtual ~TRenderSystem();
 protected:
 	bool _CanDraw();
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
 	void MakeAutoParam(cbGlobalParam& param, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
 public:
-	TSpotLightPtr AddSpotLight();
-	TPointLightPtr AddPointLight();
-	TDirectLightPtr AddDirectLight();
-	TCameraPtr SetOthogonalCamera(double far1);
-	TCameraPtr SetPerspectiveCamera(double fov, int eyeDistance, double far1);
-	TSkyBoxPtr SetSkyBox(const std::string& imgName);
-	TPostProcessPtr AddPostProcess(const std::string& name);
+	STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() {
+		return mSkyBox;
+	};
+	STDMETHODIMP_(TCameraPtr) GetDefCamera() {
+		return mDefCamera;
+	}
+	STDMETHODIMP_(XMINT4) GetWinSize() {
+		XMINT4 ret = { mScreenWidth, mScreenHeight, 0, 0 };
+		return ret;
+	}
+	STDMETHODIMP_(TSpotLightPtr) AddSpotLight() override;
+	STDMETHODIMP_(TPointLightPtr) AddPointLight() override;
+	STDMETHODIMP_(TDirectLightPtr) AddDirectLight() override;
+	STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) override;
+	STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) override;
+	STDMETHODIMP_(TSkyBoxPtr) SetSkyBox(const std::string& imgName) override;
+	STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) override;
 public:
-	virtual void SetHandle(HINSTANCE hInstance, HWND hWnd) = 0;
-	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
-
-	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
-	//virtual void ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
-	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
-
-	virtual TMaterialPtr CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
-
-	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) = 0;
-	virtual IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) = 0;
-	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
-	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
-
-	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) = 0;
-	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
-
-	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
-	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
-
-	virtual IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
-	virtual IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) = 0;
-	IProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
-
-	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) = 0;
-	virtual IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
-
-	virtual void SetBlendFunc(const TBlendFunc& blendFunc) = 0;
-	virtual void SetDepthState(const TDepthState& depthState) = 0;
+	STDMETHODIMP_(IProgramPtr) CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 public:
-	ITexturePtr GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);
+	STDMETHODIMP_(ITexturePtr) GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);
 public:
-	virtual bool BeginScene() = 0;
-	virtual void EndScene() = 0;
-	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) = 0;
-	void Draw(IRenderable* renderable);
+	STDMETHODIMP_(void) Draw(IRenderable* renderable);
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube) = 0;
 };

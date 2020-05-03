@@ -30,6 +30,7 @@ protected:
 	XMMATRIX GetWorldTransform();
 protected:
 	IRenderSystem* mRenderSys = nullptr;
+	TD3DInput* mInput = nullptr;
 	SDTimer mTimer;
 	TMovablePtr mMove;
 	XMFLOAT4 mBackgndColor;

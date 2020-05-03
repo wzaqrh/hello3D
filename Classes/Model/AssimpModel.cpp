@@ -132,7 +132,7 @@ void Evaluator::Eval(float pTime)
 }
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, 
+AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove,
 	const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
@@ -499,7 +499,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			op.mIndexBuffer = mesh->mIndexBuffer;
 			op.mVertexBuffer = mesh->mVertexBuffer;
 			op.mTextures = *mesh->mTextures;
-			opList.push_back(op);
+			opList.AddOP(op);
 #else
 //#define DEBUG_UNITY_PBR 1
 #if DEBUG_UNITY_PBR
@@ -531,16 +531,16 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 
 int AssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
 {
-	int count = opList.size();
+	int count = opList.Count();
 	mDrawCount = 0;
 	DoDraw(mRootNode, opList);
 
 	XMMATRIX world = mMove->GetWorldTransform();
-	for (int i = count; i < opList.size(); ++i) {
+	for (int i = count; i < opList.Count(); ++i) {
 		opList[i].mWorldTransform = world;
 	}
 
-	return opList.size() - count;
+	return opList.Count() - count;
 }
 
 void AssimpModel::Draw()

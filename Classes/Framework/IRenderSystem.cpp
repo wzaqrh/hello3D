@@ -6,29 +6,29 @@
 #include "TThreadPump.h"
 #include "TMaterialCB.h"
 
-IRenderSystem::IRenderSystem()
+TRenderSystem::TRenderSystem()
 {
 	mDrawLimit = 4;
 }
 
-IRenderSystem::~IRenderSystem()
+TRenderSystem::~TRenderSystem()
 {
 }
 
-bool IRenderSystem::_CanDraw()
+bool TRenderSystem::_CanDraw()
 {
 	//return mDrawCount++ < mDrawLimit;
 	//return mDrawCount++ == mDrawLimit-1;
 	return true;
 }
 
-void IRenderSystem::_PushRenderTarget(IRenderTexturePtr rendTarget)
+void TRenderSystem::_PushRenderTarget(IRenderTexturePtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
 	SetRenderTarget(rendTarget);
 }
 
-void IRenderSystem::_PopRenderTarget()
+void TRenderSystem::_PopRenderTarget()
 {
 	if (!mRenderTargetStk.empty())
 		mRenderTargetStk.pop_back();
@@ -36,7 +36,7 @@ void IRenderSystem::_PopRenderTarget()
 	SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
-TSpotLightPtr IRenderSystem::AddSpotLight()
+TSpotLightPtr TRenderSystem::AddSpotLight()
 {
 	TSpotLightPtr light = std::make_shared<TSpotLight>();
 	mSpotLights.push_back(light);
@@ -44,7 +44,7 @@ TSpotLightPtr IRenderSystem::AddSpotLight()
 	return light;
 }
 
-TPointLightPtr IRenderSystem::AddPointLight()
+TPointLightPtr TRenderSystem::AddPointLight()
 {
 	TPointLightPtr light = std::make_shared<TPointLight>();
 	mPointLights.push_back(light);
@@ -52,7 +52,7 @@ TPointLightPtr IRenderSystem::AddPointLight()
 	return light;
 }
 
-TDirectLightPtr IRenderSystem::AddDirectLight()
+TDirectLightPtr TRenderSystem::AddDirectLight()
 {
 	TDirectLightPtr light = std::make_shared<TDirectLight>();
 	mDirectLights.push_back(light);
@@ -60,27 +60,27 @@ TDirectLightPtr IRenderSystem::AddDirectLight()
 	return light;
 }
 
-TCameraPtr IRenderSystem::SetOthogonalCamera(double far1)
+TCameraPtr TRenderSystem::SetOthogonalCamera(double far1)
 {
 	mDefCamera = TCamera::CreateOthogonal(mScreenWidth, mScreenHeight, far1);
 	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }
 
-TCameraPtr IRenderSystem::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
+TCameraPtr TRenderSystem::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
 {
 	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
 	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }
 
-TSkyBoxPtr IRenderSystem::SetSkyBox(const std::string& imgName)
+TSkyBoxPtr TRenderSystem::SetSkyBox(const std::string& imgName)
 {
 	mSkyBox = std::make_shared<TSkyBox>(this, mDefCamera, imgName);
 	return mSkyBox;
 }
 
-TPostProcessPtr IRenderSystem::AddPostProcess(const std::string& name)
+TPostProcessPtr TRenderSystem::AddPostProcess(const std::string& name)
 {
 	TPostProcessPtr process;
 	if (name == E_PASS_POSTPROCESS) {
@@ -93,7 +93,7 @@ TPostProcessPtr IRenderSystem::AddPostProcess(const std::string& name)
 }
 
 
-IProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr TRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	std::string ext = GetFileExt(name);
 	if (ext.empty()) {
@@ -106,7 +106,7 @@ IProgramPtr IRenderSystem::CreateProgram(const std::string& name, const char* vs
 	}
 }
 
-ITexturePtr IRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
+ITexturePtr TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
 {
 	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;
@@ -126,14 +126,14 @@ ITexturePtr IRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMA
 	return texView;
 }
 
-void IRenderSystem::Draw(IRenderable* renderable)
+void TRenderSystem::Draw(IRenderable* renderable)
 {
 	TRenderOperationQueue opQue;
 	renderable->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_FORWARDBASE);
 }
 
-void IRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType)
+void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType)
 {
 	memset(&globalParam, 0, sizeof(globalParam));
 

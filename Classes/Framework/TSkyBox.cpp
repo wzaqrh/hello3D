@@ -11,10 +11,10 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	mIndexBuffer = nullptr;
 
 	SKYBOX_VERTEX Vertexs[4];
-	float fHighW = -1.0f - (1.0f / (float)pRenderSys->mScreenWidth);
-	float fHighH = -1.0f - (1.0f / (float)pRenderSys->mScreenHeight);
-	float fLowW = 1.0f + (1.0f / (float)pRenderSys->mScreenWidth);
-	float fLowH = 1.0f + (1.0f / (float)pRenderSys->mScreenHeight);
+	float fHighW = -1.0f - (1.0f / (float)pRenderSys->GetWinSize().x);
+	float fHighH = -1.0f - (1.0f / (float)pRenderSys->GetWinSize().y);
+	float fLowW = 1.0f + (1.0f / (float)pRenderSys->GetWinSize().x);
+	float fLowH = 1.0f + (1.0f / (float)pRenderSys->GetWinSize().y);
 	Vertexs[0].pos = XMFLOAT4(fLowW, fLowH, 1.0f, 1.0f);
 	Vertexs[1].pos = XMFLOAT4(fLowW, fHighH, 1.0f, 1.0f);
 	Vertexs[2].pos = XMFLOAT4(fHighW, fLowH, 1.0f, 1.0f);
@@ -25,7 +25,7 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	mCubeSRV = mRenderSys->GetTexByPath(imgName, format, true, true);
 #if 0
-	auto pCam1 = mRenderSys->mDefCamera;
+	auto pCam1 = mRenderSys->GetDefCamera();
 	XMFLOAT3 pos0 = pCam->CalNDC(XMFLOAT3(fLowW, fLowH, 1.0f));
 	XMFLOAT3 pos1 = pCam->CalNDC(XMFLOAT3(fLowW, fHighH, 1.0f));
 	XMFLOAT3 pos2 = pCam->CalNDC(XMFLOAT3(fHighW, fLowH, 1.0f));
@@ -51,7 +51,7 @@ int TSkyBox::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mVertexBuffer = mVertexBuffer;
 	op.mTextures.push_back(mCubeSRV);
 	op.mWorldTransform = XMMatrixIdentity();// mRefCam->mWorld;
-	opList.push_back(op);
+	opList.AddOP(op);
 	return 1;
 }
 

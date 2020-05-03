@@ -25,7 +25,7 @@ void Lesson5::OnPostInitDevice()
 	mModel = new AssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	
-	mRendTexture = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
+	mRendTexture = mRenderSys->CreateRenderTexture(mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
 
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(mRendTexture->GetColorTexture());

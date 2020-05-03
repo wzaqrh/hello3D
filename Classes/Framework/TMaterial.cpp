@@ -339,7 +339,7 @@ TMaterialPtr TMaterialBuilder::Build()
 }
 
 /********** TMaterialFactory **********/
-TMaterialFactory::TMaterialFactory(IRenderSystem* pRenderSys)
+TMaterialFactory::TMaterialFactory(TRenderSystem* pRenderSys)
 {
 	mRenderSys = pRenderSys;
 }
@@ -373,7 +373,7 @@ TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(
 	return material;
 }
 
-void SetCommonField(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
+void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
 {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
@@ -382,13 +382,13 @@ void SetCommonField(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
 }
 
-void SetCommonField2(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
+void SetCommonField2(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
 {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 }
 
-void AddD3D9Technique(TMaterialBuilder& builder, IRenderSystem* pRenderSys)
+void AddD3D9Technique(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
 {
 	builder.CloneTechnique(pRenderSys, "d3d9");
 	builder.ClearSamplersToTech();
@@ -550,11 +550,11 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			SET_DEBUG_NAME(TexToneMaps[i]->mDepthStencilView, "TexToneMaps"+i);
 			nSampleLen *= 2;
 		}
-		IRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
+		IRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->GetWinSize().x / 8, mRenderSys->GetWinSize().y / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
 		SET_DEBUG_NAME(TexBrightPass->mDepthStencilView, "TexBrightPass");
 		std::vector<IRenderTexturePtr> TexBlooms(NUM_BLOOM_TEXTURES);
 		for (size_t i = 0; i < NUM_BLOOM_TEXTURES; i++) {
-			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->mScreenWidth / 8, mRenderSys->mScreenHeight / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
+			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->GetWinSize().x / 8, mRenderSys->GetWinSize().y / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
 			SET_DEBUG_NAME(TexBlooms[i]->mDepthStencilView, "TexBlooms"+i);
 		}
 

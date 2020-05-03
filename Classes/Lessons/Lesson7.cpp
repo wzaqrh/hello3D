@@ -20,9 +20,9 @@ void Lesson7::OnPostInitDevice()
 	float dd = 9;
 	mMove->SetDefScale(SCALE_BASE * 0.02); mMove->SetPosition(dd, dd, -dd);
 #if 0
-	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
+	auto LightCam = mLight->GetLightCamera(*mRenderSys->GetDefCamera());
 	//auto pCam = &LightCam;
-	auto pCam = mRenderSys->mDefCamera;
+	auto pCam = mRenderSys->GetDefCamera();
 	XMFLOAT4 p0 = pCam->CalNDC(XMFLOAT4(30, 30, 0, 1));
 	//XMFLOAT3 p1 = pCam->CalNDC(mPosition);
 #endif
@@ -61,7 +61,7 @@ void Lesson7::OnRender()
 	//pass1
 	mRenderSys->SetRenderTarget(mPass1RT);
 	mRenderSys->ClearColorDepthStencil(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
-	auto LightCam = mLight->GetLightCamera(*mRenderSys->mDefCamera);
+	auto LightCam = mLight->GetLightCamera(*mRenderSys->GetDefCamera());
 	{
 		mModel1->Update(mTimer.mDeltaTime);
 		float s = SCALE_BASE;

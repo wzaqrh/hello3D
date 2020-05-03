@@ -15,7 +15,7 @@ public:
 	void push_back(TMeshSharedPtr mesh);
 };
 
-class IRenderSystem;
+struct IRenderSystem;
 class AssimpModel 
 	: public IRenderable
 {

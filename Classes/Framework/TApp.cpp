@@ -38,6 +38,8 @@ std::string TApp::OnCreateRenderSys()
 void TApp::Attach(HINSTANCE hInstance, HWND hWnd)
 {
 	mRenderSys->SetHandle(hInstance, hWnd);
+
+	mInput = new TD3DInput(hInstance, hWnd, mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
 }
 
 bool TApp::Initialize()
@@ -64,24 +66,24 @@ void TApp::Render()
 	mRenderSys->ClearColorDepthStencil(mBackgndColor, 1.0f, 0);
 
 	mTimer.Update();
-	mRenderSys->mInput->Frame();
+	mInput->Frame();
 	mRenderSys->Update(0);
 	//rotate camera
-	if (mRenderSys->mDefCamera->mIsPespective)
+	if (mRenderSys->GetDefCamera()->mIsPespective)
 	{
-		TINT4 m = mRenderSys->mInput->GetMouseLocation(false);
-		float angy = 3.14 * m.x / mRenderSys->mScreenWidth, angx = 3.14 * m.y / mRenderSys->mScreenHeight;
+		TINT4 m = mInput->GetMouseLocation(false);
+		float angy = 3.14 * m.x / mRenderSys->GetWinSize().x, angx = 3.14 * m.y / mRenderSys->GetWinSize().y;
 		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
-		auto eye = mRenderSys->mDefCamera->mEye;
-		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -mRenderSys->mDefCamera->mEyeDistance, 1), euler);
-		mRenderSys->mDefCamera->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), mRenderSys->mDefCamera->mAt);
+		auto eye = mRenderSys->GetDefCamera()->mEye;
+		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -mRenderSys->GetDefCamera()->mEyeDistance, 1), euler);
+		mRenderSys->GetDefCamera()->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), mRenderSys->GetDefCamera()->mAt);
 	}
 
 	{
-		TINT4 m = mRenderSys->mInput->GetMouseLocation(true);
+		TINT4 m = mInput->GetMouseLocation(true);
 		float scalez = clamp(0.00001f, 10.0f, mMove->mDefScale * (1000 + m.z) / 1000.0f);
-		float angy = 3.14 * -m.x / mRenderSys->mScreenWidth, angx = 3.14 * -m.y / mRenderSys->mScreenHeight;
+		float angy = 3.14 * -m.x / mRenderSys->GetWinSize().x, angx = 3.14 * -m.y / mRenderSys->GetWinSize().y;
 		
 		mMove->SetScale(scalez);
 		mMove->SetEulerX(angx);

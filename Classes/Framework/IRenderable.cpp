@@ -64,17 +64,17 @@ TRenderOperation::TRenderOperation()
 }
 
 /********** TRenderOperationQueue **********/
-void TRenderOperationQueue::clear()
+void TRenderOperationQueue::Clear()
 {
 	mOps.clear();
 }
 
-void TRenderOperationQueue::push_back(const TRenderOperation& op)
+void TRenderOperationQueue::AddOP(const TRenderOperation& op)
 {
 	mOps.push_back(op);
 }
 
-size_t TRenderOperationQueue::size() const
+size_t TRenderOperationQueue::Count() const
 {
 	return mOps.size();
 }

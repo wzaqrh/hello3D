@@ -6,8 +6,8 @@
 #define D3D11_DEBUG
 //#define PRELOAD_SHADER
 
-class IRenderSystem;
-
+struct IRenderSystem;
+ 
 //BaseType.h
 struct TCamera;
 typedef std::shared_ptr<TCamera> TCameraPtr;
@@ -95,6 +95,7 @@ typedef std::shared_ptr<class TSprite> TSpritePtr;
 //Utility.h
 struct TData;
 class SDTimer;
+class TD3DInput;
 typedef std::shared_ptr<class SDTimer> SDTimerPtr;
 
 typedef std::function<void(IResource* ress, HRESULT hr)> TThreadPumpCallback;

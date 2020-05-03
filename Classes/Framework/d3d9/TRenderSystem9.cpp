@@ -42,7 +42,7 @@ bool TRenderSystem9::Initialize()
 	mScreenHeight = height;
 	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight);
 
-	mInput = new TD3DInput(mHInst, mHWnd, width, height);
+	
 
 	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
 	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
@@ -626,7 +626,7 @@ void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, con
 	cbGlobalParam globalParam;
 	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 
-	for (int i = 0; i < opQueue.size(); ++i)
+	for (int i = 0; i < opQueue.Count(); ++i)
 		if (opQueue[i].mMaterial->IsLoaded()) {
 			globalParam.World = opQueue[i].mWorldTransform;
 			globalParam.WorldInv = XM::Inverse(globalParam.World);

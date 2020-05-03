@@ -113,6 +113,6 @@ int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mVertexBuffer = mVertexBuffer;
 	op.mTextures.push_back(mTexture);
 	op.mWorldTransform = mMove->GetWorldTransform();
-	opList.push_back(op);
+	opList.AddOP(op);
 	return 1;
 }

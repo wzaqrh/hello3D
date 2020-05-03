@@ -32,12 +32,17 @@ public:
 	TRenderOperation();
 };
 
+MIDL_INTERFACE("36718746-09D1-444E-B38D-21C61ECDEBA4")
+IRenderOperationQueue : public IUnknown{
+
+};
+
 struct TRenderOperationQueue {
 	std::vector<TRenderOperation> mOps;
 public:
-	void clear();
-	void push_back(const TRenderOperation& op);
-	size_t size() const;
+	void Clear();
+	void AddOP(const TRenderOperation& op);
+	size_t Count() const;
 	TRenderOperation& At(size_t pos);
 	const TRenderOperation& At(size_t pos) const;
 	TRenderOperation& operator[](size_t pos);

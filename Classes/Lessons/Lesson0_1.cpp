@@ -23,8 +23,8 @@ void TAppLesson0_1::OnPostInitDevice()
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(mRenderSys->GetTexByPath("image\\smile.png"));
 
-	mSprite->SetPosition(-mRenderSys->mScreenWidth / 2, -mRenderSys->mScreenHeight / 2, 0);
-	mSprite->SetSize(mRenderSys->mScreenWidth / 2, mRenderSys->mScreenHeight / 2);
+	mSprite->SetPosition(-mRenderSys->GetWinSize().x / 2, -mRenderSys->GetWinSize().y / 2, 0);
+	mSprite->SetSize(mRenderSys->GetWinSize().x / 2, mRenderSys->GetWinSize().y / 2);
 #endif
 }
 

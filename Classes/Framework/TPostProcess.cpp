@@ -76,15 +76,15 @@ int TPostProcess::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mTextures.push_back(mMainTex->GetColorTexture());
 	op.mWorldTransform = XMMatrixIdentity();
 	op.mVertBufferByPass = mVertBufferByPass;
-	opList.push_back(op);
+	opList.AddOP(op);
 	return 1;
 }
 
 /********** TBloom **********/
 IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, IRenderTexturePtr target) {
 	auto srv = target->GetColorTexture();
-	float sx = srv->GetWidth() * 1.0 / RenderSys->mScreenWidth;
-	float sy = srv->GetHeight() * 1.0 / RenderSys->mScreenHeight;
+	float sx = srv->GetWidth() * 1.0 / RenderSys->GetWinSize().x;
+	float sy = srv->GetHeight() * 1.0 / RenderSys->GetWinSize().y;
 	assert(sx <= 1 && sy <= 1);
 	POSTPROCESS_VERTEX_QUAD quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
 	IVertexBufferPtr vertBuf = RenderSys->CreateVertexBuffer(sizeof(POSTPROCESS_VERTEX_QUAD), sizeof(POSTPROCESS_VERTEX), 0, &quad);
