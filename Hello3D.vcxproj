@@ -376,6 +376,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Classes\Export\Export.cpp" />
     <ClCompile Include="Classes\Framework\d3d11\TInterfaceType11.cpp" />
     <ClCompile Include="Classes\Framework\d3d11\TRenderSystem11.cpp" />
     <ClCompile Include="Classes\Framework\d3d9\TInterfaceType9.cpp" />
@@ -405,11 +406,12 @@
     <ClCompile Include="Classes\Lessons\LessonD3D9.cpp" />
     <ClCompile Include="Classes\Main.cpp" />
     <ClCompile Include="Classes\Model\AssimpModel.cpp" />
-    <ClCompile Include="Classes\Model\TMesh.cpp" />
+    <ClCompile Include="Classes\Model\TAssimpMesh.cpp" />
     <ClCompile Include="Classes\Utility\D3DEnumCT.cpp" />
     <ClCompile Include="Classes\Utility\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Classes\Export\Export.h" />
     <ClInclude Include="Classes\Framework\ComBase.h" />
     <ClInclude Include="Classes\Framework\d3d11\stddx11.h" />
     <ClInclude Include="Classes\Framework\d3d11\TInterfaceType11.h" />
@@ -443,7 +445,7 @@
     <ClInclude Include="Classes\Lessons\Lesson8.h" />
     <ClInclude Include="Classes\Lessons\LessonD3D9.h" />
     <ClInclude Include="Classes\Model\AssimpModel.h" />
-    <ClInclude Include="Classes\Model\TMesh.h" />
+    <ClInclude Include="Classes\Model\TAssimpMesh.h" />
     <ClInclude Include="Classes\Utility\D3DEnumCT.h" />
     <ClInclude Include="Classes\Utility\Utility.h" />
   </ItemGroup>

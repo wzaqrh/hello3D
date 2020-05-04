@@ -212,12 +212,12 @@ void AssimpModel::processNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-void ReCalculateTangents(std::vector<MeshVertex>& vertices, const std::vector<UINT>& indices) {
+void ReCalculateTangents(std::vector<AssimpMeshVertex>& vertices, const std::vector<UINT>& indices) {
 	for (int i = 0; i < indices.size(); i += 3) {
 		// Shortcuts for vertices
-		MeshVertex& v0 = vertices[indices[i+0]];
-		MeshVertex& v1 = vertices[indices[i+1]];
-		MeshVertex& v2 = vertices[indices[i+2]];
+		AssimpMeshVertex& v0 = vertices[indices[i+0]];
+		AssimpMeshVertex& v1 = vertices[indices[i+1]];
+		AssimpMeshVertex& v2 = vertices[indices[i+2]];
 
 		// Shortcuts for UVs
 		XMFLOAT2& uv0 = v0.Tex;
@@ -249,7 +249,7 @@ void ReCalculateTangents(std::vector<MeshVertex>& vertices, const std::vector<UI
 TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	// Data to fill
-	std::vector<MeshVertex> vertices;
+	std::vector<AssimpMeshVertex> vertices;
 	std::vector<UINT> indices;
 	TTextureBySlotPtr texturesPtr = std::make_shared<TTextureBySlot>();
 	TTextureBySlot& textures = *texturesPtr;
@@ -263,7 +263,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 	for (UINT vertexId = 0; vertexId < mesh->mNumVertices; vertexId++)
 	{
-		MeshVertex vertex;
+		AssimpMeshVertex vertex;
 		memset(&vertex, 0, sizeof(vertex));
 		vertex.Pos = ToXM(mesh->mVertices[vertexId]);
 		if (mesh->mTextureCoords[0]) {
@@ -335,7 +335,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 	auto material = mMaterial->Clone(mRenderSys);
 	if (mMatCb) mMatCb(material);
-	return std::make_shared<TMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
+	return std::make_shared<TAssimpMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
 std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
@@ -476,7 +476,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 
 		for (int i = 0; i < meshes.size(); i++) {
 			auto mesh = meshes[i];
-			if (mesh->data->HasBones()) {
+			if (mesh->Data->HasBones()) {
 				const auto& boneMats = GetBoneMatrices(node, i);
 				size_t boneSize = boneMats.size(); 
 				//assert(boneSize <= MAX_MATRICES);
@@ -491,25 +491,20 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
 			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
 			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
-			mesh->mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), make_data(weightedSkin));
+			mesh->Material->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), make_data(weightedSkin));
 
 #ifdef USE_RENDER_OP
-			TRenderOperation op = {};
-			op.mMaterial = mesh->mMaterial;
-			op.mIndexBuffer = mesh->mIndexBuffer;
-			op.mVertexBuffer = mesh->mVertexBuffer;
-			op.mTextures = *mesh->mTextures;
-			opList.AddOP(op);
+			mesh->GenRenderOperation(opList);
 #else
 //#define DEBUG_UNITY_PBR 1
 #if DEBUG_UNITY_PBR
-			if (mesh->indices.size() == 18258) {
+			if (mesh->Indices.size() == 18258) {
 				cbUnityMaterial cb;
 				//cb._Color = XMFLOAT4(1, 0, 0, 0);
 				//cb._SpecLightOff = 1;
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
-				mRenderSys->UpdateConstBuffer(mesh->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
+				mRenderSys->UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 			}
 			else {
 				cbUnityMaterial cb;
@@ -517,7 +512,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 				//cb._SpecLightOff = 1;
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
-				mRenderSys->UpdateConstBuffer(mesh->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
+				mRenderSys->UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 			}
 #endif
 			mesh->Draw(mRenderSys);

@@ -4,9 +4,6 @@
     <ClCompile Include="Classes\Framework\TApp.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Model\TMesh.cpp">
-      <Filter>Classes\Model</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Model\AssimpModel.cpp">
       <Filter>Classes\Model</Filter>
     </ClCompile>
@@ -97,6 +94,12 @@
     <ClCompile Include="Classes\Framework\TBaseTypes.cpp">
       <Filter>Classes\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\Export\Export.cpp">
+      <Filter>Classes\Export</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Model\TAssimpMesh.cpp">
+      <Filter>Classes\Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\Framework\TApp.h">
@@ -104,9 +107,6 @@
     </ClInclude>
     <ClInclude Include="Classes\Framework\std.h">
       <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Model\TMesh.h">
-      <Filter>Classes\Model</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Model\AssimpModel.h">
       <Filter>Classes\Model</Filter>
@@ -207,6 +207,12 @@
     <ClInclude Include="Classes\Framework\ComBase.h">
       <Filter>Classes\Framework\interface</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\Export\Export.h">
+      <Filter>Classes\Export</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Model\TAssimpMesh.h">
+      <Filter>Classes\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Classes">
@@ -244,6 +250,9 @@
     </Filter>
     <Filter Include="Classes\Framework\interface">
       <UniqueIdentifier>{b02729df-1074-414c-9d44-45b12a062288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Export">
+      <UniqueIdentifier>{7c975c11-8101-4fcb-8765-9f9131aaebec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

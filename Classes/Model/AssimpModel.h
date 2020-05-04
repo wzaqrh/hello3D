@@ -1,6 +1,6 @@
 #pragma once
 #include "TPredefine.h"
-#include "TMesh.h"
+#include "TAssimpMesh.h"
 #include "IRenderable.h"
 
 struct AiNodeInfo {

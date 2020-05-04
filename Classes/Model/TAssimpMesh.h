@@ -1,8 +1,9 @@
 #pragma once
 #include "TPredefine.h"
+#include "IRenderable.h"
 
 //#define MESH_VETREX_POSTEX
-struct MeshVertex
+struct AssimpMeshVertex
 {
 	XMFLOAT3 Pos;
 #ifndef MESH_VETREX_POSTEX
@@ -17,30 +18,26 @@ struct MeshVertex
 #endif
 };
 
-struct IRenderSystem;
-class TMesh {
+class TAssimpMesh : public IRenderable {
 public:
-	const aiMesh* data = nullptr;
-	std::vector<MeshVertex> vertices;
-	std::vector<UINT> indices;
-
-	TTextureBySlotPtr mTextures;
-	IVertexBufferPtr mVertexBuffer;
-	IIndexBufferPtr mIndexBuffer;
-	TMaterialPtr mMaterial;
+	const aiMesh* Data = nullptr;
+	std::vector<AssimpMeshVertex> Vertices;
+	std::vector<UINT> Indices;
+	TTextureBySlotPtr Textures;
+	IVertexBufferPtr VertexBuffer;
+	IIndexBufferPtr IndexBuffer;
+	TMaterialPtr Material;
 public:
-	TMesh(const aiMesh* __data, 
-		std::vector<MeshVertex>& __vertices, 
+	TAssimpMesh(const aiMesh* __data, 
+		std::vector<AssimpMeshVertex>& __vertices, 
 		std::vector<UINT>& __indices,
 		TTextureBySlotPtr __textures,
 		TMaterialPtr __material,
 		IRenderSystem *__renderSys);
-	void Close();
-	void Draw(IRenderSystem* renderSys);
-
 	bool HasTexture(int slot);
+	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
 private:
 	bool setupMesh(IRenderSystem *renderSys);
 };
-typedef std::shared_ptr<TMesh> TMeshSharedPtr;
+typedef std::shared_ptr<TAssimpMesh> TMeshSharedPtr;
 typedef std::vector<TMeshSharedPtr> TMeshSharedPtrVector;
