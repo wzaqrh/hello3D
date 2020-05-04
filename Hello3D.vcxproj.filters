@@ -1,263 +1,254 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Classes\Framework\TApp.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Model\AssimpModel.cpp">
-      <Filter>Classes\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Main.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson1.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson2.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson3.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson4.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson5.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson6.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson7.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TMovable.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson8.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TThreadPump.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\d3d11\TRenderSystem11.cpp">
-      <Filter>Classes\Framework\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\d3d9\TRenderSystem9.cpp">
-      <Filter>Classes\Framework\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\LessonD3D9.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TSprite.cpp">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TSkyBox.cpp">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TPostProcess.cpp">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\IRenderable.cpp">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\IResource.cpp">
-      <Filter>Classes\Framework\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TMaterial.cpp">
-      <Filter>Classes\Framework\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TMaterialCB.cpp">
-      <Filter>Classes\Framework\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\d3d11\TInterfaceType11.cpp">
-      <Filter>Classes\Framework\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\d3d9\TInterfaceType9.cpp">
-      <Filter>Classes\Framework\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Utility\D3DEnumCT.cpp">
-      <Filter>Classes\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Utility\Utility.cpp">
-      <Filter>Classes\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson0_1.cpp">
-      <Filter>Classes\Lessons</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\IRenderSystem.cpp">
-      <Filter>Classes\Framework\interface</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TInterfaceType.cpp">
-      <Filter>Classes\Framework\interface</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Framework\TBaseTypes.cpp">
-      <Filter>Classes\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Export\Export.cpp">
-      <Filter>Classes\Export</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Model\TAssimpMesh.cpp">
-      <Filter>Classes\Model</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Classes\Framework\TApp.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\std.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Model\AssimpModel.h">
-      <Filter>Classes\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson1.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson2.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson3.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson4.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson5.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson6.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson7.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TMovable.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson8.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TThreadPump.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\d3d11\TRenderSystem11.h">
-      <Filter>Classes\Framework\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\d3d9\TRenderSystem9.h">
-      <Filter>Classes\Framework\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\LessonD3D9.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\d3d11\stddx11.h">
-      <Filter>Classes\Framework\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\d3d9\stddx9.h">
-      <Filter>Classes\Framework\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TSprite.h">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TSkyBox.h">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TPostProcess.h">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\IRenderable.h">
-      <Filter>Classes\Framework\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\IResource.h">
-      <Filter>Classes\Framework\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TMaterial.h">
-      <Filter>Classes\Framework\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TMaterialCB.h">
-      <Filter>Classes\Framework\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\d3d11\TInterfaceType11.h">
-      <Filter>Classes\Framework\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\d3d9\TInterfaceType9.h">
-      <Filter>Classes\Framework\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Utility\D3DEnumCT.h">
-      <Filter>Classes\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Utility\Utility.h">
-      <Filter>Classes\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson0_1.h">
-      <Filter>Classes\Lessons</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\IRenderSystem.h">
-      <Filter>Classes\Framework\interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TInterfaceType.h">
-      <Filter>Classes\Framework\interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TBaseTypes.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\TPredefine.h">
-      <Filter>Classes\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Framework\ComBase.h">
-      <Filter>Classes\Framework\interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Export\Export.h">
-      <Filter>Classes\Export</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Model\TAssimpMesh.h">
-      <Filter>Classes\Model</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Classes">
-      <UniqueIdentifier>{39b606e9-d650-42c0-a46b-81fe688ad022}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Classes\Framework">
-      <UniqueIdentifier>{b0138fc3-6844-4763-a276-95e364399192}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Classes\Model">
-      <UniqueIdentifier>{6f0167b8-ca3d-45eb-9213-ac1c4cffd53e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Classes\Lessons">
-      <UniqueIdentifier>{b7aaf79f-0f85-49e7-95c2-1813f91cb617}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Lib">
       <UniqueIdentifier>{43b959a5-9db6-4dcf-9832-11705bedfd9c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="fx">
-      <UniqueIdentifier>{0f5daee9-9076-4f36-baca-5b152488f6b4}</UniqueIdentifier>
+    <Filter Include="Classes">
+      <UniqueIdentifier>{00ed3f52-e911-48f3-bbd9-e112d23115e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Framework\d3d11">
-      <UniqueIdentifier>{b5c952d2-d239-4894-92c4-54bf2f51c839}</UniqueIdentifier>
+    <Filter Include="Classes\App">
+      <UniqueIdentifier>{055bf9d4-c8ca-49f5-b7ae-90b8d21d4082}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Framework\d3d9">
-      <UniqueIdentifier>{3845ec8c-3527-46d9-9713-6812481afa31}</UniqueIdentifier>
+    <Filter Include="Classes\Renderable">
+      <UniqueIdentifier>{69e873fd-306c-4441-9e2c-b6016288efee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Framework\renderable">
-      <UniqueIdentifier>{45e61584-a97b-4a83-97e3-7d79d6b7670c}</UniqueIdentifier>
+    <Filter Include="Classes\Rendersys">
+      <UniqueIdentifier>{2ebc33e8-8f22-4581-9c24-ec736992d61d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Framework\resource">
-      <UniqueIdentifier>{f7e74a1a-95b2-4d5e-8d40-97953e960d10}</UniqueIdentifier>
+    <Filter Include="Classes\Rendersys\d3d9">
+      <UniqueIdentifier>{a91036af-8dc9-4072-bf04-88751f777c57}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Utility">
-      <UniqueIdentifier>{af3d38b9-c3eb-47d9-932c-8e801eb59167}</UniqueIdentifier>
+    <Filter Include="Classes\Rendersys\d3d11">
+      <UniqueIdentifier>{7a4c0e2e-c475-4d36-8f0d-0b4b376ddc25}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Framework\interface">
-      <UniqueIdentifier>{b02729df-1074-414c-9d44-45b12a062288}</UniqueIdentifier>
+    <Filter Include="Classes\Base">
+      <UniqueIdentifier>{502691fb-4a03-44af-95f0-8342e21e93b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\TestCases">
+      <UniqueIdentifier>{eeeb25f1-9a84-4c30-9fa1-a0fbba8ca550}</UniqueIdentifier>
     </Filter>
     <Filter Include="Classes\Export">
-      <UniqueIdentifier>{7c975c11-8101-4fcb-8765-9f9131aaebec}</UniqueIdentifier>
+      <UniqueIdentifier>{b1706ccb-be9f-4002-a030-7028a976af83}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\assimp-vc140-mt.lib">
       <Filter>Lib</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Classes\app\Main.cpp">
+      <Filter>Classes\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\app\TApp.cpp">
+      <Filter>Classes\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\app\TMovable.cpp">
+      <Filter>Classes\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\AssimpModel.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\IRenderable.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\TAssimpMesh.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\TInterfaceType.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\TPostProcess.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\TSkyBox.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\TSprite.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\IRenderSystem.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\IResource.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\TMaterial.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\TMaterialCB.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\TThreadPump.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\d3d9\TInterfaceType9.cpp">
+      <Filter>Classes\Rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\d3d9\TRenderSystem9.cpp">
+      <Filter>Classes\Rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\d3d11\TInterfaceType11.cpp">
+      <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\d3d11\TRenderSystem11.cpp">
+      <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\base\D3DEnumCT.cpp">
+      <Filter>Classes\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\base\TBaseTypes.cpp">
+      <Filter>Classes\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\base\Utility.cpp">
+      <Filter>Classes\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson0_1.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson1.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson2.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson3.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson4.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson5.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson6.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson7.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\Lesson8.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Lessons\LessonD3D9.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Export\Export.cpp">
+      <Filter>Classes\Export</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Classes\app\TApp.h">
+      <Filter>Classes\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\app\TMovable.h">
+      <Filter>Classes\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\AssimpModel.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\IRenderable.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\TAssimpMesh.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\TInterfaceType.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\TPostProcess.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\TSkyBox.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\TSprite.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\IRenderSystem.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\IResource.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TMaterial.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TMaterialCB.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TThreadPump.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d9\stddx9.h">
+      <Filter>Classes\Rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d9\TInterfaceType9.h">
+      <Filter>Classes\Rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d9\TRenderSystem9.h">
+      <Filter>Classes\Rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d11\stddx11.h">
+      <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d11\TInterfaceType11.h">
+      <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d11\TRenderSystem11.h">
+      <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\base\ComBase.h">
+      <Filter>Classes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\base\D3DEnumCT.h">
+      <Filter>Classes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\base\std.h">
+      <Filter>Classes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\base\TBaseTypes.h">
+      <Filter>Classes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\base\Utility.h">
+      <Filter>Classes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson0_1.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson1.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson2.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson3.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson4.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson5.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson6.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson7.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\Lesson8.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Lessons\LessonD3D9.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TPredefine.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Export\Export.h">
+      <Filter>Classes\Export</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
