@@ -19,7 +19,7 @@ void TAppLesson2::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mModel = new AssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson2"), layouts);
+	mModel = new TAssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson2"), layouts);
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); mScale = 0.05;
 	//mModel->PlayAnim(0);

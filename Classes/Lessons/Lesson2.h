@@ -1,6 +1,6 @@
 #pragma once
 #include "TApp.h"
-#include "AssimpModel.h"
+#include "TAssimpModel.h"
 
 class TAppLesson2 : public TApp
 {
@@ -9,6 +9,6 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModel* mModel = nullptr;
+	TAssimpModel* mModel = nullptr;
 };
 

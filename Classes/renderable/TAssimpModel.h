@@ -16,14 +16,14 @@ public:
 };
 
 struct IRenderSystem;
-class AssimpModel 
+class TAssimpModel 
 	: public IRenderable
 {
 public:
-	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, 
+	TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, 
 		const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb = nullptr);
-	AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType);
-	~AssimpModel();
+	TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType);
+	~TAssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
 	void PlayAnim(int Index);

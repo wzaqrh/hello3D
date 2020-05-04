@@ -1,6 +1,6 @@
 #pragma once
 #include "TApp.h"
-#include "AssimpModel.h"
+#include "TAssimpModel.h"
 #include "TSprite.h"
 
 struct cbShadowMap
@@ -16,7 +16,7 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModel *mModel1, *mModel2 = nullptr;
+	TAssimpModel *mModel1, *mModel2 = nullptr;
 	TPointLightPtr mLight;
 };
 

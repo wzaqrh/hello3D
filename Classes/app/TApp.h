@@ -6,7 +6,7 @@
 #include "TMaterial.h"
 #include "Utility.h"
 
-class AssimpModel;
+class TAssimpModel;
 struct aiNode;
 class TApp
 {

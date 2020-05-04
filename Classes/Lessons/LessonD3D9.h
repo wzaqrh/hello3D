@@ -1,6 +1,6 @@
 #pragma once
 #include "TApp.h"
-#include "AssimpModel.h"
+#include "TAssimpModel.h"
 #include "TSprite.h"
 
 class LessonD3D9 : public TApp

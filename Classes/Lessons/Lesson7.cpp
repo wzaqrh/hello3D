@@ -35,10 +35,10 @@ void Lesson7::OnPostInitDevice()
 
 	auto move1 = std::make_shared<TMovable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new AssimpModel(mRenderSys, move1, matName);
+	mModel1 = new TAssimpModel(mRenderSys, move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new AssimpModel(mRenderSys, mMove, matName);
+	mModel2 = new TAssimpModel(mRenderSys, mMove, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 

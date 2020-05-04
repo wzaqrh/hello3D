@@ -1,4 +1,4 @@
-#include "AssimpModel.h"
+#include "TAssimpModel.h"
 #include "TMaterialCB.h"
 #include "Utility.h"
 #include "IRenderSystem.h"
@@ -132,7 +132,7 @@ void Evaluator::Eval(float pTime)
 }
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove,
+TAssimpModel::TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove,
 	const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
@@ -140,14 +140,14 @@ AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove,
 	LoadMaterial(shaderName, layouts, cb);
 }
 
-AssimpModel::AssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType)
+TAssimpModel::TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
 	LoadMaterial(matType, nullptr);
 }
 
-AssimpModel::~AssimpModel()
+TAssimpModel::~TAssimpModel()
 {
 	delete mImporter;
 }
@@ -164,7 +164,7 @@ aiProcess_OptimizeMeshes |
 aiProcess_Debone |
 aiProcess_ValidateDataStructure;*/
 
-void AssimpModel::LoadModel(const std::string& imgPath)
+void TAssimpModel::LoadModel(const std::string& imgPath)
 {
 	TIME_PROFILE(AssimpModel_LoadModel);
 
@@ -195,7 +195,7 @@ void AssimpModel::LoadModel(const std::string& imgPath)
 	}
 }
 
-void AssimpModel::processNode(aiNode* node, const aiScene* scene)
+void TAssimpModel::processNode(aiNode* node, const aiScene* scene)
 {
 	mNodeInfos[node].mLocalTransform = node->mTransformation;
 	mNodeInfos[node].mGlobalTransform = mNodeInfos[node].mLocalTransform;
@@ -246,7 +246,7 @@ void ReCalculateTangents(std::vector<AssimpMeshVertex>& vertices, const std::vec
 	}
 }
 
-TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
+TMeshSharedPtr TAssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	// Data to fill
 	std::vector<AssimpMeshVertex> vertices;
@@ -338,7 +338,7 @@ TMeshSharedPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	return std::make_shared<TAssimpMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
-std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
+std::vector<ITexturePtr> TAssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
 {
 	std::vector<ITexturePtr> textures;
 	for (UINT i = 0; i < mat->GetTextureCount(type); i++)
@@ -353,7 +353,7 @@ std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTe
 	return textures;
 }
 
-const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex)
+const std::vector<aiMatrix4x4>& TAssimpModel::GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex)
 {
 	assert(pMeshIndex < pNode->mNumMeshes);
 	size_t meshIndex = pNode->mMeshes[pMeshIndex];
@@ -392,7 +392,7 @@ void VisitNode(aiNode* cur, std::map<const aiNode*, AiNodeInfo>& mNodeInfos, std
 	}
 }
 
-void AssimpModel::Update(float dt)
+void TAssimpModel::Update(float dt)
 {
 	std::vector<aiNode*> vec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mScene->mNumAnimations) {
@@ -429,7 +429,7 @@ void AssimpModel::Update(float dt)
 	}
 }
 
-void AssimpModel::PlayAnim(int Index)
+void TAssimpModel::PlayAnim(int Index)
 {
 	mCurrentAnimIndex = Index;
 	mElapse = 0;
@@ -448,7 +448,7 @@ void AssimpModel::PlayAnim(int Index)
 	}
 }
 
-void AssimpModel::LoadMaterial(const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
+void TAssimpModel::LoadMaterial(const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
 {
 	std::function<void(TMaterialPtr)> callback;
 	callback = [&](TMaterialPtr mat) {
@@ -460,13 +460,13 @@ void AssimpModel::LoadMaterial(const std::string& shaderName, const std::vector<
 	mMatCb = cb;
 }
 
-void AssimpModel::LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb)
+void TAssimpModel::LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb)
 {
 	mMaterial = mRenderSys->CreateMaterial(matType, nullptr);
 	mMatCb = cb;
 }
 
-void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
+void TAssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 {
 	auto& meshes = mNodeInfos[node];
 	if (meshes.size() > 0) {
@@ -524,7 +524,7 @@ void AssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 		DoDraw(node->mChildren[i], opList);
 }
 
-int AssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
+int TAssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
 {
 	int count = opList.Count();
 	mDrawCount = 0;
@@ -538,7 +538,7 @@ int AssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
 	return opList.Count() - count;
 }
 
-void AssimpModel::Draw()
+void TAssimpModel::Draw()
 {
 	mRenderSys->Draw(this);
 }

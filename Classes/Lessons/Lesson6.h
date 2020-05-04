@@ -1,6 +1,6 @@
 #pragma once
 #include "TApp.h"
-#include "AssimpModel.h"
+#include "TAssimpModel.h"
 #include "TSprite.h"
 
 
@@ -12,6 +12,6 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModel* mModel = nullptr;
+	TAssimpModel* mModel = nullptr;
 };
 

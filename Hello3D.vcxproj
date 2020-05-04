@@ -396,7 +396,7 @@
     <ClCompile Include="Classes\Lessons\Lesson7.cpp" />
     <ClCompile Include="Classes\Lessons\Lesson8.cpp" />
     <ClCompile Include="Classes\Lessons\LessonD3D9.cpp" />
-    <ClCompile Include="Classes\renderable\AssimpModel.cpp" />
+    <ClCompile Include="Classes\renderable\TAssimpModel.cpp" />
     <ClCompile Include="Classes\renderable\IRenderable.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpMesh.cpp" />
     <ClCompile Include="Classes\renderable\TInterfaceType.cpp" />
@@ -432,7 +432,7 @@
     <ClInclude Include="Classes\Lessons\Lesson7.h" />
     <ClInclude Include="Classes\Lessons\Lesson8.h" />
     <ClInclude Include="Classes\Lessons\LessonD3D9.h" />
-    <ClInclude Include="Classes\renderable\AssimpModel.h" />
+    <ClInclude Include="Classes\renderable\TAssimpModel.h" />
     <ClInclude Include="Classes\renderable\IRenderable.h" />
     <ClInclude Include="Classes\renderable\TAssimpMesh.h" />
     <ClInclude Include="Classes\renderable\TInterfaceType.h" />
