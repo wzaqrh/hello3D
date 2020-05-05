@@ -121,4 +121,4 @@ void Lesson6::OnRender()
 	}
 }
 
-auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");

@@ -36,4 +36,4 @@ void TAppLesson0_1::OnRender()
 	}
 }
 
-//auto reg = AppRegister<TAppLesson0_1>("TAppLesson0_1: LayerColor");
+auto reg = AppRegister<TAppLesson0_1>("TAppLesson0_1: LayerColor");
