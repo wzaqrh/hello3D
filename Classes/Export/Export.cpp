@@ -5,8 +5,10 @@
 #include "TRenderSystem9.h"
 #include "IRenderable.h"
 #include "TMaterial.h"
+#include "TSprite.h"
 
-IRenderSystem* RenderSystemCreate(HINSTANCE hInstance, HWND hWnd, bool isd3d11)
+//RenderSystem
+IRenderSystem* RenderSystem_Create(HINSTANCE hInstance, HWND hWnd, bool isd3d11)
 {
 	IRenderSystem* rendersys = nullptr;
 	if (isd3d11) {
@@ -26,13 +28,13 @@ IRenderSystem* RenderSystemCreate(HINSTANCE hInstance, HWND hWnd, bool isd3d11)
 	return rendersys;
 }
 
-void RenderSystemDestroy(IRenderSystem* rendersys)
+void RenderSystem_Destroy(IRenderSystem* rendersys)
 {
 	rendersys->CleanUp();
 	rendersys->Release();
 }
 
-void RenderSystemRender(IRenderSystem* rendersys, XMFLOAT4 bgColor, IRenderable** renderables, int renderableCount)
+void RenderSystem_Render(IRenderSystem* rendersys, XMFLOAT4 bgColor, IRenderable** renderables, int renderableCount)
 {
 	rendersys->ClearColorDepthStencil(bgColor, 1.0f, 0);
 	rendersys->Update(0);
@@ -45,4 +47,33 @@ void RenderSystemRender(IRenderSystem* rendersys, XMFLOAT4 bgColor, IRenderable*
 		}
 		rendersys->EndScene();
 	}
+}
+
+//ITexture
+ITexture* Texture_GetByPath(IRenderSystem* rendersys, const char* imgPath)
+{
+	ITexturePtr texture = rendersys->GetTexByPath(imgPath);
+	return texture ? texture.Detach() : nullptr;
+}
+
+//TSprite
+TSprite* Sprite_Create(IRenderSystem* rendersys, const char* imgPath)
+{
+	return new TSprite(rendersys, E_MAT_SPRITE);
+}
+
+void Sprite_Destroy(TSprite* sprite)
+{
+	delete sprite;
+}
+
+void Sprite_SetTexture(TSprite* sprite, ITexture* texture)
+{
+	sprite->SetTexture(ITexturePtr(texture));
+}
+
+void Sprite_SetRect(TSprite* sprite, XMFLOAT2 pos, XMFLOAT2 size)
+{
+	sprite->SetPosition(pos.x, pos.y, 0);
+	sprite->SetSize(size.x, size.y);
 }

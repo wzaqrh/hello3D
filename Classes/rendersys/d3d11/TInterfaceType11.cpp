@@ -94,13 +94,18 @@ ID3D11ShaderResourceView*& TTexture11::GetSRV11()
 
 D3D11_TEXTURE2D_DESC TTexture11::GetDesc()
 {
-	ID3D11Texture2D* pTexture;
-	texture->GetResource((ID3D11Resource **)&pTexture);
+	if (texture != nullptr) {
+		ID3D11Texture2D* pTexture;
+		texture->GetResource((ID3D11Resource **)&pTexture);
 
-	D3D11_TEXTURE2D_DESC desc;
-	pTexture->GetDesc(&desc);
-
-	return desc;
+		D3D11_TEXTURE2D_DESC desc;
+		pTexture->GetDesc(&desc);
+		return desc;
+	}
+	else {
+		D3D11_TEXTURE2D_DESC desc = {0};
+		return desc;
+	}
 }
 
 int TTexture11::GetWidth()

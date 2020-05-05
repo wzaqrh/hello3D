@@ -56,8 +56,10 @@ const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
 TSprite::TSprite(IRenderSystem* RenderSys, const std::string& matName)
-:mQuad(0,0,0,0)
-, mFlipY(true)
+	: mQuad(0, 0, 0, 0)
+	, mFlipY(true)
+	, mSize(0, 0)
+	, mPosition(0, 0)
 {
 	mMove = std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
@@ -98,6 +100,9 @@ void TSprite::SetFlipY(bool flipY)
 void TSprite::SetTexture(ITexturePtr Texture)
 {
 	mTexture = Texture;
+	if (mSize.x == 0 && mSize.y == 0) {
+		SetSize(Texture->GetWidth(), Texture->GetHeight());
+	}
 }
 
 void TSprite::Draw()
