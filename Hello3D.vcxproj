@@ -93,7 +93,7 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)Classes\rendersys\d3d9;$(ProjectDir)Classes\rendersys\d3d11;$(ProjectDir)Classes;$(ProjectDir)Classes\app;$(ProjectDir)Classes\base;$(ProjectDir)Classes\renderable;$(ProjectDir)Classes\rendersys;$(SolutionDir)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)Classes\rendersys\d3d9;$(ProjectDir)Classes\rendersys\d3d11;$(ProjectDir)Classes;$(ProjectDir)Classes\app;$(ProjectDir)Classes\base;$(ProjectDir)Classes\renderable;$(ProjectDir)Classes\rendersys;$(ProjectDir)Classes\TestCases;$(SolutionDir)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
     <IntDir>$(Configuration)\objs</IntDir>
   </PropertyGroup>
@@ -386,16 +386,6 @@
     <ClCompile Include="Classes\base\TBaseTypes.cpp" />
     <ClCompile Include="Classes\base\Utility.cpp" />
     <ClCompile Include="Classes\Export\Export.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson0_1.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson1.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson2.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson3.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson4.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson5.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson6.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson7.cpp" />
-    <ClCompile Include="Classes\Lessons\Lesson8.cpp" />
-    <ClCompile Include="Classes\Lessons\LessonD3D9.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpModel.cpp" />
     <ClCompile Include="Classes\renderable\IRenderable.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpMesh.cpp" />
@@ -412,6 +402,16 @@
     <ClCompile Include="Classes\rendersys\TMaterial.cpp" />
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp" />
     <ClCompile Include="Classes\rendersys\TThreadPump.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson0_1.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson1.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson2.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson3.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson4.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson5.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson6.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson7.cpp" />
+    <ClCompile Include="Classes\TestCases\Lesson8.cpp" />
+    <ClCompile Include="Classes\TestCases\LessonD3D9.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h" />
@@ -422,16 +422,6 @@
     <ClInclude Include="Classes\base\TBaseTypes.h" />
     <ClInclude Include="Classes\base\Utility.h" />
     <ClInclude Include="Classes\Export\Export.h" />
-    <ClInclude Include="Classes\Lessons\Lesson0_1.h" />
-    <ClInclude Include="Classes\Lessons\Lesson1.h" />
-    <ClInclude Include="Classes\Lessons\Lesson2.h" />
-    <ClInclude Include="Classes\Lessons\Lesson3.h" />
-    <ClInclude Include="Classes\Lessons\Lesson4.h" />
-    <ClInclude Include="Classes\Lessons\Lesson5.h" />
-    <ClInclude Include="Classes\Lessons\Lesson6.h" />
-    <ClInclude Include="Classes\Lessons\Lesson7.h" />
-    <ClInclude Include="Classes\Lessons\Lesson8.h" />
-    <ClInclude Include="Classes\Lessons\LessonD3D9.h" />
     <ClInclude Include="Classes\renderable\TAssimpModel.h" />
     <ClInclude Include="Classes\renderable\IRenderable.h" />
     <ClInclude Include="Classes\renderable\TAssimpMesh.h" />
@@ -450,6 +440,16 @@
     <ClInclude Include="Classes\rendersys\TMaterial.h" />
     <ClInclude Include="Classes\rendersys\TMaterialCB.h" />
     <ClInclude Include="Classes\rendersys\TThreadPump.h" />
+    <ClInclude Include="Classes\TestCases\Lesson0_1.h" />
+    <ClInclude Include="Classes\TestCases\Lesson1.h" />
+    <ClInclude Include="Classes\TestCases\Lesson2.h" />
+    <ClInclude Include="Classes\TestCases\Lesson3.h" />
+    <ClInclude Include="Classes\TestCases\Lesson4.h" />
+    <ClInclude Include="Classes\TestCases\Lesson5.h" />
+    <ClInclude Include="Classes\TestCases\Lesson6.h" />
+    <ClInclude Include="Classes\TestCases\Lesson7.h" />
+    <ClInclude Include="Classes\TestCases\Lesson8.h" />
+    <ClInclude Include="Classes\TestCases\LessonD3D9.h" />
     <ClInclude Include="Classes\TPredefine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

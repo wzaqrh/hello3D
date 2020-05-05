@@ -258,13 +258,35 @@ bool TRenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int da
 	assert(buffer != nullptr);
 	HRESULT hr = S_OK;
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	IContantBufferPtr cbuffer = PtrCast(buffer).Cast<IContantBuffer>();
-	TContantBuffer11Ptr cbuffer11 = PtrCast(cbuffer).As<TContantBuffer11>();
-	hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
-	if (CheckHR(hr))
-		return false;
-	memcpy(MappedResource.pData, data, dataSize);
-	mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+	switch (buffer->GetType())
+	{
+	case E_HWBUFFER_CONSTANT: {
+		IContantBufferPtr cbuffer = PtrCast(buffer).Cast<IContantBuffer>();
+		TContantBuffer11Ptr cbuffer11 = PtrCast(cbuffer).As<TContantBuffer11>();
+		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+		if (CheckHR(hr)) return false;
+		memcpy(MappedResource.pData, data, dataSize);
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+	}break;
+	case E_HWBUFFER_VERTEX:{
+		IVertexBufferPtr cbuffer = PtrCast(buffer).Cast<IVertexBuffer>();
+		TVertexBuffer11Ptr cbuffer11 = PtrCast(cbuffer).As<TVertexBuffer11>();
+		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+		if (CheckHR(hr)) return false;
+		memcpy(MappedResource.pData, data, dataSize);
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+	}break;
+	case E_HWBUFFER_INDEX: {
+		IIndexBufferPtr cbuffer = PtrCast(buffer).Cast<IIndexBuffer>();
+		TIndexBuffer11Ptr cbuffer11 = PtrCast(cbuffer).As<TIndexBuffer11>();
+		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+		if (CheckHR(hr)) return false;
+		memcpy(MappedResource.pData, data, dataSize);
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+	}break;
+	default:
+		break;
+	}
 	return true;
 }
 

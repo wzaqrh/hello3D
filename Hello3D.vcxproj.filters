@@ -101,41 +101,41 @@
     <ClCompile Include="Classes\base\Utility.cpp">
       <Filter>Classes\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson0_1.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson1.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson2.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson3.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson4.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson5.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson6.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson7.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\Lesson8.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Lessons\LessonD3D9.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Export\Export.cpp">
       <Filter>Classes\Export</Filter>
     </ClCompile>
     <ClCompile Include="Classes\renderable\TAssimpModel.cpp">
       <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson0_1.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson1.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson2.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson3.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson4.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson5.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson6.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson7.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\Lesson8.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\LessonD3D9.cpp">
+      <Filter>Classes\TestCases</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -211,36 +211,6 @@
     <ClInclude Include="Classes\base\Utility.h">
       <Filter>Classes\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson0_1.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson1.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson2.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson3.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson4.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson5.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson6.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson7.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\Lesson8.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Lessons\LessonD3D9.h">
-      <Filter>Classes\TestCases</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\TPredefine.h">
       <Filter>Classes</Filter>
     </ClInclude>
@@ -249,6 +219,36 @@
     </ClInclude>
     <ClInclude Include="Classes\renderable\TAssimpModel.h">
       <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson0_1.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson1.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson2.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson3.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson4.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson5.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson6.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson7.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\Lesson8.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TestCases\LessonD3D9.h">
+      <Filter>Classes\TestCases</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -324,3 +324,15 @@ TProgram11::TProgram11()
 {
 	mRes = MakePtr<TResource>((IUnknown**)0);
 }
+
+void TProgram11::SetVertex(TVertexShader11Ptr pVertex)
+{
+	mVertex = pVertex;
+	mRes->AddDependency(pVertex->AsRes());
+}
+
+void TProgram11::SetPixel(TPixelShader11Ptr pPixel)
+{
+	mPixel = pPixel;
+	mRes->AddDependency(pPixel->AsRes());
+}
