@@ -57,7 +57,7 @@ DLL_EXPORT LONG JustTest(LONG p1, LONG p2)
 }
 
 //ITexture
-ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPath)
+ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath)
 {
 	ITexturePtr texture = rendersys->LoadTexture(imgPath);
 	return texture ? texture.Detach() : nullptr;
@@ -69,9 +69,9 @@ DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width,
 	return texture ? texture.Detach() : nullptr;
 }
 
-DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, char* data, int dataSize, int dataStep)
+DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, PBYTE data, int dataSize, int dataStep)
 {
-	return rendersys->LoadRawTextureData(texture, data, dataSize, dataStep);
+	return rendersys->LoadRawTextureData(texture, (char*)data, dataSize, dataStep);
 }
 
 //TSprite
