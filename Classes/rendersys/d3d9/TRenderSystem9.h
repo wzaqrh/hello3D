@@ -5,7 +5,6 @@
 class TRenderSystem9
 	: public TRenderSystem
 {
-	HINSTANCE mHInst = NULL;
 	HWND mHWnd = NULL;
 
 	D3DCAPS9 mD3DCaps;
@@ -20,11 +19,10 @@ public:
 	TRenderSystem9();
 	virtual ~TRenderSystem9();
 
-	STDMETHODIMP_(bool) Initialize() override;
+	STDMETHODIMP_(bool) Initialize(HWND hWnd) override;
 	STDMETHODIMP_(void) Update(float dt) override;
 	STDMETHODIMP_(void) CleanUp() override;
 public:
-	STDMETHODIMP_(void) SetHandle(HINSTANCE hInstance, HWND hWnd) override;
 	STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
 
 	STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;

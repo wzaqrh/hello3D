@@ -6,7 +6,6 @@ class TRenderSystem11
 	: public TRenderSystem
 {
 private:
-	HINSTANCE mHInst = NULL;
 	HWND mHWnd = NULL;
 	D3D_DRIVER_TYPE mDriverType = D3D_DRIVER_TYPE_NULL;
 	D3D_FEATURE_LEVEL mFeatureLevel = D3D_FEATURE_LEVEL_11_0;
@@ -30,11 +29,10 @@ public:
 	TRenderSystem11();
 	~TRenderSystem11();
 public:
-	STDMETHODIMP_(bool) Initialize();
+	STDMETHODIMP_(bool) Initialize(HWND hWnd);
 	STDMETHODIMP_(void) Update(float dt);
 	STDMETHODIMP_(void) CleanUp();
 public:
-	STDMETHODIMP_(void) SetHandle(HINSTANCE hInstance, HWND hWnd);
 	STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
 
 	STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);

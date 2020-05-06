@@ -152,7 +152,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;d3dx11d.lib;d3dx10d.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;d3dx11d.lib;d3dx10d.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;legacy_stdio_definitions.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
@@ -161,6 +161,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalLibraryDirectories>.\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>
@@ -376,9 +377,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="lib\assimp-vc140-mt.lib" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Classes\app\Main.cpp" />
     <ClCompile Include="Classes\app\TApp.cpp" />
     <ClCompile Include="Classes\app\TMovable.cpp" />
@@ -402,16 +400,16 @@
     <ClCompile Include="Classes\rendersys\TMaterial.cpp" />
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp" />
     <ClCompile Include="Classes\rendersys\TThreadPump.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson0_1.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson1.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson2.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson3.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson4.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson5.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson6.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson7.cpp" />
-    <ClCompile Include="Classes\TestCases\Lesson8.cpp" />
-    <ClCompile Include="Classes\TestCases\LessonD3D9.cpp" />
+    <ClCompile Include="Classes\TestCases\TestExport.cpp" />
+    <ClCompile Include="Classes\TestCases\TestSprite.cpp" />
+    <ClCompile Include="Classes\TestCases\TestModel.cpp" />
+    <ClCompile Include="Classes\TestCases\TestDiffuse.cpp" />
+    <ClCompile Include="Classes\TestCases\TestSpecSkybox.cpp" />
+    <ClCompile Include="Classes\TestCases\TestFog.cpp" />
+    <ClCompile Include="Classes\TestCases\TestRT.cpp" />
+    <ClCompile Include="Classes\TestCases\TestPBR.cpp" />
+    <ClCompile Include="Classes\TestCases\TestShadowMap.cpp" />
+    <ClCompile Include="Classes\TestCases\TestBloom.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h" />
@@ -440,16 +438,6 @@
     <ClInclude Include="Classes\rendersys\TMaterial.h" />
     <ClInclude Include="Classes\rendersys\TMaterialCB.h" />
     <ClInclude Include="Classes\rendersys\TThreadPump.h" />
-    <ClInclude Include="Classes\TestCases\Lesson0_1.h" />
-    <ClInclude Include="Classes\TestCases\Lesson1.h" />
-    <ClInclude Include="Classes\TestCases\Lesson2.h" />
-    <ClInclude Include="Classes\TestCases\Lesson3.h" />
-    <ClInclude Include="Classes\TestCases\Lesson4.h" />
-    <ClInclude Include="Classes\TestCases\Lesson5.h" />
-    <ClInclude Include="Classes\TestCases\Lesson6.h" />
-    <ClInclude Include="Classes\TestCases\Lesson7.h" />
-    <ClInclude Include="Classes\TestCases\Lesson8.h" />
-    <ClInclude Include="Classes\TestCases\LessonD3D9.h" />
     <ClInclude Include="Classes\TPredefine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

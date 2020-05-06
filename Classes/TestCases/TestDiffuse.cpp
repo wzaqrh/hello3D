@@ -1,11 +1,25 @@
-#include "Lesson4.h"
+#include "TApp.h"
+#include "TAssimpModel.h"
 
-/********** Lesson4 **********/
-void Lesson4::OnPostInitDevice()
+class TestDiffuse : public TApp
 {
-	auto light2 = mRenderSys->AddDirectLight();
-	light2->SetDirection(0, 0, 1);
+protected:
+	virtual void OnRender() override;
+	virtual void OnPostInitDevice() override;
+	virtual void OnInitLight() override;
+private:
+	TAssimpModel* mModel = nullptr;
+};
 
+void TestDiffuse::OnInitLight()
+{
+	auto light = mRenderSys->AddPointLight();
+	light->SetDiffuseColor(1, 1, 1, 1);
+	light->SetPosition(0, 0, -200);
+}
+
+void TestDiffuse::OnPostInitDevice()
+{
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -15,21 +29,14 @@ void Lesson4::OnPostInitDevice()
 		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-};
-	mModel = new TAssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson4"), layouts, [&](TMaterialPtr mat) {
-#if 0
-		TFogExp fog;
-		fog.SetColor(0.5, 0.5, 0.5);
-		fog.SetExp(0.1);
-		TMaterialBuilder builder(mat);
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(TFogExp), &fog), MAKE_CBNAME(TFogExp), true);
-#endif
-	});
-	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
+	};
+	mModel = new TAssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson2"), layouts);
+	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
+	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); mScale = 0.05;
 	//mModel->PlayAnim(0);
 }
 
-void Lesson4::OnRender()
+void TestDiffuse::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
 	if (mRenderSys->BeginScene()) {
@@ -38,4 +45,4 @@ void Lesson4::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");
+//auto reg = AppRegister<TAppLesson2>("TAppLesson2: Diffuse Light");

@@ -1,6 +1,25 @@
-#include "Lesson7.h"
+#include "TApp.h"
+#include "TAssimpModel.h"
+#include "TSprite.h"
 
-void Lesson7::OnInitLight()
+struct cbShadowMap
+{
+	XMMATRIX LightView;
+	XMMATRIX LightProjection;
+};
+
+class TestShadowMap : public TApp
+{
+protected:
+	virtual void OnRender() override;
+	virtual void OnPostInitDevice() override;
+	virtual void OnInitLight() override;
+private:
+	TAssimpModel *mModel1, *mModel2 = nullptr;
+	TPointLightPtr mLight;
+};
+
+void TestShadowMap::OnInitLight()
 {
 	mLight = mRenderSys->AddPointLight();//1, -1, 1
 	float ddd = 10;
@@ -11,7 +30,7 @@ void Lesson7::OnInitLight()
 
 #define USE_RENDER_TEXTURE
 #define SCALE_BASE 0.01
-void Lesson7::OnPostInitDevice()
+void TestShadowMap::OnPostInitDevice()
 {
 #if 1
 	mRenderSys->SetPerspectiveCamera(45, 30, 300);
@@ -42,7 +61,7 @@ void Lesson7::OnPostInitDevice()
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 
-void Lesson7::OnRender()
+void TestShadowMap::OnRender()
 {
 #if 1
 	mModel1->Update(mTimer.mDeltaTime);

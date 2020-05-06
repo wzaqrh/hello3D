@@ -1,9 +1,21 @@
-#include "Lesson6.h"
 #include "TMaterialCB.h"
 #include "IRenderable.h"
 #include "TInterfaceType.h"
+#include "TApp.h"
+#include "TAssimpModel.h"
+#include "TSprite.h"
 
-void Lesson6::OnInitLight()
+class TestPBR : public TApp
+{
+protected:
+	virtual void OnRender() override;
+	virtual void OnPostInitDevice() override;
+	virtual void OnInitLight() override;
+private:
+	TAssimpModel* mModel = nullptr;
+};
+
+void TestPBR::OnInitLight()
 {
 #if 0
 	{
@@ -56,7 +68,7 @@ void Lesson6::OnInitLight()
 
 //#define PBR_DEBUG
 /********** Lesson6 **********/
-void Lesson6::OnPostInitDevice()
+void TestPBR::OnPostInitDevice()
 {
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
@@ -107,7 +119,7 @@ void Lesson6::OnPostInitDevice()
 #endif
 }
 
-void Lesson6::OnRender()
+void TestPBR::OnRender()
 {
 	if (mModel) mModel->Update(mTimer.mDeltaTime);
 	if (mRenderSys->BeginScene()) {

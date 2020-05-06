@@ -17,35 +17,20 @@ TApp::~TApp()
 
 void TApp::Create()
 {
-	if (OnCreateRenderSys() == "d3d9") {
-		mRenderSys = new TRenderSystem9;
-	}
-	else {
-		mRenderSys = new TRenderSystem11;
-	}
-}
-
 #if 0
-std::string gDefRenderSystem = "d3d9";
+	mRenderSys = new TRenderSystem9;
 #else
-std::string gDefRenderSystem = "d3d11";
+	mRenderSys = new TRenderSystem11;
 #endif
-std::string TApp::OnCreateRenderSys()
-{
-	return gDefRenderSystem;
 }
 
-void TApp::Attach(HINSTANCE hInstance, HWND hWnd)
+bool TApp::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
-	mRenderSys->SetHandle(hInstance, hWnd);
-
+	mHnd = hWnd;
 	mInput = new TD3DInput(hInstance, hWnd, mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
-}
 
-bool TApp::Initialize()
-{
 	OnPreInitDevice();
-	if (FAILED(mRenderSys->Initialize())) {
+	if (FAILED(mRenderSys->Initialize(mHnd))) {
 		mRenderSys->CleanUp();
 		return false;
 	}
@@ -108,19 +93,18 @@ XMMATRIX TApp::GetWorldTransform()
 	return mMove->GetWorldTransform();
 }
 
-std::map<std::string, std::function<TApp*()>> gRegAppClasses;
-void RegisterApp(std::string name, std::function<TApp*()> appCls)
-{
+
+std::map<std::string, std::function<IApp*()>> gRegAppClasses;
+void RegisterApp(std::string name, std::function<IApp*()> appCls) {
 	gRegAppClasses[name] = appCls;
 }
 
 std::string gCurrentAppName;
-TApp* gApp;
-TApp* CreateApp(std::string name)
+IApp* CreateApp(std::string name)
 {
 	auto entry = gRegAppClasses[name];
 	assert(entry);
-	gApp = entry();
+	IApp* gApp = entry();
 	gApp->Create();
 	return gApp;
 }

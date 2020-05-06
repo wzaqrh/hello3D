@@ -1,7 +1,18 @@
-#include "Lesson1.h"
+#include "TApp.h"
+#include "TAssimpModel.h"
 #include "TInterfaceType.h"
 
-void TAppLesson1::OnPostInitDevice()
+class TestModel : public TApp
+{
+protected:
+	virtual void OnRender() override;
+	virtual void OnPostInitDevice() override;
+private:
+	int mDrawFlag = 0;
+	TAssimpModel* mModel = nullptr;
+};
+
+void TestModel::OnPostInitDevice()
 {
 #if 0
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
@@ -24,7 +35,7 @@ void TAppLesson1::OnPostInitDevice()
 	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 }
 
-void TAppLesson1::OnRender()
+void TestModel::OnRender()
 {
 	mModel->Update(mTimer.mDeltaTime);
 	if (mRenderSys->BeginScene()) {
@@ -33,4 +44,4 @@ void TAppLesson1::OnRender()
 	}
 }
 
-//auto reg = AppRegister<TAppLesson1>("TAppLesson1: Load Model");
+//auto reg = AppRegister<TAppLesson1>("Assimp Model");

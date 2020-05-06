@@ -1,15 +1,19 @@
-#include "Lesson0_1.h"
+#include "TApp.h"
 #include "TInterfaceType.h"
 #include "TSprite.h"
 #include "TRenderSystem11.h"
 #include "TRenderSystem9.h"
 
-std::string TAppLesson0_1::OnCreateRenderSys()
+class TestSprite : public TApp
 {
-	return gDefRenderSystem;
-}
+protected:
+	virtual void OnRender() override;
+	virtual void OnPostInitDevice() override;
+private:
+	TSpritePtr mSprite;
+};
 
-void TAppLesson0_1::OnPostInitDevice()
+void TestSprite::OnPostInitDevice()
 {
 #if 0
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
@@ -28,7 +32,7 @@ void TAppLesson0_1::OnPostInitDevice()
 #endif
 }
 
-void TAppLesson0_1::OnRender()
+void TestSprite::OnRender()
 {
 	if (mRenderSys->BeginScene()) {
 		mRenderSys->Draw(mSprite.get());
@@ -36,4 +40,4 @@ void TAppLesson0_1::OnRender()
 	}
 }
 
-auto reg = AppRegister<TAppLesson0_1>("TAppLesson0_1: LayerColor");
+//auto reg = AppRegister<TestSprite>("Sprite");

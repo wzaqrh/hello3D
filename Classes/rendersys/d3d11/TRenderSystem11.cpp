@@ -18,8 +18,9 @@ TRenderSystem11::~TRenderSystem11()
 {
 }
 
-bool TRenderSystem11::Initialize()
+bool TRenderSystem11::Initialize(HWND hWnd)
 {
+	mHWnd = hWnd;
 	RECT rc;
 	GetClientRect(mHWnd, &rc);
 	UINT width = rc.right - rc.left;
@@ -180,12 +181,6 @@ void TRenderSystem11::Update(float dt)
 
 void TRenderSystem11::CleanUp()
 {
-}
-
-void TRenderSystem11::SetHandle(HINSTANCE hInstance, HWND hWnd)
-{
-	mHInst = hInstance;
-	mHWnd = hWnd;
 }
 
 void TRenderSystem11::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)

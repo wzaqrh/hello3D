@@ -8,9 +8,9 @@
 #include "TSprite.h"
 
 //RenderSystem
-IRenderSystem* RenderSystem_Create(HINSTANCE hInstance, HWND hWnd, bool isd3d11)
+ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11)
 {
-	IRenderSystem* rendersys = nullptr;
+	ExportRenderSystem rendersys = nullptr;
 	if (isd3d11) {
 		rendersys = new TRenderSystem11;
 	}
@@ -18,23 +18,24 @@ IRenderSystem* RenderSystem_Create(HINSTANCE hInstance, HWND hWnd, bool isd3d11)
 		rendersys = new TRenderSystem9;
 	}
 
-	rendersys->SetHandle(hInstance, hWnd);
-
-	if (FAILED(rendersys->Initialize())) {
+	if (FAILED(rendersys->Initialize(hWnd))) {
 		rendersys->CleanUp();
 		rendersys = nullptr;
 	}
 
+	rendersys->SetOthogonalCamera(100);
+	rendersys->AddPointLight();
+
 	return rendersys;
 }
 
-void RenderSystem_Destroy(IRenderSystem* rendersys)
+void RenderSystem_Destroy(ExportRenderSystem rendersys)
 {
 	rendersys->CleanUp();
 	rendersys->Release();
 }
 
-void RenderSystem_Render(IRenderSystem* rendersys, XMFLOAT4 bgColor, IRenderable** renderables, int renderableCount)
+void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportRenderable* renderables, int renderableCount)
 {
 	rendersys->ClearColorDepthStencil(bgColor, 1.0f, 0);
 	rendersys->Update(0);
@@ -50,29 +51,32 @@ void RenderSystem_Render(IRenderSystem* rendersys, XMFLOAT4 bgColor, IRenderable
 }
 
 //ITexture
-ITexture* Texture_GetByPath(IRenderSystem* rendersys, const char* imgPath)
+ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPath)
 {
 	ITexturePtr texture = rendersys->GetTexByPath(imgPath);
 	return texture ? texture.Detach() : nullptr;
 }
 
 //TSprite
-TSprite* Sprite_Create(IRenderSystem* rendersys, const char* imgPath)
+ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath)
 {
-	return new TSprite(rendersys, E_MAT_SPRITE);
+	TSprite* sprite = new TSprite(rendersys.self, E_MAT_SPRITE);
+	if (imgPath != nullptr && imgPath != "")
+		sprite->SetTexture(rendersys->GetTexByPath(imgPath));
+	return ExportSprite(sprite);
 }
 
-void Sprite_Destroy(TSprite* sprite)
+void Sprite_Destroy(ExportSprite sprite)
 {
-	delete sprite;
+	sprite.DestroySelf();
 }
 
-void Sprite_SetTexture(TSprite* sprite, ITexture* texture)
+void Sprite_SetTexture(ExportSprite sprite, ExportTexture texture)
 {
-	sprite->SetTexture(ITexturePtr(texture));
+	sprite->SetTexture(ITexturePtr(texture.self));
 }
 
-void Sprite_SetRect(TSprite* sprite, XMFLOAT2 pos, XMFLOAT2 size)
+void Sprite_SetRect(ExportSprite sprite, XMFLOAT2 pos, XMFLOAT2 size)
 {
 	sprite->SetPosition(pos.x, pos.y, 0);
 	sprite->SetSize(size.x, size.y);

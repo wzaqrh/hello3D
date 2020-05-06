@@ -1,6 +1,17 @@
-#include "Lesson8.h"
+#include "TApp.h"
+#include "TAssimpModel.h"
+#include "TSprite.h"
 
-void Lesson8::OnPostInitDevice()
+class TestBloom : public TApp
+{
+protected:
+	virtual void OnRender() override;
+	virtual void OnPostInitDevice() override;
+private:
+	TAssimpModel* mModel = nullptr;
+};
+
+void TestBloom::OnPostInitDevice()
 {
 	mRenderSys->SetPerspectiveCamera(45, 10, 300);
 
@@ -21,7 +32,7 @@ void Lesson8::OnPostInitDevice()
 	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 }
 
-void Lesson8::OnRender()
+void TestBloom::OnRender()
 {
 	if (mModel) mModel->Update(mTimer.mDeltaTime);
 

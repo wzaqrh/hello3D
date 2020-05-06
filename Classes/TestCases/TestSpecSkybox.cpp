@@ -1,6 +1,17 @@
-#include "Lesson3.h"
+#include "TApp.h"
+#include "TAssimpModel.h"
 
-void Lesson3::OnInitLight()
+class TestSpecSkybox : public TApp
+{
+protected:
+	virtual void OnRender() override;
+	virtual void OnInitLight() override;
+	virtual void OnPostInitDevice() override;
+private:
+	TAssimpModel* mModel = nullptr;
+};
+
+void TestSpecSkybox::OnInitLight()
 {
 #if 0
 	auto light1 = mRenderSys->mPointLights[0];
@@ -22,7 +33,7 @@ void Lesson3::OnInitLight()
 	light2->SetDirection(0, 0, 1);
 }
 
-void Lesson3::OnPostInitDevice()
+void TestSpecSkybox::OnPostInitDevice()
 {
 	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
 	
@@ -36,7 +47,7 @@ void Lesson3::OnPostInitDevice()
 	//mModel->PlayAnim(0);
 }
 
-void Lesson3::OnRender()
+void TestSpecSkybox::OnRender()
 {
 	if (mRenderSys->BeginScene()) {
 		if (mModel) mModel->Update(mTimer.mDeltaTime);

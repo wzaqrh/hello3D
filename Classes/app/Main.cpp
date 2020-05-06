@@ -17,7 +17,7 @@
 
 #pragma comment(lib, "legacy_stdio_definitions.lib")
 
-HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, TApp* app);
+HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -25,12 +25,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	gApp = CreateApp(gCurrentAppName);
+	auto AppDraw = CreateApp(gCurrentAppName);
 
-	if (FAILED(InitWindow(hInstance, nCmdShow, gApp)))
+	HWND handle;
+	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), &handle)))
 		return 0;
 
-	if (! gApp->Initialize()) 
+	if (!AppDraw->Initialize(hInstance, handle))
 		return 0;
 
 	MSG msg = { 0 };
@@ -43,11 +44,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
-			gApp->Render();
+			AppDraw->Render();
 		}
 	}
 
-	gApp->CleanUp();
+	AppDraw->CleanUp();
 	return (int)msg.wParam;
 }
 
@@ -55,7 +56,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 //--------------------------------------------------------------------------------------
 // Register class and create window
 //--------------------------------------------------------------------------------------
-HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, TApp* app)
+HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle)
 {
 	// Register class
 	WNDCLASSEX wcex;
@@ -77,13 +78,13 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, TApp* app)
 	// Create window
 	RECT rc = { 0, 0, C_WINDOW_WIDTH, C_WINDOW_HEIGHT };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-	auto HWnd = CreateWindowA("TutorialWindowClass", app->mName.c_str(), WS_OVERLAPPEDWINDOW,
+	auto HWnd = CreateWindowA("TutorialWindowClass", name, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
 		NULL);
 	if (! HWnd)
 		return E_FAIL;
 
-	app->Attach(hInstance, HWnd);
+	*pHandle = HWnd;
 
 	ShowWindow(HWnd, nCmdShow);
 	return S_OK;

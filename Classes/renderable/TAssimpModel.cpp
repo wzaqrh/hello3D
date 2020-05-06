@@ -1,9 +1,10 @@
 #include "TAssimpModel.h"
+#include "TMaterial.h"
 #include "TMaterialCB.h"
+#include "TMovable.h"
 #include "Utility.h"
 #include "IRenderSystem.h"
 #include "TInterfaceType.h"
-#include "Lesson6.h"
 
 /********** AiNodeInfo **********/
 AiNodeInfo::AiNodeInfo()

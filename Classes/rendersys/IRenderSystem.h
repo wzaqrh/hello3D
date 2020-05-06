@@ -5,7 +5,7 @@
 MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
 IRenderSystem : public IUnknown
 {
-	virtual STDMETHODIMP_(bool) Initialize() = 0;
+	virtual STDMETHODIMP_(bool) Initialize(HWND hWnd) = 0;
 	virtual STDMETHODIMP_(void) Update(float dt) = 0;
 	virtual STDMETHODIMP_(void) CleanUp() = 0;
 	
@@ -22,7 +22,6 @@ IRenderSystem : public IUnknown
 	virtual STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) = 0;
 
 
-	virtual STDMETHODIMP_(void) SetHandle(HINSTANCE hInstance, HWND hWnd) = 0;
 	virtual STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 
 	virtual STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;

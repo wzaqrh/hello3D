@@ -2,17 +2,41 @@
 #include "std.h"
 #include "TPredefine.h"
 #include "IRenderSystem.h"
+#include "TSprite.h"
 
-//IRenderSystem
-IRenderSystem* RenderSystem_Create(HINSTANCE hInstance, HWND hWnd, bool isd3d11);
-void RenderSystem_Destroy(IRenderSystem* rendersys);
-void RenderSystem_Render(IRenderSystem* rendersys, XMFLOAT4 bgColor, IRenderable** renderables, int renderableCount);
+#define DLL_EXPORT extern "C" __declspec(dllexport)
 
-//ITexture
-ITexture* Texture_GetByPath(IRenderSystem* rendersys, const char* imgPath);
+#pragma pack(push,1)
+struct ExportRenderable {
+	IRenderable* self;
+	ExportRenderable(IRenderable* self__ = nullptr) :self(self__) {}
+	IRenderable* operator->() { return self; }
+};
+
+struct ExportRenderSystem {
+	IRenderSystem* self;
+	ExportRenderSystem(IRenderSystem* self__ = nullptr) :self(self__) {}
+	IRenderSystem* operator->() { return self; }
+};
+DLL_EXPORT ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11);
+DLL_EXPORT void RenderSystem_Destroy(ExportRenderSystem rendersys);
+DLL_EXPORT void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportRenderable* renderables, int renderableCount);
+
+struct ExportTexture {
+	ITexture* self;
+	ExportTexture(ITexture* self__ = nullptr) :self(self__) {}
+	ITexture* operator->() { return self; }
+};
+DLL_EXPORT ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPath);
 
 //TSprite
-TSprite* Sprite_Create(IRenderSystem* rendersys, const char* imgPath);
-void Sprite_Destroy(TSprite* sprite);
-void Sprite_SetTexture(TSprite* sprite, ITexture* texture);
-void Sprite_SetRect(TSprite* sprite, XMFLOAT2 pos, XMFLOAT2 size);
+struct ExportSprite : ExportRenderable {
+	ExportSprite(TSprite* self__ = nullptr) :ExportRenderable(self__) {}
+	TSprite* operator->() { return static_cast<TSprite*>(self); }
+	void DestroySelf() { delete self; }
+};
+DLL_EXPORT ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath);
+DLL_EXPORT void Sprite_Destroy(ExportSprite sprite);
+DLL_EXPORT void Sprite_SetTexture(ExportSprite sprite, ExportTexture texture);
+DLL_EXPORT void Sprite_SetRect(ExportSprite sprite, XMFLOAT2 pos, XMFLOAT2 size);
+#pragma pack(pop) 

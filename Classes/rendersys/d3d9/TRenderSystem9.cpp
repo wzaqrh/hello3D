@@ -17,8 +17,9 @@ TRenderSystem9::~TRenderSystem9()
 
 }
 
-bool TRenderSystem9::Initialize()
+bool TRenderSystem9::Initialize(HWND hWnd)
 {
+	mHWnd = hWnd;
 	RECT rc;
 	GetClientRect(mHWnd, &rc);
 	UINT width = rc.right - rc.left;
@@ -112,12 +113,6 @@ void TRenderSystem9::Update(float dt)
 
 void TRenderSystem9::CleanUp()
 {
-}
-
-void TRenderSystem9::SetHandle(HINSTANCE hInstance, HWND hWnd)
-{
-	mHInst = hInstance;
-	mHWnd = hWnd;
 }
 
 static inline D3DCOLOR XMFLOAT2D3DCOLOR(XMFLOAT4 color) {
