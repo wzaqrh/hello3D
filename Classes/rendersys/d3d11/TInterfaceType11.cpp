@@ -72,55 +72,59 @@ ID3D11PixelShader*& TPixelShader11::GetShader11()
 /********** TTexture11 **********/
 TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, std::string __path)
 {
-	path = __path;
-	texture = __texture;
-	mRes = MakePtr<TResource>((IUnknown**)&texture);
+	mPath = __path;
+	mTexture = __texture;
+
+	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
+	mRes->AddOnLoadedListener([this](IResource* ) {
+		D3D11_TEXTURE2D_DESC desc = GetDesc();
+		mWidth = desc.Width;
+		mHeight = desc.Height;
+		mFormat = desc.Format;
+	});
 }
 
-void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture)
+TTexture11::TTexture11(int width, int height, DXGI_FORMAT format)
 {
-	texture = __texture;
+	mWidth = width;
+	mHeight = height;
+	mFormat = format;
+	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
 }
 
-const char* TTexture11::GetPath()
-{
-	return path.c_str();
+void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture) {
+	mTexture = __texture;
+}
+ID3D11ShaderResourceView*& TTexture11::GetSRV11() {
+	return mTexture;
 }
 
-ID3D11ShaderResourceView*& TTexture11::GetSRV11()
-{
-	return texture;
+const char* TTexture11::GetPath() { 
+	return mPath.c_str(); 
 }
-
+int TTexture11::GetWidth() {
+	return mWidth;
+}
+int TTexture11::GetHeight() {
+	return mHeight;
+}
+DXGI_FORMAT TTexture11::GetFormat() {
+	return mFormat;
+}
 D3D11_TEXTURE2D_DESC TTexture11::GetDesc()
 {
-	if (texture != nullptr) {
+	if (mTexture != nullptr) {
 		ID3D11Texture2D* pTexture;
-		texture->GetResource((ID3D11Resource **)&pTexture);
+		mTexture->GetResource((ID3D11Resource **)&pTexture);
 
 		D3D11_TEXTURE2D_DESC desc;
 		pTexture->GetDesc(&desc);
 		return desc;
 	}
 	else {
-		D3D11_TEXTURE2D_DESC desc = {0};
+		D3D11_TEXTURE2D_DESC desc = { 0 };
 		return desc;
 	}
-}
-
-int TTexture11::GetWidth()
-{
-	return GetDesc().Width;
-}
-
-int TTexture11::GetHeight()
-{
-	return GetDesc().Height;
-}
-
-DXGI_FORMAT TTexture11::GetFormat()
-{
-	return GetDesc().Format;
 }
 
 /********** TVertex11Buffer **********/

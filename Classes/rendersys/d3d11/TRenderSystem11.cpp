@@ -662,6 +662,48 @@ ITexturePtr TRenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT fo
 	return pTextureRV;
 }
 
+ITexturePtr TRenderSystem11::CreateTexture(int width, int height, DXGI_FORMAT format)
+{
+	return MakePtr<TTexture11>(width, height, format);
+}
+bool TRenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
+{
+	assert(dataStep * texture->GetHeight() <= dataSize);
+	D3D11_SUBRESOURCE_DATA initData = { data, dataStep, 0 };
+
+	D3D11_TEXTURE2D_DESC desc = {};
+	desc.Width = texture->GetWidth();
+	desc.Height = texture->GetHeight();
+	desc.MipLevels = desc.ArraySize = 1;
+	desc.Format = texture->GetFormat();
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	ComPtr<ID3D11Texture2D> tex;
+	HRESULT hr = mDevice->CreateTexture2D(&desc, &initData, tex.GetAddressOf());
+
+	if (SUCCEEDED(hr))
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+		SRVDesc.Format = texture->GetFormat();
+		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		SRVDesc.Texture2D.MipLevels = 1;
+
+		ID3D11ShaderResourceView* texSRV;
+		hr = mDevice->CreateShaderResourceView(tex.Get(), &SRVDesc, &texSRV);
+		if (SUCCEEDED(hr)) 
+		{
+			TTexture11Ptr tex11 = PtrCast(texture).As<TTexture11>();
+			tex11->SetSRV11(texSRV);
+
+			tex11->AsRes()->CheckAndSetLoaded();
+		}
+	}
+
+	return SUCCEEDED(hr);
+}
+
 void TRenderSystem11::SetBlendFunc(const TBlendFunc& blendFunc)
 {
 	mCurBlendFunc = blendFunc;

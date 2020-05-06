@@ -50,9 +50,9 @@ IRenderSystem : public IUnknown
 	virtual STDMETHODIMP_(void) SetBlendFunc(const TBlendFunc& blendFunc) = 0;
 	virtual STDMETHODIMP_(void) SetDepthState(const TDepthState& depthState) = 0;
 
-
-	virtual STDMETHODIMP_(ITexturePtr) GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false)= 0;
-
+	virtual STDMETHODIMP_(ITexturePtr) LoadTexture(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false)= 0;
+	virtual STDMETHODIMP_(ITexturePtr) CreateTexture(int width, int height, DXGI_FORMAT format) = 0;
+	virtual STDMETHODIMP_(bool) LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
 
 	virtual STDMETHODIMP_(bool) BeginScene() = 0;
 	virtual STDMETHODIMP_(void) EndScene() = 0;
@@ -121,7 +121,7 @@ public:
 public:
 	STDMETHODIMP_(IProgramPtr) CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 public:
-	STDMETHODIMP_(ITexturePtr) GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);
+	STDMETHODIMP_(ITexturePtr) LoadTexture(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);
 public:
 	STDMETHODIMP_(void) Draw(IRenderable* renderable);
 protected:

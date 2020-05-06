@@ -347,7 +347,7 @@ std::vector<ITexturePtr> TAssimpModel::loadMaterialTextures(aiMaterial* mat, aiT
 		aiString str; mat->GetTexture(type, i, &str);
 		std::string key = str.C_Str();
 
-		ITexturePtr texInfo = mRenderSys->GetTexByPath(key);
+		ITexturePtr texInfo = mRenderSys->LoadTexture(key);
 		textures.push_back(texInfo);
 		mLoadedTexture[key] = texInfo;
 	}

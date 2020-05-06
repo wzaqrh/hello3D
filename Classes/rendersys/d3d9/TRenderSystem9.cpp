@@ -129,7 +129,7 @@ void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, 
 
 IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
-	TTexture9Ptr pTextureRV = new TTexture9("");
+	TTexture9Ptr pTextureRV = new TTexture9(nullptr, "");
 	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
@@ -423,7 +423,7 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 
 	TTexture9Ptr pTextureRV;
 	if (IsFileExist(pSrcFile)) {
-		pTextureRV = MakePtr<TTexture9>(imgPath);
+		pTextureRV = MakePtr<TTexture9>(nullptr, imgPath);
 		if (isCube) {
 			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile, 
 				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3DEnumCT::d3d11To9(format)/*D3DFMT_A16B16G16R16F*/,
@@ -444,6 +444,43 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 		//MessageBoxA(0, szBuf, "", MB_OK);
 	}
 	return pTextureRV;
+}
+
+ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format)
+{
+	TTexture9Ptr texture = MakePtr<TTexture9>(width, height, format);
+	IDirect3DTexture9* pTexture = nullptr;
+	if (FAILED(mDevice9->CreateTexture(width, height, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
+		return nullptr;
+	texture->SetSRV9(pTexture);
+	return texture;
+}
+
+bool TRenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
+{
+	assert(dataStep * texture->GetHeight() <= dataSize);
+	TTexture9Ptr tex9 = PtrCast(texture).As<TTexture9>();
+
+	int width = texture->GetWidth(), height = texture->GetHeight();
+	IDirect3DTexture9* pTexture = tex9->GetSRV9();
+	if (pTexture == nullptr) return false;
+
+	D3DLOCKED_RECT outRect;
+	if (FAILED(pTexture->LockRect(0, &outRect, nullptr, D3DLOCK_DISCARD)))
+		return false;
+	
+	char *src = data, *dst = (char*)outRect.pBits;
+	int pitch = min(outRect.Pitch, dataStep);
+	for (int y = 0; y < height; ++y)
+	{
+		memcpy(dst, src, pitch);
+		src += dataStep;
+		dst += outRect.Pitch;
+	}
+	if (FAILED(pTexture->UnlockRect(0)))
+		return false;
+
+	return true;
 }
 
 void TRenderSystem9::SetBlendFunc(const TBlendFunc& blendFunc)

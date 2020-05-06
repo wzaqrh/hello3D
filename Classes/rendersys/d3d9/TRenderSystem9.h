@@ -49,6 +49,9 @@ public:
 
 	STDMETHODIMP_(void) SetBlendFunc(const TBlendFunc& blendFunc) override;
 	STDMETHODIMP_(void) SetDepthState(const TDepthState& depthState) override;
+
+	STDMETHODIMP_(ITexturePtr) CreateTexture(int width, int height, DXGI_FORMAT format) override;
+	STDMETHODIMP_(bool) LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 public:
 	STDMETHODIMP_(bool) BeginScene() override;
 	STDMETHODIMP_(void) EndScene() override;

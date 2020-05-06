@@ -106,7 +106,7 @@ IProgramPtr TRenderSystem::CreateProgram(const std::string& name, const char* vs
 	}
 }
 
-ITexturePtr TRenderSystem::GetTexByPath(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
+ITexturePtr TRenderSystem::LoadTexture(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
 {
 	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;

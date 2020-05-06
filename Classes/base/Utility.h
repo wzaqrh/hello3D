@@ -7,6 +7,7 @@ bool CheckHR(HRESULT result);
 
 extern std::string gDefRenderSystem;
 extern std::string gModelPath;
+std::string GetCurDirectory();
 std::string GetModelPath();
 std::string MakeModelPath(const char* name);
 std::string GetFileExt(const std::string& fileName);

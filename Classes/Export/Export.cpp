@@ -59,7 +59,7 @@ DLL_EXPORT LONG JustTest(LONG p1, LONG p2)
 //ITexture
 ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPath)
 {
-	ITexturePtr texture = rendersys->GetTexByPath(imgPath);
+	ITexturePtr texture = rendersys->LoadTexture(imgPath);
 	return texture ? texture.Detach() : nullptr;
 }
 
@@ -72,7 +72,7 @@ ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath)
 	TSprite* sprite = new TSprite(rendersys, E_MAT_SPRITE);
 #endif
 	if (imgPath != nullptr && imgPath != "")
-		sprite->SetTexture(rendersys->GetTexByPath(imgPath));
+		sprite->SetTexture(rendersys->LoadTexture(imgPath));
 	return ExportSprite(sprite);
 }
 

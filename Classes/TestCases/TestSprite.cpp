@@ -25,7 +25,7 @@ void TestSprite::OnPostInitDevice()
 
 	//mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
-	mSprite->SetTexture(mRenderSys->GetTexByPath("model\\theyKilledKenny.jpg"));
+	mSprite->SetTexture(mRenderSys->LoadTexture("model\\theyKilledKenny.jpg"));
 
 	mSprite->SetPosition(-mRenderSys->GetWinSize().x / 2, -mRenderSys->GetWinSize().y / 2, 0);
 	mSprite->SetSize(mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
@@ -40,4 +40,4 @@ void TestSprite::OnRender()
 	}
 }
 
-auto reg = AppRegister<TestSprite>("Sprite");
+//auto reg = AppRegister<TestSprite>("Sprite");

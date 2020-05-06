@@ -4,42 +4,51 @@
 #include "Utility.h"
 
 /********** TTexture9 **********/
-TTexture9::TTexture9(const std::string& __path)
-	:texture(nullptr)
-	, textureCube(nullptr)
-	, path(__path)
-{
-	mRes = MakePtr<TResource>((IUnknown**)&texture);
-}
-
 TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
-	:texture(__texture)
-	, textureCube(nullptr)
-	, path(__path)
+	: mTexture(__texture)
+	, mTextureCube(nullptr)
+	, mPath(__path)
 {
-	mRes = MakePtr<TResource>((IUnknown**)&texture);
+	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
+	mRes->AddOnLoadedListener([this](IResource*) {
+		D3DSURFACE_DESC desc = GetDesc();
+		mWidth = desc.Width;
+		mHeight = desc.Height;
+		mFormat = D3DEnumCT::d3d9To11(desc.Format);
+	});
 }
 
-const char* TTexture9::GetPath()
+TTexture9::TTexture9(int width, int height, DXGI_FORMAT format)
+	: mTexture(nullptr)
+	, mTextureCube(nullptr)
+	, mPath()
 {
-	return path.c_str();
+	mWidth = width;
+	mHeight = height;
+	mFormat = format;
 }
-int TTexture9::GetWidth()
+
+void TTexture9::SetSRV9(IDirect3DTexture9* __texture)
 {
-	return GetDesc().Width;
+	mTexture = __texture;
 }
-int TTexture9::GetHeight()
-{
-	return GetDesc().Height;
+
+const char* TTexture9::GetPath() {
+	return mPath.c_str();
 }
-DXGI_FORMAT TTexture9::GetFormat()
-{
-	return D3DEnumCT::d3d9To11(GetDesc().Format);
+int TTexture9::GetWidth() {
+	return mWidth;
+}
+int TTexture9::GetHeight() {
+	return mHeight;
+}
+DXGI_FORMAT TTexture9::GetFormat() {
+	return mFormat;// D3DEnumCT::d3d9To11(GetDesc().Format);
 }
 D3DSURFACE_DESC TTexture9::GetDesc()
 {
 	D3DSURFACE_DESC desc;
-	texture->GetLevelDesc(0, &desc);
+	mTexture->GetLevelDesc(0, &desc);
 	return desc;
 }
 
