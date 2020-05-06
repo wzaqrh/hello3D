@@ -63,6 +63,17 @@ ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPat
 	return texture ? texture.Detach() : nullptr;
 }
 
+DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, int format)
+{
+	ITexturePtr texture = rendersys->CreateTexture(width, height, static_cast<DXGI_FORMAT>(format));
+	return texture ? texture.Detach() : nullptr;
+}
+
+DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, char* data, int dataSize, int dataStep)
+{
+	return rendersys->LoadRawTextureData(texture, data, dataSize, dataStep);
+}
+
 //TSprite
 ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath)
 {
