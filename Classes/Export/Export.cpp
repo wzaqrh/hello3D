@@ -18,7 +18,7 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11)
 		rendersys = new TRenderSystem9;
 	}
 
-	if (FAILED(rendersys->Initialize(hWnd))) {
+	if (FAILED(rendersys->Initialize((HWND)hWnd))) {
 		rendersys->CleanUp();
 		rendersys = nullptr;
 	}
@@ -50,6 +50,12 @@ void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportR
 	}
 }
 
+DLL_EXPORT LONG JustTest(LONG p1, LONG p2)
+{
+	int p3 = p1 + p2;
+	return p3;
+}
+
 //ITexture
 ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPath)
 {
@@ -60,7 +66,11 @@ ExportTexture Texture_GetByPath(ExportRenderSystem rendersys, const char* imgPat
 //TSprite
 ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath)
 {
+#ifdef EXPORT_STRUCT
 	TSprite* sprite = new TSprite(rendersys.self, E_MAT_SPRITE);
+#else
+	TSprite* sprite = new TSprite(rendersys, E_MAT_SPRITE);
+#endif
 	if (imgPath != nullptr && imgPath != "")
 		sprite->SetTexture(rendersys->GetTexByPath(imgPath));
 	return ExportSprite(sprite);
@@ -68,12 +78,20 @@ ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath)
 
 void Sprite_Destroy(ExportSprite sprite)
 {
+#ifdef EXPORT_STRUCT
 	sprite.DestroySelf();
+#else
+	delete sprite;
+#endif
 }
 
 void Sprite_SetTexture(ExportSprite sprite, ExportTexture texture)
 {
+#ifdef EXPORT_STRUCT
 	sprite->SetTexture(ITexturePtr(texture.self));
+#else
+	sprite->SetTexture(ITexturePtr(texture));
+#endif
 }
 
 void Sprite_SetRect(ExportSprite sprite, XMFLOAT2 pos, XMFLOAT2 size)

@@ -35,8 +35,12 @@ bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 
 void TestExport::Render()
 {
+#ifdef EXPORT_STRUCT
 	ExportRenderable rends[] = { mSprite.self };
-	RenderSystem_Render(mRenderSys, XMFLOAT4(0, 0, 0, 0), rends, sizeof(rends) / sizeof(rends[0]));
+#else
+	ExportRenderable rends[] = { mSprite };
+#endif
+	RenderSystem_Render(mRenderSys, XMFLOAT4(0,0,0,0), rends, sizeof(rends) / sizeof(rends[0]));
 }
 
 void TestExport::CleanUp()
@@ -49,4 +53,4 @@ std::string TestExport::GetName()
 	return "TestExport";
 }
 
-auto reg = AppRegister<TestExport>("TestExport");
+//auto reg = AppRegister<TestExport>("TestExport");
