@@ -128,6 +128,7 @@ ITexture : public IUnknown{
 	virtual STDMETHODIMP_(int) GetWidth() = 0;
 	virtual STDMETHODIMP_(int) GetHeight() = 0;
 	virtual STDMETHODIMP_(DXGI_FORMAT) GetFormat() = 0;
+	virtual STDMETHODIMP_(int) GetMipmapCount() = 0;
 };
 typedef ComPtr<ITexture> ITexturePtr;
 

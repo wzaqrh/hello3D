@@ -63,15 +63,35 @@ ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath)
 	return texture ? texture.Detach() : nullptr;
 }
 
-DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, int format)
+DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format)
 {
-	ITexturePtr texture = rendersys->CreateTexture(width, height, static_cast<DXGI_FORMAT>(format));
+	ITexturePtr texture = rendersys->CreateTexture(width, height, format);
 	return texture ? texture.Detach() : nullptr;
 }
 
 DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, PBYTE data, int dataSize, int dataStep)
 {
 	return rendersys->LoadRawTextureData(texture, (char*)data, dataSize, dataStep);
+}
+
+DLL_EXPORT int Texture_Width(ExportTexture texture)
+{
+	return texture->GetWidth();
+}
+
+DLL_EXPORT int Texture_Height(ExportTexture texture)
+{
+	return texture->GetHeight();
+}
+
+DLL_EXPORT DXGI_FORMAT Texture_Format(ExportTexture texture)
+{
+	return texture->GetFormat();
+}
+
+DLL_EXPORT int Texture_MipmapCount(ExportTexture texture)
+{
+	return texture->GetMipmapCount();
 }
 
 //TSprite

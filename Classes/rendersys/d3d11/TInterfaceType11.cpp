@@ -70,17 +70,18 @@ ID3D11PixelShader*& TPixelShader11::GetShader11()
 }
 
 /********** TTexture11 **********/
-TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, std::string __path)
+TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, const std::string& __path)
 {
 	mPath = __path;
 	mTexture = __texture;
 
 	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
-	mRes->AddOnLoadedListener([this](IResource* ) {
+	mRes->AddOnLoadedListener([this](IResource* pRes) {
 		D3D11_TEXTURE2D_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
 		mFormat = desc.Format;
+		mMipCount = desc.MipLevels;
 	});
 }
 
@@ -89,6 +90,7 @@ TTexture11::TTexture11(int width, int height, DXGI_FORMAT format)
 	mWidth = width;
 	mHeight = height;
 	mFormat = format;
+	mMipCount = 1;
 	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
 }
 
@@ -110,6 +112,9 @@ int TTexture11::GetHeight() {
 }
 DXGI_FORMAT TTexture11::GetFormat() {
 	return mFormat;
+}
+int TTexture11::GetMipmapCount() {
+	return mMipCount;
 }
 D3D11_TEXTURE2D_DESC TTexture11::GetDesc()
 {

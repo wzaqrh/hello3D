@@ -194,6 +194,7 @@ public:
 	STDMETHODIMP_(int) GetWidth() override;
 	STDMETHODIMP_(int) GetHeight() override;
 	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
+	STDMETHODIMP_(int) GetMipmapCount() override;
 private:
 	D3DSURFACE_DESC GetDesc();
 };

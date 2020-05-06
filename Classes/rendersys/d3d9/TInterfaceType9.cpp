@@ -26,6 +26,7 @@ TTexture9::TTexture9(int width, int height, DXGI_FORMAT format)
 	mWidth = width;
 	mHeight = height;
 	mFormat = format;
+	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
 }
 
 void TTexture9::SetSRV9(IDirect3DTexture9* __texture)
@@ -44,6 +45,9 @@ int TTexture9::GetHeight() {
 }
 DXGI_FORMAT TTexture9::GetFormat() {
 	return mFormat;// D3DEnumCT::d3d9To11(GetDesc().Format);
+}
+STDMETHODIMP_(int) TTexture9::GetMipmapCount() {
+	return mTexture ? mTexture->GetLevelCount() : 1;
 }
 D3DSURFACE_DESC TTexture9::GetDesc()
 {

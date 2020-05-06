@@ -45,8 +45,12 @@ DLL_EXPORT void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgCol
 
 //Texture
 DLL_EXPORT ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath);
-DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, int format);
+DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format);
 DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, PBYTE data, int dataSize, int dataStep);
+DLL_EXPORT int Texture_Width(ExportTexture texture);
+DLL_EXPORT int Texture_Height(ExportTexture texture);
+DLL_EXPORT DXGI_FORMAT Texture_Format(ExportTexture texture);
+DLL_EXPORT int Texture_MipmapCount(ExportTexture texture);
 
 //TSprite
 DLL_EXPORT ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath);

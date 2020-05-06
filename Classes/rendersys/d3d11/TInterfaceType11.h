@@ -154,15 +154,15 @@ typedef ComPtr<TContantBuffer11> TContantBuffer11Ptr;
 struct INHERIT_COM("8D8622A5-CCFD-4BB1-ACA5-922A89E174A2")
 TTexture11 : public ComBase<ITexture> {
 private:
-	int mWidth, mHeight;
-	DXGI_FORMAT mFormat;
+	int mWidth = 0, mHeight = 0, mMipCount = 0;
+	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
 	ID3D11ShaderResourceView *mTexture;
 	IResourcePtr mRes;
 	std::string mPath;
 public:
 	TTexture11(int width, int height, DXGI_FORMAT format);
 
-	TTexture11(ID3D11ShaderResourceView* __texture, std::string __path);
+	TTexture11(ID3D11ShaderResourceView* __texture, const std::string& __path);
 	STDMETHODIMP_(IResourcePtr) AsRes() override {
 		return mRes;
 	}
@@ -177,6 +177,7 @@ public:
 	STDMETHODIMP_(int) GetWidth() override;
 	STDMETHODIMP_(int) GetHeight() override;
 	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
+	STDMETHODIMP_(int) GetMipmapCount() override;
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 };
