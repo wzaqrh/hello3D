@@ -61,7 +61,7 @@ public:
 	STDMETHODIMP_(void) SetBlendFunc(const TBlendFunc& blendFunc);
 	STDMETHODIMP_(void) SetDepthState(const TDepthState& depthState);
 
-	STDMETHODIMP_(ITexturePtr) CreateTexture(int width, int height, DXGI_FORMAT format);
+	STDMETHODIMP_(ITexturePtr) CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap);
 	STDMETHODIMP_(bool) LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep);
 public:
 	STDMETHODIMP_(bool) BeginScene();

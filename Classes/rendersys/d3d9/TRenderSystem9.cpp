@@ -446,9 +446,10 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 	return pTextureRV;
 }
 
-ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format)
+ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap)
 {
-	TTexture9Ptr texture = MakePtr<TTexture9>(width, height, format);
+	assert(mipmap == 1);
+	TTexture9Ptr texture = MakePtr<TTexture9>(width, height, format, mipmap);
 	IDirect3DTexture9* pTexture = nullptr;
 	if (FAILED(mDevice9->CreateTexture(width, height, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
 		return nullptr;

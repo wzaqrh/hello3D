@@ -44,7 +44,7 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 
 	if (bmpInfo.biClrImportant != 0) return nullptr;
 
-	ITexturePtr texture = mRenderSys->CreateTexture(bmpInfo.biWidth, bmpInfo.biHeight, DXGI_FORMAT_R8G8B8A8_UNORM);
+	ITexturePtr texture = mRenderSys->CreateTexture(bmpInfo.biWidth, bmpInfo.biHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 4);
 
 	std::vector<char> imgBuf;
 	imgBuf.resize(bmpInfo.biWidth * bmpInfo.biHeight * 4);

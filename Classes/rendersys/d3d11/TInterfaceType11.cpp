@@ -85,12 +85,12 @@ TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, const std::string& _
 	});
 }
 
-TTexture11::TTexture11(int width, int height, DXGI_FORMAT format)
+TTexture11::TTexture11(int width, int height, DXGI_FORMAT format, int mipmap)
 {
 	mWidth = width;
 	mHeight = height;
 	mFormat = format;
-	mMipCount = 1;
+	mMipCount = mipmap;
 	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
 }
 

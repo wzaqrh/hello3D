@@ -15,10 +15,11 @@ TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
 		mWidth = desc.Width;
 		mHeight = desc.Height;
 		mFormat = D3DEnumCT::d3d9To11(desc.Format);
+		mMipCount = mTexture->GetLevelCount();
 	});
 }
 
-TTexture9::TTexture9(int width, int height, DXGI_FORMAT format)
+TTexture9::TTexture9(int width, int height, DXGI_FORMAT format, int mipmap)
 	: mTexture(nullptr)
 	, mTextureCube(nullptr)
 	, mPath()
@@ -26,6 +27,7 @@ TTexture9::TTexture9(int width, int height, DXGI_FORMAT format)
 	mWidth = width;
 	mHeight = height;
 	mFormat = format;
+	mMipCount = mipmap;
 	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
 }
 
@@ -46,8 +48,8 @@ int TTexture9::GetHeight() {
 DXGI_FORMAT TTexture9::GetFormat() {
 	return mFormat;// D3DEnumCT::d3d9To11(GetDesc().Format);
 }
-STDMETHODIMP_(int) TTexture9::GetMipmapCount() {
-	return mTexture ? mTexture->GetLevelCount() : 1;
+int TTexture9::GetMipmapCount() {
+	return mMipCount;
 }
 D3DSURFACE_DESC TTexture9::GetDesc()
 {

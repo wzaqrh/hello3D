@@ -160,7 +160,7 @@ private:
 	IResourcePtr mRes;
 	std::string mPath;
 public:
-	TTexture11(int width, int height, DXGI_FORMAT format);
+	TTexture11(int width, int height, DXGI_FORMAT format, int mipmap);
 
 	TTexture11(ID3D11ShaderResourceView* __texture, const std::string& __path);
 	STDMETHODIMP_(IResourcePtr) AsRes() override {

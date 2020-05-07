@@ -63,9 +63,9 @@ ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath)
 	return texture ? texture.Detach() : nullptr;
 }
 
-DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format)
+DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format, int mipmap)
 {
-	ITexturePtr texture = rendersys->CreateTexture(width, height, format);
+	ITexturePtr texture = rendersys->CreateTexture(width, height, format, mipmap);
 	return texture ? texture.Detach() : nullptr;
 }
 

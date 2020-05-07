@@ -166,14 +166,14 @@ typedef ComPtr<TContantBuffer9> TContantBuffer9Ptr;
 struct INHERIT_COM("911D06C1-544B-4977-8367-1C74C3EC3113")
 TTexture9 : public ComBase<ITexture> {
 private:
-	int mWidth, mHeight;
-	DXGI_FORMAT mFormat;
+	int mWidth = 0, mHeight = 0, mMipCount = 0;
+	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
 	IDirect3DTexture9 *mTexture;
 	IDirect3DCubeTexture9* mTextureCube;
 	IResourcePtr mRes;
 	std::string mPath;
 public:
-	TTexture9(int width, int height, DXGI_FORMAT format);
+	TTexture9(int width, int height, DXGI_FORMAT format, int mipmap);
 	TTexture9(IDirect3DTexture9 *__texture, const std::string& __path);
 	STDMETHODIMP_(IResourcePtr) AsRes() override {
 		return mRes;
