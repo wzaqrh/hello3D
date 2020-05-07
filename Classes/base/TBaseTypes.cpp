@@ -81,7 +81,7 @@ void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)
 	mHeight = height;
 	mFar = far1;
 	mFOV = fov / 180.0 * XM_PI;
-	mProjection = XMMatrixPerspectiveFovLH(mFOV, mWidth / mHeight, 0.01f, mFar);
+	mProjection = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
 	mIsPespective = true;
 }
 
