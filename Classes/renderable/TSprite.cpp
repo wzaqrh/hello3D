@@ -9,7 +9,7 @@ Quad::Quad(float x, float y, float w, float h)
 {
 	SetFlipY(false);
 	SetRect(x, y, w, h);
-	SetColor(1, 1, 1, 1);
+	SetColor(XMFLOAT4(1, 1, 1, 1));
 }
 
 void Quad::SetRect(float x, float y, float w, float h)
@@ -20,12 +20,12 @@ void Quad::SetRect(float x, float y, float w, float h)
 	rb.Pos = XMFLOAT3(x + w, y, 0);
 }
 
-void Quad::SetColor(float r, float g, float b, float a)
+void Quad::SetColor(const XMFLOAT4& color)
 {
-	lb.Color = XMFLOAT4(r, g, b, a);
-	lt.Color = XMFLOAT4(r, g, b, a);
-	rt.Color = XMFLOAT4(r, g, b, a);
-	rb.Color = XMFLOAT4(r, g, b, a);
+	lb.Color = color;
+	lt.Color = color;
+	rt.Color = color;
+	rb.Color = color;
 }
 
 void Quad::SetZ(float z)
@@ -57,6 +57,7 @@ const unsigned int indices[] = {
 };
 TSprite::TSprite(IRenderSystem* RenderSys, const std::string& matName)
 	: mQuad(0, 0, 0, 0)
+	, mQuadDirty(true)
 	, mFlipY(true)
 	, mSize(0, 0)
 	, mPosition(0, 0)
@@ -78,8 +79,9 @@ void TSprite::SetPosition(float x, float y, float z)
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetZ(z);
 	mQuad.SetFlipY(mFlipY);
-
-	mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	
+	mQuadDirty = true;
+	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetSize(float w, float h)
@@ -88,19 +90,31 @@ void TSprite::SetSize(float w, float h)
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetFlipY(mFlipY);
 
-	mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	mQuadDirty = true;
+	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetFlipY(bool flipY)
 {
 	mFlipY = flipY;
 	mQuad.SetFlipY(flipY);
+
+	mQuadDirty = true;
+	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+}
+
+void TSprite::SetColor(XMFLOAT4 color)
+{
+	mQuad.SetColor(color);
+
+	mQuadDirty = true;
+	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void TSprite::SetTexture(ITexturePtr Texture)
 {
 	mTexture = Texture;
-	if (mSize.x == 0 && mSize.y == 0) {
+	if (mSize.x == 0 && mSize.y == 0 && Texture) {
 		SetSize(Texture->GetWidth(), Texture->GetHeight());
 	}
 }
@@ -112,11 +126,16 @@ void TSprite::Draw()
 
 int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 {
+	if (mQuadDirty) {
+		mQuadDirty = false;
+		mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	}
+
 	TRenderOperation op = {};
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.push_back(mTexture);
+	if (mTexture) op.mTextures.push_back(mTexture);
 	op.mWorldTransform = mMove->GetWorldTransform();
 	opList.AddOP(op);
 	return 1;

@@ -19,7 +19,7 @@ struct Quad
 	};
 	Quad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
-	void SetColor(float r, float g, float b, float a);
+	void SetColor(const XMFLOAT4& color);
 	void SetZ(float z);
 	void SetFlipY(bool flipY);
 };
@@ -29,12 +29,12 @@ class TSprite
 {
 private:
 	Quad mQuad;
+	bool mQuadDirty;
 	XMFLOAT2 mPosition;
 	XMFLOAT2 mSize;
 	bool mFlipY;
 private:
 	IRenderSystem* mRenderSys = nullptr;
-
 	ITexturePtr mTexture = nullptr;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
@@ -50,6 +50,7 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(float w, float h);
 	void SetTexture(ITexturePtr Texture);
+	void SetColor(XMFLOAT4 color);
 	void SetFlipY(bool flipY);
 };
 typedef std::shared_ptr<TSprite> TSpritePtr;

@@ -209,6 +209,11 @@ TBlendFunc::TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst)
 	dst = __dst;
 }
 
+TBlendFunc TBlendFunc::DISABLE = TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO);
+TBlendFunc TBlendFunc::ALPHA_PREMULTIPLIED = TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA);
+TBlendFunc TBlendFunc::ALPHA_NON_PREMULTIPLIED = TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+TBlendFunc TBlendFunc::ADDITIVE = TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE);
+
 /********** TDepthState **********/
 TDepthState::TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /*= D3D11_COMPARISON_LESS*/, D3D11_DEPTH_WRITE_MASK __depthWriteMask /*= D3D11_DEPTH_WRITE_MASK_ALL*/)
 {
@@ -216,6 +221,9 @@ TDepthState::TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /
 	depthFunc = __depthFunc;
 	depthWriteMask = __depthWriteMask;
 }
+
+TDepthState TDepthState::For2D = TDepthState(false, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ZERO);
+TDepthState TDepthState::For3D = TDepthState(true, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ALL);
 
 /********** TData **********/
 TData::TData(void* __data, unsigned int __dataSize)

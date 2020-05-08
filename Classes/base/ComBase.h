@@ -87,7 +87,7 @@ public:
 	}
 
 	template<class U> U* As() {
-		return static_cast<U*>(mPtr.Get());
+		return mPtr ? static_cast<U*>(mPtr.Get()) : nullptr;
 	}
 };
 template<class T> TComCast<T> PtrCast(const ComPtr<T>& ptr) { return TComCast<T>(ptr); }

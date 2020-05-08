@@ -55,7 +55,6 @@ public:
 	STDMETHODIMP_(IResourcePtr) AsRes() override {
 		return mRes;
 	}
-
 	STDMETHODIMP_(IBlobDataPtr) GetBlob() override;
 	ID3D11PixelShader*& GetShader11();
 };
@@ -106,7 +105,6 @@ public:
 	STDMETHODIMP_(enHardwareBufferType) GetType() override {
 		return E_HWBUFFER_VERTEX;
 	}
-
 	STDMETHODIMP_(unsigned int) GetStride() override;
 	STDMETHODIMP_(unsigned int) GetOffset() override;
 };
@@ -144,7 +142,6 @@ public:
 	STDMETHODIMP_(enHardwareBufferType) GetType() override {
 		return E_HWBUFFER_CONSTANT;
 	}
-
 	ID3D11Buffer*& GetBuffer11();
 	STDMETHODIMP_(unsigned int) GetBufferSize() override;
 };
@@ -156,7 +153,7 @@ TTexture11 : public ComBase<ITexture> {
 private:
 	int mWidth = 0, mHeight = 0, mMipCount = 0;
 	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
-	ID3D11ShaderResourceView *mTexture;
+	ID3D11ShaderResourceView *mTexture = nullptr;
 	IResourcePtr mRes;
 	std::string mPath;
 public:
@@ -186,15 +183,15 @@ typedef ComPtr<TTexture11> TTexture11Ptr;
 struct INHERIT_COM("8CE37B57-8702-4A14-BD43-9FB19455D410")
 TRenderTexture11 : public ComBase<IRenderTexture> {
 private:
-	ID3D11Texture2D* mRenderTargetTexture;
-	ID3D11ShaderResourceView* mRenderTargetSRV;
+	ID3D11Texture2D* mRenderTargetTexture = nullptr;
+	ID3D11ShaderResourceView* mRenderTargetSRV = nullptr;
 	ITexturePtr mRenderTargetPtr;
-	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11RenderTargetView* mRenderTargetView = nullptr;
 
-	ID3D11Texture2D* mDepthStencilTexture;
-	ID3D11DepthStencilView* mDepthStencilView;
+	ID3D11Texture2D* mDepthStencilTexture = nullptr;
+	ID3D11DepthStencilView* mDepthStencilView = nullptr;
 
-	DXGI_FORMAT mFormat;
+	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
 public:
 	TRenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
 	STDMETHODIMP_(ITexturePtr) GetColorTexture() override;

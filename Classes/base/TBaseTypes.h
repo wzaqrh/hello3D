@@ -98,18 +98,30 @@ public:
 };
 typedef std::shared_ptr<TSpotLight> TSpotLightPtr;
 
-struct TBlendFunc {
+struct TBlendFunc 
+{
 	D3D11_BLEND src, dst;
+
 	TBlendFunc() :src(D3D11_BLEND_ONE), dst(D3D11_BLEND_INV_SRC_ALPHA) {};
 	TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst);
+
+	static TBlendFunc DISABLE;
+	static TBlendFunc ALPHA_PREMULTIPLIED;
+	static TBlendFunc ALPHA_NON_PREMULTIPLIED;
+	static TBlendFunc ADDITIVE;
 };
 
-struct TDepthState {
+struct TDepthState 
+{
 	BOOL depthEnable;
 	D3D11_COMPARISON_FUNC depthFunc;
 	D3D11_DEPTH_WRITE_MASK depthWriteMask;
+
 	TDepthState() :depthEnable(false), depthFunc(D3D11_COMPARISON_LESS), depthWriteMask(D3D11_DEPTH_WRITE_MASK_ALL) {}
 	TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
+
+	static TDepthState For2D;
+	static TDepthState For3D;
 };
 
 enum EConstBufferElementType {
