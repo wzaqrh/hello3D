@@ -90,7 +90,7 @@ void TSprite::SetSize(float w, float h)
 		if (w == 0) w = mTexture->GetWidth();
 		if (h == 0) h = mTexture->GetHeight();
 	}
-	mSize = XMFLOAT2(w,h);
+	mSize = XMFLOAT2(w, h);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetFlipY(mFlipY);
 

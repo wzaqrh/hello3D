@@ -135,9 +135,6 @@
     <ClCompile Include="Classes\TestCases\TestRawTexture.cpp">
       <Filter>Classes\TestCases</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">

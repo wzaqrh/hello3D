@@ -48,7 +48,7 @@ void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportR
 }
 void RenderSystem_RClear(ExportRenderSystem rendersys, XMFLOAT4 bgColor)
 {
-	//rendersys->ClearColorDepthStencil(bgColor, 1.0f, 0);
+	rendersys->ClearColorDepthStencil(bgColor, 1.0f, 0);
 }
 bool RenderSystem_RBeginScene(ExportRenderSystem rendersys)
 {

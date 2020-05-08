@@ -12,7 +12,7 @@ protected:
 	virtual std::string GetName() override;
 private:
 	ExportRenderSystem mRenderSys;
-	ExportSprite mSprite;
+	std::vector<ExportSprite> mSprites;
 public:
 	std::string mName;
 };
@@ -26,11 +26,23 @@ bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	mRenderSys = RenderSystem_Create(hWnd, true);
 
-	//mSprite = SpriteImage_Create(mRenderSys, "model\\smile.png");
-	mSprite = SpriteColor_Create(mRenderSys, XMFLOAT4(0xA9 / 255.0, 0xA9 / 255.0, 0xA9 / 255.0, 1));
-	XMINT4 size = mRenderSys->GetWinSize();
-	mSprite->SetPosition(-size.x / 4, -size.y / 4, 0);
-	mSprite->SetSize(size.x / 2, size.y / 2);
+	float poslists[3 * 4] = {
+		-206.5, -110.5,155, 219,
+		-108.5, -10.5, 155, 219,
+		-8.5,  89.5,  155,  219
+	};
+
+	for (int i = 0; i < 3; ++i)
+	{
+		auto sp = SpriteImage_Create(mRenderSys, "model\\smile.png");
+		//auto sp = SpriteColor_Create(mRenderSys, XMFLOAT4(0xA9 / 255.0, 0xA9 / 255.0, 0xA9 / 255.0, 1));
+		XMINT4 size = mRenderSys->GetWinSize();
+		sp->SetPosition(poslists[i * 4 + 0], poslists[i * 4 + 2], 0);
+		sp->SetSize(poslists[i * 4 + 1] - poslists[i * 4 + 0], 
+			poslists[i * 4 + 3] - poslists[i * 4 + 2]);
+
+		mSprites.push_back(sp);
+	}
 	return true;
 }
 
@@ -39,9 +51,11 @@ void TestExport::Render()
 #ifdef EXPORT_STRUCT
 	ExportRenderable rends[] = { mSprite.self };
 #else
-	ExportRenderable rends[] = { mSprite };
+	ExportRenderable rends[3] = {};
+	for (int i = 0; i < mSprites.size(); ++i)
+		rends[i] = mSprites[i];
 #endif
-	RenderSystem_Render(mRenderSys, XMFLOAT4(0,0,0,0), rends, sizeof(rends) / sizeof(rends[0]));
+	RenderSystem_Render(mRenderSys, XMFLOAT4(0,0,0,0), rends, mSprites.size());
 }
 
 void TestExport::CleanUp()
@@ -54,4 +68,4 @@ std::string TestExport::GetName()
 	return "TestExport";
 }
 
-//auto reg = AppRegister<TestExport>("TestExport");
+auto reg = AppRegister<TestExport>("TestExport");
