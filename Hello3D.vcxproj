@@ -402,6 +402,7 @@
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp" />
     <ClCompile Include="Classes\rendersys\TThreadPump.cpp" />
     <ClCompile Include="Classes\TestCases\TestExport.cpp" />
+    <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp" />
     <ClCompile Include="Classes\TestCases\TestRawTexture.cpp" />
     <ClCompile Include="Classes\TestCases\TestSprite.cpp" />
     <ClCompile Include="Classes\TestCases\TestModel.cpp" />

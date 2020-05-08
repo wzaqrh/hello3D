@@ -26,10 +26,11 @@ bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	mRenderSys = RenderSystem_Create(hWnd, true);
 
-	mSprite = Sprite_Create(mRenderSys, "model\\smile.png");
-	mSprite->SetPosition(-mRenderSys->GetWinSize().x / 2, -mRenderSys->GetWinSize().y / 2, 0);
-	mSprite->SetSize(mRenderSys->GetWinSize().x / 2, mRenderSys->GetWinSize().y / 2);
-	
+	//mSprite = SpriteImage_Create(mRenderSys, "model\\smile.png");
+	mSprite = SpriteColor_Create(mRenderSys, XMFLOAT4(0xA9 / 255.0, 0xA9 / 255.0, 0xA9 / 255.0, 1));
+	XMINT4 size = mRenderSys->GetWinSize();
+	mSprite->SetPosition(-size.x / 4, -size.y / 4, 0);
+	mSprite->SetSize(size.x / 2, size.y / 2);
 	return true;
 }
 

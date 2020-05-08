@@ -87,4 +87,4 @@ void TestRawTexture::OnRender()
 	}
 }
 
-auto reg = AppRegister<TestRawTexture>("Sprite: RawTexture");
+//auto reg = AppRegister<TestRawTexture>("Sprite: RawTexture");

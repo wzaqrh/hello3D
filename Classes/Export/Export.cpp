@@ -25,6 +25,8 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11)
 
 	rendersys->SetOthogonalCamera(100);
 	rendersys->AddPointLight();
+	rendersys->SetDepthState(TDepthState::For2D);
+	rendersys->SetBlendFunc(TBlendFunc::ALPHA_NON_PREMULTIPLIED);
 
 	return rendersys;
 }
@@ -37,23 +39,61 @@ void RenderSystem_Destroy(ExportRenderSystem rendersys)
 
 void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportRenderable* renderables, int renderableCount)
 {
-	rendersys->ClearColorDepthStencil(bgColor, 1.0f, 0);
-	rendersys->Update(0);
+	RenderSystem_RClear(rendersys, bgColor);
 
-	if (rendersys->BeginScene()) {
-		TRenderOperationQueue opQueue;
-		for (int i = 0; i < renderableCount; ++i) {
-			renderables[i]->GenRenderOperation(opQueue);
-			rendersys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
-		}
-		rendersys->EndScene();
+	if (RenderSystem_RBeginScene(rendersys)) {
+		RenderSystem_RRender(rendersys, renderables, renderableCount);
+		RenderSystem_REndScene(rendersys);
 	}
 }
-
-DLL_EXPORT LONG JustTest(LONG p1, LONG p2)
+void RenderSystem_RClear(ExportRenderSystem rendersys, XMFLOAT4 bgColor)
 {
-	int p3 = p1 + p2;
-	return p3;
+	//rendersys->ClearColorDepthStencil(bgColor, 1.0f, 0);
+}
+bool RenderSystem_RBeginScene(ExportRenderSystem rendersys)
+{
+	rendersys->Update(0);
+	return rendersys->BeginScene();
+}
+void RenderSystem_RRender(ExportRenderSystem rendersys, ExportRenderable* renderables, int renderableCount)
+{
+	TRenderOperationQueue opQueue;
+	for (int i = 0; i < renderableCount; ++i) {
+		renderables[i]->GenRenderOperation(opQueue);
+		rendersys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+	}
+}
+void RenderSystem_REndScene(ExportRenderSystem rendersys)
+{
+	rendersys->EndScene();
+}
+
+DLL_EXPORT void RenderSystem_SetRenderTarget(ExportRenderSystem rendersys, ExportRenderTarget renderTarget)
+{
+	rendersys->SetRenderTarget(renderTarget ? IRenderTexturePtr(renderTarget) : nullptr);
+}
+
+//RenderTarget
+DLL_EXPORT ExportRenderTarget RenderTarget_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format)
+{
+	auto rt = rendersys->CreateRenderTexture(width, height, format);
+	return rt ? rt.Detach() : nullptr;
+}
+
+template<class T>
+T* ComPtrGetAddRef(const ComPtr<T>& ptr) {
+	T* texture = nullptr;
+	if (ptr) {
+		texture = ptr.Get();
+		if (texture) texture->AddRef();
+	}
+	return texture;
+}
+
+DLL_EXPORT ExportTexture RenderTarget_GetTexture(ExportRenderTarget renderTarget)
+{
+	ExportTexture texture = ComPtrGetAddRef(renderTarget ? renderTarget->GetColorTexture() : nullptr);
+	return texture;
 }
 
 //ITexture
@@ -95,7 +135,18 @@ DLL_EXPORT int Texture_MipmapCount(ExportTexture texture)
 }
 
 //TSprite
-ExportSprite Sprite_Create(ExportRenderSystem rendersys, const char* imgPath)
+DLL_EXPORT ExportSprite SpriteColor_Create(ExportRenderSystem rendersys, XMFLOAT4 color)
+{
+#ifdef EXPORT_STRUCT
+	TSprite* sprite = new TSprite(rendersys.self, E_MAT_LAYERCOLOR);
+#else
+	TSprite* sprite = new TSprite(rendersys, E_MAT_LAYERCOLOR);
+#endif
+	sprite->SetColor(color);
+	return ExportSprite(sprite);
+}
+
+ExportSprite SpriteImage_Create(ExportRenderSystem rendersys, const char* imgPath)
 {
 #ifdef EXPORT_STRUCT
 	TSprite* sprite = new TSprite(rendersys.self, E_MAT_SPRITE);
@@ -129,4 +180,14 @@ void Sprite_SetRect(ExportSprite sprite, XMFLOAT2 pos, XMFLOAT2 size)
 {
 	sprite->SetPosition(pos.x, pos.y, 0);
 	sprite->SetSize(size.x, size.y);
+}
+
+DLL_EXPORT void Sprite_SetColor(ExportSprite sprite, XMFLOAT4 color)
+{
+	sprite->SetColor(color);
+}
+
+DLL_EXPORT void Sprite_SetFlipY(ExportSprite sprite, bool flipY)
+{
+	sprite->SetFlipY(flipY);
 }
