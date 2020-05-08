@@ -86,6 +86,10 @@ void TSprite::SetPosition(float x, float y, float z)
 
 void TSprite::SetSize(float w, float h)
 {
+	if (mTexture != nullptr) {
+		if (w == 0) w = mTexture->GetWidth();
+		if (h == 0) h = mTexture->GetHeight();
+	}
 	mSize = XMFLOAT2(w,h);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetFlipY(mFlipY);
@@ -114,8 +118,8 @@ void TSprite::SetColor(XMFLOAT4 color)
 void TSprite::SetTexture(ITexturePtr Texture)
 {
 	mTexture = Texture;
-	if (mSize.x == 0 && mSize.y == 0 && Texture) {
-		SetSize(Texture->GetWidth(), Texture->GetHeight());
+	if (Texture != nullptr && (mSize.x == 0 || mSize.y == 0)) {
+		SetSize(mSize.x, mSize.y == 0);
 	}
 }
 

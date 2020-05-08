@@ -97,9 +97,9 @@ DLL_EXPORT ExportTexture RenderTarget_GetTexture(ExportRenderTarget renderTarget
 }
 
 //ITexture
-ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath)
+ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath, bool async)
 {
-	ITexturePtr texture = rendersys->LoadTexture(imgPath);
+	ITexturePtr texture = rendersys->LoadTexture(imgPath, DXGI_FORMAT_UNKNOWN, async);
 	return texture ? texture.Detach() : nullptr;
 }
 

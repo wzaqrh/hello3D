@@ -52,7 +52,7 @@ DLL_EXPORT ExportRenderTarget RenderTarget_Create(ExportRenderSystem rendersys, 
 DLL_EXPORT ExportTexture RenderTarget_GetTexture(ExportRenderTarget renderTarget);
 
 //Texture
-DLL_EXPORT ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath);
+DLL_EXPORT ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath, bool async);
 DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format, int mipmap);
 DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, PBYTE data, int dataSize, int dataStep);
 DLL_EXPORT int Texture_Width(ExportTexture texture);
