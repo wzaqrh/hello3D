@@ -29,9 +29,10 @@ public:
 	TRenderSystem11();
 	~TRenderSystem11();
 public:
-	STDMETHODIMP_(bool) Initialize(HWND hWnd);
+	STDMETHODIMP_(bool) Initialize(HWND hWnd, RECT vp);
 	STDMETHODIMP_(void) Update(float dt);
 	STDMETHODIMP_(void) CleanUp();
+	STDMETHODIMP_(void) SetViewPort(int x, int y, int w, int h);
 public:
 	STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
 
@@ -73,7 +74,7 @@ private:
 	HRESULT _CreateDeviceAndSwapChain(int width, int height);
 	HRESULT _CreateBackRenderTargetView();
 	HRESULT _CreateBackDepthStencilView(int width, int height);
-	void _SetViewports(int width, int height);
+	void _SetViewports(int width, int height, int x = 0, int y = 0);
 	HRESULT _SetRasterizerState(); 
 protected:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);

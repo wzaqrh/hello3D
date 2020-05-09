@@ -17,9 +17,10 @@ TRenderSystem9::~TRenderSystem9()
 
 }
 
-bool TRenderSystem9::Initialize(HWND hWnd)
+bool TRenderSystem9::Initialize(HWND hWnd, RECT vp)
 {
 	mHWnd = hWnd;
+	
 	RECT rc;
 	GetClientRect(mHWnd, &rc);
 	UINT width = rc.right - rc.left;
@@ -54,6 +55,11 @@ bool TRenderSystem9::Initialize(HWND hWnd)
 	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));
 	return true;
+}
+
+void TRenderSystem9::SetViewPort(int x, int y, int w, int h)
+{
+
 }
 
 bool TRenderSystem9::_CreateDeviceAndSwapChain()

@@ -19,9 +19,10 @@ public:
 	TRenderSystem9();
 	virtual ~TRenderSystem9();
 
-	STDMETHODIMP_(bool) Initialize(HWND hWnd) override;
+	STDMETHODIMP_(bool) Initialize(HWND hWnd, RECT vp) override;
 	STDMETHODIMP_(void) Update(float dt) override;
 	STDMETHODIMP_(void) CleanUp() override;
+	STDMETHODIMP_(void) SetViewPort(int x, int y, int w, int h);
 public:
 	STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
 

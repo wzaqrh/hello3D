@@ -38,7 +38,7 @@ typedef IRenderTexture* ExportRenderTarget;
 #endif
 
 //RenderSystem
-DLL_EXPORT ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11);
+DLL_EXPORT ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp);
 DLL_EXPORT void RenderSystem_Destroy(ExportRenderSystem rendersys);
 DLL_EXPORT void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportRenderable* renderables, int renderableCount);
 DLL_EXPORT void RenderSystem_RClear(ExportRenderSystem rendersys, XMFLOAT4 bgColor);
@@ -46,6 +46,7 @@ DLL_EXPORT bool RenderSystem_RBeginScene(ExportRenderSystem rendersys);
 DLL_EXPORT void RenderSystem_RRender(ExportRenderSystem rendersys, ExportRenderable* renderables, int renderableCount);
 DLL_EXPORT void RenderSystem_REndScene(ExportRenderSystem rendersys);
 DLL_EXPORT void RenderSystem_SetRenderTarget(ExportRenderSystem rendersys, ExportRenderTarget renderTarget);
+DLL_EXPORT void RenderSystem_SetViewPort(ExportRenderSystem rendersys, int x, int y, int w, int h);
 
 //RenderTarget
 DLL_EXPORT ExportRenderTarget RenderTarget_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format);

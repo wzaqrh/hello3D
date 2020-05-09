@@ -24,8 +24,14 @@ void TestExport::Create()
 
 bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
-	mRenderSys = RenderSystem_Create(hWnd, true);
+	RECT rc;
+	GetClientRect(hWnd, &rc);
+	rc.left = rc.bottom / 2; rc.top = rc.bottom / 2;
+	//rc.bottom /= 2; rc.right /= 2;
 
+	mRenderSys = RenderSystem_Create(hWnd, true, rc);
+
+#if 0
 	float poslists[3 * 4] = {
 		-206.5, -110.5,155, 219,
 		-108.5, -10.5, 155, 219,
@@ -34,12 +40,21 @@ bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 
 	for (int i = 0; i < 3; ++i)
 	{
-		auto sp = SpriteImage_Create(mRenderSys, "model\\smile.png");
+		auto sp = SpriteImage_Create(mRenderSys, "model\\theyKilledKenny.png");
 		//auto sp = SpriteColor_Create(mRenderSys, XMFLOAT4(0xA9 / 255.0, 0xA9 / 255.0, 0xA9 / 255.0, 1));
 		XMINT4 size = mRenderSys->GetWinSize();
 		sp->SetPosition(poslists[i * 4 + 0], poslists[i * 4 + 2], 0);
 		sp->SetSize(poslists[i * 4 + 1] - poslists[i * 4 + 0], 
 			poslists[i * 4 + 3] - poslists[i * 4 + 2]);
+
+		mSprites.push_back(sp);
+	}
+#endif
+	{
+		auto sp = SpriteImage_Create(mRenderSys, "model\\theyKilledKenny.png");
+		XMINT4 size = mRenderSys->GetWinSize();
+		sp->SetPosition(-size.x/2, -size.y/2, 0);
+		sp->SetSize(size.x, size.y);
 
 		mSprites.push_back(sp);
 	}

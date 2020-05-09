@@ -5,10 +5,11 @@
 MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
 IRenderSystem : public IUnknown
 {
-	virtual STDMETHODIMP_(bool) Initialize(HWND hWnd) = 0;
+	virtual STDMETHODIMP_(bool) Initialize(HWND hWnd, RECT vp = {0,0,0,0}) = 0;
 	virtual STDMETHODIMP_(void) Update(float dt) = 0;
 	virtual STDMETHODIMP_(void) CleanUp() = 0;
-	
+	virtual STDMETHODIMP_(void) SetViewPort(int x, int y, int w, int h) = 0;
+
 	virtual STDMETHODIMP_(XMINT4) GetWinSize() = 0;
 	virtual STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() = 0;
 	virtual STDMETHODIMP_(TCameraPtr) GetDefCamera() = 0;

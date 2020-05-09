@@ -8,7 +8,7 @@
 #include "TSprite.h"
 
 //RenderSystem
-ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11)
+ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 {
 	ExportRenderSystem rendersys = nullptr;
 	if (isd3d11) {
@@ -18,7 +18,7 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11)
 		rendersys = new TRenderSystem9;
 	}
 
-	if (FAILED(rendersys->Initialize((HWND)hWnd))) {
+	if (FAILED(rendersys->Initialize(hWnd, vp))) {
 		rendersys->CleanUp();
 		rendersys = nullptr;
 	}
@@ -71,6 +71,11 @@ void RenderSystem_REndScene(ExportRenderSystem rendersys)
 DLL_EXPORT void RenderSystem_SetRenderTarget(ExportRenderSystem rendersys, ExportRenderTarget renderTarget)
 {
 	rendersys->SetRenderTarget(renderTarget ? IRenderTexturePtr(renderTarget) : nullptr);
+}
+
+DLL_EXPORT void RenderSystem_SetViewPort(ExportRenderSystem rendersys, int x, int y, int w, int h)
+{
+	rendersys->SetViewPort(x, y, w, h);
 }
 
 //RenderTarget

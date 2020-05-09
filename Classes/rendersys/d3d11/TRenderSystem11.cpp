@@ -18,29 +18,35 @@ TRenderSystem11::~TRenderSystem11()
 {
 }
 
-bool TRenderSystem11::Initialize(HWND hWnd)
+bool TRenderSystem11::Initialize(HWND hWnd, RECT vp)
 {
 	mHWnd = hWnd;
+	
+	if (vp.right == 0 || vp.bottom == 0)
+		GetClientRect(mHWnd, &vp);
+	UINT vpWidth = vp.right - vp.left;
+	UINT vpHeight = vp.bottom - vp.top;
+
 	RECT rc;
 	GetClientRect(mHWnd, &rc);
-	UINT width = rc.right - rc.left;
-	UINT height = rc.bottom - rc.top;
+	UINT rcWidth = rc.right - rc.left;
+	UINT rcHeight = rc.bottom - rc.top;
 
-	if (CheckHR(_CreateDeviceAndSwapChain(width, height))) return false;
+	if (CheckHR(_CreateDeviceAndSwapChain(rcWidth, rcHeight))) return false;
 
 	if (CheckHR(_CreateBackRenderTargetView())) return false;
-	if (CheckHR(_CreateBackDepthStencilView(width, height))) return false;
+	if (CheckHR(_CreateBackDepthStencilView(rcWidth, rcHeight))) return false;
 	mDeviceContext->OMSetRenderTargets(1, &mBackRenderTargetView, mBackDepthStencilView);
 
-	_SetViewports(width, height);
+	_SetViewports(vpWidth, vpHeight, vp.left, vp.top);
 
 	if (CheckHR(_SetRasterizerState())) return false;
 
 	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
 	SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
 
-	mScreenWidth = width;
-	mScreenHeight = height;
+	mScreenWidth = vpWidth;
+	mScreenHeight = vpHeight;
 	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight);
 
 	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
@@ -149,7 +155,7 @@ HRESULT TRenderSystem11::_CreateBackDepthStencilView(int width, int height)
 	return hr;
 }
 
-void TRenderSystem11::_SetViewports(int width, int height)
+void TRenderSystem11::_SetViewports(int width, int height, int x, int y)
 {
 	// Setup the viewport
 	D3D11_VIEWPORT vp;
@@ -157,8 +163,8 @@ void TRenderSystem11::_SetViewports(int width, int height)
 	vp.Height = (FLOAT)height;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
+	vp.TopLeftX = x;
+	vp.TopLeftY = y;
 	mDeviceContext->RSSetViewports(1, &vp);
 }
 
@@ -200,6 +206,11 @@ void TRenderSystem11::_ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4
 	auto target11 = PtrCast(rendTarget).As<TRenderTexture11>();
 	mDeviceContext->ClearRenderTargetView(target11->GetColorBuffer11(), (const float*)&color);
 	mDeviceContext->ClearDepthStencilView(target11->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, Depth, Stencil);
+}
+
+void TRenderSystem11::SetViewPort(int x, int y, int w, int h)
+{
+	_SetViewports(w, h, x, y);
 }
 
 void TRenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
