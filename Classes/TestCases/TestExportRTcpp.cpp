@@ -23,7 +23,7 @@ void TestExportRT::Create()
 
 bool TestExportRT::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
-	mRenderSys = RenderSystem_Create(hWnd, true);
+	mRenderSys = RenderSystem_Create(hWnd, true, {0,0,0,0});
 
 	//mSprite = SpriteImage_Create(mRenderSys, "model\\smile.png");
 	mSprite = SpriteColor_Create(mRenderSys, XMFLOAT4(0xA9 / 255.0, 0xA9 / 255.0, 0xA9 / 255.0, 1));
@@ -68,4 +68,4 @@ std::string TestExportRT::GetName()
 	return "TestExportRT";
 }
 
-auto reg = AppRegister<TestExportRT>("TestExportRT");
+//auto reg = AppRegister<TestExportRT>("TestExportRT");

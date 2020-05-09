@@ -83,4 +83,4 @@ std::string TestExport::GetName()
 	return "TestExport";
 }
 
-auto reg = AppRegister<TestExport>("TestExport");
+//auto reg = AppRegister<TestExport>("TestExport");

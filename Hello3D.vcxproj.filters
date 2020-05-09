@@ -135,6 +135,15 @@
     <ClCompile Include="Classes\TestCases\TestRawTexture.cpp">
       <Filter>Classes\TestCases</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\renderable\TMesh.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TestCases\TestMesh.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">
@@ -216,6 +225,9 @@
       <Filter>Classes\Export</Filter>
     </ClInclude>
     <ClInclude Include="Classes\renderable\TAssimpModel.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\TMesh.h">
       <Filter>Classes\Renderable</Filter>
     </ClInclude>
   </ItemGroup>

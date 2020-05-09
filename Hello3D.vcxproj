@@ -31,11 +31,11 @@
     <ProjectGuid>{06EDC280-1187-4614-A248-E640C095FA6B}</ProjectGuid>
     <RootNamespace>Tutorial01</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
@@ -389,6 +389,7 @@
     <ClCompile Include="Classes\renderable\IRenderable.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpMesh.cpp" />
     <ClCompile Include="Classes\renderable\TInterfaceType.cpp" />
+    <ClCompile Include="Classes\renderable\TMesh.cpp" />
     <ClCompile Include="Classes\renderable\TPostProcess.cpp" />
     <ClCompile Include="Classes\renderable\TSkyBox.cpp" />
     <ClCompile Include="Classes\renderable\TSprite.cpp" />
@@ -402,6 +403,8 @@
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp" />
     <ClCompile Include="Classes\rendersys\TThreadPump.cpp" />
     <ClCompile Include="Classes\TestCases\TestExport.cpp" />
+    <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp" />
+    <ClCompile Include="Classes\TestCases\TestMesh.cpp" />
     <ClCompile Include="Classes\TestCases\TestRawTexture.cpp" />
     <ClCompile Include="Classes\TestCases\TestSprite.cpp" />
     <ClCompile Include="Classes\TestCases\TestModel.cpp" />
@@ -426,6 +429,7 @@
     <ClInclude Include="Classes\renderable\IRenderable.h" />
     <ClInclude Include="Classes\renderable\TAssimpMesh.h" />
     <ClInclude Include="Classes\renderable\TInterfaceType.h" />
+    <ClInclude Include="Classes\renderable\TMesh.h" />
     <ClInclude Include="Classes\renderable\TPostProcess.h" />
     <ClInclude Include="Classes\renderable\TSkyBox.h" />
     <ClInclude Include="Classes\renderable\TSprite.h" />

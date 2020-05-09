@@ -87,8 +87,8 @@ protected:
 
 	ID3D11InputLayout* _CreateInputLayout(TProgram11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 protected:
-	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void BindPass(const TPassPtr& pass, const cbGlobalParam& globalParam);
+	void RenderPass(const TPassPtr& pass, TTextureBySlot& texturs, int iterCnt, const TRenderOperation& op, const cbGlobalParam& globalParam);
 	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
 	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
 	void _RenderSkyBox();

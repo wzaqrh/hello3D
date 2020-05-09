@@ -66,7 +66,7 @@ HRESULT TRenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
-	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_DRIVER_TYPE driverTypes[] =
@@ -567,10 +567,10 @@ IIndexBufferPtr TRenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT f
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.Usage = D3D11_USAGE_DYNAMIC;
 	bd.ByteWidth = bufferSize;// sizeof(WORD) * Indices.size();
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
@@ -765,7 +765,7 @@ static std::vector<ID3D11SamplerState*> GetSampler11List(const std::vector<ISamp
 	return ret;
 }
 
-void TRenderSystem11::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
+void TRenderSystem11::BindPass(const TPassPtr& pass, const cbGlobalParam& globalParam)
 {
 	std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
 	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
@@ -796,7 +796,7 @@ std::vector<ID3D11ShaderResourceView*> GetTextureViews11(std::vector<ITexturePtr
 	return views;
 }
 
-void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
+void TRenderSystem11::RenderPass(const TPassPtr& pass, TTextureBySlot& textures, int iterCnt, const TRenderOperation& op, const cbGlobalParam& globalParam)
 {
 	if (iterCnt >= 0) {
 		_PushRenderTarget(pass->mIterTargets[iterCnt]);
@@ -826,13 +826,15 @@ void TRenderSystem11::RenderPass(TPassPtr pass, TTextureBySlot& textures, int it
 
 		BindPass(pass, globalParam);
 
-		if (indexBuffer) {
-			if (_CanDraw())
-			mDeviceContext->DrawIndexed(indexBuffer->GetBufferSize() / indexBuffer->GetWidth(), 0, 0);
+		if (op.mIndexBuffer) {
+			//if (_CanDraw())
+			int indexPos = op.mIndexPos;
+			int indexCount = op.mIndexCount != 0 ? op.mIndexCount : op.mIndexBuffer->GetBufferSize() / op.mIndexBuffer->GetWidth();
+			mDeviceContext->DrawIndexed(indexCount, indexPos, 0);
 		}
 		else {
-			if (_CanDraw())
-			mDeviceContext->Draw(vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(), 0);
+			//if (_CanDraw())
+			mDeviceContext->Draw(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0);
 		}
 
 		if (pass->OnUnbind)
@@ -869,7 +871,7 @@ void TRenderSystem11::RenderOperation(const TRenderOperation& op, const std::str
 				SetVertexBuffer(op.mVertexBuffer);
 			}
 			ITexturePtr first = !textures.empty() ? textures[0] : nullptr;
-			RenderPass(pass, textures, i, op.mIndexBuffer, op.mVertexBuffer, globalParam);
+			RenderPass(pass, textures, i, op, globalParam);
 			textures[0] = first;
 		}
 		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
@@ -879,7 +881,7 @@ void TRenderSystem11::RenderOperation(const TRenderOperation& op, const std::str
 		else {
 			SetVertexBuffer(op.mVertexBuffer);
 		}
-		RenderPass(pass, textures, -1, op.mIndexBuffer, op.mVertexBuffer, globalParam);
+		RenderPass(pass, textures, -1, op, globalParam);
 	}
 }
 

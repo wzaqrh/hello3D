@@ -52,6 +52,7 @@ public:
 	void SetTexture(ITexturePtr Texture);
 	void SetColor(XMFLOAT4 color);
 	void SetFlipY(bool flipY);
+	const Quad* GetQuad() { return &mQuad; }
 };
 typedef std::shared_ptr<TSprite> TSpritePtr;
 
