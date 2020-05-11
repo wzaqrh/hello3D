@@ -6,6 +6,7 @@
 #include "IRenderable.h"
 #include "TMaterial.h"
 #include "TSprite.h"
+#include "TMovable.h"
 
 //RenderSystem
 ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
@@ -23,7 +24,7 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 		rendersys = nullptr;
 	}
 
-	rendersys->SetOthogonalCamera(100);
+	//rendersys->SetOthogonalCamera(100);
 	rendersys->AddPointLight();
 	rendersys->SetDepthState(TDepthState::For2D);
 	rendersys->SetBlendFunc(TBlendFunc::ALPHA_NON_PREMULTIPLIED);
@@ -76,6 +77,49 @@ DLL_EXPORT void RenderSystem_SetRenderTarget(ExportRenderSystem rendersys, Expor
 DLL_EXPORT void RenderSystem_SetViewPort(ExportRenderSystem rendersys, int x, int y, int w, int h)
 {
 	rendersys->SetViewPort(x, y, w, h);
+}
+
+//camera
+ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1)
+{
+	TCameraPtr camera = rendersys->SetOthogonalCamera(far1);
+	return camera.get();
+}
+
+ExportTransform Camera_GetTransform(ExportCamera camera)
+{
+	return camera->GetTransform().get();
+}
+
+//Transform
+void Transform_SetScale(ExportTransform transform, XMFLOAT3 s)
+{
+	transform->SetScale(s);
+}
+
+DLL_EXPORT XMFLOAT3 Transform_GetScale(ExportTransform transform)
+{
+	return transform->GetScale();
+}
+
+void Transform_SetPosition(ExportTransform transform, XMFLOAT3 position)
+{
+	transform->SetPosition(position);
+}
+
+DLL_EXPORT XMFLOAT3 Transform_GetPosition(ExportTransform transform)
+{
+	return transform->GetPosition();
+}
+
+void Transform_SetEuler(ExportTransform transform, XMFLOAT3 euler)
+{
+	transform->SetEuler(euler);
+}
+
+DLL_EXPORT XMFLOAT3 Transform_GetEuler(ExportTransform transform)
+{
+	return transform->GetEuler();
 }
 
 //RenderTarget

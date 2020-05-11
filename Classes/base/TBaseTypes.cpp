@@ -1,17 +1,18 @@
 #include "TBaseTypes.h"
+#include "TMovable.h"
 #include "TMaterialCB.h"
+#include "Utility.h"
 
 TCameraBase::TCameraBase()
 {
-	mWorld = XMMatrixIdentity();
-	mView = XMMatrixIdentity();
-	mProjection = XMMatrixIdentity();
+	mView_ = XMMatrixIdentity();
+	mProjection_ = XMMatrixIdentity();
 }
 
 XMFLOAT3 TCameraBase::CalNDC(XMFLOAT3 pos)
 {
 	XMFLOAT3 ret = XMFLOAT3(0,0,0);
-	XMMATRIX vp = mView * mProjection;
+	XMMATRIX vp = mView_ * mProjection_;
 	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, 1), vp);
 	auto w = XMVectorGetW(vec);
 	if (w != 0) {
@@ -22,13 +23,38 @@ XMFLOAT3 TCameraBase::CalNDC(XMFLOAT3 pos)
 
 XMFLOAT4 TCameraBase::CalNDC(XMFLOAT4 pos)
 {
-	XMMATRIX vp = mView * mProjection;
+	XMMATRIX vp = mView_ * mProjection_;
 	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, pos.z), vp);
 	XMFLOAT4 ret = XMFLOAT4(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec), XMVectorGetW(vec));
 	return ret;
 }
 
+const XMMATRIX& TCameraBase::GetView()
+{
+	return mView_;
+}
+
+//void TCameraBase::SetView(const XMMATRIX& view)
+//{
+//	mView_ = view;
+//}
+
+const XMMATRIX& TCameraBase::GetProjection()
+{
+	return mProjection_;
+}
+
+//void TCameraBase::SetProjection(const XMMATRIX& projection)
+//{
+//	mProjection_ = projection;
+//}
+
 /********** TCamera **********/
+TCamera::TCamera()
+{
+	mTransform = std::make_shared<TTransform>();
+}
+
 TCamera::TCamera(const TCamera& other)
 {
 	mIsPespective = other.mIsPespective;
@@ -40,9 +66,11 @@ TCamera::TCamera(const TCamera& other)
 	mFOV = other.mFOV;
 	mFar = other.mFar;
 	
-	mView = other.mView;
-	mProjection = other.mProjection;
-	mWorld = other.mWorld;
+	mView_ = other.mView_;
+	mProjection_ = other.mProjection_;
+
+	mTransformDirty = true;
+	mTransform = std::make_shared<TTransform>(*other.mTransform);
 }
 
 TCameraPtr TCamera::CreatePerspective(int width, int height, double fov /*= 45.0*/, int eyeDistance /*= 10*/, double far1 /*= 100*/)
@@ -70,9 +98,7 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
 	XMVECTOR Eye = XMVectorSet(mEye.x, mEye.y, mEye.z, 0.0f);
 	XMVECTOR At = XMVectorSet(mAt.x, mAt.y, mAt.z, 0.0f);
 	XMVECTOR Up = XMVectorSet(mUp.x, mUp.y, mUp.z, 0.0f);
-	mView = XMMatrixLookAtLH(Eye, At, Up);
-
-	mWorld = XMMatrixTranslation(eye.x, eye.y, eye.z);
+	mView_ = XMMatrixLookAtLH(Eye, At, Up);
 }
 
 void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)
@@ -81,7 +107,7 @@ void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)
 	mHeight = height;
 	mFar = far1;
 	mFOV = fov / 180.0 * XM_PI;
-	mProjection = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
+	mProjection_ = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
 	mIsPespective = true;
 }
 
@@ -90,8 +116,29 @@ void TCamera::SetOthogonalProj(int width, int height, double far1)
 	mWidth = width;
 	mHeight = height;
 	mFar = far1;
-	mProjection = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
+	mProjection_ = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
 	mIsPespective = false;
+}
+
+TTransformPtr TCamera::GetTransform()
+{
+	mTransformDirty = true;
+	return mTransform;
+}
+
+const XMMATRIX& TCamera::GetView()
+{
+	if (mTransformDirty) {
+		mTransformDirty = false;
+		auto worldInv = XM::Inverse(mTransform->GetMatrix());
+		mWorldView = worldInv * mView_;
+	}
+	return mWorldView;
+}
+
+const XMMATRIX& TCamera::GetProjection()
+{
+	return mProjection_;
 }
 
 /********** TDirectLight **********/

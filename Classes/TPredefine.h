@@ -86,6 +86,7 @@ struct TMaterialBuilder;
 struct TMaterialFactory;
 typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;
 
+typedef std::shared_ptr<struct TTransform> TTransformPtr;
 typedef std::shared_ptr<struct TMovable> TMovablePtr;
 typedef std::shared_ptr<class TSkyBox> TSkyBoxPtr;
 typedef std::shared_ptr<class TPostProcess> TPostProcessPtr;

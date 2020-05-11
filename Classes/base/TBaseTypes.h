@@ -11,11 +11,10 @@ struct TData {
 };
 template <class T> inline TData make_data(const T& v) { return TData((void*)&v, sizeof(v)); }
 
-__declspec(align(16)) 
-struct TCameraBase {
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
+__declspec(align(16)) struct TCameraBase {
+public:
+	XMMATRIX mView_;
+	XMMATRIX mProjection_;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -23,27 +22,37 @@ public:
 public:
 	XMFLOAT3 CalNDC(XMFLOAT3 pos);
 	XMFLOAT4 CalNDC(XMFLOAT4 pos);
+
+	virtual const XMMATRIX& GetView();
+	//virtual void SetView(const XMMATRIX& view);
+	virtual const XMMATRIX& GetProjection();
+	//virtual void SetProjection(const XMMATRIX& projection);
 };
 
-struct TCamera : public TCameraBase {
+__declspec(align(16)) struct TCamera : public TCameraBase {
 public:
+	XMMATRIX mWorldView;
+	TTransformPtr mTransform;
+	bool mTransformDirty;
+
 	bool mIsPespective = true;
 	float mEyeDistance;
 	XMFLOAT3 mEye, mAt, mUp;
 	int mWidth, mHeight;
 	double mFOV, mFar;
 public:
-	void* operator new(size_t i){
-		return _mm_malloc(i,16);
-	}
-	void operator delete(void* p) {
-		_mm_free(p);
-	}
-	TCamera() {}
+	void* operator new(size_t i){ return _mm_malloc(i,16); }
+	void operator delete(void* p) { _mm_free(p); }
+	TCamera();
 	TCamera(const TCamera& other);
+public:
 	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at);
 	void SetPerspectiveProj(int width, int height, double fov, double far1);
 	void SetOthogonalProj(int width, int height, double far1);
+	TTransformPtr GetTransform();
+
+	const XMMATRIX& GetView() override;
+	const XMMATRIX& GetProjection() override;
 public:
 	static std::shared_ptr<TCamera> CreatePerspective(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1 = 100);
 	static std::shared_ptr<TCamera> CreateOthogonal(int width, int height, double far1 = 100);

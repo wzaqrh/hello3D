@@ -138,15 +138,15 @@ void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 	memset(&globalParam, 0, sizeof(globalParam));
 
 	if (castShadow) {
-		globalParam.View = COPY_TO_GPU(pLightCam->mView);
-		globalParam.Projection = COPY_TO_GPU(pLightCam->mProjection);
+		globalParam.View = COPY_TO_GPU(pLightCam->GetView());
+		globalParam.Projection = COPY_TO_GPU(pLightCam->GetProjection());
 	}
 	else {
-		globalParam.View = COPY_TO_GPU(mDefCamera->mView);
-		globalParam.Projection = COPY_TO_GPU(mDefCamera->mProjection);
+		globalParam.View = COPY_TO_GPU(mDefCamera->GetView());
+		globalParam.Projection = COPY_TO_GPU(mDefCamera->GetProjection());
 
-		globalParam.LightView = COPY_TO_GPU(pLightCam->mView);
-		globalParam.LightProjection = COPY_TO_GPU(pLightCam->mProjection);
+		globalParam.LightView = COPY_TO_GPU(pLightCam->GetView());
+		globalParam.LightProjection = COPY_TO_GPU(pLightCam->GetProjection());
 	}
 	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
 
