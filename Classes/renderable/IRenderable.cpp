@@ -59,6 +59,9 @@ void TTextureBySlot::Merge(const TTextureBySlot& other) {
 
 /********** TRenderOperation **********/
 TRenderOperation::TRenderOperation()
+	: mIndexPos(0)
+	, mIndexCount(0)
+	, mIndexBase(0)
 {
 	mWorldTransform = XMMatrixIdentity();
 }

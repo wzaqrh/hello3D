@@ -144,9 +144,6 @@
     <ClCompile Include="Classes\TestCases\TestMesh.cpp">
       <Filter>Classes\TestCases</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Export\TestExportMesh.cpp">
-      <Filter>Classes\TestCases</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">

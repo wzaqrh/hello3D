@@ -44,6 +44,7 @@ int TMesh::GenRenderOperation(TRenderOperationQueue& opList)
 		op.mTextures = SubMeshs[i].Textures;
 		op.mIndexPos = SubMeshs[i].IndicePos;
 		op.mIndexCount = SubMeshs[i].IndiceCount;
+		op.mIndexBase = SubMeshs[i].IndiceBase;
 		opList.AddOP(op);
 		++opCount;
 	}

@@ -29,7 +29,7 @@ struct TRenderOperation {
 	IVertexBufferPtr mVertexBuffer;
 	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 	IIndexBufferPtr mIndexBuffer;
-	short mIndexPos, mIndexCount;
+	short mIndexPos, mIndexCount, mIndexBase;
 	TTextureBySlot mTextures;
 	XMMATRIX mWorldTransform;
 public:

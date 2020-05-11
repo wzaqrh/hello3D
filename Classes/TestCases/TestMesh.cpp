@@ -49,9 +49,7 @@ void TestMesh::OnPostInitDevice()
 	};
 	for (int i = 0; i < spriteCount; ++i)
 	{
-		for (int j = 0; j < 6; ++j)
-			indices[i * 6 + j] = indices[j] + 4 * i;
-		mMesh->SetIndices(indices + 6 * i, 6 * i, 6, i);
+		mMesh->SetIndices(indices, 6 * i, 6, 4 * i, i);
 		mMesh->SetTexture(0, texture, i);
 	}
 	

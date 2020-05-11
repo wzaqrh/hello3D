@@ -238,9 +238,9 @@ DLL_EXPORT void Mesh_SetSubMeshCount(ExportMesh mesh, int count)
 	mesh->SetSubMeshCount(count);
 }
 
-DLL_EXPORT void Mesh_SetIndices(ExportMesh mesh, const UINT* indiceData, int indicePos, int indiceCount, int subMeshIndex)
+DLL_EXPORT void Mesh_SetIndices(ExportMesh mesh, const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
 {
-	mesh->SetIndices(indiceData, indicePos, indiceCount, subMeshIndex);
+	mesh->SetIndices(indiceData, indicePos, indiceCount, indiceBase, subMeshIndex);
 }
 
 DLL_EXPORT void Mesh_SetTexture(ExportMesh mesh, int slot, ExportTexture texture, int subMeshIndex)

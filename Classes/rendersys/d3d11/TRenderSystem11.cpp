@@ -828,9 +828,8 @@ void TRenderSystem11::RenderPass(const TPassPtr& pass, TTextureBySlot& textures,
 
 		if (op.mIndexBuffer) {
 			//if (_CanDraw())
-			int indexPos = op.mIndexPos;
 			int indexCount = op.mIndexCount != 0 ? op.mIndexCount : op.mIndexBuffer->GetBufferSize() / op.mIndexBuffer->GetWidth();
-			mDeviceContext->DrawIndexed(indexCount, indexPos, 0);
+			mDeviceContext->DrawIndexed(indexCount, op.mIndexPos, op.mIndexBase);
 		}
 		else {
 			//if (_CanDraw())
