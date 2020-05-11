@@ -109,6 +109,9 @@ void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)
 	mFOV = fov / 180.0 * XM_PI;
 	mProjection_ = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
 	mIsPespective = true;
+
+	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
+	mTransformDirty = true;
 }
 
 void TCamera::SetOthogonalProj(int width, int height, double far1)
@@ -116,8 +119,12 @@ void TCamera::SetOthogonalProj(int width, int height, double far1)
 	mWidth = width;
 	mHeight = height;
 	mFar = far1;
-	mProjection_ = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
+	//mProjection_ = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
+	mProjection_ = XMMatrixOrthographicOffCenterLH(0, mWidth, 0, mHeight, 0.01, mFar);
 	mIsPespective = false;
+
+	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
+	mTransformDirty = true;
 }
 
 TTransformPtr TCamera::GetTransform()
@@ -130,8 +137,22 @@ const XMMATRIX& TCamera::GetView()
 {
 	if (mTransformDirty) {
 		mTransformDirty = false;
-		auto worldInv = XM::Inverse(mTransform->GetMatrix());
-		mWorldView = worldInv * mView_;
+
+		auto position = mTransform->GetPosition();
+		{
+			auto newpos = position;// XMFLOAT3(position.x - mWidth / 2, position.y - mHeight / 2, 0);
+			auto scale = mTransform->GetScale();
+			newpos.x *= 1 - scale.x;
+			newpos.y *= 1 - scale.y;
+			newpos.z *= 1 - scale.z;
+			mTransform->SetPosition(newpos);
+
+			auto srt = mTransform->GetMatrixSRT();
+			auto worldInv = XM::Inverse(srt);
+			auto view = mView_;
+			mWorldView = worldInv * view;
+		}
+		mTransform->SetPosition(position);
 	}
 	return mWorldView;
 }

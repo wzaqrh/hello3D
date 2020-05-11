@@ -15,6 +15,7 @@ __declspec(align(16)) struct TCameraBase {
 public:
 	XMMATRIX mView_;
 	XMMATRIX mProjection_;
+	XMMATRIX mWorldView;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -31,7 +32,6 @@ public:
 
 __declspec(align(16)) struct TCamera : public TCameraBase {
 public:
-	XMMATRIX mWorldView;
 	TTransformPtr mTransform;
 	bool mTransformDirty;
 
@@ -53,6 +53,12 @@ public:
 
 	const XMMATRIX& GetView() override;
 	const XMMATRIX& GetProjection() override;
+	int GetWidth() {
+		return mWidth;
+	}
+	int GetHeight() {
+		return mHeight;
+	}
 public:
 	static std::shared_ptr<TCamera> CreatePerspective(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1 = 100);
 	static std::shared_ptr<TCamera> CreateOthogonal(int width, int height, double far1 = 100);

@@ -35,7 +35,8 @@ public:
 		return mEuler;
 	}
 
-	const XMMATRIX& GetMatrix();
+	const XMMATRIX& GetMatrixSRT();
+	const XMMATRIX& GetMatrixTSR();
 };
 typedef std::shared_ptr<TTransform> TTransformPtr;
 

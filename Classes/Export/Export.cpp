@@ -79,6 +79,11 @@ DLL_EXPORT void RenderSystem_SetViewPort(ExportRenderSystem rendersys, int x, in
 	rendersys->SetViewPort(x, y, w, h);
 }
 
+DLL_EXPORT XMINT4 RenderSystem_GetWinSize(ExportRenderSystem rendersys)
+{
+	return rendersys->GetWinSize();
+}
+
 //camera
 ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1)
 {
@@ -89,6 +94,11 @@ ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1)
 ExportTransform Camera_GetTransform(ExportCamera camera)
 {
 	return camera->GetTransform().get();
+}
+
+DLL_EXPORT XMINT4 Camera_GetSize(ExportCamera camera)
+{
+	return {camera->GetWidth(), camera->GetHeight(), 0, 0};
 }
 
 //Transform

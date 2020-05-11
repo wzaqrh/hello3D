@@ -75,18 +75,35 @@ void TTransform::SetEuler(const XMFLOAT3& euler)
 	mDirty = true;
 }
 
-const XMMATRIX& TTransform::GetMatrix()
+const XMMATRIX& TTransform::GetMatrixSRT()
 {
 	if (mDirty)
 	{
 		mDirty = false;
 		mMatrix = XMMatrixScaling(mScale.x, mScale.y, mScale.z);
-		if (mEuler.x > 0 || mEuler.x > 0 || mEuler.z > 0) {
+		if (mEuler.x != 0 || mEuler.x != 0 || mEuler.z != 0) {
 			XMMATRIX euler = XMMatrixRotationZ(mEuler.z) * XMMatrixRotationX(mEuler.x) * XMMatrixRotationY(mEuler.y);
 			mMatrix *= euler;
 		}
 		if (mPosition.x != 0 || mPosition.y != 0 || mPosition.z != 0) {
 			mMatrix *= XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
+		}
+	}
+	return mMatrix;
+}
+
+const XMMATRIX& TTransform::GetMatrixTSR()
+{
+	if (mDirty)
+	{
+		mDirty = false;
+		mMatrix = XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
+		if (mScale.x != 1 || mScale.y != 1 || mScale.z != 1) {
+			mMatrix *= XMMatrixScaling(mScale.x, mScale.y, mScale.z);
+		}
+		if (mEuler.x != 0 || mEuler.x != 0 || mEuler.z != 0) {
+			XMMATRIX euler = XMMatrixRotationZ(mEuler.z) * XMMatrixRotationX(mEuler.x) * XMMatrixRotationY(mEuler.y);
+			mMatrix *= euler;
 		}
 	}
 	return mMatrix;
@@ -106,6 +123,6 @@ void TMovable::SetDefScale(float s)
 
 const XMMATRIX& TMovable::GetWorldTransform()
 {
-	return GetMatrix();
+	return GetMatrixSRT();
 }
 

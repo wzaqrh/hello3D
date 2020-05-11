@@ -51,10 +51,12 @@ DLL_EXPORT void RenderSystem_RRender(ExportRenderSystem rendersys, ExportRendera
 DLL_EXPORT void RenderSystem_REndScene(ExportRenderSystem rendersys);
 DLL_EXPORT void RenderSystem_SetRenderTarget(ExportRenderSystem rendersys, ExportRenderTarget renderTarget);
 DLL_EXPORT void RenderSystem_SetViewPort(ExportRenderSystem rendersys, int x, int y, int w, int h);
+DLL_EXPORT XMINT4 RenderSystem_GetWinSize(ExportRenderSystem rendersys);
 
 //Camera
 DLL_EXPORT ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1);
 DLL_EXPORT ExportTransform Camera_GetTransform(ExportCamera camera);
+DLL_EXPORT XMINT4 Camera_GetSize(ExportCamera camera);
 
 //Transform
 DLL_EXPORT void Transform_SetScale(ExportTransform transform, XMFLOAT3 s);
