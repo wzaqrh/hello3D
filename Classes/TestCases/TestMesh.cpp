@@ -65,4 +65,4 @@ void TestMesh::OnRender()
 	}
 }
 
-auto reg = AppRegister<TestMesh>("estMesh");
+//auto reg = AppRegister<TestMesh>("estMesh");

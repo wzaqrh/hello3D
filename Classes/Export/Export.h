@@ -3,6 +3,7 @@
 #include "TPredefine.h"
 #include "IRenderSystem.h"
 #include "TSprite.h"
+#include "TMesh.h"
 
 #define DLL_EXPORT extern "C" __declspec(dllexport)
 
@@ -35,6 +36,7 @@ typedef IRenderSystem* ExportRenderSystem;
 typedef ITexture* ExportTexture;
 typedef TSprite* ExportSprite;
 typedef IRenderTexture* ExportRenderTarget;
+typedef TMesh* ExportMesh;
 #endif
 
 //RenderSystem
@@ -70,3 +72,15 @@ DLL_EXPORT void Sprite_SetRect(ExportSprite sprite, XMFLOAT2 pos, XMFLOAT2 size)
 DLL_EXPORT void Sprite_SetColor(ExportSprite sprite, XMFLOAT4 color);
 DLL_EXPORT void Sprite_SetFlipY(ExportSprite sprite, bool flipY);
  
+
+//TMesh
+DLL_EXPORT ExportMesh Mesh_Create(ExportRenderSystem rendersys, int vertCount, int indexCount);
+DLL_EXPORT void Mesh_Clear(ExportMesh mesh);
+DLL_EXPORT void Mesh_SetVertexs(ExportMesh mesh, const MeshVertex* vertData, int vertCount);
+DLL_EXPORT void Mesh_SetVertexsPC(ExportMesh mesh, const MeshVertex* vertData, int vertCount, int vertPos);
+DLL_EXPORT void Mesh_SetPositions(ExportMesh mesh, const XMFLOAT3* posData, int count);
+DLL_EXPORT void Mesh_SetColors(ExportMesh mesh, const XMFLOAT4* colorData, int count);
+DLL_EXPORT void Mesh_SetUVs(ExportMesh mesh, const XMFLOAT2* uvData, int count);
+DLL_EXPORT void Mesh_SetSubMeshCount(ExportMesh mesh, int count);
+DLL_EXPORT void Mesh_SetIndices(ExportMesh mesh, const UINT* indiceData, int indicePos, int indiceCount, int subMeshIndex);
+DLL_EXPORT void Mesh_SetTexture(ExportMesh mesh, int slot, ExportTexture texture, int subMeshIndex);

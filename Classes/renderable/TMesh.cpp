@@ -105,7 +105,7 @@ void TMesh::SetSubMeshCount(int count)
 	SubMeshs.resize(count);
 }
 
-void TMesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int subMeshIndex)
+void TMesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
 {
 	assert(subMeshIndex < SubMeshs.size());
 	IndiceDirty = true;
@@ -115,6 +115,7 @@ void TMesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, i
 	auto& submesh = SubMeshs[subMeshIndex];
 	submesh.IndicePos = indicePos;
 	submesh.IndiceCount = indiceCount;
+	submesh.IndiceBase = indiceBase;
 }
 
 void TMesh::SetTexture(int slot, ITexturePtr texture, int subMeshIndex)

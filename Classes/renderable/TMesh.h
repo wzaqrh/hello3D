@@ -23,7 +23,7 @@ public:
 	IIndexBufferPtr IndexBuffer;
 
 	struct SubMesh {
-		short IndicePos,IndiceCount;
+		short IndicePos,IndiceCount,IndiceBase;
 		TTextureBySlot Textures;
 	};
 	std::vector<SubMesh> SubMeshs;
@@ -38,7 +38,7 @@ public:
 	void SetColors(const XMFLOAT4* colorData, int count);
 	void SetUVs(const XMFLOAT2* uvData, int count);
 	void SetSubMeshCount(int count);
-	void SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int subMeshIndex);
+	void SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
 	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
 };
 typedef std::shared_ptr<TMesh> TMeshPtr;

@@ -196,3 +196,54 @@ DLL_EXPORT void Sprite_SetFlipY(ExportSprite sprite, bool flipY)
 {
 	sprite->SetFlipY(flipY);
 }
+
+//Mesh
+DLL_EXPORT ExportMesh Mesh_Create(ExportRenderSystem rendersys, int vertCount, int indexCount)
+{
+	return new TMesh(rendersys, E_MAT_SPRITE, vertCount, indexCount);
+}
+
+DLL_EXPORT void Mesh_Clear(ExportMesh mesh)
+{
+	mesh->Clear();
+}
+
+DLL_EXPORT void Mesh_SetVertexs(ExportMesh mesh, const MeshVertex* vertData, int vertCount)
+{
+	mesh->SetVertexs(vertData, vertCount);
+}
+
+DLL_EXPORT void Mesh_SetVertexsPC(ExportMesh mesh, const MeshVertex* vertData, int vertCount, int vertPos)
+{
+	mesh->SetVertexs(vertData, vertCount, vertPos);
+}
+
+DLL_EXPORT void Mesh_SetPositions(ExportMesh mesh, const XMFLOAT3* posData, int count)
+{
+	mesh->SetPositions(posData, count);
+}
+
+DLL_EXPORT void Mesh_SetColors(ExportMesh mesh, const XMFLOAT4* colorData, int count)
+{
+	mesh->SetColors(colorData, count);
+}
+
+DLL_EXPORT void Mesh_SetUVs(ExportMesh mesh, const XMFLOAT2* uvData, int count)
+{
+	mesh->SetUVs(uvData, count);
+}
+
+DLL_EXPORT void Mesh_SetSubMeshCount(ExportMesh mesh, int count)
+{
+	mesh->SetSubMeshCount(count);
+}
+
+DLL_EXPORT void Mesh_SetIndices(ExportMesh mesh, const UINT* indiceData, int indicePos, int indiceCount, int subMeshIndex)
+{
+	mesh->SetIndices(indiceData, indicePos, indiceCount, subMeshIndex);
+}
+
+DLL_EXPORT void Mesh_SetTexture(ExportMesh mesh, int slot, ExportTexture texture, int subMeshIndex)
+{
+	mesh->SetTexture(slot, texture, subMeshIndex);
+}
