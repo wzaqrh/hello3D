@@ -6,6 +6,7 @@ __declspec(align(16)) struct TTransform {
 	XMFLOAT3 mScale;
 	XMFLOAT3 mPosition;
 	XMFLOAT3 mEuler;//ZXY
+	XMFLOAT3 mFlip;
 	bool mDirty = false;
 public:
 	void* operator new(size_t i) { return _mm_malloc(i, 16); }
@@ -17,9 +18,7 @@ public:
 	void SetScaleZ(float sz);
 	void SetScale(float s);
 	void SetScale(const XMFLOAT3& s);
-	const XMFLOAT3& GetScale() {
-		return mScale;
-	}
+	XMFLOAT3 GetScale();
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& position);
@@ -34,6 +33,9 @@ public:
 	const XMFLOAT3& GetEuler() {
 		return mEuler;
 	}
+
+	void SetFlipY(bool flip);
+	bool IsFlipY();
 
 	const XMMATRIX& GetMatrixSRT();
 	const XMMATRIX& GetMatrixTSR();

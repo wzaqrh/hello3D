@@ -57,6 +57,7 @@ DLL_EXPORT XMINT4 RenderSystem_GetWinSize(ExportRenderSystem rendersys);
 DLL_EXPORT ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1);
 DLL_EXPORT ExportTransform Camera_GetTransform(ExportCamera camera);
 DLL_EXPORT XMINT4 Camera_GetSize(ExportCamera camera);
+DLL_EXPORT void Camera_SetFlipY(ExportCamera camera, bool flipY);
 
 //Transform
 DLL_EXPORT void Transform_SetScale(ExportTransform transform, XMFLOAT3 s);
@@ -65,6 +66,8 @@ DLL_EXPORT void Transform_SetPosition(ExportTransform transform, XMFLOAT3 positi
 DLL_EXPORT XMFLOAT3 Transform_GetPosition(ExportTransform transform);
 DLL_EXPORT void Transform_SetEuler(ExportTransform transform, XMFLOAT3 euler);
 DLL_EXPORT XMFLOAT3 Transform_GetEuler(ExportTransform transform);
+DLL_EXPORT void Transform_SetFlipY(ExportTransform transform, bool flip);
+DLL_EXPORT bool Transform_IsFlipY(ExportTransform transform);
 
 //RenderTarget
 DLL_EXPORT ExportRenderTarget RenderTarget_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format);

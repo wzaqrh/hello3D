@@ -53,11 +53,13 @@ const XMMATRIX& TCameraBase::GetProjection()
 TCamera::TCamera()
 {
 	mTransform = std::make_shared<TTransform>();
+	mUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
 }
 
 TCamera::TCamera(const TCamera& other)
 {
 	mIsPespective = other.mIsPespective;
+	mFlipY = other.mFlipY;
 	mEye = other.mEye;
 	mAt = other.mAt;
 	mUp = other.mUp;
@@ -94,10 +96,25 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
 {
 	mEye = eye;
 	mAt = at;
-	mUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMVECTOR Eye = XMVectorSet(mEye.x, mEye.y, mEye.z, 0.0f);
-	XMVECTOR At = XMVectorSet(mAt.x, mAt.y, mAt.z, 0.0f);
-	XMVECTOR Up = XMVectorSet(mUp.x, mUp.y, mUp.z, 0.0f);
+	SetLookAt(mEye, mAt, mUp);
+}
+
+void TCamera::SetFlipY(bool flip)
+{
+	mFlipY = flip;
+	if (mIsPespective) {
+		SetPerspectiveProj(mWidth, mHeight, mFOV, mFar);
+	}
+	else {
+		SetOthogonalProj(mWidth, mHeight, mFar);
+	}
+}
+
+void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at, XMFLOAT3 up)
+{
+	XMVECTOR Eye = XMVectorSet(eye.x, eye.y, eye.z, 0.0f);
+	XMVECTOR At = XMVectorSet(at.x, at.y, at.z, 0.0f);
+	XMVECTOR Up = XMVectorSet(up.x, up.y, up.z, 0.0f);
 	mView_ = XMMatrixLookAtLH(Eye, At, Up);
 }
 
@@ -109,6 +126,8 @@ void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)
 	mFOV = fov / 180.0 * XM_PI;
 	mProjection_ = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
 	mIsPespective = true;
+	
+	if (mFlipY) mProjection_ = mProjection_ * XMMatrixScaling(1, -1, 1);
 
 	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
@@ -122,6 +141,8 @@ void TCamera::SetOthogonalProj(int width, int height, double far1)
 	//mProjection_ = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
 	mProjection_ = XMMatrixOrthographicOffCenterLH(0, mWidth, 0, mHeight, 0.01, mFar);
 	mIsPespective = false;
+
+	if (mFlipY) mProjection_ = mProjection_ * XMMatrixScaling(1, -1, 1);
 
 	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
@@ -139,19 +160,8 @@ const XMMATRIX& TCamera::GetView()
 		mTransformDirty = false;
 
 		auto position = mTransform->GetPosition();
-		
-		/*XMFLOAT3 poslist[] = {
-			XMFLOAT3(1146, 643, 0),
-			XMFLOAT3(1148, 643, 0),
-			XMFLOAT3(1153, 643, 0)
-		};
-		XMVECTOR resList[3];*/
-
-		//for (int i = 0; i < ARRAYSIZE(poslist); ++i)
 		{
-			//auto position = poslist[i];
-
-			auto newpos = position;// XMFLOAT3(position.x - mWidth / 2, position.y - mHeight / 2, 0);
+			auto newpos = position;
 			auto scale = mTransform->GetScale();
 			newpos.x = position.x - scale.x * mWidth / 2;
 			newpos.y = position.y - scale.y * mHeight / 2;
@@ -162,13 +172,7 @@ const XMMATRIX& TCamera::GetView()
 			auto worldInv = XM::Inverse(srt);
 			auto view = mView_;
 			mWorldView = worldInv * view;
-
-			//resList[i] = XMVector3Transform(XMVectorSet(0, 0, 0, 1), mWorldView);
-			/*auto res = XMVector3Transform(XMVectorSet(0, 0, 0, 1), mWorldView);
-			char buf[260]; sprintf(buf, "TCamera: (%.3f,%.3f)", XMVectorGetX(res), XMVectorGetY(res));
-			OutputDebugStringA(buf);*/
 		}
-		
 		mTransform->SetPosition(position);
 	}
 	return mWorldView;

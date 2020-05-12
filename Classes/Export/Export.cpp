@@ -101,6 +101,11 @@ DLL_EXPORT XMINT4 Camera_GetSize(ExportCamera camera)
 	return {camera->GetWidth(), camera->GetHeight(), 0, 0};
 }
 
+DLL_EXPORT void Camera_SetFlipY(ExportCamera camera, bool flipY)
+{
+	camera->SetFlipY(flipY);
+}
+
 //Transform
 void Transform_SetScale(ExportTransform transform, XMFLOAT3 s)
 {
@@ -130,6 +135,16 @@ void Transform_SetEuler(ExportTransform transform, XMFLOAT3 euler)
 DLL_EXPORT XMFLOAT3 Transform_GetEuler(ExportTransform transform)
 {
 	return transform->GetEuler();
+}
+
+DLL_EXPORT void Transform_SetFlipY(ExportTransform transform, bool flip)
+{
+	transform->SetFlipY(flip);
+}
+
+DLL_EXPORT bool Transform_IsFlipY(ExportTransform transform)
+{
+	return transform->IsFlipY();
 }
 
 //RenderTarget

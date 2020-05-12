@@ -4,6 +4,7 @@
 TTransform::TTransform()
 {
 	mScale = XMFLOAT3(1, 1, 1);
+	mFlip = XMFLOAT3(1, 1, 1);
 	mPosition = XMFLOAT3(0, 0, 0);
 	mEuler = XMFLOAT3(0, 0, 0);
 	mMatrix = XMMatrixIdentity();
@@ -37,6 +38,11 @@ void TTransform::SetScale(const XMFLOAT3& s)
 {
 	mScale = s;
 	mDirty = true;
+}
+
+XMFLOAT3 TTransform::GetScale()
+{
+	return XMFLOAT3(mScale.x * mFlip.x, mScale.y * mFlip.y, mScale.z * mFlip.z);
 }
 
 void TTransform::SetPosition(float x, float y, float z)
@@ -75,12 +81,26 @@ void TTransform::SetEuler(const XMFLOAT3& euler)
 	mDirty = true;
 }
 
+void TTransform::SetFlipY(bool flip)
+{
+	mFlip.y = flip ? -1 : 1;
+	mDirty = true;
+}
+
+bool TTransform::IsFlipY()
+{
+	return mFlip.y < 0;
+}
+
 const XMMATRIX& TTransform::GetMatrixSRT()
 {
 	if (mDirty)
 	{
 		mDirty = false;
 		mMatrix = XMMatrixScaling(mScale.x, mScale.y, mScale.z);
+		if (mFlip.x != 1 || mFlip.y != 1 || mFlip.z != 1) {
+			mMatrix *= XMMatrixScaling(mFlip.x, mFlip.y, mFlip.z);
+		}
 		if (mEuler.x != 0 || mEuler.x != 0 || mEuler.z != 0) {
 			XMMATRIX euler = XMMatrixRotationZ(mEuler.z) * XMMatrixRotationX(mEuler.x) * XMMatrixRotationY(mEuler.y);
 			mMatrix *= euler;
@@ -100,6 +120,9 @@ const XMMATRIX& TTransform::GetMatrixTSR()
 		mMatrix = XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
 		if (mScale.x != 1 || mScale.y != 1 || mScale.z != 1) {
 			mMatrix *= XMMatrixScaling(mScale.x, mScale.y, mScale.z);
+		}
+		if (mFlip.x != 1 || mFlip.y != 1 || mFlip.z != 1) {
+			mMatrix *= XMMatrixScaling(mFlip.x, mFlip.y, mFlip.z);
 		}
 		if (mEuler.x != 0 || mEuler.x != 0 || mEuler.z != 0) {
 			XMMATRIX euler = XMMatrixRotationZ(mEuler.z) * XMMatrixRotationX(mEuler.x) * XMMatrixRotationY(mEuler.y);

@@ -81,7 +81,7 @@ void TMesh::SetPositions(const XMFLOAT3* posData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
-	for (int i = 0; i < count; ++i)
+	for (int i = 0; i < VertPos; ++i)
 		Vertices[i].Position = posData[i];
 }
 
@@ -89,7 +89,7 @@ void TMesh::SetColors(const XMFLOAT4* colorData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
-	for (int i = 0; i < count; ++i)
+	for (int i = 0; i < VertPos; ++i)
 		Vertices[i].Color = colorData[i];
 }
 
@@ -97,7 +97,7 @@ void TMesh::SetUVs(const XMFLOAT2* uvData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
-	for (int i = 0; i < count; ++i)
+	for (int i = 0; i < VertPos; ++i)
 		Vertices[i].UV = uvData[i];
 }
 

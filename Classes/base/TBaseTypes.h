@@ -36,6 +36,7 @@ public:
 	bool mTransformDirty;
 
 	bool mIsPespective = true;
+	bool mFlipY = false;
 	float mEyeDistance;
 	XMFLOAT3 mEye, mAt, mUp;
 	int mWidth, mHeight;
@@ -53,12 +54,11 @@ public:
 
 	const XMMATRIX& GetView() override;
 	const XMMATRIX& GetProjection() override;
-	int GetWidth() {
-		return mWidth;
-	}
-	int GetHeight() {
-		return mHeight;
-	}
+	int GetWidth() { return mWidth; }
+	int GetHeight() { return mHeight; }
+	void SetFlipY(bool flip);
+private:
+	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at, XMFLOAT3 up);
 public:
 	static std::shared_ptr<TCamera> CreatePerspective(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1 = 100);
 	static std::shared_ptr<TCamera> CreateOthogonal(int width, int height, double far1 = 100);
