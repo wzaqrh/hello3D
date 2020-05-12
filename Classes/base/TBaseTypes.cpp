@@ -139,19 +139,36 @@ const XMMATRIX& TCamera::GetView()
 		mTransformDirty = false;
 
 		auto position = mTransform->GetPosition();
+		
+		/*XMFLOAT3 poslist[] = {
+			XMFLOAT3(1146, 643, 0),
+			XMFLOAT3(1148, 643, 0),
+			XMFLOAT3(1153, 643, 0)
+		};
+		XMVECTOR resList[3];*/
+
+		//for (int i = 0; i < ARRAYSIZE(poslist); ++i)
 		{
+			//auto position = poslist[i];
+
 			auto newpos = position;// XMFLOAT3(position.x - mWidth / 2, position.y - mHeight / 2, 0);
 			auto scale = mTransform->GetScale();
-			newpos.x *= 1 - scale.x;
-			newpos.y *= 1 - scale.y;
-			newpos.z *= 1 - scale.z;
+			newpos.x = position.x - scale.x * mWidth / 2;
+			newpos.y = position.y - scale.y * mHeight / 2;
+			newpos.z = position.z;
 			mTransform->SetPosition(newpos);
 
 			auto srt = mTransform->GetMatrixSRT();
 			auto worldInv = XM::Inverse(srt);
 			auto view = mView_;
 			mWorldView = worldInv * view;
+
+			//resList[i] = XMVector3Transform(XMVectorSet(0, 0, 0, 1), mWorldView);
+			/*auto res = XMVector3Transform(XMVectorSet(0, 0, 0, 1), mWorldView);
+			char buf[260]; sprintf(buf, "TCamera: (%.3f,%.3f)", XMVectorGetX(res), XMVectorGetY(res));
+			OutputDebugStringA(buf);*/
 		}
+		
 		mTransform->SetPosition(position);
 	}
 	return mWorldView;
