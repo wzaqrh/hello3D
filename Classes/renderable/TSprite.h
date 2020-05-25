@@ -11,12 +11,16 @@ struct Pos3Color3Tex2
 
 struct Quad
 {
+#if _MSC_VER <= 1800
+	Pos3Color3Tex2 lb, lt, rt, rb;
+#else
 	union {
 		Pos3Color3Tex2 m[4];
-		struct {
+		struct q{
 			Pos3Color3Tex2 lb,lt,rt,rb;
 		};
 	};
+#endif
 	Quad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
 	void SetColor(const XMFLOAT4& color);

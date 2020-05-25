@@ -15,7 +15,9 @@
 #include "IRenderSystem.h"
 #include "TApp.h"
 
+#if _MSC_VER > 1800
 #pragma comment(lib, "legacy_stdio_definitions.lib")
+#endif
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);

@@ -9,12 +9,16 @@ struct POSTPROCESS_VERTEX
 };
 
 struct POSTPROCESS_VERTEX_QUAD {
+#if _MSC_VER <= 1800
+	POSTPROCESS_VERTEX lb, lt, rt, rb;
+#else
 	union {
 		POSTPROCESS_VERTEX m[4];
 		struct {
 			POSTPROCESS_VERTEX lb, lt, rt, rb;
 		};
 	};
+#endif
 public:
 	POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
