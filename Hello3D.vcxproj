@@ -93,7 +93,7 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)Classes\rendersys\d3d9;$(ProjectDir)Classes\rendersys\d3d11;$(ProjectDir)Classes;$(ProjectDir)Classes\app;$(ProjectDir)Classes\base;$(ProjectDir)Classes\renderable;$(ProjectDir)Classes\rendersys;$(ProjectDir)Classes\TestCases;$(SolutionDir)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)Classes\rendersys\d3d9;$(ProjectDir)Classes\rendersys\d3d11;$(ProjectDir)Classes;$(ProjectDir)Classes\app;$(ProjectDir)Classes\base;$(ProjectDir)Classes\renderable;$(ProjectDir)Classes\rendersys;$(ProjectDir)Classes\TestCases;$(SolutionDir);$(ProjectDir)include\freetype2\freetype;$(ProjectDir)include\freetype2</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
     <IntDir>$(Configuration)\objs</IntDir>
   </PropertyGroup>
@@ -152,7 +152,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;d3dx11d.lib;d3dx10d.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;legacy_stdio_definitions.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;d3dx11d.lib;d3dx10d.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;legacy_stdio_definitions.lib;assimp-vc140-mt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
@@ -224,13 +224,13 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(ProjectDir)include;$(ProjectDir)include\freetype2\freetype;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;d3dx11d.lib;d3dx10d.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;legacy_stdio_definitions.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;d3dx11d.lib;d3dx10d.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;legacy_stdio_definitions.lib;assimp-vc140-mt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -385,6 +385,8 @@
     <ClCompile Include="Classes\base\TBaseTypes.cpp" />
     <ClCompile Include="Classes\base\Utility.cpp" />
     <ClCompile Include="Classes\Export\Export.cpp" />
+    <ClCompile Include="Classes\renderable\label\TFont.cpp" />
+    <ClCompile Include="Classes\renderable\label\TLabel.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpModel.cpp" />
     <ClCompile Include="Classes\renderable\IRenderable.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpMesh.cpp" />
@@ -425,6 +427,9 @@
     <ClInclude Include="Classes\base\TBaseTypes.h" />
     <ClInclude Include="Classes\base\Utility.h" />
     <ClInclude Include="Classes\Export\Export.h" />
+    <ClInclude Include="Classes\renderable\label\TFont.h" />
+    <ClInclude Include="Classes\renderable\label\TLabel.h" />
+    <ClInclude Include="Classes\renderable\RenderableManager.h" />
     <ClInclude Include="Classes\renderable\TAssimpModel.h" />
     <ClInclude Include="Classes\renderable\IRenderable.h" />
     <ClInclude Include="Classes\renderable\TAssimpMesh.h" />

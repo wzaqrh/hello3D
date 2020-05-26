@@ -27,3 +27,7 @@
 typedef struct _XMINT4 {
 	int x, y, z, w;
 } XMINT4;
+
+typedef struct _XMINT2 {
+	int x, y;
+} XMINT2;

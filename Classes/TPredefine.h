@@ -91,8 +91,11 @@ typedef std::shared_ptr<struct TMovable> TMovablePtr;
 typedef std::shared_ptr<class TSkyBox> TSkyBoxPtr;
 typedef std::shared_ptr<class TPostProcess> TPostProcessPtr;
 typedef std::shared_ptr<class TThreadPump> TThreadPumpPtr;
-typedef std::shared_ptr<class TSprite> TSpritePtr;
 
+typedef std::shared_ptr<class TSprite> TSpritePtr;
+typedef std::shared_ptr<class TMesh> TMeshPtr;
+typedef std::shared_ptr<class TLabel> TLabelPtr;
+typedef std::shared_ptr<class TFontCache> TFontCachePtr;
 //Utility.h
 struct TData;
 class SDTimer;

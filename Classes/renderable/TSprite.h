@@ -39,8 +39,8 @@ private:
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 public:
-	TMaterialPtr mMaterial;
-	TMovablePtr mMove;
+	TMaterialPtr Material;
+	TTransformPtr Transform;
 public:
 	TSprite(IRenderSystem* RenderSys, const std::string& matName = "");
 	~TSprite();

@@ -39,6 +39,7 @@ public:
 
 	const XMMATRIX& GetMatrixSRT();
 	const XMMATRIX& GetMatrixTSR();
+	const XMMATRIX& Matrix();
 };
 typedef std::shared_ptr<TTransform> TTransformPtr;
 

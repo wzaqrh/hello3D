@@ -112,6 +112,11 @@ const XMMATRIX& TTransform::GetMatrixSRT()
 	return mMatrix;
 }
 
+const XMMATRIX& TTransform::Matrix()
+{
+	return GetMatrixSRT();
+}
+
 const XMMATRIX& TTransform::GetMatrixTSR()
 {
 	if (mDirty)

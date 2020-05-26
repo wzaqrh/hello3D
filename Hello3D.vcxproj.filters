@@ -31,6 +31,9 @@
     <Filter Include="Classes\Export">
       <UniqueIdentifier>{b1706ccb-be9f-4002-a030-7028a976af83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Renderable\label">
+      <UniqueIdentifier>{9064968c-14d0-4f32-9c4b-dba1dfd9128b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Classes\app\Main.cpp">
@@ -144,6 +147,12 @@
     <ClCompile Include="Classes\TestCases\TestMesh.cpp">
       <Filter>Classes\TestCases</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\renderable\label\TLabel.cpp">
+      <Filter>Classes\Renderable\label</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\renderable\label\TFont.cpp">
+      <Filter>Classes\Renderable\label</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">
@@ -228,6 +237,15 @@
       <Filter>Classes\Renderable</Filter>
     </ClInclude>
     <ClInclude Include="Classes\renderable\TMesh.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\label\TLabel.h">
+      <Filter>Classes\Renderable\label</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\label\TFont.h">
+      <Filter>Classes\Renderable\label</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\RenderableManager.h">
       <Filter>Classes\Renderable</Filter>
     </ClInclude>
   </ItemGroup>
