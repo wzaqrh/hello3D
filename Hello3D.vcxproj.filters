@@ -51,9 +51,6 @@
     <ClCompile Include="Classes\renderable\TAssimpMesh.cpp">
       <Filter>Classes\Renderable</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\renderable\TInterfaceType.cpp">
-      <Filter>Classes\Renderable</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\renderable\TPostProcess.cpp">
       <Filter>Classes\Renderable</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
       <Filter>Classes\Rendersys</Filter>
     </ClCompile>
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp">
-      <Filter>Classes\Rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\rendersys\TThreadPump.cpp">
       <Filter>Classes\Rendersys</Filter>
     </ClCompile>
     <ClCompile Include="Classes\rendersys\d3d9\TInterfaceType9.cpp">
@@ -153,6 +147,12 @@
     <ClCompile Include="Classes\renderable\label\TFont.cpp">
       <Filter>Classes\Renderable\label</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\rendersys\TInterfaceType.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\d3d11\TThreadPump.cpp">
+      <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">
@@ -165,9 +165,6 @@
       <Filter>Classes\Renderable</Filter>
     </ClInclude>
     <ClInclude Include="Classes\renderable\TAssimpMesh.h">
-      <Filter>Classes\Renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\renderable\TInterfaceType.h">
       <Filter>Classes\Renderable</Filter>
     </ClInclude>
     <ClInclude Include="Classes\renderable\TPostProcess.h">
@@ -189,9 +186,6 @@
       <Filter>Classes\Rendersys</Filter>
     </ClInclude>
     <ClInclude Include="Classes\rendersys\TMaterialCB.h">
-      <Filter>Classes\Rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\rendersys\TThreadPump.h">
       <Filter>Classes\Rendersys</Filter>
     </ClInclude>
     <ClInclude Include="Classes\rendersys\d3d9\stddx9.h">
@@ -247,6 +241,15 @@
     </ClInclude>
     <ClInclude Include="Classes\renderable\RenderableManager.h">
       <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TSceneManager.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TInterfaceType.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\d3d11\TThreadPump.h">
+      <Filter>Classes\Rendersys\d3d11</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

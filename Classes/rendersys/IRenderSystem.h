@@ -2,6 +2,8 @@
 #include "TBaseTypes.h"
 #include "TPredefine.h"
 
+struct ISceneManager;
+
 MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
 IRenderSystem : public IUnknown
 {
