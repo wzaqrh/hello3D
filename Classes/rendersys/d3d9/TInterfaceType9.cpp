@@ -1,5 +1,5 @@
-#include "TPredefine.h"
 #include "TInterfaceType9.h"
+#include "IResource.h"
 #include "IRenderSystem.h"
 #include "Utility.h"
 

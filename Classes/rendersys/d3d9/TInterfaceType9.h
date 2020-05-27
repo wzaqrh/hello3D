@@ -1,6 +1,35 @@
 #pragma once
 #include "TInterfaceType.h"
 
+#ifdef USE_EXPORT_COM
+typedef ComPtr<struct TBlobDataD3d9> TBlobDataD3d9Ptr;
+typedef ComPtr<struct TInputLayout9> TInputLayout9Ptr;
+typedef std::shared_ptr<struct TConstantTable> TConstantTablePtr;
+typedef ComPtr<struct TVertexShader9> TVertexShader9Ptr;
+typedef ComPtr<struct TPixelShader9> TPixelShader9Ptr;
+typedef ComPtr<struct TProgram9> TProgram9Ptr;
+typedef ComPtr<struct TIndexBuffer9> TIndexBuffer9Ptr;
+typedef ComPtr<struct TVertexBuffer9> TVertexBuffer9Ptr;
+typedef ComPtr<struct TContantBuffer9> TContantBuffer9Ptr;
+typedef ComPtr<struct TTexture9> TTexture9Ptr;
+typedef ComPtr<struct TRenderTexture9> TRenderTexture9Ptr;
+typedef ComPtr<struct TSamplerState9> TSamplerState9Ptr;
+#else
+typedef std::shared_ptr<struct TBlobDataD3d9> TBlobDataD3d9Ptr;
+typedef std::shared_ptr<struct TInputLayout9> TInputLayout9Ptr;
+typedef std::shared_ptr<struct TConstantTable> TConstantTablePtr;
+typedef std::shared_ptr<struct TVertexShader9> TVertexShader9Ptr;
+typedef std::shared_ptr<struct TPixelShader9> TPixelShader9Ptr;
+typedef std::shared_ptr<struct TProgram9> TProgram9Ptr;
+typedef std::shared_ptr<struct TIndexBuffer9> TIndexBuffer9Ptr;
+typedef std::shared_ptr<struct TVertexBuffer9> TVertexBuffer9Ptr;
+typedef std::shared_ptr<struct TContantBuffer9> TContantBuffer9Ptr;
+typedef std::shared_ptr<struct TTexture9> TTexture9Ptr;
+typedef std::shared_ptr<struct TRenderTexture9> TRenderTexture9Ptr;
+typedef std::shared_ptr<struct TSamplerState9> TSamplerState9Ptr;
+#endif
+
+
 struct INHERIT_COM("671C236B-006F-4C27-98B3-C57DF7915D16")
 TBlobDataD3d9 : public ComBase<IBlobData> {
 	ID3DXBuffer* mBlob = nullptr;
@@ -9,7 +38,6 @@ public:
 	STDMETHODIMP_(char*) GetBufferPointer() override;
 	STDMETHODIMP_(size_t) GetBufferSize() override;
 };
-typedef ComPtr<TBlobDataD3d9> TBlobDataD3d9Ptr;
 
 struct INHERIT_COM("69ED611C-C5DB-460F-8110-63E89FC5DA7B")
 TInputLayout9 : public ComBase<IInputLayout> {
@@ -24,7 +52,6 @@ public:
 		return mRes;
 	}
 };
-typedef ComPtr<TInputLayout9> TInputLayout9Ptr;
 
 struct TConstantTable {
 	ID3DXConstantTable* mTable = nullptr;
@@ -43,7 +70,6 @@ public:
 	void SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDeclElement& elem);
 	void SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDecl& decl);
 };
-typedef std::shared_ptr<TConstantTable> TConstantTablePtr;
 
 struct INHERIT_COM("A86E63AD-B9A1-4C4A-828A-444BB3ABF478")
 TVertexShader9 : public ComBase<IVertexShader> {
@@ -61,7 +87,6 @@ public:
 	IDirect3DVertexShader9*& GetShader9();
 	void SetConstTable(ID3DXConstantTable* constTable);
 };
-typedef ComPtr<TVertexShader9> TVertexShader9Ptr;
 
 struct INHERIT_COM("71FE7436-1A61-4F32-B690-D9FD117433D5")
 TPixelShader9 : public ComBase<IPixelShader> {
@@ -79,7 +104,6 @@ public:
 	IDirect3DPixelShader9*& GetShader9();
 	void SetConstTable(ID3DXConstantTable* constTable);
 };
-typedef ComPtr<TPixelShader9> TPixelShader9Ptr;
 
 struct INHERIT_COM("E752C828-54D6-44F5-BF79-26461299779D")
 TProgram9 : public ComBase<IProgram> {
@@ -100,7 +124,6 @@ public:
 		return mPixel;
 	}
 };
-typedef ComPtr<TProgram9> TProgram9Ptr;
 
 /********** HardwareBuffer **********/
 struct INHERIT_COM("8E88ACBA-26ED-4C83-A012-A6B161567D11")
@@ -122,7 +145,6 @@ public:
 	STDMETHODIMP_(int) GetWidth() override;
 	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
 };
-typedef ComPtr<TIndexBuffer9> TIndexBuffer9Ptr;
 
 struct INHERIT_COM("6BEE478A-8730-4DC4-A732-A34A78722A30")
 TVertexBuffer9 : public ComBase<IVertexBuffer> {
@@ -142,7 +164,6 @@ public:
 	STDMETHODIMP_(unsigned int) GetStride() override;
 	STDMETHODIMP_(unsigned int) GetOffset() override;
 };
-typedef ComPtr<TVertexBuffer9> TVertexBuffer9Ptr;
 
 struct INHERIT_COM("FDCC7A1A-C780-4A83-BFFF-2721F3A0D562")
 TContantBuffer9 : public ComBase<IContantBuffer> {
@@ -160,7 +181,6 @@ public:
 	char* GetBuffer9();
 	void SetBuffer9(char* data, int dataSize);
 };
-typedef ComPtr<TContantBuffer9> TContantBuffer9Ptr;
 
 /********** Texture **********/
 struct INHERIT_COM("911D06C1-544B-4977-8367-1C74C3EC3113")
@@ -198,7 +218,6 @@ public:
 private:
 	D3DSURFACE_DESC GetDesc();
 };
-typedef ComPtr<TTexture9> TTexture9Ptr;
 
 struct INHERIT_COM("455BD4A6-AF0B-40B6-BAEB-CDF4C94189D8")
 TRenderTexture9 : public ComBase<IRenderTexture> {
@@ -211,7 +230,6 @@ public:
 	IDirect3DSurface9*& GetColorBuffer9();
 	IDirect3DSurface9*& GetDepthStencilBuffer9();
 };
-typedef ComPtr<TRenderTexture9> TRenderTexture9Ptr;
 
 struct INHERIT_COM("7BC9743D-B003-4298-8574-4FFE3E7E97D5")
 TSamplerState9 : public ComBase<ISamplerState> {
@@ -219,4 +237,3 @@ TSamplerState9 : public ComBase<ISamplerState> {
 public:
 	std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();
 };
-typedef ComPtr<TSamplerState9> TSamplerState9Ptr;

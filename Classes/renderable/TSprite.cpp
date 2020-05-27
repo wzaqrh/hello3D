@@ -1,7 +1,7 @@
 #include "TSprite.h"
+#include "TTransform.h"
 #include "IRenderSystem.h"
 #include "TMaterial.h"
-#include "TMovable.h"
 #include "TInterfaceType.h"
 
 /********** Quad **********/
@@ -132,7 +132,7 @@ int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 {
 	if (mQuadDirty) {
 		mQuadDirty = false;
-		mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+		mRenderSys->UpdateBuffer((mVertexBuffer), &mQuad, sizeof(mQuad));
 	}
 
 	TRenderOperation op = {};

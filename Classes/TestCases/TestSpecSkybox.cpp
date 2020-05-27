@@ -1,5 +1,7 @@
 #include "TApp.h"
 #include "TAssimpModel.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestSpecSkybox : public TApp
 {
@@ -50,7 +52,7 @@ void TestSpecSkybox::OnPostInitDevice()
 void TestSpecSkybox::OnRender()
 {
 	if (mRenderSys->BeginScene()) {
-		if (mModel) mModel->Update(mTimer.mDeltaTime);
+		if (mModel) mModel->Update(mTimer->mDeltaTime);
 		if (mModel) mModel->Draw();
 		mRenderSys->EndScene();
 	}

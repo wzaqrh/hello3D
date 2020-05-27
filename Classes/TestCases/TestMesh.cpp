@@ -1,9 +1,8 @@
 #include "TApp.h"
-#include "TInterfaceType.h"
-#include "TSprite.h"
 #include "TMesh.h"
-#include "TRenderSystem11.h"
-#include "TRenderSystem9.h"
+#include "TSprite.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestMesh : public TApp
 {

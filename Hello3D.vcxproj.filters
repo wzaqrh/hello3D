@@ -42,9 +42,6 @@
     <ClCompile Include="Classes\app\TApp.cpp">
       <Filter>Classes\App</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\app\TMovable.cpp">
-      <Filter>Classes\App</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\renderable\IRenderable.cpp">
       <Filter>Classes\Renderable</Filter>
     </ClCompile>
@@ -85,9 +82,6 @@
       <Filter>Classes\Rendersys\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="Classes\base\D3DEnumCT.cpp">
-      <Filter>Classes\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\base\TBaseTypes.cpp">
       <Filter>Classes\Base</Filter>
     </ClCompile>
     <ClCompile Include="Classes\base\Utility.cpp">
@@ -153,12 +147,18 @@
     <ClCompile Include="Classes\rendersys\d3d11\TThreadPump.cpp">
       <Filter>Classes\Rendersys\d3d11</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\base\TTransform.cpp">
+      <Filter>Classes\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\TBaseTypes.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\rendersys\ISceneManager.cpp">
+      <Filter>Classes\Rendersys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">
-      <Filter>Classes\App</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\app\TMovable.h">
       <Filter>Classes\App</Filter>
     </ClInclude>
     <ClInclude Include="Classes\renderable\IRenderable.h">
@@ -215,9 +215,6 @@
     <ClInclude Include="Classes\base\std.h">
       <Filter>Classes\Base</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\base\TBaseTypes.h">
-      <Filter>Classes\Base</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\base\Utility.h">
       <Filter>Classes\Base</Filter>
     </ClInclude>
@@ -242,14 +239,35 @@
     <ClInclude Include="Classes\renderable\RenderableManager.h">
       <Filter>Classes\Renderable</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\rendersys\TSceneManager.h">
-      <Filter>Classes\Rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\rendersys\TInterfaceType.h">
       <Filter>Classes\Rendersys</Filter>
     </ClInclude>
     <ClInclude Include="Classes\rendersys\d3d11\TThreadPump.h">
       <Filter>Classes\Rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TInterfaceTypePred.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\renderable\IRenderablePred.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TMaterialPred.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\base\TTransform.h">
+      <Filter>Classes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\ISceneManagerPred.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\ISceneManager.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TBaseTypes.h">
+      <Filter>Classes\Rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\rendersys\TConstBufferDecl.h">
+      <Filter>Classes\Rendersys</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

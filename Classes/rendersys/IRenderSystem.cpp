@@ -1,10 +1,10 @@
 #include "IRenderSystem.h"
-#include "TMaterial.h"
-#include "Utility.h"
-#include "TSkyBox.h"
-#include "TPostProcess.h"
-#include "TThreadPump.h"
+#include "ISceneManager.h"
 #include "TMaterialCB.h"
+#include "TMaterial.h"
+#include "TPostProcess.h"
+#include "TSkyBox.h"
+#include "Utility.h"
 
 TRenderSystem::TRenderSystem()
 {

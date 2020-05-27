@@ -1,12 +1,13 @@
 #include "Export.h"
-#include "Utility.h"
 #include "IRenderSystem.h"
 #include "TRenderSystem11.h"
 #include "TRenderSystem9.h"
+#include "ISceneManager.h"
 #include "IRenderable.h"
 #include "TMaterial.h"
 #include "TSprite.h"
-#include "TMovable.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 //RenderSystem
 ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
@@ -24,7 +25,8 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 		rendersys = nullptr;
 	}
 
-	//rendersys->SetOthogonalCamera(100);
+	rendersys->SetOthogonalCamera(100);
+
 	rendersys->AddPointLight();
 	rendersys->SetDepthState(TDepthState::For2D);
 	rendersys->SetBlendFunc(TBlendFunc::ALPHA_NON_PREMULTIPLIED);
@@ -71,7 +73,7 @@ void RenderSystem_REndScene(ExportRenderSystem rendersys)
 
 DLL_EXPORT void RenderSystem_SetRenderTarget(ExportRenderSystem rendersys, ExportRenderTarget renderTarget)
 {
-	rendersys->SetRenderTarget(renderTarget ? IRenderTexturePtr(renderTarget) : nullptr);
+	rendersys->SetRenderTarget(renderTarget ? MakePtr(renderTarget) : nullptr);
 }
 
 DLL_EXPORT void RenderSystem_SetViewPort(ExportRenderSystem rendersys, int x, int y, int w, int h)
@@ -147,45 +149,51 @@ DLL_EXPORT bool Transform_IsFlipY(ExportTransform transform)
 	return transform->IsFlipY();
 }
 
+#ifdef USE_EXPORT_COM
+template<class T> T* GetExportPtr(const ComPtr<T>& ptr) {
+	return ptr ? ptr.Detach() : nullptr;
+}
+#else
+template<class T> T* GetExportPtr(std::shared_ptr<T>& ptr) {
+	T* texture = nullptr;
+	if (ptr) {
+		texture = PtrRaw(ptr);
+		if (texture) texture->AddRef();
+		ptr.reset();
+	}
+	return texture;
+}
+#endif
+
 //RenderTarget
 DLL_EXPORT ExportRenderTarget RenderTarget_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format)
 {
-	auto rt = rendersys->CreateRenderTexture(width, height, format);
-	return rt ? rt.Detach() : nullptr;
-}
-
-template<class T>
-T* ComPtrGetAddRef(const ComPtr<T>& ptr) {
-	T* texture = nullptr;
-	if (ptr) {
-		texture = ptr.Get();
-		if (texture) texture->AddRef();
-	}
-	return texture;
+	IRenderTexturePtr rt = rendersys->CreateRenderTexture(width, height, format);
+	return GetExportPtr(rt);
 }
 
 DLL_EXPORT ExportTexture RenderTarget_GetTexture(ExportRenderTarget renderTarget)
 {
-	ExportTexture texture = ComPtrGetAddRef(renderTarget ? renderTarget->GetColorTexture() : nullptr);
-	return texture;
+	ITexturePtr texture = renderTarget ? renderTarget->GetColorTexture() : nullptr;
+	return GetExportPtr(texture);
 }
 
 //ITexture
-ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath, bool async)
+DLL_EXPORT ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath, bool async)
 {
 	ITexturePtr texture = rendersys->LoadTexture(imgPath, DXGI_FORMAT_UNKNOWN, async);
-	return texture ? texture.Detach() : nullptr;
+	return GetExportPtr(texture);
 }
 
 DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format, int mipmap)
 {
 	ITexturePtr texture = rendersys->CreateTexture(width, height, format, mipmap);
-	return texture ? texture.Detach() : nullptr;
+	return GetExportPtr(texture);
 }
 
 DLL_EXPORT bool Texture_LoadRawData(ExportRenderSystem rendersys, ExportTexture texture, PBYTE data, int dataSize, int dataStep)
 {
-	return rendersys->LoadRawTextureData(texture, (char*)data, dataSize, dataStep);
+	return rendersys->LoadRawTextureData(MakePtr(texture), (char*)data, dataSize, dataStep);
 }
 
 DLL_EXPORT int Texture_Width(ExportTexture texture)
@@ -217,7 +225,7 @@ DLL_EXPORT ExportSprite SpriteColor_Create(ExportRenderSystem rendersys, XMFLOAT
 	TSprite* sprite = new TSprite(rendersys, E_MAT_LAYERCOLOR);
 #endif
 	sprite->SetColor(color);
-	return ExportSprite(sprite);
+	return sprite;
 }
 
 ExportSprite SpriteImage_Create(ExportRenderSystem rendersys, const char* imgPath)
@@ -229,7 +237,7 @@ ExportSprite SpriteImage_Create(ExportRenderSystem rendersys, const char* imgPat
 #endif
 	if (imgPath != nullptr && imgPath != "")
 		sprite->SetTexture(rendersys->LoadTexture(imgPath));
-	return ExportSprite(sprite);
+	return sprite;
 }
 
 void Sprite_Destroy(ExportSprite sprite)
@@ -246,7 +254,7 @@ void Sprite_SetTexture(ExportSprite sprite, ExportTexture texture)
 #ifdef EXPORT_STRUCT
 	sprite->SetTexture(ITexturePtr(texture.self));
 #else
-	sprite->SetTexture(ITexturePtr(texture));
+	sprite->SetTexture(MakePtr(texture));
 #endif
 }
 
@@ -314,5 +322,5 @@ DLL_EXPORT void Mesh_SetIndices(ExportMesh mesh, const UINT* indiceData, int ind
 
 DLL_EXPORT void Mesh_SetTexture(ExportMesh mesh, int slot, ExportTexture texture, int subMeshIndex)
 {
-	mesh->SetTexture(slot, texture, subMeshIndex);
+	mesh->SetTexture(slot, MakePtr(texture), subMeshIndex);
 }

@@ -1,6 +1,14 @@
 #pragma once
 #include "std.h"
 
+#ifdef USE_EXPORT_COM
+typedef ComPtr<struct IResource> IResourcePtr;
+typedef ComPtr<struct TResource> TResourcePtr;
+#else
+typedef std::shared_ptr<struct IResource> IResourcePtr;
+typedef std::shared_ptr<struct TResource> TResourcePtr;
+#endif
+
 enum enResourceState {
 	E_RES_STATE_NONE,
 	E_RES_STATE_PREPARED,
@@ -8,7 +16,6 @@ enum enResourceState {
 	E_RES_STATE_LOADED,
 	E_RES_STATE_UNLOADING
 };
-
 MIDL_INTERFACE("14542070-5390-402A-9655-0F162D1C6A74") 
 IResource : public IUnknown {
 public:
@@ -24,17 +31,15 @@ public:
 
 	virtual STDMETHODIMP_(void) AddOnLoadedListener(std::function<void(IResource*)> cb) = 0;
 	virtual STDMETHODIMP_(void) CheckAndSetLoaded() = 0;
-	virtual STDMETHODIMP_(void) AddDependency(ComPtr<IResource> res) = 0;
-
+	virtual STDMETHODIMP_(void) AddDependency(IResourcePtr res) = 0;
 };
-typedef ComPtr<IResource> IResourcePtr;
 
 struct INHERIT_COM("20FB61DE-C191-489C-972E-D12D01A82ECF")
 TResource : public ComBase<IResource> {
 	IUnknown** mDeviceObj;
 	enResourceState mCurState;
 	std::vector<std::function<void(IResource*)>> OnLoadeds;
-	std::vector<ComPtr<TResource>> mDepends;
+	std::vector<TResourcePtr> mDepends;
 public:
 	TResource() :mCurState(E_RES_STATE_NONE),mDeviceObj(nullptr) {}
 	TResource(IUnknown** deviceObj);
@@ -48,8 +53,8 @@ public:
 
 	STDMETHODIMP_(void) AddOnLoadedListener(std::function<void(IResource*)> cb) override;
 	STDMETHODIMP_(void) CheckAndSetLoaded() override;
-	STDMETHODIMP_(void) AddDependency(ComPtr<IResource> res) override;
+	STDMETHODIMP_(void) AddDependency(IResourcePtr res) override;
 protected:
 	virtual bool CheckLoaded() const;
 };
-typedef ComPtr<TResource> TResourcePtr;
+

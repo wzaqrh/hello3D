@@ -1,5 +1,5 @@
 #pragma once
-#include "TPredefine.h"
+//INCLUDE_PREDEFINE_H
 #include "TAssimpMesh.h"
 #include "IRenderable.h"
 
@@ -16,6 +16,7 @@ public:
 };
 
 struct IRenderSystem;
+typedef std::shared_ptr<struct TMovable> TMovablePtr;
 class TAssimpModel 
 	: public IRenderable
 {

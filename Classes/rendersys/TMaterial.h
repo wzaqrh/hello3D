@@ -1,16 +1,36 @@
 #pragma once
-#include "TPredefine.h"
-#include "IRenderable.h"
+#include "TMaterialPred.h"
+#include "TInterfaceTypePred.h"
 #include "IResource.h"
+#include "TMaterialCB.h"
 
 #define E_PASS_SHADOWCASTER "ShadowCaster"
 #define E_PASS_FORWARDBASE "ForwardBase"
 #define E_PASS_FORWARDADD "ForwardAdd"
 #define E_PASS_POSTPROCESS "PostProcess"
 
-class TRenderSystem;
+struct TTextureBySlot {
+	std::vector<ITexturePtr> textures;
+public:
+	bool empty() const;
+	size_t size() const;
 
-struct TContantBufferInfo {
+	void clear();
+	void push_back(ITexturePtr texture);
+	void swap(TTextureBySlot& other);
+	void resize(size_t size);
+
+	const ITexturePtr At(size_t pos) const;
+	ITexturePtr& At(size_t pos);
+
+	const ITexturePtr operator[](size_t pos) const;
+	ITexturePtr& operator[](size_t pos);
+public:
+	void Merge(const TTextureBySlot& other);
+};
+
+struct TContantBufferInfo 
+{
 	IContantBufferPtr buffer;
 	bool isUnique;
 	std::string name;
@@ -20,7 +40,10 @@ public:
 };
 #define MAKE_CBNAME(V) #V
 
-struct TPass {
+struct TData;
+class IRenderSystem;
+struct TPass 
+{
 	std::string mLightMode,mName;
 	IInputLayoutPtr mInputLayout;
 	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
@@ -48,9 +71,9 @@ public:
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
-typedef std::shared_ptr<TPass> TPassPtr;
 
-struct TTechnique {
+struct TTechnique
+{
 	std::string mName;
 	std::vector<TPassPtr> mPasses;
 public:
@@ -65,10 +88,10 @@ public:
 
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
-typedef std::shared_ptr<TTechnique> TTechniquePtr;
 
 struct INHERIT_COM("04059656-CA19-432B-BBEC-41E46EFB8CCD")
-TMaterial : public TResource {
+TMaterial : public TResource 
+{
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
@@ -82,9 +105,9 @@ public:
 	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 };
-typedef std::shared_ptr<TMaterial> TMaterialPtr;
 
-struct TMaterialBuilder {
+struct TMaterialBuilder 
+{
 	TMaterialPtr mMaterial;
 	TTechniquePtr mCurTech;
 	TPassPtr mCurPass;
@@ -118,7 +141,9 @@ public:
 #define E_MAT_MODEL_SHADOW "model_shadow"
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
-struct TMaterialFactory {
+class TRenderSystem;
+struct TMaterialFactory 
+{
 	TRenderSystem* mRenderSys;
 	std::map<std::string, TMaterialPtr> mMaterials;
 public:
@@ -127,8 +152,6 @@ public:
 private:
 	TMaterialPtr CreateStdMaterial(std::string name);
 };
-typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;
-
 
 #define FILE_EXT_CSO ".cso"
 #define FILE_EXT_FX ".fx"

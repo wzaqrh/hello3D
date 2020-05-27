@@ -1,54 +1,106 @@
 #include "TMaterialCB.h"
+#include "TBaseTypes.h"
+#include "TConstBufferDecl.h"
 
-/********** TConstBufferDeclElement **********/
-TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)
-	:name(__name)
-	,type(__type)
-	,size(__size)
-	,count(__count)
-	,offset(__offset)
+/********** TDirectLight **********/
+TDirectLight::TDirectLight()
 {
-}
-
-TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& elem)
-{
-	elements.push_back(elem);
-	return elements.back();
-}
-TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl)
-{
-	elements.push_back(elem);
-	subDecls.insert(std::make_pair(elem.name, subDecl));
-	return elements.back();
-}
-TConstBufferDeclElement& TConstBufferDecl::Last()
-{
-	return elements.back();
+	SetDirection(0, 0, 1);
+	SetDiffuseColor(1, 1, 1, 1);
+	SetSpecularColor(1, 1, 1, 1);
+	SetSpecularPower(32);
 }
 
-/********** TConstBufferDeclBuilder **********/
-TConstBufferDeclBuilder::TConstBufferDeclBuilder(TConstBufferDecl& decl)
-	:mDecl(decl)
+void TDirectLight::SetDirection(float x, float y, float z)
 {
+	LightPos = XMFLOAT4(x, y, z, 0);
 }
 
-TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElement& elem)
+void TDirectLight::SetDiffuseColor(float r, float g, float b, float a)
 {
-	mDecl.Add(elem).offset = mDecl.bufferSize;
-	mDecl.bufferSize += elem.size;
-	return *this;
+	DiffuseColor = XMFLOAT4(r, g, b, a);
 }
 
-TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl)
+void TDirectLight::SetSpecularColor(float r, float g, float b, float a)
 {
-	mDecl.Add(elem, subDecl).offset = mDecl.bufferSize;
-	mDecl.bufferSize += elem.size;
-	return *this;
+	SpecularColorPower = XMFLOAT4(r, g, b, SpecularColorPower.w);
 }
 
-TConstBufferDecl& TConstBufferDeclBuilder::Build()
+void TDirectLight::SetSpecularPower(float power)
 {
-	return mDecl;
+	SpecularColorPower.w = power;
+}
+
+TConstBufferDecl& TDirectLight::GetDesc()
+{
+	static TConstBufferDecl decl;
+	TConstBufferDeclBuilder builder(decl);
+	TDirectLight cb;
+	BUILD_ADD(LightPos);
+	BUILD_ADD(DiffuseColor);
+	BUILD_ADD(SpecularColorPower);
+	return builder.Build();
+}
+
+/********** TLight **********/
+TPointLight::TPointLight()
+{
+	SetPosition(0, 0, -10);
+	SetAttenuation(1.0, 0.01, 0.0);
+}
+
+void TPointLight::SetPosition(float x, float y, float z)
+{
+	LightPos = XMFLOAT4(x, y, z, 1);
+}
+
+void TPointLight::SetAttenuation(float a, float b, float c)
+{
+	Attenuation = XMFLOAT4(a, b, c, 0);
+}
+
+TConstBufferDecl& TPointLight::GetDesc()
+{
+	static TConstBufferDecl decl;
+	decl = TDirectLight::GetDesc();
+
+	TConstBufferDeclBuilder builder(decl);
+	TPointLight cb;
+	BUILD_ADD(Attenuation);
+	return builder.Build();
+}
+
+/********** TSpotLight **********/
+TSpotLight::TSpotLight()
+{
+	SetDirection(0, 0, 1);
+	SetAngle(3.14 * 30 / 180);
+}
+
+void TSpotLight::SetDirection(float x, float y, float z)
+{
+	DirectionCutOff = XMFLOAT4(x, y, z, DirectionCutOff.w);
+}
+
+void TSpotLight::SetCutOff(float cutoff)
+{
+	DirectionCutOff.w = cutoff;
+}
+
+void TSpotLight::SetAngle(float radian)
+{
+	SetCutOff(cos(radian));
+}
+
+TConstBufferDecl& TSpotLight::GetDesc()
+{
+	static TConstBufferDecl decl;
+	decl = TPointLight::GetDesc();
+
+	TConstBufferDeclBuilder builder(decl);
+	TSpotLight cb;
+	BUILD_ADD(DirectionCutOff);
+	return builder.Build();
 }
 
 /********** cbGlobalParam **********/

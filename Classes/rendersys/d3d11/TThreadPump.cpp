@@ -1,4 +1,5 @@
 #include "TThreadPump.h"
+#include "IResource.h"
 #include "Utility.h"
 
 void ResourceSetLoaded(IResource* res, HRESULT hr)
@@ -118,9 +119,11 @@ void TThreadPump::Update(float dt)
 				IResourcePtr res = entry->res;
 				auto callback = entry->callback;
 				entry->Clear();
-
-				if (callback) 
-					callback(res.Get(), hr);
+#ifdef USE_EXPORT_COM
+				if (callback) callback(res.Get(), hr);
+#else
+				if (callback) callback(res.get(), hr);
+#endif
 			}
 		}
 	}
@@ -132,9 +135,11 @@ void TThreadPump::Update(float dt)
 				IResourcePtr res = entry->res;
 				auto callback = entry->callback;
 				entry->Clear();
-
-				if (callback)
-					callback(entry->res.Get(), hr);
+#ifdef USE_EXPORT_COM
+				if (callback) callback(entry->res.Get(), hr);
+#else
+				if (callback) callback(entry->res.get(), hr);
+#endif
 			}
 		}
 	}

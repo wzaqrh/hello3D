@@ -1,6 +1,8 @@
 #include "TApp.h"
 #include "TAssimpModel.h"
 #include "TSprite.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 struct cbShadowMap
 {
@@ -64,8 +66,8 @@ void TestShadowMap::OnPostInitDevice()
 void TestShadowMap::OnRender()
 {
 #if 1
-	mModel1->Update(mTimer.mDeltaTime);
-	mModel2->Update(mTimer.mDeltaTime);
+	mModel1->Update(mTimer->mDeltaTime);
+	mModel2->Update(mTimer->mDeltaTime);
 
 	TRenderOperationQueue opQueue;
 	mModel1->GenRenderOperation(opQueue);

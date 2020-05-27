@@ -1,5 +1,5 @@
 #pragma once
-#include "TPredefine.h"
+//INCLUDE_PREDEFINE_H
 #include "TInterfaceType.h"
 #include "ft2build.h"
 #include "freetype.h"

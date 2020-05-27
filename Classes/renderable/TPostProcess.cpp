@@ -3,6 +3,7 @@
 #include "TInterfaceType.h"
 #include "TMaterial.h"
 #include "TMaterialCB.h"
+#include "rendersys/TConstBufferDecl.h"
 
 /********** POSTPROCESS_VERTEX_QUAD **********/
 POSTPROCESS_VERTEX_QUAD::POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h)

@@ -1,6 +1,6 @@
 #pragma once
 #include "IRenderable.h"
-#include "TPredefine.h"
+#include "rendersys/TInterfaceTypePred.h"
 
 struct Pos3Color3Tex2
 {

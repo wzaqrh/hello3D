@@ -1,5 +1,5 @@
 #pragma once
-#include "TPredefine.h"
+//INCLUDE_PREDEFINE_H
 #include "TBaseTypes.h"
 #include "D3DEnumCT.h"
 

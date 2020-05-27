@@ -1,5 +1,5 @@
 #pragma once
-#include "TPredefine.h"
+//INCLUDE_PREDEFINE_H
 #include "IRenderable.h"
 
 //#define MESH_VETREX_POSTEX

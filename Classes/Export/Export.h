@@ -1,6 +1,6 @@
 #pragma once
 #include "std.h"
-#include "TPredefine.h"
+//INCLUDE_PREDEFINE_H
 #include "IRenderSystem.h"
 #include "TSprite.h"
 #include "TMesh.h"

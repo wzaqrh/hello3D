@@ -1,10 +1,7 @@
 #pragma once
-#include "TPredefine.h"
 #include "IRenderSystem.h"
-#include "TMovable.h"
-#include "TInterfaceType.h"
-#include "TMaterial.h"
-#include "Utility.h"
+#include "TInterfaceTypePred.h"
+#include "TMaterialPred.h"
 
 class TAssimpModel;
 struct aiNode;
@@ -18,7 +15,7 @@ struct IApp
 	virtual std::string GetName() = 0;
 };
 
-
+typedef std::shared_ptr<struct TMovable> TMovablePtr;
 class TApp : public IApp
 {
 public:
@@ -39,8 +36,8 @@ protected:
 	XMMATRIX GetWorldTransform();
 protected:
 	IRenderSystem* mRenderSys = nullptr;
-	TD3DInput* mInput = nullptr;
-	SDTimer mTimer;
+	class TD3DInput* mInput = nullptr;
+	class SDTimer* mTimer;
 	TMovablePtr mMove;
 	XMFLOAT4 mBackgndColor;
 public:

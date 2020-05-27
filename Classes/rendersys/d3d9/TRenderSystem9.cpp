@@ -1,10 +1,11 @@
 #include "TRenderSystem9.h"
-#include "TMaterial.h"
-#include "Utility.h"
-#include "TSkyBox.h"
-#include "TPostProcess.h"
-#include "TInterfaceType9.h"
+#include "ISceneManager.h"
 #include "TMaterialCB.h"
+#include "TMaterial.h"
+#include "TInterfaceType9.h"
+#include "TPostProcess.h"
+#include "TSkyBox.h"
+#include "Utility.h"
 
 TRenderSystem9::TRenderSystem9()
 {
@@ -135,14 +136,14 @@ void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, 
 
 IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
-	TTexture9Ptr pTextureRV = new TTexture9(nullptr, "");
+	TTexture9Ptr pTextureRV = MakePtr<TTexture9>(nullptr, "");
 	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
 	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
-	TRenderTexture9Ptr ret = new TRenderTexture9(pTextureRV, pSurfaceDepthStencil);
+	TRenderTexture9Ptr ret = MakePtr<TRenderTexture9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;
 }
 
@@ -169,14 +170,14 @@ TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void
 
 IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
 {
-	TContantBuffer9Ptr ret = new TContantBuffer9(buffer->GetDecl());
+	TContantBuffer9Ptr ret = MakePtr<TContantBuffer9>(buffer->GetDecl());
 	return ret;
 }
 
 IContantBufferPtr TRenderSystem9::CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
-	TContantBuffer9Ptr ret = new TContantBuffer9(std::make_shared<TConstBufferDecl>(cbDecl));
-	if (data) UpdateBuffer(ret.Get(), data, ret->GetBufferSize());
+	TContantBuffer9Ptr ret = MakePtr<TContantBuffer9>(std::make_shared<TConstBufferDecl>(cbDecl));
+	if (data) UpdateBuffer((ret), data, ret->GetBufferSize());
 	return ret;
 }
 
@@ -186,9 +187,9 @@ IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
 	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
-		ret = new TIndexBuffer9(pIndexBuffer, bufferSize, format);
+		ret = MakePtr<TIndexBuffer9>(pIndexBuffer, bufferSize, format);
 	}
-	if (buffer) UpdateBuffer(ret.Get(), buffer, bufferSize);
+	if (buffer) UpdateBuffer((ret), buffer, bufferSize);
 	return ret;
 }
 
@@ -202,9 +203,9 @@ IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, 
 	TVertexBuffer9Ptr ret;
 	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
 	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, D3DUSAGE_WRITEONLY, 0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
-		ret = new TVertexBuffer9(pVertexBuffer, bufferSize, stride, offset);
+		ret = MakePtr<TVertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
 	}
-	if (buffer) UpdateBuffer(ret.Get(), buffer, bufferSize);
+	if (buffer) UpdateBuffer(ret, buffer, bufferSize);
 	return ret;
 }
 
@@ -250,11 +251,11 @@ bool TRenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 
 void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
 {
-	UpdateBuffer(buffer.Get(), data, dataSize);
+	UpdateBuffer((buffer), data, dataSize);
 }
 
 static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
-	TVertexShader9Ptr ret = new TVertexShader9();
+	TVertexShader9Ptr ret = MakePtr< TVertexShader9>();
 
 	if (CheckHR(pDevice9->CreateVertexShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
 
@@ -273,8 +274,8 @@ TVertexShader9Ptr TRenderSystem9::_CreateVS(const char* filename, const char* en
 	Flag = D3DXSHADER_DEBUG;
 #endif
 	entry = entry ? entry : "VS";
-	TBlobDataD3d9Ptr blob = new TBlobDataD3d9(nullptr);
-	TBlobDataD3d9Ptr errBlob = new TBlobDataD3d9(nullptr);
+	TBlobDataD3d9Ptr blob = MakePtr<TBlobDataD3d9>(nullptr);
+	TBlobDataD3d9Ptr errBlob = MakePtr<TBlobDataD3d9>(nullptr);
 	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
@@ -466,7 +467,7 @@ ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT for
 bool TRenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
 	assert(dataStep * texture->GetHeight() <= dataSize);
-	TTexture9Ptr tex9 = PtrCast(texture).As<TTexture9>();
+	TTexture9Ptr tex9 = PtrCast(texture).As1<TTexture9>();
 
 	int width = texture->GetWidth(), height = texture->GetHeight();
 	IDirect3DTexture9* pTexture = tex9->GetSRV9();
@@ -508,9 +509,9 @@ void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 
 void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	TProgram9Ptr program = PtrCast(pass->mProgram).As<TProgram9>();
-	TPixelShader9* ps = program->mPixel.Get();
-	TVertexShader9* vs = program->mVertex.Get();
+	TProgram9Ptr program = PtrCast(pass->mProgram).As1<TProgram9>();
+	TPixelShader9* ps = PtrRaw(program->mPixel);
+	TVertexShader9* vs = PtrRaw(program->mVertex);
 
 	if (pass->mConstantBuffers.size() > 0) {
 		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
@@ -663,7 +664,7 @@ void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, con
 	auto LightCam = light->GetLightCamera(*mDefCamera);
 	
 	cbGlobalParam globalParam;
-	MakeAutoParam(globalParam, &LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+	MakeAutoParam(globalParam, LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 
 	for (int i = 0; i < opQueue.Count(); ++i)
 		if (opQueue[i].mMaterial->IsLoaded()) {

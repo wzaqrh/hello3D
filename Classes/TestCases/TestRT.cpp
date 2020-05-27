@@ -1,9 +1,11 @@
-#include "TInterfaceType.h"
 #include "TApp.h"
+#include "rendersys/TInterfaceType.h"
 #include "TAssimpModel.h"
 #include "TSprite.h"
+#include "TTransform.h"
+#include "Utility.h"
 
-class Lesson5 : public TApp
+class TestRT : public TApp
 {
 protected:
 	virtual void OnRender() override;
@@ -15,8 +17,8 @@ private:
 	TSpritePtr mSprite, mLayerColor;
 };
 
-/********** Lesson5 **********/
-void Lesson5::OnInitLight()
+/********** TestRT **********/
+void TestRT::OnInitLight()
 {
 	auto light1 = mRenderSys->AddPointLight();
 	light1->SetPosition(20, 0, -20);
@@ -24,7 +26,7 @@ void Lesson5::OnInitLight()
 	light1->SetSpecularPower(60);
 }
 
-void Lesson5::OnPostInitDevice()
+void TestRT::OnPostInitDevice()
 {
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
 	{
@@ -52,14 +54,14 @@ void Lesson5::OnPostInitDevice()
 }
 
 //#define USE_RENDER_TARGET
-void Lesson5::OnRender()
+void TestRT::OnRender()
 {
 	if (mRenderSys->BeginScene()) {
 #ifdef USE_RENDER_TARGET
 		mRenderSys->SetRenderTarget(mRendTexture);
 		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
 #endif
-		mModel->Update(mTimer.mDeltaTime);
+		mModel->Update(mTimer->mDeltaTime);
 		mModel->Draw();
 #ifdef USE_RENDER_TARGET
 		mRenderSys->SetRenderTarget(nullptr);
@@ -70,4 +72,4 @@ void Lesson5::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson5>("TAppLesson5: RenderTarget");
+//auto reg = AppRegister<TestRT>("TestRT: RenderTarget");

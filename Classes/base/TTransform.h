@@ -1,7 +1,8 @@
 #pragma once
 #include "TBaseTypes.h"
 
-__declspec(align(16)) struct TTransform {
+__declspec(align(16)) 
+struct TTransform {
 	XMMATRIX mMatrix;
 	XMFLOAT3 mScale;
 	XMFLOAT3 mPosition;
