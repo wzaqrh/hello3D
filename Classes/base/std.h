@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <assert.h>
+#include <type_traits>
 #include <map>
 #include <memory>
 #include <queue>
