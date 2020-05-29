@@ -1,8 +1,9 @@
 #pragma once
 #include "ISceneManagerPred.h"
+#include "TInterfaceTypePred.h"
 #include "IRenderablePred.h"
-#include "TBaseTypes.h"
 #include "TMaterialPred.h"
+#include "TBaseTypes.h"
 
 __declspec(align(16)) 
 struct TCameraBase {
@@ -61,13 +62,52 @@ public:
 MIDL_INTERFACE("CCCACB79-2DB3-4771-9AE5-1CB5369F206C")
 ISceneManager : public IUnknown
 {
+	virtual STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) = 0;
+	virtual STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) = 0;
 	virtual STDMETHODIMP_(TCameraPtr) GetDefCamera() = 0;
 
 	virtual STDMETHODIMP_(TSpotLightPtr) AddSpotLight() = 0;
 	virtual STDMETHODIMP_(TPointLightPtr) AddPointLight() = 0;
 	virtual STDMETHODIMP_(TDirectLightPtr) AddDirectLight() = 0;
-	virtual STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) = 0;
-	virtual STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) = 0;
+
+	virtual STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() = 0;
 	virtual STDMETHODIMP_(TSkyBoxPtr) SetSkyBox(const std::string& imgName) = 0;
 	virtual STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) = 0;
+};
+
+struct TSceneManager : public ComBase<ISceneManager>
+{
+public:
+	IRenderSystem* mRenderSys;
+	IRenderTexturePtr mPostProcessRT;
+	int mScreenWidth, mScreenHeight;
+	
+
+	TCameraPtr mDefCamera;
+	TSkyBoxPtr mSkyBox;
+	std::vector<TPostProcessPtr> mPostProcs;
+
+	std::vector<TDirectLightPtr> mDirectLights;
+	std::vector<TPointLightPtr> mPointLights;
+	std::vector<TSpotLightPtr> mSpotLights;
+	std::vector<std::pair<TDirectLight*, enLightType>> mLightsOrder;
+public:
+	TSceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, TCameraPtr defCamera);
+
+	STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) override;
+	STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) override;
+	STDMETHODIMP_(TCameraPtr) GetDefCamera() {
+		return mDefCamera;
+	}
+
+	STDMETHODIMP_(TSpotLightPtr) AddSpotLight() override;
+	STDMETHODIMP_(TPointLightPtr) AddPointLight() override;
+	STDMETHODIMP_(TDirectLightPtr) AddDirectLight() override;
+
+	STDMETHODIMP_(TSkyBoxPtr) SetSkyBox(const std::string& imgName) override;
+	STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() {
+		return mSkyBox;
+	};
+
+	STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) override;
 };

@@ -1,4 +1,7 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_MESH
 #include "TApp.h"
+#include "ISceneManager.h"
 #include "TMesh.h"
 #include "TSprite.h"
 #include "TTransform.h"
@@ -17,7 +20,7 @@ private:
 
 void TestMesh::OnPostInitDevice()
 {
-	mRenderSys->SetOthogonalCamera(100);
+	mRenderSys->GetSceneManager()->SetOthogonalCamera(100);
 
 	auto texture = mRenderSys->LoadTexture("model\\theyKilledKenny.jpg");
 
@@ -62,4 +65,5 @@ void TestMesh::OnRender()
 	}
 }
 
-//auto reg = AppRegister<TestMesh>("estMesh");
+auto reg = AppRegister<TestMesh>("estMesh");
+#endif

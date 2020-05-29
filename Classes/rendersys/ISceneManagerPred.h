@@ -1,6 +1,7 @@
 #pragma once
 #include "std.h"
 
-struct TCameraBase;
+typedef std::shared_ptr<struct TCameraBase> TCameraBasePtr;
 typedef std::shared_ptr<struct TCamera> TCameraPtr;
-
+typedef std::shared_ptr<struct ISceneManager> ISceneManagerPtr;
+typedef std::shared_ptr<struct TSceneManager> TSceneManagerPtr;

@@ -41,7 +41,7 @@ public:
 #define MAKE_CBNAME(V) #V
 
 struct TData;
-class IRenderSystem;
+struct IRenderSystem;
 struct TPass 
 {
 	std::string mLightMode,mName;
@@ -141,7 +141,7 @@ public:
 #define E_MAT_MODEL_SHADOW "model_shadow"
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
-class TRenderSystem;
+struct TRenderSystem;
 struct TMaterialFactory 
 {
 	TRenderSystem* mRenderSys;

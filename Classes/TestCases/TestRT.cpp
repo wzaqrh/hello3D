@@ -1,4 +1,7 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_RT
 #include "TApp.h"
+#include "ISceneManager.h"
 #include "rendersys/TInterfaceType.h"
 #include "TAssimpModel.h"
 #include "TSprite.h"
@@ -20,7 +23,7 @@ private:
 /********** TestRT **********/
 void TestRT::OnInitLight()
 {
-	auto light1 = mRenderSys->AddPointLight();
+	auto light1 = mRenderSys->GetSceneManager()->AddPointLight();
 	light1->SetPosition(20, 0, -20);
 	light1->SetAttenuation(1.0, 0.01, 0);
 	light1->SetSpecularPower(60);
@@ -72,4 +75,5 @@ void TestRT::OnRender()
 	}
 }
 
-//auto reg = AppRegister<TestRT>("TestRT: RenderTarget");
+auto reg = AppRegister<TestRT>("TestRT: RenderTarget");
+#endif

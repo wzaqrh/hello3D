@@ -16,7 +16,7 @@ struct Quad
 #else
 	union {
 		Pos3Color3Tex2 m[4];
-		struct q{
+		struct {
 			Pos3Color3Tex2 lb,lt,rt,rb;
 		};
 	};

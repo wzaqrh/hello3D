@@ -36,63 +36,6 @@ void TRenderSystem::_PopRenderTarget()
 	SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
-TSpotLightPtr TRenderSystem::AddSpotLight()
-{
-	TSpotLightPtr light = std::make_shared<TSpotLight>();
-	mSpotLights.push_back(light);
-	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_SPOT));
-	return light;
-}
-
-TPointLightPtr TRenderSystem::AddPointLight()
-{
-	TPointLightPtr light = std::make_shared<TPointLight>();
-	mPointLights.push_back(light);
-	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_POINT));
-	return light;
-}
-
-TDirectLightPtr TRenderSystem::AddDirectLight()
-{
-	TDirectLightPtr light = std::make_shared<TDirectLight>();
-	mDirectLights.push_back(light);
-	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_DIRECT));
-	return light;
-}
-
-TCameraPtr TRenderSystem::SetOthogonalCamera(double far1)
-{
-	mDefCamera = TCamera::CreateOthogonal(mScreenWidth, mScreenHeight, far1);
-	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
-	return mDefCamera;
-}
-
-TCameraPtr TRenderSystem::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
-{
-	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
-	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
-	return mDefCamera;
-}
-
-TSkyBoxPtr TRenderSystem::SetSkyBox(const std::string& imgName)
-{
-	mSkyBox = std::make_shared<TSkyBox>(this, mDefCamera, imgName);
-	return mSkyBox;
-}
-
-TPostProcessPtr TRenderSystem::AddPostProcess(const std::string& name)
-{
-	TPostProcessPtr process;
-	if (name == E_PASS_POSTPROCESS) {
-		TBloom* bloom = new TBloom(this, mPostProcessRT);
-		process = std::shared_ptr<TPostProcess>(bloom);
-	}
-
-	if (process) mPostProcs.push_back(process);
-	return process;
-}
-
-
 IProgramPtr TRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	std::string ext = GetFileExt(name);
@@ -142,8 +85,8 @@ void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 		globalParam.Projection = COPY_TO_GPU(pLightCam->GetProjection());
 	}
 	else {
-		globalParam.View = COPY_TO_GPU(mDefCamera->GetView());
-		globalParam.Projection = COPY_TO_GPU(mDefCamera->GetProjection());
+		globalParam.View = COPY_TO_GPU(mSceneManager->mDefCamera->GetView());
+		globalParam.Projection = COPY_TO_GPU(mSceneManager->mDefCamera->GetProjection());
 
 		globalParam.LightView = COPY_TO_GPU(pLightCam->GetView());
 		globalParam.LightProjection = COPY_TO_GPU(pLightCam->GetProjection());
@@ -169,4 +112,9 @@ void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 	default:
 		break;
 	}
+}
+
+STDMETHODIMP_(ISceneManagerPtr) TRenderSystem::GetSceneManager()
+{
+	return mSceneManager;
 }

@@ -43,15 +43,14 @@ bool TRenderSystem9::Initialize(HWND hWnd, RECT vp)
 
 	mScreenWidth = width;
 	mScreenHeight = height;
-	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight);
-
-	
 
 	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
 	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
 
 	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
+
+	mSceneManager = MakePtr<TSceneManager>(this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, TCamera::CreatePerspective(mScreenWidth, mScreenHeight));
 
 	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));
@@ -661,7 +660,7 @@ void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::stri
 
 void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
-	auto LightCam = light->GetLightCamera(*mDefCamera);
+	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
 	
 	cbGlobalParam globalParam;
 	MakeAutoParam(globalParam, LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
@@ -691,8 +690,9 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 		IDirect3DTexture9* depthMapView = PtrCast(mShadowPassRT->GetColorTexture()).As<TTexture9>()->GetSRV9();
 		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
 
-		if (mSkyBox && mSkyBox->mCubeSRV) {
-			IDirect3DCubeTexture9* texture = PtrCast(mSkyBox->mCubeSRV).As<TTexture9>()->GetSRVCube9();
+		auto& skyBox = mSceneManager->mSkyBox;
+		if (skyBox && skyBox->mCubeSRV) {
+			IDirect3DCubeTexture9* texture = PtrCast(skyBox->mCubeSRV).As<TTexture9>()->GetSRVCube9();
 			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
 		}
 	}
@@ -701,13 +701,14 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 		mDevice9->SetTexture(0, pSRV);
 	}
 
-	if (!mLightsOrder.empty()) {
+	auto& lightsOrder = mSceneManager->mLightsOrder;
+	if (!lightsOrder.empty()) {
 		TBlendFunc orgBlend = mCurBlendFunc;
 		SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
-		RenderLight(mLightsOrder[0].first, mLightsOrder[0].second, opQueue, lightMode);
+		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
 
-		for (int i = 1; i < mLightsOrder.size(); ++i) {
-			auto order = mLightsOrder[i];
+		for (int i = 1; i < lightsOrder.size(); ++i) {
+			auto order = lightsOrder[i];
 			SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
 			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
 			RenderLight(order.first, order.second, opQueue, __lightMode);
@@ -730,7 +731,7 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 
 void TRenderSystem9::_RenderSkyBox()
 {
-	if (mSkyBox) mSkyBox->Draw();
+	if (mSceneManager->mSkyBox) mSceneManager->mSkyBox->Draw();
 }
 
 void TRenderSystem9::_DoPostProcess()
@@ -739,8 +740,8 @@ void TRenderSystem9::_DoPostProcess()
 	SetDepthState(TDepthState(false));
 
 	TRenderOperationQueue opQue;
-	for (size_t i = 0; i < mPostProcs.size(); ++i)
-		mPostProcs[i]->GenRenderOperation(opQue);
+	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
+		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_POSTPROCESS);
 
 	SetDepthState(orgState);
@@ -753,7 +754,7 @@ bool TRenderSystem9::BeginScene()
 
 	mCastShdowFlag = false;
 
-	if (!mPostProcs.empty()) {
+	if (!mSceneManager->mPostProcs.empty()) {
 		SetRenderTarget(mPostProcessRT);
 		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
@@ -763,7 +764,7 @@ bool TRenderSystem9::BeginScene()
 
 void TRenderSystem9::EndScene()
 {
-	if (!mPostProcs.empty()) {
+	if (!mSceneManager->mPostProcs.empty()) {
 		SetRenderTarget(nullptr);
 	}
 	_DoPostProcess();

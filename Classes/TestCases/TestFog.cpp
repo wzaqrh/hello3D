@@ -1,3 +1,5 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_FOG
 #include "TApp.h"
 #include "TAssimpModel.h"
 #include "TTransform.h"
@@ -15,7 +17,7 @@ private:
 /********** Lesson4 **********/
 void TestFog::OnPostInitDevice()
 {
-	auto light2 = mRenderSys->AddDirectLight();
+	auto light2 = mRenderSys->GetSceneManager()->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
@@ -50,4 +52,5 @@ void TestFog::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");
+auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");
+#endif

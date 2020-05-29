@@ -1,4 +1,7 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_BLOOM
 #include "TApp.h"
+#include "ISceneManager.h"
 #include "TAssimpModel.h"
 #include "TSprite.h"
 #include "TTransform.h"
@@ -15,10 +18,10 @@ private:
 
 void TestBloom::OnPostInitDevice()
 {
-	mRenderSys->SetPerspectiveCamera(45, 10, 300);
+	mRenderSys->GetSceneManager()->SetPerspectiveCamera(45, 10, 300);
 
-	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
-	mRenderSys->AddPostProcess(E_PASS_POSTPROCESS);
+	mRenderSys->GetSceneManager()->SetSkyBox("images\\uffizi_cross.dds");
+	mRenderSys->GetSceneManager()->AddPostProcess(E_PASS_POSTPROCESS);
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
 	{
@@ -44,4 +47,5 @@ void TestBloom::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson8>("Lesson8: PostProcess Bloom");
+auto reg = AppRegister<Lesson8>("Lesson8: PostProcess Bloom");
+#endif

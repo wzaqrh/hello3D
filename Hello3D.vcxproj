@@ -456,6 +456,7 @@
     <ClInclude Include="Classes\rendersys\TMaterial.h" />
     <ClInclude Include="Classes\rendersys\TMaterialCB.h" />
     <ClInclude Include="Classes\rendersys\TMaterialPred.h" />
+    <ClInclude Include="Classes\TestCases\TestCase.h" />
     <ClInclude Include="Classes\TPredefine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
