@@ -144,9 +144,9 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(ProjectDir)include;$(ProjectDir)../dwke3d/WebKitLibraries/win/include/cairo;$(ProjectDir)../dwke3d/CairoAdapterDx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;_XM_NO_INTRINSICS_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
@@ -402,6 +402,7 @@
     <ClCompile Include="Classes\rendersys\TMaterial.cpp" />
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp" />
     <ClCompile Include="Classes\rendersys\TThreadPump.cpp" />
+    <ClCompile Include="Classes\TestCases\TestCairo.cpp" />
     <ClCompile Include="Classes\TestCases\TestExport.cpp" />
     <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp" />
     <ClCompile Include="Classes\TestCases\TestMesh.cpp" />
