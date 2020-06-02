@@ -1,8 +1,6 @@
 #include "TApp.h"
 #include "TInterfaceType.h"
 #include "TSprite.h"
-#include "TRenderSystem11.h"
-#include "TRenderSystem9.h"
 #include "Utility.h"
 #include "WINGDI.h"
 

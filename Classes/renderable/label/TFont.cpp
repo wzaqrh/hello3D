@@ -1,0 +1,167 @@
+#include "TFont.h"
+#include "rendersys/IRenderSystem.h"
+
+////////////////////////////////TFontTextureBuilder//////////////////////////////////////////
+TFontTextureBuilder::TFontTextureBuilder(IRenderSystem* renderSys, XMINT2 size)
+{
+	mRenderSys = renderSys;
+	mWidth = size.x;
+	mHeight = size.y;
+	mTexture = renderSys->CreateTexture(mWidth, mHeight, DXGI_FORMAT_R8_UNORM, 1);
+	mRawBuffer.resize(mWidth * mHeight);
+}
+
+TextureAtlasPtr TFontTextureBuilder::Get(int ch)
+{
+	TextureAtlasPtr atlas = nullptr;
+	auto iter = mAtlasByCh.find(ch);
+	if (iter != mAtlasByCh.end())
+		atlas = iter->second;
+	return atlas;
+}
+
+bool TFontTextureBuilder::ContainsKey(int ch) const
+{
+	return mAtlasByCh.find(ch) != mAtlasByCh.end();
+}
+
+TextureAtlasPtr TFontTextureBuilder::Add(int ch, int w, int h, unsigned char* buffer)
+{
+	if (mCol + w > mWidth) {
+		mRow += mColH;
+		mCol = 0;
+		mColH = 0;
+
+		if (mCol + w > mWidth) return nullptr;
+	}
+	if (h >= mColH) {
+		if (mRow + h > mHeight) return nullptr;
+		mColH = h;
+	}
+
+	XMINT2 pos0 = { mCol, mRow }, pos1 = { mCol + w, mRow + h };
+	XMFLOAT2 uv0 = { pos0.x * 1.0f / mWidth, pos0.y * 1.0f / mHeight }, uv1 = { pos1.x * 1.0f / mWidth, pos1.y * 1.0f / mHeight };
+	TextureAtlasPtr atlas = std::make_shared<TextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
+
+	for (int y = 0; y < h; ++y)
+		memcpy(&mRawBuffer[(pos0.y + y) * mWidth + pos0.x], buffer + y * w, w);
+	mRawBufferDirty = true;
+
+	mCol += w;
+	mAtlasByCh.insert(std::make_pair(ch, atlas));
+
+	return atlas;
+}
+
+ITexturePtr TFontTextureBuilder::GetTexture()
+{
+	if (mRawBufferDirty) {
+		mRawBufferDirty = false;
+		mRenderSys->LoadRawTextureData(mTexture, &mRawBuffer[0], mRawBuffer.size(), mWidth);
+	}
+	return mTexture;
+}
+
+////////////////////////////////TFontCharactorCache//////////////////////////////////////////
+TFontCharactorCache::TFontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace)
+{
+	mRenderSys = renderSys;
+	mFtFace = ftFace;
+	AllocFontTexBuilder();
+}
+
+FontTextureBuilderPtr TFontCharactorCache::AllocFontTexBuilder()
+{
+	XMINT2 size = { 512,512 };
+	mCurFontTexBuilder = std::make_shared<TFontTextureBuilder>(mRenderSys, size);
+	mFontTextureBuilders.push_back(mCurFontTexBuilder);
+	return mCurFontTexBuilder;
+}
+
+TFontCharactorPtr TFontCharactorCache::Get(int ch)
+{
+	TFontCharactorPtr charactor = nullptr;
+	auto iter = mCharactors.find(ch);
+	if (iter != mCharactors.end()) {
+		charactor = iter->second;
+	}
+	else {
+		if (FT_Load_Char(mFtFace, ch, FT_LOAD_RENDER)) {
+			charactor = std::make_shared<TFontCharactor>();
+			charactor->Size = { mFtFace->glyph->bitmap.width, mFtFace->glyph->bitmap.rows };
+			charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
+			charactor->Advance = mFtFace->glyph->advance.x;
+			
+			mCurFontTexBuilder->Add(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
+
+			mCharactors.insert(std::make_pair(ch, charactor));
+		}
+		else {
+			//error
+			assert(false);
+		}
+	}
+	return charactor;
+}
+
+////////////////////////////////TFont//////////////////////////////////////////
+TFont::TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
+{
+	mFontName = fontPath;
+	if (FT_New_Face(ftLib, fontPath.c_str(), 0, &mFtFace)) {
+		//std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		assert(false);
+		return;
+	}
+
+	mFontSize = fontSize;
+	if (FT_Set_Char_Size(mFtFace, fontSize * 64, 0, dpi, 0)) {
+		//std::cout << "ERROR::FREETYPE: Failed to set char size" << std::endl;
+		assert(false);
+		return;
+	}
+
+	mCharactorCache = std::make_shared<TFontCharactorCache>(renderSys, mFtFace);
+}
+
+TFont::~TFont()
+{
+	FT_Done_Face(mFtFace);
+}
+
+TFontCharactorPtr TFont::Get(int ch)
+{
+	return mCharactorCache->Get(ch);
+}
+
+////////////////////////////////TFontCache//////////////////////////////////////////
+TFontCache::TFontCache(IRenderSystem* renderSys, int dpi)
+{
+	mRenderSys = renderSys;
+	mDPI = dpi;
+	if (FT_Init_FreeType(&mFtLib)) {
+		//std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		assert(false);
+		return;
+	}
+}
+
+TFontCache::~TFontCache()
+{
+	FT_Done_FreeType(mFtLib);
+}
+
+TFontPtr TFontCache::GetFont(std::string fontPath, int fontSize)
+{
+	TFontPtr font = nullptr;
+	FontKey key = { fontPath, fontSize };
+	auto iter = mFonts.find(key);
+	if (iter != mFonts.end()) {
+		font = iter->second;
+	}
+	else {
+		font = std::make_shared<TFont>(mRenderSys, mFtLib, fontPath, fontSize, mDPI);
+		mFonts.insert(std::make_pair(key, font));
+	}
+	return font;
+}

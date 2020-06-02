@@ -1,6 +1,7 @@
 #include "TApp.h"
 #include "TAssimpModel.h"
-#include "TInterfaceType.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestModel : public TApp
 {
@@ -37,7 +38,7 @@ void TestModel::OnPostInitDevice()
 
 void TestModel::OnRender()
 {
-	mModel->Update(mTimer.mDeltaTime);
+	mModel->Update(mTimer->mDeltaTime);
 	if (mRenderSys->BeginScene()) {
 		mModel->Draw();
 		mRenderSys->EndScene();

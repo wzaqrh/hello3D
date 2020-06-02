@@ -1,4 +1,4 @@
-#include "TMovable.h"
+#include "TTransform.h"
 
 //TTransform
 TTransform::TTransform()
@@ -110,6 +110,11 @@ const XMMATRIX& TTransform::GetMatrixSRT()
 		}
 	}
 	return mMatrix;
+}
+
+const XMMATRIX& TTransform::Matrix()
+{
+	return GetMatrixSRT();
 }
 
 const XMMATRIX& TTransform::GetMatrixTSR()

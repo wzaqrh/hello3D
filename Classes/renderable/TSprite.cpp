@@ -1,7 +1,7 @@
 #include "TSprite.h"
+#include "TTransform.h"
 #include "IRenderSystem.h"
 #include "TMaterial.h"
-#include "TMovable.h"
 #include "TInterfaceType.h"
 
 /********** Quad **********/
@@ -62,9 +62,9 @@ TSprite::TSprite(IRenderSystem* RenderSys, const std::string& matName)
 	, mSize(0, 0)
 	, mPosition(0, 0)
 {
-	mMove = std::make_shared<TMovable>();
+	Transform = std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-	mMaterial = mRenderSys->CreateMaterial(matName != "" ? matName : E_MAT_SPRITE, nullptr);
+	Material = mRenderSys->CreateMaterial(matName != "" ? matName : E_MAT_SPRITE, nullptr);
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 }
@@ -132,15 +132,15 @@ int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 {
 	if (mQuadDirty) {
 		mQuadDirty = false;
-		mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+		mRenderSys->UpdateBuffer((mVertexBuffer), &mQuad, sizeof(mQuad));
 	}
 
 	TRenderOperation op = {};
-	op.mMaterial = mMaterial;
+	op.mMaterial = Material;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
 	if (mTexture) op.mTextures.push_back(mTexture);
-	op.mWorldTransform = mMove->GetWorldTransform();
+	op.mWorldTransform = Transform->Matrix();
 	opList.AddOP(op);
 	return 1;
 }

@@ -1,9 +1,10 @@
-#include "TMaterialCB.h"
-#include "IRenderable.h"
-#include "TInterfaceType.h"
 #include "TApp.h"
+#include "TMaterial.h"
+#include "IRenderable.h"
 #include "TAssimpModel.h"
 #include "TSprite.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestPBR : public TApp
 {
@@ -121,7 +122,7 @@ void TestPBR::OnPostInitDevice()
 
 void TestPBR::OnRender()
 {
-	if (mModel) mModel->Update(mTimer.mDeltaTime);
+	if (mModel) mModel->Update(mTimer->mDeltaTime);
 	if (mRenderSys->BeginScene()) {
 		TRenderOperationQueue opQueue;
 		if (mModel) mModel->GenRenderOperation(opQueue);

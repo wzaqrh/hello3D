@@ -1,8 +1,50 @@
 #pragma once
-#include "TBaseTypes.h"
+#include "TMaterialPred.h"
+
+struct TCameraBase;
+struct TCamera;
+struct TConstBufferDecl;
+struct TDirectLight {
+public:
+	XMFLOAT4 LightPos;//world space
+	XMFLOAT4 DiffuseColor;
+	XMFLOAT4 SpecularColorPower;
+public:
+	TDirectLight();
+	void SetDirection(float x, float y, float z);
+	void SetDiffuseColor(float r, float g, float b, float a);
+	void SetSpecularColor(float r, float g, float b, float a);
+	void SetSpecularPower(float power);
+public:
+	TCameraBase* GetLightCamera(TCamera& otherCam);
+	static TConstBufferDecl& GetDesc();
+};
+struct TPointLight : public TDirectLight {
+public:
+	XMFLOAT4 Attenuation;
+public:
+	TPointLight();
+	void SetPosition(float x, float y, float z);
+	void SetAttenuation(float a, float b, float c);
+public:
+	static TConstBufferDecl& GetDesc();
+};
+struct TSpotLight : public TPointLight {
+public:
+	XMFLOAT4 DirectionCutOff;
+public:
+	TSpotLight();
+	void SetDirection(float x, float y, float z);
+	void SetCutOff(float cutoff);
+	void SetAngle(float radian);
+public:
+	static TConstBufferDecl& GetDesc();
+};
+
 
 #define MAX_LIGHTS 4
-__declspec(align(16)) struct cbGlobalParam
+__declspec(align(16)) 
+struct cbGlobalParam
 {
 	XMMATRIX World;
 	XMMATRIX View;
@@ -24,7 +66,9 @@ public:
 	static TConstBufferDecl MKDesc();
 };
 
-struct TFogExp {
+struct TConstBufferDecl;
+struct TFogExp 
+{
 	XMFLOAT4 FogColorExp;
 public:
 	TFogExp();
@@ -33,8 +77,10 @@ public:
 	static TConstBufferDecl& GetDesc();
 };
 
+
 const int MAX_MATRICES = 56;
-__declspec(align(16)) struct cbWeightedSkin
+__declspec(align(16)) 
+struct cbWeightedSkin
 {
 	XMMATRIX Model;
 	XMMATRIX Models[MAX_MATRICES];
@@ -47,7 +93,9 @@ __declspec(align(16)) struct cbWeightedSkin
 	static TConstBufferDecl MKDesc();
 };
 
-__declspec(align(16)) struct cbUnityMaterial
+
+__declspec(align(16)) 
+struct cbUnityMaterial
 {
 	XMFLOAT4 _SpecColor;
 	XMFLOAT4 _Color;
@@ -60,7 +108,9 @@ __declspec(align(16)) struct cbUnityMaterial
 	static TConstBufferDecl MKDesc();
 };
 
-__declspec(align(16)) struct cbUnityGlobal
+
+__declspec(align(16)) 
+struct cbUnityGlobal
 {
 	XMFLOAT4 _Unity_IndirectSpecColor;
 	XMFLOAT4 _AmbientOrLightmapUV;
@@ -71,13 +121,4 @@ __declspec(align(16)) struct cbUnityGlobal
 	static TConstBufferDecl MKDesc();
 };
 
-struct TConstBufferDeclBuilder {
-	TConstBufferDecl& mDecl;
-public:
-	//TConstBufferDeclBuilder();
-	TConstBufferDeclBuilder(TConstBufferDecl& decl);
-	TConstBufferDecl& Build();
-	TConstBufferDeclBuilder& Add(const TConstBufferDeclElement& elem);
-	TConstBufferDeclBuilder& Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl);
-};
-#define MAKE_CBDESC(CB) (CB::GetDesc())
+

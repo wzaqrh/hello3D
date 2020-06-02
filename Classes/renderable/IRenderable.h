@@ -1,29 +1,10 @@
 #pragma once
 #include "std.h"
-#include "TPredefine.h"
+#include "IRenderablePred.h"
+#include "TMaterial.h"
+#include "TInterfaceTypePred.h"
 
 /********** RenderOperation **********/
-struct TTextureBySlot {
-	std::vector<ITexturePtr> textures;
-public:
-	bool empty() const;
-	size_t size() const;
-	
-	void clear();
-	void push_back(ITexturePtr texture);
-	void swap(TTextureBySlot& other);
-	void resize(size_t size);
-
-	const ITexturePtr At(size_t pos) const;
-	ITexturePtr& At(size_t pos);
-	
-	const ITexturePtr operator[](size_t pos) const;
-	ITexturePtr& operator[](size_t pos);
-public:
-	void Merge(const TTextureBySlot& other);
-};
-typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
-
 struct TRenderOperation {
 	TMaterialPtr mMaterial;
 	IVertexBufferPtr mVertexBuffer;
@@ -34,11 +15,6 @@ struct TRenderOperation {
 	XMMATRIX mWorldTransform;
 public:
 	TRenderOperation();
-};
-
-MIDL_INTERFACE("36718746-09D1-444E-B38D-21C61ECDEBA4")
-IRenderOperationQueue : public IUnknown{
-
 };
 
 struct TRenderOperationQueue {

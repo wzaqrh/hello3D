@@ -1,6 +1,5 @@
 #pragma once
-#include "IResource.h"
-#include "TPredefine.h"
+#include "TInterfaceTypePred.h"
 
 /********** Program **********/
 MIDL_INTERFACE("2695D081-9638-4E9F-8457-0DEE61E64CC2")
@@ -8,7 +7,6 @@ IBlobData : public IUnknown {
 	virtual STDMETHODIMP_(char*) GetBufferPointer() = 0;
 	virtual STDMETHODIMP_(size_t) GetBufferSize() = 0;
 };
-typedef ComPtr<IBlobData> IBlobDataPtr;
 
 struct INHERIT_COM("96C6C5C1-66E3-41A5-B1C5-352F744A643D")
 TBlobDataStd : public ComBase<IBlobData> {
@@ -25,7 +23,6 @@ IInputLayout : public IUnknown {
 	//virtual IDirect3DVertexDeclaration9*& GetLayout9();
 	virtual STDMETHODIMP_(IResourcePtr) AsRes() = 0;
 };
-typedef ComPtr<IInputLayout> IInputLayoutPtr;
 
 MIDL_INTERFACE("777F6B5E-8D44-4B8C-97FA-650E8941F5DD") 
 IVertexShader : public IUnknown{
@@ -34,7 +31,6 @@ IVertexShader : public IUnknown{
 	//virtual IDirect3DVertexShader9*& GetShader9();
 	virtual STDMETHODIMP_(IResourcePtr) AsRes() = 0;
 };
-typedef ComPtr<IVertexShader> IVertexShaderPtr;
 
 MIDL_INTERFACE("71327DD1-B0CF-4D2A-BF7F-E2BFE7BFCF6C") 
 IPixelShader : public IUnknown{
@@ -44,7 +40,6 @@ public:
 	//virtual IDirect3DPixelShader9*& GetShader9();
 	virtual STDMETHODIMP_(IResourcePtr) AsRes() = 0;
 };
-typedef ComPtr<IPixelShader> IPixelShaderPtr;
 
 MIDL_INTERFACE("045503F0-A83C-4C83-98B4-C8E0ADE5B501")
 IProgram : public IUnknown{
@@ -65,7 +60,6 @@ IHardwareBuffer : public IUnknown {
 	//virtual ID3D11Buffer*& GetBuffer11();
 	virtual STDMETHODIMP_(unsigned int) GetBufferSize() = 0;
 };
-typedef ComPtr<IHardwareBuffer> IHardwareBufferPtr;
 
 MIDL_INTERFACE("D7760DD8-E04F-4250-9D27-3C7621176481") 
 IVertexBuffer : public IHardwareBuffer {
@@ -75,7 +69,6 @@ IVertexBuffer : public IHardwareBuffer {
 	virtual STDMETHODIMP_(unsigned int) GetStride() = 0;
 	virtual STDMETHODIMP_(unsigned int) GetOffset() = 0;
 };
-typedef ComPtr<IVertexBuffer> IVertexBufferPtr;
 
 MIDL_INTERFACE("2FE3BA8E-76E7-4C62-859D-6498B33F2208") 
 IIndexBuffer : public IHardwareBuffer {
@@ -86,7 +79,6 @@ IIndexBuffer : public IHardwareBuffer {
 	virtual STDMETHODIMP_(DXGI_FORMAT) GetFormat() = 0;
 	int GetCount();
 };
-typedef ComPtr<IIndexBuffer> IIndexBufferPtr;
 
 MIDL_INTERFACE("269D01F6-D1C2-44EF-9FF1-5A272361915E") 
 IContantBuffer : public IHardwareBuffer {
@@ -95,7 +87,6 @@ IContantBuffer : public IHardwareBuffer {
 	//virtual void* GetBuffer9();
 	virtual STDMETHODIMP_(TConstBufferDeclPtr) GetDecl() = 0;
 };
-typedef ComPtr<IContantBuffer> IContantBufferPtr;
 
 /********** Texture **********/
 enum enTextureType {
@@ -130,7 +121,6 @@ ITexture : public IUnknown{
 	virtual STDMETHODIMP_(DXGI_FORMAT) GetFormat() = 0;
 	virtual STDMETHODIMP_(int) GetMipmapCount() = 0;
 };
-typedef ComPtr<ITexture> ITexturePtr;
 
 MIDL_INTERFACE("981ACD59-B868-43E5-A179-E20FB65EF83B") 
 IRenderTexture : public IUnknown {
@@ -142,11 +132,9 @@ IRenderTexture : public IUnknown {
 	//virtual IDirect3DSurface9*& GetColorBuffer9();
 	//virtual IDirect3DSurface9*& GetDepthStencilBuffer9();
 };
-typedef ComPtr<IRenderTexture> IRenderTexturePtr;
 
 MIDL_INTERFACE("AAA0B36E-55F2-48EC-8BF9-F2595EF275BF") 
 ISamplerState : public IUnknown{
 	//virtual ID3D11SamplerState*& GetSampler11();
 	//virtual std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();
 };
-typedef ComPtr<ISamplerState> ISamplerStatePtr;

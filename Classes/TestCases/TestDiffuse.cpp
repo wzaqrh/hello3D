@@ -1,5 +1,7 @@
 #include "TApp.h"
 #include "TAssimpModel.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestDiffuse : public TApp
 {
@@ -38,7 +40,7 @@ void TestDiffuse::OnPostInitDevice()
 
 void TestDiffuse::OnRender()
 {
-	mModel->Update(mTimer.mDeltaTime);
+	mModel->Update(mTimer->mDeltaTime);
 	if (mRenderSys->BeginScene()) {
 		mModel->Draw();
 		mRenderSys->EndScene();

@@ -1,5 +1,6 @@
 #include "TInterfaceType11.h"
 #include "IRenderSystem.h"
+#include "IResource.h"
 #include "Utility.h"
 
 template<class T>
@@ -29,17 +30,24 @@ TInputLayout11::TInputLayout11()
 {
 	mRes = MakePtr<TResource>((IUnknown**)&mLayout);
 }
+IResourcePtr TInputLayout11::AsRes() {
+	return mRes;
+}
 
 ID3D11InputLayout*& TInputLayout11::GetLayout11()
 {
 	return mLayout;
 }
 
+
 /********** TVertexShader11 **********/
 TVertexShader11::TVertexShader11(IBlobDataPtr pBlob)
 	:mBlob(pBlob)
 {
 	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
+}
+IResourcePtr TVertexShader11::AsRes() {
+	return mRes;
 }
 
 IBlobDataPtr TVertexShader11::GetBlob()
@@ -57,6 +65,9 @@ TPixelShader11::TPixelShader11(IBlobDataPtr pBlob)
 	: mBlob(pBlob)
 {
 	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
+}
+IResourcePtr TPixelShader11::AsRes() {
+	return mRes;
 }
 
 IBlobDataPtr TPixelShader11::GetBlob()
@@ -337,6 +348,16 @@ ID3D11SamplerState*& TSamplerState11::GetSampler11()
 TProgram11::TProgram11()
 {
 	mRes = MakePtr<TResource>((IUnknown**)0);
+}
+IResourcePtr TProgram11::AsRes() {
+	return mRes;
+}
+
+IVertexShaderPtr TProgram11::GetVertex() {
+	return mVertex;
+}
+IPixelShaderPtr TProgram11::GetPixel() {
+	return mPixel;
 }
 
 void TProgram11::SetVertex(TVertexShader11Ptr pVertex)

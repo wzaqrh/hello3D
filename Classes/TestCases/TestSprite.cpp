@@ -1,8 +1,5 @@
 #include "TApp.h"
-#include "TInterfaceType.h"
 #include "TSprite.h"
-#include "TRenderSystem11.h"
-#include "TRenderSystem9.h"
 
 class TestSprite : public TApp
 {
@@ -27,7 +24,7 @@ void TestSprite::OnPostInitDevice()
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(mRenderSys->LoadTexture("model\\theyKilledKenny.jpg"));
 
-	mSprite->SetPosition(-mRenderSys->GetWinSize().x / 2, -mRenderSys->GetWinSize().y / 2, 0);
+	mSprite->SetPosition(0, 0, 0);
 	mSprite->SetSize(mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
 #endif
 }

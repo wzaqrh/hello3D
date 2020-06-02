@@ -1,6 +1,8 @@
 #include "TApp.h"
 #include "TAssimpModel.h"
 #include "TSprite.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestBloom : public TApp
 {
@@ -34,7 +36,7 @@ void TestBloom::OnPostInitDevice()
 
 void TestBloom::OnRender()
 {
-	if (mModel) mModel->Update(mTimer.mDeltaTime);
+	if (mModel) mModel->Update(mTimer->mDeltaTime);
 
 	if (mRenderSys->BeginScene()) {
 		if (mModel) mModel->Draw();

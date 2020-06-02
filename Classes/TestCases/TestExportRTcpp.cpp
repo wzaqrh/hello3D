@@ -1,5 +1,6 @@
 #include "TApp.h"
 #include "Export/Export.h"
+#include "TInterfaceType.h"
 #include "TSprite.h"
 
 class TestExportRT : public IApp
@@ -36,7 +37,7 @@ bool TestExportRT::Initialize(HINSTANCE hInstance, HWND hWnd)
 	mSpriteRT->SetSize(size.x / 2, size.y / 2);
 
 	mRT = RenderTarget_Create(mRenderSys, size.x, size.y, DXGI_FORMAT_B8G8R8A8_UNORM);
-	mSpriteRT->SetTexture(RenderTarget_GetTexture(mRT));
+	mSpriteRT->SetTexture(MakePtr(RenderTarget_GetTexture(mRT)));
 	return true;
 }
 

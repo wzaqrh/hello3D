@@ -1,5 +1,7 @@
 #include "TApp.h"
 #include "TAssimpModel.h"
+#include "TTransform.h"
+#include "Utility.h"
 
 class TestFog : public TApp
 {
@@ -41,7 +43,7 @@ void TestFog::OnPostInitDevice()
 
 void TestFog::OnRender()
 {
-	mModel->Update(mTimer.mDeltaTime);
+	mModel->Update(mTimer->mDeltaTime);
 	if (mRenderSys->BeginScene()) {
 		mModel->Draw();
 		mRenderSys->EndScene();

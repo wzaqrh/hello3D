@@ -56,9 +56,9 @@ void TResource::CheckAndSetLoaded()
 	}
 }
 
-void TResource::AddDependency(ComPtr<IResource> res)
+void TResource::AddDependency(IResourcePtr res)
 {
-	mDepends.push_back(PtrCast(res).As<TResource>());
+	mDepends.push_back(PtrCast(res).As1<TResource>());
 	res->AddOnLoadedListener([=](IResource* res) {
 		CheckAndSetLoaded();
 	});

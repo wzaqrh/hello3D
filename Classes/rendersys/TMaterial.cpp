@@ -1,7 +1,8 @@
 #include "TMaterial.h"
 #include "TMaterialCB.h"
-#include "TInterfaceType.h"
 #include "IRenderSystem.h"
+#include "TInterfaceType.h"
+#include "TConstBufferDecl.h"
 #include "TPostProcess.h"
 #include "Utility.h"
 

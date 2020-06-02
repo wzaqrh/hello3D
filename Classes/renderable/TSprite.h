@@ -1,6 +1,6 @@
 #pragma once
 #include "IRenderable.h"
-#include "TPredefine.h"
+#include "rendersys/TInterfaceTypePred.h"
 
 struct Pos3Color3Tex2
 {
@@ -43,8 +43,8 @@ private:
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 public:
-	TMaterialPtr mMaterial;
-	TMovablePtr mMove;
+	TMaterialPtr Material;
+	TTransformPtr Transform;
 public:
 	TSprite(IRenderSystem* RenderSys, const std::string& matName = "");
 	~TSprite();

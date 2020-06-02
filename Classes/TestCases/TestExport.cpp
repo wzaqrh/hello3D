@@ -26,12 +26,14 @@ bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	RECT rc;
 	GetClientRect(hWnd, &rc);
-	rc.left = rc.bottom / 2; rc.top = rc.bottom / 2;
+	//rc.left = rc.bottom / 2; rc.top = rc.bottom / 2;
 	//rc.bottom /= 2; rc.right /= 2;
 
 	mRenderSys = RenderSystem_Create(hWnd, true, rc);
 
-#if 0
+#define SP_COUNT 1
+
+#if SP_COUNT > 1
 	float poslists[3 * 4] = {
 		-206.5, -110.5,155, 219,
 		-108.5, -10.5, 155, 219,
@@ -52,9 +54,8 @@ bool TestExport::Initialize(HINSTANCE hInstance, HWND hWnd)
 #endif
 	{
 		auto sp = SpriteImage_Create(mRenderSys, "model\\theyKilledKenny.png");
-		XMINT4 size = mRenderSys->GetWinSize();
-		sp->SetPosition(-size.x/2, -size.y/2, 0);
-		sp->SetSize(size.x, size.y);
+		sp->SetPosition(0, 0, 0);
+		sp->SetSize(mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
 
 		mSprites.push_back(sp);
 	}
@@ -66,7 +67,7 @@ void TestExport::Render()
 #ifdef EXPORT_STRUCT
 	ExportRenderable rends[] = { mSprite.self };
 #else
-	ExportRenderable rends[3] = {};
+	ExportRenderable rends[SP_COUNT] = {};
 	for (int i = 0; i < mSprites.size(); ++i)
 		rends[i] = mSprites[i];
 #endif
@@ -83,4 +84,4 @@ std::string TestExport::GetName()
 	return "TestExport";
 }
 
-//auto reg = AppRegister<TestExport>("TestExport");
+auto reg = AppRegister<TestExport>("TestExport");

@@ -1,5 +1,6 @@
 #pragma once
 #include "IRenderable.h"
+#include "ISceneManagerPred.h"
 #include "TInterfaceType.h"
 
 struct SKYBOX_VERTEX

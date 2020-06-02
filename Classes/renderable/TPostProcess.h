@@ -1,13 +1,12 @@
 #pragma once
 #include "IRenderable.h"
-#include "TPredefine.h"
+//INCLUDE_PREDEFINE_H
 
 struct POSTPROCESS_VERTEX
 {
 	XMFLOAT4 Pos;
 	XMFLOAT2 Tex;
 };
-
 struct POSTPROCESS_VERTEX_QUAD {
 #if _MSC_VER <= 1800
 	POSTPROCESS_VERTEX lb, lt, rt, rb;
@@ -25,9 +24,8 @@ public:
 	void SetFlipY(bool flipY);
 	void SetZ(float z);
 };
-
-class TPostProcess 
-	: public IRenderable {
+class TPostProcess : public IRenderable 
+{
 protected:
 	IRenderSystem* mRenderSys = nullptr;
 	IRenderTexturePtr mMainTex;
@@ -41,7 +39,6 @@ public:
 	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
 	void Draw();
 };
-typedef std::shared_ptr<TPostProcess> TPostProcessPtr;
 
 struct cbBloom {
 	XMFLOAT4 SampleOffsets[16];
@@ -51,9 +48,7 @@ struct cbBloom {
 	static cbBloom CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier);
 	static TConstBufferDecl& GetDesc();
 };
-
-class TBloom 
-	: public TPostProcess
+class TBloom : public TPostProcess
 {
 public:
 	TBloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex);

@@ -1,12 +1,14 @@
 #include "TApp.h"
-#include "Utility.h"
 #include "IRenderSystem.h"
 #include "TRenderSystem11.h"
 #include "TRenderSystem9.h"
+#include "TTransform.h"
+#include "ISceneManager.h"
+#include "Utility.h"
 
 TApp::TApp()
 {
-	mMove = std::make_shared<TMovable>();
+	mMove = MakePtr<TMovable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 }
 
@@ -28,6 +30,7 @@ bool TApp::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	mHnd = hWnd;
 	mInput = new TD3DInput(hInstance, hWnd, mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
+	mTimer = new SDTimer;
 
 	OnPreInitDevice();
 	if (FAILED(mRenderSys->Initialize(mHnd))) {
@@ -50,7 +53,7 @@ void TApp::Render()
 {
 	mRenderSys->ClearColorDepthStencil(mBackgndColor, 1.0f, 0);
 
-	mTimer.Update();
+	mTimer->Update();
 	mInput->Frame();
 	mRenderSys->Update(0);
 	//rotate camera
