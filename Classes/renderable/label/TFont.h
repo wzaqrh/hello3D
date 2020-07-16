@@ -48,14 +48,15 @@ typedef std::shared_ptr<TFontCharactor> TFontCharactorPtr;
 
 class TFontCharactorCache
 {
-	FT_Face mFtFace;
 	IRenderSystem* mRenderSys = nullptr;
+	FT_Face mFtFace;
 	std::vector<TFontTexturePtr> mFontTextures;
 	TFontTexturePtr mCurFontTexture;
 	std::map<int, TFontCharactorPtr> mCharactors;
 public:
 	TFontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace);
 	TFontCharactorPtr GetCharactor(int ch);
+	void FlushChange();
 private:
 	TFontTexturePtr AllocFontTexture();
 };
@@ -70,7 +71,8 @@ class TFont
 public:
 	TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi = 72);
 	~TFont();
-	TFontCharactorPtr Get(int ch);
+	void Flush();
+	TFontCharactorPtr GetCharactor(int ch);
 };
 typedef std::shared_ptr<TFont> TFontPtr;
 

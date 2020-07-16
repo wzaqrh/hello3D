@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_RAW_TEXTURE
+#if defined TEST_RAW_TEXTURE && TEST_CASE == TEST_RAW_TEXTURE
 #include "TApp.h"
 #include "ISceneManager.h"
 #include "TInterfaceType.h"
@@ -71,7 +71,7 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 
 void TestRawTexture::OnPostInitDevice()
 {
-	mRenderSys->GetSceneManager()->SetOthogonalCamera(100);
+	mContext->GetSceneMng()->SetOthogonalCamera(100);
 
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(LoadTexture("smile.bmp"));
@@ -82,9 +82,9 @@ void TestRawTexture::OnPostInitDevice()
 
 void TestRawTexture::OnRender()
 {
-	if (mRenderSys->BeginScene()) {
+	if (mContext->GetRenderSys()->BeginScene()) {
 		mRenderSys->Draw(mSprite.get());
-		mRenderSys->EndScene();
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 

@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_EXPORT_RT
+#if defined TEST_EXPORT_RT && TEST_CASE == TEST_EXPORT_RT
 #include "TApp.h"
 #include "Export/Export.h"
 #include "TInterfaceType.h"

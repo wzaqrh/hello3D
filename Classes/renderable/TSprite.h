@@ -21,6 +21,7 @@ struct Quad
 		};
 	};
 #endif
+	Quad();
 	Quad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
 	void SetColor(const XMFLOAT4& color);

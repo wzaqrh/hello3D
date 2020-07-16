@@ -5,6 +5,12 @@
 #include "TInterfaceType.h"
 
 /********** Quad **********/
+Quad::Quad()
+{
+	SetFlipY(false);
+	SetColor(XMFLOAT4(1, 1, 1, 1));
+}
+
 Quad::Quad(float x, float y, float w, float h)
 {
 	SetFlipY(false);

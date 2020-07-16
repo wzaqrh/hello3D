@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_MODEL
+#if defined TEST_MODEL && TEST_CASE == TEST_MODEL
 #include "TApp.h"
 #include "TAssimpModel.h"
 #include "TTransform.h"
@@ -28,9 +28,9 @@ void TestModel::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mModel = new AssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson1"), layouts);
+	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson1"), layouts);
 #else
-	mModel = new TAssimpModel(mRenderSys, mMove, E_MAT_MODEL);
+	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
 #endif
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
@@ -41,11 +41,11 @@ void TestModel::OnPostInitDevice()
 void TestModel::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mRenderSys->BeginScene()) {
-		mModel->Draw();
-		mRenderSys->EndScene();
+	if (mContext->GetRenderSys()->BeginScene()) {
+		mContext->GetRenderSys()->Draw();
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 
-auto reg = AppRegister<TAppLesson1>("Assimp Model");
+auto reg = AppRegister<TestModel>("TestModel: Assimp Model");
 #endif

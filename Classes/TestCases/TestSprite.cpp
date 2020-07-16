@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_SPRITE
+#if defined TEST_SPRITE && TEST_CASE == TEST_SPRITE
 #include "TApp.h"
 #include "ISceneManager.h"
 #include "TSprite.h"
@@ -21,7 +21,7 @@ void TestSprite::OnPostInitDevice()
 	mSprite->SetPosition(-5, -5, 0);
 	mSprite->SetSize(5, 5);
 #else
-	mRenderSys->GetSceneManager()->SetOthogonalCamera(100);
+	mContext->GetSceneMng()->SetOthogonalCamera(100);
 
 	//mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
 	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
@@ -34,9 +34,9 @@ void TestSprite::OnPostInitDevice()
 
 void TestSprite::OnRender()
 {
-	if (mRenderSys->BeginScene()) {
+	if (mContext->GetRenderSys()->BeginScene()) {
 		mRenderSys->Draw(mSprite.get());
-		mRenderSys->EndScene();
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 

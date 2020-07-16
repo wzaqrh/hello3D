@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_FOG
+#if defined TEST_FOG && TEST_CASE == TEST_FOG
 #include "TApp.h"
 #include "TAssimpModel.h"
 #include "TTransform.h"
@@ -17,7 +17,7 @@ private:
 /********** Lesson4 **********/
 void TestFog::OnPostInitDevice()
 {
-	auto light2 = mRenderSys->GetSceneManager()->AddDirectLight();
+	auto light2 = mContext->GetSceneMng()->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
@@ -30,7 +30,7 @@ void TestFog::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
-	mModel = new TAssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson4"), layouts, [&](TMaterialPtr mat) {
+	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson4"), layouts, [&](TMaterialPtr mat) {
 #if 0
 		TFogExp fog;
 		fog.SetColor(0.5, 0.5, 0.5);
@@ -46,11 +46,11 @@ void TestFog::OnPostInitDevice()
 void TestFog::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mRenderSys->BeginScene()) {
+	if (mContext->GetRenderSys()->BeginScene()) {
 		mModel->Draw();
-		mRenderSys->EndScene();
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 
-auto reg = AppRegister<Lesson4>("TAppLesson4: Fog");
+auto reg = AppRegister<TestFog>("TestFog: Fog");
 #endif

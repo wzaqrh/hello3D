@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_RT
+#if defined TEST_RT && TEST_CASE == TEST_RT
 #include "TApp.h"
 #include "ISceneManager.h"
 #include "rendersys/TInterfaceType.h"
@@ -23,7 +23,7 @@ private:
 /********** TestRT **********/
 void TestRT::OnInitLight()
 {
-	auto light1 = mRenderSys->GetSceneManager()->AddPointLight();
+	auto light1 = mContext->GetSceneMng()->AddPointLight();
 	light1->SetPosition(20, 0, -20);
 	light1->SetAttenuation(1.0, 0.01, 0);
 	light1->SetSpecularPower(60);
@@ -59,7 +59,7 @@ void TestRT::OnPostInitDevice()
 //#define USE_RENDER_TARGET
 void TestRT::OnRender()
 {
-	if (mRenderSys->BeginScene()) {
+	if (mContext->GetRenderSys()->BeginScene()) {
 #ifdef USE_RENDER_TARGET
 		mRenderSys->SetRenderTarget(mRendTexture);
 		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
@@ -71,7 +71,7 @@ void TestRT::OnRender()
 		if (mSprite) mSprite->Draw();
 		if (mLayerColor) mLayerColor->Draw();
 #endif
-		mRenderSys->EndScene();
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 

@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_PBR
+#if defined TEST_PBR && TEST_CASE == TEST_PBR
 #include "TApp.h"
 #include "ISceneManager.h"
 #include "TMaterial.h"
@@ -23,7 +23,7 @@ void TestPBR::OnInitLight()
 {
 #if 0
 	{
-		auto light = mRenderSys->GetSceneManager()->AddPointLight();//1, -1, 1
+		auto light = mContext->GetSceneMng()->AddPointLight();//1, -1, 1
 		float ddd = 10;
 		light->SetPosition(-ddd, ddd, -ddd);
 		light->SetAttenuation(1, 0.001, 0);
@@ -32,7 +32,7 @@ void TestPBR::OnInitLight()
 
 #if 0
 	{
-		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
+		auto light = mContext->GetSceneMng()->AddDirectLight();
 		light->SetDirection(0, -1, 0);
 		float i = 0.7;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -41,13 +41,13 @@ void TestPBR::OnInitLight()
 
 #if 1
 	{
-		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
+		auto light = mContext->GetSceneMng()->AddDirectLight();
 		light->SetDirection(1, -1, 1);
 		float i = 0.7;
 		light->SetDiffuseColor(i, i, i, 1.0);
 	}
 	{
-		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
+		auto light = mContext->GetSceneMng()->AddDirectLight();
 		light->SetDirection(-1, -1, 0);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -56,13 +56,13 @@ void TestPBR::OnInitLight()
 
 #if 0
 	{
-		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
+		auto light = mContext->GetSceneMng()->AddDirectLight();
 		light->SetDirection(1, -1, 1);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
 	}
 	{
-		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
+		auto light = mContext->GetSceneMng()->AddDirectLight();
 		light->SetDirection(-1, -1, -1);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -74,10 +74,10 @@ void TestPBR::OnInitLight()
 /********** Lesson6 **********/
 void TestPBR::OnPostInitDevice()
 {
-	mRenderSys->GetSceneManager()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->GetSceneMng()->SetSkyBox("images\\uffizi_cross.dds");
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
-	mRenderSys->GetSceneManager()->SetPerspectiveCamera(45, 30, 1000);
+	mContext->GetSceneMng()->SetPerspectiveCamera(45, 30, 1000);
 
 #if 0
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
@@ -116,7 +116,7 @@ void TestPBR::OnPostInitDevice()
 		}
 	}
 #else
-	mModel = new TAssimpModel(mRenderSys, mMove, E_MAT_MODEL);
+	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
 	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
 	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
@@ -126,16 +126,16 @@ void TestPBR::OnPostInitDevice()
 void TestPBR::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
-	if (mRenderSys->BeginScene()) {
+	if (mContext->GetRenderSys()->BeginScene()) {
 		TRenderOperationQueue opQueue;
 		if (mModel) mModel->GenRenderOperation(opQueue);
 
 		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->GetRenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
 
-		mRenderSys->EndScene();
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 
-auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+auto reg = AppRegister<TestPBR>("TestPBR: PBR");
 #endif

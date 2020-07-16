@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_SHADOW_MAP
+#if defined TEST_SHADOW_MAP && TEST_CASE == TEST_SHADOW_MAP
 #include "TApp.h"
 #include "ISceneManager.h"
 #include "TAssimpModel.h"
@@ -26,7 +26,7 @@ private:
 
 void TestShadowMap::OnInitLight()
 {
-	mLight = mRenderSys->GetSceneManager()->AddPointLight();//1, -1, 1
+	mLight = mContext->GetSceneMng()->AddPointLight();//1, -1, 1
 	float ddd = 10;
 	mLight->SetPosition(ddd, ddd, -ddd);
 	mLight->SetAttenuation(1, 0.001, 0);
@@ -38,15 +38,15 @@ void TestShadowMap::OnInitLight()
 void TestShadowMap::OnPostInitDevice()
 {
 #if 1
-	mRenderSys->GetSceneManager()->SetPerspectiveCamera(45, 30, 300);
-	mRenderSys->GetSceneManager()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->GetSceneMng()->SetPerspectiveCamera(45, 30, 300);
+	mContext->GetSceneMng()->SetSkyBox("images\\uffizi_cross.dds");
 
 	float dd = 9;
 	mMove->SetDefScale(SCALE_BASE * 0.02); mMove->SetPosition(dd, dd, -dd);
 #if 0
-	auto LightCam = mLight->GetLightCamera(*mRenderSys->GetSceneManager()->GetDefCamera());
+	auto LightCam = mLight->GetLightCamera(*mContext->GetSceneMng()->GetDefCamera());
 	//auto pCam = &LightCam;
-	auto pCam = mRenderSys->GetSceneManager()->GetDefCamera();
+	auto pCam = mContext->GetSceneMng()->GetDefCamera();
 	XMFLOAT4 p0 = pCam->CalNDC(XMFLOAT4(30, 30, 0, 1));
 	//XMFLOAT3 p1 = pCam->CalNDC(mPosition);
 #endif
@@ -76,16 +76,16 @@ void TestShadowMap::OnRender()
 	mModel1->GenRenderOperation(opQueue);
 	mModel2->GenRenderOperation(opQueue);
 
-	if (mRenderSys->BeginScene()) {
+	if (mContext->GetRenderSys()->BeginScene()) {
 		mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
 		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
-		mRenderSys->EndScene();
+		mContext->GetRenderSys()->EndScene();
 	}
 #else
 	//pass1
 	mRenderSys->SetRenderTarget(mPass1RT);
 	mRenderSys->ClearColorDepthStencil(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
-	auto LightCam = mLight->GetLightCamera(*mRenderSys->GetSceneManager()->GetDefCamera());
+	auto LightCam = mLight->GetLightCamera(*mContext->GetSceneMng()->GetDefCamera());
 	{
 		mModel1->Update(mTimer.mDeltaTime);
 		float s = SCALE_BASE;

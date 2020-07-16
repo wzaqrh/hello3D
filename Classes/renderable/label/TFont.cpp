@@ -78,6 +78,11 @@ TFontTexturePtr TFontCharactorCache::AllocFontTexture()
 	return mCurFontTexture;
 }
 
+bool CheckError(int error) {
+	assert(error == 0);
+	return error == 0;
+}
+
 TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 {
 	TFontCharactorPtr charactor = nullptr;
@@ -86,49 +91,46 @@ TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 		charactor = iter->second;
 	}
 	else {
-		if (FT_Load_Char(mFtFace, ch, FT_LOAD_RENDER)) {
-			charactor = std::make_shared<TFontCharactor>();
-			charactor->Size = { mFtFace->glyph->bitmap.width, mFtFace->glyph->bitmap.rows };
-			charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
-			charactor->Advance = mFtFace->glyph->advance.x;
+		if (!CheckError(FT_Load_Glyph(mFtFace, FT_Get_Char_Index(mFtFace, ch), FT_LOAD_DEFAULT))) return nullptr;
+		if (!CheckError(FT_Render_Glyph(mFtFace->glyph, FT_RENDER_MODE_NORMAL))) return nullptr;
 
-			charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
-			mCharactors.insert(std::make_pair(ch, charactor));
-		}
-		else {
-			//error
-			assert(false);
-		}
+		charactor = std::make_shared<TFontCharactor>();
+		charactor->Size = { mFtFace->glyph->bitmap.width, mFtFace->glyph->bitmap.rows };
+		charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
+		charactor->Advance = mFtFace->glyph->advance.x;
+
+		charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
+		mCharactors.insert(std::make_pair(ch, charactor));
 	}
 	return charactor;
+}
+
+void TFontCharactorCache::FlushChange()
+{
+	mCurFontTexture->GetTexture();
 }
 
 ////////////////////////////////TFont//////////////////////////////////////////
 TFont::TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
 {
 	mFontName = fontPath;
-	if (FT_New_Face(ftLib, fontPath.c_str(), 0, &mFtFace)) {
-		//std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-		assert(false);
-		return;
-	}
-
 	mFontSize = fontSize;
-	if (FT_Set_Char_Size(mFtFace, fontSize * 64, 0, dpi, 0)) {
-		//std::cout << "ERROR::FREETYPE: Failed to set char size" << std::endl;
-		assert(false);
-		return;
-	}
+	if (!CheckError(FT_New_Face(ftLib, fontPath.c_str(), 0, &mFtFace))) return;
+	if (!CheckError(FT_Set_Char_Size(mFtFace, fontSize * 64, 0, dpi, 0))) return;
+	if (!CheckError(FT_Select_Charmap(mFtFace, FT_ENCODING_UNICODE))) return;
 
 	mCharactorCache = std::make_shared<TFontCharactorCache>(renderSys, mFtFace);
 }
-
 TFont::~TFont()
 {
 	FT_Done_Face(mFtFace);
 }
 
-TFontCharactorPtr TFont::Get(int ch)
+void TFont::Flush()
+{
+	mCharactorCache->FlushChange();
+}
+TFontCharactorPtr TFont::GetCharactor(int ch) 
 {
 	return mCharactorCache->GetCharactor(ch);
 }

@@ -1,5 +1,6 @@
 #象素数 = 点数*分辨率/72 
 //pixel=fontsize(dot) / 72(dot/inch) * dpi(pixel/inch)
+//pixel=char_width*64/72*horz_resolution //FT_Set_Char_Size
 
 #象素坐标＝ 网格坐标*象素数/EM大小
 
@@ -43,5 +44,44 @@
 		//hint范围内多个字形并步进总宽度是不可能的，要一个个步进
 		//hinting依赖最终字符宽度和高度象素值，所以它依赖分辨率 //对已hint的轮廓,字形轮廓处理2D变换时，注意使用整型象素距离（否则会很难看）
 	
-	
+FT_Set_Char_Size(
+	face,	/* face对象的句柄 */ 
+	0, 		/* 以1/64点为单位的字符宽度 */
+    16*64, 	/* 以1/64点为单位的字符高度 */
+    300, 	/* 设备水平分辨率 */
+    300 ); 	/* 设备垂直分辨率 */
+
+glyph_index = FT_Get_Char_Index(face, charcode);
+
+FT_Load_Glyph(
+    face, 			/* face对象的句柄 */
+    glyph_index, 	/* 字形索引 */
+    load_flags ); 	/* 装载标志，参考下面  default=FT_LOAD_DEFAULT*/
+//'嵌入位图'优先于'原生图像格式'
+//visit by face->glyph
+
+//若face->glyph->format != FT_GLYPH_FORMAT_BITMAP，可通过FT_Render_Glyph直接转换为位图
+FT_Render_Glyph(face->glyph, render_mode);//FT_RENDER_MODE_NORMAL=抗锯齿(256级灰度)
+//通过glyph->bitmap直接访问，用glyph->bitmap_left和glyph->bitmap_top指定起始位置
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	

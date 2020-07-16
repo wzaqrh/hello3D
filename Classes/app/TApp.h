@@ -1,5 +1,5 @@
 #pragma once
-#include "IRenderSystem.h"
+#include "TContext.h"
 #include "TInterfaceTypePred.h"
 #include "TMaterialPred.h"
 
@@ -35,7 +35,7 @@ protected:
 protected:
 	XMMATRIX GetWorldTransform();
 protected:
-	IRenderSystem* mRenderSys = nullptr;
+	TContext* mContext = nullptr;
 	class TD3DInput* mInput = nullptr;
 	class SDTimer* mTimer;
 	TMovablePtr mMove;

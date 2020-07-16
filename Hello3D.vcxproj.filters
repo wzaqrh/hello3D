@@ -156,6 +156,12 @@
     <ClCompile Include="Classes\rendersys\ISceneManager.cpp">
       <Filter>Classes\Rendersys</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\renderable\RenderableFactory.cpp">
+      <Filter>Classes\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\TContext.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">
@@ -236,9 +242,6 @@
     <ClInclude Include="Classes\renderable\label\TFont.h">
       <Filter>Classes\Renderable\label</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\renderable\RenderableManager.h">
-      <Filter>Classes\Renderable</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\rendersys\TInterfaceType.h">
       <Filter>Classes\Rendersys</Filter>
     </ClInclude>
@@ -269,8 +272,14 @@
     <ClInclude Include="Classes\rendersys\TConstBufferDecl.h">
       <Filter>Classes\Rendersys</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\renderable\RenderableFactory.h">
+      <Filter>Classes\Renderable</Filter>
+    </ClInclude>
     <ClInclude Include="Classes\TestCases\TestCase.h">
       <Filter>Classes\TestCases</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\TContext.h">
+      <Filter>Classes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

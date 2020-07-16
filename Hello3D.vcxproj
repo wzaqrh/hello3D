@@ -31,13 +31,13 @@
     <ProjectGuid>{06EDC280-1187-4614-A248-E640C095FA6B}</ProjectGuid>
     <RootNamespace>Tutorial01</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -386,6 +386,7 @@
     <ClCompile Include="Classes\Export\Export.cpp" />
     <ClCompile Include="Classes\renderable\label\TFont.cpp" />
     <ClCompile Include="Classes\renderable\label\TLabel.cpp" />
+    <ClCompile Include="Classes\renderable\RenderableFactory.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpModel.cpp" />
     <ClCompile Include="Classes\renderable\IRenderable.cpp" />
     <ClCompile Include="Classes\renderable\TAssimpMesh.cpp" />
@@ -405,6 +406,7 @@
     <ClCompile Include="Classes\rendersys\TInterfaceType.cpp" />
     <ClCompile Include="Classes\rendersys\TMaterial.cpp" />
     <ClCompile Include="Classes\rendersys\TMaterialCB.cpp" />
+    <ClCompile Include="Classes\TContext.cpp" />
     <ClCompile Include="Classes\TestCases\TestExport.cpp" />
     <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp" />
     <ClCompile Include="Classes\TestCases\TestMesh.cpp" />
@@ -430,7 +432,7 @@
     <ClInclude Include="Classes\renderable\IRenderablePred.h" />
     <ClInclude Include="Classes\renderable\label\TFont.h" />
     <ClInclude Include="Classes\renderable\label\TLabel.h" />
-    <ClInclude Include="Classes\renderable\RenderableManager.h" />
+    <ClInclude Include="Classes\renderable\RenderableFactory.h" />
     <ClInclude Include="Classes\renderable\TAssimpModel.h" />
     <ClInclude Include="Classes\renderable\IRenderable.h" />
     <ClInclude Include="Classes\renderable\TAssimpMesh.h" />
@@ -456,6 +458,8 @@
     <ClInclude Include="Classes\rendersys\TMaterial.h" />
     <ClInclude Include="Classes\rendersys\TMaterialCB.h" />
     <ClInclude Include="Classes\rendersys\TMaterialPred.h" />
+    <ClInclude Include="Classes\TContext.h" />
+    <ClInclude Include="Classes\TestCases\TestCase.h" />
     <ClInclude Include="Classes\TPredefine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

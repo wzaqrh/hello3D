@@ -1,5 +1,5 @@
 #include "TestCase.h"
-#if TEST_CASE == TEST_MESH
+#if defined TEST_MESH && TEST_CASE == TEST_MESH
 #include "TApp.h"
 #include "ISceneManager.h"
 #include "TMesh.h"
@@ -20,17 +20,17 @@ private:
 
 void TestMesh::OnPostInitDevice()
 {
-	mRenderSys->GetSceneManager()->SetOthogonalCamera(100);
+	mContext->GetSceneMng()->SetOthogonalCamera(100);
 
-	auto texture = mRenderSys->LoadTexture("model\\theyKilledKenny.jpg");
+	auto texture = mContext->GetRenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
 
 	const int spriteCount = 4;
-	auto size = mRenderSys->GetWinSize();
+	auto size = mContext->GetRenderSys()->GetWinSize();
 	float xlist[] = { -size.x / 2, 0, -size.x / 2 , 0 };
 	float ylist[] = { -size.y / 2, -size.y / 2, 0 , 0 };
 	for (int i = 0; i < spriteCount; ++i)
 	{
-		auto sprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
+		auto sprite = mContext->GetRenderableFac()->CreateSprite();
 		sprite->SetTexture(texture);
 
 		sprite->SetPosition(xlist[i], ylist[i], 0);
@@ -39,8 +39,7 @@ void TestMesh::OnPostInitDevice()
 		mSprites.push_back(sprite);
 	}
 
-
-	mMesh = std::make_shared<TMesh>(mRenderSys, E_MAT_SPRITE);
+	mMesh = mContext->GetRenderableFac()->CreateMesh(E_MAT_SPRITE);
 
 	for (int i = 0; i < spriteCount; ++i)
 		mMesh->SetVertexs((MeshVertex*)mSprites[i]->GetQuad(), 4, 4 * i);
@@ -59,11 +58,11 @@ void TestMesh::OnPostInitDevice()
 
 void TestMesh::OnRender()
 {
-	if (mRenderSys->BeginScene()) {
-		mRenderSys->Draw(mMesh.get());
-		mRenderSys->EndScene();
+	if (mContext->GetRenderSys()->BeginScene()) {
+		mContext->GetRenderSys()->Draw(mMesh.get());
+		mContext->GetRenderSys()->EndScene();
 	}
 }
 
-auto reg = AppRegister<TestMesh>("estMesh");
+auto reg = AppRegister<TestMesh>("TestMesh");
 #endif
