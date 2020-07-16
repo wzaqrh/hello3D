@@ -1,4 +1,7 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_SPEC_SKYBOX
 #include "TApp.h"
+#include "ISceneManager.h"
 #include "TAssimpModel.h"
 #include "TTransform.h"
 #include "Utility.h"
@@ -31,13 +34,13 @@ void TestSpecSkybox::OnInitLight()
 	//light2->SetAttenuation(1.0, 0.1, 0);
 	//light2->SetAngle(3.14*15/180);
 
-	auto light2 = mRenderSys->AddDirectLight();
+	auto light2 = mRenderSys->GetSceneManager()->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 }
 
 void TestSpecSkybox::OnPostInitDevice()
 {
-	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+	mRenderSys->GetSceneManager()->SetSkyBox("images\\uffizi_cross.dds");
 	
 	mModel = new TAssimpModel(mRenderSys, mMove, E_MAT_MODEL);
 	//mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
@@ -58,4 +61,5 @@ void TestSpecSkybox::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");
+auto reg = AppRegister<Lesson3>("TAppLesson3: Specular Light + skybox");
+#endif

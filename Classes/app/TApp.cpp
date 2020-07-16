@@ -57,15 +57,15 @@ void TApp::Render()
 	mInput->Frame();
 	mRenderSys->Update(0);
 	//rotate camera
-	if (mRenderSys->GetDefCamera()->mIsPespective)
+	if (mRenderSys->GetSceneManager()->GetDefCamera()->mIsPespective)
 	{
 		TINT4 m = mInput->GetMouseLocation(false);
 		float angy = 3.14 * m.x / mRenderSys->GetWinSize().x, angx = 3.14 * m.y / mRenderSys->GetWinSize().y;
 		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
-		auto eye = mRenderSys->GetDefCamera()->mEye;
-		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -mRenderSys->GetDefCamera()->mEyeDistance, 1), euler);
-		mRenderSys->GetDefCamera()->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), mRenderSys->GetDefCamera()->mAt);
+		auto eye = mRenderSys->GetSceneManager()->GetDefCamera()->mEye;
+		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -mRenderSys->GetSceneManager()->GetDefCamera()->mEyeDistance, 1), euler);
+		mRenderSys->GetSceneManager()->GetDefCamera()->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), mRenderSys->GetSceneManager()->GetDefCamera()->mAt);
 	}
 
 	{
@@ -88,7 +88,7 @@ std::string TApp::GetName()
 
 void TApp::OnInitLight()
 {
-	mRenderSys->AddPointLight();
+	mRenderSys->GetSceneManager()->AddPointLight();
 }
 
 XMMATRIX TApp::GetWorldTransform()

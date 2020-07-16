@@ -4,45 +4,45 @@
 #include "ft2build.h"
 #include "freetype.h"
 
-class TextureAtlas {
+class TFontTextureAtlas {
 public:
 	ITexturePtr Texture;
 	XMFLOAT2 UV0, UV1;
 	XMINT2 Pos0, Pos1;
 public:
-	TextureAtlas(ITexturePtr texture, XMFLOAT2 uv0, XMFLOAT2 uv1, XMINT2 pos0, XMINT2 pos1) 
+	TFontTextureAtlas(ITexturePtr texture, XMFLOAT2 uv0, XMFLOAT2 uv1, XMINT2 pos0, XMINT2 pos1) 
 		:Texture(texture), UV0(uv0), UV1(uv1), Pos0(pos0), Pos1(pos1) {}
 };
-typedef std::shared_ptr<TextureAtlas> TextureAtlasPtr;
+typedef std::shared_ptr<TFontTextureAtlas> TFontTextureAtlasPtr;
 
-class TFontTextureBuilder {
+class TFontTexture {
 	IRenderSystem* mRenderSys = nullptr;
 	int mWidth = 0, mHeight = 0;
 	ITexturePtr mTexture;
 	std::vector<char> mRawBuffer;
 	bool mRawBufferDirty = false;
 
-	std::map<int, TextureAtlasPtr> mAtlasByCh;
+	std::map<int, TFontTextureAtlasPtr> mAtlasByCh;
 	int mCol = 0, mRow = 0, mColH = 0;
 public:
-	TFontTextureBuilder(IRenderSystem* renderSys, XMINT2 size);
+	TFontTexture(IRenderSystem* renderSys, XMINT2 size);
 
-	TextureAtlasPtr Get(int ch);
-	bool ContainsKey(int ch) const;
-	TextureAtlasPtr Add(int ch, int w, int h, unsigned char* buffer);
+	TFontTextureAtlasPtr GetCharactor(int ch);
+	bool ContainsCharactor(int ch) const;
+	TFontTextureAtlasPtr AddCharactor(int ch, int w, int h, unsigned char* buffer);
 public:
 	ITexturePtr GetTexture();
 	int Width() const { return mWidth; }
 	int Height() const { return mHeight; }
 };
-typedef std::shared_ptr<TFontTextureBuilder> FontTextureBuilderPtr;
+typedef std::shared_ptr<TFontTexture> TFontTexturePtr;
 
 struct TFontCharactor
 {
 	XMINT2 Size;    
 	XMINT2 Bearing;
 	int Advance;
-	TextureAtlasPtr Atlas;
+	TFontTextureAtlasPtr Atlas;
 };
 typedef std::shared_ptr<TFontCharactor> TFontCharactorPtr;
 
@@ -50,14 +50,14 @@ class TFontCharactorCache
 {
 	FT_Face mFtFace;
 	IRenderSystem* mRenderSys = nullptr;
-	std::vector<FontTextureBuilderPtr> mFontTextureBuilders;
-	FontTextureBuilderPtr mCurFontTexBuilder;
+	std::vector<TFontTexturePtr> mFontTextures;
+	TFontTexturePtr mCurFontTexture;
 	std::map<int, TFontCharactorPtr> mCharactors;
 public:
 	TFontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace);
-	TFontCharactorPtr Get(int ch);
+	TFontCharactorPtr GetCharactor(int ch);
 private:
-	FontTextureBuilderPtr AllocFontTexBuilder();
+	TFontTexturePtr AllocFontTexture();
 };
 typedef std::shared_ptr<TFontCharactorCache> TFontCharactorCachePtr;
 

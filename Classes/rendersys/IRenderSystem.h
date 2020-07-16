@@ -14,17 +14,8 @@ IRenderSystem : public IUnknown
 	virtual STDMETHODIMP_(void) SetViewPort(int x, int y, int w, int h) = 0;
 
 	virtual STDMETHODIMP_(XMINT4) GetWinSize() = 0;
-	virtual STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() = 0;
-	virtual STDMETHODIMP_(TCameraPtr) GetDefCamera() = 0;
 
-	virtual STDMETHODIMP_(TSpotLightPtr) AddSpotLight() = 0;
-	virtual STDMETHODIMP_(TPointLightPtr) AddPointLight() = 0;
-	virtual STDMETHODIMP_(TDirectLightPtr) AddDirectLight() = 0;
-	virtual STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) = 0;
-	virtual STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) = 0;
-	virtual STDMETHODIMP_(TSkyBoxPtr) SetSkyBox(const std::string& imgName) = 0;
-	virtual STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) = 0;
-
+	virtual STDMETHODIMP_(ISceneManagerPtr) GetSceneManager() = 0;
 
 	virtual STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 
@@ -33,13 +24,14 @@ IRenderSystem : public IUnknown
 
 	virtual STDMETHODIMP_(TMaterialPtr) CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
 
-	virtual STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer) = 0;
-	virtual STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) = 0;
 	virtual STDMETHODIMP_(IIndexBufferPtr) CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual STDMETHODIMP_(void) SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 
 	virtual STDMETHODIMP_(IVertexBufferPtr) CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr) = 0;
 	virtual STDMETHODIMP_(void) SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
+	
+	virtual STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer) = 0;
+	virtual STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) = 0;
 
 	virtual STDMETHODIMP_(bool) UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
 	virtual STDMETHODIMP_(void) UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
@@ -69,31 +61,21 @@ __declspec(align(16))
 TRenderSystem : ComBase<IRenderSystem>
 {
 protected:
+	size_t mDrawCount = 0, mDrawLimit = INT_MAX;
+	int mScreenWidth, mScreenHeight;
+
 	std::map<std::string, ITexturePtr> mTexByPath;
-public:
-	int mScreenWidth;
-	int mScreenHeight;
-public:
-	TSkyBoxPtr mSkyBox;
-	TCameraPtr mDefCamera;
-protected:
 	std::string mFXCDir;
-	bool mCastShdowFlag = false;
+	
 	TBlendFunc mCurBlendFunc;
 	TDepthState mCurDepthState;
 
+	bool mCastShdowFlag = false;
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
-
-	TMaterialFactoryPtr mMaterialFac;
 	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
 
-	std::vector<TPostProcessPtr> mPostProcs;
-	std::vector<TPointLightPtr> mPointLights;
-	std::vector<TDirectLightPtr> mDirectLights;
-	std::vector<TSpotLightPtr> mSpotLights;
-	std::vector<std::pair<TDirectLight*, enLightType>> mLightsOrder;
-
-	size_t mDrawCount = 0,mDrawLimit = INT_MAX;
+	TMaterialFactoryPtr mMaterialFac;
+	TSceneManagerPtr mSceneManager;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -105,24 +87,11 @@ protected:
 	void _PopRenderTarget();
 	void MakeAutoParam(cbGlobalParam& param, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
 public:
-	STDMETHODIMP_(TSkyBoxPtr) GetSkyBox() {
-		return mSkyBox;
-	};
-	STDMETHODIMP_(TCameraPtr) GetDefCamera() {
-		return mDefCamera;
-	}
 	STDMETHODIMP_(XMINT4) GetWinSize() {
 		XMINT4 ret = { mScreenWidth, mScreenHeight, 0, 0 };
 		return ret;
 	}
-	STDMETHODIMP_(TSpotLightPtr) AddSpotLight() override;
-	STDMETHODIMP_(TPointLightPtr) AddPointLight() override;
-	STDMETHODIMP_(TDirectLightPtr) AddDirectLight() override;
-	STDMETHODIMP_(TCameraPtr) SetOthogonalCamera(double far1) override;
-	STDMETHODIMP_(TCameraPtr) SetPerspectiveCamera(double fov, int eyeDistance, double far1) override;
-	STDMETHODIMP_(TSkyBoxPtr) SetSkyBox(const std::string& imgName) override;
-	STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) override;
-public:
+	STDMETHODIMP_(ISceneManagerPtr) GetSceneManager();
 	STDMETHODIMP_(IProgramPtr) CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 public:
 	STDMETHODIMP_(ITexturePtr) LoadTexture(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);

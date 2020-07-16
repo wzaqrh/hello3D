@@ -1,4 +1,7 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_PBR
 #include "TApp.h"
+#include "ISceneManager.h"
 #include "TMaterial.h"
 #include "IRenderable.h"
 #include "TAssimpModel.h"
@@ -20,7 +23,7 @@ void TestPBR::OnInitLight()
 {
 #if 0
 	{
-		auto light = mRenderSys->AddPointLight();//1, -1, 1
+		auto light = mRenderSys->GetSceneManager()->AddPointLight();//1, -1, 1
 		float ddd = 10;
 		light->SetPosition(-ddd, ddd, -ddd);
 		light->SetAttenuation(1, 0.001, 0);
@@ -29,7 +32,7 @@ void TestPBR::OnInitLight()
 
 #if 0
 	{
-		auto light = mRenderSys->AddDirectLight();
+		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
 		light->SetDirection(0, -1, 0);
 		float i = 0.7;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -38,13 +41,13 @@ void TestPBR::OnInitLight()
 
 #if 1
 	{
-		auto light = mRenderSys->AddDirectLight();
+		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
 		light->SetDirection(1, -1, 1);
 		float i = 0.7;
 		light->SetDiffuseColor(i, i, i, 1.0);
 	}
 	{
-		auto light = mRenderSys->AddDirectLight();
+		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
 		light->SetDirection(-1, -1, 0);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -53,13 +56,13 @@ void TestPBR::OnInitLight()
 
 #if 0
 	{
-		auto light = mRenderSys->AddDirectLight();
+		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
 		light->SetDirection(1, -1, 1);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
 	}
 	{
-		auto light = mRenderSys->AddDirectLight();
+		auto light = mRenderSys->GetSceneManager()->AddDirectLight();
 		light->SetDirection(-1, -1, -1);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -71,10 +74,10 @@ void TestPBR::OnInitLight()
 /********** Lesson6 **********/
 void TestPBR::OnPostInitDevice()
 {
-	mRenderSys->SetSkyBox("images\\uffizi_cross.dds");
+	mRenderSys->GetSceneManager()->SetSkyBox("images\\uffizi_cross.dds");
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
-	mRenderSys->SetPerspectiveCamera(45, 30, 1000);
+	mRenderSys->GetSceneManager()->SetPerspectiveCamera(45, 30, 1000);
 
 #if 0
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
@@ -134,4 +137,5 @@ void TestPBR::OnRender()
 	}
 }
 
-//auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+auto reg = AppRegister<Lesson6>("TAppLesson6: PBR");
+#endif

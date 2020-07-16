@@ -1,6 +1,8 @@
 #include "ISceneManager.h"
 #include "TTransform.h"
 #include "TMaterialCB.h"
+#include "TSkyBox.h"
+#include "TPostProcess.h"
 #include "Utility.h"
 
 
@@ -191,4 +193,70 @@ const XMMATRIX& TCamera::GetView()
 const XMMATRIX& TCamera::GetProjection()
 {
 	return mProjection_;
+}
+
+//TSceneManager
+TSceneManager::TSceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, TCameraPtr defCamera)
+{
+	mRenderSys = renderSys;
+	mScreenWidth  = screenSize.x;
+	mScreenHeight = screenSize.y;
+	mPostProcessRT = postRT;
+	mDefCamera = defCamera;
+}
+
+TSpotLightPtr TSceneManager::AddSpotLight()
+{
+	TSpotLightPtr light = std::make_shared<TSpotLight>();
+	mSpotLights.push_back(light);
+	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_SPOT));
+	return light;
+}
+
+TPointLightPtr TSceneManager::AddPointLight()
+{
+	TPointLightPtr light = std::make_shared<TPointLight>();
+	mPointLights.push_back(light);
+	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_POINT));
+	return light;
+}
+
+TDirectLightPtr TSceneManager::AddDirectLight()
+{
+	TDirectLightPtr light = std::make_shared<TDirectLight>();
+	mDirectLights.push_back(light);
+	mLightsOrder.push_back(std::pair<TDirectLight*, enLightType>(light.get(), E_LIGHT_DIRECT));
+	return light;
+}
+
+TCameraPtr TSceneManager::SetOthogonalCamera(double far1)
+{
+	mDefCamera = TCamera::CreateOthogonal(mScreenWidth, mScreenHeight, far1);
+	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
+	return mDefCamera;
+}
+
+TCameraPtr TSceneManager::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
+{
+	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
+	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
+	return mDefCamera;
+}
+
+TSkyBoxPtr TSceneManager::SetSkyBox(const std::string& imgName)
+{
+	mSkyBox = std::make_shared<TSkyBox>(mRenderSys, mDefCamera, imgName);
+	return mSkyBox;
+}
+
+TPostProcessPtr TSceneManager::AddPostProcess(const std::string& name)
+{
+	TPostProcessPtr process;
+	if (name == E_PASS_POSTPROCESS) {
+		TBloom* bloom = new TBloom(mRenderSys, mPostProcessRT);
+		process = std::shared_ptr<TPostProcess>(bloom);
+	}
+
+	if (process) mPostProcs.push_back(process);
+	return process;
 }

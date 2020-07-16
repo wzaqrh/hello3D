@@ -25,7 +25,7 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	mCubeSRV = mRenderSys->LoadTexture(imgName, format, true, true);
 #if 0
-	auto pCam1 = mRenderSys->GetDefCamera();
+	auto pCam1 = mRenderSys->GetSceneManager()->GetDefCamera();
 	XMFLOAT3 pos0 = pCam->CalNDC(XMFLOAT3(fLowW, fLowH, 1.0f));
 	XMFLOAT3 pos1 = pCam->CalNDC(XMFLOAT3(fLowW, fHighH, 1.0f));
 	XMFLOAT3 pos2 = pCam->CalNDC(XMFLOAT3(fHighW, fLowH, 1.0f));

@@ -1,4 +1,7 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_DIFFUSE
 #include "TApp.h"
+#include "ISceneManager.h"
 #include "TAssimpModel.h"
 #include "TTransform.h"
 #include "Utility.h"
@@ -15,7 +18,7 @@ private:
 
 void TestDiffuse::OnInitLight()
 {
-	auto light = mRenderSys->AddPointLight();
+	auto light = mRenderSys->GetSceneManager()->AddPointLight();
 	light->SetDiffuseColor(1, 1, 1, 1);
 	light->SetPosition(0, 0, -200);
 }
@@ -47,4 +50,5 @@ void TestDiffuse::OnRender()
 	}
 }
 
-//auto reg = AppRegister<TAppLesson2>("TAppLesson2: Diffuse Light");
+auto reg = AppRegister<TAppLesson2>("TAppLesson2: Diffuse Light");
+#endif

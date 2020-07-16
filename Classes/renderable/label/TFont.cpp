@@ -1,8 +1,8 @@
 #include "TFont.h"
 #include "rendersys/IRenderSystem.h"
 
-////////////////////////////////TFontTextureBuilder//////////////////////////////////////////
-TFontTextureBuilder::TFontTextureBuilder(IRenderSystem* renderSys, XMINT2 size)
+/********** TFontTexture **********/
+TFontTexture::TFontTexture(IRenderSystem* renderSys, XMINT2 size)
 {
 	mRenderSys = renderSys;
 	mWidth = size.x;
@@ -11,21 +11,21 @@ TFontTextureBuilder::TFontTextureBuilder(IRenderSystem* renderSys, XMINT2 size)
 	mRawBuffer.resize(mWidth * mHeight);
 }
 
-TextureAtlasPtr TFontTextureBuilder::Get(int ch)
+TFontTextureAtlasPtr TFontTexture::GetCharactor(int ch)
 {
-	TextureAtlasPtr atlas = nullptr;
+	TFontTextureAtlasPtr atlas = nullptr;
 	auto iter = mAtlasByCh.find(ch);
 	if (iter != mAtlasByCh.end())
 		atlas = iter->second;
 	return atlas;
 }
 
-bool TFontTextureBuilder::ContainsKey(int ch) const
+bool TFontTexture::ContainsCharactor(int ch) const
 {
 	return mAtlasByCh.find(ch) != mAtlasByCh.end();
 }
 
-TextureAtlasPtr TFontTextureBuilder::Add(int ch, int w, int h, unsigned char* buffer)
+TFontTextureAtlasPtr TFontTexture::AddCharactor(int ch, int w, int h, unsigned char* buffer)
 {
 	if (mCol + w > mWidth) {
 		mRow += mColH;
@@ -41,7 +41,7 @@ TextureAtlasPtr TFontTextureBuilder::Add(int ch, int w, int h, unsigned char* bu
 
 	XMINT2 pos0 = { mCol, mRow }, pos1 = { mCol + w, mRow + h };
 	XMFLOAT2 uv0 = { pos0.x * 1.0f / mWidth, pos0.y * 1.0f / mHeight }, uv1 = { pos1.x * 1.0f / mWidth, pos1.y * 1.0f / mHeight };
-	TextureAtlasPtr atlas = std::make_shared<TextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
+	TFontTextureAtlasPtr atlas = std::make_shared<TFontTextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
 
 	for (int y = 0; y < h; ++y)
 		memcpy(&mRawBuffer[(pos0.y + y) * mWidth + pos0.x], buffer + y * w, w);
@@ -53,7 +53,7 @@ TextureAtlasPtr TFontTextureBuilder::Add(int ch, int w, int h, unsigned char* bu
 	return atlas;
 }
 
-ITexturePtr TFontTextureBuilder::GetTexture()
+ITexturePtr TFontTexture::GetTexture()
 {
 	if (mRawBufferDirty) {
 		mRawBufferDirty = false;
@@ -62,23 +62,23 @@ ITexturePtr TFontTextureBuilder::GetTexture()
 	return mTexture;
 }
 
-////////////////////////////////TFontCharactorCache//////////////////////////////////////////
+/********** TFontCharactorCache **********/
 TFontCharactorCache::TFontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace)
 {
 	mRenderSys = renderSys;
 	mFtFace = ftFace;
-	AllocFontTexBuilder();
+	AllocFontTexture();
 }
 
-FontTextureBuilderPtr TFontCharactorCache::AllocFontTexBuilder()
+TFontTexturePtr TFontCharactorCache::AllocFontTexture()
 {
 	XMINT2 size = { 512,512 };
-	mCurFontTexBuilder = std::make_shared<TFontTextureBuilder>(mRenderSys, size);
-	mFontTextureBuilders.push_back(mCurFontTexBuilder);
-	return mCurFontTexBuilder;
+	mCurFontTexture = std::make_shared<TFontTexture>(mRenderSys, size);
+	mFontTextures.push_back(mCurFontTexture);
+	return mCurFontTexture;
 }
 
-TFontCharactorPtr TFontCharactorCache::Get(int ch)
+TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 {
 	TFontCharactorPtr charactor = nullptr;
 	auto iter = mCharactors.find(ch);
@@ -91,9 +91,8 @@ TFontCharactorPtr TFontCharactorCache::Get(int ch)
 			charactor->Size = { mFtFace->glyph->bitmap.width, mFtFace->glyph->bitmap.rows };
 			charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
 			charactor->Advance = mFtFace->glyph->advance.x;
-			
-			mCurFontTexBuilder->Add(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
 
+			charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
 			mCharactors.insert(std::make_pair(ch, charactor));
 		}
 		else {
@@ -131,7 +130,7 @@ TFont::~TFont()
 
 TFontCharactorPtr TFont::Get(int ch)
 {
-	return mCharactorCache->Get(ch);
+	return mCharactorCache->GetCharactor(ch);
 }
 
 ////////////////////////////////TFontCache//////////////////////////////////////////

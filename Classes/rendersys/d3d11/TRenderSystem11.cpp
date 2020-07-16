@@ -48,13 +48,14 @@ bool TRenderSystem11::Initialize(HWND hWnd, RECT vp)
 
 	mScreenWidth = vpWidth;
 	mScreenHeight = vpHeight;
-	mDefCamera = TCamera::CreatePerspective(mScreenWidth, mScreenHeight);
 
 	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
 	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
 
 	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
+
+	mSceneManager = MakePtr<TSceneManager>(this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, TCamera::CreatePerspective(mScreenWidth, mScreenHeight));
 
 	D3D_SHADER_MACRO Shader_Macros[] = { "SHADER_MODEL", "40000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros+ARRAYSIZE(Shader_Macros));
@@ -887,7 +888,7 @@ void TRenderSystem11::RenderOperation(const TRenderOperation& op, const std::str
 
 void TRenderSystem11::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
 {
-	auto LightCam = light->GetLightCamera(*mDefCamera);
+	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
 	cbGlobalParam globalParam;
 	MakeAutoParam(globalParam, LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
 	for (int i = 0; i < opQueue.Count(); ++i)
@@ -914,9 +915,9 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		ID3D11ShaderResourceView* depthMapView = PtrCast(mShadowPassRT->GetColorTexture()).As<TTexture11>()->GetSRV11();
 		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
-
-		if (mSkyBox && mSkyBox->mCubeSRV) {
-			auto texture = PtrCast(mSkyBox->mCubeSRV).As<TTexture11>()->GetSRV11();
+		auto skybox = mSceneManager->mSkyBox;
+		if (skybox && skybox->mCubeSRV) {
+			auto texture = PtrCast(skybox->mCubeSRV).As<TTexture11>()->GetSRV11();
 			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &texture);
 		}
 	}
@@ -925,13 +926,14 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 		mDeviceContext->PSSetShaderResources(0, 1, &pSRV);
 	}
 
-	if (!mLightsOrder.empty()) {
+	auto& lightsOrder = mSceneManager->mLightsOrder;
+	if (!lightsOrder.empty()) {
 		TBlendFunc orgBlend = mCurBlendFunc;
 		SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
-		RenderLight(mLightsOrder[0].first, mLightsOrder[0].second, opQueue, lightMode);
+		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
 
-		for (int i = 1; i < mLightsOrder.size(); ++i) {
-			auto order = mLightsOrder[i];
+		for (int i = 1; i < lightsOrder.size(); ++i) {
+			auto order = lightsOrder[i];
 			SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
 			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
 			RenderLight(order.first, order.second, opQueue, __lightMode);
@@ -952,7 +954,7 @@ void TRenderSystem11::RenderQueue(const TRenderOperationQueue& opQueue, const st
 
 void TRenderSystem11::_RenderSkyBox()
 {
-	if (mSkyBox) mSkyBox->Draw();
+	if (mSceneManager->mSkyBox) mSceneManager->mSkyBox->Draw();
 }
 
 void TRenderSystem11::_DoPostProcess()
@@ -961,8 +963,8 @@ void TRenderSystem11::_DoPostProcess()
 	SetDepthState(TDepthState(false));
 
 	TRenderOperationQueue opQue;
-	for (size_t i = 0; i < mPostProcs.size(); ++i)
-		mPostProcs[i]->GenRenderOperation(opQue);
+	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
+		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_POSTPROCESS);
 
 	SetDepthState(orgState);
@@ -972,7 +974,7 @@ bool TRenderSystem11::BeginScene()
 {
 	mCastShdowFlag = false;
 
-	if (!mPostProcs.empty()) {
+	if (!mSceneManager->mPostProcs.empty()) {
 		SetRenderTarget(mPostProcessRT);
 		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
@@ -982,7 +984,7 @@ bool TRenderSystem11::BeginScene()
 
 void TRenderSystem11::EndScene()
 {
-	if (!mPostProcs.empty()) {
+	if (!mSceneManager->mPostProcs.empty()) {
 		SetRenderTarget(nullptr);
 	}
 	_DoPostProcess();

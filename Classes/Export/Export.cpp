@@ -25,9 +25,9 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 		rendersys = nullptr;
 	}
 
-	rendersys->SetOthogonalCamera(100);
+	rendersys->GetSceneManager()->SetOthogonalCamera(100);
 
-	rendersys->AddPointLight();
+	rendersys->GetSceneManager()->AddPointLight();
 	rendersys->SetDepthState(TDepthState::For2D);
 	rendersys->SetBlendFunc(TBlendFunc::ALPHA_NON_PREMULTIPLIED);
 
@@ -89,7 +89,7 @@ DLL_EXPORT XMINT4 RenderSystem_GetWinSize(ExportRenderSystem rendersys)
 //camera
 ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1)
 {
-	TCameraPtr camera = rendersys->SetOthogonalCamera(far1);
+	TCameraPtr camera = rendersys->GetSceneManager()->SetOthogonalCamera(far1);
 	return camera.get();
 }
 

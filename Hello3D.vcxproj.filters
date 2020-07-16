@@ -269,5 +269,8 @@
     <ClInclude Include="Classes\rendersys\TConstBufferDecl.h">
       <Filter>Classes\Rendersys</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\TestCases\TestCase.h">
+      <Filter>Classes\TestCases</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

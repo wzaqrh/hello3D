@@ -1,3 +1,5 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_EXPORT_RT
 #include "TApp.h"
 #include "Export/Export.h"
 #include "TInterfaceType.h"
@@ -69,4 +71,5 @@ std::string TestExportRT::GetName()
 	return "TestExportRT";
 }
 
-//auto reg = AppRegister<TestExportRT>("TestExportRT");
+auto reg = AppRegister<TestExportRT>("TestExportRT");
+#endif

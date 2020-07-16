@@ -1,3 +1,5 @@
+#include "TestCase.h"
+#if TEST_CASE == TEST_MODEL
 #include "TApp.h"
 #include "TAssimpModel.h"
 #include "TTransform.h"
@@ -45,4 +47,5 @@ void TestModel::OnRender()
 	}
 }
 
-//auto reg = AppRegister<TAppLesson1>("Assimp Model");
+auto reg = AppRegister<TAppLesson1>("Assimp Model");
+#endif
