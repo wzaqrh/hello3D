@@ -90,20 +90,24 @@ TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 	if (iter != mCharactors.end()) {
 		charactor = iter->second;
 	}
-	else {
-		if (!CheckError(FT_Load_Glyph(mFtFace, FT_Get_Char_Index(mFtFace, ch), FT_LOAD_DEFAULT))) return nullptr;
-		if (!CheckError(FT_Render_Glyph(mFtFace->glyph, FT_RENDER_MODE_NORMAL))) return nullptr;
+	else { 
+		do {
+			FT_UInt charIndex = FT_Get_Char_Index(mFtFace, ch); if (charIndex == 0) break;
+			if (!CheckError(FT_Load_Glyph(mFtFace, charIndex, FT_LOAD_DEFAULT))) break;
+			if (!CheckError(FT_Render_Glyph(mFtFace->glyph, FT_RENDER_MODE_NORMAL))) break;
+			FT_Glyph glyph; if (!CheckError(FT_Get_Glyph(mFtFace->glyph, &glyph))) break;
 
-		charactor = std::make_shared<TFontCharactor>();
+			charactor = std::make_shared<TFontCharactor>();
+			charactor->charIndex = charIndex;
+			charactor->glyph = glyph;
+			
+			FT_Glyph_Get_CBox(charactor->glyph, ft_glyph_bbox_pixels, &charactor->bbox);
+			charactor->Size = { (int)mFtFace->glyph->bitmap.width, (int)mFtFace->glyph->bitmap.rows };
+			charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
+			charactor->Advance = mFtFace->glyph->advance.x >> 6;
 
-		if (!CheckError(FT_Get_Glyph(mFtFace->glyph, &charactor->glyph))) return nullptr;
-		FT_Glyph_Get_CBox(charactor->glyph, ft_glyph_bbox_pixels, &charactor->bbox);
-
-		charactor->Size = { (int)mFtFace->glyph->bitmap.width, (int)mFtFace->glyph->bitmap.rows };
-		charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
-		charactor->Advance = mFtFace->glyph->advance.x >> 6;
-
-		charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
+			charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
+		} while (0);
 		mCharactors.insert(std::make_pair(ch, charactor));
 	}
 	return charactor;

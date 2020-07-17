@@ -40,6 +40,7 @@ typedef std::shared_ptr<TFontTexture> TFontTexturePtr;
 
 struct TFontCharactor
 {
+	FT_UInt charIndex;
 	FT_Glyph glyph;
 	FT_BBox bbox;	//dot space
 

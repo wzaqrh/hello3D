@@ -116,18 +116,29 @@ void TLabel::UpdateBBox()
 	mBBox.xMin = mBBox.yMin = 32000;
 	mBBox.xMax = mBBox.yMax = -32000;
 
+	bool useKerning = FT_HAS_KERNING(mFont->GetFtFace());
+	int previousCharIndex = 0;
+
 	XMINT2 pen = { 0, 0 };//dot space
 	for (int i = 0; i < mCharSeq.size(); i++)
 	{
 		mCharSeq[i].pen = pen;
 		int c = mString[i];
 		if (c == '\n') {
+			++mLineCount;
 			pen.y -= TODOT(mFont->GetFtFace()->size->metrics.height);
 			pen.x = 0;
-			++mLineCount;
+			previousCharIndex = 0;
 		}
 		else {
 			auto& ch = *mCharSeq[i].charInfo;
+
+			if (useKerning && previousCharIndex && ch.charIndex)
+			{
+				FT_Vector delta;
+				FT_Get_Kerning(mFont->GetFtFace(), previousCharIndex, ch.charIndex, FT_KERNING_DEFAULT, &delta);
+				pen.x += delta.x >> 6;
+			}
 
 			FT_BBox glyph_bbox = ch.bbox;
 			glyph_bbox.xMin += pen.x;
@@ -144,6 +155,7 @@ void TLabel::UpdateBBox()
 			mCharSeq[i].quad.FlipY();
 
 			pen.x += ch.Advance;
+			previousCharIndex = ch.charIndex;
 		}
 	}
 
