@@ -95,9 +95,13 @@ TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 		if (!CheckError(FT_Render_Glyph(mFtFace->glyph, FT_RENDER_MODE_NORMAL))) return nullptr;
 
 		charactor = std::make_shared<TFontCharactor>();
-		charactor->Size = { mFtFace->glyph->bitmap.width, mFtFace->glyph->bitmap.rows };
+
+		if (!CheckError(FT_Get_Glyph(mFtFace->glyph, &charactor->glyph))) return nullptr;
+		FT_Glyph_Get_CBox(charactor->glyph, ft_glyph_bbox_pixels, &charactor->bbox);
+
+		charactor->Size = { (int)mFtFace->glyph->bitmap.width, (int)mFtFace->glyph->bitmap.rows };
 		charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
-		charactor->Advance = mFtFace->glyph->advance.x;
+		charactor->Advance = mFtFace->glyph->advance.x >> 6;
 
 		charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
 		mCharactors.insert(std::make_pair(ch, charactor));

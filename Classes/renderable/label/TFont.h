@@ -3,6 +3,7 @@
 #include "TInterfaceType.h"
 #include "ft2build.h"
 #include "freetype.h"
+#include "freetype2/freetype/ftglyph.h"
 
 class TFontTextureAtlas {
 public:
@@ -39,9 +40,12 @@ typedef std::shared_ptr<TFontTexture> TFontTexturePtr;
 
 struct TFontCharactor
 {
-	XMINT2 Size;    
-	XMINT2 Bearing;
-	int Advance;
+	FT_Glyph glyph;
+	FT_BBox bbox;	//dot space
+
+	XMINT2 Size;	//dot space   
+	XMINT2 Bearing;	//dot space
+	int Advance;	//dot space
 	TFontTextureAtlasPtr Atlas;
 };
 typedef std::shared_ptr<TFontCharactor> TFontCharactorPtr;
@@ -71,8 +75,10 @@ class TFont
 public:
 	TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi = 72);
 	~TFont();
-	void Flush();
+public:
+	FT_Face GetFtFace() { return mFtFace; }
 	TFontCharactorPtr GetCharactor(int ch);
+	void Flush();
 };
 typedef std::shared_ptr<TFont> TFontPtr;
 

@@ -133,8 +133,9 @@ public:
 	TMaterialPtr Build();
 };
 
-#define E_MAT_SPRITE "sprite"
+#define E_MAT_SPRITE "Sprite"
 #define E_MAT_LAYERCOLOR "LayerColor"
+#define E_MAT_LABEL "Label"
 #define E_MAT_SKYBOX "skybox"
 #define E_MAT_MODEL "model"
 #define E_MAT_MODEL_PBR "model_pbr"
@@ -157,7 +158,7 @@ private:
 #define FILE_EXT_FX ".fx"
 
 #ifdef PRELOAD_SHADER
-#define MAKE_MAT_NAME(NAME) (NAME)
+#define MAKE_MAT_NAME(NAME) std::string(NAME)
 #else
-#define MAKE_MAT_NAME(NAME) (NAME FILE_EXT_FX)
+#define MAKE_MAT_NAME(NAME) std::string(NAME) + FILE_EXT_FX
 #endif

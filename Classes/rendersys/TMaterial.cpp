@@ -402,7 +402,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 
 	TMaterialPtr material;
 	TMaterialBuilder builder;
-	if (name == E_MAT_SPRITE) {
+	if (name == E_MAT_SPRITE || name == E_MAT_LAYERCOLOR || name == E_MAT_LABEL) {
 		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
@@ -410,20 +410,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Sprite")));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-	else if (name == E_MAT_LAYERCOLOR) {
-		SetCommonField(builder, mRenderSys);
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("LayerColor")));
+		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME(name)));
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 
 		AddD3D9Technique(builder, mRenderSys);
