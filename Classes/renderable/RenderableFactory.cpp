@@ -7,6 +7,7 @@
 RenderableFactory::RenderableFactory(IRenderSystem* renderSys)
 {
 	mRenderSys = renderSys;
+	mFontCache = std::make_shared<TFontCache>(renderSys);
 }
 
 TSpritePtr RenderableFactory::CreateSprite()

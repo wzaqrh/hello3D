@@ -409,6 +409,7 @@
     <ClCompile Include="Classes\TContext.cpp" />
     <ClCompile Include="Classes\TestCases\TestExport.cpp" />
     <ClCompile Include="Classes\TestCases\TestExportRTcpp.cpp" />
+    <ClCompile Include="Classes\TestCases\TestLabel.cpp" />
     <ClCompile Include="Classes\TestCases\TestMesh.cpp" />
     <ClCompile Include="Classes\TestCases\TestRawTexture.cpp" />
     <ClCompile Include="Classes\TestCases\TestSprite.cpp" />

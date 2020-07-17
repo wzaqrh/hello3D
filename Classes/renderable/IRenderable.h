@@ -10,7 +10,7 @@ struct TRenderOperation {
 	IVertexBufferPtr mVertexBuffer;
 	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 	IIndexBufferPtr mIndexBuffer;
-	short mIndexPos, mIndexCount, mIndexBase;
+	short mIndexPos = 0, mIndexCount = 0, mIndexBase = 0;
 	TTextureBySlot mTextures;
 	XMMATRIX mWorldTransform;
 public:

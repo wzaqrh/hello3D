@@ -26,7 +26,10 @@ struct Quad
 	void SetRect(float x, float y, float w, float h);
 	void SetColor(const XMFLOAT4& color);
 	void SetZ(float z);
-	void SetFlipY(bool flipY);
+	void FlipY();
+	void SetTexCoord(const XMFLOAT2& uv0, const XMFLOAT2& uv1);
+private:
+	void DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt);
 };
 
 class TSprite
@@ -53,6 +56,7 @@ public:
 	void Draw();
 public:
 	void SetPosition(float x, float y, float z);
+	void SetSize(const XMFLOAT2& size);
 	void SetSize(float w, float h);
 	void SetTexture(ITexturePtr Texture);
 	void SetColor(XMFLOAT4 color);

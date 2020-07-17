@@ -162,6 +162,9 @@
     <ClCompile Include="Classes\TContext.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\TestCases\TestLabel.cpp">
+      <Filter>Classes\TestCases</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Classes\app\TApp.h">

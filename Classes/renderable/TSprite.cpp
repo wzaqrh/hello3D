@@ -7,14 +7,14 @@
 /********** Quad **********/
 Quad::Quad()
 {
-	SetFlipY(false);
+	DoSetTexCoords(XMFLOAT2(0, 0), XMFLOAT2(1, 1));
 	SetColor(XMFLOAT4(1, 1, 1, 1));
 }
 
 Quad::Quad(float x, float y, float w, float h)
 {
-	SetFlipY(false);
 	SetRect(x, y, w, h);
+	DoSetTexCoords(XMFLOAT2(0, 0), XMFLOAT2(1, 1));
 	SetColor(XMFLOAT4(1, 1, 1, 1));
 }
 
@@ -42,20 +42,26 @@ void Quad::SetZ(float z)
 	rb.Pos.z = z;
 }
 
-void Quad::SetFlipY(bool flipY)
+void Quad::FlipY()
 {
-	int pl = 0;
-	int pr = 1;
-	int pt = 1;
-	int pb = 0;
-	
-	if (flipY) std::swap(pt, pb);
-	
-	lb.Tex = XMFLOAT2(pl, pb);
-	lt.Tex = XMFLOAT2(pl, pt);
-	rt.Tex = XMFLOAT2(pr, pt);
-	rb.Tex = XMFLOAT2(pr, pb);
+	std::swap(lb.Tex.y, rt.Tex.y);
+	DoSetTexCoords(lb.Tex, rt.Tex);
 }
+
+void Quad::DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt)
+{
+	lb.Tex = XMFLOAT2(plb.x, plb.y);
+	lt.Tex = XMFLOAT2(plb.x, prt.y);
+	rt.Tex = XMFLOAT2(prt.x, prt.y);
+	rb.Tex = XMFLOAT2(prt.x, plb.y);
+}
+
+void Quad::SetTexCoord(const XMFLOAT2& uv0, const XMFLOAT2& uv1)
+{
+	DoSetTexCoords(uv0, uv1);
+}
+
+
 
 /********** TSprite **********/
 const unsigned int indices[] = {
@@ -73,6 +79,8 @@ TSprite::TSprite(IRenderSystem* RenderSys, const std::string& matName)
 	Material = mRenderSys->CreateMaterial(matName != "" ? matName : E_MAT_SPRITE, nullptr);
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
+
+	if (mFlipY) mQuad.FlipY();
 }
 
 TSprite::~TSprite()
@@ -84,7 +92,7 @@ void TSprite::SetPosition(float x, float y, float z)
 	mPosition = XMFLOAT2(x, y);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 	mQuad.SetZ(z);
-	mQuad.SetFlipY(mFlipY);
+	//mQuad.FlipY(mFlipY);
 	
 	mQuadDirty = true;
 	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
@@ -98,16 +106,23 @@ void TSprite::SetSize(float w, float h)
 	}
 	mSize = XMFLOAT2(w, h);
 	mQuad.SetRect(mPosition.x, mPosition.y, mSize.x, mSize.y);
-	mQuad.SetFlipY(mFlipY);
+	//mQuad.FlipY(mFlipY);
 
 	mQuadDirty = true;
 	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
+void TSprite::SetSize(const XMFLOAT2& size)
+{
+	SetSize(size.x, size.y);
+}
+
 void TSprite::SetFlipY(bool flipY)
 {
-	mFlipY = flipY;
-	mQuad.SetFlipY(flipY);
+	if (mFlipY != flipY) {
+		mFlipY = flipY;
+		mQuad.FlipY();
+	}
 
 	mQuadDirty = true;
 	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));

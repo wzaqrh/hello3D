@@ -92,7 +92,7 @@ void OutPutMatrix(FILE* fd, const aiMatrix4x4& m);
 void OutPutMatrix(FILE* fd, const XMMATRIX& m);
 
 #define C_WINDOW_WIDTH 1024
-#define C_WINDOW_HEIGHT 1024
+#define C_WINDOW_HEIGHT 768
 
 #ifdef _DEBUG
 void SetDebugName(ID3D11DeviceChild* child, const std::string& name);

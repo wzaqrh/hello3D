@@ -4,4 +4,5 @@
 #define TEST_DIFFUSE 1
 #define TEST_FOG 2
 #define TEST_MESH 3
-#define TEST_CASE TEST_MESH
+#define TEST_LABEL 4
+#define TEST_CASE TEST_LABEL
