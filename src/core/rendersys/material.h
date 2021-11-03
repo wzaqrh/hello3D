@@ -1,8 +1,8 @@
 #pragma once
-#include "TMaterialPred.h"
-#include "TInterfaceTypePred.h"
-#include "IResource.h"
-#include "TMaterialCB.h"
+#include "core/rendersys/material_pred.h"
+#include "core/rendersys/interface_type_pred.h"
+#include "core/rendersys/resource.h"
+#include "core/rendersys/material_cb.h"
 
 #define E_PASS_SHADOWCASTER "ShadowCaster"
 #define E_PASS_FORWARDBASE "ForwardBase"

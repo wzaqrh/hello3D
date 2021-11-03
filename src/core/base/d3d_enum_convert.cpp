@@ -1,4 +1,4 @@
-#include "D3DEnumCT.h"
+#include "d3d_enum_convert.h"
 
 D3DBLEND D3DEnumCT::d3d11To9(D3D11_BLEND blend)
 {

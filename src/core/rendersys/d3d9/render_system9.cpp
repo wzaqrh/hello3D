@@ -1,11 +1,11 @@
-#include "TRenderSystem9.h"
-#include "ISceneManager.h"
-#include "TMaterialCB.h"
-#include "TMaterial.h"
-#include "TInterfaceType9.h"
-#include "TPostProcess.h"
-#include "TSkyBox.h"
-#include "Utility.h"
+#include "render_system9.h"
+#include "interface_type9.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/rendersys/material_cb.h"
+#include "core/rendersys/material.h"
+#include "core/renderable/post_process.h"
+#include "core/renderable/skybox.h"
+#include "core/base/utility.h"
 
 TRenderSystem9::TRenderSystem9()
 {

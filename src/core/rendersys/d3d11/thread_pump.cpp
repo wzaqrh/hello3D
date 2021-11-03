@@ -1,6 +1,6 @@
-#include "TThreadPump.h"
-#include "IResource.h"
-#include "Utility.h"
+#include "thread_pump.h"
+#include "core/rendersys/resource.h"
+#include "core/base/utility.h"
 
 void ResourceSetLoaded(IResource* res, HRESULT hr)
 {

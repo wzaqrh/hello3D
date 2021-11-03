@@ -1,5 +1,5 @@
 #pragma once
-#include "TInterfaceTypePred.h"
+#include "core/rendersys/interface_type_pred.h"
 
 /********** Program **********/
 MIDL_INTERFACE("2695D081-9638-4E9F-8457-0DEE61E64CC2")

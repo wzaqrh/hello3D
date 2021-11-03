@@ -1,7 +1,7 @@
 #pragma once
-#include "TContext.h"
-#include "TInterfaceTypePred.h"
-#include "TMaterialPred.h"
+#include "core/context.h"
+#include "core/rendersys/interface_type_pred.h"
+#include "core/rendersys/material_pred.h"
 
 class TAssimpModel;
 struct aiNode;

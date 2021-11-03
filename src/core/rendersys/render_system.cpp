@@ -1,10 +1,10 @@
-#include "IRenderSystem.h"
-#include "ISceneManager.h"
-#include "TMaterialCB.h"
-#include "TMaterial.h"
-#include "TPostProcess.h"
-#include "TSkyBox.h"
-#include "Utility.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/rendersys/material_cb.h"
+#include "core/rendersys/material.h"
+#include "core/renderable/post_process.h"
+#include "core/renderable/skybox.h"
+#include "core/base/utility.h"
 
 TRenderSystem::TRenderSystem()
 {

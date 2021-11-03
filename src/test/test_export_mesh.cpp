@@ -1,6 +1,6 @@
-#include "TApp.h"
+#include "test/app.h"
 #include "Export/Export.h"
-#include "TSprite.h"
+#include "core/renderable/sprite.h"
 
 class TestExportMesh : public IApp
 {
@@ -59,7 +59,7 @@ bool TestExportMesh::Initialize(HINSTANCE hInstance, HWND hWnd)
 		{
 			for (int j = 0; j < 6; ++j)
 				indices[i * 6 + j] = indices[j] + 4 * i;
-			Mesh_SetIndices(mMesh, indices + 6 * i, 6 * i, 6, i);
+			Mesh_SetIndices(mMesh, indices + 6 * i, 6 * i, 6, 0, i);
 			Mesh_SetTexture(mMesh, 0, texture, i);
 		}
 	}

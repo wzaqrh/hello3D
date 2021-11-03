@@ -2,7 +2,7 @@
 #ifdef _DEBUG
 #define D3D_DEBUG_INFO
 #endif
-#include <windows.h>
+#include <Windows.h>
 #include <d3dcompiler.h>
 #include <xnamath.h>
 #include <dinput.h>

@@ -1,7 +1,7 @@
-#include "TInterfaceType9.h"
-#include "IResource.h"
-#include "IRenderSystem.h"
-#include "Utility.h"
+#include "interface_type9.h"
+#include "core/rendersys/resource.h"
+#include "core/rendersys/render_system.h"
+#include "core/base/utility.h"
 
 /********** TTexture9 **********/
 TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)

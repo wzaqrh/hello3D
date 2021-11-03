@@ -1,6 +1,6 @@
 #pragma once
 //INCLUDE_PREDEFINE_H
-#include "TBaseTypes.h"
+#include "core/rendersys/base_type.h"
 
 class D3DEnumCT {
 public:

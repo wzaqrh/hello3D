@@ -1,10 +1,10 @@
-#include "TApp.h"
-#include "IRenderSystem.h"
-#include "TRenderSystem11.h"
-#include "TRenderSystem9.h"
-#include "TTransform.h"
-#include "ISceneManager.h"
-#include "Utility.h"
+#include "test/app.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/d3d11/render_system11.h"
+#include "core/rendersys/d3d9/render_system9.h"
+#include "core/base/transform.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/base/utility.h"
 
 TApp::TApp()
 {

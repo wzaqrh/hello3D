@@ -1,4 +1,4 @@
-#include "IResource.h"
+#include "core/rendersys/resource.h"
 
 /********** IResource **********/
 TResource::TResource(IUnknown** deviceObj)

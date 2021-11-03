@@ -1,5 +1,5 @@
 #pragma once
-#include "TMaterialPred.h"
+#include "core/rendersys/material_pred.h"
 
 struct TCameraBase;
 struct TCamera;

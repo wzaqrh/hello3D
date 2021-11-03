@@ -1,8 +1,8 @@
 #pragma once
 //INCLUDE_PREDEFINE_H
-#include "IRenderable.h"
-#include "TFont.h"
-#include "TSprite.h"
+#include "core/renderable/renderable.h"
+#include "core/renderable/font.h"
+#include "core/renderable/sprite.h"
 
 class TLabel : public IRenderable {
 	IRenderSystem* mRenderSys = nullptr;

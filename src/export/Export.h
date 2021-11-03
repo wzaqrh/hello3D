@@ -1,9 +1,9 @@
 #pragma once
-#include "std.h"
+#include "core/base/std.h"
 //INCLUDE_PREDEFINE_H
-#include "IRenderSystem.h"
-#include "TSprite.h"
-#include "TMesh.h"
+#include "core/rendersys/render_system.h"
+#include "core/renderable/sprite.h"
+#include "core/renderable/mesh.h"
 
 #define DLL_EXPORT extern "C" __declspec(dllexport)
 

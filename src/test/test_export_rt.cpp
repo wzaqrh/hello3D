@@ -1,9 +1,9 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_EXPORT_RT && TEST_CASE == TEST_EXPORT_RT
-#include "TApp.h"
+#include "test/app.h"
 #include "Export/Export.h"
-#include "TInterfaceType.h"
-#include "TSprite.h"
+#include "core/rendersys/interface_type.h"
+#include "core/renderable/sprite.h"
 
 class TestExportRT : public IApp
 {

@@ -1,8 +1,8 @@
-#include "TMesh.h"
-#include "IRenderSystem.h"
-#include "IRenderable.h"
-#include "TMaterial.h"
-#include "TInterfaceType.h"
+#include "core/renderable/mesh.h"
+#include "core/rendersys/render_system.h"
+#include "core/renderable/renderable.h"
+#include "core/rendersys/material.h"
+#include "core/rendersys/interface_type.h"
 
 /********** TMesh **********/
 TMesh::TMesh(IRenderSystem* renderSys, const std::string& matName, int vertCount, int indexCount)

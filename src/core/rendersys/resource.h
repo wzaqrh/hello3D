@@ -1,5 +1,5 @@
 #pragma once
-#include "std.h"
+#include "core/base/std.h"
 
 #ifdef USE_EXPORT_COM
 typedef ComPtr<struct IResource> IResourcePtr;

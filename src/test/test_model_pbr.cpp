@@ -1,13 +1,13 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_PBR && TEST_CASE == TEST_PBR
-#include "TApp.h"
-#include "ISceneManager.h"
-#include "TMaterial.h"
-#include "IRenderable.h"
-#include "TAssimpModel.h"
-#include "TSprite.h"
-#include "TTransform.h"
-#include "Utility.h"
+#include "test/app.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/rendersys/material.h"
+#include "core/renderable/renderable.h"
+#include "core/renderable/assimp_model.h"
+#include "core/renderable/sprite.h"
+#include "core/base/transform.h"
+#include "core/base/utility.h"
 
 class TestPBR : public TApp
 {

@@ -1,8 +1,8 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_EXPORT && TEST_CASE == TEST_EXPORT
-#include "TApp.h"
+#include "test/app.h"
 #include "Export/Export.h"
-#include "TSprite.h"
+#include "core/renderable/sprite.h"
 
 class TestExport : public IApp
 {

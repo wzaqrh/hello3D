@@ -1,9 +1,9 @@
 #pragma once
-#include "TInterfaceTypePred.h"
-#include "IRenderablePred.h"
-#include "ISceneManagerPred.h"
-#include "TMaterialPred.h"
-#include "TBaseTypes.h"
+#include "core/rendersys/interface_type_pred.h"
+#include "core/renderable/renderable_pred.h"
+#include "core/rendersys/scene_manager_pred.h"
+#include "core/rendersys/material_pred.h"
+#include "core/rendersys/base_type.h"
 
 MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
 IRenderSystem : public IUnknown

@@ -1,6 +1,6 @@
-#include "TSkyBox.h"
-#include "IRenderSystem.h"
-#include "TMaterial.h"
+#include "core/renderable/skybox.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/material.h"
 
 TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
 {

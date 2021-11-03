@@ -1,7 +1,7 @@
-#include "TAssimpMesh.h"
-#include "IRenderSystem.h"
-#include "IRenderable.h"
-#include "TInterfaceType.h"
+#include "core/renderable/assimp_mesh.h"
+#include "core/rendersys/render_system.h"
+#include "core/renderable/renderable.h"
+#include "core/rendersys/interface_type.h"
 
 /********** TMesh **********/
 TAssimpMesh::TAssimpMesh(const aiMesh* __data,

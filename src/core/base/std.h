@@ -11,19 +11,19 @@
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 
+#include <assert.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include <assert.h>
-#include <type_traits>
 #include <map>
 #include <memory>
 #include <queue>
 #include <functional>
+#include <type_traits>
 
-#include "stddx9.h"
-#include "stddx11.h"
-#include "ComBase.h"
+#include "core/rendersys/d3d9/stddx9.h"
+#include "core/rendersys/d3d11/stddx11.h"
+#include "core/base/com_base.h"
 
 typedef struct _XMINT4 {
 	int x, y, z, w;

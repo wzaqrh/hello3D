@@ -1,30 +1,25 @@
-#include "TestCase.h"
-#if defined TEST_DIFFUSE && TEST_CASE == TEST_DIFFUSE
-#include "TApp.h"
-#include "ISceneManager.h"
-#include "TAssimpModel.h"
-#include "TTransform.h"
-#include "Utility.h"
+#include "test/test_case.h"
+#if defined TEST_FOG && TEST_CASE == TEST_FOG
+#include "test/app.h"
+#include "core/renderable/assimp_model.h"
+#include "core/base/transform.h"
+#include "core/base/utility.h"
 
-class TestDiffuse : public TApp
+class TestFog : public TApp
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
-	virtual void OnInitLight() override;
 private:
 	TAssimpModel* mModel = nullptr;
 };
 
-void TestDiffuse::OnInitLight()
+/********** Lesson4 **********/
+void TestFog::OnPostInitDevice()
 {
-	auto light = mContext->GetSceneMng()->AddPointLight();
-	light->SetDiffuseColor(1, 1, 1, 1);
-	light->SetPosition(0, 0, -200);
-}
+	auto light2 = mContext->GetSceneMng()->AddDirectLight();
+	light2->SetDirection(0, 0, 1);
 
-void TestDiffuse::OnPostInitDevice()
-{
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -34,14 +29,21 @@ void TestDiffuse::OnPostInitDevice()
 		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson2"), layouts);
-	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
-	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); mScale = 0.05;
+};
+	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson4"), layouts, [&](TMaterialPtr mat) {
+#if 0
+		TFogExp fog;
+		fog.SetColor(0.5, 0.5, 0.5);
+		fog.SetExp(0.1);
+		TMaterialBuilder builder(mat);
+		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(TFogExp), &fog), MAKE_CBNAME(TFogExp), true);
+#endif
+	});
+	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	//mModel->PlayAnim(0);
 }
 
-void TestDiffuse::OnRender()
+void TestFog::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
 	if (mContext->GetRenderSys()->BeginScene()) {
@@ -50,5 +52,5 @@ void TestDiffuse::OnRender()
 	}
 }
 
-auto reg = AppRegister<TestDiffuse>("TestDiffuse: Diffuse Light");
+auto reg = AppRegister<TestFog>("TestFog: Fog");
 #endif

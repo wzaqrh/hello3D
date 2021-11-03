@@ -1,6 +1,6 @@
-#include "TContext.h"
-#include "TRenderSystem11.h"
-#include "TRenderSystem9.h"
+#include "core/context.h"
+#include "core/rendersys/d3d11/render_system11.h"
+#include "core/rendersys/d3d9/render_system9.h"
 
 TContext::TContext()
 {}

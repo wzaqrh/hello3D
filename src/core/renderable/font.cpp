@@ -1,5 +1,5 @@
-#include "TFont.h"
-#include "rendersys/IRenderSystem.h"
+#include "core/renderable/font.h"
+#include "core/rendersys/render_system.h"
 
 /********** TFontTexture **********/
 TFontTexture::TFontTexture(IRenderSystem* renderSys, XMINT2 size)

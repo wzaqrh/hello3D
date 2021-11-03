@@ -1,8 +1,8 @@
-#include "TSprite.h"
-#include "TTransform.h"
-#include "IRenderSystem.h"
-#include "TMaterial.h"
-#include "TInterfaceType.h"
+#include "core/renderable/sprite.h"
+#include "core/base/transform.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/material.h"
+#include "core/rendersys/interface_type.h"
 
 /********** Quad **********/
 Quad::Quad()

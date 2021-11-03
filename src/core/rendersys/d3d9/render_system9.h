@@ -1,6 +1,6 @@
 #pragma once
-#include "IRenderSystem.h"
-#include "TInterfaceType9.h"
+#include "core/rendersys/render_system.h"
+#include "interface_type9.h"
 
 class TRenderSystem9
 	: public TRenderSystem

@@ -1,11 +1,11 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_BLOOM && TEST_CASE == TEST_BLOOM
-#include "TApp.h"
-#include "ISceneManager.h"
-#include "TAssimpModel.h"
-#include "TSprite.h"
-#include "TTransform.h"
-#include "Utility.h"
+#include "test/app.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/renderable/assimp_model.h"
+#include "core/renderable/sprite.h"
+#include "core/base/transform.h"
+#include "core/base/utility.h"
 
 class TestBloom : public TApp
 {

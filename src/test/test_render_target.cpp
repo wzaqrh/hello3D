@@ -1,12 +1,12 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_RT && TEST_CASE == TEST_RT
-#include "TApp.h"
-#include "ISceneManager.h"
-#include "rendersys/TInterfaceType.h"
-#include "TAssimpModel.h"
-#include "TSprite.h"
-#include "TTransform.h"
-#include "Utility.h"
+#include "test/app.h"
+#include "core/rendersys/scene_manager.h"
+#include "rendersys/core/rendersys/interface_type.h"
+#include "core/renderable/assimp_model.h"
+#include "core/renderable/sprite.h"
+#include "core/base/transform.h"
+#include "core/base/utility.h"
 
 class TestRT : public TApp
 {

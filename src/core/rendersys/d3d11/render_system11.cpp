@@ -1,12 +1,12 @@
-#include "TRenderSystem11.h"
-#include "ISceneManager.h"
-#include "TMaterialCB.h"
-#include "TMaterial.h"
-#include "TInterfaceType11.h"
-#include "TPostProcess.h"
-#include "TSkyBox.h"
-#include "TThreadPump.h"
-#include "Utility.h"
+#include "render_system11.h"
+#include "interface_type11.h"
+#include "thread_pump.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/rendersys/material_cb.h"
+#include "core/rendersys/material.h"
+#include "core/renderable/post_process.h"
+#include "core/renderable/skybox.h"
+#include "core/base/utility.h"
 
 TRenderSystem11::TRenderSystem11()
 {

@@ -1,5 +1,5 @@
-#include "IRenderable.h"
-#include "TInterfaceType.h"
+#include "core/renderable/renderable.h"
+#include "core/rendersys/interface_type.h"
 
 /********** TTextureBySlot **********/
 void TTextureBySlot::clear()

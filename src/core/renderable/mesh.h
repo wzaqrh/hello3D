@@ -1,6 +1,6 @@
 #pragma once
 //INCLUDE_PREDEFINE_H
-#include "IRenderable.h"
+#include "core/renderable/renderable.h"
 
 struct MeshVertex
 {

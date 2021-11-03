@@ -1,7 +1,7 @@
 #pragma once
 //INCLUDE_PREDEFINE_H
-#include "TAssimpMesh.h"
-#include "IRenderable.h"
+#include "core/renderable/assimp_mesh.h"
+#include "core/renderable/renderable.h"
 
 struct AiNodeInfo {
 	aiMatrix4x4 mLocalTransform;

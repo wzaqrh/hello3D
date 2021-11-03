@@ -1,9 +1,9 @@
 #pragma once
-#include "ISceneManagerPred.h"
-#include "TInterfaceTypePred.h"
-#include "IRenderablePred.h"
-#include "TMaterialPred.h"
-#include "TBaseTypes.h"
+#include "core/rendersys/scene_manager_pred.h"
+#include "core/rendersys/interface_type_pred.h"
+#include "core/renderable/renderable_pred.h"
+#include "core/rendersys/material_pred.h"
+#include "core/rendersys/base_type.h"
 
 __declspec(align(16)) 
 struct TCameraBase {

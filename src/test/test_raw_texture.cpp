@@ -1,10 +1,10 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_RAW_TEXTURE && TEST_CASE == TEST_RAW_TEXTURE
-#include "TApp.h"
-#include "ISceneManager.h"
-#include "TInterfaceType.h"
-#include "TSprite.h"
-#include "Utility.h"
+#include "test/app.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/rendersys/interface_type.h"
+#include "core/renderable/sprite.h"
+#include "core/base/utility.h"
 #include "WINGDI.h"
 
 class TestRawTexture : public TApp

@@ -1,9 +1,9 @@
-#include "TPostProcess.h"
-#include "IRenderSystem.h"
-#include "TInterfaceType.h"
-#include "TMaterial.h"
-#include "TMaterialCB.h"
-#include "rendersys/TConstBufferDecl.h"
+#include "core/renderable/post_process.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/interface_type.h"
+#include "core/rendersys/material.h"
+#include "core/rendersys/material_cb.h"
+#include "core/rendersys/const_buffer_decl.h"
 
 /********** POSTPROCESS_VERTEX_QUAD **********/
 POSTPROCESS_VERTEX_QUAD::POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h)

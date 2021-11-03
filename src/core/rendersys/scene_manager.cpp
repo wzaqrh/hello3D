@@ -1,9 +1,9 @@
-#include "ISceneManager.h"
-#include "TTransform.h"
-#include "TMaterialCB.h"
-#include "TSkyBox.h"
-#include "TPostProcess.h"
-#include "Utility.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/base/transform.h"
+#include "core/rendersys/material_cb.h"
+#include "core/renderable/skybox.h"
+#include "core/renderable/post_process.h"
+#include "core/base/utility.h"
 
 
 TCameraBase* TDirectLight::GetLightCamera(TCamera& otherCam)

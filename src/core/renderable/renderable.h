@@ -1,8 +1,8 @@
 #pragma once
-#include "std.h"
-#include "IRenderablePred.h"
-#include "TMaterial.h"
-#include "TInterfaceTypePred.h"
+#include "core/base/std.h"
+#include "core/renderable/renderable_pred.h"
+#include "core/rendersys/material.h"
+#include "core/rendersys/interface_type_pred.h"
 
 /********** RenderOperation **********/
 struct TRenderOperation {

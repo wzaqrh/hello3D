@@ -1,15 +1,16 @@
+#include "core/base/utility.h"
 #include <windows.h>
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <d3dcompiler.h>
 #include <xnamath.h>
-#include "Utility.h"
 #include <dinput.h>
 
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
-
-
+#if _MSC_VER > 1800
+#pragma comment(lib, "legacy_stdio_definitions.lib")
+#endif
 
 /********** TD3DInput **********/
 TD3DInput::TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)

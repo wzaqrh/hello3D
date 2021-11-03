@@ -1,5 +1,5 @@
 #pragma once
-#include "TInterfaceType.h"
+#include "core/rendersys/interface_type.h"
 
 typedef std::function<void(IResource* res, HRESULT hr)> TThreadPumpCallback;
 void ResourceSetLoaded(IResource* res, HRESULT hr);

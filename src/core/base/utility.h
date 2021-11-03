@@ -1,7 +1,7 @@
 #pragma once
 //INCLUDE_PREDEFINE_H
-#include "TBaseTypes.h"
-#include "D3DEnumCT.h"
+#include "core/rendersys/base_type.h"
+#include "d3d_enum_convert.h"
 
 bool CheckHR(HRESULT result);
 

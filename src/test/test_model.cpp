@@ -1,9 +1,9 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_MODEL && TEST_CASE == TEST_MODEL
-#include "TApp.h"
-#include "TAssimpModel.h"
-#include "TTransform.h"
-#include "Utility.h"
+#include "test/app.h"
+#include "core/renderable/assimp_model.h"
+#include "core/base/transform.h"
+#include "core/base/utility.h"
 
 class TestModel : public TApp
 {

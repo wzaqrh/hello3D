@@ -1,7 +1,7 @@
-#include "TInterfaceType11.h"
-#include "IRenderSystem.h"
-#include "IResource.h"
-#include "Utility.h"
+#include "interface_type11.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource.h"
+#include "core/base/utility.h"
 
 template<class T>
 static IUnknown*& MakeDeviceObjectRef(T*& ref) {

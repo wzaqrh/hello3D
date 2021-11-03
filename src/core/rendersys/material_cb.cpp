@@ -1,6 +1,6 @@
-#include "TMaterialCB.h"
-#include "TBaseTypes.h"
-#include "TConstBufferDecl.h"
+#include "core/rendersys/material_cb.h"
+#include "core/rendersys/base_type.h"
+#include "core/rendersys/const_buffer_decl.h"
 
 /********** TDirectLight **********/
 TDirectLight::TDirectLight()

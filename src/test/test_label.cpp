@@ -1,9 +1,9 @@
-#include "TestCase.h"
+#include "test/test_case.h"
 #if defined TEST_LABEL && TEST_CASE == TEST_LABEL
-#include "TApp.h"
-#include "ISceneManager.h"
-#include "TTransform.h"
-#include "label/TLabel.h"
+#include "test/app.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/base/transform.h"
+#include "label/core/renderable/label.h"
 
 #define CASE_COUNT 4
 

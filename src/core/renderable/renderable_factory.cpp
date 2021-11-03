@@ -1,8 +1,8 @@
-#include "RenderableFactory.h"
-#include "TSprite.h"
-#include "TMesh.h"
-#include "label/TFont.h"
-#include "label/TLabel.h"
+#include "core/renderable/renderable_factory.h"
+#include "core/renderable/sprite.h"
+#include "core/renderable/mesh.h"
+#include "core/renderable/font.h"
+#include "core/renderable/label.h"
 
 RenderableFactory::RenderableFactory(IRenderSystem* renderSys)
 {

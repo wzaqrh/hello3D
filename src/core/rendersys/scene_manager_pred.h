@@ -1,5 +1,5 @@
 #pragma once
-#include "std.h"
+#include "core/base/std.h"
 
 typedef std::shared_ptr<struct TCameraBase> TCameraBasePtr;
 typedef std::shared_ptr<struct TCamera> TCameraPtr;

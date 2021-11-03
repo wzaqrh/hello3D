@@ -1,7 +1,7 @@
-#include "TBaseTypes.h"
-#include "TMaterialCB.h"
-#include "TConstBufferDecl.h"
-#include "Utility.h"
+#include "core/rendersys/base_type.h"
+#include "core/rendersys/material_cb.h"
+#include "core/rendersys/const_buffer_decl.h"
+#include "core/base/utility.h"
 
 /********** TConstBufferDeclElement **********/
 TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)

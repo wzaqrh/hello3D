@@ -1,5 +1,5 @@
 #pragma once
-#include "std.h"
+#include "core/base/std.h"
 
 template<class T> T clamp(T minVal, T maxVal, T v) { return min(max(v, minVal),maxVal); }
 

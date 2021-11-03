@@ -26,12 +26,99 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\base\com_base.h" />
+    <ClInclude Include="src\core\base\d3d_enum_convert.h" />
+    <ClInclude Include="src\core\base\std.h" />
+    <ClInclude Include="src\core\base\transform.h" />
+    <ClInclude Include="src\core\base\utility.h" />
+    <ClInclude Include="src\core\context.h" />
+    <ClInclude Include="src\core\pre_define.h" />
+    <ClInclude Include="src\core\renderable\assimp_mesh.h" />
+    <ClInclude Include="src\core\renderable\assimp_model.h" />
+    <ClInclude Include="src\core\renderable\font.h" />
+    <ClInclude Include="src\core\renderable\label.h" />
+    <ClInclude Include="src\core\renderable\mesh.h" />
+    <ClInclude Include="src\core\renderable\post_process.h" />
+    <ClInclude Include="src\core\renderable\renderable.h" />
+    <ClInclude Include="src\core\renderable\renderable_factory.h" />
+    <ClInclude Include="src\core\renderable\renderable_pred.h" />
+    <ClInclude Include="src\core\renderable\skybox.h" />
+    <ClInclude Include="src\core\renderable\sprite.h" />
+    <ClInclude Include="src\core\rendersys\base_type.h" />
+    <ClInclude Include="src\core\rendersys\const_buffer_decl.h" />
+    <ClInclude Include="src\core\rendersys\d3d11\interface_type11.h" />
+    <ClInclude Include="src\core\rendersys\d3d11\render_system11.h" />
+    <ClInclude Include="src\core\rendersys\d3d11\stddx11.h" />
+    <ClInclude Include="src\core\rendersys\d3d11\thread_pump.h" />
+    <ClInclude Include="src\core\rendersys\d3d9\interface_type9.h" />
+    <ClInclude Include="src\core\rendersys\d3d9\render_system9.h" />
+    <ClInclude Include="src\core\rendersys\d3d9\stddx9.h" />
+    <ClInclude Include="src\core\rendersys\interface_type.h" />
+    <ClInclude Include="src\core\rendersys\interface_type_pred.h" />
+    <ClInclude Include="src\core\rendersys\material.h" />
+    <ClInclude Include="src\core\rendersys\material_cb.h" />
+    <ClInclude Include="src\core\rendersys\material_pred.h" />
+    <ClInclude Include="src\core\rendersys\render_system.h" />
+    <ClInclude Include="src\core\rendersys\resource.h" />
+    <ClInclude Include="src\core\rendersys\scene_manager.h" />
+    <ClInclude Include="src\core\rendersys\scene_manager_pred.h" />
+    <ClInclude Include="src\export\Export.h" />
+    <ClInclude Include="src\test\app.h" />
+    <ClInclude Include="src\test\test_case.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\base\d3d_enum_convert.cpp" />
+    <ClCompile Include="src\core\base\transform.cpp" />
+    <ClCompile Include="src\core\base\utility.cpp" />
+    <ClCompile Include="src\core\context.cpp" />
+    <ClCompile Include="src\core\renderable\assimp_mesh.cpp" />
+    <ClCompile Include="src\core\renderable\assimp_model.cpp" />
+    <ClCompile Include="src\core\renderable\font.cpp" />
+    <ClCompile Include="src\core\renderable\label.cpp" />
+    <ClCompile Include="src\core\renderable\mesh.cpp" />
+    <ClCompile Include="src\core\renderable\post_process.cpp" />
+    <ClCompile Include="src\core\renderable\renderable.cpp" />
+    <ClCompile Include="src\core\renderable\renderable_factory.cpp" />
+    <ClCompile Include="src\core\renderable\skybox.cpp" />
+    <ClCompile Include="src\core\renderable\sprite.cpp" />
+    <ClCompile Include="src\core\rendersys\base_type.cpp" />
+    <ClCompile Include="src\core\rendersys\d3d11\interface_type11.cpp" />
+    <ClCompile Include="src\core\rendersys\d3d11\render_system11.cpp" />
+    <ClCompile Include="src\core\rendersys\d3d11\thread_pump.cpp" />
+    <ClCompile Include="src\core\rendersys\d3d9\interface_type9.cpp" />
+    <ClCompile Include="src\core\rendersys\d3d9\render_system9.cpp" />
+    <ClCompile Include="src\core\rendersys\interface_type.cpp" />
+    <ClCompile Include="src\core\rendersys\material.cpp" />
+    <ClCompile Include="src\core\rendersys\material_cb.cpp" />
+    <ClCompile Include="src\core\rendersys\render_system.cpp" />
+    <ClCompile Include="src\core\rendersys\resource.cpp" />
+    <ClCompile Include="src\core\rendersys\scene_manager.cpp" />
+    <ClCompile Include="src\export\Export.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\test\app.cpp" />
+    <ClCompile Include="src\test\test_bloom.cpp" />
+    <ClCompile Include="src\test\test_diffuse.cpp" />
+    <ClCompile Include="src\test\test_export.cpp" />
+    <ClCompile Include="src\test\test_export_mesh.cpp" />
+    <ClCompile Include="src\test\test_export_rt.cpp" />
+    <ClCompile Include="src\test\test_fog.cpp" />
+    <ClCompile Include="src\test\test_label.cpp" />
+    <ClCompile Include="src\test\test_mesh.cpp" />
+    <ClCompile Include="src\test\test_model.cpp" />
+    <ClCompile Include="src\test\test_model_pbr.cpp" />
+    <ClCompile Include="src\test\test_raw_texture.cpp" />
+    <ClCompile Include="src\test\test_render_target.cpp" />
+    <ClCompile Include="src\test\test_shadow_map.cpp" />
+    <ClCompile Include="src\test\test_spec_skybox.cpp" />
+    <ClCompile Include="src\test\test_sprite.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Hello3D</ProjectName>
+    <ProjectName>mir</ProjectName>
     <ProjectGuid>{06EDC280-1187-4614-A248-E640C095FA6B}</ProjectGuid>
     <RootNamespace>Tutorial01</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -42,7 +129,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -93,15 +180,15 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)Classes\rendersys\d3d9;$(ProjectDir)Classes\rendersys\d3d11;$(ProjectDir)Classes;$(ProjectDir)Classes\app;$(ProjectDir)Classes\base;$(ProjectDir)Classes\renderable;$(ProjectDir)Classes\rendersys;$(ProjectDir)Classes\TestCases;$(SolutionDir);$(ProjectDir)include\freetype2\freetype;$(ProjectDir)include\freetype2</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)src;$(DXSDK_DIR)Include;$(ProjectDir)include;$(ProjectDir)include\freetype2\freetype;$(ProjectDir)include\freetype2</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86;$(ProjectDir)libs;</LibraryPath>
     <IntDir>$(Configuration)\objs</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x64;$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)Classes;$(ProjectDir)Classes\app;$(ProjectDir)Classes\base;$(ProjectDir)Classes\renderable;$(ProjectDir)Classes\rendersys;$(SolutionDir)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath);$(ProjectDir)src</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x64;$(LibraryPath)</LibraryPath>
     <IntDir>$(Configuration)\objs</IntDir>
     <OutDir>$(SolutionDir)\$(Configuration)\</OutDir>
@@ -144,7 +231,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(ProjectDir)include;$(ProjectDir)..\dwke3d\WebKitLibraries\win\include\cairo;$(ProjectDir)..\dwke3d\CairoAdapterDx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -161,7 +248,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <AdditionalLibraryDirectories>.\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>

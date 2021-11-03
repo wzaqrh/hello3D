@@ -11,13 +11,9 @@
 #include <d3dcompiler.h>
 #include <xnamath.h>
 #include <dinput.h>
-#include "Utility.h"
-#include "IRenderSystem.h"
-#include "TApp.h"
-
-#if _MSC_VER > 1800
-#pragma comment(lib, "legacy_stdio_definitions.lib")
-#endif
+#include "core/rendersys/render_system.h"
+#include "core/base/utility.h"
+#include "test/app.h"
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);

@@ -1,7 +1,7 @@
 #pragma once
-#include "IRenderable.h"
-#include "ISceneManagerPred.h"
-#include "TInterfaceType.h"
+#include "core/renderable/renderable.h"
+#include "core/rendersys/scene_manager_pred.h"
+#include "core/rendersys/interface_type.h"
 
 struct SKYBOX_VERTEX
 {

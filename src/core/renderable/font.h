@@ -1,6 +1,6 @@
 #pragma once
 //INCLUDE_PREDEFINE_H
-#include "TInterfaceType.h"
+#include "core/rendersys/interface_type.h"
 #include "ft2build.h"
 #include "freetype.h"
 #include "freetype2/freetype/ftglyph.h"

@@ -1,7 +1,7 @@
 #pragma once
-#include "IRenderSystem.h"
-#include "ISceneManager.h"
-#include "RenderableFactory.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/scene_manager.h"
+#include "core/renderable/renderable_factory.h"
 
 class TContext {
 	ISceneManager* mSceneMng;

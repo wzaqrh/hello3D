@@ -1,5 +1,5 @@
 #pragma once
-#include "TInterfaceType.h"
+#include "core/rendersys/interface_type.h"
 
 #ifdef USE_EXPORT_COM
 typedef ComPtr< struct TBlobDataD3d11> TBlobDataD3d11Ptr;
