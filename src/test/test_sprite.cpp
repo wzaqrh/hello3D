@@ -4,6 +4,8 @@
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/sprite.h"
 
+using namespace mir;
+
 class TestSprite : public TApp
 {
 protected:

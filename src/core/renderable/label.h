@@ -4,6 +4,8 @@
 #include "core/renderable/font.h"
 #include "core/renderable/sprite.h"
 
+namespace mir {
+
 class TLabel : public IRenderable {
 	IRenderSystem* mRenderSys = nullptr;
 	TFontPtr mFont;
@@ -42,3 +44,5 @@ private:
 	void ForceLayout();
 };
 typedef std::shared_ptr<TLabel> TLabelPtr;
+
+}

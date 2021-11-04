@@ -6,6 +6,8 @@
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 TRenderSystem::TRenderSystem()
 {
 	mDrawLimit = 4;
@@ -117,4 +119,6 @@ void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 STDMETHODIMP_(ISceneManagerPtr) TRenderSystem::GetSceneManager()
 {
 	return mSceneManager;
+}
+
 }

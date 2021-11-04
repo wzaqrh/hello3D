@@ -4,6 +4,8 @@
 #include "core/rendersys/resource.h"
 #include "core/rendersys/material_cb.h"
 
+namespace mir {
+
 #define E_PASS_SHADOWCASTER "ShadowCaster"
 #define E_PASS_FORWARDBASE "ForwardBase"
 #define E_PASS_FORWARDADD "ForwardAdd"
@@ -162,3 +164,5 @@ private:
 #else
 #define MAKE_MAT_NAME(NAME) std::string(NAME) + FILE_EXT_FX
 #endif
+
+}

@@ -12,6 +12,8 @@
 #pragma comment(lib, "legacy_stdio_definitions.lib")
 #endif
 
+namespace mir {
+
 /********** TD3DInput **********/
 TD3DInput::TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
@@ -435,4 +437,6 @@ XMMATRIX XM::Inverse(const XMMATRIX& m)
 	XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(m));
 	XMMATRIX ret = COPY_TO_GPU(XMMatrixInverse(&det, m));
 	return ret;
+}
+
 }

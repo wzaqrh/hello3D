@@ -1,6 +1,8 @@
 #include "core/renderable/renderable.h"
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 /********** TTextureBySlot **********/
 void TTextureBySlot::clear()
 {
@@ -100,4 +102,6 @@ const TRenderOperation& TRenderOperationQueue::operator[](size_t pos) const
 TRenderOperation& TRenderOperationQueue::operator[](size_t pos)
 {
 	return At(pos);
+}
+
 }

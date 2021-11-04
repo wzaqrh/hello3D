@@ -7,6 +7,8 @@
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 TRenderSystem9::TRenderSystem9()
 {
 	mMaterialFac = std::make_shared<TMaterialFactory>(this);
@@ -771,4 +773,6 @@ void TRenderSystem9::EndScene()
 
 	mDevice9->EndScene();
 	mDevice9->Present(NULL, NULL, NULL, NULL);
+}
+
 }

@@ -2,6 +2,8 @@
 #include "core/renderable/renderable.h"
 #include "core/rendersys/interface_type_pred.h"
 
+namespace mir {
+
 struct Pos3Color3Tex2
 {
 	XMFLOAT3 Pos;
@@ -65,3 +67,4 @@ public:
 };
 typedef std::shared_ptr<TSprite> TSpritePtr;
 
+}

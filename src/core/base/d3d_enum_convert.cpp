@@ -1,5 +1,7 @@
 #include "d3d_enum_convert.h"
 
+namespace mir {
+
 D3DBLEND D3DEnumCT::d3d11To9(D3D11_BLEND blend)
 {
 	switch (blend)
@@ -478,4 +480,6 @@ int D3DEnumCT::GetWidth(DXGI_FORMAT format)
 		break;
 	}
 	return width;
+}
+
 }

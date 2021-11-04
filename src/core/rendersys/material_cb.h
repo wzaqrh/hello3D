@@ -1,6 +1,8 @@
 #pragma once
 #include "core/rendersys/material_pred.h"
 
+namespace mir {
+
 struct TCameraBase;
 struct TCamera;
 struct TConstBufferDecl;
@@ -121,4 +123,4 @@ struct cbUnityGlobal
 	static TConstBufferDecl MKDesc();
 };
 
-
+}

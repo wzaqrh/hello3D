@@ -2,6 +2,8 @@
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/material.h"
 
+namespace mir {
+
 TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
 {
 	mRenderSys = pRenderSys;
@@ -58,4 +60,6 @@ int TSkyBox::GenRenderOperation(TRenderOperationQueue& opList)
 void TSkyBox::Draw()
 {
 	mRenderSys->Draw(this);
+}
+
 }

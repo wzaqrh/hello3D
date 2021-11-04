@@ -6,6 +6,8 @@
 #include "core/rendersys/interface_type.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 /********** AiNodeInfo **********/
 AiNodeInfo::AiNodeInfo()
 {
@@ -542,4 +544,6 @@ int TAssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
 void TAssimpModel::Draw()
 {
 	mRenderSys->Draw(this);
+}
+
 }

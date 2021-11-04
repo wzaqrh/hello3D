@@ -2,6 +2,8 @@
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/const_buffer_decl.h"
 
+namespace mir {
+
 /********** TDirectLight **********/
 TDirectLight::TDirectLight()
 {
@@ -229,4 +231,6 @@ TConstBufferDecl cbUnityGlobal::MKDesc()
 	BUILD_ADD(_AmbientOrLightmapUV);
 	BUILD_ADD(_Unity_SpecCube0_HDR);
 	return builder.Build();
+}
+
 }

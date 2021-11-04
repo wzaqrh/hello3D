@@ -3,6 +3,8 @@
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/renderable_factory.h"
 
+namespace mir {
+
 class TContext {
 	ISceneManager* mSceneMng;
 	IRenderSystem* mRenderSys;
@@ -18,3 +20,5 @@ public:
 	IRenderSystem* GetRenderSys() { return mRenderSys; }
 	RenderableFactory* GetRenderableFac() { return mRenderableFac; }
 };
+
+}

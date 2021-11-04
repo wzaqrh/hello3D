@@ -2,6 +2,8 @@
 //INCLUDE_PREDEFINE_H
 #include "core/renderable/renderable.h"
 
+namespace mir {
+
 //#define MESH_VETREX_POSTEX
 struct AssimpMeshVertex
 {
@@ -41,3 +43,5 @@ private:
 };
 typedef std::shared_ptr<TAssimpMesh> TMeshSharedPtr;
 typedef std::vector<TMeshSharedPtr> TMeshSharedPtrVector;
+
+}

@@ -4,6 +4,8 @@
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
 
+namespace mir {
+
 RenderableFactory::RenderableFactory(IRenderSystem* renderSys)
 {
 	mRenderSys = renderSys;
@@ -29,4 +31,6 @@ TLabelPtr RenderableFactory::CreateLabel(const std::string& fontPath, int fontSi
 {
 	TFontPtr font = mFontCache->GetFont(fontPath, fontSize);
 	return std::make_shared<TLabel>(mRenderSys, font);
+}
+
 }

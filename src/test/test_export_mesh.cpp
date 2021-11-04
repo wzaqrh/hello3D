@@ -2,6 +2,8 @@
 #include "Export/Export.h"
 #include "core/renderable/sprite.h"
 
+using namespace mir;
+
 class TestExportMesh : public IApp
 {
 protected:

@@ -4,6 +4,8 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 /********** Quad **********/
 Quad::Quad()
 {
@@ -164,4 +166,6 @@ int TSprite::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mWorldTransform = Transform->Matrix();
 	opList.AddOP(op);
 	return 1;
+}
+
 }

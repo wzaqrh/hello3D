@@ -1,6 +1,8 @@
 #pragma once
 #include "core/base/std.h"
 
+namespace mir {
+
 struct IRenderSystem;
 #ifdef USE_EXPORT_COM
 
@@ -45,3 +47,5 @@ typedef ComPtr<struct TResource> TResourcePtr;
 typedef std::shared_ptr<struct IResource> IResourcePtr;
 typedef std::shared_ptr<struct TResource> TResourcePtr;
 #endif
+
+}

@@ -2,6 +2,8 @@
 #include "core/renderable/renderable.h"
 //INCLUDE_PREDEFINE_H
 
+namespace mir {
+
 struct POSTPROCESS_VERTEX
 {
 	XMFLOAT4 Pos;
@@ -53,3 +55,5 @@ class TBloom : public TPostProcess
 public:
 	TBloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex);
 };
+
+}

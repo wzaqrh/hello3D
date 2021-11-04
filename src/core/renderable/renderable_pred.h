@@ -1,6 +1,8 @@
 #pragma once
 #include "core/base/std.h"
 
+namespace mir {
+
 typedef std::shared_ptr<struct TTransform> TTransformPtr;
 
 struct TTextureBySlot;
@@ -17,3 +19,5 @@ typedef std::shared_ptr<class TSprite> TSpritePtr;
 typedef std::shared_ptr<class TMesh> TMeshPtr;
 typedef std::shared_ptr<class TLabel> TLabelPtr;
 typedef std::shared_ptr<class TFontCache> TFontCachePtr;
+
+}

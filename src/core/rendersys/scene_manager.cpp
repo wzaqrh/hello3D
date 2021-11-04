@@ -5,6 +5,7 @@
 #include "core/renderable/post_process.h"
 #include "core/base/utility.h"
 
+namespace mir {
 
 TCameraBase* TDirectLight::GetLightCamera(TCamera& otherCam)
 {
@@ -259,4 +260,6 @@ TPostProcessPtr TSceneManager::AddPostProcess(const std::string& name)
 
 	if (process) mPostProcs.push_back(process);
 	return process;
+}
+
 }

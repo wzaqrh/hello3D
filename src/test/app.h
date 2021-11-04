@@ -3,8 +3,14 @@
 #include "core/rendersys/interface_type_pred.h"
 #include "core/rendersys/material_pred.h"
 
-class TAssimpModel;
-struct aiNode;
+namespace mir {
+	struct aiNode;
+	class TAssimpModel;
+	class TD3DInput;
+	class SDTimer;
+	struct TMovable;
+	typedef std::shared_ptr<struct TMovable> TMovablePtr;
+}
 
 struct IApp
 {
@@ -15,7 +21,7 @@ struct IApp
 	virtual std::string GetName() = 0;
 };
 
-typedef std::shared_ptr<struct TMovable> TMovablePtr;
+typedef std::shared_ptr<mir::TMovable> TMovablePtr;
 class TApp : public IApp
 {
 public:
@@ -35,10 +41,10 @@ protected:
 protected:
 	XMMATRIX GetWorldTransform();
 protected:
-	TContext* mContext = nullptr;
-	class TD3DInput* mInput = nullptr;
-	class SDTimer* mTimer;
-	TMovablePtr mMove;
+	mir::TContext* mContext = nullptr;
+	class mir::TD3DInput* mInput = nullptr;
+	class mir::SDTimer* mTimer;
+	mir::TMovablePtr mMove;
 	XMFLOAT4 mBackgndColor;
 public:
 	std::string mName;

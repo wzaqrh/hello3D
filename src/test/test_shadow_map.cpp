@@ -7,6 +7,8 @@
 #include "core/base/transform.h"
 #include "core/base/utility.h"
 
+using namespace mir;
+
 struct cbShadowMap
 {
 	XMMATRIX LightView;
@@ -41,8 +43,8 @@ void TestShadowMap::OnPostInitDevice()
 	mContext->GetSceneMng()->SetPerspectiveCamera(45, 30, 300);
 	mContext->GetSceneMng()->SetSkyBox("images\\uffizi_cross.dds");
 
-	float dd = 9;
-	mMove->SetDefScale(SCALE_BASE * 0.02); mMove->SetPosition(dd, dd, -dd);
+	float dd = 3;
+	mMove->SetDefScale(SCALE_BASE * 0.2); mMove->SetPosition(0, 0, -dd);
 #if 0
 	auto LightCam = mLight->GetLightCamera(*mContext->GetSceneMng()->GetDefCamera());
 	//auto pCam = &LightCam;
@@ -59,10 +61,10 @@ void TestShadowMap::OnPostInitDevice()
 
 	auto move1 = std::make_shared<TMovable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new TAssimpModel(mRenderSys, move1, matName);
+	mModel1 = new TAssimpModel(mContext->GetRenderSys(), move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new TAssimpModel(mRenderSys, mMove, matName);
+	mModel2 = new TAssimpModel(mContext->GetRenderSys(), mMove, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 
@@ -77,8 +79,8 @@ void TestShadowMap::OnRender()
 	mModel2->GenRenderOperation(opQueue);
 
 	if (mContext->GetRenderSys()->BeginScene()) {
-		mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mRenderSys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->GetRenderSys()->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
+		mContext->GetRenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
 		mContext->GetRenderSys()->EndScene();
 	}
 #else
@@ -108,5 +110,5 @@ void TestShadowMap::OnRender()
 #endif
 }
 
-auto reg = AppRegister<Lesson7>("Lesson7: ShadowMap");
+auto reg = AppRegister<TestShadowMap>("Lesson7: ShadowMap");
 #endif

@@ -1,6 +1,8 @@
 #pragma once
 #include "core/rendersys/base_type.h"
 
+namespace mir {
+
 __declspec(align(16)) 
 struct TTransform {
 	XMMATRIX mMatrix;
@@ -53,4 +55,4 @@ public:
 };
 typedef std::shared_ptr<TMovable> TMovablePtr;
 
-
+}

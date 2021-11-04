@@ -1,6 +1,8 @@
 #pragma once
 #include "core/base/std.h"
 
+namespace mir {
+
 enum enLightType {
 	E_LIGHT_DIRECT,
 	E_LIGHT_POINT,
@@ -26,3 +28,5 @@ struct TMaterialBuilder;
 
 struct TMaterialFactory;
 typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;
+
+}

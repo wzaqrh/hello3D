@@ -1,6 +1,8 @@
 #include "core/renderable/font.h"
 #include "core/rendersys/render_system.h"
 
+namespace mir {
+
 /********** TFontTexture **********/
 TFontTexture::TFontTexture(IRenderSystem* renderSys, XMINT2 size)
 {
@@ -173,4 +175,6 @@ TFontPtr TFontCache::GetFont(std::string fontPath, int fontSize)
 		mFonts.insert(std::make_pair(key, font));
 	}
 	return font;
+}
+
 }

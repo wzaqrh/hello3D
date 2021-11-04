@@ -3,6 +3,8 @@
 #include "core/renderable/renderable.h"
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 /********** TMesh **********/
 TAssimpMesh::TAssimpMesh(const aiMesh* __data,
 	std::vector<AssimpMeshVertex>& __vertices,
@@ -43,4 +45,6 @@ int TAssimpMesh::GenRenderOperation(TRenderOperationQueue& opList)
 	op.mTextures = *Textures;
 	opList.AddOP(op);
 	return 1;
+}
+
 }

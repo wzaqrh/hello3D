@@ -8,6 +8,8 @@
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 TRenderSystem11::TRenderSystem11()
 {
 	mMaterialFac = std::make_shared<TMaterialFactory>(this);
@@ -989,4 +991,6 @@ void TRenderSystem11::EndScene()
 	}
 	_DoPostProcess();
 	mSwapChain->Present(0, 0);
+}
+
 }

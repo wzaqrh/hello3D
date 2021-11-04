@@ -2,8 +2,9 @@
 #include "core/rendersys/render_system.h"
 #include "interface_type11.h"
 
-class TRenderSystem11 
-	: public TRenderSystem
+namespace mir {
+
+class TRenderSystem11 : public TRenderSystem
 {
 private:
 	HWND mHWnd = NULL;
@@ -95,3 +96,4 @@ protected:
 	void _DoPostProcess();
 };
 
+}

@@ -5,6 +5,8 @@
 #include "core/base/transform.h"
 #include "core/base/utility.h"
 
+using namespace mir;
+
 class TestModel : public TApp
 {
 protected:
@@ -42,7 +44,7 @@ void TestModel::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
 	if (mContext->GetRenderSys()->BeginScene()) {
-		mContext->GetRenderSys()->Draw();
+		mContext->GetRenderSys()->Draw(mModel);
 		mContext->GetRenderSys()->EndScene();
 	}
 }

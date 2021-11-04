@@ -2,6 +2,8 @@
 #include "core/rendersys/resource.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 void ResourceSetLoaded(IResource* res, HRESULT hr)
 {
 	if (! FAILED(hr))
@@ -143,4 +145,6 @@ void TThreadPump::Update(float dt)
 			}
 		}
 	}
+}
+
 }

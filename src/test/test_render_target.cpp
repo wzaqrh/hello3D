@@ -8,6 +8,8 @@
 #include "core/base/transform.h"
 #include "core/base/utility.h"
 
+using namespace mir;
+
 class TestRT : public TApp
 {
 protected:

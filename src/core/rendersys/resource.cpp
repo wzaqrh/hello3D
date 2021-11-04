@@ -1,6 +1,7 @@
 #include "core/rendersys/resource.h"
 
-/********** IResource **********/
+namespace mir {
+
 TResource::TResource(IUnknown** deviceObj)
 	:mCurState(E_RES_STATE_NONE)
 	,mDeviceObj(deviceObj)
@@ -62,4 +63,6 @@ void TResource::AddDependency(IResourcePtr res)
 	res->AddOnLoadedListener([=](IResource* res) {
 		CheckAndSetLoaded();
 	});
+}
+
 }

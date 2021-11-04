@@ -5,6 +5,8 @@
 #include "core/rendersys/material_pred.h"
 #include "core/rendersys/base_type.h"
 
+namespace mir {
+
 MIDL_INTERFACE("B43DD74F-6C65-4C17-85C1-F89A9B2348AD")
 IRenderSystem : public IUnknown
 {
@@ -100,3 +102,5 @@ public:
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube) = 0;
 };
+
+}

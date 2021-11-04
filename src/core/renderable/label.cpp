@@ -5,6 +5,8 @@
 #include "core/rendersys/interface_type.h"
 #include "freetype2/freetype/ftglyph.h"
 
+namespace mir {
+
 struct IndicesData {
 	unsigned int Indices[TLabel::MAX_STRING_LENGTH * 6];
 	IndicesData() {
@@ -232,4 +234,6 @@ void TLabel::SetString(const std::string& str)
 
 	AutoUpdateSize();
 	ForceLayout();
+}
+
 }

@@ -6,6 +6,8 @@
 #include "core/base/transform.h"
 #include "core/base/utility.h"
 
+using namespace mir;
+
 class TestDiffuse : public TApp
 {
 protected:

@@ -1,6 +1,8 @@
 #pragma once
 #include "core/rendersys/interface_type_pred.h"
 
+namespace mir {
+
 /********** Program **********/
 MIDL_INTERFACE("2695D081-9638-4E9F-8457-0DEE61E64CC2")
 IBlobData : public IUnknown {
@@ -138,3 +140,5 @@ ISamplerState : public IUnknown{
 	//virtual ID3D11SamplerState*& GetSampler11();
 	//virtual std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();
 };
+
+}

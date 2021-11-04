@@ -2,6 +2,8 @@
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/d3d11/interface_type11.h"
 
+namespace mir {
+
 template<class T>
 static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	IUnknown** ppDeviceObj = (IUnknown**)&ref;
@@ -27,4 +29,6 @@ size_t TBlobDataStd::GetBufferSize()
 int IIndexBuffer::GetCount()
 {
 	return GetBufferSize() / GetWidth();
+}
+
 }

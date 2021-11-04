@@ -2,6 +2,8 @@
 //INCLUDE_PREDEFINE_H
 #include "core/renderable/renderable.h"
 
+namespace mir {
+
 struct MeshVertex
 {
 	XMFLOAT3 Position;
@@ -42,3 +44,5 @@ public:
 	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
 };
 typedef std::shared_ptr<TMesh> TMeshPtr;
+
+}

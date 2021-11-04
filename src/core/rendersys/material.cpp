@@ -6,6 +6,8 @@
 #include "core/renderable/post_process.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 /********** TContantBufferInfo **********/
 TContantBufferInfo::TContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name, bool __isUnique)
 	:buffer(__buffer)
@@ -624,4 +626,6 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
 
 	material = builder.Build();
 	return material;
+}
+
 }

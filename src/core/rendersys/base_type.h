@@ -1,6 +1,8 @@
 #pragma once
 #include "core/base/std.h"
 
+namespace mir {
+
 template<class T> T clamp(T minVal, T maxVal, T v) { return min(max(v, minVal),maxVal); }
 
 struct TData 
@@ -68,3 +70,5 @@ public:
 	TConstBufferDeclElement& Last();
 };
 typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
+
+}

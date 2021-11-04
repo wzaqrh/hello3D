@@ -5,6 +5,8 @@
 #include "core/rendersys/material_pred.h"
 #include "core/rendersys/base_type.h"
 
+namespace mir {
+
 __declspec(align(16)) 
 struct TCameraBase {
 public:
@@ -110,4 +112,5 @@ public:
 	};
 
 	STDMETHODIMP_(TPostProcessPtr) AddPostProcess(const std::string& name) override;
+};
 };

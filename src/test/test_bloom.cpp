@@ -7,6 +7,8 @@
 #include "core/base/transform.h"
 #include "core/base/utility.h"
 
+using namespace mir;
+
 class TestBloom : public TApp
 {
 protected:

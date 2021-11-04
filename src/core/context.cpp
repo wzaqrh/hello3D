@@ -2,6 +2,8 @@
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d9/render_system9.h"
 
+namespace mir {
+
 TContext::TContext()
 {}
 bool TContext::Initialize(HWND hWnd)
@@ -24,6 +26,6 @@ bool TContext::Initialize(HWND hWnd)
 TContext::~TContext()
 {}
 void TContext::Dispose()
-{
+{}
 
 }

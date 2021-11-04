@@ -1,5 +1,7 @@
 #include "core/base/transform.h"
 
+namespace mir {
+
 //TTransform
 TTransform::TTransform()
 {
@@ -154,3 +156,4 @@ const XMMATRIX& TMovable::GetWorldTransform()
 	return GetMatrixSRT();
 }
 
+}

@@ -6,11 +6,13 @@
 #include "core/rendersys/scene_manager.h"
 #include "core/base/utility.h"
 
+using namespace mir;
+
 TApp::TApp()
 {
-	mMove = MakePtr<TMovable>();
+	mMove = mir::MakePtr<mir::TMovable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
-	mContext = new TContext;
+	mContext = new mir::TContext;
 }
 void TApp::Create()
 {}
@@ -26,8 +28,8 @@ bool TApp::Initialize(HINSTANCE hInstance, HWND hWnd)
 	OnInitLight();
 	OnPostInitDevice();
 
-	mInput = new TD3DInput(hInstance, hWnd, mContext->GetRenderSys()->GetWinSize().x, mContext->GetRenderSys()->GetWinSize().y);
-	mTimer = new SDTimer;
+	mInput = new mir::TD3DInput(hInstance, hWnd, mContext->GetRenderSys()->GetWinSize().x, mContext->GetRenderSys()->GetWinSize().y);
+	mTimer = new mir::SDTimer;
 	return true;
 }
 
@@ -53,7 +55,7 @@ void TApp::Render()
 	//rotate camera
 	if (sceneMng->GetDefCamera()->mIsPespective)
 	{
-		TINT4 m = mInput->GetMouseLocation(false);
+		mir::TINT4 m = mInput->GetMouseLocation(false);
 		float angy = 3.14 * m.x / renderSys->GetWinSize().x, angx = 3.14 * m.y / renderSys->GetWinSize().y;
 		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
@@ -63,8 +65,8 @@ void TApp::Render()
 	}
 
 	{
-		TINT4 m = mInput->GetMouseLocation(true);
-		float scalez = clamp(0.00001f, 10.0f, mMove->mDefScale * (1000 + m.z) / 1000.0f);
+		mir::TINT4 m = mInput->GetMouseLocation(true);
+		float scalez = mir::clamp(0.00001f, 10.0f, mMove->mDefScale * (1000 + m.z) / 1000.0f);
 		float angy = 3.14 * -m.x / renderSys->GetWinSize().x, angx = 3.14 * -m.y / renderSys->GetWinSize().y;
 		
 		mMove->SetScale(scalez);

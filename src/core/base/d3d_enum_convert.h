@@ -1,6 +1,7 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
 #include "core/rendersys/base_type.h"
+
+namespace mir {
 
 class D3DEnumCT {
 public:
@@ -15,3 +16,5 @@ public:
 	static D3DTEXTUREADDRESS d3d11To9(D3D11_TEXTURE_ADDRESS_MODE addrMode);
 	static std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> d3d11To9(D3D11_FILTER filter);
 };
+
+}

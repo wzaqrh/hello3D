@@ -1,6 +1,8 @@
 #pragma once
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 #ifdef USE_EXPORT_COM
 typedef ComPtr< struct TBlobDataD3d11> TBlobDataD3d11Ptr;
 typedef ComPtr< struct TInputLayout11> TInputLayout11Ptr;
@@ -219,3 +221,5 @@ public:
 	TSamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
 	ID3D11SamplerState*& GetSampler11();
 };
+
+}

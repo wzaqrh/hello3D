@@ -3,6 +3,8 @@
 #include "core/rendersys/resource.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 template<class T>
 static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	IUnknown** ppDeviceObj = (IUnknown**)&ref;
@@ -370,4 +372,6 @@ void TProgram11::SetPixel(TPixelShader11Ptr pPixel)
 {
 	mPixel = pPixel;
 	mRes->AddDependency(pPixel->AsRes());
+}
+
 }

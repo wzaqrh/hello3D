@@ -7,6 +7,8 @@
 #include "core/base/utility.h"
 #include "WINGDI.h"
 
+using namespace mir;
+
 class TestRawTexture : public TApp
 {
 protected:

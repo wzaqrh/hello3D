@@ -4,6 +4,8 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/interface_type_pred.h"
 
+namespace mir {
+
 /********** RenderOperation **********/
 struct TRenderOperation {
 	TMaterialPtr mMaterial;
@@ -32,3 +34,5 @@ public:
 struct IRenderable {
 	virtual int GenRenderOperation(TRenderOperationQueue& opList) = 0;
 };
+
+}

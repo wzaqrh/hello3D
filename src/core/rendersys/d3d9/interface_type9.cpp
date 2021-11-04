@@ -3,6 +3,8 @@
 #include "core/rendersys/render_system.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 /********** TTexture9 **********/
 TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
 	: mTexture(__texture)
@@ -361,4 +363,6 @@ void TProgram9::SetVertex(TVertexShader9Ptr pVertex) {
 void TProgram9::SetPixel(TPixelShader9Ptr pPixel) {
 	mPixel = pPixel;
 	mRes->AddDependency(pPixel->AsRes());
+}
+
 }

@@ -3,6 +3,8 @@
 #include "core/rendersys/scene_manager_pred.h"
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 struct SKYBOX_VERTEX
 {
 	XMFLOAT4 pos;
@@ -27,3 +29,5 @@ public:
 	void Draw();
 };
 typedef std::shared_ptr<TSkyBox> TSkyBoxPtr;
+
+}

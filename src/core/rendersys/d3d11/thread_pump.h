@@ -1,6 +1,8 @@
 #pragma once
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 typedef std::function<void(IResource* res, HRESULT hr)> TThreadPumpCallback;
 void ResourceSetLoaded(IResource* res, HRESULT hr);
 
@@ -30,4 +32,6 @@ public:
 	void Update(float dt);
 };
 typedef std::shared_ptr<TThreadPump> TThreadPumpPtr;
+
+}
 

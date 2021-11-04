@@ -4,6 +4,8 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 /********** TMesh **********/
 TMesh::TMesh(IRenderSystem* renderSys, const std::string& matName, int vertCount, int indexCount)
 {
@@ -124,4 +126,6 @@ void TMesh::SetTexture(int slot, ITexturePtr texture, int subMeshIndex)
 	assert(subMeshIndex < SubMeshs.size());
 	auto& submesh = SubMeshs[subMeshIndex];
 	submesh.Textures[slot] = texture;
+}
+
 }

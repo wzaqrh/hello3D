@@ -1,6 +1,8 @@
 #pragma once
 #include "core/rendersys/interface_type.h"
 
+namespace mir {
+
 #ifdef USE_EXPORT_COM
 typedef ComPtr<struct TBlobDataD3d9> TBlobDataD3d9Ptr;
 typedef ComPtr<struct TInputLayout9> TInputLayout9Ptr;
@@ -237,3 +239,5 @@ TSamplerState9 : public ComBase<ISamplerState> {
 public:
 	std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();
 };
+
+}

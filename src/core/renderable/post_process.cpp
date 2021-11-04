@@ -5,6 +5,8 @@
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/const_buffer_decl.h"
 
+namespace mir {
+
 /********** POSTPROCESS_VERTEX_QUAD **********/
 POSTPROCESS_VERTEX_QUAD::POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h)
 {
@@ -187,4 +189,6 @@ TConstBufferDecl& cbBloom::GetDesc()
 	builder.Add(CBELEMNTS(SampleOffsets));
 	builder.Add(CBELEMNTS(SampleWeights));
 	return builder.Build();
+}
+
 }

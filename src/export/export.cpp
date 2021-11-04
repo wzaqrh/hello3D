@@ -14,10 +14,10 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 {
 	ExportRenderSystem rendersys = nullptr;
 	if (isd3d11) {
-		rendersys = new TRenderSystem11;
+		rendersys = new mir::TRenderSystem11;
 	}
 	else {
-		rendersys = new TRenderSystem9;
+		rendersys = new mir::TRenderSystem9;
 	}
 
 	if (FAILED(rendersys->Initialize(hWnd, vp))) {
@@ -28,8 +28,8 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 	rendersys->GetSceneManager()->SetOthogonalCamera(100);
 
 	rendersys->GetSceneManager()->AddPointLight();
-	rendersys->SetDepthState(TDepthState::For2D);
-	rendersys->SetBlendFunc(TBlendFunc::ALPHA_NON_PREMULTIPLIED);
+	rendersys->SetDepthState(mir::TDepthState::For2D);
+	rendersys->SetBlendFunc(mir::TBlendFunc::ALPHA_NON_PREMULTIPLIED);
 
 	return rendersys;
 }
@@ -60,7 +60,7 @@ bool RenderSystem_RBeginScene(ExportRenderSystem rendersys)
 }
 void RenderSystem_RRender(ExportRenderSystem rendersys, ExportRenderable* renderables, int renderableCount)
 {
-	TRenderOperationQueue opQueue;
+	mir::TRenderOperationQueue opQueue;
 	for (int i = 0; i < renderableCount; ++i) {
 		renderables[i]->GenRenderOperation(opQueue);
 		rendersys->RenderQueue(opQueue, E_PASS_FORWARDBASE);
@@ -89,7 +89,7 @@ DLL_EXPORT XMINT4 RenderSystem_GetWinSize(ExportRenderSystem rendersys)
 //camera
 ExportCamera CameraOrtho_Create(ExportRenderSystem rendersys, int far1)
 {
-	TCameraPtr camera = rendersys->GetSceneManager()->SetOthogonalCamera(far1);
+	mir::TCameraPtr camera = rendersys->GetSceneManager()->SetOthogonalCamera(far1);
 	return camera.get();
 }
 
@@ -168,26 +168,26 @@ template<class T> T* GetExportPtr(std::shared_ptr<T>& ptr) {
 //RenderTarget
 DLL_EXPORT ExportRenderTarget RenderTarget_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format)
 {
-	IRenderTexturePtr rt = rendersys->CreateRenderTexture(width, height, format);
+	mir::IRenderTexturePtr rt = rendersys->CreateRenderTexture(width, height, format);
 	return GetExportPtr(rt);
 }
 
 DLL_EXPORT ExportTexture RenderTarget_GetTexture(ExportRenderTarget renderTarget)
 {
-	ITexturePtr texture = renderTarget ? renderTarget->GetColorTexture() : nullptr;
+	mir::ITexturePtr texture = renderTarget ? renderTarget->GetColorTexture() : nullptr;
 	return GetExportPtr(texture);
 }
 
 //ITexture
 DLL_EXPORT ExportTexture Texture_Load(ExportRenderSystem rendersys, const char* imgPath, bool async)
 {
-	ITexturePtr texture = rendersys->LoadTexture(imgPath, DXGI_FORMAT_UNKNOWN, async);
+	mir::ITexturePtr texture = rendersys->LoadTexture(imgPath, DXGI_FORMAT_UNKNOWN, async);
 	return GetExportPtr(texture);
 }
 
 DLL_EXPORT ExportTexture Texture_Create(ExportRenderSystem rendersys, int width, int height, DXGI_FORMAT format, int mipmap)
 {
-	ITexturePtr texture = rendersys->CreateTexture(width, height, format, mipmap);
+	mir::ITexturePtr texture = rendersys->CreateTexture(width, height, format, mipmap);
 	return GetExportPtr(texture);
 }
 
@@ -222,7 +222,7 @@ DLL_EXPORT ExportSprite SpriteColor_Create(ExportRenderSystem rendersys, XMFLOAT
 #ifdef EXPORT_STRUCT
 	TSprite* sprite = new TSprite(rendersys.self, E_MAT_LAYERCOLOR);
 #else
-	TSprite* sprite = new TSprite(rendersys, E_MAT_LAYERCOLOR);
+	mir::TSprite* sprite = new mir::TSprite(rendersys, E_MAT_LAYERCOLOR);
 #endif
 	sprite->SetColor(color);
 	return sprite;
@@ -233,7 +233,7 @@ ExportSprite SpriteImage_Create(ExportRenderSystem rendersys, const char* imgPat
 #ifdef EXPORT_STRUCT
 	TSprite* sprite = new TSprite(rendersys.self, E_MAT_SPRITE);
 #else
-	TSprite* sprite = new TSprite(rendersys, E_MAT_SPRITE);
+	mir::TSprite* sprite = new mir::TSprite(rendersys, E_MAT_SPRITE);
 #endif
 	if (imgPath != nullptr && imgPath != "")
 		sprite->SetTexture(rendersys->LoadTexture(imgPath));
@@ -277,7 +277,7 @@ DLL_EXPORT void Sprite_SetFlipY(ExportSprite sprite, bool flipY)
 //Mesh
 DLL_EXPORT ExportMesh Mesh_Create(ExportRenderSystem rendersys, int vertCount, int indexCount)
 {
-	return new TMesh(rendersys, E_MAT_SPRITE, vertCount, indexCount);
+	return new mir::TMesh(rendersys, E_MAT_SPRITE, vertCount, indexCount);
 }
 
 DLL_EXPORT void Mesh_Clear(ExportMesh mesh)
@@ -285,12 +285,12 @@ DLL_EXPORT void Mesh_Clear(ExportMesh mesh)
 	mesh->Clear();
 }
 
-DLL_EXPORT void Mesh_SetVertexs(ExportMesh mesh, const MeshVertex* vertData, int vertCount)
+DLL_EXPORT void Mesh_SetVertexs(ExportMesh mesh, const ExportMeshVertex* vertData, int vertCount)
 {
 	mesh->SetVertexs(vertData, vertCount);
 }
 
-DLL_EXPORT void Mesh_SetVertexsPC(ExportMesh mesh, const MeshVertex* vertData, int vertCount, int vertPos)
+DLL_EXPORT void Mesh_SetVertexsPC(ExportMesh mesh, const ExportMeshVertex* vertData, int vertCount, int vertPos)
 {
 	mesh->SetVertexs(vertData, vertCount, vertPos);
 }

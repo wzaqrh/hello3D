@@ -3,6 +3,8 @@
 #include "wrl/client.h"
 using Microsoft::WRL::ComPtr;
 
+namespace mir {
+
 template <class BASE, const IID* piid = &__uuidof(BASE) >
 class ComBase : public BASE
 {
@@ -182,5 +184,6 @@ template<class T, class P0, class P1, class P2, class P3> std::shared_ptr<T> Mak
 }
 #endif
 
-
 #define INHERIT_COM(X) //DECLSPEC_UUID(X)
+
+}

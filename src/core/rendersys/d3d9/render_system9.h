@@ -2,8 +2,9 @@
 #include "core/rendersys/render_system.h"
 #include "interface_type9.h"
 
-class TRenderSystem9
-	: public TRenderSystem
+namespace mir {
+
+class TRenderSystem9 : public TRenderSystem
 {
 	HWND mHWnd = NULL;
 
@@ -76,3 +77,5 @@ private:
 	void _SetRasterizerState();
 	bool _CreateDeviceAndSwapChain();
 };
+
+}

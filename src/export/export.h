@@ -31,14 +31,15 @@ struct ExportSprite : ExportRenderable {
 };
 #pragma pack(pop)
 #else
-typedef IRenderable* ExportRenderable;
-typedef IRenderSystem* ExportRenderSystem;
-typedef ITexture* ExportTexture;
-typedef TSprite* ExportSprite;
-typedef IRenderTexture* ExportRenderTarget;
-typedef TMesh* ExportMesh;
-typedef TCamera* ExportCamera;
-typedef TTransform* ExportTransform;
+typedef mir::IRenderable* ExportRenderable;
+typedef mir::IRenderSystem* ExportRenderSystem;
+typedef mir::ITexture* ExportTexture;
+typedef mir::TSprite* ExportSprite;
+typedef mir::IRenderTexture* ExportRenderTarget;
+typedef mir::TMesh* ExportMesh;
+typedef mir::TCamera* ExportCamera;
+typedef mir::TTransform* ExportTransform;
+typedef mir::MeshVertex ExportMeshVertex;
 #endif
 
 //RenderSystem
@@ -95,8 +96,8 @@ DLL_EXPORT void Sprite_SetFlipY(ExportSprite sprite, bool flipY);
 //TMesh
 DLL_EXPORT ExportMesh Mesh_Create(ExportRenderSystem rendersys, int vertCount, int indexCount);
 DLL_EXPORT void Mesh_Clear(ExportMesh mesh);
-DLL_EXPORT void Mesh_SetVertexs(ExportMesh mesh, const MeshVertex* vertData, int vertCount);
-DLL_EXPORT void Mesh_SetVertexsPC(ExportMesh mesh, const MeshVertex* vertData, int vertCount, int vertPos);
+DLL_EXPORT void Mesh_SetVertexs(ExportMesh mesh, const ExportMeshVertex* vertData, int vertCount);
+DLL_EXPORT void Mesh_SetVertexsPC(ExportMesh mesh, const ExportMeshVertex* vertData, int vertCount, int vertPos);
 DLL_EXPORT void Mesh_SetPositions(ExportMesh mesh, const XMFLOAT3* posData, int count);
 DLL_EXPORT void Mesh_SetColors(ExportMesh mesh, const XMFLOAT4* colorData, int count);
 DLL_EXPORT void Mesh_SetUVs(ExportMesh mesh, const XMFLOAT2* uvData, int count);

@@ -5,6 +5,8 @@
 #include "freetype.h"
 #include "freetype2/freetype/ftglyph.h"
 
+namespace mir {
+
 class TFontTextureAtlas {
 public:
 	ITexturePtr Texture;
@@ -103,3 +105,5 @@ public:
 	TFontPtr GetFont(std::string fontPath, int fontSize);
 };
 typedef std::shared_ptr<TFontCache> TFontCachePtr;
+
+}

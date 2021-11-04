@@ -63,7 +63,7 @@
     <ClInclude Include="src\core\rendersys\resource.h" />
     <ClInclude Include="src\core\rendersys\scene_manager.h" />
     <ClInclude Include="src\core\rendersys\scene_manager_pred.h" />
-    <ClInclude Include="src\export\Export.h" />
+    <ClInclude Include="src\export\export.h" />
     <ClInclude Include="src\test\app.h" />
     <ClInclude Include="src\test\test_case.h" />
   </ItemGroup>
@@ -94,7 +94,7 @@
     <ClCompile Include="src\core\rendersys\render_system.cpp" />
     <ClCompile Include="src\core\rendersys\resource.cpp" />
     <ClCompile Include="src\core\rendersys\scene_manager.cpp" />
-    <ClCompile Include="src\export\Export.cpp" />
+    <ClCompile Include="src\export\export.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\test\app.cpp" />
     <ClCompile Include="src\test\test_bloom.cpp" />

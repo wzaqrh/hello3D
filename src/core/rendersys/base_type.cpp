@@ -3,6 +3,8 @@
 #include "core/rendersys/const_buffer_decl.h"
 #include "core/base/utility.h"
 
+namespace mir {
+
 /********** TConstBufferDeclElement **********/
 TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)
 	:name(__name)
@@ -82,4 +84,6 @@ TData::TData(void* __data, unsigned int __dataSize)
 	:data(__data)
 	, dataSize(__dataSize)
 {
+}
+
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "core/base/std.h"
 
+namespace mir {
+
 #ifdef USE_EXPORT_COM
 typedef ComPtr<struct IResource> IResourcePtr;
 typedef ComPtr<struct TResource> TResourcePtr;
@@ -58,3 +60,4 @@ protected:
 	virtual bool CheckLoaded() const;
 };
 
+}

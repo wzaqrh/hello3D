@@ -5,6 +5,8 @@
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/sprite.h"
 
+using namespace mir;
+
 class TestExportRT : public IApp
 {
 protected:

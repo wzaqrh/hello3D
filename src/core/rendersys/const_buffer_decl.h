@@ -1,5 +1,7 @@
 #pragma once
 
+namespace mir {
+
 template<class T> struct CBETypeTrait {};
 #define DECLRAE_CBET(E,CLS) template<> struct CBETypeTrait<CLS> { enum {value = E }; };
 DECLRAE_CBET(E_CONSTBUF_ELEM_INT, unsigned int);
@@ -37,3 +39,5 @@ public:
 	TConstBufferDeclBuilder& Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl);
 };
 #define MAKE_CBDESC(CB) (CB::GetDesc())
+
+}

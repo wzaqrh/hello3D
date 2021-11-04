@@ -5,6 +5,8 @@
 #include "core/base/transform.h"
 #include "label/core/renderable/label.h"
 
+using namespace mir;
+
 #define CASE_COUNT 4
 
 class TestLabel : public TApp

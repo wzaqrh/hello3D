@@ -3,6 +3,8 @@
 #include "core/renderable/assimp_mesh.h"
 #include "core/renderable/renderable.h"
 
+namespace mir {
+
 struct AiNodeInfo {
 	aiMatrix4x4 mLocalTransform;
 	aiMatrix4x4 mGlobalTransform;
@@ -69,3 +71,5 @@ public:
 	Evaluator(const aiAnimation* Anim) :mAnim(Anim) {}
 	void Eval(float pTime);
 };
+
+}

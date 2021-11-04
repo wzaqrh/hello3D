@@ -3,6 +3,8 @@
 #include "core/rendersys/base_type.h"
 #include "d3d_enum_convert.h"
 
+namespace mir {
+
 bool CheckHR(HRESULT result);
 
 extern std::string gDefRenderSystem;
@@ -103,3 +105,5 @@ void SetDebugName(ID3D11DeviceChild* child, const std::string& name);
 
 void __log(const char* msg);
 void __log(const D3DCAPS9& caps);
+
+}
