@@ -43,27 +43,6 @@
     <ClInclude Include="src\core\renderable\sprite.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\rendersys\base_type.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\const_buffer_decl.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\interface_type.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\interface_type_pred.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\material.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\material_cb.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\material_pred.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\rendersys\render_system.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
@@ -118,6 +97,30 @@
     <ClInclude Include="src\export\export.h">
       <Filter>src\export</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\rendersys\material.h">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\material_cb.h">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\material_pred.h">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\base_type.h">
+      <Filter>src\core\rendersys\type</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\interface_type.h">
+      <Filter>src\core\rendersys\type</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\interface_type_pred.h">
+      <Filter>src\core\rendersys\type</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\const_buffer_decl.h">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\material_factory.h">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\base\d3d_enum_convert.cpp">
@@ -152,18 +155,6 @@
     </ClCompile>
     <ClCompile Include="src\core\renderable\sprite.cpp">
       <Filter>src\core\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\rendersys\base_type.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\rendersys\interface_type.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\rendersys\material.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\rendersys\material_cb.cpp">
-      <Filter>src\core\rendersys</Filter>
     </ClCompile>
     <ClCompile Include="src\core\rendersys\render_system.cpp">
       <Filter>src\core\rendersys</Filter>
@@ -252,6 +243,21 @@
     <ClCompile Include="src\test\test_sprite.cpp">
       <Filter>src\test\test_cases</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\rendersys\material.cpp">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\rendersys\material_cb.cpp">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\rendersys\base_type.cpp">
+      <Filter>src\core\rendersys\type</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\rendersys\interface_type.cpp">
+      <Filter>src\core\rendersys\type</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\rendersys\material_factory.cpp">
+      <Filter>src\core\rendersys\material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -283,6 +289,12 @@
     </Filter>
     <Filter Include="src\test\test_cases">
       <UniqueIdentifier>{669d16a2-ce5b-4c1f-a67a-d38a8e2be48e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\material">
+      <UniqueIdentifier>{9ffd0cd2-2f97-41ba-8427-ac868b8ac017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\type">
+      <UniqueIdentifier>{405177f7-1d50-43ab-b4c2-1e9583ab70c1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

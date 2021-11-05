@@ -1,9 +1,10 @@
 #include "core/renderable/assimp_model.h"
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
-#include "core/base/transform.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
+#include "core/base/transform.h"
 #include "core/base/utility.h"
 
 namespace mir {

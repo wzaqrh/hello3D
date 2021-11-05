@@ -1,6 +1,7 @@
 #include "test/test_case.h"
 #if defined TEST_SHADOW_MAP && TEST_CASE == TEST_SHADOW_MAP
 #include "test/app.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"

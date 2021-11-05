@@ -51,11 +51,11 @@ enum EConstBufferElementType
 };
 struct TConstBufferDeclElement
 {
-	size_t offset;
-	size_t size;
-	size_t count;
 	std::string name;
 	EConstBufferElementType type;
+	size_t size;
+	size_t count;
+	size_t offset;
 public:
 	TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count = 0, size_t __offset = 0);
 };

@@ -2,7 +2,7 @@
 #include "interface_type9.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/rendersys/material_cb.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/renderable/post_process.h"
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"

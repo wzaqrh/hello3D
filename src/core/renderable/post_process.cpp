@@ -3,6 +3,7 @@
 #include "core/rendersys/interface_type.h"
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/const_buffer_decl.h"
 
 namespace mir {

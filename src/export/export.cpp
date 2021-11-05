@@ -4,7 +4,7 @@
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/renderable.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
 #include "core/base/utility.h"

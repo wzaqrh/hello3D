@@ -1,6 +1,6 @@
 #include "core/renderable/skybox.h"
 #include "core/rendersys/render_system.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 
 namespace mir {
 

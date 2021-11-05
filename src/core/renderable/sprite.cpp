@@ -1,7 +1,7 @@
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
 #include "core/rendersys/render_system.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
 
 namespace mir {

@@ -1,6 +1,5 @@
 #include "core/renderable/assimp_mesh.h"
 #include "core/rendersys/render_system.h"
-#include "core/renderable/renderable.h"
 #include "core/rendersys/interface_type.h"
 
 namespace mir {

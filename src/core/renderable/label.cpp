@@ -1,9 +1,9 @@
+#include "freetype2/freetype/ftglyph.h"
 #include "core/renderable/label.h"
 #include "core/base/transform.h"
 #include "core/rendersys/render_system.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
-#include "freetype2/freetype/ftglyph.h"
 
 namespace mir {
 

@@ -58,6 +58,7 @@
     <ClInclude Include="src\core\rendersys\interface_type_pred.h" />
     <ClInclude Include="src\core\rendersys\material.h" />
     <ClInclude Include="src\core\rendersys\material_cb.h" />
+    <ClInclude Include="src\core\rendersys\material_factory.h" />
     <ClInclude Include="src\core\rendersys\material_pred.h" />
     <ClInclude Include="src\core\rendersys\render_system.h" />
     <ClInclude Include="src\core\rendersys\resource.h" />
@@ -91,6 +92,7 @@
     <ClCompile Include="src\core\rendersys\interface_type.cpp" />
     <ClCompile Include="src\core\rendersys\material.cpp" />
     <ClCompile Include="src\core\rendersys\material_cb.cpp" />
+    <ClCompile Include="src\core\rendersys\material_factory.cpp" />
     <ClCompile Include="src\core\rendersys\render_system.cpp" />
     <ClCompile Include="src\core\rendersys\resource.cpp" />
     <ClCompile Include="src\core\rendersys\scene_manager.cpp" />

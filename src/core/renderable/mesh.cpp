@@ -1,7 +1,6 @@
 #include "core/renderable/mesh.h"
 #include "core/rendersys/render_system.h"
-#include "core/renderable/renderable.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
 
 namespace mir {
