@@ -1,6 +1,7 @@
 #include "test/test_case.h"
 #if defined TEST_MODEL && TEST_CASE == TEST_MODEL
 #include "test/app.h"
+#include "core/rendersys/material_factory.h"
 #include "core/renderable/assimp_model.h"
 #include "core/base/transform.h"
 #include "core/base/utility.h"

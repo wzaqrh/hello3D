@@ -283,7 +283,7 @@ namespace mir {
 			int index = 0;
 			for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Uniform"))) {
 				XmlUniformInfo uniform;
-				uniform.IsUnique = it.second.get<int>("<xmlattr>.IsUnique", TRUE);
+				uniform.IsUnique = it.second.get<bool>("<xmlattr>.IsUnique", true);
 
 				TConstBufferDeclBuilder builder(uniform.Decl);
 
