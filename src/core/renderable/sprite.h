@@ -7,7 +7,7 @@ namespace mir {
 struct Pos3Color3Tex2
 {
 	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
+	unsigned int Color;
 	XMFLOAT2 Tex;
 };
 

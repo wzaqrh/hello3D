@@ -30,7 +30,8 @@ float4 PS(PS_INPUT input) : SV_Target
 {	
 	float4 diffuseColor = GetTextureMain(input.Tex);
 	float4 finalColor = diffuseColor * input.Color;
-	return finalColor;
+	//return float4(1.0,0.0,0.0,1.0);
+	return diffuseColor;
 }
 
 

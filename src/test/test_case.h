@@ -1,5 +1,6 @@
 #pragma once
 
+#define TEST_SPRITE -1
 #define TEST_BLOOM 0
 #define TEST_DIFFUSE 1
 #define TEST_FOG 2
@@ -9,4 +10,4 @@
 #define TEST_MODEL 6
 #define TEST_SHADOW_MAP 7
 
-#define TEST_CASE TEST_SHADOW_MAP
+#define TEST_CASE TEST_SPRITE

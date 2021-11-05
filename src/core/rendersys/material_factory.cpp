@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -21,10 +22,25 @@ namespace boost_property_tree = boost::property_tree;
 
 namespace mir {
 
-	/********** XmlParserMaterialLoader **********/
+	/********** CreateMaterialByParseXml **********/
 	struct XmlAttributeInfo {
 		std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
 		std::vector<std::string> LayoutStr;
+	public:
+		XmlAttributeInfo() {}
+		XmlAttributeInfo(const XmlAttributeInfo& other) {
+			LayoutStr = other.LayoutStr;
+			Layout = other.Layout;
+			for (size_t i = 0; i < Layout.size(); ++i)
+				Layout[i].SemanticName = LayoutStr[i].c_str();
+		}
+		XmlAttributeInfo& operator=(const XmlAttributeInfo& other) {
+			LayoutStr = other.LayoutStr;
+			Layout = other.Layout;
+			for (size_t i = 0; i < Layout.size(); ++i)
+				Layout[i].SemanticName = LayoutStr[i].c_str();
+			return *this;
+		}
 	};
 	struct XmlUniformInfo {
 		TConstBufferDecl Decl;
@@ -86,7 +102,7 @@ namespace mir {
 			return *this;
 		}*/
 		void AddPass(XmlPassInfo&& pass) {
-			Passes.push_back(std::move(pass));
+			Passes.push_back((pass));
 		}
 	};
 	struct XmlShaderInfo {
@@ -94,24 +110,83 @@ namespace mir {
 		std::vector<XmlSubShaderInfo> SubShaders;
 	public:
 		void AddSubShader(XmlSubShaderInfo&& subShader) {
-			SubShaders.push_back(std::move(subShader));
+			SubShaders.push_back((subShader));
 		}
 	};
 
-	class ParseXmlAndCreateMaterial
+	struct MaterialAssetEntry {
+		std::string ShaderName;
+		std::string VariantName;
+	};
+	class MaterialNameToAssetMapping : boost::noncopyable {
+		std::unordered_map<std::string, MaterialAssetEntry> mMatEntryByMatName;
+	public:
+		bool InitFromXmlFile(const std::string& xmlFilePath) {
+			bool result = false;
+			std::string filename = xmlFilePath;
+			if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
+				boost_property_tree::ptree pt;
+				boost_property_tree::read_xml(filename, pt);
+				VisitConfig(pt);
+				result = true;
+			}
+			return result;
+		}
+
+		MaterialAssetEntry MaterialAssetEntryByMatName(const std::string& matName) const {
+			auto find_iter = mMatEntryByMatName.find(matName);
+			if (find_iter != mMatEntryByMatName.end()) {
+				return find_iter->second;
+			}
+			else {
+				return MaterialAssetEntry{matName, ""};
+			}
+		}
+		MaterialAssetEntry operator()(const std::string& matName) const {
+			return MaterialAssetEntryByMatName(matName);
+		}
+	private:
+		void Clear() {
+			mMatEntryByMatName.clear();
+		}
+		void VisitMaterial(const boost_property_tree::ptree& nodeMaterial) {
+			for (auto& it : nodeMaterial) {
+				MaterialAssetEntry entry;
+				entry.ShaderName = it.second.get<std::string>("ShaderName", it.first);
+				entry.VariantName = it.second.get<std::string>("ShaderVariantName", "");
+				mMatEntryByMatName.insert(std::make_pair(it.first, entry));
+			}
+		}
+		void VisitConfig(const boost_property_tree::ptree& nodeConfig) {
+			for (auto& it : boost::make_iterator_range(nodeConfig.equal_range("Config.Material"))) {
+				VisitMaterial(it.second);
+			}
+		}
+	};
+
+	class MaterialAssetManager
 	{
 		std::map<std::string, XmlShaderInfo> mIncludeByName, mShaderByName, mShaderVariantByName;
 		std::map<std::string, XmlAttributeInfo> mAttrByName;
 		std::map<std::string, XmlUniformInfo> mUniformByName;
 		std::map<std::string, XmlSamplersInfo> mSamplersByName;
+		std::shared_ptr<MaterialNameToAssetMapping> mMatNameToAsset;
 	public:
-		TMaterialPtr Execute(TRenderSystem* renderSys,
+		MaterialAssetManager() {
+			mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
+			mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
+		}
+		TMaterialPtr LoadMaterial(TRenderSystem* renderSys,
 			const std::string& shaderName,
 			const std::string& variantName) {
 			XmlShaderInfo shaderInfo;
 			if (!variantName.empty()) ParseShaderVariantXml(shaderName, variantName, shaderInfo);
 			else ParseShaderXml(shaderName, shaderInfo);
 			return CreateMaterial(renderSys, shaderName, shaderInfo);
+		}
+	public:
+		const MaterialNameToAssetMapping& MatNameToAsset() const {
+			return *mMatNameToAsset;
 		}
 	private:
 		struct Visitor {
@@ -142,9 +217,8 @@ namespace mir {
 			}
 		}
 		
-		static EConstBufferElementType ConvertStringToConstBufferElementType(const std::string& str,
-			int count,
-			int& size) {
+		static EConstBufferElementType ConvertStringToConstBufferElementType(
+			const std::string& str, int count, int& size) {
 			EConstBufferElementType result = E_CONSTBUF_ELEM_MAX;
 			if (str == "int") result = E_CONSTBUF_ELEM_INT, size = 4;
 			else if (str == "float") result = E_CONSTBUF_ELEM_FLOAT, size = 4;
@@ -155,7 +229,7 @@ namespace mir {
 			return result;
 		}
 		void VisitAttributes(const PropertyTreePath& nodeProgram, Visitor& vis) {
-			for (auto& it : nodeProgram->get_child("PROGRAM.UseAttribute")) {
+			for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseAttribute"))) {
 				std::string refName = it.second.data();
 				auto find_iter = mAttrByName.find(refName);
 				if (find_iter != mAttrByName.end()) {
@@ -164,24 +238,26 @@ namespace mir {
 			}
 
 			int index = 0;
-			for (auto& it : nodeProgram->get_child("PROGRAM.Attribute")) {
+			for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Attribute"))) {
 				XmlAttributeInfo attribute;
-				int elementCount = it.second.count("Attribute.Element");
+
+				int elementCount = it.second.count("Element");
 				attribute.Layout.resize(elementCount);
 				attribute.LayoutStr.resize(elementCount);
-
 				int byteOffset = 0, j = 0;
-				for (auto& element : it.second.get_child("Attribute.Element")) {
+				for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
 					attribute.LayoutStr[j] = element.second.get<std::string>("<xmlattr>.SemanticName");
-					attribute.Layout[j] = D3D11_INPUT_ELEMENT_DESC{
+					auto& layoutJ = attribute.Layout[j];
+					layoutJ = D3D11_INPUT_ELEMENT_DESC{
 						attribute.LayoutStr[j].c_str(),
-						element.second.get<UINT>("<xmlattr>.SemanticIndex"),
+						element.second.get<UINT>("<xmlattr>.SemanticIndex", 0),
 						(DXGI_FORMAT)element.second.get<UINT>("<xmlattr>.Format"),
-						element.second.get<UINT>("<xmlattr>.InputSlot"),
-						element.second.get<UINT>("<xmlattr>.ByteOffset"),
+						element.second.get<UINT>("<xmlattr>.InputSlot", 0),
+						element.second.get<UINT>("<xmlattr>.ByteOffset", byteOffset),
 						D3D11_INPUT_PER_VERTEX_DATA,
 						0
 					};
+					byteOffset = layoutJ.AlignedByteOffset + D3DEnumCT::GetWidth(layoutJ.Format);
 					++j;
 				}
 
@@ -196,7 +272,7 @@ namespace mir {
 			}
 		}
 		void VisitUniforms(const PropertyTreePath& nodeProgram, Visitor& vis) {
-			for (auto& it : nodeProgram->get_child("PROGRAM.UseUniform")) {
+			for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseUniform"))) {
 				std::string refName = it.second.data();
 				auto find_iter = mUniformByName.find(refName);
 				if (find_iter != mUniformByName.end()) {
@@ -205,22 +281,23 @@ namespace mir {
 			}
 
 			int index = 0;
-			for (auto& it : nodeProgram->get_child("PROGRAM.Uniform")) {
+			for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Uniform"))) {
 				XmlUniformInfo uniform;
-				uniform.IsUnique = it.second.get<int>("<xmlattr>.IsUnique", true);
+				uniform.IsUnique = it.second.get<int>("<xmlattr>.IsUnique", TRUE);
 
 				TConstBufferDeclBuilder builder(uniform.Decl);
 
 				int byteOffset = 0;
-				for (auto& element : it.second.get_child("Uniform.Element")) {
+				for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
 					int size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
 					int count = element.second.get<int>("<xmlattr>.Count", 0);
 					int offset = element.second.get<int>("<xmlattr>.Offset", byteOffset);
-					EConstBufferElementType uniformElementType = ConvertStringToConstBufferElementType(element.second.get<std::string>("<xmlattr>.Type"), count, size);
+					EConstBufferElementType uniformElementType = ConvertStringToConstBufferElementType(
+						element.second.get<std::string>("<xmlattr>.Type"/*, "int"*/), count, size);
 					BOOST_ASSERT(uniformElementType != E_CONSTBUF_ELEM_MAX);
-					std::string name = element.second.get<std::string>("<xmlattr>.Name");
-
-					builder.Add(TConstBufferDeclElement(name.c_str(), uniformElementType, size, count, offset));
+					
+					std::string Name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
+					builder.Add(TConstBufferDeclElement(Name.c_str(), uniformElementType, size, count, offset));
 					byteOffset = offset + size;
 
 					int dataSize = uniform.Data.size();
@@ -264,14 +341,13 @@ namespace mir {
 		}
 		void VisitSamplers(const PropertyTreePath& nodeProgram, Visitor& vis) {
 			int index = 0;
-			for (auto& it : nodeProgram->get_child("PROGRAM.Sampler")) {
+			for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Sampler"))) {
 				XmlSamplersInfo sampler;
-				sampler.Samplers.resize(it.second.count("Sampler.Element"));
-				int j = 0;
-				for (auto& element : it.second.get_child("Sampler.Element")) {
-					sampler.Samplers[j].first = element.second.get<int>("<xmlattr>.Slot");
-					sampler.Samplers[j].second = element.second.get<int>("<xmlattr>.Filter", D3D11_FILTER_MIN_MAG_MIP_LINEAR);
-					++j;
+				for (auto& element : it.second.get_child("Element")) {
+					sampler.Samplers.emplace_back(std::make_pair(
+						element.second.get<int>("<xmlattr>.Slot", 0),
+						element.second.get<int>("<xmlattr>.Filter", D3D11_FILTER_MIN_MAG_MIP_LINEAR)
+					));
 				}
 
 				std::string Name = it.second.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
@@ -285,52 +361,57 @@ namespace mir {
 			}
 		}
 		void VisitProgram(const PropertyTreePath& nodeProgram, Visitor& vis) {
-			vis.shaderInfo.Program.FxName = nodeProgram->get<std::string>("PROGRAM.FileName");
-			vis.shaderInfo.Program.VsEntry = nodeProgram->get<std::string>("PROGRAM.VertexEntry");
-			vis.shaderInfo.Program.Topo = static_cast<D3D_PRIMITIVE_TOPOLOGY>(nodeProgram->get<int>("PROGRAM.Topology"), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			vis.shaderInfo.Program.FxName = nodeProgram->get<std::string>("FileName", "");
+			vis.shaderInfo.Program.VsEntry = nodeProgram->get<std::string>("VertexEntry", "");
+			vis.shaderInfo.Program.Topo = static_cast<D3D_PRIMITIVE_TOPOLOGY>(
+				nodeProgram->get<int>("Topology", D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 			VisitAttributes(nodeProgram, vis);
 			VisitUniforms(nodeProgram, vis);
 			VisitSamplers(nodeProgram, vis);
 		}
 		
 		void VisitSubShader(const PropertyTreePath& nodeTechnique, Visitor& vis) {
+			XmlSubShaderInfo subShader;
 			int index = 0;
-			for (auto& it : nodeTechnique->get_child("SubShader.Pass")) {
+			for (auto& it : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
 				auto& node_pass = it.second;
 				XmlPassInfo pass;
 
 				pass.LightMode = E_PASS_FORWARDBASE;
-				auto find_tags = node_pass.find("SubShader.Tags");
+				auto find_tags = node_pass.find("Tags");
 				if (find_tags != node_pass.not_found()) {
 					auto& node_tag = find_tags->second;
-					pass.LightMode = node_tag.get<std::string>("Tags.LightMode", pass.LightMode);
+					pass.LightMode = node_tag.get<std::string>("LightMode", pass.LightMode);
 				}
 
-				pass.ShortName = node_pass.get<std::string>("Pass.ShortName", node_pass.get<std::string>("Pass.Name"));
-				pass.Name = node_pass.get<std::string>("Pass.Name", boost::lexical_cast<std::string>(index));
+				pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
+				pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
 				pass.PSEntry = "PS";
-				auto find_program = node_pass.find("SubShader.PROGRAM");
+				auto find_program = node_pass.find("PROGRAM");
 				if (find_program != node_pass.not_found()) {
 					auto& node_program = find_program->second;
-					pass.PSEntry = node_program.get<std::string>("PROGRAM.PixelEntry", pass.PSEntry);
+					pass.PSEntry = node_program.get<std::string>("PixelEntry", pass.PSEntry);
 				}
+
+				subShader.AddPass(std::move(pass));
 				++index;
 			}
+			vis.shaderInfo.AddSubShader(std::move(subShader));
 		}
 		void VisitShader(const PropertyTreePath& nodeShader, Visitor& vis) {
-			for (auto& it : nodeShader->get_child("Shader.Include")) {
+			for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Include"))) {
 				VisitInclude(it.second.data());
 			}
 
 			int index = 0;
-			for (auto& it : nodeShader->get_child("Shader.PROGRAM")) {
+			for (auto& it : boost::make_iterator_range(nodeShader->equal_range("PROGRAM"))) {
 				VisitProgram(PropertyTreePath(nodeShader, it.second, index++), vis);
 			}
 
 			if (!vis.JustInclude) {
 				index = 0;
-				for (auto& it : nodeShader->get_child("Shader.SubShader")) {
+				for (auto& it : boost::make_iterator_range(nodeShader->equal_range("SubShader"))) {
 					VisitSubShader(PropertyTreePath(nodeShader, it.second, index++), vis);
 				}
 			}
@@ -338,14 +419,15 @@ namespace mir {
 		void VisitShaderVariant(const PropertyTreePath& nodeVariant,
 			const std::string& variantName,
 			XmlShaderInfo& shaderInfo) {
-			for (auto& it : nodeVariant->get_child("ShaderVariant.UseShader")) {
+			for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("UseShader"))) {
 				ParseShaderXml(it.second.data(), shaderInfo);
 			}
 
-			for (auto& it : nodeVariant->get_child("ShaderVariant.Variant")) {
+			for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("Variant"))) {
 				std::string name = it.second.get<std::string>("<xmlattr>.Name");
 				if (name == variantName) {
-					shaderInfo.Program.Topo = static_cast<D3D_PRIMITIVE_TOPOLOGY>(it.second.get<int>("Variant.Topology"));
+					shaderInfo.Program.Topo = static_cast<D3D_PRIMITIVE_TOPOLOGY>(
+						it.second.get<int>("Topology"), shaderInfo.Program.Topo);
 				}
 			}
 		}
@@ -359,7 +441,7 @@ namespace mir {
 					boost_property_tree::ptree pt;
 					boost_property_tree::read_xml(filename, pt);
 					Visitor visitor{ false, shaderInfo };
-					VisitShader(pt, visitor);
+					VisitShader(pt.get_child("Shader"), visitor);
 					mShaderByName.insert(std::make_pair(shaderName, visitor.shaderInfo));
 					result = true;
 				}
@@ -384,7 +466,7 @@ namespace mir {
 				if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
 					boost_property_tree::ptree pt;
 					boost_property_tree::read_xml(filename, pt);
-					VisitShaderVariant(pt, variantName, shaderInfo);
+					VisitShaderVariant(pt.get_child("Variant"), variantName, shaderInfo);
 					mShaderVariantByName.insert(std::make_pair(strKey, shaderInfo));
 					result = true;
 				}
@@ -413,19 +495,28 @@ namespace mir {
 					builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 					builder.SetTopology(shaderInfo.Program.Topo);
 
-					IProgramPtr program = builder.SetProgram(renderSys->CreateProgram(MAKE_MAT_NAME(shaderInfo.Program.FxName), shaderInfo.Program.VsEntry.c_str(), passInfo.PSEntry.c_str()));
-					builder.SetInputLayout(renderSys->CreateLayout(program, &shaderInfo.Program.Attr.Layout[0], shaderInfo.Program.Attr.Layout.size()));
+					IProgramPtr program = builder.SetProgram(renderSys->CreateProgram(
+						MAKE_MAT_NAME(shaderInfo.Program.FxName), 
+						shaderInfo.Program.VsEntry.c_str(), 
+						passInfo.PSEntry.c_str()));
+					builder.SetInputLayout(renderSys->CreateLayout(program, 
+						&shaderInfo.Program.Attr.Layout[0], 
+						shaderInfo.Program.Attr.Layout.size()));
 
 					for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 						auto& elem = shaderInfo.Program.Samplers[k];
-						builder.AddSampler(renderSys->CreateSampler(D3D11_FILTER(elem.first), D3D11_COMPARISON_NEVER));
+						builder.AddSampler(renderSys->CreateSampler(
+							D3D11_FILTER(elem.first), 
+							D3D11_COMPARISON_NEVER)
+						);
 					}
 				}
 			}
 
 			for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
 				auto& uniformI = shaderInfo.Program.Uniforms[i];
-				builder.AddConstBufferToTech(renderSys->CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]), uniformI.ShortName, uniformI.IsUnique);
+				builder.AddConstBufferToTech(renderSys->CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]), 
+					uniformI.ShortName, uniformI.IsUnique);
 			}
 
 			builder.CloneTechnique(renderSys, "d3d9");
@@ -561,24 +652,25 @@ namespace mir {
 	}
 
 	/********** TMaterialFactory **********/
-	TMaterialFactory::TMaterialFactory(TRenderSystem* pRenderSys)
-	{
+	TMaterialFactory::TMaterialFactory(TRenderSystem* pRenderSys) {
 		mRenderSys = pRenderSys;
-		mParseXmlCreateMaterial = std::make_shared<ParseXmlAndCreateMaterial>();
+		mMatAssetMng = std::make_shared<MaterialAssetManager>();
 	}
 
-	TMaterialPtr TMaterialFactory::GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback /*= nullptr*/, std::string identify /* = ""*/, bool readonly /*= false*/)
-	{
+	TMaterialPtr TMaterialFactory::GetMaterial(const std::string& matName, 
+		std::function<void(TMaterialPtr material)> callback /*= nullptr*/, 
+		std::string identify /* = ""*/, 
+		bool readonly /*= false*/) {
 		TMaterialPtr material;
 
-		if (mMaterials.find(name) == mMaterials.end()) {
-			mMaterials.insert(std::make_pair(name, CreateStdMaterial(name)));
+		if (mMaterials.find(matName) == mMaterials.end()) {
+			mMaterials.insert(std::make_pair(matName, CreateStdMaterial(matName)));
 		}
 
 		if (!identify.empty()) {
-			auto key = name + ":" + identify;
+			auto key = matName + ":" + identify;
 			if (mMaterials.find(key) == mMaterials.end()) {
-				material = mMaterials[name]->Clone(mRenderSys);
+				material = mMaterials[matName]->Clone(mRenderSys);
 				if (callback) callback(material);
 				mMaterials.insert(std::make_pair(key, material));
 			}
@@ -587,22 +679,22 @@ namespace mir {
 			}
 		}
 		else if (callback != nullptr) {
-			material = mMaterials[name]->Clone(mRenderSys);
+			material = mMaterials[matName]->Clone(mRenderSys);
 			callback(material);
 		}
 		else {
-			material = readonly ? mMaterials[name] : mMaterials[name]->Clone(mRenderSys);
+			material = readonly ? mMaterials[matName] : mMaterials[matName]->Clone(mRenderSys);
 		}
 		return material;
 	}
 
 #if defined MATERIAL_FROM_XML
-	TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name) {
-		return mParseXmlCreateMaterial->Execute(mRenderSys, name, "");
+	TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& matName) {
+		auto entry = mMatAssetMng->MatNameToAsset()(matName);
+		return mMatAssetMng->LoadMaterial(mRenderSys, entry.ShaderName, entry.VariantName);
 	}
 #else
-	void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
-	{
+	void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
 		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 		builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
@@ -610,21 +702,18 @@ namespace mir {
 		builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
 	}
 
-	void SetCommonField2(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
-	{
+	void SetCommonField2(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
 		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 	}
 
-	void AddD3D9Technique(TMaterialBuilder& builder, TRenderSystem* pRenderSys)
-	{
+	void AddD3D9Technique(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
 		builder.CloneTechnique(pRenderSys, "d3d9");
 		builder.ClearSamplersToTech();
 		builder.AddSamplerToTech(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS), 8);
 	}
 
-	TMaterialPtr TMaterialFactory::CreateStdMaterial(std::string name)
-	{
+	TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& name) {
 		TIME_PROFILE2(CreateStdMaterial, name);
 
 		TMaterialPtr material;

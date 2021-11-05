@@ -1,0 +1,19 @@
+<Shader Name="Skybox">
+	<Include>Standard</Include>
+	
+	<PROGRAM>
+		<Topology>5</Topology>
+		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
+		<UseUniform>cbGlobalParam</UseUniform>
+		<UseSampler>samStandard</UseSampler>
+		
+		<FileName>Skybox</FileName>
+		<VertexEntry>VS</VertexEntry>
+	</PROGRAM>
+	
+	<SubShader>
+		<Pass>
+			<PROGRAM> <PixelEntry>PS</PixelEntry> </PROGRAM>
+		</Pass>
+	</SubShader>
+</Shader>

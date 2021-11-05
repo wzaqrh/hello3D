@@ -30,10 +30,16 @@ void Quad::SetRect(float x, float y, float w, float h)
 
 void Quad::SetColor(const XMFLOAT4& color)
 {
-	lb.Color = color;
-	lt.Color = color;
-	rt.Color = color;
-	rb.Color = color;
+	unsigned char c[4] = {
+		static_cast<unsigned char>(color.x * 255),
+		static_cast<unsigned char>(color.y * 255),
+		static_cast<unsigned char>(color.z * 255),
+		static_cast<unsigned char>(color.w * 255),
+	};
+	lb.Color = *((int*)c);
+	lt.Color = *((int*)c);
+	rt.Color = *((int*)c);
+	rb.Color = *((int*)c);
 }
 
 void Quad::SetZ(float z)

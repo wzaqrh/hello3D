@@ -1,0 +1,30 @@
+<Shader Name="Standard">
+	<PROGRAM>
+		<Attribute Name="attrPos3Color4Tex2">
+			<Element SemanticName="POSITION" Format="6" SemanticIndex="0" InputSlot="0"></Element>
+			<Element SemanticName="COLOR" 	 Format="28"></Element>
+			<Element SemanticName="TEXCOORD" Format="16"></Element>
+		</Attribute>
+		<Uniform Name="cbGlobalParam">
+			<Element Name="World" 		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
+			<Element Name="View" 	 	Type="matrix"></Element>
+			<Element Name="Projection" 	Type="matrix"></Element>
+			
+			<Element Name="WorldInv" 	 Type="matrix"></Element>
+			<Element Name="ViewInv" 	 Type="matrix"></Element>
+			<Element Name="ProjectionInv"	Type="matrix"></Element>
+			
+			<Element Name="LightView" 	 	Type="matrix"></Element>
+			<Element Name="LightProjection" Type="matrix"></Element>
+			<Element Name="Light"			Type="struct" Size="80"></Element>
+			
+			<Element Name="LightType" 	 	Type="int"></Element>
+			<Element Name="HasDepthMap" 	Type="int"></Element>
+		</Uniform>
+		<Sampler Name="samStandard">
+			<Element Slot="0" Filter="0x15"></Element>
+			<Element Slot="1" Filter="0x55"></Element>
+			<Element Slot="2" Filter="0x0"></Element>
+		</Sampler>
+	</PROGRAM>
+</Shader>

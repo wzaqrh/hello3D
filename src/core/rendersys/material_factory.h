@@ -47,17 +47,17 @@ namespace mir {
 #define E_MAT_MODEL_SHADOW "model_shadow"
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
-//#define MATERIAL_FROM_XML
+#define MATERIAL_FROM_XML
 	struct TRenderSystem;
 	struct TMaterialFactory
 	{
 		TRenderSystem* mRenderSys;
 		std::map<std::string, TMaterialPtr> mMaterials;
-		std::shared_ptr<class ParseXmlAndCreateMaterial> mParseXmlCreateMaterial;
+		std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 	public:
 		TMaterialFactory(TRenderSystem* pRenderSys);
-		TMaterialPtr GetMaterial(std::string name, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly = false);
+		TMaterialPtr GetMaterial(const std::string& matName, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly = false);
 	private:
-		TMaterialPtr CreateStdMaterial(std::string name);
+		TMaterialPtr CreateStdMaterial(const std::string& matName);
 	};
 }

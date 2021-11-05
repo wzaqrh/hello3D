@@ -1,0 +1,11 @@
+<Shader Name="Skeleton">
+	<Uniform Name="cbWeightedSkin">
+		<Element Name="Model" 	Type="matrix"></Element>
+		<Element Name="Models" 	Type="matrix" Count="56"></Element>
+		
+		<Element Name="hasNormal" 	 Type="int"></Element>
+		<Element Name="hasMetalness" Type="int"></Element>
+		<Element Name="hasRoughness" Type="int"></Element>
+		<Element Name="hasAO" 		 Type="int"></Element>
+	</Uniform>
+</Shader>
