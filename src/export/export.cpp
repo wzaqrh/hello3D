@@ -37,7 +37,7 @@ ExportRenderSystem RenderSystem_Create(HWND hWnd, bool isd3d11, RECT vp)
 void RenderSystem_Destroy(ExportRenderSystem rendersys)
 {
 	rendersys->CleanUp();
-	rendersys->Release();
+	delete rendersys;
 }
 
 void RenderSystem_Render(ExportRenderSystem rendersys, XMFLOAT4 bgColor, ExportRenderable* renderables, int renderableCount)

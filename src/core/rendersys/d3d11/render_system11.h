@@ -30,45 +30,45 @@ public:
 	TRenderSystem11();
 	~TRenderSystem11();
 public:
-	STDMETHODIMP_(bool) Initialize(HWND hWnd, RECT vp);
-	STDMETHODIMP_(void) Update(float dt);
-	STDMETHODIMP_(void) CleanUp();
-	STDMETHODIMP_(void) SetViewPort(int x, int y, int w, int h);
+	bool Initialize(HWND hWnd, RECT vp);
+	void Update(float dt);
+	void CleanUp();
+	void SetViewPort(int x, int y, int w, int h);
 public:
-	STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
+	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
 
-	STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
+	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth=1.0, UINT8 Stencil=0);
-	STDMETHODIMP_(void) SetRenderTarget(IRenderTexturePtr rendTarget);
+	void SetRenderTarget(IRenderTexturePtr rendTarget);
 
-	STDMETHODIMP_(TMaterialPtr) GetMaterial(const std::string& name, bool sharedUse);
+	TMaterialPtr GetMaterial(const std::string& name, bool sharedUse);
 
-	STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer);
-	STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr);
-	STDMETHODIMP_(IIndexBufferPtr) CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
-	STDMETHODIMP_(void) SetIndexBuffer(IIndexBufferPtr indexBuffer);
+	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer);
+	IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr);
+	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
+	void SetIndexBuffer(IIndexBufferPtr indexBuffer);
 
-	STDMETHODIMP_(IVertexBufferPtr) CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
-	STDMETHODIMP_(void) SetVertexBuffer(IVertexBufferPtr vertexBuffer);
+	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
+	void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
 
-	STDMETHODIMP_(bool) UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize);
-	STDMETHODIMP_(void) UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize);
+	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize);
+	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize);
 
-	STDMETHODIMP_(IProgramPtr) CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
-	STDMETHODIMP_(IProgramPtr) CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 
-	STDMETHODIMP_(ISamplerStatePtr) CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
-	STDMETHODIMP_(IInputLayoutPtr) CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
+	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
-	STDMETHODIMP_(void) SetBlendFunc(const TBlendFunc& blendFunc);
-	STDMETHODIMP_(void) SetDepthState(const TDepthState& depthState);
+	void SetBlendFunc(const TBlendFunc& blendFunc);
+	void SetDepthState(const TDepthState& depthState);
 
-	STDMETHODIMP_(ITexturePtr) CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap);
-	STDMETHODIMP_(bool) LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep);
+	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap);
+	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep);
 public:
-	STDMETHODIMP_(bool) BeginScene();
-	STDMETHODIMP_(void) EndScene();
-	STDMETHODIMP_(void) RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	bool BeginScene();
+	void EndScene();
+	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 private:

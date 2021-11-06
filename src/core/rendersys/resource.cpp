@@ -59,7 +59,7 @@ void TResource::CheckAndSetLoaded()
 
 void TResource::AddDependency(IResourcePtr res)
 {
-	mDepends.push_back(PtrCast(res).As1<TResource>());
+	mDepends.push_back(std::static_pointer_cast<TResource>(res));
 	res->AddOnLoadedListener([=](IResource* res) {
 		CheckAndSetLoaded();
 	});

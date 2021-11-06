@@ -116,7 +116,7 @@ void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 	}
 }
 
-STDMETHODIMP_(ISceneManagerPtr) TRenderSystem::GetSceneManager()
+ISceneManagerPtr TRenderSystem::GetSceneManager()
 {
 	return mSceneManager;
 }

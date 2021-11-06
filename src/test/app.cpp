@@ -10,7 +10,7 @@ using namespace mir;
 
 TApp::TApp()
 {
-	mMove = mir::MakePtr<mir::TMovable>();
+	mMove = MakePtr<mir::TMovable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 	mContext = new mir::TContext;
 }

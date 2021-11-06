@@ -20,44 +20,44 @@ public:
 	TRenderSystem9();
 	virtual ~TRenderSystem9();
 
-	STDMETHODIMP_(bool) Initialize(HWND hWnd, RECT vp) override;
-	STDMETHODIMP_(void) Update(float dt) override;
-	STDMETHODIMP_(void) CleanUp() override;
-	STDMETHODIMP_(void) SetViewPort(int x, int y, int w, int h);
+	bool Initialize(HWND hWnd, RECT vp) override;
+	void Update(float dt) override;
+	void CleanUp() override;
+	void SetViewPort(int x, int y, int w, int h);
 public:
-	STDMETHODIMP_(void) ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
+	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
 
-	STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
-	STDMETHODIMP_(void) SetRenderTarget(IRenderTexturePtr rendTarget) override;
+	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
+	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	STDMETHODIMP_(TMaterialPtr) GetMaterial(const std::string& name, bool sharedUse) override;
+	TMaterialPtr GetMaterial(const std::string& name, bool sharedUse) override;
 
-	STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer) override;
-	STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) override;
-	STDMETHODIMP_(IIndexBufferPtr) CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
-	STDMETHODIMP_(void) SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
+	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
+	IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) override;
+	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
+	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
-	STDMETHODIMP_(IVertexBufferPtr) CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) override;
-	STDMETHODIMP_(void) SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
+	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) override;
+	void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
-	STDMETHODIMP_(bool) UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
-	STDMETHODIMP_(void) UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
+	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
+	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 
-	STDMETHODIMP_(IProgramPtr) CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
-	STDMETHODIMP_(IProgramPtr) CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
+	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
+	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 
-	STDMETHODIMP_(ISamplerStatePtr) CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
-	STDMETHODIMP_(IInputLayoutPtr) CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
+	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
+	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
 
-	STDMETHODIMP_(void) SetBlendFunc(const TBlendFunc& blendFunc) override;
-	STDMETHODIMP_(void) SetDepthState(const TDepthState& depthState) override;
+	void SetBlendFunc(const TBlendFunc& blendFunc) override;
+	void SetDepthState(const TDepthState& depthState) override;
 
-	STDMETHODIMP_(ITexturePtr) CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) override;
-	STDMETHODIMP_(bool) LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
+	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) override;
+	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 public:
-	STDMETHODIMP_(bool) BeginScene() override;
-	STDMETHODIMP_(void) EndScene() override;
-	STDMETHODIMP_(void) RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) override;
+	bool BeginScene() override;
+	void EndScene() override;
+	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
 	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);

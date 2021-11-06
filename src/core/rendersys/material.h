@@ -91,8 +91,7 @@ public:
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
 
-struct INHERIT_COM("04059656-CA19-432B-BBEC-41E46EFB8CCD")
-TMaterial : public TResource 
+class TMaterial : public TResource 
 {
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;

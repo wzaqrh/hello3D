@@ -23,7 +23,11 @@
 
 #include "core/rendersys/d3d9/stddx9.h"
 #include "core/rendersys/d3d11/stddx11.h"
-#include "core/base/com_base.h"
+
+#include "wrl/client.h"
+using Microsoft::WRL::ComPtr;
+#define MakePtr std::make_shared
+#define PtrRaw(T) T.get()
 
 typedef struct _XMINT4 {
 	int x, y, z, w;

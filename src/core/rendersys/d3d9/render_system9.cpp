@@ -151,8 +151,8 @@ IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXG
 void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = PtrCast(rendTarget).As<TRenderTexture9>()->GetColorBuffer9();
-		mCurDepthStencilBuffer = PtrCast(rendTarget).As<TRenderTexture9>()->GetDepthStencilBuffer9();
+		mCurColorBuffer = std::static_pointer_cast<TRenderTexture9>(rendTarget)->GetColorBuffer9();
+		mCurDepthStencilBuffer = std::static_pointer_cast<TRenderTexture9>(rendTarget)->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;
@@ -196,7 +196,7 @@ IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 
 void TRenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-	mDevice9->SetIndices(indexBuffer ? PtrCast(indexBuffer).As<TIndexBuffer9>()->GetBuffer9() : nullptr);
+	mDevice9->SetIndices(indexBuffer ? std::static_pointer_cast<TIndexBuffer9>(indexBuffer)->GetBuffer9() : nullptr);
 }
 
 IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
@@ -214,7 +214,7 @@ void TRenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 {
 	UINT offset = vertexBuffer->GetOffset();
 	UINT stride = vertexBuffer->GetStride();
-	IDirect3DVertexBuffer9* buffer = PtrCast(vertexBuffer).As<TVertexBuffer9>()->GetBuffer9();
+	IDirect3DVertexBuffer9* buffer = std::static_pointer_cast<TVertexBuffer9>(vertexBuffer)->GetBuffer9();
 	mDevice9->SetStreamSource(0, buffer, offset, stride);
 }
 
@@ -225,20 +225,20 @@ bool TRenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	switch (bufferType)
 	{
 	case E_HWBUFFER_CONSTANT: {
-		IContantBufferPtr cbuffer = PtrCast(buffer).Cast<IContantBuffer>();
-		PtrCast(cbuffer).As<TContantBuffer9>()->SetBuffer9((char*)data, dataSize);
+		IContantBufferPtr cbuffer = std::static_pointer_cast<IContantBuffer>(buffer);
+		std::static_pointer_cast<TContantBuffer9>(cbuffer)->SetBuffer9((char*)data, dataSize);
 	}break;
 	case E_HWBUFFER_VERTEX: {
-		IVertexBufferPtr vbuffer = PtrCast(buffer).Cast<IVertexBuffer>();
-		IDirect3DVertexBuffer9* buffer9 = PtrCast(vbuffer).As<TVertexBuffer9>()->GetBuffer9();
+		IVertexBufferPtr vbuffer = std::static_pointer_cast<IVertexBuffer>(buffer);
+		IDirect3DVertexBuffer9* buffer9 = std::static_pointer_cast<TVertexBuffer9>(vbuffer)->GetBuffer9();
 		void* pByteDest = nullptr;
 		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
 		memcpy(pByteDest, data, dataSize);
 		if (CheckHR(buffer9->Unlock())) return false;
 	}break;
 	case E_HWBUFFER_INDEX: {
-		IIndexBufferPtr ibuffer = PtrCast(buffer).Cast<IIndexBuffer>();
-		IDirect3DIndexBuffer9* buffer9 = PtrCast(ibuffer).As<TIndexBuffer9>()->GetBuffer9();
+		IIndexBufferPtr ibuffer = std::static_pointer_cast<IIndexBuffer>(buffer);
+		IDirect3DIndexBuffer9* buffer9 = std::static_pointer_cast<TIndexBuffer9>(ibuffer)->GetBuffer9();
 		void* pByteDest = nullptr;
 		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
 		memcpy(pByteDest, data, dataSize);
@@ -403,12 +403,12 @@ IInputLayoutPtr TRenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_E
 
 	auto resource = pProgram->AsRes();
 	if (resource->IsLoaded()) {
-		ret->mLayout = _CreateInputLayout(PtrCast(pProgram).As<TProgram9>(), ret->mInputDescs);
+		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<TProgram9>(pProgram).get(), ret->mInputDescs);
 		resource->SetLoaded();
 	}
 	else {
 		resource->AddOnLoadedListener([=](IResource* res) {
-			ret->mLayout = _CreateInputLayout(PtrCast(pProgram).As<TProgram9>(), ret->mInputDescs);
+			ret->mLayout = _CreateInputLayout(std::static_pointer_cast<TProgram9>(pProgram).get(), ret->mInputDescs);
 			res->SetLoaded();
 		});
 	}
@@ -468,7 +468,7 @@ ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT for
 bool TRenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
 	assert(dataStep * texture->GetHeight() <= dataSize);
-	TTexture9Ptr tex9 = PtrCast(texture).As1<TTexture9>();
+	TTexture9Ptr tex9 = std::static_pointer_cast<TTexture9>(texture);
 
 	int width = texture->GetWidth(), height = texture->GetHeight();
 	IDirect3DTexture9* pTexture = tex9->GetSRV9();
@@ -510,7 +510,7 @@ void TRenderSystem9::SetDepthState(const TDepthState& depthState)
 
 void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	TProgram9Ptr program = PtrCast(pass->mProgram).As1<TProgram9>();
+	TProgram9Ptr program = std::static_pointer_cast<TProgram9>(pass->mProgram);
 	TPixelShader9* ps = PtrRaw(program->mPixel);
 	TVertexShader9* vs = PtrRaw(program->mVertex);
 
@@ -520,7 +520,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
-		char* buffer9 = (char*)PtrCast(buffer).As<TContantBuffer9>()->GetBuffer9();
+		char* buffer9 = (char*)std::static_pointer_cast<TContantBuffer9>(buffer)->GetBuffer9();
 		TConstBufferDeclPtr decl = buffer->GetDecl();
 		vs->mConstTable.SetValue(mDevice9, buffer9, *decl);
 		ps->mConstTable.SetValue(mDevice9, buffer9, *decl);
@@ -533,7 +533,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	if (!pass->mSamplers.empty()) {
 		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
 			ISamplerStatePtr sampler = pass->mSamplers[i];
-			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = PtrCast(sampler).As<TSamplerState9>()->GetSampler9();
+			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = std::static_pointer_cast<TSamplerState9>(sampler)->GetSampler9();
 			for (auto& pair : states) {
 				mDevice9->SetSamplerState(i, pair.first, pair.second);
 			}
@@ -585,7 +585,7 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 
 	{
 		for (size_t i = 0; i < textures.size(); ++i) {
-			auto iTex = PtrCast(textures[i]).As<TTexture9>();
+			auto iTex = std::static_pointer_cast<TTexture9>(textures[i]);
 			if (iTex) {
 				IDirect3DTexture9* texture = iTex->GetSRV9();
 				IDirect3DCubeTexture9* textureCube = iTex->GetSRVCube9();
@@ -630,7 +630,7 @@ void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::stri
 	std::vector<TPassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes)
 	{
-		mDevice9->SetVertexDeclaration(PtrCast(pass->mInputLayout).As<TInputLayout9>()->GetLayout9());
+		mDevice9->SetVertexDeclaration(std::static_pointer_cast<TInputLayout9>(pass->mInputLayout)->GetLayout9());
 		SetVertexBuffer(op.mVertexBuffer);
 		SetIndexBuffer(op.mIndexBuffer);
 
@@ -689,17 +689,17 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		IDirect3DTexture9* depthMapView = PtrCast(mShadowPassRT->GetColorTexture()).As<TTexture9>()->GetSRV9();
+		IDirect3DTexture9* depthMapView = std::static_pointer_cast<TTexture9>(mShadowPassRT->GetColorTexture())->GetSRV9();
 		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
 
 		auto& skyBox = mSceneManager->mSkyBox;
 		if (skyBox && skyBox->mCubeSRV) {
-			IDirect3DCubeTexture9* texture = PtrCast(skyBox->mCubeSRV).As<TTexture9>()->GetSRVCube9();
+			IDirect3DCubeTexture9* texture = std::static_pointer_cast<TTexture9>(skyBox->mCubeSRV)->GetSRVCube9();
 			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
 		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		IDirect3DTexture9* pSRV = PtrCast(mPostProcessRT->GetColorTexture()).As<TTexture9>()->GetSRV9();
+		IDirect3DTexture9* pSRV = std::static_pointer_cast<TTexture9>(mPostProcessRT->GetColorTexture())->GetSRV9();
 		mDevice9->SetTexture(0, pSRV);
 	}
 

@@ -121,11 +121,7 @@ void TThreadPump::Update(float dt)
 				IResourcePtr res = entry->res;
 				auto callback = entry->callback;
 				entry->Clear();
-#ifdef USE_EXPORT_COM
-				if (callback) callback(res.Get(), hr);
-#else
 				if (callback) callback(res.get(), hr);
-#endif
 			}
 		}
 	}
@@ -137,11 +133,7 @@ void TThreadPump::Update(float dt)
 				IResourcePtr res = entry->res;
 				auto callback = entry->callback;
 				entry->Clear();
-#ifdef USE_EXPORT_COM
-				if (callback) callback(entry->res.Get(), hr);
-#else
 				if (callback) callback(entry->res.get(), hr);
-#endif
 			}
 		}
 	}

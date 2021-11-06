@@ -3,20 +3,6 @@
 
 namespace mir {
 
-#ifdef USE_EXPORT_COM
-typedef ComPtr<struct TBlobDataD3d9> TBlobDataD3d9Ptr;
-typedef ComPtr<struct TInputLayout9> TInputLayout9Ptr;
-typedef std::shared_ptr<struct TConstantTable> TConstantTablePtr;
-typedef ComPtr<struct TVertexShader9> TVertexShader9Ptr;
-typedef ComPtr<struct TPixelShader9> TPixelShader9Ptr;
-typedef ComPtr<struct TProgram9> TProgram9Ptr;
-typedef ComPtr<struct TIndexBuffer9> TIndexBuffer9Ptr;
-typedef ComPtr<struct TVertexBuffer9> TVertexBuffer9Ptr;
-typedef ComPtr<struct TContantBuffer9> TContantBuffer9Ptr;
-typedef ComPtr<struct TTexture9> TTexture9Ptr;
-typedef ComPtr<struct TRenderTexture9> TRenderTexture9Ptr;
-typedef ComPtr<struct TSamplerState9> TSamplerState9Ptr;
-#else
 typedef std::shared_ptr<struct TBlobDataD3d9> TBlobDataD3d9Ptr;
 typedef std::shared_ptr<struct TInputLayout9> TInputLayout9Ptr;
 typedef std::shared_ptr<struct TConstantTable> TConstantTablePtr;
@@ -29,20 +15,16 @@ typedef std::shared_ptr<struct TContantBuffer9> TContantBuffer9Ptr;
 typedef std::shared_ptr<struct TTexture9> TTexture9Ptr;
 typedef std::shared_ptr<struct TRenderTexture9> TRenderTexture9Ptr;
 typedef std::shared_ptr<struct TSamplerState9> TSamplerState9Ptr;
-#endif
 
-
-struct INHERIT_COM("671C236B-006F-4C27-98B3-C57DF7915D16")
-TBlobDataD3d9 : public ComBase<IBlobData> {
+struct TBlobDataD3d9 : public IBlobData {
 	ID3DXBuffer* mBlob = nullptr;
 public:
 	TBlobDataD3d9(ID3DXBuffer* pBlob);
-	STDMETHODIMP_(char*) GetBufferPointer() override;
-	STDMETHODIMP_(size_t) GetBufferSize() override;
+	char* GetBufferPointer() override;
+	size_t GetBufferSize() override;
 };
 
-struct INHERIT_COM("69ED611C-C5DB-460F-8110-63E89FC5DA7B")
-TInputLayout9 : public ComBase<IInputLayout> {
+struct TInputLayout9 : public IInputLayout {
 public:
 	std::vector<D3DVERTEXELEMENT9> mInputDescs;
 	IDirect3DVertexDeclaration9* mLayout = nullptr;
@@ -50,7 +32,7 @@ public:
 public:
 	TInputLayout9();
 	IDirect3DVertexDeclaration9*& GetLayout9();
-	STDMETHODIMP_(IResourcePtr) AsRes() override {
+	IResourcePtr AsRes() override {
 		return mRes;
 	}
 };
@@ -73,16 +55,15 @@ public:
 	void SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDecl& decl);
 };
 
-struct INHERIT_COM("A86E63AD-B9A1-4C4A-828A-444BB3ABF478")
-TVertexShader9 : public ComBase<IVertexShader> {
+struct TVertexShader9 : public IVertexShader {
 	TConstantTable mConstTable;
 	IBlobDataPtr mBlob,mErrBlob;
 	IDirect3DVertexShader9* mShader = nullptr;
 	IResourcePtr mRes;
 public:
 	TVertexShader9();
-	STDMETHODIMP_(IBlobDataPtr) GetBlob() override;
-	STDMETHODIMP_(IResourcePtr) AsRes() override {
+	IBlobDataPtr GetBlob() override;
+	IResourcePtr AsRes() override {
 		return mRes;
 	}
 
@@ -90,16 +71,15 @@ public:
 	void SetConstTable(ID3DXConstantTable* constTable);
 };
 
-struct INHERIT_COM("71FE7436-1A61-4F32-B690-D9FD117433D5")
-TPixelShader9 : public ComBase<IPixelShader> {
+struct TPixelShader9 : public IPixelShader {
 	TConstantTable mConstTable;
 	IBlobDataPtr mBlob, mErrBlob;
 	IDirect3DPixelShader9* mShader = nullptr;
 	IResourcePtr mRes;
 public:
 	TPixelShader9();
-	virtual STDMETHODIMP_(IBlobDataPtr) GetBlob() override;
-	STDMETHODIMP_(IResourcePtr) AsRes() override {
+	virtual IBlobDataPtr GetBlob() override;
+	IResourcePtr AsRes() override {
 		return mRes;
 	}
 
@@ -107,29 +87,27 @@ public:
 	void SetConstTable(ID3DXConstantTable* constTable);
 };
 
-struct INHERIT_COM("E752C828-54D6-44F5-BF79-26461299779D")
-TProgram9 : public ComBase<IProgram> {
+struct TProgram9 : public IProgram {
 	TVertexShader9Ptr mVertex;
 	TPixelShader9Ptr mPixel;
 	IResourcePtr mRes;
 public:
 	TProgram9();
-	STDMETHODIMP_(IResourcePtr) AsRes() override {
+	IResourcePtr AsRes() override {
 		return mRes;
 	}
 	void SetVertex(TVertexShader9Ptr pVertex);
 	void SetPixel(TPixelShader9Ptr pPixel);
-	STDMETHODIMP_(IVertexShaderPtr) GetVertex() override {
+	IVertexShaderPtr GetVertex() override {
 		return mVertex;
 	}
-	STDMETHODIMP_(IPixelShaderPtr) GetPixel() override {
+	IPixelShaderPtr GetPixel() override {
 		return mPixel;
 	}
 };
 
 /********** HardwareBuffer **********/
-struct INHERIT_COM("8E88ACBA-26ED-4C83-A012-A6B161567D11")
-TIndexBuffer9 : public ComBase<IIndexBuffer> {
+struct TIndexBuffer9 : public IIndexBuffer {
 	IDirect3DIndexBuffer9* buffer;
 	unsigned int bufferSize;
 	DXGI_FORMAT format;
@@ -139,17 +117,16 @@ public:
 	TIndexBuffer9() :buffer(nullptr), bufferSize(0), format(DXGI_FORMAT_UNKNOWN) {};
 public:
 	IDirect3DIndexBuffer9*& GetBuffer9();
-	STDMETHODIMP_(enHardwareBufferType) GetType() override {
+	enHardwareBufferType GetType() override {
 		return E_HWBUFFER_INDEX;
 	}
-	STDMETHODIMP_(unsigned int) GetBufferSize() override;
+	unsigned int GetBufferSize() override;
 
-	STDMETHODIMP_(int) GetWidth() override;
-	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
+	int GetWidth() override;
+	DXGI_FORMAT GetFormat() override;
 };
 
-struct INHERIT_COM("6BEE478A-8730-4DC4-A732-A34A78722A30")
-TVertexBuffer9 : public ComBase<IVertexBuffer> {
+struct TVertexBuffer9 : public IVertexBuffer {
 	IDirect3DVertexBuffer9* buffer;
 	unsigned int bufferSize;
 	unsigned int stride, offset;
@@ -158,35 +135,33 @@ public:
 		:buffer(__buffer), bufferSize(__bufferSize), stride(__stride), offset(__offset) {};
 	
 	IDirect3DVertexBuffer9*& GetBuffer9();
-	STDMETHODIMP_(enHardwareBufferType) GetType() override {
+	enHardwareBufferType GetType() override {
 		return E_HWBUFFER_VERTEX;
 	}
-	STDMETHODIMP_(unsigned int) GetBufferSize() override;
+	unsigned int GetBufferSize() override;
 
-	STDMETHODIMP_(unsigned int) GetStride() override;
-	STDMETHODIMP_(unsigned int) GetOffset() override;
+	unsigned int GetStride() override;
+	unsigned int GetOffset() override;
 };
 
-struct INHERIT_COM("FDCC7A1A-C780-4A83-BFFF-2721F3A0D562")
-TContantBuffer9 : public ComBase<IContantBuffer> {
+struct TContantBuffer9 : public IContantBuffer {
 	TConstBufferDeclPtr mDecl;
 	std::vector<char> mBuffer9;
 public:
 	TContantBuffer9(TConstBufferDeclPtr decl);
 public:
-	STDMETHODIMP_(enHardwareBufferType) GetType() override {
+	enHardwareBufferType GetType() override {
 		return E_HWBUFFER_CONSTANT;
 	}
-	STDMETHODIMP_(unsigned int) GetBufferSize() override;
+	unsigned int GetBufferSize() override;
 
-	STDMETHODIMP_(TConstBufferDeclPtr) GetDecl() override;
+	TConstBufferDeclPtr GetDecl() override;
 	char* GetBuffer9();
 	void SetBuffer9(char* data, int dataSize);
 };
 
 /********** Texture **********/
-struct INHERIT_COM("911D06C1-544B-4977-8367-1C74C3EC3113")
-TTexture9 : public ComBase<ITexture> {
+struct TTexture9 : public ITexture {
 private:
 	int mWidth = 0, mHeight = 0, mMipCount = 0;
 	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
@@ -197,11 +172,11 @@ private:
 public:
 	TTexture9(int width, int height, DXGI_FORMAT format, int mipmap);
 	TTexture9(IDirect3DTexture9 *__texture, const std::string& __path);
-	STDMETHODIMP_(IResourcePtr) AsRes() override {
+	IResourcePtr AsRes() override {
 		return mRes;
 	}
 
-	STDMETHODIMP_(bool) HasSRV() override {
+	bool HasSRV() override {
 		return mTexture != nullptr || mTextureCube != nullptr;
 	}
 	void SetSRV9(IDirect3DTexture9* __texture);
@@ -212,29 +187,27 @@ public:
 		return mTextureCube;
 	}
 
-	STDMETHODIMP_(const char*) GetPath() override;
-	STDMETHODIMP_(int) GetWidth() override;
-	STDMETHODIMP_(int) GetHeight() override;
-	STDMETHODIMP_(DXGI_FORMAT) GetFormat() override;
-	STDMETHODIMP_(int) GetMipmapCount() override;
+	const char* GetPath() override;
+	int GetWidth() override;
+	int GetHeight() override;
+	DXGI_FORMAT GetFormat() override;
+	int GetMipmapCount() override;
 private:
 	D3DSURFACE_DESC GetDesc();
 };
 
-struct INHERIT_COM("455BD4A6-AF0B-40B6-BAEB-CDF4C94189D8")
-TRenderTexture9 : public ComBase<IRenderTexture> {
+struct TRenderTexture9 : public IRenderTexture {
 	IDirect3DSurface9* mDepthStencilBuffer;
 	IDirect3DSurface9* mColorBuffer;
 	TTexture9Ptr mColorTexture;
 public:
 	TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
-	STDMETHODIMP_(ITexturePtr) GetColorTexture() override;
+	ITexturePtr GetColorTexture() override;
 	IDirect3DSurface9*& GetColorBuffer9();
 	IDirect3DSurface9*& GetDepthStencilBuffer9();
 };
 
-struct INHERIT_COM("7BC9743D-B003-4298-8574-4FFE3E7E97D5")
-TSamplerState9 : public ComBase<ISamplerState> {
+struct TSamplerState9 : public ISamplerState {
 	std::map<D3DSAMPLERSTATETYPE, DWORD> mStates;
 public:
 	std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();
