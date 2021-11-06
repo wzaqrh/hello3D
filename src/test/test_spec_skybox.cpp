@@ -8,14 +8,14 @@
 
 using namespace mir;
 
-class TestSpecSkybox : public TApp
+class TestSpecSkybox : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnInitLight() override;
 	virtual void OnPostInitDevice() override;
 private:
-	TAssimpModel* mModel = nullptr;
+	AssimpModel* mModel = nullptr;
 };
 
 void TestSpecSkybox::OnInitLight()

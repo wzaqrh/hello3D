@@ -4,14 +4,13 @@
 
 namespace mir {
 
-struct MeshVertex
-{
+struct MeshVertex {
 	XMFLOAT3 Position;
 	XMFLOAT4 Color;
 	XMFLOAT2 UV;
 };
 
-class TMesh : public IRenderable {
+class Mesh : public IRenderable {
 	IRenderSystem* mRenderSys = nullptr;
 public:
 	TMaterialPtr Material;
@@ -26,12 +25,12 @@ public:
 
 	struct SubMesh {
 		short IndicePos,IndiceCount,IndiceBase;
-		TTextureBySlot Textures;
+		TextureBySlot Textures;
 	};
 	std::vector<SubMesh> SubMeshs;
 public:
-	TMesh(IRenderSystem* renderSys, const std::string& matName, int vertCount = 1024, int indexCount = 1024);
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	Mesh(IRenderSystem* renderSys, const std::string& matName, int vertCount = 1024, int indexCount = 1024);
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 
 	void Clear();
 	void SetVertexs(const MeshVertex* vertData, int vertCount);
@@ -43,6 +42,6 @@ public:
 	void SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
 	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
 };
-typedef std::shared_ptr<TMesh> TMeshPtr;
+typedef std::shared_ptr<Mesh> MeshPtr;
 
 }

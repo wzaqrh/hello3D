@@ -16,14 +16,14 @@ struct cbShadowMap
 	XMMATRIX LightProjection;
 };
 
-class TestShadowMap : public TApp
+class TestShadowMap : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	TAssimpModel *mModel1, *mModel2 = nullptr;
+	AssimpModel *mModel1, *mModel2 = nullptr;
 	TPointLightPtr mLight;
 };
 
@@ -60,12 +60,12 @@ void TestShadowMap::OnPostInitDevice()
 	//std::string matName = E_MAT_MODEL_PBR;
 	std::string matName = E_MAT_MODEL;
 
-	auto move1 = std::make_shared<TMovable>();
+	auto move1 = std::make_shared<Movable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new TAssimpModel(mContext->GetRenderSys(), move1, matName);
+	mModel1 = new AssimpModel(mContext->GetRenderSys(), move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new TAssimpModel(mContext->GetRenderSys(), mMove, matName);
+	mModel2 = new AssimpModel(mContext->GetRenderSys(), mMove, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 
@@ -75,7 +75,7 @@ void TestShadowMap::OnRender()
 	mModel1->Update(mTimer->mDeltaTime);
 	mModel2->Update(mTimer->mDeltaTime);
 
-	TRenderOperationQueue opQueue;
+	RenderOperationQueue opQueue;
 	mModel1->GenRenderOperation(opQueue);
 	mModel2->GenRenderOperation(opQueue);
 

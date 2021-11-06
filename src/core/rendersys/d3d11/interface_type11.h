@@ -3,69 +3,69 @@
 
 namespace mir {
 
-typedef std::shared_ptr< struct TBlobDataD3d11> TBlobDataD3d11Ptr;
-typedef std::shared_ptr< struct TInputLayout11> TInputLayout11Ptr;
-typedef std::shared_ptr< struct TVertexShader11> TVertexShader11Ptr;
-typedef std::shared_ptr< struct TPixelShader11> TPixelShader11Ptr;
-typedef std::shared_ptr< struct TProgram11> TProgram11Ptr;
-typedef std::shared_ptr< struct TVertexBuffer11> TVertexBuffer11Ptr;
-typedef std::shared_ptr< struct TIndexBuffer11> TIndexBuffer11Ptr;
-typedef std::shared_ptr< struct TContantBuffer11> TContantBuffer11Ptr;
-typedef std::shared_ptr< struct TTexture11> TTexture11Ptr;
-typedef std::shared_ptr< struct TRenderTexture11> TRenderTexture11Ptr;
-typedef std::shared_ptr< struct TSamplerState11> TSamplerState11Ptr;
+typedef std::shared_ptr< struct BlobData11> TBlobDataD3d11Ptr;
+typedef std::shared_ptr< struct InputLayout11> TInputLayout11Ptr;
+typedef std::shared_ptr< struct VertexShader11> TVertexShader11Ptr;
+typedef std::shared_ptr< struct PixelShader11> TPixelShader11Ptr;
+typedef std::shared_ptr< struct Program11> TProgram11Ptr;
+typedef std::shared_ptr< struct VertexBuffer11> TVertexBuffer11Ptr;
+typedef std::shared_ptr< struct IndexBuffer11> TIndexBuffer11Ptr;
+typedef std::shared_ptr< struct ContantBuffer11> TContantBuffer11Ptr;
+typedef std::shared_ptr< struct Texture11> TTexture11Ptr;
+typedef std::shared_ptr< struct RenderTexture11> TRenderTexture11Ptr;
+typedef std::shared_ptr< struct SamplerState11> TSamplerState11Ptr;
 
 /********** Program **********/
-struct TBlobDataD3d11 : public IBlobData {
+struct BlobData11 : public IBlobData {
 	ID3DBlob* mBlob = nullptr;
 public:
-	TBlobDataD3d11(ID3DBlob* pBlob);
+	BlobData11(ID3DBlob* pBlob);
 	char* GetBufferPointer() override;
 	size_t GetBufferSize() override;
 };
 
-struct TInputLayout11 : public IInputLayout {
+struct InputLayout11 : public IInputLayout {
 public:
 	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
 	ID3D11InputLayout* mLayout = nullptr;
 	TResourcePtr mRes;
 public:
-	TInputLayout11();
+	InputLayout11();
 	ID3D11InputLayout*& GetLayout11();
 	IResourcePtr AsRes() override;
 };
 
-struct TVertexShader11 : public IVertexShader {
+struct VertexShader11 : public IVertexShader {
 	ID3D11VertexShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
 	TResourcePtr mRes;
 public:
-	TVertexShader11(IBlobDataPtr pBlob);
+	VertexShader11(IBlobDataPtr pBlob);
 	IResourcePtr AsRes() override;
 
 	IBlobDataPtr GetBlob() override;
 	ID3D11VertexShader*& GetShader11();
 };
 
-struct TPixelShader11 : public IPixelShader {
+struct PixelShader11 : public IPixelShader {
 	ID3D11PixelShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
 	TResourcePtr mRes;
 public:
-	TPixelShader11(IBlobDataPtr pBlob);
+	PixelShader11(IBlobDataPtr pBlob);
 	IResourcePtr AsRes() override;
 	IBlobDataPtr GetBlob() override;
 	ID3D11PixelShader*& GetShader11();
 };
 
-struct TProgram11 : public IProgram {
+struct Program11 : public IProgram {
 	TVertexShader11Ptr mVertex;
 	TPixelShader11Ptr mPixel;
 	TResourcePtr mRes;
 public:
-	TProgram11();
+	Program11();
 	IResourcePtr AsRes() override;
 	void SetVertex(TVertexShader11Ptr pVertex);
 	void SetPixel(TPixelShader11Ptr pPixel);
@@ -74,67 +74,67 @@ public:
 };
 
 /********** HardwareBuffer **********/
-struct THardwareBuffer {
+struct HardwareBuffer {
 	ID3D11Buffer* buffer;
 	unsigned int bufferSize;
 public:
-	THardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :buffer(__buffer), bufferSize(__bufferSize) {};
-	THardwareBuffer() :buffer(nullptr), bufferSize(0) {};
+	HardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :buffer(__buffer), bufferSize(__bufferSize) {};
+	HardwareBuffer() :buffer(nullptr), bufferSize(0) {};
 };
 
-struct TVertexBuffer11 : public IVertexBuffer {
+struct VertexBuffer11 : public IVertexBuffer {
 	unsigned int stride, offset;
-	THardwareBuffer hd;
+	HardwareBuffer hd;
 public:
-	TVertexBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
+	VertexBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
 		:hd(__buffer, __bufferSize), stride(__stride), offset(__offset) {};
-	TVertexBuffer11() :stride(0), offset(0) {};
+	VertexBuffer11() :stride(0), offset(0) {};
 	int GetCount();
 public:
 	ID3D11Buffer*& GetBuffer11();
 	unsigned int GetBufferSize() override;
-	enHardwareBufferType GetType() override {
-		return E_HWBUFFER_VERTEX;
+	HardwareBufferType GetType() override {
+		return kHWBufferVertex;
 	}
 	unsigned int GetStride() override;
 	unsigned int GetOffset() override;
 };
 
-struct TIndexBuffer11 : public IIndexBuffer {
+struct IndexBuffer11 : public IIndexBuffer {
 	DXGI_FORMAT format;
-	THardwareBuffer hd;
+	HardwareBuffer hd;
 public:
-	TIndexBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize, DXGI_FORMAT __format)
+	IndexBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize, DXGI_FORMAT __format)
 		:hd(__buffer, __bufferSize), format(__format) {};
-	TIndexBuffer11() :format(DXGI_FORMAT_UNKNOWN) {};
+	IndexBuffer11() :format(DXGI_FORMAT_UNKNOWN) {};
 public:
 	ID3D11Buffer*& GetBuffer11();
 	unsigned int GetBufferSize() override;
-	enHardwareBufferType GetType() override {
-		return E_HWBUFFER_INDEX;
+	HardwareBufferType GetType() override {
+		return kHWBufferIndex;
 	}
 
 	int GetWidth() override;
 	DXGI_FORMAT GetFormat() override;
 };
 
-struct TContantBuffer11 : public IContantBuffer {
+struct ContantBuffer11 : public IContantBuffer {
 	TConstBufferDeclPtr mDecl;
-	THardwareBuffer hd;
+	HardwareBuffer hd;
 public:
-	TContantBuffer11() {}
-	TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl);
+	ContantBuffer11() {}
+	ContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl);
 public:
 	TConstBufferDeclPtr GetDecl() override;
-	enHardwareBufferType GetType() override {
-		return E_HWBUFFER_CONSTANT;
+	HardwareBufferType GetType() override {
+		return kHWBufferConstant;
 	}
 	ID3D11Buffer*& GetBuffer11();
 	unsigned int GetBufferSize() override;
 };
 
 /********** Texture **********/
-struct TTexture11 : public ITexture {
+struct Texture11 : public ITexture {
 private:
 	int mWidth = 0, mHeight = 0, mMipCount = 0;
 	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
@@ -142,16 +142,12 @@ private:
 	IResourcePtr mRes;
 	std::string mPath;
 public:
-	TTexture11(int width, int height, DXGI_FORMAT format, int mipmap);
+	Texture11(int width, int height, DXGI_FORMAT format, int mipmap);
 
-	TTexture11(ID3D11ShaderResourceView* __texture, const std::string& __path);
-	IResourcePtr AsRes() override {
-		return mRes;
-	}
+	Texture11(ID3D11ShaderResourceView* __texture, const std::string& __path);
+	IResourcePtr AsRes() override { return mRes; }
 
-	bool HasSRV() override {
-		return mTexture != nullptr;
-	}
+	bool HasSRV() override { return mTexture != nullptr; }
 	void SetSRV11(ID3D11ShaderResourceView* __texture);
 	ID3D11ShaderResourceView*& GetSRV11();
 
@@ -164,7 +160,7 @@ private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 };
 
-struct TRenderTexture11 : public IRenderTexture {
+struct RenderTexture11 : public IRenderTexture {
 private:
 	ID3D11Texture2D* mRenderTargetTexture = nullptr;
 	ID3D11ShaderResourceView* mRenderTargetSRV = nullptr;
@@ -176,7 +172,7 @@ private:
 
 	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
 public:
-	TRenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
+	RenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
 	ITexturePtr GetColorTexture() override;
 
 	ID3D11RenderTargetView*& GetColorBuffer11();
@@ -190,10 +186,10 @@ private:
 	bool InitDepthStencilView(ID3D11Device* pDevice);
 };
 
-struct TSamplerState11 : public ISamplerState {
+struct SamplerState11 : public ISamplerState {
 	ID3D11SamplerState* mSampler = nullptr;
 public:
-	TSamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
+	SamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
 	ID3D11SamplerState*& GetSampler11();
 };
 

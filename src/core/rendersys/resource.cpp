@@ -2,34 +2,34 @@
 
 namespace mir {
 
-TResource::TResource(IUnknown** deviceObj)
-	:mCurState(E_RES_STATE_NONE)
+Resource::Resource(IUnknown** deviceObj)
+	:mCurState(kResourceStateNone)
 	,mDeviceObj(deviceObj)
 {
 }
 
-void TResource::SetCurState(enResourceState state)
+void Resource::SetCurState(ResourceState state)
 {
 	if (mCurState != state) {
 		mCurState = state;
-		if (mCurState == E_RES_STATE_LOADED)
+		if (mCurState == kResourceStateLoaded)
 			SetLoaded();
 	}
 }
 
-IUnknown** TResource::GetDeviceObject()
+IUnknown** Resource::GetDeviceObject()
 {
 	return mDeviceObj;
 }
 
-void TResource::AddOnLoadedListener(std::function<void(IResource*)> lis)
+void Resource::AddOnLoadedListener(std::function<void(IResource*)> lis)
 {
 	OnLoadeds.push_back(lis);
 }
 
-void TResource::SetLoaded()
+void Resource::SetLoaded()
 {
-	mCurState = E_RES_STATE_LOADED;
+	mCurState = kResourceStateLoaded;
 
 	std::vector<std::function<void(IResource*)>> cbs;
 	cbs.swap(OnLoadeds);
@@ -37,7 +37,7 @@ void TResource::SetLoaded()
 		cb(this);
 }
 
-bool TResource::CheckLoaded() const
+bool Resource::CheckLoaded() const
 {
 	if (!mDepends.empty()) {
 		for (auto& depent : mDepends)
@@ -46,20 +46,20 @@ bool TResource::CheckLoaded() const
 		return true;
 	}
 	else {
-		return mCurState == E_RES_STATE_LOADED;
+		return mCurState == kResourceStateLoaded;
 	}
 }
 
-void TResource::CheckAndSetLoaded()
+void Resource::CheckAndSetLoaded()
 {
 	if (!IsLoaded() && CheckLoaded()) {
 		SetLoaded();
 	}
 }
 
-void TResource::AddDependency(IResourcePtr res)
+void Resource::AddDependency(IResourcePtr res)
 {
-	mDepends.push_back(std::static_pointer_cast<TResource>(res));
+	mDepends.push_back(std::static_pointer_cast<Resource>(res));
 	res->AddOnLoadedListener([=](IResource* res) {
 		CheckAndSetLoaded();
 	});

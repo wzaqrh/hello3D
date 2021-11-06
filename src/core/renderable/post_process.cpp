@@ -9,14 +9,14 @@
 namespace mir {
 
 /********** POSTPROCESS_VERTEX_QUAD **********/
-POSTPROCESS_VERTEX_QUAD::POSTPROCESS_VERTEX_QUAD(float x, float y, float w, float h)
+PostProcessVertexQuad::PostProcessVertexQuad(float x, float y, float w, float h)
 {
 	SetRect(x, y, w, h);
 	SetFlipY(true);
 	SetZ(1);
 }
 
-void POSTPROCESS_VERTEX_QUAD::SetRect(float x, float y, float w, float h)
+void PostProcessVertexQuad::SetRect(float x, float y, float w, float h)
 {
 	lb.Pos = XMFLOAT4(x, y, 0, 1);
 	lt.Pos = XMFLOAT4(x, y + h, 0, 1);
@@ -24,7 +24,7 @@ void POSTPROCESS_VERTEX_QUAD::SetRect(float x, float y, float w, float h)
 	rb.Pos = XMFLOAT4(x + w, y, 0, 1);
 }
 
-void POSTPROCESS_VERTEX_QUAD::SetFlipY(bool flipY)
+void PostProcessVertexQuad::SetFlipY(bool flipY)
 {
 	int pl = 0;
 	int pr = 1;
@@ -39,7 +39,7 @@ void POSTPROCESS_VERTEX_QUAD::SetFlipY(bool flipY)
 	rb.Tex = XMFLOAT2(pr, pb);
 }
 
-void POSTPROCESS_VERTEX_QUAD::SetZ(float z)
+void PostProcessVertexQuad::SetZ(float z)
 {
 	lb.Pos.z = z;
 	lt.Pos.z = z;
@@ -52,28 +52,28 @@ const unsigned int indices[] = {
 };
 
 /********** TPostProcess **********/
-TPostProcess::TPostProcess(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
+PostProcess::PostProcess(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
 {
 	mRenderSys = RenderSys;
 	mMainTex = mainTex;
 
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
-	POSTPROCESS_VERTEX_QUAD quad(-1, -1, 2, 2);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(POSTPROCESS_VERTEX_QUAD), sizeof(POSTPROCESS_VERTEX), 0, &quad);
+	PostProcessVertexQuad quad(-1, -1, 2, 2);
+	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }
 
-TPostProcess::~TPostProcess()
+PostProcess::~PostProcess()
 {
 }
 
-void TPostProcess::Draw()
+void PostProcess::Draw()
 {
 	mRenderSys->Draw(this);
 }
 
-int TPostProcess::GenRenderOperation(TRenderOperationQueue& opList)
+int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 {
-	TRenderOperation op = {};
+	RenderOperation op = {};
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
@@ -90,13 +90,13 @@ IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, IRenderTexturePtr targ
 	float sx = srv->GetWidth() * 1.0 / RenderSys->GetWinSize().x;
 	float sy = srv->GetHeight() * 1.0 / RenderSys->GetWinSize().y;
 	assert(sx <= 1 && sy <= 1);
-	POSTPROCESS_VERTEX_QUAD quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
-	IVertexBufferPtr vertBuf = RenderSys->CreateVertexBuffer(sizeof(POSTPROCESS_VERTEX_QUAD), sizeof(POSTPROCESS_VERTEX), 0, &quad);
+	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
+	IVertexBufferPtr vertBuf = RenderSys->CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 	return vertBuf;
 }
 
-TBloom::TBloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
-	:TPostProcess(RenderSys, mainTex)
+Bloom::Bloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
+	:PostProcess(RenderSys, mainTex)
 {
 	mMaterial = mRenderSys->GetMaterial(E_MAT_POSTPROC_BLOOM);
 
@@ -184,7 +184,7 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 	return bloom;
 }
 
-TConstBufferDecl& cbBloom::GetDesc()
+ConstBufferDecl& cbBloom::GetDesc()
 {
 	CBBEGIN(cbBloom);
 	builder.Add(CBELEMNTS(SampleOffsets));

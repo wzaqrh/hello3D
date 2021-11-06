@@ -10,17 +10,17 @@ static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	return *ppDeviceObj;
 }
 /********** TBlobDataStd **********/
-TBlobDataStd::TBlobDataStd(const std::vector<char>& buffer)
+BlobDataStandard::BlobDataStandard(const std::vector<char>& buffer)
 	:mBuffer(buffer)
 {
 }
 
-char* TBlobDataStd::GetBufferPointer()
+char* BlobDataStandard::GetBufferPointer()
 {
 	return mBuffer.empty() ? nullptr : &mBuffer[0];
 }
 
-size_t TBlobDataStd::GetBufferSize()
+size_t BlobDataStandard::GetBufferSize()
 {
 	return mBuffer.size();
 }

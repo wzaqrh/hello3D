@@ -8,14 +8,14 @@
 
 using namespace mir;
 
-class TestModel : public TApp
+class TestModel : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 private:
 	int mDrawFlag = 0;
-	TAssimpModel* mModel = nullptr;
+	AssimpModel* mModel = nullptr;
 };
 
 void TestModel::OnPostInitDevice()
@@ -33,7 +33,7 @@ void TestModel::OnPostInitDevice()
 	};
 	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson1"), layouts);
 #else
-	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
+	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
 #endif
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 

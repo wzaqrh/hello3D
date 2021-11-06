@@ -9,7 +9,7 @@
 
 using namespace mir;
 
-class TestRawTexture : public TApp
+class TestRawTexture : public App
 {
 protected:
 	virtual void OnRender() override;
@@ -17,7 +17,7 @@ protected:
 
 	ITexturePtr LoadTexture(std::string filename);
 private:
-	TSpritePtr mSprite;
+	SpritePtr mSprite;
 };
 
 ITexturePtr TestRawTexture::LoadTexture(std::string filename)
@@ -75,7 +75,7 @@ void TestRawTexture::OnPostInitDevice()
 {
 	mContext->GetSceneMng()->SetOthogonalCamera(100);
 
-	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
+	mSprite = std::make_shared<Sprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(LoadTexture("smile.bmp"));
 
 	mSprite->SetPosition(-mRenderSys->GetWinSize().x / 2, -mRenderSys->GetWinSize().y / 2, 0);

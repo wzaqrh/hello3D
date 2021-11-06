@@ -6,12 +6,7 @@
 
 namespace mir {
 
-#define E_PASS_SHADOWCASTER "ShadowCaster"
-#define E_PASS_FORWARDBASE "ForwardBase"
-#define E_PASS_FORWARDADD "ForwardAdd"
-#define E_PASS_POSTPROCESS "PostProcess"
-
-struct TTextureBySlot {
+struct TextureBySlot {
 	std::vector<ITexturePtr> textures;
 public:
 	bool empty() const;
@@ -19,7 +14,7 @@ public:
 
 	void clear();
 	void push_back(ITexturePtr texture);
-	void swap(TTextureBySlot& other);
+	void swap(TextureBySlot& other);
 	void resize(size_t size);
 
 	const ITexturePtr At(size_t pos) const;
@@ -28,23 +23,23 @@ public:
 	const ITexturePtr operator[](size_t pos) const;
 	ITexturePtr& operator[](size_t pos);
 public:
-	void Merge(const TTextureBySlot& other);
+	void Merge(const TextureBySlot& other);
 };
 
-struct TContantBufferInfo 
+struct ContantBufferInfo 
 {
 	IContantBufferPtr buffer;
 	bool isUnique;
 	std::string name;
 public:
-	TContantBufferInfo() :buffer(nullptr), isUnique(false) {}
-	TContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name = "", bool __isUnique = true);
+	ContantBufferInfo() :buffer(nullptr), isUnique(false) {}
+	ContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name = "", bool __isUnique = true);
 };
 #define MAKE_CBNAME(V) #V
 
 struct TData;
 struct IRenderSystem;
-struct TPass 
+struct Pass 
 {
 	std::string mLightMode,mName;
 	IInputLayoutPtr mInputLayout;
@@ -53,18 +48,18 @@ struct TPass
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
 
-	std::vector<TContantBufferInfo> mConstantBuffers;
+	std::vector<ContantBufferInfo> mConstantBuffers;
 
 	IRenderTexturePtr mRenderTarget;
 	std::vector<IRenderTexturePtr> mIterTargets;
-	TTextureBySlot mTextures;
+	TextureBySlot mTextures;
 
-	std::function<void(TPass*, IRenderSystem*, TTextureBySlot&)> OnBind;
-	std::function<void(TPass*, IRenderSystem*, TTextureBySlot&)> OnUnbind;
+	std::function<void(Pass*, IRenderSystem*, TextureBySlot&)> OnBind;
+	std::function<void(Pass*, IRenderSystem*, TextureBySlot&)> OnUnbind;
 public:
-	TPass(const std::string& lightMode, const std::string& name);
-	std::shared_ptr<TPass> Clone(IRenderSystem* pRenderSys);
-	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
+	Pass(const std::string& lightMode, const std::string& name);
+	std::shared_ptr<Pass> Clone(IRenderSystem* pRenderSys);
+	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
 	IRenderTexturePtr AddIterTarget(IRenderTexturePtr target);
@@ -74,14 +69,14 @@ public:
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
 
-struct TTechnique
+struct Technique
 {
 	std::string mName;
 	std::vector<TPassPtr> mPasses;
 public:
 	void AddPass(TPassPtr pass);
-	std::shared_ptr<TTechnique> Clone(IRenderSystem* pRenderSys);
-	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
+	std::shared_ptr<Technique> Clone(IRenderSystem* pRenderSys);
+	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
 
@@ -91,19 +86,19 @@ public:
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
 
-class TMaterial : public TResource 
+class Material : public Resource 
 {
 	std::vector<TTechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
-	std::shared_ptr<TMaterial> Clone(IRenderSystem* pRenderSys);
+	std::shared_ptr<Material> Clone(IRenderSystem* pRenderSys);
 	void AddTechnique(TTechniquePtr technique);
 
 	TTechniquePtr CurTech();
 	TTechniquePtr SetCurTechByIdx(int idx);
 	void SetCurTechByName(const std::string& name);
 
-	IContantBufferPtr AddConstBuffer(const TContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 };
 

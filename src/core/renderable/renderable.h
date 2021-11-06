@@ -7,32 +7,32 @@
 namespace mir {
 
 /********** RenderOperation **********/
-struct TRenderOperation {
+struct RenderOperation {
 	TMaterialPtr mMaterial;
 	IVertexBufferPtr mVertexBuffer;
 	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 	IIndexBufferPtr mIndexBuffer;
 	short mIndexPos = 0, mIndexCount = 0, mIndexBase = 0;
-	TTextureBySlot mTextures;
+	TextureBySlot mTextures;
 	XMMATRIX mWorldTransform;
 public:
-	TRenderOperation();
+	RenderOperation();
 };
 
-struct TRenderOperationQueue {
-	std::vector<TRenderOperation> mOps;
+struct RenderOperationQueue {
+	std::vector<RenderOperation> mOps;
 public:
 	void Clear();
-	void AddOP(const TRenderOperation& op);
+	void AddOP(const RenderOperation& op);
 	size_t Count() const;
-	TRenderOperation& At(size_t pos);
-	const TRenderOperation& At(size_t pos) const;
-	TRenderOperation& operator[](size_t pos);
-	const TRenderOperation& operator[](size_t pos) const;
+	RenderOperation& At(size_t pos);
+	const RenderOperation& At(size_t pos) const;
+	RenderOperation& operator[](size_t pos);
+	const RenderOperation& operator[](size_t pos) const;
 };
 
-struct IRenderable {
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) = 0;
+interface IRenderable {
+	virtual int GenRenderOperation(RenderOperationQueue& opList) = 0;
 };
 
 }

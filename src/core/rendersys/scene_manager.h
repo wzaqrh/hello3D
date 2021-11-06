@@ -7,8 +7,7 @@
 
 namespace mir {
 
-__declspec(align(16)) 
-struct TCameraBase {
+struct __declspec(align(16)) CameraBase {
 public:
 	XMMATRIX mView_;
 	XMMATRIX mProjection_;
@@ -16,7 +15,7 @@ public:
 public:
 	void* operator new(size_t i) { return _mm_malloc(i, 16); }
 	void operator delete(void* p) { _mm_free(p); }
-	TCameraBase();
+	CameraBase();
 public:
 	XMFLOAT3 CalNDC(XMFLOAT3 pos);
 	XMFLOAT4 CalNDC(XMFLOAT4 pos);
@@ -25,11 +24,11 @@ public:
 	virtual const XMMATRIX& GetProjection();
 };
 
-typedef std::shared_ptr<struct TTransform> TTransformPtr;
-__declspec(align(16)) 
-struct TCamera : public TCameraBase {
+typedef std::shared_ptr<struct Transform> TransformPtr;
+
+struct __declspec(align(16)) Camera : public CameraBase {
 public:
-	TTransformPtr mTransform;
+	TransformPtr mTransform;
 	bool mTransformDirty;
 
 	bool mIsPespective = true;
@@ -41,13 +40,13 @@ public:
 public:
 	void* operator new(size_t i) { return _mm_malloc(i, 16); }
 	void operator delete(void* p) { _mm_free(p); }
-	TCamera();
-	TCamera(const TCamera& other);
+	Camera();
+	Camera(const Camera& other);
 public:
 	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at);
 	void SetPerspectiveProj(int width, int height, double fov, double far1);
 	void SetOthogonalProj(int width, int height, double far1);
-	TTransformPtr GetTransform();
+	TransformPtr GetTransform();
 
 	const XMMATRIX& GetView() override;
 	const XMMATRIX& GetProjection() override;
@@ -57,8 +56,8 @@ public:
 private:
 	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at, XMFLOAT3 up);
 public:
-	static std::shared_ptr<TCamera> CreatePerspective(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1 = 100);
-	static std::shared_ptr<TCamera> CreateOthogonal(int width, int height, double far1 = 100);
+	static std::shared_ptr<Camera> CreatePerspective(int width, int height, double fov = 45.0, int eyeDistance = 10, double far1 = 100);
+	static std::shared_ptr<Camera> CreateOthogonal(int width, int height, double far1 = 100);
 };
 
 interface ISceneManager 
@@ -71,44 +70,39 @@ interface ISceneManager
 	virtual TPointLightPtr AddPointLight() = 0;
 	virtual TDirectLightPtr AddDirectLight() = 0;
 
-	virtual TSkyBoxPtr GetSkyBox() = 0;
-	virtual TSkyBoxPtr SetSkyBox(const std::string& imgName) = 0;
+	virtual SkyBoxPtr GetSkyBox() = 0;
+	virtual SkyBoxPtr SetSkyBox(const std::string& imgName) = 0;
 	virtual TPostProcessPtr AddPostProcess(const std::string& name) = 0;
 };
 
-struct TSceneManager : public ISceneManager
+struct SceneManager : public ISceneManager
 {
 public:
 	IRenderSystem* mRenderSys;
 	IRenderTexturePtr mPostProcessRT;
 	int mScreenWidth, mScreenHeight;
 	
-
 	TCameraPtr mDefCamera;
-	TSkyBoxPtr mSkyBox;
+	SkyBoxPtr mSkyBox;
 	std::vector<TPostProcessPtr> mPostProcs;
 
 	std::vector<TDirectLightPtr> mDirectLights;
 	std::vector<TPointLightPtr> mPointLights;
 	std::vector<TSpotLightPtr> mSpotLights;
-	std::vector<std::pair<TDirectLight*, enLightType>> mLightsOrder;
+	std::vector<std::pair<cbDirectLight*, enLightType>> mLightsOrder;
 public:
-	TSceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, TCameraPtr defCamera);
+	SceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, TCameraPtr defCamera);
 
 	TCameraPtr SetOthogonalCamera(double far1) override;
 	TCameraPtr SetPerspectiveCamera(double fov, int eyeDistance, double far1) override;
-	TCameraPtr GetDefCamera() {
-		return mDefCamera;
-	}
+	TCameraPtr GetDefCamera() { return mDefCamera; }
 
 	TSpotLightPtr AddSpotLight() override;
 	TPointLightPtr AddPointLight() override;
 	TDirectLightPtr AddDirectLight() override;
 
-	TSkyBoxPtr SetSkyBox(const std::string& imgName) override;
-	TSkyBoxPtr GetSkyBox() {
-		return mSkyBox;
-	};
+	SkyBoxPtr SetSkyBox(const std::string& imgName) override;
+	SkyBoxPtr GetSkyBox() { return mSkyBox; };
 
 	TPostProcessPtr AddPostProcess(const std::string& name) override;
 };

@@ -4,51 +4,51 @@
 namespace mir {
 
 /********** TTextureBySlot **********/
-void TTextureBySlot::clear()
+void TextureBySlot::clear()
 {
 	textures.clear();
 }
 
-void TTextureBySlot::push_back(ITexturePtr texture)
+void TextureBySlot::push_back(ITexturePtr texture)
 {
 	textures.push_back(texture);
 }
 
-bool TTextureBySlot::empty() const
+bool TextureBySlot::empty() const
 {
 	return textures.empty();
 }
 
-size_t TTextureBySlot::size() const
+size_t TextureBySlot::size() const
 {
 	return textures.size();
 }
 
-void TTextureBySlot::swap(TTextureBySlot& other)
+void TextureBySlot::swap(TextureBySlot& other)
 {
 	textures.swap(other.textures);
 }
 
-void TTextureBySlot::resize(size_t size)
+void TextureBySlot::resize(size_t size)
 {
 	textures.resize(size);
 }
 
-const ITexturePtr TTextureBySlot::At(size_t pos)  const {
+const ITexturePtr TextureBySlot::At(size_t pos)  const {
 	return textures[pos];
 }
-ITexturePtr& TTextureBySlot::At(size_t pos) {
+ITexturePtr& TextureBySlot::At(size_t pos) {
 	if (pos >= textures.size()) textures.resize(pos + 1);
 	return textures[pos];
 }
-const ITexturePtr TTextureBySlot::operator[](size_t pos)  const {
+const ITexturePtr TextureBySlot::operator[](size_t pos)  const {
 	return At(pos);
 }
-ITexturePtr& TTextureBySlot::operator[](size_t pos) {
+ITexturePtr& TextureBySlot::operator[](size_t pos) {
 	return At(pos);
 }
 
-void TTextureBySlot::Merge(const TTextureBySlot& other) {
+void TextureBySlot::Merge(const TextureBySlot& other) {
 	if (textures.size() < other.textures.size())
 		textures.resize(other.textures.size());
 
@@ -60,7 +60,7 @@ void TTextureBySlot::Merge(const TTextureBySlot& other) {
 }
 
 /********** TRenderOperation **********/
-TRenderOperation::TRenderOperation()
+RenderOperation::RenderOperation()
 	: mIndexPos(0)
 	, mIndexCount(0)
 	, mIndexBase(0)
@@ -69,37 +69,37 @@ TRenderOperation::TRenderOperation()
 }
 
 /********** TRenderOperationQueue **********/
-void TRenderOperationQueue::Clear()
+void RenderOperationQueue::Clear()
 {
 	mOps.clear();
 }
 
-void TRenderOperationQueue::AddOP(const TRenderOperation& op)
+void RenderOperationQueue::AddOP(const RenderOperation& op)
 {
 	mOps.push_back(op);
 }
 
-size_t TRenderOperationQueue::Count() const
+size_t RenderOperationQueue::Count() const
 {
 	return mOps.size();
 }
 
-const TRenderOperation& TRenderOperationQueue::At(size_t pos) const
+const RenderOperation& RenderOperationQueue::At(size_t pos) const
 {
 	return mOps[pos];
 }
 
-TRenderOperation& TRenderOperationQueue::At(size_t pos)
+RenderOperation& RenderOperationQueue::At(size_t pos)
 {
 	return mOps[pos];
 }
 
-const TRenderOperation& TRenderOperationQueue::operator[](size_t pos) const
+const RenderOperation& RenderOperationQueue::operator[](size_t pos) const
 {
 	return At(pos);
 }
 
-TRenderOperation& TRenderOperationQueue::operator[](size_t pos)
+RenderOperation& RenderOperationQueue::operator[](size_t pos)
 {
 	return At(pos);
 }

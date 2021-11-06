@@ -3,50 +3,48 @@
 
 namespace mir {
 
-struct TCameraBase;
-struct TCamera;
-struct TConstBufferDecl;
-struct TDirectLight {
+struct CameraBase;
+struct Camera;
+struct ConstBufferDecl;
+struct cbDirectLight {
 public:
 	XMFLOAT4 LightPos;//world space
 	XMFLOAT4 DiffuseColor;
 	XMFLOAT4 SpecularColorPower;
 public:
-	TDirectLight();
+	cbDirectLight();
 	void SetDirection(float x, float y, float z);
 	void SetDiffuseColor(float r, float g, float b, float a);
 	void SetSpecularColor(float r, float g, float b, float a);
 	void SetSpecularPower(float power);
 public:
-	TCameraBase* GetLightCamera(TCamera& otherCam);
-	static TConstBufferDecl& GetDesc();
+	CameraBase* GetLightCamera(Camera& otherCam);
+	static ConstBufferDecl& GetDesc();
 };
-struct TPointLight : public TDirectLight {
+struct cbPointLight : public cbDirectLight {
 public:
 	XMFLOAT4 Attenuation;
 public:
-	TPointLight();
+	cbPointLight();
 	void SetPosition(float x, float y, float z);
 	void SetAttenuation(float a, float b, float c);
 public:
-	static TConstBufferDecl& GetDesc();
+	static ConstBufferDecl& GetDesc();
 };
-struct TSpotLight : public TPointLight {
+struct cbSpotLight : public cbPointLight {
 public:
 	XMFLOAT4 DirectionCutOff;
 public:
-	TSpotLight();
+	cbSpotLight();
 	void SetDirection(float x, float y, float z);
 	void SetCutOff(float cutoff);
 	void SetAngle(float radian);
 public:
-	static TConstBufferDecl& GetDesc();
+	static ConstBufferDecl& GetDesc();
 };
 
-
 #define MAX_LIGHTS 4
-__declspec(align(16)) 
-struct cbGlobalParam
+struct __declspec(align(16)) cbGlobalParam
 {
 	XMMATRIX World;
 	XMMATRIX View;
@@ -58,31 +56,28 @@ struct cbGlobalParam
 
 	XMMATRIX LightView;
 	XMMATRIX LightProjection;
-	TSpotLight Light;
+	cbSpotLight Light;
 	
 	unsigned int LightType;//directional=1,point=2,spot=3
 	unsigned int HasDepthMap;
 public:
 	cbGlobalParam();
-	static TConstBufferDecl& GetDesc();
-	static TConstBufferDecl MKDesc();
+	static ConstBufferDecl& GetDesc();
+	static ConstBufferDecl MKDesc();
 };
 
-struct TConstBufferDecl;
-struct TFogExp 
+struct cbFogExp 
 {
 	XMFLOAT4 FogColorExp;
 public:
-	TFogExp();
+	cbFogExp();
 	void SetColor(float r, float g, float b);
 	void SetExp(float exp);
-	static TConstBufferDecl& GetDesc();
+	static ConstBufferDecl& GetDesc();
 };
 
-
-const int MAX_MATRICES = 56;
-__declspec(align(16)) 
-struct cbWeightedSkin
+constexpr int MAX_MATRICES = 56;
+struct __declspec(align(16)) cbWeightedSkin
 {
 	XMMATRIX Model;
 	XMMATRIX Models[MAX_MATRICES];
@@ -91,13 +86,11 @@ struct cbWeightedSkin
 	unsigned int hasRoughness;
 	unsigned int hasAO;
 
-	static TConstBufferDecl& GetDesc();
-	static TConstBufferDecl MKDesc();
+	static ConstBufferDecl& GetDesc();
+	static ConstBufferDecl MKDesc();
 };
 
-
-__declspec(align(16)) 
-struct cbUnityMaterial
+struct __declspec(align(16))  cbUnityMaterial
 {
 	XMFLOAT4 _SpecColor;
 	XMFLOAT4 _Color;
@@ -106,21 +99,19 @@ struct cbUnityMaterial
 	unsigned int _SpecLightOff;
 
 	cbUnityMaterial();
-	static TConstBufferDecl& GetDesc();
-	static TConstBufferDecl MKDesc();
+	static ConstBufferDecl& GetDesc();
+	static ConstBufferDecl MKDesc();
 };
 
-
-__declspec(align(16)) 
-struct cbUnityGlobal
+struct __declspec(align(16)) cbUnityGlobal
 {
 	XMFLOAT4 _Unity_IndirectSpecColor;
 	XMFLOAT4 _AmbientOrLightmapUV;
 	XMFLOAT4 _Unity_SpecCube0_HDR;
 
 	cbUnityGlobal();
-	static TConstBufferDecl& GetDesc();
-	static TConstBufferDecl MKDesc();
+	static ConstBufferDecl& GetDesc();
+	static ConstBufferDecl MKDesc();
 };
 
 }

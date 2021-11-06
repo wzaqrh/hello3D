@@ -4,7 +4,7 @@
 
 namespace mir {
 
-class TRenderSystem11 : public TRenderSystem
+class RenderSystem11 : public RenderSystem
 {
 private:
 	HWND mHWnd = NULL;
@@ -22,13 +22,13 @@ private:
 	ID3D11RenderTargetView* mCurRenderTargetView = NULL;
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
 
-	TThreadPumpPtr mThreadPump;
+	ThreadPumpPtr mThreadPump;
 	std::vector<D3D_SHADER_MACRO> mShaderMacros;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
-	TRenderSystem11();
-	~TRenderSystem11();
+	RenderSystem11();
+	~RenderSystem11();
 public:
 	bool Initialize(HWND hWnd, RECT vp);
 	void Update(float dt);
@@ -44,7 +44,7 @@ public:
 	TMaterialPtr GetMaterial(const std::string& name, bool sharedUse);
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer);
-	IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr);
+	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr);
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer);
 
@@ -60,15 +60,15 @@ public:
 	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
 	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
 
-	void SetBlendFunc(const TBlendFunc& blendFunc);
-	void SetDepthState(const TDepthState& depthState);
+	void SetBlendFunc(const BlendFunc& blendFunc);
+	void SetDepthState(const DepthState& depthState);
 
 	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap);
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep);
 public:
 	bool BeginScene();
 	void EndScene();
-	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode);
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 private:
@@ -86,12 +86,12 @@ protected:
 	TPixelShader11Ptr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
 	TPixelShader11Ptr _CreatePSByFXC(const char* filename);
 
-	ID3D11InputLayout* _CreateInputLayout(TProgram11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
+	ID3D11InputLayout* _CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 protected:
 	void BindPass(const TPassPtr& pass, const cbGlobalParam& globalParam);
-	void RenderPass(const TPassPtr& pass, TTextureBySlot& texturs, int iterCnt, const TRenderOperation& op, const cbGlobalParam& globalParam);
-	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderPass(const TPassPtr& pass, TextureBySlot& texturs, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam);
+	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+	void RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
 	void _RenderSkyBox();
 	void _DoPostProcess();
 };

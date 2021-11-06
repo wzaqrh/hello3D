@@ -6,7 +6,7 @@
 namespace mir {
 
 /********** TMesh **********/
-TMesh::TMesh(IRenderSystem* renderSys, const std::string& matName, int vertCount, int indexCount)
+Mesh::Mesh(IRenderSystem* renderSys, const std::string& matName, int vertCount, int indexCount)
 {
 	mRenderSys = renderSys;
 	Material = mRenderSys->GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
@@ -20,7 +20,7 @@ TMesh::TMesh(IRenderSystem* renderSys, const std::string& matName, int vertCount
 	SubMeshs.resize(1);
 }
 
-int TMesh::GenRenderOperation(TRenderOperationQueue& opList)
+int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (VertDirty)
 	{
@@ -38,7 +38,7 @@ int TMesh::GenRenderOperation(TRenderOperationQueue& opList)
 	for (int i = 0; i < SubMeshs.size(); ++i)
 	if (SubMeshs[i].IndiceCount > 0)
 	{
-		TRenderOperation op = {};
+		RenderOperation op = {};
 		op.mMaterial = Material;
 		op.mIndexBuffer = IndexBuffer;
 		op.mVertexBuffer = VertexBuffer;
@@ -52,7 +52,7 @@ int TMesh::GenRenderOperation(TRenderOperationQueue& opList)
 	return opCount;
 }
 
-void TMesh::Clear()
+void Mesh::Clear()
 {
 	VertDirty = true;
 	VertPos = 0;
@@ -63,14 +63,14 @@ void TMesh::Clear()
 	SubMeshs[0].IndicePos = 0;
 }
 
-void TMesh::SetVertexs(const MeshVertex* vertData, int vertCount)
+void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount)
 {
 	VertDirty = true;
 	VertPos = vertCount;
 	Vertices.assign(vertData, vertData + vertCount);
 }
 
-void TMesh::SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos)
+void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, vertPos + vertCount);
@@ -78,7 +78,7 @@ void TMesh::SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos)
 		Vertices[i + vertPos] = vertData[i];
 }
 
-void TMesh::SetPositions(const XMFLOAT3* posData, int count)
+void Mesh::SetPositions(const XMFLOAT3* posData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
@@ -86,7 +86,7 @@ void TMesh::SetPositions(const XMFLOAT3* posData, int count)
 		Vertices[i].Position = posData[i];
 }
 
-void TMesh::SetColors(const XMFLOAT4* colorData, int count)
+void Mesh::SetColors(const XMFLOAT4* colorData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
@@ -94,7 +94,7 @@ void TMesh::SetColors(const XMFLOAT4* colorData, int count)
 		Vertices[i].Color = colorData[i];
 }
 
-void TMesh::SetUVs(const XMFLOAT2* uvData, int count)
+void Mesh::SetUVs(const XMFLOAT2* uvData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
@@ -102,12 +102,12 @@ void TMesh::SetUVs(const XMFLOAT2* uvData, int count)
 		Vertices[i].UV = uvData[i];
 }
 
-void TMesh::SetSubMeshCount(int count)
+void Mesh::SetSubMeshCount(int count)
 {
 	SubMeshs.resize(count);
 }
 
-void TMesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
+void Mesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
 {
 	assert(subMeshIndex < SubMeshs.size());
 	IndiceDirty = true;
@@ -120,7 +120,7 @@ void TMesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, i
 	submesh.IndiceBase = indiceBase;
 }
 
-void TMesh::SetTexture(int slot, ITexturePtr texture, int subMeshIndex)
+void Mesh::SetTexture(int slot, ITexturePtr texture, int subMeshIndex)
 {
 	assert(subMeshIndex < SubMeshs.size());
 	auto& submesh = SubMeshs[subMeshIndex];

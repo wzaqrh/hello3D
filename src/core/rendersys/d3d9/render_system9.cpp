@@ -9,18 +9,18 @@
 
 namespace mir {
 
-TRenderSystem9::TRenderSystem9()
+RenderSystem9::RenderSystem9()
 {
-	mMaterialFac = std::make_shared<TMaterialFactory>(this);
+	mMaterialFac = std::make_shared<MaterialFactory>(this);
 	mFXCDir = "d3d9\\";
 }
 
-TRenderSystem9::~TRenderSystem9()
+RenderSystem9::~RenderSystem9()
 {
 
 }
 
-bool TRenderSystem9::Initialize(HWND hWnd, RECT vp)
+bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 {
 	mHWnd = hWnd;
 	
@@ -37,8 +37,8 @@ bool TRenderSystem9::Initialize(HWND hWnd, RECT vp)
 	if (!_CreateDeviceAndSwapChain()) return false;
 	_SetRasterizerState();
 
-	SetDepthState(TDepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
-	SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
+	SetDepthState(DepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
+	SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
 
 	mDevice9->GetRenderTarget(0, &mBackColorBuffer); mCurColorBuffer = mBackColorBuffer;
 	mDevice9->GetDepthStencilSurface(&mBackDepthStencilBuffer); mCurDepthStencilBuffer = mBackDepthStencilBuffer;
@@ -52,19 +52,19 @@ bool TRenderSystem9::Initialize(HWND hWnd, RECT vp)
 	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 
-	mSceneManager = MakePtr<TSceneManager>(this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, TCamera::CreatePerspective(mScreenWidth, mScreenHeight));
+	mSceneManager = MakePtr<SceneManager>(this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
 
 	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));
 	return true;
 }
 
-void TRenderSystem9::SetViewPort(int x, int y, int w, int h)
+void RenderSystem9::SetViewPort(int x, int y, int w, int h)
 {
 
 }
 
-bool TRenderSystem9::_CreateDeviceAndSwapChain()
+bool RenderSystem9::_CreateDeviceAndSwapChain()
 {	
 	// Get the desktop display mode.
 	D3DDISPLAYMODE displayMode;
@@ -102,24 +102,24 @@ bool TRenderSystem9::_CreateDeviceAndSwapChain()
 	return success;
 }
 
-bool TRenderSystem9::_GetDeviceCaps()
+bool RenderSystem9::_GetDeviceCaps()
 {
 	if (CheckHR(mD3D9->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &mD3DCaps))) return false;
 	__log(mD3DCaps);
 	return true;
 }
 
-void TRenderSystem9::_SetRasterizerState()
+void RenderSystem9::_SetRasterizerState()
 {
 	mDevice9->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	mDevice9->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 }
 
-void TRenderSystem9::Update(float dt)
+void RenderSystem9::Update(float dt)
 {
 }
 
-void TRenderSystem9::CleanUp()
+void RenderSystem9::CleanUp()
 {
 }
 
@@ -127,7 +127,7 @@ static inline D3DCOLOR XMFLOAT2D3DCOLOR(XMFLOAT4 color) {
 	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x * 255), int(color.y * 255), int(color.z * 255), int(color.w * 255));
 	return dc;
 }
-void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
+void RenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
 {
 	if (mCurColorBuffer != mBackColorBuffer) {
 		//mDevice9->ColorFill(mCurColorBuffer, NULL, XMFLOAT2D3DCOLOR(color));
@@ -135,24 +135,24 @@ void TRenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, 
 	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), Depth, Stencil);
 }
 
-IRenderTexturePtr TRenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
+IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
-	TTexture9Ptr pTextureRV = MakePtr<TTexture9>(nullptr, "");
-	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
+	TTexture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
+	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
 	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
-	TRenderTexture9Ptr ret = MakePtr<TRenderTexture9>(pTextureRV, pSurfaceDepthStencil);
+	TRenderTexture9Ptr ret = MakePtr<RenderTexture9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;
 }
 
-void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
+void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = std::static_pointer_cast<TRenderTexture9>(rendTarget)->GetColorBuffer9();
-		mCurDepthStencilBuffer = std::static_pointer_cast<TRenderTexture9>(rendTarget)->GetDepthStencilBuffer9();
+		mCurColorBuffer = std::static_pointer_cast<RenderTexture9>(rendTarget)->GetColorBuffer9();
+		mCurDepthStencilBuffer = std::static_pointer_cast<RenderTexture9>(rendTarget)->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;
@@ -162,83 +162,83 @@ void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-TMaterialPtr TRenderSystem9::GetMaterial(const std::string& name, bool sharedUse)
+TMaterialPtr RenderSystem9::GetMaterial(const std::string& name, bool sharedUse)
 {
 	TMaterialPtr material = mMaterialFac->GetMaterial(name, sharedUse);
 	material->SetCurTechByName("d3d9");
 	return material;
 }
 
-IContantBufferPtr TRenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
+IContantBufferPtr RenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
 {
-	TContantBuffer9Ptr ret = MakePtr<TContantBuffer9>(buffer->GetDecl());
+	TContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(buffer->GetDecl());
 	return ret;
 }
 
-IContantBufferPtr TRenderSystem9::CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data /*= nullptr*/)
+IContantBufferPtr RenderSystem9::CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
-	TContantBuffer9Ptr ret = MakePtr<TContantBuffer9>(std::make_shared<TConstBufferDecl>(cbDecl));
+	TContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));
 	if (data) UpdateBuffer((ret), data, ret->GetBufferSize());
 	return ret;
 }
 
-IIndexBufferPtr TRenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
+IIndexBufferPtr RenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
 {
 	TIndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
-	D3DFORMAT Format = D3DEnumCT::d3d11To9(format);
+	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
-		ret = MakePtr<TIndexBuffer9>(pIndexBuffer, bufferSize, format);
+		ret = MakePtr<IndexBuffer9>(pIndexBuffer, bufferSize, format);
 	}
 	if (buffer) UpdateBuffer((ret), buffer, bufferSize);
 	return ret;
 }
 
-void TRenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
+void RenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-	mDevice9->SetIndices(indexBuffer ? std::static_pointer_cast<TIndexBuffer9>(indexBuffer)->GetBuffer9() : nullptr);
+	mDevice9->SetIndices(indexBuffer ? std::static_pointer_cast<IndexBuffer9>(indexBuffer)->GetBuffer9() : nullptr);
 }
 
-IVertexBufferPtr TRenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
+IVertexBufferPtr RenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
 	TVertexBuffer9Ptr ret;
 	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
 	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, D3DUSAGE_WRITEONLY, 0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
-		ret = MakePtr<TVertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
+		ret = MakePtr<VertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
 	}
 	if (buffer) UpdateBuffer(ret, buffer, bufferSize);
 	return ret;
 }
 
-void TRenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
+void RenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 {
 	UINT offset = vertexBuffer->GetOffset();
 	UINT stride = vertexBuffer->GetStride();
-	IDirect3DVertexBuffer9* buffer = std::static_pointer_cast<TVertexBuffer9>(vertexBuffer)->GetBuffer9();
+	IDirect3DVertexBuffer9* buffer = std::static_pointer_cast<VertexBuffer9>(vertexBuffer)->GetBuffer9();
 	mDevice9->SetStreamSource(0, buffer, offset, stride);
 }
 
-bool TRenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
+bool RenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
 {
 	assert(buffer != nullptr);
-	enHardwareBufferType bufferType = buffer->GetType();
+	HardwareBufferType bufferType = buffer->GetType();
 	switch (bufferType)
 	{
-	case E_HWBUFFER_CONSTANT: {
+	case kHWBufferConstant: {
 		IContantBufferPtr cbuffer = std::static_pointer_cast<IContantBuffer>(buffer);
-		std::static_pointer_cast<TContantBuffer9>(cbuffer)->SetBuffer9((char*)data, dataSize);
+		std::static_pointer_cast<ContantBuffer9>(cbuffer)->SetBuffer9((char*)data, dataSize);
 	}break;
-	case E_HWBUFFER_VERTEX: {
+	case kHWBufferVertex: {
 		IVertexBufferPtr vbuffer = std::static_pointer_cast<IVertexBuffer>(buffer);
-		IDirect3DVertexBuffer9* buffer9 = std::static_pointer_cast<TVertexBuffer9>(vbuffer)->GetBuffer9();
+		IDirect3DVertexBuffer9* buffer9 = std::static_pointer_cast<VertexBuffer9>(vbuffer)->GetBuffer9();
 		void* pByteDest = nullptr;
 		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
 		memcpy(pByteDest, data, dataSize);
 		if (CheckHR(buffer9->Unlock())) return false;
 	}break;
-	case E_HWBUFFER_INDEX: {
+	case kHWBufferIndex: {
 		IIndexBufferPtr ibuffer = std::static_pointer_cast<IIndexBuffer>(buffer);
-		IDirect3DIndexBuffer9* buffer9 = std::static_pointer_cast<TIndexBuffer9>(ibuffer)->GetBuffer9();
+		IDirect3DIndexBuffer9* buffer9 = std::static_pointer_cast<IndexBuffer9>(ibuffer)->GetBuffer9();
 		void* pByteDest = nullptr;
 		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
 		memcpy(pByteDest, data, dataSize);
@@ -250,13 +250,13 @@ bool TRenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	return true;
 }
 
-void TRenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
+void RenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
 {
 	UpdateBuffer((buffer), data, dataSize);
 }
 
 static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
-	TVertexShader9Ptr ret = MakePtr< TVertexShader9>();
+	TVertexShader9Ptr ret = MakePtr< VertexShader9>();
 
 	if (CheckHR(pDevice9->CreateVertexShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
 
@@ -268,15 +268,15 @@ static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPt
 	ret->AsRes()->SetLoaded();
 	return ret;
 }
-TVertexShader9Ptr TRenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
+TVertexShader9Ptr RenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
 	entry = entry ? entry : "VS";
-	TBlobDataD3d9Ptr blob = MakePtr<TBlobDataD3d9>(nullptr);
-	TBlobDataD3d9Ptr errBlob = MakePtr<TBlobDataD3d9>(nullptr);
+	TBlobDataD3d9Ptr blob = MakePtr<BlobData9>(nullptr);
+	TBlobDataD3d9Ptr errBlob = MakePtr<BlobData9>(nullptr);
 	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
@@ -287,18 +287,18 @@ TVertexShader9Ptr TRenderSystem9::_CreateVS(const char* filename, const char* en
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-TVertexShader9Ptr TRenderSystem9::_CreateVSByFXC(const char* filename)
+TVertexShader9Ptr RenderSystem9::_CreateVSByFXC(const char* filename)
 {
 	TVertexShader9Ptr ret;
 	std::vector<char> buffer = ReadFile(filename, "rb");
 	if (!buffer.empty()) {
-		ret = _CreateVSByBlob(mDevice9, MakePtr<TBlobDataStd>(buffer));
+		ret = _CreateVSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
 	}
 	return ret;
 }
 
 static TPixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
-	TPixelShader9Ptr ret = MakePtr<TPixelShader9>();
+	TPixelShader9Ptr ret = MakePtr<PixelShader9>();
 	ret->mBlob = pBlob;
 	
 	if (CheckHR(pDevice9->CreatePixelShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
@@ -310,15 +310,15 @@ static TPixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr
 	ret->AsRes()->SetLoaded();
 	return ret;
 }
-TPixelShader9Ptr TRenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
+TPixelShader9Ptr RenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
 	entry = entry ? entry : "PS";
-	TBlobDataD3d9Ptr blob = MakePtr<TBlobDataD3d9>(nullptr);
-	TBlobDataD3d9Ptr errBlob = MakePtr<TBlobDataD3d9>(nullptr);
+	TBlobDataD3d9Ptr blob = MakePtr<BlobData9>(nullptr);
+	TBlobDataD3d9Ptr errBlob = MakePtr<BlobData9>(nullptr);
 	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
@@ -329,31 +329,31 @@ TPixelShader9Ptr TRenderSystem9::_CreatePS(const char* filename, const char* ent
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-TPixelShader9Ptr TRenderSystem9::_CreatePSByFXC(const char* filename)
+TPixelShader9Ptr RenderSystem9::_CreatePSByFXC(const char* filename)
 {
 	TPixelShader9Ptr ret;
 	std::vector<char> buffer = ReadFile(filename, "rb");
 	if (!buffer.empty()) {
-		ret = _CreatePSByBlob(mDevice9, MakePtr<TBlobDataStd>(buffer));
+		ret = _CreatePSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
 	}
 	return ret;
 }
 
-IProgramPtr TRenderSystem9::CreateProgramByCompile(const char* vsPath, const char* psPath /*= nullptr*/, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr RenderSystem9::CreateProgramByCompile(const char* vsPath, const char* psPath /*= nullptr*/, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
-	TProgram9Ptr program = MakePtr<TProgram9>();
+	TProgram9Ptr program = MakePtr<Program9>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
 	program->SetPixel(_CreatePS(psPath, psEntry));
 	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
-IProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
-	TProgram9Ptr program = MakePtr<TProgram9>();
+	TProgram9Ptr program = MakePtr<Program9>();
 
 	vsEntry = vsEntry ? vsEntry : "VS";
 	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
@@ -367,16 +367,16 @@ IProgramPtr TRenderSystem9::CreateProgramByFXC(const std::string& name, const ch
 	return program;
 }
 
-ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
+ISamplerStatePtr RenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
 {
-	TSamplerState9Ptr ret = MakePtr<TSamplerState9>();
+	TSamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
-	ret->mStates[D3DSAMP_ADDRESSU] = D3DEnumCT::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
-	ret->mStates[D3DSAMP_ADDRESSV] = D3DEnumCT::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
-	ret->mStates[D3DSAMP_ADDRESSW] = D3DEnumCT::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSU] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSV] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSW] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
 	ret->mStates[D3DSAMP_BORDERCOLOR] = D3DCOLOR_ARGB(0,0,0,0);
 
-	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = D3DEnumCT::d3d11To9(filter);
+	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = D3dEnumConvert::d3d11To9(filter);
 	for (auto& iter : fts)
 		ret->mStates[iter.first] = iter.second;
 
@@ -387,35 +387,35 @@ ISamplerStatePtr TRenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FIL
 	return ret;
 }
 
-IDirect3DVertexDeclaration9* TRenderSystem9::_CreateInputLayout(TProgram9* _, const std::vector<D3DVERTEXELEMENT9>& descArr)
+IDirect3DVertexDeclaration9* RenderSystem9::_CreateInputLayout(Program9* _, const std::vector<D3DVERTEXELEMENT9>& descArr)
 {
 	IDirect3DVertexDeclaration9* ret = nullptr;
 	if (CheckHR(mDevice9->CreateVertexDeclaration(&descArr[0], &ret))) return nullptr;
 	return ret;
 }
 
-IInputLayoutPtr TRenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
-	TInputLayout9Ptr ret = MakePtr<TInputLayout9>();
+	TInputLayout9Ptr ret = MakePtr<InputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)
-		ret->mInputDescs.push_back(D3DEnumCT::d3d11To9(descArray[i]));
+		ret->mInputDescs.push_back(D3dEnumConvert::d3d11To9(descArray[i]));
 	ret->mInputDescs.push_back(D3DDECL_END());
 
 	auto resource = pProgram->AsRes();
 	if (resource->IsLoaded()) {
-		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<TProgram9>(pProgram).get(), ret->mInputDescs);
+		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program9>(pProgram).get(), ret->mInputDescs);
 		resource->SetLoaded();
 	}
 	else {
 		resource->AddOnLoadedListener([=](IResource* res) {
-			ret->mLayout = _CreateInputLayout(std::static_pointer_cast<TProgram9>(pProgram).get(), ret->mInputDescs);
+			ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program9>(pProgram).get(), ret->mInputDescs);
 			res->SetLoaded();
 		});
 	}
 	return ret;
 }
 
-ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
+ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
@@ -431,10 +431,10 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 
 	TTexture9Ptr pTextureRV;
 	if (IsFileExist(pSrcFile)) {
-		pTextureRV = MakePtr<TTexture9>(nullptr, imgPath);
+		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
 		if (isCube) {
 			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile, 
-				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3DEnumCT::d3d11To9(format)/*D3DFMT_A16B16G16R16F*/,
+				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3dEnumConvert::d3d11To9(format)/*D3DFMT_A16B16G16R16F*/,
 				D3DPOOL_MANAGED, D3DX_FILTER_NONE/*D3DX_DEFAULT */, D3DX_FILTER_NONE, 0, NULL,
 				NULL, &pTextureRV->GetSRVCube9()))) {
 				pTextureRV = nullptr;
@@ -454,10 +454,10 @@ ITexturePtr TRenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 	return pTextureRV;
 }
 
-ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap)
+ITexturePtr RenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap)
 {
 	assert(mipmap == 1);
-	TTexture9Ptr texture = MakePtr<TTexture9>(width, height, format, mipmap);
+	TTexture9Ptr texture = MakePtr<Texture9>(width, height, format, mipmap);
 	IDirect3DTexture9* pTexture = nullptr;
 	if (FAILED(mDevice9->CreateTexture(width, height, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
 		return nullptr;
@@ -465,10 +465,10 @@ ITexturePtr TRenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT for
 	return texture;
 }
 
-bool TRenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
+bool RenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
 	assert(dataStep * texture->GetHeight() <= dataSize);
-	TTexture9Ptr tex9 = std::static_pointer_cast<TTexture9>(texture);
+	TTexture9Ptr tex9 = std::static_pointer_cast<Texture9>(texture);
 
 	int width = texture->GetWidth(), height = texture->GetHeight();
 	IDirect3DTexture9* pTexture = tex9->GetSRV9();
@@ -492,27 +492,27 @@ bool TRenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 	return true;
 }
 
-void TRenderSystem9::SetBlendFunc(const TBlendFunc& blendFunc)
+void RenderSystem9::SetBlendFunc(const BlendFunc& blendFunc)
 {
 	mCurBlendFunc = blendFunc;
-	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.src == D3D11_BLEND_ONE && blendFunc.dst == D3D11_BLEND_ZERO) ? FALSE : TRUE);
-	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3DEnumCT::d3d11To9(blendFunc.src));
-	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3DEnumCT::d3d11To9(blendFunc.dst));
+	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.Src == D3D11_BLEND_ONE && blendFunc.Dst == D3D11_BLEND_ZERO) ? FALSE : TRUE);
+	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3dEnumConvert::d3d11To9(blendFunc.Src));
+	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3dEnumConvert::d3d11To9(blendFunc.Dst));
 }
 
-void TRenderSystem9::SetDepthState(const TDepthState& depthState)
+void RenderSystem9::SetDepthState(const DepthState& depthState)
 {
 	mCurDepthState = depthState;
-	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.depthEnable);
-	mDevice9->SetRenderState(D3DRS_ZFUNC, D3DEnumCT::d3d11To9(depthState.depthFunc));
-	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.depthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
+	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.DepthEnable);
+	mDevice9->SetRenderState(D3DRS_ZFUNC, D3dEnumConvert::d3d11To9(depthState.DepthFunc));
+	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.DepthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
-void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
+void RenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 {
-	TProgram9Ptr program = std::static_pointer_cast<TProgram9>(pass->mProgram);
-	TPixelShader9* ps = PtrRaw(program->mPixel);
-	TVertexShader9* vs = PtrRaw(program->mVertex);
+	TProgram9Ptr program = std::static_pointer_cast<Program9>(pass->mProgram);
+	PixelShader9* ps = PtrRaw(program->mPixel);
+	VertexShader9* vs = PtrRaw(program->mVertex);
 
 	if (pass->mConstantBuffers.size() > 0) {
 		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
@@ -520,7 +520,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
 		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
-		char* buffer9 = (char*)std::static_pointer_cast<TContantBuffer9>(buffer)->GetBuffer9();
+		char* buffer9 = (char*)std::static_pointer_cast<ContantBuffer9>(buffer)->GetBuffer9();
 		TConstBufferDeclPtr decl = buffer->GetDecl();
 		vs->mConstTable.SetValue(mDevice9, buffer9, *decl);
 		ps->mConstTable.SetValue(mDevice9, buffer9, *decl);
@@ -533,7 +533,7 @@ void TRenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
 	if (!pass->mSamplers.empty()) {
 		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
 			ISamplerStatePtr sampler = pass->mSamplers[i];
-			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = std::static_pointer_cast<TSamplerState9>(sampler)->GetSampler9();
+			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = std::static_pointer_cast<SamplerState9>(sampler)->GetSampler9();
 			for (auto& pair : states) {
 				mDevice9->SetSamplerState(i, pair.first, pair.second);
 			}
@@ -566,7 +566,7 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 	assert(FALSE);
 	return 0;
 }
-void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
+void RenderSystem9::RenderPass(TPassPtr pass, TextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
 {
 	if (iterCnt >= 0) {
 		_PushRenderTarget(pass->mIterTargets[iterCnt]);
@@ -585,7 +585,7 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 
 	{
 		for (size_t i = 0; i < textures.size(); ++i) {
-			auto iTex = std::static_pointer_cast<TTexture9>(textures[i]);
+			auto iTex = std::static_pointer_cast<Texture9>(textures[i]);
 			if (iTex) {
 				IDirect3DTexture9* texture = iTex->GetSRV9();
 				IDirect3DCubeTexture9* textureCube = iTex->GetSRVCube9();
@@ -600,14 +600,14 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 		BindPass(pass, globalParam);
 
 		if (indexBuffer) {
-			D3DPRIMITIVETYPE topo = D3DEnumCT::d3d11To9(pass->mTopoLogy);
+			D3DPRIMITIVETYPE topo = D3dEnumConvert::d3d11To9(pass->mTopoLogy);
 			if (_CanDraw())
 			mDevice9->DrawIndexedPrimitive(topo,
 				0, 0, vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(),
 				0, CalPrimCount(indexBuffer->GetCount(), topo));
 		}
 		else {
-			D3DPRIMITIVETYPE topo = D3DEnumCT::d3d11To9(pass->mTopoLogy);
+			D3DPRIMITIVETYPE topo = D3dEnumConvert::d3d11To9(pass->mTopoLogy);
 			if (_CanDraw())
 			mDevice9->DrawPrimitive(topo, 0, CalPrimCount(vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(), topo));
 		}
@@ -624,17 +624,17 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 	}
 }
 
-void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+void RenderSystem9::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
 {
 	TTechniquePtr tech = op.mMaterial->CurTech();
 	std::vector<TPassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes)
 	{
-		mDevice9->SetVertexDeclaration(std::static_pointer_cast<TInputLayout9>(pass->mInputLayout)->GetLayout9());
+		mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(pass->mInputLayout)->GetLayout9());
 		SetVertexBuffer(op.mVertexBuffer);
 		SetIndexBuffer(op.mIndexBuffer);
 
-		TTextureBySlot textures = op.mTextures;
+		TextureBySlot textures = op.mTextures;
 		textures.Merge(pass->mTextures);
 
 		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
@@ -660,7 +660,7 @@ void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::stri
 	}
 }
 
-void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode)
+void RenderSystem9::RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
 	
@@ -671,47 +671,47 @@ void TRenderSystem9::RenderLight(TDirectLight* light, enLightType lightType, con
 		if (opQueue[i].mMaterial->IsLoaded()) {
 			globalParam.World = opQueue[i].mWorldTransform;
 			globalParam.WorldInv = XM::Inverse(globalParam.World);
-			RenderOperation(opQueue[i], lightMode, globalParam);
+			RenderOp(opQueue[i], lightMode, globalParam);
 		}
 }
 
-void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode)
+void RenderSystem9::RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	mDrawCount = 0;
-	TDepthState orgState = mCurDepthState;
-	TBlendFunc orgBlend = mCurBlendFunc;
+	DepthState orgState = mCurDepthState;
+	BlendFunc orgBlend = mCurBlendFunc;
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowPassRT);
 		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
-		SetDepthState(TDepthState(false));
-		SetBlendFunc(TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
+		SetDepthState(DepthState(false));
+		SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		IDirect3DTexture9* depthMapView = std::static_pointer_cast<TTexture9>(mShadowPassRT->GetColorTexture())->GetSRV9();
+		IDirect3DTexture9* depthMapView = std::static_pointer_cast<Texture9>(mShadowPassRT->GetColorTexture())->GetSRV9();
 		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
 
 		auto& skyBox = mSceneManager->mSkyBox;
 		if (skyBox && skyBox->mCubeSRV) {
-			IDirect3DCubeTexture9* texture = std::static_pointer_cast<TTexture9>(skyBox->mCubeSRV)->GetSRVCube9();
+			IDirect3DCubeTexture9* texture = std::static_pointer_cast<Texture9>(skyBox->mCubeSRV)->GetSRVCube9();
 			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
 		}
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		IDirect3DTexture9* pSRV = std::static_pointer_cast<TTexture9>(mPostProcessRT->GetColorTexture())->GetSRV9();
+		IDirect3DTexture9* pSRV = std::static_pointer_cast<Texture9>(mPostProcessRT->GetColorTexture())->GetSRV9();
 		mDevice9->SetTexture(0, pSRV);
 	}
 
 	auto& lightsOrder = mSceneManager->mLightsOrder;
 	if (!lightsOrder.empty()) {
-		TBlendFunc orgBlend = mCurBlendFunc;
-		SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
+		BlendFunc orgBlend = mCurBlendFunc;
+		SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
 		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
 
 		for (int i = 1; i < lightsOrder.size(); ++i) {
 			auto order = lightsOrder[i];
-			SetBlendFunc(TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
+			SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
 			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
 			RenderLight(order.first, order.second, opQueue, __lightMode);
 		}
@@ -731,17 +731,17 @@ void TRenderSystem9::RenderQueue(const TRenderOperationQueue& opQueue, const std
 	}
 }
 
-void TRenderSystem9::_RenderSkyBox()
+void RenderSystem9::_RenderSkyBox()
 {
 	if (mSceneManager->mSkyBox) mSceneManager->mSkyBox->Draw();
 }
 
-void TRenderSystem9::_DoPostProcess()
+void RenderSystem9::_DoPostProcess()
 {
-	TDepthState orgState = mCurDepthState;
-	SetDepthState(TDepthState(false));
+	DepthState orgState = mCurDepthState;
+	SetDepthState(DepthState(false));
 
-	TRenderOperationQueue opQue;
+	RenderOperationQueue opQue;
 	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
 		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_POSTPROCESS);
@@ -749,7 +749,7 @@ void TRenderSystem9::_DoPostProcess()
 	SetDepthState(orgState);
 }
 
-bool TRenderSystem9::BeginScene()
+bool RenderSystem9::BeginScene()
 {
 	if (FAILED(mDevice9->BeginScene()))
 		return false;
@@ -764,7 +764,7 @@ bool TRenderSystem9::BeginScene()
 	return true;
 }
 
-void TRenderSystem9::EndScene()
+void RenderSystem9::EndScene()
 {
 	if (!mSceneManager->mPostProcs.empty()) {
 		SetRenderTarget(nullptr);

@@ -11,14 +11,14 @@
 
 using namespace mir;
 
-class TestPBR : public TApp
+class TestPBR : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	TAssimpModel* mModel = nullptr;
+	AssimpModel* mModel = nullptr;
 };
 
 void TestPBR::OnInitLight()
@@ -118,7 +118,7 @@ void TestPBR::OnPostInitDevice()
 		}
 	}
 #else
-	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
+	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
 	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
 	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
@@ -129,7 +129,7 @@ void TestPBR::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
 	if (mContext->GetRenderSys()->BeginScene()) {
-		TRenderOperationQueue opQueue;
+		RenderOperationQueue opQueue;
 		if (mModel) mModel->GenRenderOperation(opQueue);
 
 		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);

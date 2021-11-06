@@ -3,7 +3,7 @@
 namespace mir {
 
 //TTransform
-TTransform::TTransform()
+Transform::Transform()
 {
 	mScale = XMFLOAT3(1, 1, 1);
 	mFlip = XMFLOAT3(1, 1, 1);
@@ -12,89 +12,89 @@ TTransform::TTransform()
 	mMatrix = XMMatrixIdentity();
 }
 
-void TTransform::SetScaleX(float sx)
+void Transform::SetScaleX(float sx)
 {
 	mScale.x = sx;
 	mDirty = true;
 }
 
-void TTransform::SetScaleY(float sy)
+void Transform::SetScaleY(float sy)
 {
 	mScale.y = sy;
 	mDirty = true;
 }
 
-void TTransform::SetScaleZ(float sz)
+void Transform::SetScaleZ(float sz)
 {
 	mScale.z = sz;
 	mDirty = true;
 }
 
-void TTransform::SetScale(float s)
+void Transform::SetScale(float s)
 {
 	mScale = XMFLOAT3(s, s, s);
 	mDirty = true;
 }
 
-void TTransform::SetScale(const XMFLOAT3& s)
+void Transform::SetScale(const XMFLOAT3& s)
 {
 	mScale = s;
 	mDirty = true;
 }
 
-XMFLOAT3 TTransform::GetScale()
+XMFLOAT3 Transform::GetScale()
 {
 	return XMFLOAT3(mScale.x * mFlip.x, mScale.y * mFlip.y, mScale.z * mFlip.z);
 }
 
-void TTransform::SetPosition(float x, float y, float z)
+void Transform::SetPosition(float x, float y, float z)
 {
 	mPosition = XMFLOAT3(x, y, z);
 	mDirty = true;
 }
 
-void TTransform::SetPosition(const XMFLOAT3& position)
+void Transform::SetPosition(const XMFLOAT3& position)
 {
 	mPosition = position;
 	mDirty = true;
 }
 
-void TTransform::SetEulerZ(float angle)
+void Transform::SetEulerZ(float angle)
 {
 	mEuler.z = angle;
 	mDirty = true;
 }
 
-void TTransform::SetEulerX(float angle)
+void Transform::SetEulerX(float angle)
 {
 	mEuler.x = angle;
 	mDirty = true;
 }
 
-void TTransform::SetEulerY(float angle)
+void Transform::SetEulerY(float angle)
 {
 	mEuler.y = angle;
 	mDirty = true;
 }
 
-void TTransform::SetEuler(const XMFLOAT3& euler)
+void Transform::SetEuler(const XMFLOAT3& euler)
 {
 	mEuler = euler;
 	mDirty = true;
 }
 
-void TTransform::SetFlipY(bool flip)
+void Transform::SetFlipY(bool flip)
 {
 	mFlip.y = flip ? -1 : 1;
 	mDirty = true;
 }
 
-bool TTransform::IsFlipY()
+bool Transform::IsFlipY()
 {
 	return mFlip.y < 0;
 }
 
-const XMMATRIX& TTransform::GetMatrixSRT()
+const XMMATRIX& Transform::GetMatrixSRT()
 {
 	if (mDirty)
 	{
@@ -114,12 +114,12 @@ const XMMATRIX& TTransform::GetMatrixSRT()
 	return mMatrix;
 }
 
-const XMMATRIX& TTransform::Matrix()
+const XMMATRIX& Transform::Matrix()
 {
 	return GetMatrixSRT();
 }
 
-const XMMATRIX& TTransform::GetMatrixTSR()
+const XMMATRIX& Transform::GetMatrixTSR()
 {
 	if (mDirty)
 	{
@@ -140,18 +140,18 @@ const XMMATRIX& TTransform::GetMatrixTSR()
 }
 
 //TMovable
-TMovable::TMovable()
+Movable::Movable()
 {
 	mDefScale = 1;
 }
 
-void TMovable::SetDefScale(float s)
+void Movable::SetDefScale(float s)
 {
 	mDefScale = s;
 	SetScale(s);
 }
 
-const XMMATRIX& TMovable::GetWorldTransform()
+const XMMATRIX& Movable::GetWorldTransform()
 {
 	return GetMatrixSRT();
 }

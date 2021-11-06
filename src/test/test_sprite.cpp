@@ -7,13 +7,13 @@
 
 using namespace mir;
 
-class TestSprite : public TApp
+class TestSprite : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 private:
-	TSpritePtr mSprite;
+	SpritePtr mSprite;
 };
 
 void TestSprite::OnPostInitDevice()
@@ -27,7 +27,7 @@ void TestSprite::OnPostInitDevice()
 	mContext->GetSceneMng()->SetOthogonalCamera(100);
 
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LAYERCOLOR);
-	mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_SPRITE);
+	mSprite = std::make_shared<Sprite>(mContext->GetRenderSys(), E_MAT_SPRITE);
 	mSprite->SetTexture(mContext->GetRenderSys()->LoadTexture("model\\theyKilledKenny.jpg"));
 
 	int win_width = mContext->GetRenderSys()->GetWinSize().x;

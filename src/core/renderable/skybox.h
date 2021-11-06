@@ -5,14 +5,11 @@
 
 namespace mir {
 
-struct SKYBOX_VERTEX
-{
+struct SkyboxVertex {
 	XMFLOAT4 pos;
 };
 
-class TSkyBox 
-	: public IRenderable
-{
+class SkyBox : public IRenderable {
 private:
 	TCameraPtr mRefCam;
 	IRenderSystem* mRenderSys = nullptr;
@@ -22,12 +19,12 @@ public:
 	ITexturePtr mCubeSRV;
 	TMaterialPtr mMaterial;
 public:
-	TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName);
-	~TSkyBox();
+	SkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName);
+	~SkyBox();
 	void SetRefCamera(TCameraPtr pCam);
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 	void Draw();
 };
-typedef std::shared_ptr<TSkyBox> TSkyBoxPtr;
+typedef std::shared_ptr<SkyBox> SkyBoxPtr;
 
 }

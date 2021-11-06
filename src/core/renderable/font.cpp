@@ -4,7 +4,7 @@
 namespace mir {
 
 /********** TFontTexture **********/
-TFontTexture::TFontTexture(IRenderSystem* renderSys, XMINT2 size)
+FontTexture::FontTexture(IRenderSystem* renderSys, XMINT2 size)
 {
 	mRenderSys = renderSys;
 	mWidth = size.x;
@@ -13,21 +13,21 @@ TFontTexture::TFontTexture(IRenderSystem* renderSys, XMINT2 size)
 	mRawBuffer.resize(mWidth * mHeight);
 }
 
-TFontTextureAtlasPtr TFontTexture::GetCharactor(int ch)
+FontTextureAtlasPtr FontTexture::GetCharactor(int ch)
 {
-	TFontTextureAtlasPtr atlas = nullptr;
+	FontTextureAtlasPtr atlas = nullptr;
 	auto iter = mAtlasByCh.find(ch);
 	if (iter != mAtlasByCh.end())
 		atlas = iter->second;
 	return atlas;
 }
 
-bool TFontTexture::ContainsCharactor(int ch) const
+bool FontTexture::ContainsCharactor(int ch) const
 {
 	return mAtlasByCh.find(ch) != mAtlasByCh.end();
 }
 
-TFontTextureAtlasPtr TFontTexture::AddCharactor(int ch, int w, int h, unsigned char* buffer)
+FontTextureAtlasPtr FontTexture::AddCharactor(int ch, int w, int h, unsigned char* buffer)
 {
 	if (mCol + w > mWidth) {
 		mRow += mColH;
@@ -43,7 +43,7 @@ TFontTextureAtlasPtr TFontTexture::AddCharactor(int ch, int w, int h, unsigned c
 
 	XMINT2 pos0 = { mCol, mRow }, pos1 = { mCol + w, mRow + h };
 	XMFLOAT2 uv0 = { pos0.x * 1.0f / mWidth, pos0.y * 1.0f / mHeight }, uv1 = { pos1.x * 1.0f / mWidth, pos1.y * 1.0f / mHeight };
-	TFontTextureAtlasPtr atlas = std::make_shared<TFontTextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
+	FontTextureAtlasPtr atlas = std::make_shared<FontTextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
 
 	for (int y = 0; y < h; ++y)
 		memcpy(&mRawBuffer[(pos0.y + y) * mWidth + pos0.x], buffer + y * w, w);
@@ -55,7 +55,7 @@ TFontTextureAtlasPtr TFontTexture::AddCharactor(int ch, int w, int h, unsigned c
 	return atlas;
 }
 
-ITexturePtr TFontTexture::GetTexture()
+ITexturePtr FontTexture::GetTexture()
 {
 	if (mRawBufferDirty) {
 		mRawBufferDirty = false;
@@ -65,17 +65,17 @@ ITexturePtr TFontTexture::GetTexture()
 }
 
 /********** TFontCharactorCache **********/
-TFontCharactorCache::TFontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace)
+FontCharactorCache::FontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace)
 {
 	mRenderSys = renderSys;
 	mFtFace = ftFace;
 	AllocFontTexture();
 }
 
-TFontTexturePtr TFontCharactorCache::AllocFontTexture()
+FontTexturePtr FontCharactorCache::AllocFontTexture()
 {
 	XMINT2 size = { 512,512 };
-	mCurFontTexture = std::make_shared<TFontTexture>(mRenderSys, size);
+	mCurFontTexture = std::make_shared<FontTexture>(mRenderSys, size);
 	mFontTextures.push_back(mCurFontTexture);
 	return mCurFontTexture;
 }
@@ -85,9 +85,9 @@ bool CheckError(int error) {
 	return error == 0;
 }
 
-TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
+FontCharactorPtr FontCharactorCache::GetCharactor(int ch)
 {
-	TFontCharactorPtr charactor = nullptr;
+	FontCharactorPtr charactor = nullptr;
 	auto iter = mCharactors.find(ch);
 	if (iter != mCharactors.end()) {
 		charactor = iter->second;
@@ -99,7 +99,7 @@ TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 			if (!CheckError(FT_Render_Glyph(mFtFace->glyph, FT_RENDER_MODE_NORMAL))) break;
 			FT_Glyph glyph; if (!CheckError(FT_Get_Glyph(mFtFace->glyph, &glyph))) break;
 
-			charactor = std::make_shared<TFontCharactor>();
+			charactor = std::make_shared<FontCharactor>();
 			charactor->charIndex = charIndex;
 			charactor->glyph = glyph;
 			
@@ -115,13 +115,13 @@ TFontCharactorPtr TFontCharactorCache::GetCharactor(int ch)
 	return charactor;
 }
 
-void TFontCharactorCache::FlushChange()
+void FontCharactorCache::FlushChange()
 {
 	mCurFontTexture->GetTexture();
 }
 
 ////////////////////////////////TFont//////////////////////////////////////////
-TFont::TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
+Font::Font(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
 {
 	mFontName = fontPath;
 	mFontSize = fontSize;
@@ -129,24 +129,24 @@ TFont::TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, i
 	if (!CheckError(FT_Set_Char_Size(mFtFace, fontSize * 64, 0, dpi, 0))) return;
 	if (!CheckError(FT_Select_Charmap(mFtFace, FT_ENCODING_UNICODE))) return;
 
-	mCharactorCache = std::make_shared<TFontCharactorCache>(renderSys, mFtFace);
+	mCharactorCache = std::make_shared<FontCharactorCache>(renderSys, mFtFace);
 }
-TFont::~TFont()
+Font::~Font()
 {
 	FT_Done_Face(mFtFace);
 }
 
-void TFont::Flush()
+void Font::Flush()
 {
 	mCharactorCache->FlushChange();
 }
-TFontCharactorPtr TFont::GetCharactor(int ch) 
+FontCharactorPtr Font::GetCharactor(int ch) 
 {
 	return mCharactorCache->GetCharactor(ch);
 }
 
 ////////////////////////////////TFontCache//////////////////////////////////////////
-TFontCache::TFontCache(IRenderSystem* renderSys, int dpi)
+FontCache::FontCache(IRenderSystem* renderSys, int dpi)
 {
 	mRenderSys = renderSys;
 	mDPI = dpi;
@@ -157,12 +157,12 @@ TFontCache::TFontCache(IRenderSystem* renderSys, int dpi)
 	}
 }
 
-TFontCache::~TFontCache()
+FontCache::~FontCache()
 {
 	FT_Done_FreeType(mFtLib);
 }
 
-TFontPtr TFontCache::GetFont(std::string fontPath, int fontSize)
+TFontPtr FontCache::GetFont(std::string fontPath, int fontSize)
 {
 	TFontPtr font = nullptr;
 	FontKey key = { fontPath, fontSize };
@@ -171,7 +171,7 @@ TFontPtr TFontCache::GetFont(std::string fontPath, int fontSize)
 		font = iter->second;
 	}
 	else {
-		font = std::make_shared<TFont>(mRenderSys, mFtLib, fontPath, fontSize, mDPI);
+		font = std::make_shared<Font>(mRenderSys, mFtLib, fontPath, fontSize, mDPI);
 		mFonts.insert(std::make_pair(key, font));
 	}
 	return font;

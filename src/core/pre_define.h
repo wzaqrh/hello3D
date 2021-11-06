@@ -5,5 +5,5 @@
 #include "core/renderable/renderable_pred.h"
 #include "core/rendersys/material_pred.h"
 
-typedef std::shared_ptr<struct TTransform> TTransformPtr;
-typedef std::shared_ptr<struct TMovable> TMovablePtr;
+typedef std::shared_ptr<struct Transform> TTransformPtr;
+typedef std::shared_ptr<struct Movable> TMovablePtr;

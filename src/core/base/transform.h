@@ -3,8 +3,7 @@
 
 namespace mir {
 
-__declspec(align(16)) 
-struct TTransform {
+struct __declspec(align(16)) Transform {
 	XMMATRIX mMatrix;
 	XMFLOAT3 mScale;
 	XMFLOAT3 mPosition;
@@ -14,7 +13,7 @@ struct TTransform {
 public:
 	void* operator new(size_t i) { return _mm_malloc(i, 16); }
 	void operator delete(void* p) { _mm_free(p); }
-	TTransform();
+	Transform();
 public:
 	void SetScaleX(float sx);
 	void SetScaleY(float sy);
@@ -25,17 +24,13 @@ public:
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& position);
-	const XMFLOAT3& GetPosition() {
-		return mPosition;
-	}
+	const XMFLOAT3& GetPosition() { return mPosition; }
 
 	void SetEulerZ(float angle);
 	void SetEulerX(float angle);
 	void SetEulerY(float angle);
 	void SetEuler(const XMFLOAT3& euler);
-	const XMFLOAT3& GetEuler() {
-		return mEuler;
-	}
+	const XMFLOAT3& GetEuler() { return mEuler; }
 
 	void SetFlipY(bool flip);
 	bool IsFlipY();
@@ -44,15 +39,15 @@ public:
 	const XMMATRIX& GetMatrixTSR();
 	const XMMATRIX& Matrix();
 };
-typedef std::shared_ptr<TTransform> TTransformPtr;
+typedef std::shared_ptr<Transform> TransformPtr;
 
-struct TMovable : public TTransform {
+struct Movable : public Transform {
 	float mDefScale;	
 public:
-	TMovable();
+	Movable();
 	void SetDefScale(float s);
 	const XMMATRIX& GetWorldTransform();
 };
-typedef std::shared_ptr<TMovable> TMovablePtr;
+typedef std::shared_ptr<Movable> MovablePtr;
 
 }

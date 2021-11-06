@@ -3,21 +3,21 @@
 
 namespace mir {
 
-typedef std::shared_ptr<struct TTransform> TTransformPtr;
+typedef std::shared_ptr<struct Transform> TransformPtr;
 
-struct TTextureBySlot;
-typedef std::shared_ptr<TTextureBySlot> TTextureBySlotPtr;
+struct TextureBySlot;
+typedef std::shared_ptr<TextureBySlot> TTextureBySlotPtr;
 
-struct TRenderOperation;
-struct TRenderOperationQueue;
+struct RenderOperation;
+struct RenderOperationQueue;
 
 struct IRenderable;
 
-typedef std::shared_ptr<class TSkyBox> TSkyBoxPtr;
-typedef std::shared_ptr<class TPostProcess> TPostProcessPtr;
-typedef std::shared_ptr<class TSprite> TSpritePtr;
-typedef std::shared_ptr<class TMesh> TMeshPtr;
-typedef std::shared_ptr<class TLabel> TLabelPtr;
-typedef std::shared_ptr<class TFontCache> TFontCachePtr;
+typedef std::shared_ptr<class SkyBox> SkyBoxPtr;
+typedef std::shared_ptr<class PostProcess> TPostProcessPtr;
+typedef std::shared_ptr<class Sprite> SpritePtr;
+typedef std::shared_ptr<class Mesh> MeshPtr;
+typedef std::shared_ptr<class Label> LabelPtr;
+typedef std::shared_ptr<class FontCache> FontCachePtr;
 
 }

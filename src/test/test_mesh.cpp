@@ -9,14 +9,14 @@
 
 using namespace mir;
 
-class TestMesh : public TApp
+class TestMesh : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 private:
-	std::vector<TSpritePtr> mSprites;
-	TMeshPtr mMesh;
+	std::vector<SpritePtr> mSprites;
+	MeshPtr mMesh;
 };
 
 

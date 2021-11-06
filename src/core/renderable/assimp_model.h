@@ -8,49 +8,48 @@ namespace mir {
 struct AiNodeInfo {
 	aiMatrix4x4 mLocalTransform;
 	aiMatrix4x4 mGlobalTransform;
-	TMeshSharedPtrVector meshes;
+	AssimpMeshPtrVector meshes;
 	int channelIndex;
 public:
 	AiNodeInfo() {
 		channelIndex = -1;
 	}
-	TMeshSharedPtr operator[](int pos) {
+	AssimpMeshPtr operator[](int pos) {
 		return meshes[pos];
 	}
 	size_t MeshCount() const {
 		return meshes.size();
 	}
-	void AddMesh(TMeshSharedPtr mesh) {
+	void AddMesh(AssimpMeshPtr mesh) {
 		meshes.push_back(mesh);
 	}
 };
 
 struct IRenderSystem;
-typedef std::shared_ptr<struct TMovable> TMovablePtr;
-class TAssimpModel : public IRenderable
-{
+typedef std::shared_ptr<struct Movable> MovablePtr;
+class AssimpModel : public IRenderable {
 public:
-	TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType);
-	~TAssimpModel();
+	AssimpModel(IRenderSystem* RenderSys, MovablePtr pMove, const std::string& matType);
+	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
 	void PlayAnim(int Index);
 
 	void Update(float dt);
 	void Draw();
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
-	void DoDraw(aiNode* node, TRenderOperationQueue& opList);
+	void DoDraw(aiNode* node, RenderOperationQueue& opList);
 	void LoadMaterial(const std::string& matType);
 	void processNode(aiNode * node, const aiScene * scene);
-	TMeshSharedPtr processMesh(aiMesh * mesh, const aiScene * scene);
+	AssimpMeshPtr processMesh(aiMesh * mesh, const aiScene * scene);
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 private:
 	TMaterialPtr mMaterial;
-	TMovablePtr mMove;
+	MovablePtr mMove;
 public:
-	TMeshSharedPtrVector mMeshes;
+	AssimpMeshPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
 	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
 	std::map<std::string, ITexturePtr> mLoadedTexture;

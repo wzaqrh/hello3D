@@ -5,7 +5,7 @@
 namespace mir {
 
 /********** TMesh **********/
-TAssimpMesh::TAssimpMesh(const aiMesh* __data,
+AssimpMesh::AssimpMesh(const aiMesh* __data,
 	std::vector<AssimpMeshVertex>& __vertices,
 	std::vector<UINT>& __indices,
 	TTextureBySlotPtr __textures,
@@ -21,23 +21,23 @@ TAssimpMesh::TAssimpMesh(const aiMesh* __data,
 	setupMesh(__renderSys);
 }
 
-bool TAssimpMesh::setupMesh(IRenderSystem *renderSys)
+bool AssimpMesh::setupMesh(IRenderSystem *renderSys)
 {
 	VertexBuffer = renderSys->CreateVertexBuffer(sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
 	IndexBuffer = renderSys->CreateIndexBuffer(sizeof(UINT) * Indices.size(), DXGI_FORMAT_R32_UINT, &Indices[0]);
 	return true;
 }
 
-bool TAssimpMesh::HasTexture(int slot)
+bool AssimpMesh::HasTexture(int slot)
 {
 	return (slot < Textures->size()) 
 		&& Textures->At(slot)
 		&& Textures->At(slot)->HasSRV();
 }
 
-int TAssimpMesh::GenRenderOperation(TRenderOperationQueue& opList)
+int AssimpMesh::GenRenderOperation(RenderOperationQueue& opList)
 {
-	TRenderOperation op = {};
+	RenderOperation op = {};
 	op.mMaterial = Material;
 	op.mIndexBuffer = IndexBuffer;
 	op.mVertexBuffer = VertexBuffer;

@@ -4,7 +4,7 @@
 
 namespace mir {
 
-TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
+SkyBox::SkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
 {
 	mRenderSys = pRenderSys;
 	mRefCam = pCam;
@@ -12,7 +12,7 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	mMaterial = mRenderSys->GetMaterial(E_MAT_SKYBOX);
 	mIndexBuffer = nullptr;
 
-	SKYBOX_VERTEX Vertexs[4];
+	SkyboxVertex Vertexs[4];
 	float fHighW = -1.0f - (1.0f / (float)pRenderSys->GetWinSize().x);
 	float fHighH = -1.0f - (1.0f / (float)pRenderSys->GetWinSize().y);
 	float fLowW = 1.0f + (1.0f / (float)pRenderSys->GetWinSize().x);
@@ -21,7 +21,7 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	Vertexs[1].pos = XMFLOAT4(fLowW, fHighH, 1.0f, 1.0f);
 	Vertexs[2].pos = XMFLOAT4(fHighW, fLowH, 1.0f, 1.0f);
 	Vertexs[3].pos = XMFLOAT4(fHighW, fHighH, 1.0f, 1.0f);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(SKYBOX_VERTEX) * 4, sizeof(SKYBOX_VERTEX), 0, Vertexs);
+	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
 
 	//DXGI_FORMAT format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -36,18 +36,18 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 #endif
 }
 
-TSkyBox::~TSkyBox()
+SkyBox::~SkyBox()
 {
 }
 
-void TSkyBox::SetRefCamera(TCameraPtr pCam)
+void SkyBox::SetRefCamera(TCameraPtr pCam)
 {
 	mRefCam = pCam;
 }
 
-int TSkyBox::GenRenderOperation(TRenderOperationQueue& opList)
+int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 {
-	TRenderOperation op = {};
+	RenderOperation op = {};
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
@@ -57,7 +57,7 @@ int TSkyBox::GenRenderOperation(TRenderOperationQueue& opList)
 	return 1;
 }
 
-void TSkyBox::Draw()
+void SkyBox::Draw()
 {
 	mRenderSys->Draw(this);
 }

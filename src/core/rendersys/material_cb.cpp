@@ -5,7 +5,7 @@
 namespace mir {
 
 /********** TDirectLight **********/
-TDirectLight::TDirectLight()
+cbDirectLight::cbDirectLight()
 {
 	SetDirection(0, 0, 1);
 	SetDiffuseColor(1, 1, 1, 1);
@@ -13,31 +13,31 @@ TDirectLight::TDirectLight()
 	SetSpecularPower(32);
 }
 
-void TDirectLight::SetDirection(float x, float y, float z)
+void cbDirectLight::SetDirection(float x, float y, float z)
 {
 	LightPos = XMFLOAT4(x, y, z, 0);
 }
 
-void TDirectLight::SetDiffuseColor(float r, float g, float b, float a)
+void cbDirectLight::SetDiffuseColor(float r, float g, float b, float a)
 {
 	DiffuseColor = XMFLOAT4(r, g, b, a);
 }
 
-void TDirectLight::SetSpecularColor(float r, float g, float b, float a)
+void cbDirectLight::SetSpecularColor(float r, float g, float b, float a)
 {
 	SpecularColorPower = XMFLOAT4(r, g, b, SpecularColorPower.w);
 }
 
-void TDirectLight::SetSpecularPower(float power)
+void cbDirectLight::SetSpecularPower(float power)
 {
 	SpecularColorPower.w = power;
 }
 
-TConstBufferDecl& TDirectLight::GetDesc()
+ConstBufferDecl& cbDirectLight::GetDesc()
 {
-	static TConstBufferDecl decl;
-	TConstBufferDeclBuilder builder(decl);
-	TDirectLight cb;
+	static ConstBufferDecl decl;
+	ConstBufferDeclBuilder builder(decl);
+	cbDirectLight cb;
 	BUILD_ADD(LightPos);
 	BUILD_ADD(DiffuseColor);
 	BUILD_ADD(SpecularColorPower);
@@ -45,62 +45,62 @@ TConstBufferDecl& TDirectLight::GetDesc()
 }
 
 /********** TLight **********/
-TPointLight::TPointLight()
+cbPointLight::cbPointLight()
 {
 	SetPosition(0, 0, -10);
 	SetAttenuation(1.0, 0.01, 0.0);
 }
 
-void TPointLight::SetPosition(float x, float y, float z)
+void cbPointLight::SetPosition(float x, float y, float z)
 {
 	LightPos = XMFLOAT4(x, y, z, 1);
 }
 
-void TPointLight::SetAttenuation(float a, float b, float c)
+void cbPointLight::SetAttenuation(float a, float b, float c)
 {
 	Attenuation = XMFLOAT4(a, b, c, 0);
 }
 
-TConstBufferDecl& TPointLight::GetDesc()
+ConstBufferDecl& cbPointLight::GetDesc()
 {
-	static TConstBufferDecl decl;
-	decl = TDirectLight::GetDesc();
+	static ConstBufferDecl decl;
+	decl = cbDirectLight::GetDesc();
 
-	TConstBufferDeclBuilder builder(decl);
-	TPointLight cb;
+	ConstBufferDeclBuilder builder(decl);
+	cbPointLight cb;
 	BUILD_ADD(Attenuation);
 	return builder.Build();
 }
 
 /********** TSpotLight **********/
-TSpotLight::TSpotLight()
+cbSpotLight::cbSpotLight()
 {
 	SetDirection(0, 0, 1);
 	SetAngle(3.14 * 30 / 180);
 }
 
-void TSpotLight::SetDirection(float x, float y, float z)
+void cbSpotLight::SetDirection(float x, float y, float z)
 {
 	DirectionCutOff = XMFLOAT4(x, y, z, DirectionCutOff.w);
 }
 
-void TSpotLight::SetCutOff(float cutoff)
+void cbSpotLight::SetCutOff(float cutoff)
 {
 	DirectionCutOff.w = cutoff;
 }
 
-void TSpotLight::SetAngle(float radian)
+void cbSpotLight::SetAngle(float radian)
 {
 	SetCutOff(cos(radian));
 }
 
-TConstBufferDecl& TSpotLight::GetDesc()
+ConstBufferDecl& cbSpotLight::GetDesc()
 {
-	static TConstBufferDecl decl;
-	decl = TPointLight::GetDesc();
+	static ConstBufferDecl decl;
+	decl = cbPointLight::GetDesc();
 
-	TConstBufferDeclBuilder builder(decl);
-	TSpotLight cb;
+	ConstBufferDeclBuilder builder(decl);
+	cbSpotLight cb;
 	BUILD_ADD(DirectionCutOff);
 	return builder.Build();
 }
@@ -114,13 +114,13 @@ cbGlobalParam::cbGlobalParam()
 	Projection = Ident;
 }
 
-TConstBufferDecl& cbGlobalParam::GetDesc()
+ConstBufferDecl& cbGlobalParam::GetDesc()
 {
-	static TConstBufferDecl desc = MKDesc();
+	static ConstBufferDecl desc = MKDesc();
 	return desc;
 }
 
-TConstBufferDecl cbGlobalParam::MKDesc()
+ConstBufferDecl cbGlobalParam::MKDesc()
 {
 	CBBEGIN(cbGlobalParam);
 	BUILD_ADD(World);
@@ -141,37 +141,37 @@ TConstBufferDecl cbGlobalParam::MKDesc()
 }
 
 /********** TFogExp **********/
-TFogExp::TFogExp()
+cbFogExp::cbFogExp()
 {
 	SetColor(0.5, 0.5, 0.5);
 	SetExp(1);
 }
 
-void TFogExp::SetColor(float r, float g, float b)
+void cbFogExp::SetColor(float r, float g, float b)
 {
 	FogColorExp = XMFLOAT4(r, g, b, FogColorExp.w);
 }
 
-void TFogExp::SetExp(float exp)
+void cbFogExp::SetExp(float exp)
 {
 	FogColorExp.w = exp;
 }
 
-TConstBufferDecl& TFogExp::GetDesc()
+ConstBufferDecl& cbFogExp::GetDesc()
 {
-	CBBEGIN(TFogExp);
+	CBBEGIN(cbFogExp);
 	BUILD_ADD(FogColorExp);
 	return builder.Build();
 }
 
 /********** cbWeightedSkin **********/
-TConstBufferDecl& cbWeightedSkin::GetDesc()
+ConstBufferDecl& cbWeightedSkin::GetDesc()
 {
-	static TConstBufferDecl desc = MKDesc();
+	static ConstBufferDecl desc = MKDesc();
 	return desc;
 }
 
-TConstBufferDecl cbWeightedSkin::MKDesc()
+ConstBufferDecl cbWeightedSkin::MKDesc()
 {
 	CBBEGIN(cbWeightedSkin);
 	BUILD_ADD(Model);
@@ -193,13 +193,13 @@ cbUnityMaterial::cbUnityMaterial()
 	_SpecLightOff = 0;
 }
 
-TConstBufferDecl& cbUnityMaterial::GetDesc()
+ConstBufferDecl& cbUnityMaterial::GetDesc()
 {
-	static TConstBufferDecl desc = MKDesc();
+	static ConstBufferDecl desc = MKDesc();
 	return desc;
 }
 
-TConstBufferDecl cbUnityMaterial::MKDesc()
+ConstBufferDecl cbUnityMaterial::MKDesc()
 {
 	CBBEGIN(cbUnityMaterial);
 	BUILD_ADD(_SpecColor);
@@ -218,13 +218,13 @@ cbUnityGlobal::cbUnityGlobal()
 	_Unity_SpecCube0_HDR = XMFLOAT4(0.5, 1, 0, 0);
 }
 
-TConstBufferDecl& cbUnityGlobal::GetDesc()
+ConstBufferDecl& cbUnityGlobal::GetDesc()
 {
-	static TConstBufferDecl desc = MKDesc();
+	static ConstBufferDecl desc = MKDesc();
 	return desc;
 }
 
-TConstBufferDecl cbUnityGlobal::MKDesc()
+ConstBufferDecl cbUnityGlobal::MKDesc()
 {
 	CBBEGIN(cbUnityGlobal);
 	BUILD_ADD(_Unity_IndirectSpecColor);

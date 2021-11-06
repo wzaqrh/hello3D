@@ -11,19 +11,19 @@ void ResourceSetLoaded(IResource* res, HRESULT hr)
 }
 
 /********** TThreadPumpEntry **********/
-void TThreadPumpEntry::Clear()
+void ThreadPumpEntry::Clear()
 {
 	hr = 0;
 	res = nullptr;
 	callback = nullptr;
 }
 
-bool TThreadPumpEntry::IsNull() const
+bool ThreadPumpEntry::IsNull() const
 {
 	return callback != nullptr;
 }
 
-bool TThreadPumpEntry::IsAttached() const
+bool ThreadPumpEntry::IsAttached() const
 {
 	return res->GetDeviceObject() != nullptr;
 }
@@ -47,9 +47,9 @@ void TThreadPump::ClearWorkItems()
 	mEntries.clear();
 }
 
-HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, TThreadPumpCallback callback)
+HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, ThreadPumpCallback callback)
 {
-	TThreadPumpEntryPtr entry;
+	ThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
 		if (mEntries[i]->IsNull()) {
 			entry = mEntries[i];
@@ -58,7 +58,7 @@ HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID
 	}
 
 	if (entry == nullptr) {
-		entry = std::make_shared<TThreadPumpEntry>();
+		entry = std::make_shared<ThreadPumpEntry>();
 		mEntries.push_back(entry);
 	}
 
@@ -68,9 +68,9 @@ HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID
 	return mThreadPump->AddWorkItem(loader, processor, (HRESULT*)&entry->hr, (void**)res->GetDeviceObject());
 }
 
-HRESULT TThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, TThreadPumpEntryPtr entry)> addItemCB, TThreadPumpCallback callback)
+HRESULT TThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, ThreadPumpEntryPtr entry)> addItemCB, ThreadPumpCallback callback)
 {
-	TThreadPumpEntryPtr entry;
+	ThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
 		if (mEntries[i]->IsNull()) {
 			entry = mEntries[i];
@@ -79,7 +79,7 @@ HRESULT TThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11
 	}
 
 	if (entry == nullptr) {
-		entry = std::make_shared<TThreadPumpEntry>();
+		entry = std::make_shared<ThreadPumpEntry>();
 		mEntries.push_back(entry);
 	}
 

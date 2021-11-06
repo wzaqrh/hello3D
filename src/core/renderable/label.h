@@ -6,7 +6,7 @@
 
 namespace mir {
 
-class TLabel : public IRenderable {
+class Label : public IRenderable {
 	IRenderSystem* mRenderSys = nullptr;
 	TFontPtr mFont;
 
@@ -14,13 +14,13 @@ class TLabel : public IRenderable {
 	IIndexBufferPtr mIndexBuffer;
 	TMaterialPtr Material;
 public:
-	TTransformPtr Transform;
+	TransformPtr Transform;
 	enum { MAX_STRING_LENGTH = 256 };
 public:
 	std::string mString;
 	struct CharEntry {
 		Quad quad;
-		TFontCharactorPtr charInfo;
+		FontCharactorPtr charInfo;
 		ITexturePtr texture;
 		XMINT2 pen;//dot space
 	};
@@ -32,8 +32,8 @@ public:
 	bool mAutoUptSize = true;
 	float mScale = 1;
 public:
-	TLabel(IRenderSystem* renderSys, TFontPtr font);
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	Label(IRenderSystem* renderSys, TFontPtr font);
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 public:
 	void SetString(const std::string& str);
 	void SetSize(bool autoCalSize, XMFLOAT2 size);
@@ -43,6 +43,6 @@ private:
 	void UpdateBBox();
 	void ForceLayout();
 };
-typedef std::shared_ptr<TLabel> TLabelPtr;
+typedef std::shared_ptr<Label> LabelPtr;
 
 }

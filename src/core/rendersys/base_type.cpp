@@ -6,83 +6,83 @@
 namespace mir {
 
 /********** TConstBufferDeclElement **********/
-TConstBufferDeclElement::TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)
-	:name(__name)
-	, type(__type)
-	, size(__size)
-	, count(__count)
-	, offset(__offset)
+ConstBufferDeclElement::ConstBufferDeclElement(const char* __name, ConstBufferElementType __type, size_t __size, size_t __count, size_t __offset)
+	:Name(__name)
+	, Type(__type)
+	, Size(__size)
+	, Count(__count)
+	, Offset(__offset)
 {
 }
 
-TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& elem)
+ConstBufferDeclElement& ConstBufferDecl::Add(const ConstBufferDeclElement& elem)
 {
-	elements.push_back(elem);
-	return elements.back();
+	Elements.push_back(elem);
+	return Elements.back();
 }
-TConstBufferDeclElement& TConstBufferDecl::Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl)
+ConstBufferDeclElement& ConstBufferDecl::Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl)
 {
-	elements.push_back(elem);
-	subDecls.insert(std::make_pair(elem.name, subDecl));
-	return elements.back();
+	Elements.push_back(elem);
+	SubDecls.insert(std::make_pair(elem.Name, subDecl));
+	return Elements.back();
 }
-TConstBufferDeclElement& TConstBufferDecl::Last()
+ConstBufferDeclElement& ConstBufferDecl::Last()
 {
-	return elements.back();
+	return Elements.back();
 }
 
 /********** TConstBufferDeclBuilder **********/
-TConstBufferDeclBuilder::TConstBufferDeclBuilder(TConstBufferDecl& decl)
+ConstBufferDeclBuilder::ConstBufferDeclBuilder(ConstBufferDecl& decl)
 	:mDecl(decl)
 {
 }
 
-TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElement& elem)
+ConstBufferDeclBuilder& ConstBufferDeclBuilder::Add(const ConstBufferDeclElement& elem)
 {
-	mDecl.Add(elem).offset = mDecl.bufferSize;
-	mDecl.bufferSize += elem.size;
+	mDecl.Add(elem).Offset = mDecl.BufferSize;
+	mDecl.BufferSize += elem.Size;
 	return *this;
 }
 
-TConstBufferDeclBuilder& TConstBufferDeclBuilder::Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl)
+ConstBufferDeclBuilder& ConstBufferDeclBuilder::Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl)
 {
-	mDecl.Add(elem, subDecl).offset = mDecl.bufferSize;
-	mDecl.bufferSize += elem.size;
+	mDecl.Add(elem, subDecl).Offset = mDecl.BufferSize;
+	mDecl.BufferSize += elem.Size;
 	return *this;
 }
 
-TConstBufferDecl& TConstBufferDeclBuilder::Build()
+ConstBufferDecl& ConstBufferDeclBuilder::Build()
 {
 	return mDecl;
 }
 
 /********** TBlendFunc **********/
-TBlendFunc::TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst)
+BlendFunc::BlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst)
 {
-	src = __src;
-	dst = __dst;
+	Src = __src;
+	Dst = __dst;
 }
 
-TBlendFunc TBlendFunc::DISABLE = TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO);
-TBlendFunc TBlendFunc::ALPHA_PREMULTIPLIED = TBlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA);
-TBlendFunc TBlendFunc::ALPHA_NON_PREMULTIPLIED = TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
-TBlendFunc TBlendFunc::ADDITIVE = TBlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE);
+BlendFunc BlendFunc::DISABLE = BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO);
+BlendFunc BlendFunc::ALPHA_PREMULTIPLIED = BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA);
+BlendFunc BlendFunc::ALPHA_NON_PREMULTIPLIED = BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+BlendFunc BlendFunc::ADDITIVE = BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE);
 
 /********** TDepthState **********/
-TDepthState::TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /*= D3D11_COMPARISON_LESS*/, D3D11_DEPTH_WRITE_MASK __depthWriteMask /*= D3D11_DEPTH_WRITE_MASK_ALL*/)
+DepthState::DepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /*= D3D11_COMPARISON_LESS*/, D3D11_DEPTH_WRITE_MASK __depthWriteMask /*= D3D11_DEPTH_WRITE_MASK_ALL*/)
 {
-	depthEnable = __depthEnable;
-	depthFunc = __depthFunc;
-	depthWriteMask = __depthWriteMask;
+	DepthEnable = __depthEnable;
+	DepthFunc = __depthFunc;
+	DepthWriteMask = __depthWriteMask;
 }
 
-TDepthState TDepthState::For2D = TDepthState(false, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ZERO);
-TDepthState TDepthState::For3D = TDepthState(true, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ALL);
+DepthState DepthState::For2D = DepthState(false, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ZERO);
+DepthState DepthState::For3D = DepthState(true, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ALL);
 
 /********** TData **********/
 TData::TData(void* __data, unsigned int __dataSize)
-	:data(__data)
-	, dataSize(__dataSize)
+	:Data(__data)
+	, DataSize(__dataSize)
 {
 }
 

@@ -8,25 +8,25 @@ namespace mir {
 		E_LIGHT_POINT,
 		E_LIGHT_SPOT
 	};
-	typedef std::shared_ptr<struct TDirectLight> TDirectLightPtr;
-	typedef std::shared_ptr<struct TPointLight> TPointLightPtr;
-	typedef std::shared_ptr<struct TSpotLight> TSpotLightPtr;
+	typedef std::shared_ptr<struct cbDirectLight> TDirectLightPtr;
+	typedef std::shared_ptr<struct cbPointLight> TPointLightPtr;
+	typedef std::shared_ptr<struct cbSpotLight> TSpotLightPtr;
 
 	struct cbGlobalParam;
 
-	struct TPass;
-	typedef std::shared_ptr<TPass> TPassPtr;
+	struct Pass;
+	typedef std::shared_ptr<Pass> TPassPtr;
 
-	struct TTechnique;
-	typedef std::shared_ptr<TTechnique> TTechniquePtr;
+	struct Technique;
+	typedef std::shared_ptr<Technique> TTechniquePtr;
 
-	struct TMaterial;
-	typedef std::shared_ptr<TMaterial> TMaterialPtr;
+	struct Material;
+	typedef std::shared_ptr<Material> TMaterialPtr;
 
-	struct TTextureBySlot;
+	struct TextureBySlot;
 	struct TMaterialBuilder;
 
-	struct TMaterialFactory;
-	typedef std::shared_ptr<TMaterialFactory> TMaterialFactoryPtr;
+	struct MaterialFactory;
+	typedef std::shared_ptr<MaterialFactory> TMaterialFactoryPtr;
 
 }

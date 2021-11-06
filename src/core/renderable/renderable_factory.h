@@ -3,16 +3,15 @@
 
 namespace mir {
 
-class RenderableFactory
-{
+class RenderableFactory {
 	IRenderSystem* mRenderSys = nullptr;
-	TFontCachePtr mFontCache;
+	FontCachePtr mFontCache;
 public:
 	RenderableFactory(IRenderSystem* renderSys);
-	TSpritePtr CreateSprite();
-	TSpritePtr CreateColorLayer();
-	TMeshPtr CreateMesh(const std::string& matName, int vertCount = 1024, int indexCount = 1024);
-	TLabelPtr CreateLabel(const std::string& fontPath, int fontSize);
+	SpritePtr CreateSprite();
+	SpritePtr CreateColorLayer();
+	MeshPtr CreateMesh(const std::string& matName, int vertCount = 1024, int indexCount = 1024);
+	LabelPtr CreateLabel(const std::string& fontPath, int fontSize);
 };
 
 }

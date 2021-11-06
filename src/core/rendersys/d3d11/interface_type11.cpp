@@ -12,83 +12,83 @@ static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 }
 
 /********** TBlobDataD3d11 **********/
-TBlobDataD3d11::TBlobDataD3d11(ID3DBlob* pBlob)
+BlobData11::BlobData11(ID3DBlob* pBlob)
 	:mBlob(pBlob)
 {
 }
 
-char* TBlobDataD3d11::GetBufferPointer()
+char* BlobData11::GetBufferPointer()
 {
 	return (char*)mBlob->GetBufferPointer();
 }
 
-size_t TBlobDataD3d11::GetBufferSize()
+size_t BlobData11::GetBufferSize()
 {
 	return mBlob->GetBufferSize();
 }
 
 /********** TInputLayout11 **********/
-TInputLayout11::TInputLayout11()
+InputLayout11::InputLayout11()
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mLayout);
+	mRes = MakePtr<Resource>((IUnknown**)&mLayout);
 }
-IResourcePtr TInputLayout11::AsRes() {
+IResourcePtr InputLayout11::AsRes() {
 	return mRes;
 }
 
-ID3D11InputLayout*& TInputLayout11::GetLayout11()
+ID3D11InputLayout*& InputLayout11::GetLayout11()
 {
 	return mLayout;
 }
 
 
 /********** TVertexShader11 **********/
-TVertexShader11::TVertexShader11(IBlobDataPtr pBlob)
+VertexShader11::VertexShader11(IBlobDataPtr pBlob)
 	:mBlob(pBlob)
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
+	mRes = MakePtr<Resource>((IUnknown**)&mErrBlob);
 }
-IResourcePtr TVertexShader11::AsRes() {
+IResourcePtr VertexShader11::AsRes() {
 	return mRes;
 }
 
-IBlobDataPtr TVertexShader11::GetBlob()
+IBlobDataPtr VertexShader11::GetBlob()
 {
 	return mBlob;
 }
 
-ID3D11VertexShader*& TVertexShader11::GetShader11()
+ID3D11VertexShader*& VertexShader11::GetShader11()
 {
 	return mShader;
 }
 
 /********** TPixelShader11 **********/
-TPixelShader11::TPixelShader11(IBlobDataPtr pBlob)
+PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 	: mBlob(pBlob)
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mErrBlob);
+	mRes = MakePtr<Resource>((IUnknown**)&mErrBlob);
 }
-IResourcePtr TPixelShader11::AsRes() {
+IResourcePtr PixelShader11::AsRes() {
 	return mRes;
 }
 
-IBlobDataPtr TPixelShader11::GetBlob()
+IBlobDataPtr PixelShader11::GetBlob()
 {
 	return mBlob;
 }
 
-ID3D11PixelShader*& TPixelShader11::GetShader11()
+ID3D11PixelShader*& PixelShader11::GetShader11()
 {
 	return mShader;
 }
 
 /********** TTexture11 **********/
-TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, const std::string& __path)
+Texture11::Texture11(ID3D11ShaderResourceView* __texture, const std::string& __path)
 {
 	mPath = __path;
 	mTexture = __texture;
 
-	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
+	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
 	mRes->AddOnLoadedListener([this](IResource* pRes) {
 		D3D11_TEXTURE2D_DESC desc = GetDesc();
 		mWidth = desc.Width;
@@ -98,38 +98,38 @@ TTexture11::TTexture11(ID3D11ShaderResourceView* __texture, const std::string& _
 	});
 }
 
-TTexture11::TTexture11(int width, int height, DXGI_FORMAT format, int mipmap)
+Texture11::Texture11(int width, int height, DXGI_FORMAT format, int mipmap)
 {
 	mWidth = width;
 	mHeight = height;
 	mFormat = format;
 	mMipCount = mipmap;
-	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
+	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
 }
 
-void TTexture11::SetSRV11(ID3D11ShaderResourceView* __texture) {
+void Texture11::SetSRV11(ID3D11ShaderResourceView* __texture) {
 	mTexture = __texture;
 }
-ID3D11ShaderResourceView*& TTexture11::GetSRV11() {
+ID3D11ShaderResourceView*& Texture11::GetSRV11() {
 	return mTexture;
 }
 
-const char* TTexture11::GetPath() { 
+const char* Texture11::GetPath() { 
 	return mPath.c_str(); 
 }
-int TTexture11::GetWidth() {
+int Texture11::GetWidth() {
 	return mWidth;
 }
-int TTexture11::GetHeight() {
+int Texture11::GetHeight() {
 	return mHeight;
 }
-DXGI_FORMAT TTexture11::GetFormat() {
+DXGI_FORMAT Texture11::GetFormat() {
 	return mFormat;
 }
-int TTexture11::GetMipmapCount() {
+int Texture11::GetMipmapCount() {
 	return mMipCount;
 }
-D3D11_TEXTURE2D_DESC TTexture11::GetDesc()
+D3D11_TEXTURE2D_DESC Texture11::GetDesc()
 {
 	if (mTexture != nullptr) {
 		ID3D11Texture2D* pTexture;
@@ -146,76 +146,76 @@ D3D11_TEXTURE2D_DESC TTexture11::GetDesc()
 }
 
 /********** TVertex11Buffer **********/
-int TVertexBuffer11::GetCount()
+int VertexBuffer11::GetCount()
 {
 	return hd.bufferSize / stride;
 }
 
-ID3D11Buffer*& TVertexBuffer11::GetBuffer11()
+ID3D11Buffer*& VertexBuffer11::GetBuffer11()
 {
 	return hd.buffer;
 }
 
-unsigned int TVertexBuffer11::GetBufferSize()
+unsigned int VertexBuffer11::GetBufferSize()
 {
 	return hd.bufferSize;
 }
 
-unsigned int TVertexBuffer11::GetStride()
+unsigned int VertexBuffer11::GetStride()
 {
 	return stride;
 }
 
-unsigned int TVertexBuffer11::GetOffset()
+unsigned int VertexBuffer11::GetOffset()
 {
 	return offset;
 }
 
 /********** TIndexBuffer **********/
-ID3D11Buffer*& TIndexBuffer11::GetBuffer11()
+ID3D11Buffer*& IndexBuffer11::GetBuffer11()
 {
 	return hd.buffer;
 }
 
-unsigned int TIndexBuffer11::GetBufferSize()
+unsigned int IndexBuffer11::GetBufferSize()
 {
 	return hd.bufferSize;
 }
 
-int TIndexBuffer11::GetWidth()
+int IndexBuffer11::GetWidth()
 {
-	return D3DEnumCT::GetWidth(format);
+	return D3dEnumConvert::GetWidth(format);
 }
 
-DXGI_FORMAT TIndexBuffer11::GetFormat()
+DXGI_FORMAT IndexBuffer11::GetFormat()
 {
 	return format;
 }
 
 /********** TContantBuffer11 **********/
-TContantBuffer11::TContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl)
-	: hd(__buffer, decl->bufferSize)
+ContantBuffer11::ContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl)
+	: hd(__buffer, decl->BufferSize)
 	, mDecl(decl)
 {
 }
 
-TConstBufferDeclPtr TContantBuffer11::GetDecl()
+TConstBufferDeclPtr ContantBuffer11::GetDecl()
 {
 	return mDecl;
 }
 
-ID3D11Buffer*& TContantBuffer11::GetBuffer11()
+ID3D11Buffer*& ContantBuffer11::GetBuffer11()
 {
 	return hd.buffer;
 }
 
-unsigned int TContantBuffer11::GetBufferSize()
+unsigned int ContantBuffer11::GetBufferSize()
 {
 	return hd.bufferSize;
 }
 
 /********** TRenderTexture11 **********/
-TRenderTexture11::TRenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format)
+RenderTexture11::RenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format)
 {
 	mFormat = format;
 	InitRenderTexture(pDevice, width, height);
@@ -227,7 +227,7 @@ TRenderTexture11::TRenderTexture11(ID3D11Device* pDevice, int width, int height,
 }
 
 //const DXGI_FORMAT CTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
-bool TRenderTexture11::InitRenderTexture(ID3D11Device* pDevice, int width, int height)
+bool RenderTexture11::InitRenderTexture(ID3D11Device* pDevice, int width, int height)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -249,7 +249,7 @@ bool TRenderTexture11::InitRenderTexture(ID3D11Device* pDevice, int width, int h
 	return true;
 }
 
-bool TRenderTexture11::InitRenderTargetView(ID3D11Device* pDevice)
+bool RenderTexture11::InitRenderTargetView(ID3D11Device* pDevice)
 {
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
@@ -265,7 +265,7 @@ bool TRenderTexture11::InitRenderTargetView(ID3D11Device* pDevice)
 	return true;
 }
 
-bool TRenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
+bool RenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
@@ -278,12 +278,12 @@ bool TRenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 	if (FAILED(result)) {
 		return false;
 	}
-	mRenderTargetPtr = MakePtr<TTexture11>(mRenderTargetSRV, "RenderTexture");
+	mRenderTargetPtr = MakePtr<Texture11>(mRenderTargetSRV, "RenderTexture");
 	mRenderTargetPtr->AsRes()->SetLoaded();
 	return true;
 }
 
-bool TRenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height)
+bool RenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height)
 {
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
@@ -308,7 +308,7 @@ bool TRenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice, int width,
 	return true;
 }
 
-bool TRenderTexture11::InitDepthStencilView(ID3D11Device* pDevice)
+bool RenderTexture11::InitDepthStencilView(ID3D11Device* pDevice)
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
@@ -325,50 +325,50 @@ bool TRenderTexture11::InitDepthStencilView(ID3D11Device* pDevice)
 	return true;
 }
 
-ITexturePtr TRenderTexture11::GetColorTexture()
+ITexturePtr RenderTexture11::GetColorTexture()
 {
 	return mRenderTargetPtr;
 }
 
-ID3D11RenderTargetView*& TRenderTexture11::GetColorBuffer11()
+ID3D11RenderTargetView*& RenderTexture11::GetColorBuffer11()
 {
 	return mRenderTargetView;
 }
 
-ID3D11DepthStencilView*& TRenderTexture11::GetDepthStencilBuffer11()
+ID3D11DepthStencilView*& RenderTexture11::GetDepthStencilBuffer11()
 {
 	return mDepthStencilView;
 }
 
 /********** TSamplerState11 **********/
-ID3D11SamplerState*& TSamplerState11::GetSampler11()
+ID3D11SamplerState*& SamplerState11::GetSampler11()
 {
 	return mSampler;
 }
 
 /********** TProgram11 **********/
-TProgram11::TProgram11()
+Program11::Program11()
 {
-	mRes = MakePtr<TResource>((IUnknown**)0);
+	mRes = MakePtr<Resource>((IUnknown**)0);
 }
-IResourcePtr TProgram11::AsRes() {
+IResourcePtr Program11::AsRes() {
 	return mRes;
 }
 
-IVertexShaderPtr TProgram11::GetVertex() {
+IVertexShaderPtr Program11::GetVertex() {
 	return mVertex;
 }
-IPixelShaderPtr TProgram11::GetPixel() {
+IPixelShaderPtr Program11::GetPixel() {
 	return mPixel;
 }
 
-void TProgram11::SetVertex(TVertexShader11Ptr pVertex)
+void Program11::SetVertex(TVertexShader11Ptr pVertex)
 {
 	mVertex = pVertex;
 	mRes->AddDependency(pVertex->AsRes());
 }
 
-void TProgram11::SetPixel(TPixelShader11Ptr pPixel)
+void Program11::SetPixel(TPixelShader11Ptr pPixel)
 {
 	mPixel = pPixel;
 	mRes->AddDependency(pPixel->AsRes());

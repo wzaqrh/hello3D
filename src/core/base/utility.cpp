@@ -34,7 +34,7 @@
 namespace mir {
 
 /********** TD3DInput **********/
-TD3DInput::TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+D3DInput::D3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
 	memset(m_keyboardState, 0, sizeof(m_keyboardState));
 	memset(&m_mouseState, 0, sizeof(m_mouseState));
@@ -42,12 +42,12 @@ TD3DInput::TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screen
 	memset(&mMouseR, 0, sizeof(mMouseR));
 	Init(hinstance, hwnd, screenWidth, screenHeight);
 }
-TD3DInput::~TD3DInput()
+D3DInput::~D3DInput()
 {
 
 }
 
-bool TD3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+bool D3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
@@ -82,7 +82,7 @@ bool TD3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screen
 	return result;
 }
 
-bool TD3DInput::ReadKeyboard()
+bool D3DInput::ReadKeyboard()
 {
 	HRESULT result = m_keyboard->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
 	if (FAILED(result)) {
@@ -93,7 +93,7 @@ bool TD3DInput::ReadKeyboard()
 	return result == S_OK;
 }
 
-bool TD3DInput::ReadMouse()
+bool D3DInput::ReadMouse()
 {
 	HRESULT result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
 	if (FAILED(result)) {
@@ -104,7 +104,7 @@ bool TD3DInput::ReadMouse()
 	return result == S_OK;
 }
 
-void TD3DInput::Process()
+void D3DInput::Process()
 {
 	if (m_mouseState.rgbButtons[0] & 0x80) {//ЪѓБъзѓМќ
 		mMouseL.x = clamp(-m_screenWidth, m_screenWidth, mMouseL.x + m_mouseState.lX);
@@ -120,40 +120,40 @@ void TD3DInput::Process()
 	}
 }
 
-void TD3DInput::Frame()
+void D3DInput::Frame()
 {
 	if (ReadMouse()) {
 		Process();
 	}
 }
 
-TINT4 TD3DInput::GetMouseLocation(bool left)
+Int4 D3DInput::GetMouseLocation(bool left)
 {
-	TINT4 ret = left ? mMouseL : mMouseR;
+	Int4 ret = left ? mMouseL : mMouseR;
 	return ret;
 }
 
 /********** TTimeProfile **********/
-TTimeProfile::TTimeProfile(const std::string& name)
+TimeProfile::TimeProfile(const std::string& name)
 {
 	mName = name;
 	mCurTime = timeGetTime();
 }
 
-TTimeProfile::~TTimeProfile()
+TimeProfile::~TimeProfile()
 {
 	char szBuf[260]; 
 	sprintf(szBuf, "%s takes %d ms\n", mName.c_str(), timeGetTime() - mCurTime);
 	OutputDebugStringA(szBuf);
 }
 
-TIncludeStdio::TIncludeStdio(const std::string& modelPath)
+IncludeStdIo::IncludeStdIo(const std::string& modelPath)
 	:mModelPath(modelPath)
 {
 }
 
 /********** TIncludeStdio **********/
-STDMETHODIMP TIncludeStdio::Open(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
+STDMETHODIMP IncludeStdIo::Open(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
 {
 	std::string fullPath = mModelPath + pFileName;
 	FILE* fd = fopen(fullPath.c_str(), "r");
@@ -180,7 +180,7 @@ STDMETHODIMP TIncludeStdio::Open(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFil
 	return S_FALSE;
 }
 
-STDMETHODIMP TIncludeStdio::Close(THIS_ LPCVOID pData)
+STDMETHODIMP IncludeStdIo::Close(THIS_ LPCVOID pData)
 {
 	return S_OK;
 }
@@ -265,7 +265,7 @@ bool IsFileExist(const std::string& fileName)
 	return false;
 }
 
-double SDTimer::Update()
+double Timer::Update()
 {
 	double time = GetTickCount() / 1000.0;
 	mDeltaTime = mLastTime == 0.0f ? 0.0 : time - mLastTime;

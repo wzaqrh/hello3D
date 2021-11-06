@@ -7,68 +7,68 @@ template<class T> T clamp(T minVal, T maxVal, T v) { return min(max(v, minVal),m
 
 struct TData 
 {
-	void* data;
-	unsigned int dataSize;
+	void* Data;
+	unsigned int DataSize;
 	TData(void* __data, unsigned int __dataSize);
 };
 template <class T> inline TData make_data(const T& v) { return TData((void*)&v, sizeof(v)); }
 
-struct TBlendFunc 
+struct BlendFunc 
 {
-	D3D11_BLEND src, dst;
+	D3D11_BLEND Src, Dst;
 
-	TBlendFunc() :src(D3D11_BLEND_ONE), dst(D3D11_BLEND_INV_SRC_ALPHA) {};
-	TBlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst);
+	BlendFunc() :Src(D3D11_BLEND_ONE), Dst(D3D11_BLEND_INV_SRC_ALPHA) {};
+	BlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst);
 
-	static TBlendFunc DISABLE;
-	static TBlendFunc ALPHA_PREMULTIPLIED;
-	static TBlendFunc ALPHA_NON_PREMULTIPLIED;
-	static TBlendFunc ADDITIVE;
+	static BlendFunc DISABLE;
+	static BlendFunc ALPHA_PREMULTIPLIED;
+	static BlendFunc ALPHA_NON_PREMULTIPLIED;
+	static BlendFunc ADDITIVE;
 };
 
-struct TDepthState 
+struct DepthState 
 {
-	BOOL depthEnable;
-	D3D11_COMPARISON_FUNC depthFunc;
-	D3D11_DEPTH_WRITE_MASK depthWriteMask;
+	BOOL DepthEnable;
+	D3D11_COMPARISON_FUNC DepthFunc;
+	D3D11_DEPTH_WRITE_MASK DepthWriteMask;
 
-	TDepthState() :depthEnable(false), depthFunc(D3D11_COMPARISON_LESS), depthWriteMask(D3D11_DEPTH_WRITE_MASK_ALL) {}
-	TDepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
+	DepthState() :DepthEnable(false), DepthFunc(D3D11_COMPARISON_LESS), DepthWriteMask(D3D11_DEPTH_WRITE_MASK_ALL) {}
+	DepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc = D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK __depthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL);
 
-	static TDepthState For2D;
-	static TDepthState For3D;
+	static DepthState For2D;
+	static DepthState For3D;
 };
 
-enum EConstBufferElementType
+enum ConstBufferElementType
 {
-	E_CONSTBUF_ELEM_BOOL,
-	E_CONSTBUF_ELEM_INT,
-	E_CONSTBUF_ELEM_FLOAT,
-	E_CONSTBUF_ELEM_FLOAT4,
-	E_CONSTBUF_ELEM_MATRIX,
-	E_CONSTBUF_ELEM_STRUCT,
-	E_CONSTBUF_ELEM_MAX
+	kCBElementBool,
+	kCBElementInt,
+	kCBElementFloat,
+	kCBElementFloat4,
+	kCBElementMatrix,
+	kCBElementStruct,
+	kCBElementMax
 };
-struct TConstBufferDeclElement
+struct ConstBufferDeclElement
 {
-	std::string name;
-	EConstBufferElementType type;
-	size_t size;
-	size_t count;
-	size_t offset;
+	std::string Name;
+	ConstBufferElementType Type;
+	size_t Size;
+	size_t Count;
+	size_t Offset;
 public:
-	TConstBufferDeclElement(const char* __name, EConstBufferElementType __type, size_t __size, size_t __count = 0, size_t __offset = 0);
+	ConstBufferDeclElement(const char* __name, ConstBufferElementType __type, size_t __size, size_t __count = 0, size_t __offset = 0);
 };
-struct TConstBufferDecl
+struct ConstBufferDecl
 {
-	std::vector<TConstBufferDeclElement> elements;
-	std::map<std::string, TConstBufferDecl> subDecls;
-	size_t bufferSize = 0;
+	std::vector<ConstBufferDeclElement> Elements;
+	std::map<std::string, ConstBufferDecl> SubDecls;
+	size_t BufferSize = 0;
 public:
-	TConstBufferDeclElement& Add(const TConstBufferDeclElement& elem);
-	TConstBufferDeclElement& Add(const TConstBufferDeclElement& elem, const TConstBufferDecl& subDecl);
-	TConstBufferDeclElement& Last();
+	ConstBufferDeclElement& Add(const ConstBufferDeclElement& elem);
+	ConstBufferDeclElement& Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl);
+	ConstBufferDeclElement& Last();
 };
-typedef std::shared_ptr<TConstBufferDecl> TConstBufferDeclPtr;
+typedef std::shared_ptr<ConstBufferDecl> TConstBufferDeclPtr;
 
 }

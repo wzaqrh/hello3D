@@ -21,17 +21,22 @@ namespace mir {
 #define E_MAT_MODEL_SHADOW "model_shadow"
 #define E_MAT_POSTPROC_BLOOM "bloom"
 
+#define E_PASS_SHADOWCASTER "ShadowCaster"
+#define E_PASS_FORWARDBASE "ForwardBase"
+#define E_PASS_FORWARDADD "ForwardAdd"
+#define E_PASS_POSTPROCESS "PostProcess"
+
 #define MATERIAL_FROM_XML
-	struct TRenderSystem;
-	struct TMaterialFactory
-	{
-		TRenderSystem* mRenderSys;
-		std::map<std::string, TMaterialPtr> mMaterials;
-		std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
-	public:
-		TMaterialFactory(TRenderSystem* pRenderSys);
-		TMaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
-	private:
-		TMaterialPtr CreateStdMaterial(const std::string& matName);
-	};
+struct RenderSystem;
+struct MaterialFactory
+{
+	RenderSystem* mRenderSys;
+	std::map<std::string, TMaterialPtr> mMaterials;
+	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
+public:
+	MaterialFactory(RenderSystem* pRenderSys);
+	TMaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
+private:
+	TMaterialPtr CreateStdMaterial(const std::string& matName);
+};
 }

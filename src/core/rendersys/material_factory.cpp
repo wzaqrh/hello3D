@@ -30,7 +30,7 @@ struct TMaterialBuilder
 	TPassPtr mCurPass;
 public:
 	TMaterialBuilder(bool addTechPass = true) {
-		mMaterial = std::make_shared<TMaterial>();
+		mMaterial = std::make_shared<Material>();
 		if (addTechPass) {
 			AddTechnique();
 			AddPass(E_PASS_FORWARDBASE, "");
@@ -42,7 +42,7 @@ public:
 		mCurPass = mCurTech->mPasses.empty() ? nullptr : mCurTech->mPasses[mCurTech->mPasses.size() - 1];
 	}
 	TMaterialBuilder& AddTechnique(const std::string& name = "d3d11") {
-		mCurTech = std::make_shared<TTechnique>();
+		mCurTech = std::make_shared<Technique>();
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
@@ -54,7 +54,7 @@ public:
 		return *this;
 	}
 	TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
-		mCurPass = std::make_shared<TPass>(lightMode, passName);
+		mCurPass = std::make_shared<Pass>(lightMode, passName);
 		mCurTech->AddPass(mCurPass);
 		return *this;
 	}
@@ -93,11 +93,11 @@ public:
 		return *this;
 	}
 	TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
-		mCurPass->AddConstBuffer(TContantBufferInfo(buffer, name, isUnique));
+		mCurPass->AddConstBuffer(ContantBufferInfo(buffer, name, isUnique));
 		return *this;
 	}
 	TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
-		mCurTech->AddConstBuffer(TContantBufferInfo(buffer, name, isUnique));
+		mCurTech->AddConstBuffer(ContantBufferInfo(buffer, name, isUnique));
 		return *this;
 	}
 	TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target) {
@@ -140,7 +140,7 @@ struct XmlAttributeInfo {
 		}
 	};
 struct XmlUniformInfo {
-		TConstBufferDecl Decl;
+		ConstBufferDecl Decl;
 		std::string ShortName;
 		std::vector<float> Data;
 		bool IsUnique;
@@ -273,7 +273,7 @@ public:
 		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	TMaterialPtr LoadMaterial(TRenderSystem* renderSys,
+	TMaterialPtr LoadMaterial(RenderSystem* renderSys,
 		const std::string& shaderName,
 		const std::string& variantName) {
 		XmlShaderInfo shaderInfo;
@@ -314,14 +314,14 @@ private:
 		}
 	}
 
-	static EConstBufferElementType ConvertStringToConstBufferElementType(
+	static ConstBufferElementType ConvertStringToConstBufferElementType(
 		const std::string& str, int count, int& size) {
-		EConstBufferElementType result = E_CONSTBUF_ELEM_MAX;
-		if (str == "int") result = E_CONSTBUF_ELEM_INT, size = 4;
-		else if (str == "float") result = E_CONSTBUF_ELEM_FLOAT, size = 4;
-		else if (str == "float4") result = E_CONSTBUF_ELEM_FLOAT4, size = 16;
-		else if (str == "matrix") result = E_CONSTBUF_ELEM_MATRIX, size = 64;
-		else if (str == "struct") result = E_CONSTBUF_ELEM_STRUCT;
+		ConstBufferElementType result = kCBElementMax;
+		if (str == "int") result = kCBElementInt, size = 4;
+		else if (str == "float") result = kCBElementFloat, size = 4;
+		else if (str == "float4") result = kCBElementFloat4, size = 16;
+		else if (str == "matrix") result = kCBElementMatrix, size = 64;
+		else if (str == "struct") result = kCBElementStruct;
 		size *= std::max<int>(1, count);
 		return result;
 	}
@@ -354,7 +354,7 @@ private:
 					D3D11_INPUT_PER_VERTEX_DATA,
 					0
 				};
-				byteOffset = layoutJ.AlignedByteOffset + D3DEnumCT::GetWidth(layoutJ.Format);
+				byteOffset = layoutJ.AlignedByteOffset + D3dEnumConvert::GetWidth(layoutJ.Format);
 				++j;
 			}
 
@@ -382,19 +382,19 @@ private:
 			XmlUniformInfo uniform;
 			uniform.IsUnique = it.second.get<bool>("<xmlattr>.IsUnique", true);
 
-			TConstBufferDeclBuilder builder(uniform.Decl);
+			ConstBufferDeclBuilder builder(uniform.Decl);
 
 			int byteOffset = 0;
 			for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
 				int size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
 				int count = element.second.get<int>("<xmlattr>.Count", 0);
 				int offset = element.second.get<int>("<xmlattr>.Offset", byteOffset);
-				EConstBufferElementType uniformElementType = ConvertStringToConstBufferElementType(
+				ConstBufferElementType uniformElementType = ConvertStringToConstBufferElementType(
 					element.second.get<std::string>("<xmlattr>.Type"/*, "int"*/), count, size);
-				BOOST_ASSERT(uniformElementType != E_CONSTBUF_ELEM_MAX);
+				BOOST_ASSERT(uniformElementType != kCBElementMax);
 
 				std::string Name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
-				builder.Add(TConstBufferDeclElement(Name.c_str(), uniformElementType, size, count, offset));
+				builder.Add(ConstBufferDeclElement(Name.c_str(), uniformElementType, size, count, offset));
 				byteOffset = offset + size;
 
 				int dataSize = uniform.Data.size();
@@ -404,17 +404,17 @@ private:
 				if (element.second.find("<xmlattr>.Default") != element.second.not_found()) {
 					std::string strDefault = element.second.get<std::string>("<xmlattr>.Default");
 					switch (uniformElementType) {
-					case E_CONSTBUF_ELEM_INT: {
+					case kCBElementInt: {
 						*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
 					}break;
-					case E_CONSTBUF_ELEM_FLOAT: {
+					case kCBElementFloat: {
 						*static_cast<float*>(pData) = boost::lexical_cast<float>(strDefault);
 					}break;
-					case E_CONSTBUF_ELEM_FLOAT4:
-					case E_CONSTBUF_ELEM_MATRIX: {
+					case kCBElementFloat4:
+					case kCBElementMatrix: {
 						std::vector<boost::iterator_range<std::string::iterator>> lst;
 						boost::split(lst, strDefault, boost::is_any_of(","));
-						int count = (uniformElementType == E_CONSTBUF_ELEM_FLOAT4) ? 4 : 16;
+						int count = (uniformElementType == kCBElementFloat4) ? 4 : 16;
 						for (int i = 0; i < lst.size() && i < count; ++i)
 							static_cast<float*>(pData)[i] = boost::lexical_cast<float>(lst[i]);
 					}break;
@@ -578,7 +578,7 @@ private:
 		return result;
 	}
 
-	TMaterialPtr CreateMaterial(TRenderSystem* renderSys,
+	TMaterialPtr CreateMaterial(RenderSystem* renderSys,
 		const std::string& name,
 		XmlShaderInfo& shaderInfo) {
 		TMaterialBuilder builder(false);
@@ -625,12 +625,12 @@ private:
 };
 
 /********** TMaterialFactory **********/
-TMaterialFactory::TMaterialFactory(TRenderSystem* pRenderSys) {
+MaterialFactory::MaterialFactory(RenderSystem* pRenderSys) {
 	mRenderSys = pRenderSys;
 	mMatAssetMng = std::make_shared<MaterialAssetManager>();
 }
 
-TMaterialPtr TMaterialFactory::GetMaterial(const std::string& matName, bool readonly) {
+TMaterialPtr MaterialFactory::GetMaterial(const std::string& matName, bool readonly) {
 	if (mMaterials.find(matName) == mMaterials.end())
 		mMaterials.insert(std::make_pair(matName, CreateStdMaterial(matName)));
 
@@ -639,12 +639,12 @@ TMaterialPtr TMaterialFactory::GetMaterial(const std::string& matName, bool read
 }
 
 #if defined MATERIAL_FROM_XML
-TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& matName) {
+TMaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
 	return mMatAssetMng->LoadMaterial(mRenderSys, entry.ShaderName, entry.VariantName);
 }
 #else
-void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
+void SetCommonField(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
@@ -652,18 +652,18 @@ void SetCommonField(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
 }
 
-void SetCommonField2(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
+void SetCommonField2(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 }
 
-void AddD3D9Technique(TMaterialBuilder& builder, TRenderSystem* pRenderSys) {
+void AddD3D9Technique(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.CloneTechnique(pRenderSys, "d3d9");
 	builder.ClearSamplersToTech();
 	builder.AddSamplerToTech(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS), 8);
 }
 
-TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& name) {
+TMaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 	TIME_PROFILE2(CreateStdMaterial, name);
 
 	TMaterialPtr material;
@@ -823,7 +823,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& name) {
 		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
 		builder.SetRenderTarget(TexToneMaps[NUM_TONEMAP_TEXTURES - 1]);
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
+		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex->GetWidth(), mainTex->GetHeight());
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
@@ -840,7 +840,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& name) {
 		}
 		builder.SetTexture(0, TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->GetColorTexture());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
+		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
@@ -854,7 +854,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& name) {
 		builder.SetRenderTarget(TexBrightPass);
 		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
+		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
@@ -871,7 +871,7 @@ TMaterialPtr TMaterialFactory::CreateStdMaterial(const std::string& name) {
 		}
 		builder.SetTexture(1, TexBrightPass->GetColorTexture());
 		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](TPass* pass, IRenderSystem* pRenderSys, TTextureBySlot& textures) {
+		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex->GetWidth(), 3.0f, 1.25f);
 			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));

@@ -7,40 +7,42 @@
 
 namespace mir {
 
-class TFontTextureAtlas {
+class FontTextureAtlas 
+{
 public:
 	ITexturePtr Texture;
 	XMFLOAT2 UV0, UV1;
 	XMINT2 Pos0, Pos1;
 public:
-	TFontTextureAtlas(ITexturePtr texture, XMFLOAT2 uv0, XMFLOAT2 uv1, XMINT2 pos0, XMINT2 pos1) 
-		:Texture(texture), UV0(uv0), UV1(uv1), Pos0(pos0), Pos1(pos1) {}
+	FontTextureAtlas(ITexturePtr texture, XMFLOAT2 uv0, XMFLOAT2 uv1, XMINT2 pos0, XMINT2 pos1) 
+		: Texture(texture), UV0(uv0), UV1(uv1), Pos0(pos0), Pos1(pos1) {}
 };
-typedef std::shared_ptr<TFontTextureAtlas> TFontTextureAtlasPtr;
+typedef std::shared_ptr<FontTextureAtlas> FontTextureAtlasPtr;
 
-class TFontTexture {
+class FontTexture 
+{
 	IRenderSystem* mRenderSys = nullptr;
 	int mWidth = 0, mHeight = 0;
 	ITexturePtr mTexture;
 	std::vector<char> mRawBuffer;
 	bool mRawBufferDirty = false;
 
-	std::map<int, TFontTextureAtlasPtr> mAtlasByCh;
+	std::map<int, FontTextureAtlasPtr> mAtlasByCh;
 	int mCol = 0, mRow = 0, mColH = 0;
 public:
-	TFontTexture(IRenderSystem* renderSys, XMINT2 size);
+	FontTexture(IRenderSystem* renderSys, XMINT2 size);
 
-	TFontTextureAtlasPtr GetCharactor(int ch);
+	FontTextureAtlasPtr GetCharactor(int ch);
 	bool ContainsCharactor(int ch) const;
-	TFontTextureAtlasPtr AddCharactor(int ch, int w, int h, unsigned char* buffer);
+	FontTextureAtlasPtr AddCharactor(int ch, int w, int h, unsigned char* buffer);
 public:
 	ITexturePtr GetTexture();
 	int Width() const { return mWidth; }
 	int Height() const { return mHeight; }
 };
-typedef std::shared_ptr<TFontTexture> TFontTexturePtr;
+typedef std::shared_ptr<FontTexture> FontTexturePtr;
 
-struct TFontCharactor
+struct FontCharactor
 {
 	FT_UInt charIndex;
 	FT_Glyph glyph;
@@ -49,43 +51,43 @@ struct TFontCharactor
 	XMINT2 Size;	//dot space   
 	XMINT2 Bearing;	//dot space
 	int Advance;	//dot space
-	TFontTextureAtlasPtr Atlas;
+	FontTextureAtlasPtr Atlas;
 };
-typedef std::shared_ptr<TFontCharactor> TFontCharactorPtr;
+typedef std::shared_ptr<FontCharactor> FontCharactorPtr;
 
-class TFontCharactorCache
+class FontCharactorCache 
 {
 	IRenderSystem* mRenderSys = nullptr;
 	FT_Face mFtFace;
-	std::vector<TFontTexturePtr> mFontTextures;
-	TFontTexturePtr mCurFontTexture;
-	std::map<int, TFontCharactorPtr> mCharactors;
+	std::vector<FontTexturePtr> mFontTextures;
+	FontTexturePtr mCurFontTexture;
+	std::map<int, FontCharactorPtr> mCharactors;
 public:
-	TFontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace);
-	TFontCharactorPtr GetCharactor(int ch);
+	FontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace);
+	FontCharactorPtr GetCharactor(int ch);
 	void FlushChange();
 private:
-	TFontTexturePtr AllocFontTexture();
+	FontTexturePtr AllocFontTexture();
 };
-typedef std::shared_ptr<TFontCharactorCache> TFontCharactorCachePtr;
+typedef std::shared_ptr<FontCharactorCache> FontCharactorCachePtr;
 
-class TFont
+class Font 
 {
 	std::string mFontName;
 	int mFontSize;
-	TFontCharactorCachePtr mCharactorCache;
+	FontCharactorCachePtr mCharactorCache;
 	FT_Face mFtFace;
 public:
-	TFont(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi = 72);
-	~TFont();
+	Font(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi = 72);
+	~Font();
 public:
 	FT_Face GetFtFace() { return mFtFace; }
-	TFontCharactorPtr GetCharactor(int ch);
+	FontCharactorPtr GetCharactor(int ch);
 	void Flush();
 };
-typedef std::shared_ptr<TFont> TFontPtr;
+typedef std::shared_ptr<Font> TFontPtr;
 
-class TFontCache
+class FontCache
 {
 	IRenderSystem* mRenderSys = nullptr;
 	FT_Library mFtLib;
@@ -100,10 +102,10 @@ class TFontCache
 	};
 	std::map<FontKey, TFontPtr> mFonts;
 public:
-	TFontCache(IRenderSystem* renderSys, int dpi = 72);
-	~TFontCache();
+	FontCache(IRenderSystem* renderSys, int dpi = 72);
+	~FontCache();
 	TFontPtr GetFont(std::string fontPath, int fontSize);
 };
-typedef std::shared_ptr<TFontCache> TFontCachePtr;
+typedef std::shared_ptr<FontCache> FontCachePtr;
 
 }

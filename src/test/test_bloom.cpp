@@ -9,13 +9,13 @@
 
 using namespace mir;
 
-class TestBloom : public TApp
+class TestBloom : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 private:
-	TAssimpModel* mModel = nullptr;
+	AssimpModel* mModel = nullptr;
 };
 
 void TestBloom::OnPostInitDevice()
@@ -35,7 +35,7 @@ void TestBloom::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mModel = new TAssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
+	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
 	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 }
 

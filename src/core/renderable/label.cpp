@@ -8,10 +8,10 @@
 namespace mir {
 
 struct IndicesData {
-	unsigned int Indices[TLabel::MAX_STRING_LENGTH * 6];
+	unsigned int Indices[Label::MAX_STRING_LENGTH * 6];
 	IndicesData() {
 		unsigned int c_indices[6] = { 0, 1, 2, 0, 2, 3 };
-		for (size_t i = 0; i < TLabel::MAX_STRING_LENGTH; ++i) {
+		for (size_t i = 0; i < Label::MAX_STRING_LENGTH; ++i) {
 			int base = i * 6, off = i * 4;
 			Indices[base + 0] = c_indices[0] + off;
 			Indices[base + 1] = c_indices[1] + off;
@@ -24,19 +24,19 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-TLabel::TLabel(IRenderSystem* renderSys, TFontPtr font)
+Label::Label(IRenderSystem* renderSys, TFontPtr font)
 {
 	mRenderSys = renderSys;
 	mFont = font;
 
-	Transform = std::make_shared<TMovable>();
+	Transform = std::make_shared<Movable>();
 	Material = renderSys->GetMaterial(E_MAT_LABEL);
 
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, DXGI_FORMAT_R32_UINT, (void*)&sIndiceData.Indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad) * MAX_STRING_LENGTH, sizeof(Pos3Color3Tex2), 0);
 }
 
-int TLabel::GenRenderOperation(TRenderOperationQueue& opList)
+int Label::GenRenderOperation(RenderOperationQueue& opList)
 {
 	int count = 0;
 	ITexturePtr lastTex;
@@ -48,7 +48,7 @@ int TLabel::GenRenderOperation(TRenderOperationQueue& opList)
 		auto& entry = mCharSeq[idx];
 		if (entry.texture != lastTex) {
 			if (lastTex != nullptr) {
-				TRenderOperation op = {};
+				RenderOperation op = {};
 				op.mMaterial = Material;
 				op.mVertexBuffer = mVertexBuffer;
 				op.mIndexBuffer = mIndexBuffer;
@@ -66,7 +66,7 @@ int TLabel::GenRenderOperation(TRenderOperationQueue& opList)
 	}
 
 	if (lastTex) {
-		TRenderOperation op = {};
+		RenderOperation op = {};
 		op.mMaterial = Material;
 		op.mVertexBuffer = mVertexBuffer;
 		op.mIndexBuffer = mIndexBuffer;
@@ -81,7 +81,7 @@ int TLabel::GenRenderOperation(TRenderOperationQueue& opList)
 	return count;
 }
 
-void TLabel::SetSize(bool autoSize, XMFLOAT2 size)
+void Label::SetSize(bool autoSize, XMFLOAT2 size)
 {
 	mAutoUptSize = autoSize;
 	if (!autoSize) {
@@ -95,7 +95,7 @@ void TLabel::SetSize(bool autoSize, XMFLOAT2 size)
 	ForceLayout();
 }
 
-void TLabel::AutoUpdateSize()
+void Label::AutoUpdateSize()
 {
 	if (mAutoUptSize) {
 		mConetentSize.x = mBBox.xMax - mBBox.xMin;
@@ -112,7 +112,7 @@ inline int Convert266ToDotSpace(int val) {
 }
 #define TODOT(V) Convert266ToDotSpace(V)
 
-void TLabel::UpdateBBox()
+void Label::UpdateBBox()
 {
 	mLineCount = 1;
 	mBBox.xMin = mBBox.yMin = 32000;
@@ -164,7 +164,7 @@ void TLabel::UpdateBBox()
 	if (mBBox.xMin > mBBox.xMax) mBBox = { 0,0,0,0 };
 }
 
-void TLabel::ForceLayout()
+void Label::ForceLayout()
 {
 	XMINT2 stringSize = { mBBox.xMax - mBBox.xMin, mBBox.yMax - mBBox.yMin };
 
@@ -202,7 +202,7 @@ void TLabel::ForceLayout()
 	}
 }
 
-void TLabel::SetString(const std::string& str)
+void Label::SetString(const std::string& str)
 {
 	if (mString == str) return;
 	mString = str;

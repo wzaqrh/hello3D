@@ -33,7 +33,7 @@ interface IRenderSystem
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
 	
 	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) = 0;
-	virtual IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) = 0;
+	virtual IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr) = 0;
 
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
 	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
@@ -45,8 +45,8 @@ interface IRenderSystem
 	virtual ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) = 0;
 	virtual IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) = 0;
 
-	virtual void SetBlendFunc(const TBlendFunc& blendFunc) = 0;
-	virtual void SetDepthState(const TDepthState& depthState) = 0;
+	virtual void SetBlendFunc(const BlendFunc& blendFunc) = 0;
+	virtual void SetDepthState(const DepthState& depthState) = 0;
 
 	virtual ITexturePtr LoadTexture(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false)= 0;
 	virtual ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) = 0;
@@ -54,11 +54,11 @@ interface IRenderSystem
 
 	virtual bool BeginScene() = 0;
 	virtual void EndScene() = 0;
-	virtual void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) = 0;
+	virtual void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode) = 0;
 	virtual void Draw(IRenderable* renderable) = 0;
 };
 
-struct __declspec(align(16)) TRenderSystem : IRenderSystem
+struct __declspec(align(16)) RenderSystem : IRenderSystem
 {
 protected:
 	size_t mDrawCount = 0, mDrawLimit = INT_MAX;
@@ -67,8 +67,8 @@ protected:
 	std::map<std::string, ITexturePtr> mTexByPath;
 	std::string mFXCDir;
 	
-	TBlendFunc mCurBlendFunc;
-	TDepthState mCurDepthState;
+	BlendFunc mCurBlendFunc;
+	DepthState mCurDepthState;
 
 	bool mCastShdowFlag = false;
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
@@ -79,13 +79,13 @@ protected:
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
-	TRenderSystem();
-	virtual ~TRenderSystem();
+	RenderSystem();
+	virtual ~RenderSystem();
 protected:
 	bool _CanDraw();
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
-	void MakeAutoParam(cbGlobalParam& param, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType);
+	void MakeAutoParam(cbGlobalParam& param, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, enLightType lightType);
 public:
 	XMINT4 GetWinSize() {
 		XMINT4 ret = { mScreenWidth, mScreenHeight, 0, 0 };

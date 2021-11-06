@@ -16,18 +16,17 @@ std::string GetFileExt(const std::string& fileName);
 
 bool IsFileExist(const std::string& fileName);
 
-struct TINT4 {
+struct Int4 {
 	int x, y, z, w;
 };
 
-class TD3DInputImpl;
-class TD3DInput {
+class D3DInput {
 public:
-	TD3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
-	~TD3DInput();
+	D3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
+	~D3DInput();
 	bool Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
 	void Frame();
-	TINT4 GetMouseLocation(bool left);
+	Int4 GetMouseLocation(bool left);
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();
@@ -41,20 +40,20 @@ private:
 	DIMOUSESTATE m_mouseState;
 
 	long m_screenWidth = 0, m_screenHeight = 0;
-	TINT4 mMouseL, mMouseR;
+	Int4 mMouseL, mMouseR;
 };
 
-class TTimeProfile {
+class TimeProfile {
 	std::string mName;
 	unsigned int mCurTime;
 public:
-	TTimeProfile(const std::string& name);
-	~TTimeProfile();
+	TimeProfile(const std::string& name);
+	~TimeProfile();
 };
-#define TIME_PROFILE(NAME) TTimeProfile NAME(#NAME)
-#define TIME_PROFILE2(NAME1,NAME2) TTimeProfile NAME(#NAME1+(":"+NAME2))
+#define TIME_PROFILE(NAME) TimeProfile NAME(#NAME)
+#define TIME_PROFILE2(NAME1,NAME2) TimeProfile NAME(#NAME1+(":"+NAME2))
 
-class SDTimer {
+class Timer {
 	double mLastTime = 0.0;
 public:
 	double mDeltaTime = 0.0;
@@ -62,13 +61,13 @@ public:
 	double Update();
 };
 
-struct TIncludeStdio : public ID3DInclude
+struct IncludeStdIo : public ID3DInclude
 {
 	std::string mModelPath;
 	std::vector<char> mBuffer;
 	std::vector<std::string> mStrBuffer;
 public:
-	TIncludeStdio(const std::string& modelPath);
+	IncludeStdIo(const std::string& modelPath);
 	STDMETHOD(Open)(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes);
 	STDMETHOD(Close)(THIS_ LPCVOID pData);
 };

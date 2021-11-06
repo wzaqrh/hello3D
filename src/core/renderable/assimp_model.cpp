@@ -122,14 +122,14 @@ public:
 };
 
 /********** AssimpModel **********/
-TAssimpModel::TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType)
+AssimpModel::AssimpModel(IRenderSystem* RenderSys, MovablePtr pMove, const std::string& matType)
 {
-	mMove = pMove ? pMove : std::make_shared<TMovable>();
+	mMove = pMove ? pMove : std::make_shared<Movable>();
 	mRenderSys = RenderSys;
 	LoadMaterial(matType);
 }
 
-TAssimpModel::~TAssimpModel()
+AssimpModel::~AssimpModel()
 {
 	delete mImporter;
 }
@@ -146,7 +146,7 @@ aiProcess_OptimizeMeshes |
 aiProcess_Debone |
 aiProcess_ValidateDataStructure;*/
 
-void TAssimpModel::LoadModel(const std::string& imgPath)
+void AssimpModel::LoadModel(const std::string& imgPath)
 {
 	TIME_PROFILE(AssimpModel_LoadModel);
 
@@ -177,7 +177,7 @@ void TAssimpModel::LoadModel(const std::string& imgPath)
 	}
 }
 
-void TAssimpModel::processNode(aiNode* node, const aiScene* scene)
+void AssimpModel::processNode(aiNode* node, const aiScene* scene)
 {
 	mNodeInfos[node].mLocalTransform = node->mTransformation;
 	mNodeInfos[node].mGlobalTransform = mNodeInfos[node].mLocalTransform;
@@ -228,13 +228,13 @@ void ReCalculateTangents(std::vector<AssimpMeshVertex>& vertices, const std::vec
 	}
 }
 
-TMeshSharedPtr TAssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
+AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	// Data to fill
 	std::vector<AssimpMeshVertex> vertices;
 	std::vector<UINT> indices;
-	TTextureBySlotPtr texturesPtr = std::make_shared<TTextureBySlot>();
-	TTextureBySlot& textures = *texturesPtr;
+	TTextureBySlotPtr texturesPtr = std::make_shared<TextureBySlot>();
+	TextureBySlot& textures = *texturesPtr;
 	textures.resize(4);
 
 	if (mesh->mMaterialIndex >= 0)
@@ -304,23 +304,23 @@ TMeshSharedPtr TAssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 		std::vector<ITexturePtr> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, scene);
 		if (diffuseMaps.size() > 0) 
-			textures[E_TEXTURE_DIFFUSE] = diffuseMaps[0];
+			textures[kTextureDiffuse] = diffuseMaps[0];
 
 		std::vector<ITexturePtr> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, scene);
 		if (specularMaps.size() > 0) 
-			textures[E_TEXTURE_SPECULAR] = specularMaps[0];
+			textures[kTextureSpecular] = specularMaps[0];
 
 		std::vector<ITexturePtr> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, scene);
 		if (normalMaps.size() > 0) 
-			textures[E_TEXTURE_NORMAL] = normalMaps[0];
+			textures[kTextureNormal] = normalMaps[0];
 	}
 
 	auto material = mMaterial->Clone(mRenderSys);
 	//if (mMatCb) mMatCb(material);
-	return std::make_shared<TAssimpMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
+	return std::make_shared<AssimpMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
-std::vector<ITexturePtr> TAssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
+std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
 {
 	std::vector<ITexturePtr> textures;
 	for (UINT i = 0; i < mat->GetTextureCount(type); i++)
@@ -335,7 +335,7 @@ std::vector<ITexturePtr> TAssimpModel::loadMaterialTextures(aiMaterial* mat, aiT
 	return textures;
 }
 
-const std::vector<aiMatrix4x4>& TAssimpModel::GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex)
+const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex)
 {
 	assert(pMeshIndex < pNode->mNumMeshes);
 	size_t meshIndex = pNode->mMeshes[pMeshIndex];
@@ -374,7 +374,7 @@ void VisitNode(aiNode* cur, std::map<const aiNode*, AiNodeInfo>& mNodeInfos, std
 	}
 }
 
-void TAssimpModel::Update(float dt)
+void AssimpModel::Update(float dt)
 {
 	std::vector<aiNode*> vec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mScene->mNumAnimations) {
@@ -411,7 +411,7 @@ void TAssimpModel::Update(float dt)
 	}
 }
 
-void TAssimpModel::PlayAnim(int Index)
+void AssimpModel::PlayAnim(int Index)
 {
 	mCurrentAnimIndex = Index;
 	mElapse = 0;
@@ -430,12 +430,12 @@ void TAssimpModel::PlayAnim(int Index)
 	}
 }
 
-void TAssimpModel::LoadMaterial(const std::string& matType)
+void AssimpModel::LoadMaterial(const std::string& matType)
 {
 	mMaterial = mRenderSys->GetMaterial(matType);
 }
 
-void TAssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
+void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 {
 	auto& meshes = mNodeInfos[node];
 	if (meshes.MeshCount() > 0) {
@@ -456,10 +456,10 @@ void TAssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 				weightedSkin.Models[0] = XMMatrixIdentity();
 			}
 
-			weightedSkin.hasNormal = mesh->HasTexture(E_TEXTURE_PBR_NORMAL);
-			weightedSkin.hasMetalness = mesh->HasTexture(E_TEXTURE_PBR_METALNESS);
-			weightedSkin.hasRoughness = mesh->HasTexture(E_TEXTURE_PBR_ROUGHNESS);
-			weightedSkin.hasAO = mesh->HasTexture(E_TEXTURE_PBR_AO);
+			weightedSkin.hasNormal = mesh->HasTexture(kTexturePbrNormal);
+			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
+			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
+			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
 			mesh->Material->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), make_data(weightedSkin));
 
 #ifdef USE_RENDER_OP
@@ -493,7 +493,7 @@ void TAssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 		DoDraw(node->mChildren[i], opList);
 }
 
-int TAssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
+int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
 	int count = opList.Count();
 	mDrawCount = 0;
@@ -507,7 +507,7 @@ int TAssimpModel::GenRenderOperation(TRenderOperationQueue& opList)
 	return opList.Count() - count;
 }
 
-void TAssimpModel::Draw()
+void AssimpModel::Draw()
 {
 	mRenderSys->Draw(this);
 }

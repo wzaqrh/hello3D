@@ -17,11 +17,11 @@ typedef std::shared_ptr<struct IContantBuffer> IContantBufferPtr;
 typedef std::shared_ptr<struct ITexture> ITexturePtr;
 typedef std::shared_ptr<struct IRenderTexture> IRenderTexturePtr;
 typedef std::shared_ptr<struct ISamplerState> ISamplerStatePtr;
-typedef std::shared_ptr<class TThreadPump> TThreadPumpPtr;
-struct TConstBufferDeclElement;
-typedef std::shared_ptr<struct TConstBufferDecl> TConstBufferDeclPtr;
+typedef std::shared_ptr<class TThreadPump> ThreadPumpPtr;
+struct ConstBufferDeclElement;
+typedef std::shared_ptr<struct ConstBufferDecl> TConstBufferDeclPtr;
 
 typedef std::shared_ptr<struct IResource> IResourcePtr;
-typedef std::shared_ptr<struct TResource> TResourcePtr;
+typedef std::shared_ptr<struct Resource> TResourcePtr;
 
 }

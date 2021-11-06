@@ -3,7 +3,7 @@
 
 namespace mir {
 
-class D3DEnumCT {
+class D3dEnumConvert {
 public:
 	static D3DBLEND d3d11To9(D3D11_BLEND blend);
 	static D3DCMPFUNC d3d11To9(D3D11_COMPARISON_FUNC cmp);

@@ -20,7 +20,7 @@ struct AssimpMeshVertex
 #endif
 };
 
-class TAssimpMesh : public IRenderable {
+class AssimpMesh : public IRenderable {
 public:
 	const aiMesh* Data = nullptr;
 	std::vector<AssimpMeshVertex> Vertices;
@@ -30,18 +30,18 @@ public:
 	IIndexBufferPtr IndexBuffer;
 	TMaterialPtr Material;
 public:
-	TAssimpMesh(const aiMesh* __data, 
+	AssimpMesh(const aiMesh* __data, 
 		std::vector<AssimpMeshVertex>& __vertices, 
 		std::vector<UINT>& __indices,
 		TTextureBySlotPtr __textures,
 		TMaterialPtr __material,
 		IRenderSystem *__renderSys);
 	bool HasTexture(int slot);
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	bool setupMesh(IRenderSystem *renderSys);
 };
-typedef std::shared_ptr<TAssimpMesh> TMeshSharedPtr;
-typedef std::vector<TMeshSharedPtr> TMeshSharedPtrVector;
+typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
+typedef std::vector<AssimpMeshPtr> AssimpMeshPtrVector;
 
 }

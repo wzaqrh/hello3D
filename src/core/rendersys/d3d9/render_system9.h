@@ -4,7 +4,7 @@
 
 namespace mir {
 
-class TRenderSystem9 : public TRenderSystem
+class RenderSystem9 : public RenderSystem
 {
 	HWND mHWnd = NULL;
 
@@ -17,8 +17,8 @@ class TRenderSystem9 : public TRenderSystem
 
 	std::vector<D3DXMACRO> mShaderMacros;
 public:
-	TRenderSystem9();
-	virtual ~TRenderSystem9();
+	RenderSystem9();
+	virtual ~RenderSystem9();
 
 	bool Initialize(HWND hWnd, RECT vp) override;
 	void Update(float dt) override;
@@ -33,7 +33,7 @@ public:
 	TMaterialPtr GetMaterial(const std::string& name, bool sharedUse) override;
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
-	IContantBufferPtr CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) override;
+	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr) override;
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
@@ -49,20 +49,20 @@ public:
 	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
 	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
 
-	void SetBlendFunc(const TBlendFunc& blendFunc) override;
-	void SetDepthState(const TDepthState& depthState) override;
+	void SetBlendFunc(const BlendFunc& blendFunc) override;
+	void SetDepthState(const DepthState& depthState) override;
 
 	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 public:
 	bool BeginScene() override;
 	void EndScene() override;
-	void RenderQueue(const TRenderOperationQueue& opQueue, const std::string& lightMode) override;
+	void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
 	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TTextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
-	void RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(TDirectLight* light, enLightType lightType, const TRenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderPass(TPassPtr pass, TextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
+	void RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
 	void _RenderSkyBox();
 	void _DoPostProcess();
 
@@ -71,7 +71,7 @@ protected:
 	TPixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);
 	TVertexShader9Ptr _CreateVSByFXC(const char* filename);
 	TPixelShader9Ptr _CreatePSByFXC(const char* filename);
-	IDirect3DVertexDeclaration9* _CreateInputLayout(TProgram9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
+	IDirect3DVertexDeclaration9* _CreateInputLayout(Program9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:
 	bool _GetDeviceCaps();
 	void _SetRasterizerState();

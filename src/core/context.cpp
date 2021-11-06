@@ -11,7 +11,7 @@ bool TContext::Initialize(HWND hWnd)
 #if 0
 	mRenderSys = new TRenderSystem9;
 #else
-	mRenderSys = new TRenderSystem11;
+	mRenderSys = new RenderSystem11;
 #endif
 	if (FAILED(mRenderSys->Initialize(hWnd))) {
 		mRenderSys->CleanUp();

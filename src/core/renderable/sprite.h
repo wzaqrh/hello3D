@@ -4,23 +4,19 @@
 
 namespace mir {
 
-struct Pos3Color3Tex2
-{
+struct Pos3Color3Tex2 {
 	XMFLOAT3 Pos;
 	unsigned int Color;
 	XMFLOAT2 Tex;
 };
 
-struct Quad
-{
+struct Quad {
 #if _MSC_VER <= 1800
 	Pos3Color3Tex2 lb, lt, rt, rb;
 #else
 	union {
 		Pos3Color3Tex2 m[4];
-		struct {
-			Pos3Color3Tex2 lb,lt,rt,rb;
-		};
+		struct { Pos3Color3Tex2 lb,lt,rt,rb; };
 	};
 #endif
 	Quad();
@@ -34,9 +30,7 @@ private:
 	void DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt);
 };
 
-class TSprite
-	: public IRenderable
-{
+class Sprite : public IRenderable {
 private:
 	Quad mQuad;
 	bool mQuadDirty;
@@ -50,11 +44,11 @@ private:
 	IIndexBufferPtr mIndexBuffer;
 public:
 	TMaterialPtr Material;
-	TTransformPtr Transform;
+	TransformPtr Transform;
 public:
-	TSprite(IRenderSystem* RenderSys, const std::string& matName = "");
-	~TSprite();
-	virtual int GenRenderOperation(TRenderOperationQueue& opList) override;
+	Sprite(IRenderSystem* RenderSys, const std::string& matName = "");
+	~Sprite();
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 	void Draw();
 public:
 	void SetPosition(float x, float y, float z);
@@ -65,6 +59,6 @@ public:
 	void SetFlipY(bool flipY);
 	const Quad* GetQuad() { return &mQuad; }
 };
-typedef std::shared_ptr<TSprite> TSpritePtr;
+typedef std::shared_ptr<Sprite> SpritePtr;
 
 }

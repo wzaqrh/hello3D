@@ -8,15 +8,15 @@
 
 using namespace mir;
 
-TApp::TApp()
+App::App()
 {
-	mMove = MakePtr<mir::TMovable>();
+	mMove = MakePtr<mir::Movable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 	mContext = new mir::TContext;
 }
-void TApp::Create()
+void App::Create()
 {}
-bool TApp::Initialize(HINSTANCE hInstance, HWND hWnd)
+bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	mHnd = hWnd;
 
@@ -28,21 +28,21 @@ bool TApp::Initialize(HINSTANCE hInstance, HWND hWnd)
 	OnInitLight();
 	OnPostInitDevice();
 
-	mInput = new mir::TD3DInput(hInstance, hWnd, mContext->GetRenderSys()->GetWinSize().x, mContext->GetRenderSys()->GetWinSize().y);
-	mTimer = new mir::SDTimer;
+	mInput = new mir::D3DInput(hInstance, hWnd, mContext->GetRenderSys()->GetWinSize().x, mContext->GetRenderSys()->GetWinSize().y);
+	mTimer = new mir::Timer;
 	return true;
 }
 
-TApp::~TApp()
+App::~App()
 {
 	delete mContext;
 }
-void TApp::CleanUp()
+void App::CleanUp()
 {
 	mContext->Dispose();
 }
 
-void TApp::Render()
+void App::Render()
 {
 	auto renderSys = mContext->GetRenderSys();
 	auto sceneMng = mContext->GetSceneMng();
@@ -55,7 +55,7 @@ void TApp::Render()
 	//rotate camera
 	if (sceneMng->GetDefCamera()->mIsPespective)
 	{
-		mir::TINT4 m = mInput->GetMouseLocation(false);
+		mir::Int4 m = mInput->GetMouseLocation(false);
 		float angy = 3.14 * m.x / renderSys->GetWinSize().x, angx = 3.14 * m.y / renderSys->GetWinSize().y;
 		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
@@ -66,7 +66,7 @@ void TApp::Render()
 	}
 
 	{
-		mir::TINT4 m = mInput->GetMouseLocation(true);
+		mir::Int4 m = mInput->GetMouseLocation(true);
 		float scalez = mir::clamp(0.00001f, 10.0f, mMove->mDefScale * (1000 + m.z) / 1000.0f);
 		float angy = 3.14 * -m.x / renderSys->GetWinSize().x, angx = 3.14 * -m.y / renderSys->GetWinSize().y;
 		
@@ -78,17 +78,17 @@ void TApp::Render()
 	OnRender();
 }
 
-std::string TApp::GetName()
+std::string App::GetName()
 {
 	return mName;
 }
 
-void TApp::OnInitLight()
+void App::OnInitLight()
 {
 	mContext->GetSceneMng()->AddPointLight();
 }
 
-XMMATRIX TApp::GetWorldTransform()
+XMMATRIX App::GetWorldTransform()
 {
 	return mMove->GetWorldTransform();
 }

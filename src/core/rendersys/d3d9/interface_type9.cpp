@@ -6,22 +6,22 @@
 namespace mir {
 
 /********** TTexture9 **********/
-TTexture9::TTexture9(IDirect3DTexture9 *__texture, const std::string& __path)
+Texture9::Texture9(IDirect3DTexture9 *__texture, const std::string& __path)
 	: mTexture(__texture)
 	, mTextureCube(nullptr)
 	, mPath(__path)
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
+	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
 	mRes->AddOnLoadedListener([this](IResource*) {
 		D3DSURFACE_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
-		mFormat = D3DEnumCT::d3d9To11(desc.Format);
+		mFormat = D3dEnumConvert::d3d9To11(desc.Format);
 		mMipCount = mTexture->GetLevelCount();
 	});
 }
 
-TTexture9::TTexture9(int width, int height, DXGI_FORMAT format, int mipmap)
+Texture9::Texture9(int width, int height, DXGI_FORMAT format, int mipmap)
 	: mTexture(nullptr)
 	, mTextureCube(nullptr)
 	, mPath()
@@ -30,30 +30,30 @@ TTexture9::TTexture9(int width, int height, DXGI_FORMAT format, int mipmap)
 	mHeight = height;
 	mFormat = format;
 	mMipCount = mipmap;
-	mRes = MakePtr<TResource>((IUnknown**)&mTexture);
+	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
 }
 
-void TTexture9::SetSRV9(IDirect3DTexture9* __texture)
+void Texture9::SetSRV9(IDirect3DTexture9* __texture)
 {
 	mTexture = __texture;
 }
 
-const char* TTexture9::GetPath() {
+const char* Texture9::GetPath() {
 	return mPath.c_str();
 }
-int TTexture9::GetWidth() {
+int Texture9::GetWidth() {
 	return mWidth;
 }
-int TTexture9::GetHeight() {
+int Texture9::GetHeight() {
 	return mHeight;
 }
-DXGI_FORMAT TTexture9::GetFormat() {
+DXGI_FORMAT Texture9::GetFormat() {
 	return mFormat;// D3DEnumCT::d3d9To11(GetDesc().Format);
 }
-int TTexture9::GetMipmapCount() {
+int Texture9::GetMipmapCount() {
 	return mMipCount;
 }
-D3DSURFACE_DESC TTexture9::GetDesc()
+D3DSURFACE_DESC Texture9::GetDesc()
 {
 	D3DSURFACE_DESC desc;
 	mTexture->GetLevelDesc(0, &desc);
@@ -61,49 +61,49 @@ D3DSURFACE_DESC TTexture9::GetDesc()
 }
 
 /********** TIndexBuffer9 **********/
-IDirect3DIndexBuffer9*& TIndexBuffer9::GetBuffer9()
+IDirect3DIndexBuffer9*& IndexBuffer9::GetBuffer9()
 {
-	return buffer;
+	return Buffer;
 }
 
-unsigned int TIndexBuffer9::GetBufferSize()
+unsigned int IndexBuffer9::GetBufferSize()
 {
-	return bufferSize;
+	return BufferSize;
 }
 
-int TIndexBuffer9::GetWidth()
+int IndexBuffer9::GetWidth()
 {
-	return D3DEnumCT::GetWidth(format);
+	return D3dEnumConvert::GetWidth(Format);
 }
 
-DXGI_FORMAT TIndexBuffer9::GetFormat()
+DXGI_FORMAT IndexBuffer9::GetFormat()
 {
-	return format;
+	return Format;
 }
 
 /********** TVertexShader9 **********/
-unsigned int TVertexBuffer9::GetBufferSize()
+unsigned int VertexBuffer9::GetBufferSize()
 {
-	return bufferSize;
+	return BufferSize;
 }
 
-IDirect3DVertexBuffer9*& TVertexBuffer9::GetBuffer9()
+IDirect3DVertexBuffer9*& VertexBuffer9::GetBuffer9()
 {
-	return buffer;
+	return Buffer;
 }
 
-unsigned int TVertexBuffer9::GetStride()
+unsigned int VertexBuffer9::GetStride()
 {
-	return stride;
+	return Stride;
 }
 
-unsigned int TVertexBuffer9::GetOffset()
+unsigned int VertexBuffer9::GetOffset()
 {
-	return offset;
+	return Offset;
 }
 
 /********** TRenderTexture9 **********/
-TRenderTexture9::TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
+RenderTexture9::RenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;
 	mColorTexture->AsRes()->SetLoaded();
@@ -111,35 +111,35 @@ TRenderTexture9::TRenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* d
 	mDepthStencilBuffer = depthStencilBuffer;
 }
 
-ITexturePtr TRenderTexture9::GetColorTexture()
+ITexturePtr RenderTexture9::GetColorTexture()
 {
 	return mColorTexture;
 }
 
-IDirect3DSurface9*& TRenderTexture9::GetColorBuffer9()
+IDirect3DSurface9*& RenderTexture9::GetColorBuffer9()
 {
 	mColorBuffer = nullptr;
 	if (CheckHR(mColorTexture->GetSRV9()->GetSurfaceLevel(0, &mColorBuffer))) return mColorBuffer;
 	return mColorBuffer;
 }
 
-IDirect3DSurface9*& TRenderTexture9::GetDepthStencilBuffer9()
+IDirect3DSurface9*& RenderTexture9::GetDepthStencilBuffer9()
 {
 	return mDepthStencilBuffer;
 }
 
 /********** TInputLayout9 **********/
-TInputLayout9::TInputLayout9()
+InputLayout9::InputLayout9()
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mLayout);
+	mRes = MakePtr<Resource>((IUnknown**)&mLayout);
 }
 
-IDirect3DVertexDeclaration9*& TInputLayout9::GetLayout9()
+IDirect3DVertexDeclaration9*& InputLayout9::GetLayout9()
 {
 	return mLayout;
 }
 
-void TConstantTable::ReInit()
+void ConstantTable::ReInit()
 {
 	mHandles.clear();
 	mHandleByName.clear();
@@ -147,7 +147,7 @@ void TConstantTable::ReInit()
 }
 
 /********** TConstantTable **********/
-void TConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int constCount)
+void ConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int constCount)
 {
 	mTable = constTable;
 
@@ -168,7 +168,7 @@ void TConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int
 			mHandleByName.insert(handleName);
 
 			if (constDesc.Class == D3DXPC_STRUCT) {
-				TConstantTablePtr subTab = std::make_shared<TConstantTable>();
+				TConstantTablePtr subTab = std::make_shared<ConstantTable>();
 				subTab->Init(constTable, handleName.second, constDesc.StructMembers);
 				mSubByName[handleName.first] = subTab;
 			}
@@ -177,22 +177,22 @@ void TConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int
 	}
 }
 
-ID3DXConstantTable* TConstantTable::get()
+ID3DXConstantTable* ConstantTable::get()
 {
 	return mTable;
 }
 
-size_t TConstantTable::size() const
+size_t ConstantTable::size() const
 {
 	return mHandles.size();
 }
 
-D3DXHANDLE TConstantTable::GetHandle(size_t pos) const
+D3DXHANDLE ConstantTable::GetHandle(size_t pos) const
 {
 	return mHandles[pos];
 }
 
-D3DXHANDLE TConstantTable::GetHandle(const std::string& name) const
+D3DXHANDLE ConstantTable::GetHandle(const std::string& name) const
 {
 	auto iter = mHandleByName.find(name);
 	if (iter != mHandleByName.end()) {
@@ -201,7 +201,7 @@ D3DXHANDLE TConstantTable::GetHandle(const std::string& name) const
 	else return NULL;
 }
 
-TConstantTablePtr TConstantTable::At(const std::string& name)
+TConstantTablePtr ConstantTable::At(const std::string& name)
 {
 	auto iter = mSubByName.find(name);
 	if (iter != mSubByName.end()) {
@@ -210,10 +210,10 @@ TConstantTablePtr TConstantTable::At(const std::string& name)
 	else return NULL;
 }
 
-void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDecl& decl)
+void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBufferDecl& decl)
 {
-	for (size_t j = 0; j < decl.elements.size(); ++j) {
-		TConstBufferDeclElement& elem = decl.elements[j];
+	for (size_t j = 0; j < decl.Elements.size(); ++j) {
+		ConstBufferDeclElement& elem = decl.Elements[j];
 #if 0
 		auto iter = decl.subDecls.find(elem.name);
 		if (iter != decl.subDecls.end()) {
@@ -228,30 +228,30 @@ void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBuf
 	}
 }
 
-void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBufferDeclElement& elem)
+void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBufferDeclElement& elem)
 {
-	D3DXHANDLE handle = GetHandle(elem.name);
+	D3DXHANDLE handle = GetHandle(elem.Name);
 	if (handle) {
 		HRESULT hr = S_OK;
-		switch (elem.type)
+		switch (elem.Type)
 		{
-		case E_CONSTBUF_ELEM_MATRIX: {
-			if (elem.count == 0) {
-				assert(elem.size == sizeof(D3DXMATRIX));
-				hr = mTable->SetMatrixTranspose(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.offset));
+		case kCBElementMatrix: {
+			if (elem.Count == 0) {
+				assert(elem.Size == sizeof(D3DXMATRIX));
+				hr = mTable->SetMatrixTranspose(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.Offset));
 			}
 			else {
-				assert(elem.size == sizeof(D3DXMATRIX) * elem.count);
-				hr = mTable->SetMatrixTransposeArray(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.offset), elem.count);
+				assert(elem.Size == sizeof(D3DXMATRIX) * elem.Count);
+				hr = mTable->SetMatrixTransposeArray(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.Offset), elem.Count);
 			}
 		}break;
-		case E_CONSTBUF_ELEM_STRUCT:
-		case E_CONSTBUF_ELEM_BOOL:
-		case E_CONSTBUF_ELEM_INT:
-		case E_CONSTBUF_ELEM_FLOAT:
-		case E_CONSTBUF_ELEM_FLOAT4:
+		case kCBElementStruct:
+		case kCBElementBool:
+		case kCBElementInt:
+		case kCBElementFloat:
+		case kCBElementFloat4:
 		default:
-			hr = mTable->SetValue(device, handle, buffer9 + elem.offset, elem.size);
+			hr = mTable->SetValue(device, handle, buffer9 + elem.Offset, elem.Size);
 			break;
 		}
 		CheckHR(hr);
@@ -259,108 +259,108 @@ void TConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, TConstBuf
 }
 
 /********** TPixelShader9 **********/
-TPixelShader9::TPixelShader9()
+PixelShader9::PixelShader9()
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mShader);
+	mRes = MakePtr<Resource>((IUnknown**)&mShader);
 }
 
-IBlobDataPtr TPixelShader9::GetBlob()
+IBlobDataPtr PixelShader9::GetBlob()
 {
 	return mBlob;
 }
 
-IDirect3DPixelShader9*& TPixelShader9::GetShader9()
+IDirect3DPixelShader9*& PixelShader9::GetShader9()
 {
 	return mShader;
 }
 
-void TPixelShader9::SetConstTable(ID3DXConstantTable* constTable)
+void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
 {
 	mConstTable.Init(constTable);
 }
 
 /********** TVertexShader9 **********/
-TVertexShader9::TVertexShader9()
+VertexShader9::VertexShader9()
 {
-	mRes = MakePtr<TResource>((IUnknown**)&mShader);
+	mRes = MakePtr<Resource>((IUnknown**)&mShader);
 }
 
-IBlobDataPtr TVertexShader9::GetBlob()
+IBlobDataPtr VertexShader9::GetBlob()
 {
 	return mBlob;
 }
 
-IDirect3DVertexShader9*& TVertexShader9::GetShader9()
+IDirect3DVertexShader9*& VertexShader9::GetShader9()
 {
 	return mShader;
 }
 
-void TVertexShader9::SetConstTable(ID3DXConstantTable* constTable)
+void VertexShader9::SetConstTable(ID3DXConstantTable* constTable)
 {
 	mConstTable.Init(constTable);
 }
 
 /********** TBlobDataD3d9 **********/
-TBlobDataD3d9::TBlobDataD3d9(ID3DXBuffer* pBlob)
+BlobData9::BlobData9(ID3DXBuffer* pBlob)
 	:mBlob(pBlob)
 {
 }
 
-char* TBlobDataD3d9::GetBufferPointer()
+char* BlobData9::GetBufferPointer()
 {
 	return (char*)mBlob->GetBufferPointer();
 }
 
-size_t TBlobDataD3d9::GetBufferSize()
+size_t BlobData9::GetBufferSize()
 {
 	return mBlob->GetBufferSize();
 }
 
 /********** TSamplerState9 **********/
-std::map<D3DSAMPLERSTATETYPE, DWORD>& TSamplerState9::GetSampler9()
+std::map<D3DSAMPLERSTATETYPE, DWORD>& SamplerState9::GetSampler9()
 {
 	return mStates;
 }
 
 /********** TContantBuffer9 **********/
-TContantBuffer9::TContantBuffer9(TConstBufferDeclPtr decl)
+ContantBuffer9::ContantBuffer9(TConstBufferDeclPtr decl)
 	:mDecl(decl)
 {
 	assert(mDecl != nullptr);
-	mBuffer9.resize(mDecl->bufferSize);
+	mBuffer9.resize(mDecl->BufferSize);
 }
 
-TConstBufferDeclPtr TContantBuffer9::GetDecl()
+TConstBufferDeclPtr ContantBuffer9::GetDecl()
 {
 	return mDecl;
 }
 
-unsigned int TContantBuffer9::GetBufferSize()
+unsigned int ContantBuffer9::GetBufferSize()
 {
-	return mDecl->bufferSize;
+	return mDecl->BufferSize;
 }
 
-char* TContantBuffer9::GetBuffer9()
+char* ContantBuffer9::GetBuffer9()
 {
 	return mBuffer9.empty() ? nullptr : &mBuffer9[0];
 }
 
-void TContantBuffer9::SetBuffer9(char* data, int dataSize)
+void ContantBuffer9::SetBuffer9(char* data, int dataSize)
 {
 	mBuffer9.assign((char*)data, (char*)data + dataSize);
 }
 
 /********** TProgram9 **********/
-TProgram9::TProgram9()
+Program9::Program9()
 {
-	mRes = MakePtr<TResource>((IUnknown**)0);
+	mRes = MakePtr<Resource>((IUnknown**)0);
 }
 
-void TProgram9::SetVertex(TVertexShader9Ptr pVertex) {
+void Program9::SetVertex(TVertexShader9Ptr pVertex) {
 	mVertex = pVertex;
 	mRes->AddDependency(pVertex->AsRes());
 }
-void TProgram9::SetPixel(TPixelShader9Ptr pPixel) {
+void Program9::SetPixel(TPixelShader9Ptr pPixel) {
 	mPixel = pPixel;
 	mRes->AddDependency(pPixel->AsRes());
 }

@@ -5,11 +5,11 @@
 
 namespace mir {
 	struct aiNode;
-	class TAssimpModel;
-	class TD3DInput;
-	class SDTimer;
-	struct TMovable;
-	typedef std::shared_ptr<struct TMovable> TMovablePtr;
+	class AssimpModel;
+	class D3DInput;
+	class Timer;
+	struct Movable;
+	typedef std::shared_ptr<struct Movable> MovablePtr;
 }
 
 struct IApp
@@ -21,12 +21,12 @@ struct IApp
 	virtual std::string GetName() = 0;
 };
 
-typedef std::shared_ptr<mir::TMovable> TMovablePtr;
-class TApp : public IApp
+typedef std::shared_ptr<mir::Movable> TMovablePtr;
+class App : public IApp
 {
 public:
-	TApp();
-	~TApp();
+	App();
+	~App();
 public:
 	virtual void Create();
 	virtual bool Initialize(HINSTANCE hInstance, HWND hWnd);
@@ -42,9 +42,9 @@ protected:
 	XMMATRIX GetWorldTransform();
 protected:
 	mir::TContext* mContext = nullptr;
-	class mir::TD3DInput* mInput = nullptr;
-	class mir::SDTimer* mTimer;
-	mir::TMovablePtr mMove;
+	class mir::D3DInput* mInput = nullptr;
+	class mir::Timer* mTimer;
+	mir::MovablePtr mMove;
 	XMFLOAT4 mBackgndColor;
 public:
 	std::string mName;

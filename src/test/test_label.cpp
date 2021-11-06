@@ -9,15 +9,15 @@ using namespace mir;
 
 #define CASE_COUNT 4
 
-class TestLabel : public TApp
+class TestLabel : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 private:
-	TLabelPtr mLabel[CASE_COUNT];
-	TSpritePtr mLabelBg[CASE_COUNT];
-	TSpritePtr mLabelDebug;
+	LabelPtr mLabel[CASE_COUNT];
+	SpritePtr mLabelBg[CASE_COUNT];
+	SpritePtr mLabelDebug;
 };
 
 void TestLabel::OnPostInitDevice()
@@ -54,7 +54,7 @@ void TestLabel::OnPostInitDevice()
 	}
 #ifdef TEST_LABEL_DEBUG_SP
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LABEL);
-	mLabelDebug = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_SPRITE);
+	mLabelDebug = std::make_shared<Sprite>(mContext->GetRenderSys(), E_MAT_SPRITE);
 	mLabelDebug->SetTexture(mLabel->mCharSeq[0].texture);
 	mLabelDebug->SetPosition(0, 0, 0);
 	mLabelDebug->SetSize(512, 512);
@@ -64,7 +64,7 @@ void TestLabel::OnPostInitDevice()
 void TestLabel::OnRender()
 {
 	if (mContext->GetRenderSys()->BeginScene()) {
-		TRenderOperationQueue opQue;
+		RenderOperationQueue opQue;
 		if (mLabelDebug) mLabelDebug->GenRenderOperation(opQue);
 		for (int i = 0; i < CASE_COUNT; ++i) {
 			if (mLabelBg[i]) mLabelBg[i]->GenRenderOperation(opQue);

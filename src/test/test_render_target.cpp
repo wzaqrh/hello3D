@@ -10,16 +10,16 @@
 
 using namespace mir;
 
-class TestRT : public TApp
+class TestRT : public App
 {
 protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	TAssimpModel* mModel = nullptr;
+	AssimpModel* mModel = nullptr;
 	IRenderTexturePtr mRendTexture = nullptr;
-	TSpritePtr mSprite, mLayerColor;
+	SpritePtr mSprite, mLayerColor;
 };
 
 /********** TestRT **********/
@@ -43,12 +43,12 @@ void TestRT::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mModel = new TAssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
+	mModel = new AssimpModel(mRenderSys, mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
 	
 	mRendTexture = mRenderSys->CreateRenderTexture(mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
 
-	mSprite = std::make_shared<TSprite>(mRenderSys, E_MAT_SPRITE);
+	mSprite = std::make_shared<Sprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(mRendTexture->GetColorTexture());
 	mSprite->SetPosition(0, 0, 0);
 	mSprite->SetSize(5,5);

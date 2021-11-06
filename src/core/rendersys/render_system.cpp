@@ -1,36 +1,36 @@
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/rendersys/material_cb.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/renderable/post_process.h"
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"
 
 namespace mir {
 
-TRenderSystem::TRenderSystem()
+RenderSystem::RenderSystem()
 {
 	mDrawLimit = 4;
 }
 
-TRenderSystem::~TRenderSystem()
+RenderSystem::~RenderSystem()
 {
 }
 
-bool TRenderSystem::_CanDraw()
+bool RenderSystem::_CanDraw()
 {
 	//return mDrawCount++ < mDrawLimit;
 	//return mDrawCount++ == mDrawLimit-1;
 	return true;
 }
 
-void TRenderSystem::_PushRenderTarget(IRenderTexturePtr rendTarget)
+void RenderSystem::_PushRenderTarget(IRenderTexturePtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
 	SetRenderTarget(rendTarget);
 }
 
-void TRenderSystem::_PopRenderTarget()
+void RenderSystem::_PopRenderTarget()
 {
 	if (!mRenderTargetStk.empty())
 		mRenderTargetStk.pop_back();
@@ -38,7 +38,7 @@ void TRenderSystem::_PopRenderTarget()
 	SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
-IProgramPtr TRenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr RenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	std::string ext = GetFileExt(name);
 	if (ext.empty()) {
@@ -51,7 +51,7 @@ IProgramPtr TRenderSystem::CreateProgram(const std::string& name, const char* vs
 	}
 }
 
-ITexturePtr TRenderSystem::LoadTexture(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
+ITexturePtr RenderSystem::LoadTexture(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
 {
 	const char* pSrc = __imgPath.c_str();
 	std::string imgPath = __imgPath;
@@ -71,14 +71,14 @@ ITexturePtr TRenderSystem::LoadTexture(const std::string& __imgPath, DXGI_FORMAT
 	return texView;
 }
 
-void TRenderSystem::Draw(IRenderable* renderable)
+void RenderSystem::Draw(IRenderable* renderable)
 {
-	TRenderOperationQueue opQue;
+	RenderOperationQueue opQue;
 	renderable->GenRenderOperation(opQue);
 	RenderQueue(opQue, E_PASS_FORWARDBASE);
 }
 
-void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLightCam, bool castShadow, TDirectLight* light, enLightType lightType)
+void RenderSystem::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, enLightType lightType)
 {
 	memset(&globalParam, 0, sizeof(globalParam));
 
@@ -103,20 +103,20 @@ void TRenderSystem::MakeAutoParam(cbGlobalParam& globalParam, TCameraBase* pLigh
 	switch (lightType)
 	{
 	case E_LIGHT_DIRECT:
-		static_cast<TDirectLight&>(globalParam.Light) = *light;
+		static_cast<cbDirectLight&>(globalParam.Light) = *light;
 		break;
 	case E_LIGHT_POINT:
-		static_cast<TPointLight&>(globalParam.Light) = *(TPointLight*)light;
+		static_cast<cbPointLight&>(globalParam.Light) = *(cbPointLight*)light;
 		break;
 	case E_LIGHT_SPOT:
-		globalParam.Light = *(TSpotLight*)light;
+		globalParam.Light = *(cbSpotLight*)light;
 		break;
 	default:
 		break;
 	}
 }
 
-ISceneManagerPtr TRenderSystem::GetSceneManager()
+ISceneManagerPtr RenderSystem::GetSceneManager()
 {
 	return mSceneManager;
 }
