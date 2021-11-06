@@ -115,12 +115,8 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
 void TCamera::SetFlipY(bool flip)
 {
 	mFlipY = flip;
-	if (mIsPespective) {
-		SetPerspectiveProj(mWidth, mHeight, mFOV, mFar);
-	}
-	else {
-		SetOthogonalProj(mWidth, mHeight, mFar);
-	}
+	if (mIsPespective) SetPerspectiveProj(mWidth, mHeight, mFOV, mFar);
+	else SetOthogonalProj(mWidth, mHeight, mFar);
 }
 
 void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at, XMFLOAT3 up)
@@ -129,6 +125,7 @@ void TCamera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at, XMFLOAT3 up)
 	XMVECTOR At = XMVectorSet(at.x, at.y, at.z, 0.0f);
 	XMVECTOR Up = XMVectorSet(up.x, up.y, up.z, 0.0f);
 	mView_ = XMMatrixLookAtLH(Eye, At, Up);
+	mTransformDirty = true;
 }
 
 void TCamera::SetPerspectiveProj(int width, int height, double fov, double far1)

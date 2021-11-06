@@ -9,146 +9,124 @@
 
 namespace mir {
 
-/********** AiNodeInfo **********/
-AiNodeInfo::AiNodeInfo()
+struct EvaluateTransforms
 {
-	channelIndex = -1;
-}
+public:
+	std::vector<aiMatrix4x4> mTransforms;
+	const aiAnimation* mAnim;
+public:
+	EvaluateTransforms(const aiAnimation* Anim) :mAnim(Anim) {}
+	void Update(float pTime) 
+	{
+		double ticksPerSecond = mAnim->mTicksPerSecond != 0.0 ? mAnim->mTicksPerSecond : 25.0;
+		pTime *= ticksPerSecond;
 
-TMeshSharedPtr AiNodeInfo::operator[](int pos)
-{
-	return meshes[pos];
-}
+		// map into anim's duration
+		double time = 0.0f;
+		if (mAnim->mDuration > 0.0) {
+			time = fmod(pTime, mAnim->mDuration);
+		}
 
-int AiNodeInfo::size() const
-{
-	return meshes.size();
-}
+		mTransforms.resize(mAnim->mNumChannels);
 
-void AiNodeInfo::push_back(TMeshSharedPtr mesh)
-{
-	meshes.push_back(mesh);
-}
+		for (unsigned int a = 0; a < mAnim->mNumChannels; ++a) {
+			const aiNodeAnim* channel = mAnim->mChannels[a];
 
-/********** Evaluator **********/
-void Evaluator::Eval(float pTime)
-{
-	double ticksPerSecond = mAnim->mTicksPerSecond != 0.0 ? mAnim->mTicksPerSecond : 25.0;
-	pTime *= ticksPerSecond;
+			/*std::string name = "IK_Auge_L";
+			if (name == channel->mNodeName.C_Str()) {
+			channel = channel;
+			}*/
 
-	// map into anim's duration
-	double time = 0.0f;
-	if (mAnim->mDuration > 0.0) {
-		time = fmod(pTime, mAnim->mDuration);
+			// ******** Position *****
+			aiVector3D presentPosition(0, 0, 0);
+			if (channel->mNumPositionKeys > 0) {
+				// Look for present frame number. Search from last position if time is after the last time, else from beginning
+				// Should be much quicker than always looking from start for the average use case.
+				unsigned int frame = 0;
+				while (frame < channel->mNumPositionKeys - 1) {
+					if (time < channel->mPositionKeys[frame + 1].mTime) {
+						break;
+					}
+					++frame;
+				}
+
+				// interpolate between this frame's value and next frame's value
+				unsigned int nextFrame = (frame + 1) % channel->mNumPositionKeys;
+				const aiVectorKey& key = channel->mPositionKeys[frame];
+				const aiVectorKey& nextKey = channel->mPositionKeys[nextFrame];
+				double diffTime = nextKey.mTime - key.mTime;
+				if (diffTime < 0.0) {
+					diffTime += mAnim->mDuration;
+				}
+				if (diffTime > 0) {
+					float factor = float((time - key.mTime) / diffTime);
+					presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
+				}
+				else {
+					presentPosition = key.mValue;
+				}
+			}
+
+			// ******** Rotation *********
+			aiQuaternion presentRotation(1, 0, 0, 0);
+			if (channel->mNumRotationKeys > 0) {
+				unsigned int frame = 0;
+				while (frame < channel->mNumRotationKeys - 1) {
+					if (time < channel->mRotationKeys[frame + 1].mTime) {
+						break;
+					}
+					++frame;
+				}
+
+				// interpolate between this frame's value and next frame's value
+				unsigned int nextFrame = (frame + 1) % channel->mNumRotationKeys;
+				const aiQuatKey& key = channel->mRotationKeys[frame];
+				const aiQuatKey& nextKey = channel->mRotationKeys[nextFrame];
+				double diffTime = nextKey.mTime - key.mTime;
+				if (diffTime < 0.0) {
+					diffTime += mAnim->mDuration;
+				}
+				if (diffTime > 0) {
+					float factor = float((time - key.mTime) / diffTime);
+					aiQuaternion::Interpolate(presentRotation, key.mValue, nextKey.mValue, factor);
+				}
+				else {
+					presentRotation = key.mValue;
+				}
+			}
+
+			// ******** Scaling **********
+			aiVector3D presentScaling(1, 1, 1);
+			if (channel->mNumScalingKeys > 0) {
+				unsigned int frame = 0;
+				while (frame < channel->mNumScalingKeys - 1) {
+					if (time < channel->mScalingKeys[frame + 1].mTime) {
+						break;
+					}
+					++frame;
+				}
+
+				// TODO: (thom) interpolation maybe? This time maybe even logarithmic, not linear
+				presentScaling = channel->mScalingKeys[frame].mValue;
+			}
+
+			// build a transformation matrix from it
+			aiMatrix4x4& mat = mTransforms[a];
+			mat = aiMatrix4x4(presentRotation.GetMatrix());
+			mat.a1 *= presentScaling.x; mat.b1 *= presentScaling.x; mat.c1 *= presentScaling.x;
+			mat.a2 *= presentScaling.y; mat.b2 *= presentScaling.y; mat.c2 *= presentScaling.y;
+			mat.a3 *= presentScaling.z; mat.b3 *= presentScaling.z; mat.c3 *= presentScaling.z;
+			mat.a4 = presentPosition.x; mat.b4 = presentPosition.y; mat.c4 = presentPosition.z;
+		}
 	}
-
-	mTransforms.resize(mAnim->mNumChannels);
-
-	for (unsigned int a = 0; a < mAnim->mNumChannels; ++a) {
-		const aiNodeAnim* channel = mAnim->mChannels[a];
-
-		/*std::string name = "IK_Auge_L";
-		if (name == channel->mNodeName.C_Str()) {
-		channel = channel;
-		}*/
-
-		// ******** Position *****
-		aiVector3D presentPosition(0, 0, 0);
-		if (channel->mNumPositionKeys > 0) {
-			// Look for present frame number. Search from last position if time is after the last time, else from beginning
-			// Should be much quicker than always looking from start for the average use case.
-			unsigned int frame = 0;
-			while (frame < channel->mNumPositionKeys - 1) {
-				if (time < channel->mPositionKeys[frame + 1].mTime) {
-					break;
-				}
-				++frame;
-			}
-
-			// interpolate between this frame's value and next frame's value
-			unsigned int nextFrame = (frame + 1) % channel->mNumPositionKeys;
-			const aiVectorKey& key = channel->mPositionKeys[frame];
-			const aiVectorKey& nextKey = channel->mPositionKeys[nextFrame];
-			double diffTime = nextKey.mTime - key.mTime;
-			if (diffTime < 0.0) {
-				diffTime += mAnim->mDuration;
-			}
-			if (diffTime > 0) {
-				float factor = float((time - key.mTime) / diffTime);
-				presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
-			}
-			else {
-				presentPosition = key.mValue;
-			}
-		}
-
-		// ******** Rotation *********
-		aiQuaternion presentRotation(1, 0, 0, 0);
-		if (channel->mNumRotationKeys > 0) {
-			unsigned int frame = 0;
-			while (frame < channel->mNumRotationKeys - 1) {
-				if (time < channel->mRotationKeys[frame + 1].mTime) {
-					break;
-				}
-				++frame;
-			}
-
-			// interpolate between this frame's value and next frame's value
-			unsigned int nextFrame = (frame + 1) % channel->mNumRotationKeys;
-			const aiQuatKey& key = channel->mRotationKeys[frame];
-			const aiQuatKey& nextKey = channel->mRotationKeys[nextFrame];
-			double diffTime = nextKey.mTime - key.mTime;
-			if (diffTime < 0.0) {
-				diffTime += mAnim->mDuration;
-			}
-			if (diffTime > 0) {
-				float factor = float((time - key.mTime) / diffTime);
-				aiQuaternion::Interpolate(presentRotation, key.mValue, nextKey.mValue, factor);
-			}
-			else {
-				presentRotation = key.mValue;
-			}
-		}
-
-		// ******** Scaling **********
-		aiVector3D presentScaling(1, 1, 1);
-		if (channel->mNumScalingKeys > 0) {
-			unsigned int frame = 0;
-			while (frame < channel->mNumScalingKeys - 1) {
-				if (time < channel->mScalingKeys[frame + 1].mTime) {
-					break;
-				}
-				++frame;
-			}
-
-			// TODO: (thom) interpolation maybe? This time maybe even logarithmic, not linear
-			presentScaling = channel->mScalingKeys[frame].mValue;
-		}
-
-		// build a transformation matrix from it
-		aiMatrix4x4& mat = mTransforms[a];
-		mat = aiMatrix4x4(presentRotation.GetMatrix());
-		mat.a1 *= presentScaling.x; mat.b1 *= presentScaling.x; mat.c1 *= presentScaling.x;
-		mat.a2 *= presentScaling.y; mat.b2 *= presentScaling.y; mat.c2 *= presentScaling.y;
-		mat.a3 *= presentScaling.z; mat.b3 *= presentScaling.z; mat.c3 *= presentScaling.z;
-		mat.a4 = presentPosition.x; mat.b4 = presentPosition.y; mat.c4 = presentPosition.z;
-	}
-}
+};
 
 /********** AssimpModel **********/
-TAssimpModel::TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove,
-	const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
-{
-	mMove = pMove ? pMove : std::make_shared<TMovable>();
-	mRenderSys = RenderSys;
-	LoadMaterial(shaderName, layouts, cb);
-}
-
 TAssimpModel::TAssimpModel(IRenderSystem* RenderSys, TMovablePtr pMove, const std::string& matType)
 {
 	mMove = pMove ? pMove : std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-	LoadMaterial(matType, nullptr);
+	LoadMaterial(matType);
 }
 
 TAssimpModel::~TAssimpModel()
@@ -208,7 +186,7 @@ void TAssimpModel::processNode(aiNode* node, const aiScene* scene)
 		aiMesh* meshData = scene->mMeshes[node->mMeshes[i]];
 		auto mesh = processMesh(meshData, scene);
 		mMeshes.push_back(mesh);
-		mNodeInfos[node].push_back(mesh);
+		mNodeInfos[node].AddMesh(mesh);
 	}
 
 	for (int i = 0; i < node->mNumChildren; i++) {
@@ -338,7 +316,7 @@ TMeshSharedPtr TAssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	}
 
 	auto material = mMaterial->Clone(mRenderSys);
-	if (mMatCb) mMatCb(material);
+	//if (mMatCb) mMatCb(material);
 	return std::make_shared<TAssimpMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
@@ -380,7 +358,7 @@ const std::vector<aiMatrix4x4>& TAssimpModel::GetBoneMatrices(const aiNode* pNod
 	return mTransforms;
 }
 
-void VisitNode(aiNode* cur, std::map<const aiNode*, AiNodeInfo>& mNodeInfos, std::vector<aiNode*>& vec, Evaluator& eval) {
+void VisitNode(aiNode* cur, std::map<const aiNode*, AiNodeInfo>& mNodeInfos, std::vector<aiNode*>& vec, EvaluateTransforms& eval) {
 	vec.push_back(cur);
 
 	auto& nodeInfo = mNodeInfos[cur];
@@ -412,10 +390,10 @@ void TAssimpModel::Update(float dt)
 	}
 	else {
 		aiAnimation* aiAnim = mScene->mAnimations[mCurrentAnimIndex];
-		Evaluator eval(aiAnim);
+		EvaluateTransforms eval(aiAnim);
 
 		mElapse += dt;
-		eval.Eval(mElapse);
+		eval.Update(mElapse);
 
 		VisitNode(mRootNode, mNodeInfos, vec, eval);
 	}
@@ -452,33 +430,20 @@ void TAssimpModel::PlayAnim(int Index)
 	}
 }
 
-void TAssimpModel::LoadMaterial(const std::string& shaderName, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layouts, std::function<void(TMaterialPtr)> cb)
+void TAssimpModel::LoadMaterial(const std::string& matType)
 {
-	std::function<void(TMaterialPtr)> callback;
-	callback = [&](TMaterialPtr mat) {
-		TMaterialBuilder builder(mat);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(shaderName, nullptr, nullptr));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, (D3D11_INPUT_ELEMENT_DESC*)&layouts[0], layouts.size()));
-	};
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_MODEL, callback);
-	mMatCb = cb;
-}
-
-void TAssimpModel::LoadMaterial(const std::string& matType, std::function<void(TMaterialPtr)> cb)
-{
-	mMaterial = mRenderSys->CreateMaterial(matType, nullptr);
-	mMatCb = cb;
+	mMaterial = mRenderSys->GetMaterial(matType);
 }
 
 void TAssimpModel::DoDraw(aiNode* node, TRenderOperationQueue& opList)
 {
 	auto& meshes = mNodeInfos[node];
-	if (meshes.size() > 0) {
+	if (meshes.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.Model = ToXM(mNodeInfos[node].mGlobalTransform);
 		//mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
-		for (int i = 0; i < meshes.size(); i++) {
+		for (int i = 0; i < meshes.MeshCount(); i++) {
 			auto mesh = meshes[i];
 			if (mesh->Data->HasBones()) {
 				const auto& boneMats = GetBoneMatrices(node, i);

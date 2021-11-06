@@ -61,7 +61,8 @@ void TApp::Render()
 
 		auto eye = sceneMng->GetDefCamera()->mEye;
 		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -sceneMng->GetDefCamera()->mEyeDistance, 1), euler);
-		sceneMng->GetDefCamera()->SetLookAt(XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec)), sceneMng->GetDefCamera()->mAt);
+		eye = XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec));
+		sceneMng->GetDefCamera()->SetLookAt(eye, sceneMng->GetDefCamera()->mAt);
 	}
 
 	{

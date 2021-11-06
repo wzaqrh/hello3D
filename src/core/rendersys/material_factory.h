@@ -3,32 +3,6 @@
 #include "core/rendersys/render_system.h"
 
 namespace mir {
-	struct TMaterialBuilder
-	{
-		TMaterialPtr mMaterial;
-		TTechniquePtr mCurTech;
-		TPassPtr mCurPass;
-	public:
-		TMaterialBuilder(bool addTechPass = true);
-		TMaterialBuilder(TMaterialPtr material);
-		TMaterialBuilder& AddTechnique(const std::string& name = "d3d11");
-		TMaterialBuilder& CloneTechnique(IRenderSystem* pRenderSys, const std::string& name);
-		TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName);
-		TMaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName);
-
-		TMaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout);
-		TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
-		IProgramPtr SetProgram(IProgramPtr program);
-		TMaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1);
-		TMaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1);
-		TMaterialBuilder& ClearSamplersToTech();
-		TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
-		TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true);
-		TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target);
-		TMaterialBuilder& AddIterTarget(IRenderTexturePtr target);
-		TMaterialBuilder& SetTexture(size_t slot, ITexturePtr texture);
-		TMaterialPtr Build();
-	};
 
 #define FILE_EXT_CSO ".cso"
 #define FILE_EXT_FX ".fx"
@@ -56,7 +30,7 @@ namespace mir {
 		std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 	public:
 		TMaterialFactory(TRenderSystem* pRenderSys);
-		TMaterialPtr GetMaterial(const std::string& matName, std::function<void(TMaterialPtr material)> callback = nullptr, std::string identify = "", bool readonly = false);
+		TMaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
 	private:
 		TMaterialPtr CreateStdMaterial(const std::string& matName);
 	};

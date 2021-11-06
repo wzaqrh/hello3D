@@ -30,7 +30,7 @@ public:
 	STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
 	STDMETHODIMP_(void) SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	STDMETHODIMP_(TMaterialPtr) CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) override;
+	STDMETHODIMP_(TMaterialPtr) GetMaterial(const std::string& name, bool sharedUse) override;
 
 	STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer) override;
 	STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr) override;

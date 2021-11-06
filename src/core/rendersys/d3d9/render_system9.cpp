@@ -162,9 +162,9 @@ void TRenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-TMaterialPtr TRenderSystem9::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
+TMaterialPtr TRenderSystem9::GetMaterial(const std::string& name, bool sharedUse)
 {
-	TMaterialPtr material = mMaterialFac->GetMaterial(name, callback);
+	TMaterialPtr material = mMaterialFac->GetMaterial(name, sharedUse);
 	material->SetCurTechByName("d3d9");
 	return material;
 }
@@ -627,7 +627,7 @@ void TRenderSystem9::RenderPass(TPassPtr pass, TTextureBySlot& textures, int ite
 void TRenderSystem9::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
 {
 	TTechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<TPassPtr> passes = tech->GetPassesByName(lightMode);
+	std::vector<TPassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes)
 	{
 		mDevice9->SetVertexDeclaration(PtrCast(pass->mInputLayout).As<TInputLayout9>()->GetLayout9());

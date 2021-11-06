@@ -98,7 +98,7 @@ IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, IRenderTexturePtr targ
 TBloom::TBloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
 	:TPostProcess(RenderSys, mainTex)
 {
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_POSTPROC_BLOOM, nullptr);
+	mMaterial = mRenderSys->GetMaterial(E_MAT_POSTPROC_BLOOM);
 
 	auto curTech = mMaterial->CurTech();
 	for (auto& pass : curTech->mPasses) {

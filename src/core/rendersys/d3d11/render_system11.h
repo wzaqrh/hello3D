@@ -41,7 +41,7 @@ public:
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth=1.0, UINT8 Stencil=0);
 	STDMETHODIMP_(void) SetRenderTarget(IRenderTexturePtr rendTarget);
 
-	STDMETHODIMP_(TMaterialPtr) CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback);
+	STDMETHODIMP_(TMaterialPtr) GetMaterial(const std::string& name, bool sharedUse);
 
 	STDMETHODIMP_(IContantBufferPtr) CloneConstBuffer(IContantBufferPtr buffer);
 	STDMETHODIMP_(IContantBufferPtr) CreateConstBuffer(const TConstBufferDecl& cbDecl, void* data = nullptr);

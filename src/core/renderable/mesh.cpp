@@ -9,7 +9,7 @@ namespace mir {
 TMesh::TMesh(IRenderSystem* renderSys, const std::string& matName, int vertCount, int indexCount)
 {
 	mRenderSys = renderSys;
-	Material = mRenderSys->CreateMaterial(matName != "" ? matName : E_MAT_SPRITE, nullptr);
+	Material = mRenderSys->GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
 
 	Vertices.resize(vertCount);
 	VertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);

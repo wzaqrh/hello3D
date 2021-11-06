@@ -126,11 +126,11 @@ void TTechnique::ClearSamplers()
 		pass->ClearSamplers();
 }
 
-TPassPtr TTechnique::GetPassByName(const std::string& passName)
+TPassPtr TTechnique::GetPassByLightMode(const std::string& lightMode)
 {
 	TPassPtr pass;
 	for (int i = 0; i < mPasses.size(); ++i) {
-		if (mPasses[i]->mLightMode == passName) {
+		if (mPasses[i]->mLightMode == lightMode) {
 			pass = mPasses[i];
 			break;
 		}
@@ -138,11 +138,11 @@ TPassPtr TTechnique::GetPassByName(const std::string& passName)
 	return pass;
 }
 
-std::vector<TPassPtr> TTechnique::GetPassesByName(const std::string& passName)
+std::vector<TPassPtr> TTechnique::GetPassesByLightMode(const std::string& lightMode)
 {
 	std::vector<TPassPtr> passVec;
 	for (int i = 0; i < mPasses.size(); ++i) {
-		if (mPasses[i]->mLightMode == passName) {
+		if (mPasses[i]->mLightMode == lightMode) {
 			passVec.push_back(mPasses[i]);
 		}
 	}

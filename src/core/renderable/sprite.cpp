@@ -84,7 +84,7 @@ TSprite::TSprite(IRenderSystem* RenderSys, const std::string& matName)
 {
 	Transform = std::make_shared<TMovable>();
 	mRenderSys = RenderSys;
-	Material = mRenderSys->CreateMaterial(matName != "" ? matName : E_MAT_SPRITE, nullptr);
+	Material = mRenderSys->GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 

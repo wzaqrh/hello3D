@@ -228,9 +228,9 @@ void TRenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
 	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
 }
 
-TMaterialPtr TRenderSystem11::CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback)
+TMaterialPtr TRenderSystem11::GetMaterial(const std::string& name, bool sharedUse)
 {
-	return mMaterialFac->GetMaterial(name, callback);
+	return mMaterialFac->GetMaterial(name, sharedUse);
 }
 
 ID3D11InputLayout* TRenderSystem11::_CreateInputLayout(TProgram11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr)
@@ -856,7 +856,7 @@ void TRenderSystem11::RenderPass(const TPassPtr& pass, TTextureBySlot& textures,
 void TRenderSystem11::RenderOperation(const TRenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
 {
 	TTechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<TPassPtr> passes = tech->GetPassesByName(lightMode);
+	std::vector<TPassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes)
 	{
 		SetVertexBuffer(op.mVertexBuffer);

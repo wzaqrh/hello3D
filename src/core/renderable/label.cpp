@@ -30,7 +30,7 @@ TLabel::TLabel(IRenderSystem* renderSys, TFontPtr font)
 	mFont = font;
 
 	Transform = std::make_shared<TMovable>();
-	Material = renderSys->CreateMaterial(E_MAT_LABEL, nullptr);
+	Material = renderSys->GetMaterial(E_MAT_LABEL);
 
 	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, DXGI_FORMAT_R32_UINT, (void*)&sIndiceData.Indices[0]);
 	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad) * MAX_STRING_LENGTH, sizeof(Pos3Color3Tex2), 0);

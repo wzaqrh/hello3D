@@ -24,7 +24,8 @@ IRenderSystem : public IUnknown
 	virtual STDMETHODIMP_(IRenderTexturePtr) CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
 	virtual STDMETHODIMP_(void) SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
-	virtual STDMETHODIMP_(TMaterialPtr) CreateMaterial(std::string name, std::function<void(TMaterialPtr material)> callback) = 0;
+	typedef std::map<std::string, int> MaterialTags;
+	virtual STDMETHODIMP_(TMaterialPtr) GetMaterial(const std::string& name, bool sharedUse = false) = 0;
 
 	virtual STDMETHODIMP_(IIndexBufferPtr) CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual STDMETHODIMP_(void) SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;

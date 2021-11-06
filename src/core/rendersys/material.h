@@ -85,8 +85,8 @@ public:
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
 
-	TPassPtr GetPassByName(const std::string& passName);
-	std::vector<TPassPtr> GetPassesByName(const std::string& passName);
+	TPassPtr GetPassByLightMode(const std::string& lightMode);
+	std::vector<TPassPtr> GetPassesByLightMode(const std::string& lightMode);
 
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };

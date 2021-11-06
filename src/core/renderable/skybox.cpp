@@ -9,7 +9,7 @@ TSkyBox::TSkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& 
 	mRenderSys = pRenderSys;
 	mRefCam = pCam;
 
-	mMaterial = mRenderSys->CreateMaterial(E_MAT_SKYBOX, nullptr);
+	mMaterial = mRenderSys->GetMaterial(E_MAT_SKYBOX);
 	mIndexBuffer = nullptr;
 
 	SKYBOX_VERTEX Vertexs[4];
