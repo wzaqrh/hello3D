@@ -194,9 +194,9 @@ const XMMATRIX& Camera::GetProjection()
 }
 
 //TSceneManager
-SceneManager::SceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera)
+SceneManager::SceneManager(IRenderSystem& renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera)
+	:mRenderSys(renderSys)
 {
-	mRenderSys = renderSys;
 	mScreenWidth  = screenSize.x;
 	mScreenHeight = screenSize.y;
 	mPostProcessRT = postRT;

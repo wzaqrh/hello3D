@@ -11,7 +11,7 @@ namespace mir {
 
 RenderSystem9::RenderSystem9()
 {
-	mMaterialFac = std::make_shared<MaterialFactory>(this);
+	mMaterialFac = std::make_shared<MaterialFactory>(*this);
 	mFXCDir = "d3d9\\";
 }
 
@@ -52,7 +52,7 @@ bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 
-	mSceneManager = MakePtr<SceneManager>(this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
+	mSceneManager = MakePtr<SceneManager>(*this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
 
 	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));
@@ -595,7 +595,7 @@ void RenderSystem9::RenderPass(PassPtr pass, TextureBySlot& textures, int iterCn
 		}
 
 		if (pass->OnBind)
-			pass->OnBind(pass.get(), this, textures);
+			pass->OnBind(*pass, *this, textures);
 
 		BindPass(pass, globalParam);
 
@@ -613,7 +613,7 @@ void RenderSystem9::RenderPass(PassPtr pass, TextureBySlot& textures, int iterCn
 		}
 
 		if (pass->OnUnbind)
-			pass->OnUnbind(pass.get(), this, textures);
+			pass->OnUnbind(*pass, *this, textures);
 	}
 
 	if (iterCnt >= 0) {

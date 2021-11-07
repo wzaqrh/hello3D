@@ -12,14 +12,14 @@ struct SkyboxVertex {
 class SkyBox : public IRenderable {
 private:
 	CameraPtr mRefCam;
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 public:
 	ITexturePtr mCubeSRV;
 	MaterialPtr mMaterial;
 public:
-	SkyBox(IRenderSystem* pRenderSys, CameraPtr pCam, const std::string& imgName);
+	SkyBox(IRenderSystem& pRenderSys, CameraPtr pCam, const std::string& imgName);
 	~SkyBox();
 	void SetRefCamera(CameraPtr pCam);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;

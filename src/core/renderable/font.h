@@ -21,7 +21,7 @@ typedef std::shared_ptr<FontTextureAtlas> FontTextureAtlasPtr;
 
 class FontTexture 
 {
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	int mWidth = 0, mHeight = 0;
 	ITexturePtr mTexture;
 	std::vector<char> mRawBuffer;
@@ -30,7 +30,7 @@ class FontTexture
 	std::map<int, FontTextureAtlasPtr> mAtlasByCh;
 	int mCol = 0, mRow = 0, mColH = 0;
 public:
-	FontTexture(IRenderSystem* renderSys, XMINT2 size);
+	FontTexture(IRenderSystem& renderSys, XMINT2 size);
 
 	FontTextureAtlasPtr GetCharactor(int ch);
 	bool ContainsCharactor(int ch) const;
@@ -57,13 +57,13 @@ typedef std::shared_ptr<FontCharactor> FontCharactorPtr;
 
 class FontCharactorCache 
 {
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	FT_Face mFtFace;
 	std::vector<FontTexturePtr> mFontTextures;
 	FontTexturePtr mCurFontTexture;
 	std::map<int, FontCharactorPtr> mCharactors;
 public:
-	FontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace);
+	FontCharactorCache(IRenderSystem& renderSys, FT_Face ftFace);
 	FontCharactorPtr GetCharactor(int ch);
 	void FlushChange();
 private:
@@ -78,7 +78,7 @@ class Font
 	FontCharactorCachePtr mCharactorCache;
 	FT_Face mFtFace;
 public:
-	Font(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi = 72);
+	Font(IRenderSystem& renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi = 72);
 	~Font();
 public:
 	FT_Face GetFtFace() { return mFtFace; }
@@ -89,7 +89,7 @@ typedef std::shared_ptr<Font> TFontPtr;
 
 class FontCache
 {
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	FT_Library mFtLib;
 	int mDPI;
 	struct FontKey {
@@ -102,7 +102,7 @@ class FontCache
 	};
 	std::map<FontKey, TFontPtr> mFonts;
 public:
-	FontCache(IRenderSystem* renderSys, int dpi = 72);
+	FontCache(IRenderSystem& renderSys, int dpi = 72);
 	~FontCache();
 	TFontPtr GetFont(std::string fontPath, int fontSize);
 };

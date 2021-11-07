@@ -6,16 +6,16 @@
 namespace mir {
 
 /********** TMesh **********/
-Mesh::Mesh(IRenderSystem* renderSys, const std::string& matName, int vertCount, int indexCount)
+Mesh::Mesh(IRenderSystem& renderSys, const std::string& matName, int vertCount, int indexCount)
+	:mRenderSys(renderSys)
 {
-	mRenderSys = renderSys;
-	Material = mRenderSys->GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
+	Material = mRenderSys.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
 
 	Vertices.resize(vertCount);
-	VertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
+	VertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
 	
 	Indices.resize(indexCount);
-	IndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(UINT) * indexCount, DXGI_FORMAT_R32_UINT, &Indices[0]);
+	IndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(UINT) * indexCount, DXGI_FORMAT_R32_UINT, &Indices[0]);
 	
 	SubMeshs.resize(1);
 }
@@ -25,13 +25,13 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	if (VertDirty)
 	{
 		VertDirty = false;
-		mRenderSys->UpdateBuffer(VertexBuffer, &Vertices[0], Vertices.size() * sizeof(MeshVertex));
+		mRenderSys.UpdateBuffer(VertexBuffer, &Vertices[0], Vertices.size() * sizeof(MeshVertex));
 	}
 
 	if (IndiceDirty)
 	{
 		IndiceDirty = false;
-		mRenderSys->UpdateBuffer(IndexBuffer, &Indices[0], Indices.size() * sizeof(UINT));
+		mRenderSys.UpdateBuffer(IndexBuffer, &Indices[0], Indices.size() * sizeof(UINT));
 	}
 
 	int opCount = 0;

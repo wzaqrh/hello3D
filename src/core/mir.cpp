@@ -6,26 +6,28 @@ namespace mir {
 
 Mir::Mir()
 {}
-bool Mir::Initialize(HWND hWnd)
-{
+Mir::~Mir()
+{}
+bool Mir::Initialize(HWND hWnd) {
 #if 0
-	mRenderSys = new TRenderSystem9;
+	mRenderSys = std::static_pointer_cast<IRenderSystem>(std::make_shared<TRenderSystem9>());
 #else
-	mRenderSys = new RenderSystem11;
+	mRenderSys = std::static_pointer_cast<IRenderSystem>(std::make_shared<RenderSystem11>());
 #endif
 	if (FAILED(mRenderSys->Initialize(hWnd))) {
 		mRenderSys->CleanUp();
 		return false;
 	}
 
-	mSceneMng = mRenderSys->GetSceneManager().get();
-	mRenderableFac = new RenderableFactory(mRenderSys);
+	mSceneMng = mRenderSys->GetSceneManager();
+	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys);
 	return true;
 }
-
-Mir::~Mir()
-{}
-void Mir::Dispose()
-{}
+void Mir::Dispose() {
+	mRenderableFac = nullptr;
+	mMaterialFac = nullptr;
+	mSceneMng = nullptr;
+	mRenderSys = nullptr;
+}
 
 }

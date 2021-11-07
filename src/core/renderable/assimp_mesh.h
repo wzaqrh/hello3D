@@ -30,16 +30,16 @@ public:
 	IIndexBufferPtr IndexBuffer;
 	MaterialPtr Material;
 public:
-	AssimpMesh(const aiMesh* __data, 
-		std::vector<AssimpMeshVertex>& __vertices, 
-		std::vector<UINT>& __indices,
-		TTextureBySlotPtr __textures,
-		MaterialPtr __material,
-		IRenderSystem *__renderSys);
+	AssimpMesh(const aiMesh* data, 
+		std::vector<AssimpMeshVertex>& vertices, 
+		std::vector<UINT>& indices,
+		TTextureBySlotPtr textures,
+		MaterialPtr material,
+		IRenderSystem& renderSys);
 	bool HasTexture(int slot);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
-	bool setupMesh(IRenderSystem *renderSys);
+	bool setupMesh(IRenderSystem& renderSys);
 };
 typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
 typedef std::vector<AssimpMeshPtr> AssimpMeshPtrVector;

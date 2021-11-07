@@ -75,18 +75,18 @@ void Quad::SetTexCoord(const XMFLOAT2& uv0, const XMFLOAT2& uv1)
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
-Sprite::Sprite(IRenderSystem* RenderSys, const std::string& matName)
-	: mQuad(0, 0, 0, 0)
+Sprite::Sprite(IRenderSystem& RenderSys, const std::string& matName)
+	: mRenderSys(RenderSys)
+	, mQuad(0, 0, 0, 0)
 	, mQuadDirty(true)
 	, mFlipY(true)
 	, mSize(0, 0)
 	, mPosition(0, 0)
 {
 	Transform = std::make_shared<Movable>();
-	mRenderSys = RenderSys;
-	Material = mRenderSys->GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
-	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
+	Material = mRenderSys.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
 
 	if (mFlipY) mQuad.FlipY();
 }
@@ -103,7 +103,7 @@ void Sprite::SetPosition(float x, float y, float z)
 	//mQuad.FlipY(mFlipY);
 	
 	mQuadDirty = true;
-	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	//mRenderSys.UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void Sprite::SetSize(float w, float h)
@@ -117,7 +117,7 @@ void Sprite::SetSize(float w, float h)
 	//mQuad.FlipY(mFlipY);
 
 	mQuadDirty = true;
-	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	//mRenderSys.UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void Sprite::SetSize(const XMFLOAT2& size)
@@ -133,7 +133,7 @@ void Sprite::SetFlipY(bool flipY)
 	}
 
 	mQuadDirty = true;
-	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	//mRenderSys.UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void Sprite::SetColor(XMFLOAT4 color)
@@ -141,7 +141,7 @@ void Sprite::SetColor(XMFLOAT4 color)
 	mQuad.SetColor(color);
 
 	mQuadDirty = true;
-	//mRenderSys->UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
+	//mRenderSys.UpdateBuffer(mVertexBuffer.Get(), &mQuad, sizeof(mQuad));
 }
 
 void Sprite::SetTexture(ITexturePtr Texture)
@@ -154,14 +154,14 @@ void Sprite::SetTexture(ITexturePtr Texture)
 
 void Sprite::Draw()
 {
-	mRenderSys->Draw(this);
+	mRenderSys.Draw(this);
 }
 
 int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (mQuadDirty) {
 		mQuadDirty = false;
-		mRenderSys->UpdateBuffer((mVertexBuffer), &mQuad, sizeof(mQuad));
+		mRenderSys.UpdateBuffer((mVertexBuffer), &mQuad, sizeof(mQuad));
 	}
 
 	RenderOperation op = {};

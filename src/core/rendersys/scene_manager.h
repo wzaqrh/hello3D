@@ -63,7 +63,7 @@ public:
 class SceneManager 
 {
 public:
-	IRenderSystem* mRenderSys;
+	IRenderSystem& mRenderSys;
 	IRenderTexturePtr mPostProcessRT;
 	int mScreenWidth, mScreenHeight;
 	
@@ -76,7 +76,7 @@ public:
 	std::vector<cbSpotLightPtr> mSpotLights;
 	std::vector<std::pair<cbDirectLight*, LightType>> mLightsByOrder;
 public:
-	SceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera);
+	SceneManager(IRenderSystem& renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera);
 
 	CameraPtr SetOthogonalCamera(double far1);
 	CameraPtr SetPerspectiveCamera(double fov, int eyeDistance, double far1);

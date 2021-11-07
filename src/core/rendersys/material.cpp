@@ -78,14 +78,14 @@ IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
 	return ret;
 }
 
-void Pass::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data)
+void Pass::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data)
 {
 	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer)
-		pRenderSys->UpdateConstBuffer(buffer, data.Data, data.DataSize);
+		pRenderSys.UpdateConstBuffer(buffer, data.Data, data.DataSize);
 }
 
-std::shared_ptr<Pass> Pass::Clone(IRenderSystem* pRenderSys)
+std::shared_ptr<Pass> Pass::Clone(IRenderSystem& pRenderSys)
 {
 	PassPtr pass = std::make_shared<Pass>(mLightMode, mName);
 	pass->mInputLayout = mInputLayout;
@@ -98,7 +98,7 @@ std::shared_ptr<Pass> Pass::Clone(IRenderSystem* pRenderSys)
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
 		auto buffer = mConstantBuffers[i];
 		if (!buffer.isUnique)
-			buffer.buffer = pRenderSys->CloneConstBuffer(buffer.buffer);
+			buffer.buffer = pRenderSys.CloneConstBuffer(buffer.buffer);
 		pass->AddConstBuffer(buffer);
 	}
 
@@ -161,13 +161,13 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 	return std::move(passVec);
 }
 
-void Technique::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data)
+void Technique::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data)
 {
 	for (int i = 0; i < mPasses.size(); ++i)
 		mPasses[i]->UpdateConstBufferByName(pRenderSys, name, data);
 }
 
-std::shared_ptr<Technique> Technique::Clone(IRenderSystem* pRenderSys)
+std::shared_ptr<Technique> Technique::Clone(IRenderSystem& pRenderSys)
 {
 	TechniquePtr technique = std::make_shared<Technique>();
 	for (int i = 0; i < mPasses.size(); ++i)
@@ -216,7 +216,7 @@ ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
 	return sampler;
 }
 
-std::shared_ptr<Material> Material::Clone(IRenderSystem* pRenderSys)
+std::shared_ptr<Material> Material::Clone(IRenderSystem& pRenderSys)
 {
 	MaterialPtr material = std::make_shared<Material>();
 	

@@ -122,10 +122,10 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem* RenderSys, MovablePtr pMove, const std::string& matType)
+AssimpModel::AssimpModel(IRenderSystem& renderSys, MovablePtr pMove, const std::string& matType)
+	:mRenderSys(renderSys)
 {
 	mMove = pMove ? pMove : std::make_shared<Movable>();
-	mRenderSys = RenderSys;
 	LoadMaterial(matType);
 }
 
@@ -328,7 +328,7 @@ std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTe
 		aiString str; mat->GetTexture(type, i, &str);
 		std::string key = str.C_Str();
 
-		ITexturePtr texInfo = mRenderSys->LoadTexture(key);
+		ITexturePtr texInfo = mRenderSys.LoadTexture(key);
 		textures.push_back(texInfo);
 		mLoadedTexture[key] = texInfo;
 	}
@@ -432,7 +432,7 @@ void AssimpModel::PlayAnim(int Index)
 
 void AssimpModel::LoadMaterial(const std::string& matType)
 {
-	mMaterial = mRenderSys->GetMaterial(matType);
+	mMaterial = mRenderSys.GetMaterial(matType);
 }
 
 void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
@@ -441,7 +441,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 	if (meshes.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.Model = ToXM(mNodeInfos[node].mGlobalTransform);
-		//mRenderSys->mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+		//mRenderSys.mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.MeshCount(); i++) {
 			auto mesh = meshes[i];
@@ -473,7 +473,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 				//cb._SpecLightOff = 1;
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
-				mRenderSys->UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
+				mRenderSys.UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 			}
 			else {
 				cbUnityMaterial cb;
@@ -481,7 +481,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 				//cb._SpecLightOff = 1;
 				//cb._OcclusionStrength = 0;
 				//cb._GlossMapScale = 0;
-				mRenderSys->UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
+				mRenderSys.UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
 			}
 #endif
 			mesh->Draw(mRenderSys);
@@ -509,7 +509,7 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 
 void AssimpModel::Draw()
 {
-	mRenderSys->Draw(this);
+	mRenderSys.Draw(this);
 }
 
 }

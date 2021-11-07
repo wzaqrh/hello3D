@@ -7,7 +7,7 @@
 namespace mir {
 
 class Label : public IRenderable {
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	TFontPtr mFont;
 
 	IVertexBufferPtr mVertexBuffer;
@@ -32,7 +32,7 @@ public:
 	bool mAutoUptSize = true;
 	float mScale = 1;
 public:
-	Label(IRenderSystem* renderSys, TFontPtr font);
+	Label(IRenderSystem& renderSys, TFontPtr font);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 public:
 	void SetString(const std::string& str);

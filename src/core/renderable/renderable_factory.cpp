@@ -7,9 +7,9 @@
 
 namespace mir {
 
-RenderableFactory::RenderableFactory(IRenderSystem* renderSys)
+RenderableFactory::RenderableFactory(IRenderSystem& renderSys)
+	:mRenderSys(renderSys) 
 {
-	mRenderSys = renderSys;
 	mFontCache = std::make_shared<FontCache>(renderSys);
 }
 

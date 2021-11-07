@@ -25,14 +25,14 @@ public:
 	bool Empty() const { return Textures.empty(); }
 	size_t Count() const { return Textures.size(); }
 
-	ITexturePtr At(size_t pos) {
+	ITexturePtr& At(size_t pos) {
 		if (pos >= Textures.size()) Textures.resize(pos + 1);
 		return Textures[pos];
 	}
 	ITexturePtr& operator[](size_t pos) { return At(pos); }
 
 	const ITexturePtr& At(size_t pos) const { return Textures[pos]; }
-	const ITexturePtr operator[](size_t pos) const { return At(pos); }
+	const ITexturePtr& operator[](size_t pos) const { return At(pos); }
 public:
 	std::vector<ITexturePtr> Textures;
 };
@@ -65,11 +65,11 @@ struct Pass
 	std::vector<IRenderTexturePtr> mIterTargets;
 	TextureBySlot mTextures;
 
-	std::function<void(Pass*, IRenderSystem*, TextureBySlot&)> OnBind;
-	std::function<void(Pass*, IRenderSystem*, TextureBySlot&)> OnUnbind;
+	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnBind;
+	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnUnbind;
 public:
 	Pass(const std::string& lightMode, const std::string& name);
-	std::shared_ptr<Pass> Clone(IRenderSystem* pRenderSys);
+	std::shared_ptr<Pass> Clone(IRenderSystem& pRenderSys);
 	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -77,7 +77,7 @@ public:
 	
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
+	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data);
 };
 
 struct Technique
@@ -86,7 +86,7 @@ struct Technique
 	std::vector<PassPtr> mPasses;
 public:
 	void AddPass(PassPtr pass);
-	std::shared_ptr<Technique> Clone(IRenderSystem* pRenderSys);
+	std::shared_ptr<Technique> Clone(IRenderSystem& pRenderSys);
 	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -94,7 +94,7 @@ public:
 	PassPtr GetPassByLightMode(const std::string& lightMode);
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 
-	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
+	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data);
 };
 
 class Material : public Resource 
@@ -102,7 +102,7 @@ class Material : public Resource
 	std::vector<TechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
-	std::shared_ptr<Material> Clone(IRenderSystem* pRenderSys);
+	std::shared_ptr<Material> Clone(IRenderSystem& pRenderSys);
 	void AddTechnique(TechniquePtr technique);
 
 	TechniquePtr CurTech();

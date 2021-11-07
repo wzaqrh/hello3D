@@ -47,7 +47,7 @@ public:
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
 	}
-	TMaterialBuilder& CloneTechnique(IRenderSystem* pRenderSys, const std::string& name) {
+	TMaterialBuilder& CloneTechnique(IRenderSystem& pRenderSys, const std::string& name) {
 		mCurTech = mCurTech->Clone(pRenderSys);
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
@@ -273,7 +273,7 @@ public:
 		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	MaterialPtr LoadMaterial(RenderSystem* renderSys,
+	MaterialPtr LoadMaterial(RenderSystem& renderSys,
 		const std::string& shaderName,
 		const std::string& variantName) {
 		XmlShaderInfo shaderInfo;
@@ -578,7 +578,7 @@ private:
 		return result;
 	}
 
-	MaterialPtr CreateMaterial(RenderSystem* renderSys,
+	MaterialPtr CreateMaterial(RenderSystem& renderSys,
 		const std::string& name,
 		XmlShaderInfo& shaderInfo) {
 		TMaterialBuilder builder(false);
@@ -592,17 +592,17 @@ private:
 				builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 				builder.SetTopology(shaderInfo.Program.Topo);
 
-				IProgramPtr program = builder.SetProgram(renderSys->CreateProgram(
+				IProgramPtr program = builder.SetProgram(renderSys.CreateProgram(
 					MAKE_MAT_NAME(shaderInfo.Program.FxName),
 					shaderInfo.Program.VsEntry.c_str(),
 					passInfo.PSEntry.c_str()));
-				builder.SetInputLayout(renderSys->CreateLayout(program,
+				builder.SetInputLayout(renderSys.CreateLayout(program,
 					&shaderInfo.Program.Attr.Layout[0],
 					shaderInfo.Program.Attr.Layout.size()));
 
 				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 					auto& elem = shaderInfo.Program.Samplers[k];
-					builder.AddSampler(renderSys->CreateSampler(
+					builder.AddSampler(renderSys.CreateSampler(
 						D3D11_FILTER(elem.first),
 						D3D11_COMPARISON_NEVER)
 					);
@@ -612,21 +612,22 @@ private:
 
 		for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
 			auto& uniformI = shaderInfo.Program.Uniforms[i];
-			builder.AddConstBufferToTech(renderSys->CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]),
+			builder.AddConstBufferToTech(renderSys.CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]),
 				uniformI.ShortName, uniformI.IsUnique);
 		}
 
 		builder.CloneTechnique(renderSys, "d3d9");
 		builder.ClearSamplersToTech();
-		builder.AddSamplerToTech(renderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_NEVER));
+		builder.AddSamplerToTech(renderSys.CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_NEVER));
 
 		return builder.Build();
 	}
 };
 
 /********** TMaterialFactory **********/
-MaterialFactory::MaterialFactory(RenderSystem* pRenderSys) {
-	mRenderSys = pRenderSys;
+MaterialFactory::MaterialFactory(RenderSystem& renderSys)
+	:mRenderSys(renderSys)
+{
 	mMatAssetMng = std::make_shared<MaterialAssetManager>();
 }
 

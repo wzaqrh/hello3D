@@ -5,26 +5,26 @@
 namespace mir {
 
 /********** TMesh **********/
-AssimpMesh::AssimpMesh(const aiMesh* __data,
-	std::vector<AssimpMeshVertex>& __vertices,
-	std::vector<UINT>& __indices,
-	TTextureBySlotPtr __textures,
-	MaterialPtr __material,
-	IRenderSystem *__renderSys)
+AssimpMesh::AssimpMesh(const aiMesh* data,
+	std::vector<AssimpMeshVertex>& vertices,
+	std::vector<UINT>& indices,
+	TTextureBySlotPtr textures,
+	MaterialPtr material,
+	IRenderSystem& renderSys)
 {
-	Data = __data;
-	Vertices.swap(__vertices); __vertices.clear();
-	Indices.swap(__indices); __indices.clear();
-	Textures = __textures;
-	Material = __material;
+	Data = data;
+	Vertices.swap(vertices); vertices.clear();
+	Indices.swap(indices); indices.clear();
+	Textures = textures;
+	Material = material;
 
-	setupMesh(__renderSys);
+	setupMesh(renderSys);
 }
 
-bool AssimpMesh::setupMesh(IRenderSystem *renderSys)
+bool AssimpMesh::setupMesh(IRenderSystem& renderSys)
 {
-	VertexBuffer = renderSys->CreateVertexBuffer(sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
-	IndexBuffer = renderSys->CreateIndexBuffer(sizeof(UINT) * Indices.size(), DXGI_FORMAT_R32_UINT, &Indices[0]);
+	VertexBuffer = renderSys.CreateVertexBuffer(sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
+	IndexBuffer = renderSys.CreateIndexBuffer(sizeof(UINT) * Indices.size(), DXGI_FORMAT_R32_UINT, &Indices[0]);
 	return true;
 }
 

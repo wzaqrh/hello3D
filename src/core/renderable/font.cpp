@@ -4,12 +4,12 @@
 namespace mir {
 
 /********** TFontTexture **********/
-FontTexture::FontTexture(IRenderSystem* renderSys, XMINT2 size)
+FontTexture::FontTexture(IRenderSystem& renderSys, XMINT2 size)
+	:mRenderSys(renderSys)
 {
-	mRenderSys = renderSys;
 	mWidth = size.x;
 	mHeight = size.y;
-	mTexture = renderSys->CreateTexture(mWidth, mHeight, DXGI_FORMAT_R8_UNORM, 1);
+	mTexture = mRenderSys.CreateTexture(mWidth, mHeight, DXGI_FORMAT_R8_UNORM, 1);
 	mRawBuffer.resize(mWidth * mHeight);
 }
 
@@ -59,15 +59,15 @@ ITexturePtr FontTexture::GetTexture()
 {
 	if (mRawBufferDirty) {
 		mRawBufferDirty = false;
-		mRenderSys->LoadRawTextureData(mTexture, &mRawBuffer[0], mRawBuffer.size(), mWidth);
+		mRenderSys.LoadRawTextureData(mTexture, &mRawBuffer[0], mRawBuffer.size(), mWidth);
 	}
 	return mTexture;
 }
 
 /********** TFontCharactorCache **********/
-FontCharactorCache::FontCharactorCache(IRenderSystem* renderSys, FT_Face ftFace)
+FontCharactorCache::FontCharactorCache(IRenderSystem& renderSys, FT_Face ftFace)
+	:mRenderSys(renderSys)
 {
-	mRenderSys = renderSys;
 	mFtFace = ftFace;
 	AllocFontTexture();
 }
@@ -121,7 +121,7 @@ void FontCharactorCache::FlushChange()
 }
 
 ////////////////////////////////TFont//////////////////////////////////////////
-Font::Font(IRenderSystem* renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
+Font::Font(IRenderSystem& renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
 {
 	mFontName = fontPath;
 	mFontSize = fontSize;
@@ -146,9 +146,9 @@ FontCharactorPtr Font::GetCharactor(int ch)
 }
 
 ////////////////////////////////TFontCache//////////////////////////////////////////
-FontCache::FontCache(IRenderSystem* renderSys, int dpi)
+FontCache::FontCache(IRenderSystem& renderSys, int dpi)
+	:mRenderSys(renderSys)
 {
-	mRenderSys = renderSys;
 	mDPI = dpi;
 	if (FT_Init_FreeType(&mFtLib)) {
 		//std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;

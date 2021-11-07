@@ -24,16 +24,16 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-Label::Label(IRenderSystem* renderSys, TFontPtr font)
+Label::Label(IRenderSystem& renderSys, TFontPtr font)
+	:mRenderSys(renderSys)
 {
-	mRenderSys = renderSys;
 	mFont = font;
 
 	Transform = std::make_shared<Movable>();
-	Material = renderSys->GetMaterial(E_MAT_LABEL);
+	Material = mRenderSys.GetMaterial(E_MAT_LABEL);
 
-	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, DXGI_FORMAT_R32_UINT, (void*)&sIndiceData.Indices[0]);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(Quad) * MAX_STRING_LENGTH, sizeof(Pos3Color3Tex2), 0);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, DXGI_FORMAT_R32_UINT, (void*)&sIndiceData.Indices[0]);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(Quad) * MAX_STRING_LENGTH, sizeof(Pos3Color3Tex2), 0);
 }
 
 int Label::GenRenderOperation(RenderOperationQueue& opList)
@@ -198,7 +198,7 @@ void Label::ForceLayout()
 			quadArray.push_back(quad);
 		}
 
-		mRenderSys->UpdateBuffer((mVertexBuffer), &quadArray[0], quadArray.size() * sizeof(Quad));
+		mRenderSys.UpdateBuffer((mVertexBuffer), &quadArray[0], quadArray.size() * sizeof(Quad));
 	}
 }
 

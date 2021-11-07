@@ -25,11 +25,11 @@ public:
 	}
 };
 
-struct IRenderSystem;
+typedef std::shared_ptr<struct IRenderSystem> IRenderSystemPtr;
 typedef std::shared_ptr<struct Movable> MovablePtr;
 class AssimpModel : public IRenderable {
 public:
-	AssimpModel(IRenderSystem* RenderSys, MovablePtr pMove, const std::string& matType);
+	AssimpModel(IRenderSystem& RenderSys, MovablePtr pMove, const std::string& matType);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
@@ -61,7 +61,7 @@ private:
 	std::vector<aiMatrix4x4> mTransforms;
 	float mElapse = 0.0f;
 	Assimp::Importer* mImporter = nullptr;
-	IRenderSystem* mRenderSys;
+	IRenderSystem& mRenderSys;
 };
 
 }

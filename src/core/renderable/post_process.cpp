@@ -52,14 +52,14 @@ const unsigned int indices[] = {
 };
 
 /********** TPostProcess **********/
-PostProcess::PostProcess(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
+PostProcess::PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex)
+	:mRenderSys(RenderSys) 
 {
-	mRenderSys = RenderSys;
 	mMainTex = mainTex;
 
-	mIndexBuffer = mRenderSys->CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }
 
 PostProcess::~PostProcess()
@@ -68,7 +68,7 @@ PostProcess::~PostProcess()
 
 void PostProcess::Draw()
 {
-	mRenderSys->Draw(this);
+	mRenderSys.Draw(this);
 }
 
 int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
@@ -85,20 +85,20 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 }
 
 /********** TBloom **********/
-IVertexBufferPtr GetVertBufByRT(IRenderSystem* RenderSys, IRenderTexturePtr target) {
+IVertexBufferPtr GetVertBufByRT(IRenderSystem& RenderSys, IRenderTexturePtr target) {
 	auto srv = target->GetColorTexture();
-	float sx = srv->GetWidth() * 1.0 / RenderSys->GetWinSize().x;
-	float sy = srv->GetHeight() * 1.0 / RenderSys->GetWinSize().y;
+	float sx = srv->GetWidth() * 1.0 / RenderSys.GetWinSize().x;
+	float sy = srv->GetHeight() * 1.0 / RenderSys.GetWinSize().y;
 	assert(sx <= 1 && sy <= 1);
 	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
-	IVertexBufferPtr vertBuf = RenderSys->CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	IVertexBufferPtr vertBuf = RenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 	return vertBuf;
 }
 
-Bloom::Bloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex)
+Bloom::Bloom(IRenderSystem& RenderSys, IRenderTexturePtr mainTex)
 	:PostProcess(RenderSys, mainTex)
 {
-	mMaterial = mRenderSys->GetMaterial(E_MAT_POSTPROC_BLOOM);
+	mMaterial = mRenderSys.GetMaterial(E_MAT_POSTPROC_BLOOM);
 
 	auto curTech = mMaterial->CurTech();
 	for (auto& pass : curTech->mPasses) {

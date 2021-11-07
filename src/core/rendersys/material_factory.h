@@ -30,11 +30,11 @@ namespace mir {
 struct RenderSystem;
 struct MaterialFactory
 {
-	RenderSystem* mRenderSys;
+	RenderSystem& mRenderSys;
 	std::map<std::string, MaterialPtr> mMaterials;
 	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 public:
-	MaterialFactory(RenderSystem* pRenderSys);
+	MaterialFactory(RenderSystem& pRenderSys);
 	MaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
 private:
 	MaterialPtr CreateStdMaterial(const std::string& matName);

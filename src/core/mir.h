@@ -6,18 +6,20 @@
 namespace mir {
 
 class Mir {
-	SceneManager* mSceneMng;
-	IRenderSystem* mRenderSys;
-	RenderableFactory* mRenderableFac;
+	IRenderSystemPtr mRenderSys;
+	MaterialFactoryPtr mMaterialFac;
+	RenderableFactoryPtr mRenderableFac;
+	SceneManagerPtr mSceneMng;
 public:
 	Mir();
 	~Mir();
 	bool Initialize(HWND hWnd);
 	void Dispose();
 public:
-	SceneManager* GetSceneMng() { return mSceneMng; }
-	IRenderSystem* GetRenderSys() { return mRenderSys; }
-	RenderableFactory* GetRenderableFac() { return mRenderableFac; }
+	const IRenderSystemPtr& GetRenderSys() { return mRenderSys; }
+	const MaterialFactoryPtr& GetMatFac() { return mMaterialFac; }
+	const RenderableFactoryPtr& GetRenderableFac() { return mRenderableFac; }
+	const SceneManagerPtr& GetSceneMng() { return mSceneMng; }
 };
 
 }

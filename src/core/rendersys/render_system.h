@@ -61,6 +61,7 @@ interface IRenderSystem
 	virtual void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode) = 0;
 	virtual void Draw(IRenderable* renderable) = 0;
 };
+typedef std::shared_ptr<IRenderSystem> IRenderSystemPtr;
 
 struct __declspec(align(16)) RenderSystem : IRenderSystem
 {

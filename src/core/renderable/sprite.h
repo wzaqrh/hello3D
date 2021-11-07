@@ -38,7 +38,7 @@ private:
 	XMFLOAT2 mSize;
 	bool mFlipY;
 private:
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	ITexturePtr mTexture = nullptr;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
@@ -46,7 +46,7 @@ public:
 	MaterialPtr Material;
 	TransformPtr Transform;
 public:
-	Sprite(IRenderSystem* RenderSys, const std::string& matName = "");
+	Sprite(IRenderSystem& RenderSys, const std::string& matName = "");
 	~Sprite();
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 	void Draw();

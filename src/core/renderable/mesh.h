@@ -11,7 +11,7 @@ struct MeshVertex {
 };
 
 class Mesh : public IRenderable {
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 public:
 	MaterialPtr Material;
 
@@ -29,7 +29,7 @@ public:
 	};
 	std::vector<SubMesh> SubMeshs;
 public:
-	Mesh(IRenderSystem* renderSys, const std::string& matName, int vertCount = 1024, int indexCount = 1024);
+	Mesh(IRenderSystem& renderSys, const std::string& matName, int vertCount = 1024, int indexCount = 1024);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 
 	void Clear();

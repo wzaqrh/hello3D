@@ -4,28 +4,28 @@
 
 namespace mir {
 
-SkyBox::SkyBox(IRenderSystem* pRenderSys, CameraPtr pCam, const std::string& imgName)
+SkyBox::SkyBox(IRenderSystem& pRenderSys, CameraPtr pCam, const std::string& imgName)
+	:mRenderSys(pRenderSys)
 {
-	mRenderSys = pRenderSys;
 	mRefCam = pCam;
 
-	mMaterial = mRenderSys->GetMaterial(E_MAT_SKYBOX);
+	mMaterial = mRenderSys.GetMaterial(E_MAT_SKYBOX);
 	mIndexBuffer = nullptr;
 
 	SkyboxVertex Vertexs[4];
-	float fHighW = -1.0f - (1.0f / (float)pRenderSys->GetWinSize().x);
-	float fHighH = -1.0f - (1.0f / (float)pRenderSys->GetWinSize().y);
-	float fLowW = 1.0f + (1.0f / (float)pRenderSys->GetWinSize().x);
-	float fLowH = 1.0f + (1.0f / (float)pRenderSys->GetWinSize().y);
+	float fHighW = -1.0f - (1.0f / (float)mRenderSys.GetWinSize().x);
+	float fHighH = -1.0f - (1.0f / (float)mRenderSys.GetWinSize().y);
+	float fLowW = 1.0f + (1.0f / (float)mRenderSys.GetWinSize().x);
+	float fLowH = 1.0f + (1.0f / (float)mRenderSys.GetWinSize().y);
 	Vertexs[0].pos = XMFLOAT4(fLowW, fLowH, 1.0f, 1.0f);
 	Vertexs[1].pos = XMFLOAT4(fLowW, fHighH, 1.0f, 1.0f);
 	Vertexs[2].pos = XMFLOAT4(fHighW, fLowH, 1.0f, 1.0f);
 	Vertexs[3].pos = XMFLOAT4(fHighW, fHighH, 1.0f, 1.0f);
-	mVertexBuffer = mRenderSys->CreateVertexBuffer(sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
 
 	//DXGI_FORMAT format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	mCubeSRV = mRenderSys->LoadTexture(imgName, format, true, true);
+	mCubeSRV = mRenderSys.LoadTexture(imgName, format, true, true);
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
 	XMFLOAT3 pos0 = pCam->CalNDC(XMFLOAT3(fLowW, fLowH, 1.0f));
@@ -59,7 +59,7 @@ int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 
 void SkyBox::Draw()
 {
-	mRenderSys->Draw(this);
+	mRenderSys.Draw(this);
 }
 
 }

@@ -25,14 +25,14 @@ public:
 };
 class PostProcess : public IRenderable {
 protected:
-	IRenderSystem* mRenderSys = nullptr;
+	IRenderSystem& mRenderSys;
 	IRenderTexturePtr mMainTex;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 	MaterialPtr mMaterial;
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 public:
-	PostProcess(IRenderSystem* RenderSys, IRenderTexturePtr mainTex);
+	PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex);
 	~PostProcess();
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 	void Draw();
@@ -48,7 +48,7 @@ struct cbBloom {
 };
 class Bloom : public PostProcess {
 public:
-	Bloom(IRenderSystem* RenderSys, IRenderTexturePtr mainTex);
+	Bloom(IRenderSystem& RenderSys, IRenderTexturePtr mainTex);
 };
 
 }
