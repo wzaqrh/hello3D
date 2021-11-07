@@ -30,7 +30,7 @@ public:
 	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	TMaterialPtr GetMaterial(const std::string& name, bool sharedUse) override;
+	MaterialPtr GetMaterial(const std::string& name, bool sharedUse) override;
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr) override;
@@ -59,10 +59,10 @@ public:
 	void EndScene() override;
 	void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
-	void BindPass(TPassPtr pass, const cbGlobalParam& globalParam);
-	void RenderPass(TPassPtr pass, TextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
+	void BindPass(PassPtr pass, const cbGlobalParam& globalParam);
+	void RenderPass(PassPtr pass, TextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
 	void _RenderSkyBox();
 	void _DoPostProcess();
 

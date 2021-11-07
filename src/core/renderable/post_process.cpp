@@ -77,7 +77,7 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.push_back(mMainTex->GetColorTexture());
+	op.mTextures.Add(mMainTex->GetColorTexture());
 	op.mWorldTransform = XMMatrixIdentity();
 	op.mVertBufferByPass = mVertBufferByPass;
 	opList.AddOP(op);

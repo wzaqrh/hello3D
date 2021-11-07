@@ -88,18 +88,18 @@ Camera::Camera(const Camera& other)
 	mTransform = std::make_shared<Transform>(*other.mTransform);
 }
 
-TCameraPtr Camera::CreatePerspective(int width, int height, double fov /*= 45.0*/, int eyeDistance /*= 10*/, double far1 /*= 100*/)
+CameraPtr Camera::CreatePerspective(int width, int height, double fov /*= 45.0*/, int eyeDistance /*= 10*/, double far1 /*= 100*/)
 {
-	TCameraPtr pCam = std::make_shared<Camera>();
+	CameraPtr pCam = std::make_shared<Camera>();
 	pCam->mEyeDistance = eyeDistance;
 	pCam->SetLookAt(XMFLOAT3(0.0f, 0.0f, -eyeDistance), XMFLOAT3(0, 0, 0));
 	pCam->SetPerspectiveProj(width, height, fov, far1);
 	return pCam;
 }
 
-TCameraPtr Camera::CreateOthogonal(int width, int height, double far1 /*= 100*/)
+CameraPtr Camera::CreateOthogonal(int width, int height, double far1 /*= 100*/)
 {
-	TCameraPtr pCam = std::make_shared<Camera>();
+	CameraPtr pCam = std::make_shared<Camera>();
 	pCam->SetLookAt(XMFLOAT3(0.0f, 0.0f, -10), XMFLOAT3(0, 0, 0));
 	pCam->SetOthogonalProj(width, height, far1);
 	return pCam;
@@ -194,7 +194,7 @@ const XMMATRIX& Camera::GetProjection()
 }
 
 //TSceneManager
-SceneManager::SceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, TCameraPtr defCamera)
+SceneManager::SceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera)
 {
 	mRenderSys = renderSys;
 	mScreenWidth  = screenSize.x;
@@ -203,38 +203,38 @@ SceneManager::SceneManager(IRenderSystem* renderSys, XMINT2 screenSize, IRenderT
 	mDefCamera = defCamera;
 }
 
-TSpotLightPtr SceneManager::AddSpotLight()
+cbSpotLightPtr SceneManager::AddSpotLight()
 {
-	TSpotLightPtr light = std::make_shared<cbSpotLight>();
+	cbSpotLightPtr light = std::make_shared<cbSpotLight>();
 	mSpotLights.push_back(light);
-	mLightsOrder.push_back(std::pair<cbDirectLight*, enLightType>(light.get(), E_LIGHT_SPOT));
+	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightSpot));
 	return light;
 }
 
-TPointLightPtr SceneManager::AddPointLight()
+cbPointLightPtr SceneManager::AddPointLight()
 {
-	TPointLightPtr light = std::make_shared<cbPointLight>();
+	cbPointLightPtr light = std::make_shared<cbPointLight>();
 	mPointLights.push_back(light);
-	mLightsOrder.push_back(std::pair<cbDirectLight*, enLightType>(light.get(), E_LIGHT_POINT));
+	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightPoint));
 	return light;
 }
 
-TDirectLightPtr SceneManager::AddDirectLight()
+cbDirectLightPtr SceneManager::AddDirectLight()
 {
-	TDirectLightPtr light = std::make_shared<cbDirectLight>();
+	cbDirectLightPtr light = std::make_shared<cbDirectLight>();
 	mDirectLights.push_back(light);
-	mLightsOrder.push_back(std::pair<cbDirectLight*, enLightType>(light.get(), E_LIGHT_DIRECT));
+	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightDirectional));
 	return light;
 }
 
-TCameraPtr SceneManager::SetOthogonalCamera(double far1)
+CameraPtr SceneManager::SetOthogonalCamera(double far1)
 {
 	mDefCamera = Camera::CreateOthogonal(mScreenWidth, mScreenHeight, far1);
 	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }
 
-TCameraPtr SceneManager::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
+CameraPtr SceneManager::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
 {
 	mDefCamera = Camera::CreatePerspective(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
 	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
@@ -247,9 +247,9 @@ SkyBoxPtr SceneManager::SetSkyBox(const std::string& imgName)
 	return mSkyBox;
 }
 
-TPostProcessPtr SceneManager::AddPostProcess(const std::string& name)
+PostProcessPtr SceneManager::AddPostProcess(const std::string& name)
 {
-	TPostProcessPtr process;
+	PostProcessPtr process;
 	if (name == E_PASS_POSTPROCESS) {
 		Bloom* bloom = new Bloom(mRenderSys, mPostProcessRT);
 		process = std::shared_ptr<PostProcess>(bloom);

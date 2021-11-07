@@ -46,7 +46,7 @@ private:
 	AssimpMeshPtr processMesh(aiMesh * mesh, const aiScene * scene);
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 private:
-	TMaterialPtr mMaterial;
+	MaterialPtr mMaterial;
 	MovablePtr mMove;
 public:
 	AssimpMeshPtrVector mMeshes;

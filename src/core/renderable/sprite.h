@@ -43,7 +43,7 @@ private:
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 public:
-	TMaterialPtr Material;
+	MaterialPtr Material;
 	TransformPtr Transform;
 public:
 	Sprite(IRenderSystem* RenderSys, const std::string& matName = "");

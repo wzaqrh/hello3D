@@ -54,7 +54,7 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 				op.mIndexBuffer = mIndexBuffer;
 				op.mIndexBase = 4 * (i - lastCount);
 				op.mIndexCount = 6 * lastCount;
-				op.mTextures.push_back(lastTex);
+				op.mTextures.Add(lastTex);
 				op.mWorldTransform = Transform->Matrix();
 				opList.AddOP(op);
 				++count;
@@ -72,7 +72,7 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 		op.mIndexBuffer = mIndexBuffer;
 		op.mIndexBase = 4 * (mCharSeqOrder.size() - lastCount);
 		op.mIndexCount = 6 * lastCount;
-		op.mTextures.push_back(lastTex);
+		op.mTextures.Add(lastTex);
 		op.mWorldTransform = Transform->Matrix();
 		opList.AddOP(op);
 		++count;

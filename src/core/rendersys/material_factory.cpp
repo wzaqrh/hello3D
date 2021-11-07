@@ -25,9 +25,9 @@ namespace mir {
 /********** TMaterialBuilder **********/
 struct TMaterialBuilder
 {
-	TMaterialPtr mMaterial;
-	TTechniquePtr mCurTech;
-	TPassPtr mCurPass;
+	MaterialPtr mMaterial;
+	TechniquePtr mCurTech;
+	PassPtr mCurPass;
 public:
 	TMaterialBuilder(bool addTechPass = true) {
 		mMaterial = std::make_shared<Material>();
@@ -36,7 +36,7 @@ public:
 			AddPass(E_PASS_FORWARDBASE, "");
 		}
 	}
-	TMaterialBuilder(TMaterialPtr material) {
+	TMaterialBuilder(MaterialPtr material) {
 		mMaterial = material;
 		mCurTech = material->CurTech();
 		mCurPass = mCurTech->mPasses.empty() ? nullptr : mCurTech->mPasses[mCurTech->mPasses.size() - 1];
@@ -113,7 +113,7 @@ public:
 		mMaterial->AddDependency(texture->AsRes());
 		return *this;
 	}
-	TMaterialPtr Build() {
+	MaterialPtr Build() {
 		mMaterial->CheckAndSetLoaded();
 		return mMaterial;
 	}
@@ -273,7 +273,7 @@ public:
 		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	TMaterialPtr LoadMaterial(RenderSystem* renderSys,
+	MaterialPtr LoadMaterial(RenderSystem* renderSys,
 		const std::string& shaderName,
 		const std::string& variantName) {
 		XmlShaderInfo shaderInfo;
@@ -578,7 +578,7 @@ private:
 		return result;
 	}
 
-	TMaterialPtr CreateMaterial(RenderSystem* renderSys,
+	MaterialPtr CreateMaterial(RenderSystem* renderSys,
 		const std::string& name,
 		XmlShaderInfo& shaderInfo) {
 		TMaterialBuilder builder(false);
@@ -630,16 +630,16 @@ MaterialFactory::MaterialFactory(RenderSystem* pRenderSys) {
 	mMatAssetMng = std::make_shared<MaterialAssetManager>();
 }
 
-TMaterialPtr MaterialFactory::GetMaterial(const std::string& matName, bool readonly) {
+MaterialPtr MaterialFactory::GetMaterial(const std::string& matName, bool readonly) {
 	if (mMaterials.find(matName) == mMaterials.end())
 		mMaterials.insert(std::make_pair(matName, CreateStdMaterial(matName)));
 
-	TMaterialPtr material = readonly ? mMaterials[matName] : mMaterials[matName]->Clone(mRenderSys);
+	MaterialPtr material = readonly ? mMaterials[matName] : mMaterials[matName]->Clone(mRenderSys);
 	return material;
 }
 
 #if defined MATERIAL_FROM_XML
-TMaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
+MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
 	return mMatAssetMng->LoadMaterial(mRenderSys, entry.ShaderName, entry.VariantName);
 }
@@ -663,10 +663,10 @@ void AddD3D9Technique(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.AddSamplerToTech(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS), 8);
 }
 
-TMaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
+MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 	TIME_PROFILE2(CreateStdMaterial, name);
 
-	TMaterialPtr material;
+	MaterialPtr material;
 	TMaterialBuilder builder;
 	if (name == E_MAT_SPRITE || name == E_MAT_LAYERCOLOR || name == E_MAT_LABEL) {
 		SetCommonField(builder, mRenderSys);

@@ -8,6 +8,18 @@
 
 namespace mir {
 
+/********** TextureBySlot **********/
+void TextureBySlot::Merge(const TextureBySlot& other) {
+	if (Textures.size() < other.Textures.size())
+		Textures.resize(other.Textures.size());
+
+	for (size_t i = 0; i < other.Textures.size(); ++i) {
+		if (other.Textures[i] && other.Textures[i]->HasSRV()) {
+			Textures[i] = other.Textures[i];
+		}
+	}
+}
+
 /********** TContantBufferInfo **********/
 ContantBufferInfo::ContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name, bool __isUnique)
 	:buffer(__buffer)
@@ -75,7 +87,7 @@ void Pass::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string&
 
 std::shared_ptr<Pass> Pass::Clone(IRenderSystem* pRenderSys)
 {
-	TPassPtr pass = std::make_shared<Pass>(mLightMode, mName);
+	PassPtr pass = std::make_shared<Pass>(mLightMode, mName);
 	pass->mInputLayout = mInputLayout;
 	pass->mTopoLogy = mTopoLogy;
 	pass->mProgram = mProgram;
@@ -101,7 +113,7 @@ std::shared_ptr<Pass> Pass::Clone(IRenderSystem* pRenderSys)
 }
 
 /********** TTechnique **********/
-void Technique::AddPass(TPassPtr pass)
+void Technique::AddPass(PassPtr pass)
 {
 	mPasses.push_back(pass);
 }
@@ -126,9 +138,9 @@ void Technique::ClearSamplers()
 		pass->ClearSamplers();
 }
 
-TPassPtr Technique::GetPassByLightMode(const std::string& lightMode)
+PassPtr Technique::GetPassByLightMode(const std::string& lightMode)
 {
-	TPassPtr pass;
+	PassPtr pass;
 	for (int i = 0; i < mPasses.size(); ++i) {
 		if (mPasses[i]->mLightMode == lightMode) {
 			pass = mPasses[i];
@@ -138,9 +150,9 @@ TPassPtr Technique::GetPassByLightMode(const std::string& lightMode)
 	return pass;
 }
 
-std::vector<TPassPtr> Technique::GetPassesByLightMode(const std::string& lightMode)
+std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMode)
 {
-	std::vector<TPassPtr> passVec;
+	std::vector<PassPtr> passVec;
 	for (int i = 0; i < mPasses.size(); ++i) {
 		if (mPasses[i]->mLightMode == lightMode) {
 			passVec.push_back(mPasses[i]);
@@ -157,7 +169,7 @@ void Technique::UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::st
 
 std::shared_ptr<Technique> Technique::Clone(IRenderSystem* pRenderSys)
 {
-	TTechniquePtr technique = std::make_shared<Technique>();
+	TechniquePtr technique = std::make_shared<Technique>();
 	for (int i = 0; i < mPasses.size(); ++i)
 		technique->AddPass(mPasses[i]->Clone(pRenderSys));
 	technique->mName = mName;
@@ -165,17 +177,17 @@ std::shared_ptr<Technique> Technique::Clone(IRenderSystem* pRenderSys)
 }
 
 /********** TMaterial **********/
-void Material::AddTechnique(TTechniquePtr technique)
+void Material::AddTechnique(TechniquePtr technique)
 {
 	mTechniques.push_back(technique);
 }
 
-TTechniquePtr Material::CurTech()
+TechniquePtr Material::CurTech()
 {
 	return mTechniques[mCurTechIdx];
 }
 
-TTechniquePtr Material::SetCurTechByIdx(int idx)
+TechniquePtr Material::SetCurTechByIdx(int idx)
 {
 	mCurTechIdx = idx;
 	return mTechniques[mCurTechIdx];
@@ -206,7 +218,7 @@ ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
 
 std::shared_ptr<Material> Material::Clone(IRenderSystem* pRenderSys)
 {
-	TMaterialPtr material = std::make_shared<Material>();
+	MaterialPtr material = std::make_shared<Material>();
 	
 	for (auto& depend : mDepends)
 		material->AddDependency(depend);

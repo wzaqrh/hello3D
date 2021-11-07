@@ -13,7 +13,7 @@ struct MeshVertex {
 class Mesh : public IRenderable {
 	IRenderSystem* mRenderSys = nullptr;
 public:
-	TMaterialPtr Material;
+	MaterialPtr Material;
 
 	int VertPos = 0, VertDirty = false;
 	std::vector<MeshVertex> Vertices;

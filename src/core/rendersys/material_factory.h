@@ -31,12 +31,12 @@ struct RenderSystem;
 struct MaterialFactory
 {
 	RenderSystem* mRenderSys;
-	std::map<std::string, TMaterialPtr> mMaterials;
+	std::map<std::string, MaterialPtr> mMaterials;
 	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 public:
 	MaterialFactory(RenderSystem* pRenderSys);
-	TMaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
+	MaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
 private:
-	TMaterialPtr CreateStdMaterial(const std::string& matName);
+	MaterialPtr CreateStdMaterial(const std::string& matName);
 };
 }

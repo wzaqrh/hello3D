@@ -362,13 +362,13 @@ IPixelShaderPtr Program11::GetPixel() {
 	return mPixel;
 }
 
-void Program11::SetVertex(TVertexShader11Ptr pVertex)
+void Program11::SetVertex(VertexShader11Ptr pVertex)
 {
 	mVertex = pVertex;
 	mRes->AddDependency(pVertex->AsRes());
 }
 
-void Program11::SetPixel(TPixelShader11Ptr pPixel)
+void Program11::SetPixel(PixelShader11Ptr pPixel)
 {
 	mPixel = pPixel;
 	mRes->AddDependency(pPixel->AsRes());

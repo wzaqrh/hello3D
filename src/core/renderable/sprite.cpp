@@ -168,7 +168,7 @@ int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 	op.mMaterial = Material;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	if (mTexture) op.mTextures.push_back(mTexture);
+	if (mTexture) op.mTextures.Add(mTexture);
 	op.mWorldTransform = Transform->Matrix();
 	opList.AddOP(op);
 	return 1;

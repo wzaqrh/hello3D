@@ -32,7 +32,7 @@ void TestFog::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
-	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson4"), layouts, [&](TMaterialPtr mat) {
+	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson4"), layouts, [&](MaterialPtr mat) {
 #if 0
 		TFogExp fog;
 		fog.SetColor(0.5, 0.5, 0.5);

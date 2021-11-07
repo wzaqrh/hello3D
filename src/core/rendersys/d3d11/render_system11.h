@@ -41,7 +41,7 @@ public:
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth=1.0, UINT8 Stencil=0);
 	void SetRenderTarget(IRenderTexturePtr rendTarget);
 
-	TMaterialPtr GetMaterial(const std::string& name, bool sharedUse);
+	MaterialPtr GetMaterial(const std::string& name, bool sharedUse);
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer);
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr);
@@ -81,17 +81,17 @@ protected:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 
-	TVertexShader11Ptr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
-	TVertexShader11Ptr _CreateVSByFXC(const char* filename);
-	TPixelShader11Ptr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
-	TPixelShader11Ptr _CreatePSByFXC(const char* filename);
+	VertexShader11Ptr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
+	VertexShader11Ptr _CreateVSByFXC(const char* filename);
+	PixelShader11Ptr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
+	PixelShader11Ptr _CreatePSByFXC(const char* filename);
 
 	ID3D11InputLayout* _CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 protected:
-	void BindPass(const TPassPtr& pass, const cbGlobalParam& globalParam);
-	void RenderPass(const TPassPtr& pass, TextureBySlot& texturs, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam);
+	void BindPass(const PassPtr& pass, const cbGlobalParam& globalParam);
+	void RenderPass(const PassPtr& pass, TextureBySlot& texturs, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
+	void RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
 	void _RenderSkyBox();
 	void _DoPostProcess();
 };

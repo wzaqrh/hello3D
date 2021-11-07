@@ -6,6 +6,7 @@ namespace mir {
 struct CameraBase;
 struct Camera;
 struct ConstBufferDecl;
+
 struct cbDirectLight {
 public:
 	XMFLOAT4 LightPos;//world space

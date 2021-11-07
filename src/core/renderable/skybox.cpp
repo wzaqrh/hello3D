@@ -4,7 +4,7 @@
 
 namespace mir {
 
-SkyBox::SkyBox(IRenderSystem* pRenderSys, TCameraPtr pCam, const std::string& imgName)
+SkyBox::SkyBox(IRenderSystem* pRenderSys, CameraPtr pCam, const std::string& imgName)
 {
 	mRenderSys = pRenderSys;
 	mRefCam = pCam;
@@ -40,7 +40,7 @@ SkyBox::~SkyBox()
 {
 }
 
-void SkyBox::SetRefCamera(TCameraPtr pCam)
+void SkyBox::SetRefCamera(CameraPtr pCam)
 {
 	mRefCam = pCam;
 }
@@ -51,7 +51,7 @@ int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.push_back(mCubeSRV);
+	op.mTextures.Add(mCubeSRV);
 	op.mWorldTransform = XMMatrixIdentity();// mRefCam->mWorld;
 	opList.AddOP(op);
 	return 1;

@@ -12,7 +12,7 @@ class Label : public IRenderable {
 
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
-	TMaterialPtr Material;
+	MaterialPtr Material;
 public:
 	TransformPtr Transform;
 	enum { MAX_STRING_LENGTH = 256 };

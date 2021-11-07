@@ -9,7 +9,7 @@ AssimpMesh::AssimpMesh(const aiMesh* __data,
 	std::vector<AssimpMeshVertex>& __vertices,
 	std::vector<UINT>& __indices,
 	TTextureBySlotPtr __textures,
-	TMaterialPtr __material,
+	MaterialPtr __material,
 	IRenderSystem *__renderSys)
 {
 	Data = __data;
@@ -30,7 +30,7 @@ bool AssimpMesh::setupMesh(IRenderSystem *renderSys)
 
 bool AssimpMesh::HasTexture(int slot)
 {
-	return (slot < Textures->size()) 
+	return (slot < Textures->Count()) 
 		&& Textures->At(slot)
 		&& Textures->At(slot)->HasSRV();
 }

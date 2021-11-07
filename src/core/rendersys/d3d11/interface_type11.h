@@ -3,17 +3,17 @@
 
 namespace mir {
 
-typedef std::shared_ptr< struct BlobData11> TBlobDataD3d11Ptr;
-typedef std::shared_ptr< struct InputLayout11> TInputLayout11Ptr;
-typedef std::shared_ptr< struct VertexShader11> TVertexShader11Ptr;
-typedef std::shared_ptr< struct PixelShader11> TPixelShader11Ptr;
-typedef std::shared_ptr< struct Program11> TProgram11Ptr;
-typedef std::shared_ptr< struct VertexBuffer11> TVertexBuffer11Ptr;
-typedef std::shared_ptr< struct IndexBuffer11> TIndexBuffer11Ptr;
-typedef std::shared_ptr< struct ContantBuffer11> TContantBuffer11Ptr;
-typedef std::shared_ptr< struct Texture11> TTexture11Ptr;
-typedef std::shared_ptr< struct RenderTexture11> TRenderTexture11Ptr;
-typedef std::shared_ptr< struct SamplerState11> TSamplerState11Ptr;
+typedef std::shared_ptr< struct BlobData11> BlobData11Ptr;
+typedef std::shared_ptr< struct InputLayout11> InputLayout11Ptr;
+typedef std::shared_ptr< struct VertexShader11> VertexShader11Ptr;
+typedef std::shared_ptr< struct PixelShader11> PixelShader11Ptr;
+typedef std::shared_ptr< struct Program11> Program11Ptr;
+typedef std::shared_ptr< struct VertexBuffer11> VertexBuffer11Ptr;
+typedef std::shared_ptr< struct IndexBuffer11> IndexBuffer11Ptr;
+typedef std::shared_ptr< struct ContantBuffer11> ContantBuffer11Ptr;
+typedef std::shared_ptr< struct Texture11> Texture11Ptr;
+typedef std::shared_ptr< struct RenderTexture11> RenderTexture11Ptr;
+typedef std::shared_ptr< struct SamplerState11> SamplerState11Ptr;
 
 /********** Program **********/
 struct BlobData11 : public IBlobData {
@@ -28,7 +28,7 @@ struct InputLayout11 : public IInputLayout {
 public:
 	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
 	ID3D11InputLayout* mLayout = nullptr;
-	TResourcePtr mRes;
+	ResourcePtr mRes;
 public:
 	InputLayout11();
 	ID3D11InputLayout*& GetLayout11();
@@ -39,7 +39,7 @@ struct VertexShader11 : public IVertexShader {
 	ID3D11VertexShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	TResourcePtr mRes;
+	ResourcePtr mRes;
 public:
 	VertexShader11(IBlobDataPtr pBlob);
 	IResourcePtr AsRes() override;
@@ -52,7 +52,7 @@ struct PixelShader11 : public IPixelShader {
 	ID3D11PixelShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	TResourcePtr mRes;
+	ResourcePtr mRes;
 public:
 	PixelShader11(IBlobDataPtr pBlob);
 	IResourcePtr AsRes() override;
@@ -61,14 +61,14 @@ public:
 };
 
 struct Program11 : public IProgram {
-	TVertexShader11Ptr mVertex;
-	TPixelShader11Ptr mPixel;
-	TResourcePtr mRes;
+	VertexShader11Ptr mVertex;
+	PixelShader11Ptr mPixel;
+	ResourcePtr mRes;
 public:
 	Program11();
 	IResourcePtr AsRes() override;
-	void SetVertex(TVertexShader11Ptr pVertex);
-	void SetPixel(TPixelShader11Ptr pPixel);
+	void SetVertex(VertexShader11Ptr pVertex);
+	void SetPixel(PixelShader11Ptr pPixel);
 	IVertexShaderPtr GetVertex() override;
 	IPixelShaderPtr GetPixel() override;
 };
@@ -110,9 +110,7 @@ public:
 public:
 	ID3D11Buffer*& GetBuffer11();
 	unsigned int GetBufferSize() override;
-	HardwareBufferType GetType() override {
-		return kHWBufferIndex;
-	}
+	HardwareBufferType GetType() override { return kHWBufferIndex; }
 
 	int GetWidth() override;
 	DXGI_FORMAT GetFormat() override;
@@ -126,9 +124,8 @@ public:
 	ContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl);
 public:
 	TConstBufferDeclPtr GetDecl() override;
-	HardwareBufferType GetType() override {
-		return kHWBufferConstant;
-	}
+	HardwareBufferType GetType() override { return kHWBufferConstant; }
+
 	ID3D11Buffer*& GetBuffer11();
 	unsigned int GetBufferSize() override;
 };

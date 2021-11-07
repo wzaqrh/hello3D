@@ -3,30 +3,19 @@
 
 namespace mir {
 
-	enum enLightType {
-		E_LIGHT_DIRECT,
-		E_LIGHT_POINT,
-		E_LIGHT_SPOT
+	enum LightType {
+		kLightDirectional,
+		kLightPoint,
+		kLightSpot
 	};
-	typedef std::shared_ptr<struct cbDirectLight> TDirectLightPtr;
-	typedef std::shared_ptr<struct cbPointLight> TPointLightPtr;
-	typedef std::shared_ptr<struct cbSpotLight> TSpotLightPtr;
+	typedef std::shared_ptr<struct cbDirectLight> cbDirectLightPtr;
+	typedef std::shared_ptr<struct cbPointLight> cbPointLightPtr;
+	typedef std::shared_ptr<struct cbSpotLight> cbSpotLightPtr;
+	typedef std::shared_ptr<struct cbGlobalParam> cbGlobalParamPtr;
 
-	struct cbGlobalParam;
-
-	struct Pass;
-	typedef std::shared_ptr<Pass> TPassPtr;
-
-	struct Technique;
-	typedef std::shared_ptr<Technique> TTechniquePtr;
-
-	struct Material;
-	typedef std::shared_ptr<Material> TMaterialPtr;
-
-	struct TextureBySlot;
-	struct TMaterialBuilder;
-
-	struct MaterialFactory;
-	typedef std::shared_ptr<MaterialFactory> TMaterialFactoryPtr;
+	typedef std::shared_ptr<struct Pass> PassPtr;
+	typedef std::shared_ptr<struct Technique> TechniquePtr;
+	typedef std::shared_ptr<struct Material> MaterialPtr;
+	typedef std::shared_ptr<struct MaterialFactory> MaterialFactoryPtr;
 
 }

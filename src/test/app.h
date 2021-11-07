@@ -1,5 +1,5 @@
 #pragma once
-#include "core/context.h"
+#include "core/mir.h"
 #include "core/rendersys/interface_type_pred.h"
 #include "core/rendersys/material_pred.h"
 
@@ -41,7 +41,7 @@ protected:
 protected:
 	XMMATRIX GetWorldTransform();
 protected:
-	mir::TContext* mContext = nullptr;
+	mir::Mir* mContext = nullptr;
 	class mir::D3DInput* mInput = nullptr;
 	class mir::Timer* mTimer;
 	mir::MovablePtr mMove;

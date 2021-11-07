@@ -7,23 +7,34 @@
 namespace mir {
 
 struct TextureBySlot {
-	std::vector<ITexturePtr> textures;
 public:
-	bool empty() const;
-	size_t size() const;
-
-	void clear();
-	void push_back(ITexturePtr texture);
-	void swap(TextureBySlot& other);
-	void resize(size_t size);
-
-	const ITexturePtr At(size_t pos) const;
-	ITexturePtr& At(size_t pos);
-
-	const ITexturePtr operator[](size_t pos) const;
-	ITexturePtr& operator[](size_t pos);
-public:
+	void Clear() {
+		Textures.clear();
+	}
+	void Add(ITexturePtr texture) {
+		Textures.push_back(texture);
+	}
+	void Swap(TextureBySlot& other) {
+		Textures.swap(other.Textures);
+	}
+	void Resize(size_t size) {
+		Textures.resize(size);
+	}
 	void Merge(const TextureBySlot& other);
+public:
+	bool Empty() const { return Textures.empty(); }
+	size_t Count() const { return Textures.size(); }
+
+	ITexturePtr At(size_t pos) {
+		if (pos >= Textures.size()) Textures.resize(pos + 1);
+		return Textures[pos];
+	}
+	ITexturePtr& operator[](size_t pos) { return At(pos); }
+
+	const ITexturePtr& At(size_t pos) const { return Textures[pos]; }
+	const ITexturePtr operator[](size_t pos) const { return At(pos); }
+public:
+	std::vector<ITexturePtr> Textures;
 };
 
 struct ContantBufferInfo 
@@ -72,30 +83,30 @@ public:
 struct Technique
 {
 	std::string mName;
-	std::vector<TPassPtr> mPasses;
+	std::vector<PassPtr> mPasses;
 public:
-	void AddPass(TPassPtr pass);
+	void AddPass(PassPtr pass);
 	std::shared_ptr<Technique> Clone(IRenderSystem* pRenderSys);
 	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
 
-	TPassPtr GetPassByLightMode(const std::string& lightMode);
-	std::vector<TPassPtr> GetPassesByLightMode(const std::string& lightMode);
+	PassPtr GetPassByLightMode(const std::string& lightMode);
+	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 
 	void UpdateConstBufferByName(IRenderSystem* pRenderSys, const std::string& name, const TData& data);
 };
 
 class Material : public Resource 
 {
-	std::vector<TTechniquePtr> mTechniques;
+	std::vector<TechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 public:
 	std::shared_ptr<Material> Clone(IRenderSystem* pRenderSys);
-	void AddTechnique(TTechniquePtr technique);
+	void AddTechnique(TechniquePtr technique);
 
-	TTechniquePtr CurTech();
-	TTechniquePtr SetCurTechByIdx(int idx);
+	TechniquePtr CurTech();
+	TechniquePtr SetCurTechByIdx(int idx);
 	void SetCurTechByName(const std::string& name);
 
 	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);

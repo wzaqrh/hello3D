@@ -22,6 +22,6 @@ struct ConstBufferDeclElement;
 typedef std::shared_ptr<struct ConstBufferDecl> TConstBufferDeclPtr;
 
 typedef std::shared_ptr<struct IResource> IResourcePtr;
-typedef std::shared_ptr<struct Resource> TResourcePtr;
+typedef std::shared_ptr<struct Resource> ResourcePtr;
 
 }

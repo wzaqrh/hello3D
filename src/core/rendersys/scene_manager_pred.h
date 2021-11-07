@@ -3,9 +3,8 @@
 
 namespace mir {
 
-typedef std::shared_ptr<struct CameraBase> TCameraBasePtr;
-typedef std::shared_ptr<struct Camera> TCameraPtr;
-typedef std::shared_ptr<struct ISceneManager> ISceneManagerPtr;
-typedef std::shared_ptr<struct SceneManager> TSceneManagerPtr;
+typedef std::shared_ptr<struct CameraBase> CameraBasePtr;
+typedef std::shared_ptr<struct Camera> CameraPtr;
+typedef std::shared_ptr<struct SceneManager> SceneManagerPtr;
 
 }

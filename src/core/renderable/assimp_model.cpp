@@ -235,7 +235,7 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	std::vector<UINT> indices;
 	TTextureBySlotPtr texturesPtr = std::make_shared<TextureBySlot>();
 	TextureBySlot& textures = *texturesPtr;
-	textures.resize(4);
+	textures.Resize(4);
 
 	if (mesh->mMaterialIndex >= 0)
 	{

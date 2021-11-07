@@ -4,7 +4,7 @@
 namespace mir {
 
 typedef std::shared_ptr<struct IResource> IResourcePtr;
-typedef std::shared_ptr<struct Resource> TResourcePtr;
+typedef std::shared_ptr<struct Resource> ResourcePtr;
 
 enum ResourceState {
 	kResourceStateNone,
@@ -34,7 +34,7 @@ struct Resource : public IResource {
 	IUnknown** mDeviceObj;
 	ResourceState mCurState;
 	std::vector<std::function<void(IResource*)>> OnLoadeds;
-	std::vector<TResourcePtr> mDepends;
+	std::vector<ResourcePtr> mDepends;
 public:
 	Resource() :mCurState(kResourceStateNone),mDeviceObj(nullptr) {}
 	Resource(IUnknown** deviceObj);

@@ -228,7 +228,7 @@ void RenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
 	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
 }
 
-TMaterialPtr RenderSystem11::GetMaterial(const std::string& name, bool sharedUse)
+MaterialPtr RenderSystem11::GetMaterial(const std::string& name, bool sharedUse)
 {
 	return mMaterialFac->GetMaterial(name, sharedUse);
 }
@@ -246,7 +246,7 @@ ID3D11InputLayout* RenderSystem11::_CreateInputLayout(Program11* pProgram, const
 }
 IInputLayoutPtr RenderSystem11::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
-	TInputLayout11Ptr ret = MakePtr<InputLayout11>();
+	InputLayout11Ptr ret = MakePtr<InputLayout11>();
 	ret->mInputDescs.assign(descArray, descArray + descCount);
 
 	auto resource = pProgram->AsRes();
@@ -272,7 +272,7 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	{
 	case kHWBufferConstant: {
 		IContantBufferPtr cbuffer = std::static_pointer_cast<IContantBuffer>(buffer);
-		TContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(cbuffer);
+		ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(cbuffer);
 		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
 		if (CheckHR(hr)) return false;
 		memcpy(MappedResource.pData, data, dataSize);
@@ -280,7 +280,7 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	}break;
 	case kHWBufferVertex:{
 		IVertexBufferPtr cbuffer = std::static_pointer_cast<IVertexBuffer>(buffer);
-		TVertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(cbuffer);
+		VertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(cbuffer);
 		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
 		if (CheckHR(hr)) return false;
 		memcpy(MappedResource.pData, data, dataSize);
@@ -288,7 +288,7 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	}break;
 	case kHWBufferIndex: {
 		IIndexBufferPtr cbuffer = std::static_pointer_cast<IIndexBuffer>(buffer);
-		TIndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(cbuffer);
+		IndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(cbuffer);
 		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
 		if (CheckHR(hr)) return false;
 		memcpy(MappedResource.pData, data, dataSize);
@@ -322,7 +322,7 @@ ISamplerStatePtr RenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPAR
 	if (CheckHR(hr))
 		return nullptr;
 
-	TSamplerState11Ptr ret = MakePtr<SamplerState11>(pSamplerLinear);
+	SamplerState11Ptr ret = MakePtr<SamplerState11>(pSamplerLinear);
 	return ret;
 }
 
@@ -346,9 +346,9 @@ bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
 	}
 	return ret;
 }
-TPixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* szEntry, bool async)
+PixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* szEntry, bool async)
 {
-	TPixelShader11Ptr ret = MakePtr<PixelShader11>(MakePtr<BlobData11>(nullptr));
+	PixelShader11Ptr ret = MakePtr<PixelShader11>(MakePtr<BlobData11>(nullptr));
 	szEntry = szEntry ? szEntry : "PS";
 	const char* shaderModel = "ps_4_0";
 	DWORD dwShaderFlags = GetShaderFlag();
@@ -388,9 +388,9 @@ TPixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* sz
 	return ret;
 }
 
-TPixelShader11Ptr RenderSystem11::_CreatePSByFXC(const char* filename)
+PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const char* filename)
 {
-	TPixelShader11Ptr ret = MakePtr<PixelShader11>(nullptr);
+	PixelShader11Ptr ret = MakePtr<PixelShader11>(nullptr);
 	std::vector<char> buffer = ReadFile(filename, "rb");
 	if (!buffer.empty()) {
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
@@ -410,9 +410,9 @@ TPixelShader11Ptr RenderSystem11::_CreatePSByFXC(const char* filename)
 	return ret;
 }
 
-TVertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* szEntry, bool async)
+VertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* szEntry, bool async)
 {
-	TVertexShader11Ptr ret = MakePtr<VertexShader11>(MakePtr<BlobData11>(nullptr));
+	VertexShader11Ptr ret = MakePtr<VertexShader11>(MakePtr<BlobData11>(nullptr));
 	szEntry = szEntry ? szEntry : "VS";
 	const char* shaderModel = "vs_4_0";
 	DWORD dwShaderFlags = GetShaderFlag();
@@ -455,9 +455,9 @@ TVertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* s
 	return ret;
 }
 
-TVertexShader11Ptr RenderSystem11::_CreateVSByFXC(const char* filename)
+VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const char* filename)
 {
-	TVertexShader11Ptr ret = MakePtr<VertexShader11>(nullptr);
+	VertexShader11Ptr ret = MakePtr<VertexShader11>(nullptr);
 	std::vector<char> buffer = ReadFile(filename, "rb");
 	if (!buffer.empty()) {
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
@@ -482,7 +482,7 @@ IProgramPtr RenderSystem11::CreateProgramByCompile(const char* vsPath, const cha
 {
 	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
-	TProgram11Ptr program = MakePtr<Program11>();
+	Program11Ptr program = MakePtr<Program11>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry, false));
 	program->SetPixel(_CreatePS(psPath, psEntry, false));
 	program->AsRes()->CheckAndSetLoaded();
@@ -492,7 +492,7 @@ IProgramPtr RenderSystem11::CreateProgramByCompile(const char* vsPath, const cha
 IProgramPtr RenderSystem11::CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
-	TProgram11Ptr program = MakePtr<Program11>();
+	Program11Ptr program = MakePtr<Program11>();
 
 	vsEntry = vsEntry ? vsEntry : "VS";
 	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
@@ -712,7 +712,7 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 		hr = mDevice->CreateShaderResourceView(tex.Get(), &SRVDesc, &texSRV);
 		if (SUCCEEDED(hr)) 
 		{
-			TTexture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
+			Texture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
 			tex11->SetSRV11(texSRV);
 
 			tex11->AsRes()->CheckAndSetLoaded();
@@ -771,7 +771,7 @@ static std::vector<ID3D11SamplerState*> GetSampler11List(const std::vector<ISamp
 	return ret;
 }
 
-void RenderSystem11::BindPass(const TPassPtr& pass, const cbGlobalParam& globalParam)
+void RenderSystem11::BindPass(const PassPtr& pass, const cbGlobalParam& globalParam)
 {
 	std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
 	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
@@ -802,7 +802,7 @@ std::vector<ID3D11ShaderResourceView*> GetTextureViews11(std::vector<ITexturePtr
 	return views;
 }
 
-void RenderSystem11::RenderPass(const TPassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam)
+void RenderSystem11::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam)
 {
 	if (iterCnt >= 0) {
 		_PushRenderTarget(pass->mIterTargets[iterCnt]);
@@ -822,8 +822,8 @@ void RenderSystem11::RenderPass(const TPassPtr& pass, TextureBySlot& textures, i
 	}
 
 	{
-		if (textures.size() > 0) {
-			std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures.textures);
+		if (textures.Count() > 0) {
+			std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures.Textures);
 			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
 		}
 
@@ -857,8 +857,8 @@ void RenderSystem11::RenderPass(const TPassPtr& pass, TextureBySlot& textures, i
 
 void RenderSystem11::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
 {
-	TTechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<TPassPtr> passes = tech->GetPassesByLightMode(lightMode);
+	TechniquePtr tech = op.mMaterial->CurTech();
+	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes)
 	{
 		SetVertexBuffer(op.mVertexBuffer);
@@ -875,7 +875,7 @@ void RenderSystem11::RenderOp(const RenderOperation& op, const std::string& ligh
 			else {
 				SetVertexBuffer(op.mVertexBuffer);
 			}
-			ITexturePtr first = !textures.empty() ? textures[0] : nullptr;
+			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
 			RenderPass(pass, textures, i, op, globalParam);
 			textures[0] = first;
 		}
@@ -890,7 +890,7 @@ void RenderSystem11::RenderOp(const RenderOperation& op, const std::string& ligh
 	}
 }
 
-void RenderSystem11::RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
+void RenderSystem11::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
 	cbGlobalParam globalParam;
@@ -930,7 +930,7 @@ void RenderSystem11::RenderQueue(const RenderOperationQueue& opQueue, const std:
 		mDeviceContext->PSSetShaderResources(0, 1, &pSRV);
 	}
 
-	auto& lightsOrder = mSceneManager->mLightsOrder;
+	auto& lightsOrder = mSceneManager->mLightsByOrder;
 	if (!lightsOrder.empty()) {
 		BlendFunc orgBlend = mCurBlendFunc;
 		SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));

@@ -28,13 +28,13 @@ public:
 	TTextureBySlotPtr Textures;
 	IVertexBufferPtr VertexBuffer;
 	IIndexBufferPtr IndexBuffer;
-	TMaterialPtr Material;
+	MaterialPtr Material;
 public:
 	AssimpMesh(const aiMesh* __data, 
 		std::vector<AssimpMeshVertex>& __vertices, 
 		std::vector<UINT>& __indices,
 		TTextureBySlotPtr __textures,
-		TMaterialPtr __material,
+		MaterialPtr __material,
 		IRenderSystem *__renderSys);
 	bool HasTexture(int slot);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;

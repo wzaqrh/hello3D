@@ -8,27 +8,35 @@ namespace mir {
 
 /********** RenderOperation **********/
 struct RenderOperation {
-	TMaterialPtr mMaterial;
+	MaterialPtr mMaterial;
 	IVertexBufferPtr mVertexBuffer;
-	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
+	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 	IIndexBufferPtr mIndexBuffer;
 	short mIndexPos = 0, mIndexCount = 0, mIndexBase = 0;
 	TextureBySlot mTextures;
 	XMMATRIX mWorldTransform;
 public:
-	RenderOperation();
+	RenderOperation(): mIndexPos(0), mIndexCount(0), mIndexBase(0) {
+		mWorldTransform = XMMatrixIdentity();
+	}
 };
 
 struct RenderOperationQueue {
 	std::vector<RenderOperation> mOps;
 public:
-	void Clear();
-	void AddOP(const RenderOperation& op);
-	size_t Count() const;
-	RenderOperation& At(size_t pos);
-	const RenderOperation& At(size_t pos) const;
-	RenderOperation& operator[](size_t pos);
-	const RenderOperation& operator[](size_t pos) const;
+	void Clear() {
+		mOps.clear();
+	}
+	void AddOP(const RenderOperation& op) {
+		mOps.push_back(op);
+	}
+	size_t Count() const { return mOps.size(); }
+
+	RenderOperation& At(size_t pos) { return mOps[pos]; }
+	RenderOperation& operator[](size_t pos) { return At(pos); }
+
+	const RenderOperation& At(size_t pos) const { return mOps[pos]; }
+	const RenderOperation& operator[](size_t pos) const { return At(pos); }
 };
 
 interface IRenderable {

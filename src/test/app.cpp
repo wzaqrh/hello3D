@@ -12,7 +12,7 @@ App::App()
 {
 	mMove = MakePtr<mir::Movable>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
-	mContext = new mir::TContext;
+	mContext = new mir::Mir;
 }
 void App::Create()
 {}

@@ -31,7 +31,7 @@
     <ClInclude Include="src\core\base\std.h" />
     <ClInclude Include="src\core\base\transform.h" />
     <ClInclude Include="src\core\base\utility.h" />
-    <ClInclude Include="src\core\context.h" />
+    <ClInclude Include="src\core\mir.h" />
     <ClInclude Include="src\core\pre_define.h" />
     <ClInclude Include="src\core\renderable\assimp_mesh.h" />
     <ClInclude Include="src\core\renderable\assimp_model.h" />
@@ -70,7 +70,7 @@
     <ClCompile Include="src\core\base\d3d_enum_convert.cpp" />
     <ClCompile Include="src\core\base\transform.cpp" />
     <ClCompile Include="src\core\base\utility.cpp" />
-    <ClCompile Include="src\core\context.cpp" />
+    <ClCompile Include="src\core\mir.cpp" />
     <ClCompile Include="src\core\renderable\assimp_mesh.cpp" />
     <ClCompile Include="src\core\renderable\assimp_model.cpp" />
     <ClCompile Include="src\core\renderable\font.cpp" />

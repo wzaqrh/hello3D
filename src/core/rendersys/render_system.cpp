@@ -78,7 +78,7 @@ void RenderSystem::Draw(IRenderable* renderable)
 	RenderQueue(opQue, E_PASS_FORWARDBASE);
 }
 
-void RenderSystem::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, enLightType lightType)
+void RenderSystem::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, LightType lightType)
 {
 	memset(&globalParam, 0, sizeof(globalParam));
 
@@ -102,13 +102,13 @@ void RenderSystem::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightC
 	globalParam.LightType = lightType + 1;
 	switch (lightType)
 	{
-	case E_LIGHT_DIRECT:
+	case kLightDirectional:
 		static_cast<cbDirectLight&>(globalParam.Light) = *light;
 		break;
-	case E_LIGHT_POINT:
+	case kLightPoint:
 		static_cast<cbPointLight&>(globalParam.Light) = *(cbPointLight*)light;
 		break;
-	case E_LIGHT_SPOT:
+	case kLightSpot:
 		globalParam.Light = *(cbSpotLight*)light;
 		break;
 	default:
@@ -116,7 +116,7 @@ void RenderSystem::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightC
 	}
 }
 
-ISceneManagerPtr RenderSystem::GetSceneManager()
+SceneManagerPtr RenderSystem::GetSceneManager()
 {
 	return mSceneManager;
 }

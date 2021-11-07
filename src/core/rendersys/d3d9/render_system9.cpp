@@ -162,9 +162,9 @@ void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-TMaterialPtr RenderSystem9::GetMaterial(const std::string& name, bool sharedUse)
+MaterialPtr RenderSystem9::GetMaterial(const std::string& name, bool sharedUse)
 {
-	TMaterialPtr material = mMaterialFac->GetMaterial(name, sharedUse);
+	MaterialPtr material = mMaterialFac->GetMaterial(name, sharedUse);
 	material->SetCurTechByName("d3d9");
 	return material;
 }
@@ -508,7 +508,7 @@ void RenderSystem9::SetDepthState(const DepthState& depthState)
 	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.DepthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
-void RenderSystem9::BindPass(TPassPtr pass, const cbGlobalParam& globalParam)
+void RenderSystem9::BindPass(PassPtr pass, const cbGlobalParam& globalParam)
 {
 	TProgram9Ptr program = std::static_pointer_cast<Program9>(pass->mProgram);
 	PixelShader9* ps = PtrRaw(program->mPixel);
@@ -566,7 +566,7 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 	assert(FALSE);
 	return 0;
 }
-void RenderSystem9::RenderPass(TPassPtr pass, TextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
+void RenderSystem9::RenderPass(PassPtr pass, TextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
 {
 	if (iterCnt >= 0) {
 		_PushRenderTarget(pass->mIterTargets[iterCnt]);
@@ -584,7 +584,7 @@ void RenderSystem9::RenderPass(TPassPtr pass, TextureBySlot& textures, int iterC
 	}
 
 	{
-		for (size_t i = 0; i < textures.size(); ++i) {
+		for (size_t i = 0; i < textures.Count(); ++i) {
 			auto iTex = std::static_pointer_cast<Texture9>(textures[i]);
 			if (iTex) {
 				IDirect3DTexture9* texture = iTex->GetSRV9();
@@ -626,8 +626,8 @@ void RenderSystem9::RenderPass(TPassPtr pass, TextureBySlot& textures, int iterC
 
 void RenderSystem9::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
 {
-	TTechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<TPassPtr> passes = tech->GetPassesByLightMode(lightMode);
+	TechniquePtr tech = op.mMaterial->CurTech();
+	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes)
 	{
 		mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(pass->mInputLayout)->GetLayout9());
@@ -645,7 +645,7 @@ void RenderSystem9::RenderOp(const RenderOperation& op, const std::string& light
 			else {
 				SetVertexBuffer(op.mVertexBuffer);
 			}
-			ITexturePtr first = !textures.empty() ? textures[0] : nullptr;
+			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
 			RenderPass(pass, textures, i, op.mIndexBuffer, op.mVertexBuffer, globalParam);
 			textures[0] = first;
 		}
@@ -660,7 +660,7 @@ void RenderSystem9::RenderOp(const RenderOperation& op, const std::string& light
 	}
 }
 
-void RenderSystem9::RenderLight(cbDirectLight* light, enLightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
+void RenderSystem9::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
 	
@@ -703,7 +703,7 @@ void RenderSystem9::RenderQueue(const RenderOperationQueue& opQueue, const std::
 		mDevice9->SetTexture(0, pSRV);
 	}
 
-	auto& lightsOrder = mSceneManager->mLightsOrder;
+	auto& lightsOrder = mSceneManager->mLightsByOrder;
 	if (!lightsOrder.empty()) {
 		BlendFunc orgBlend = mCurBlendFunc;
 		SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));

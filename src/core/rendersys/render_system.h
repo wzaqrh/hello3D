@@ -1,11 +1,15 @@
 #pragma once
 #include "core/rendersys/interface_type_pred.h"
-#include "core/renderable/renderable_pred.h"
 #include "core/rendersys/scene_manager_pred.h"
 #include "core/rendersys/material_pred.h"
 #include "core/rendersys/base_type.h"
+#include "core/renderable/renderable.h"
 
 namespace mir {
+
+struct RenderOperation;
+struct RenderOperationQueue;
+struct IRenderable;
 
 interface IRenderSystem 
 {
@@ -16,7 +20,7 @@ interface IRenderSystem
 
 	virtual XMINT4 GetWinSize() = 0;
 
-	virtual ISceneManagerPtr GetSceneManager() = 0;
+	virtual SceneManagerPtr GetSceneManager() = 0;
 
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 
@@ -24,7 +28,7 @@ interface IRenderSystem
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
 	typedef std::map<std::string, int> MaterialTags;
-	virtual TMaterialPtr GetMaterial(const std::string& name, bool sharedUse = false) = 0;
+	virtual MaterialPtr GetMaterial(const std::string& name, bool sharedUse = false) = 0;
 
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
@@ -74,8 +78,8 @@ protected:
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
 	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
 
-	TMaterialFactoryPtr mMaterialFac;
-	TSceneManagerPtr mSceneManager;
+	MaterialFactoryPtr mMaterialFac;
+	SceneManagerPtr mSceneManager;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
 	void operator delete(void* p) { _mm_free(p); }
@@ -85,13 +89,13 @@ protected:
 	bool _CanDraw();
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
-	void MakeAutoParam(cbGlobalParam& param, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, enLightType lightType);
+	void MakeAutoParam(cbGlobalParam& param, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, LightType lightType);
 public:
 	XMINT4 GetWinSize() {
 		XMINT4 ret = { mScreenWidth, mScreenHeight, 0, 0 };
 		return ret;
 	}
-	ISceneManagerPtr GetSceneManager();
+	SceneManagerPtr GetSceneManager();
 	IProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 public:
 	ITexturePtr LoadTexture(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);

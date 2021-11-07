@@ -5,18 +5,17 @@
 
 namespace mir {
 
-class TContext {
-	ISceneManager* mSceneMng;
+class Mir {
+	SceneManager* mSceneMng;
 	IRenderSystem* mRenderSys;
 	RenderableFactory* mRenderableFac;
 public:
-	TContext();
+	Mir();
+	~Mir();
 	bool Initialize(HWND hWnd);
-
-	~TContext();
 	void Dispose();
 public:
-	ISceneManager* GetSceneMng() { return mSceneMng; }
+	SceneManager* GetSceneMng() { return mSceneMng; }
 	IRenderSystem* GetRenderSys() { return mRenderSys; }
 	RenderableFactory* GetRenderableFac() { return mRenderableFac; }
 };

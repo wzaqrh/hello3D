@@ -29,8 +29,8 @@ protected:
 	IRenderTexturePtr mMainTex;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
-	TMaterialPtr mMaterial;
-	std::map<std::pair<TPassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
+	MaterialPtr mMaterial;
+	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 public:
 	PostProcess(IRenderSystem* RenderSys, IRenderTexturePtr mainTex);
 	~PostProcess();

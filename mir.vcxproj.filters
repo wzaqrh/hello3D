@@ -73,9 +73,6 @@
     <ClInclude Include="src\core\rendersys\d3d11\thread_pump.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\context.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\pre_define.h">
       <Filter>src\core</Filter>
     </ClInclude>
@@ -114,6 +111,9 @@
     </ClInclude>
     <ClInclude Include="src\core\rendersys\material_factory.h">
       <Filter>src\core\rendersys\material</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\mir.h">
+      <Filter>src\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,9 +173,6 @@
     </ClCompile>
     <ClCompile Include="src\core\rendersys\d3d11\thread_pump.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\context.cpp">
-      <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="src\core\renderable\font.cpp">
       <Filter>src\core\renderable</Filter>
@@ -239,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="src\core\rendersys\material_factory.cpp">
       <Filter>src\core\rendersys\material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\mir.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

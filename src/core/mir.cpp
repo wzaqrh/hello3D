@@ -1,12 +1,12 @@
-#include "core/context.h"
+#include "core/mir.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d9/render_system9.h"
 
 namespace mir {
 
-TContext::TContext()
+Mir::Mir()
 {}
-bool TContext::Initialize(HWND hWnd)
+bool Mir::Initialize(HWND hWnd)
 {
 #if 0
 	mRenderSys = new TRenderSystem9;
@@ -23,9 +23,9 @@ bool TContext::Initialize(HWND hWnd)
 	return true;
 }
 
-TContext::~TContext()
+Mir::~Mir()
 {}
-void TContext::Dispose()
+void Mir::Dispose()
 {}
 
 }
