@@ -41,8 +41,6 @@ public:
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth=1.0, UINT8 Stencil=0);
 	void SetRenderTarget(IRenderTexturePtr rendTarget);
 
-	MaterialPtr GetMaterial(const std::string& name, bool sharedUse);
-
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer);
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr);
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);

@@ -46,7 +46,7 @@ public:
 	MaterialPtr Material;
 	TransformPtr Transform;
 public:
-	Sprite(IRenderSystem& RenderSys, const std::string& matName = "");
+	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");
 	~Sprite();
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 	void Draw();

@@ -35,7 +35,7 @@ struct MaterialFactory
 	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 public:
 	MaterialFactory(RenderSystem& pRenderSys);
-	MaterialPtr GetMaterial(const std::string& matName, bool sharedUse);
+	MaterialPtr GetMaterial(const std::string& matName, bool sharedUse = false);
 private:
 	MaterialPtr CreateStdMaterial(const std::string& matName);
 };

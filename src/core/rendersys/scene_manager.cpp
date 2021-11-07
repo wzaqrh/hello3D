@@ -194,8 +194,9 @@ const XMMATRIX& Camera::GetProjection()
 }
 
 //TSceneManager
-SceneManager::SceneManager(IRenderSystem& renderSys, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera)
+SceneManager::SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera)
 	:mRenderSys(renderSys)
+	,mMaterialFac(matFac)
 {
 	mScreenWidth  = screenSize.x;
 	mScreenHeight = screenSize.y;
@@ -243,7 +244,7 @@ CameraPtr SceneManager::SetPerspectiveCamera(double fov, int eyeDistance, double
 
 SkyBoxPtr SceneManager::SetSkyBox(const std::string& imgName)
 {
-	mSkyBox = std::make_shared<SkyBox>(mRenderSys, mDefCamera, imgName);
+	mSkyBox = std::make_shared<SkyBox>(mRenderSys, mMaterialFac, mDefCamera, imgName);
 	return mSkyBox;
 }
 
@@ -251,7 +252,7 @@ PostProcessPtr SceneManager::AddPostProcess(const std::string& name)
 {
 	PostProcessPtr process;
 	if (name == E_PASS_POSTPROCESS) {
-		Bloom* bloom = new Bloom(mRenderSys, mPostProcessRT);
+		Bloom* bloom = new Bloom(mRenderSys, mMaterialFac, mPostProcessRT);
 		process = std::shared_ptr<PostProcess>(bloom);
 	}
 

@@ -5,9 +5,10 @@ namespace mir {
 
 class RenderableFactory {
 	IRenderSystem& mRenderSys;
+	MaterialFactory& mMaterialFac;
 	FontCachePtr mFontCache;
 public:
-	RenderableFactory(IRenderSystem& renderSys);
+	RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac);
 	SpritePtr CreateSprite();
 	SpritePtr CreateColorLayer();
 	MeshPtr CreateMesh(const std::string& matName, int vertCount = 1024, int indexCount = 1024);

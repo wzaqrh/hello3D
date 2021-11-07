@@ -22,17 +22,17 @@ private:
 
 void TestMesh::OnPostInitDevice()
 {
-	mContext->GetSceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(100);
 
-	auto texture = mContext->GetRenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
+	auto texture = mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
 
 	const int spriteCount = 4;
-	auto size = mContext->GetRenderSys()->GetWinSize();
+	auto size = mContext->RenderSys()->GetWinSize();
 	float xlist[] = { -size.x / 2, 0, -size.x / 2 , 0 };
 	float ylist[] = { -size.y / 2, -size.y / 2, 0 , 0 };
 	for (int i = 0; i < spriteCount; ++i)
 	{
-		auto sprite = mContext->GetRenderableFac()->CreateSprite();
+		auto sprite = mContext->RenderableFac()->CreateSprite();
 		sprite->SetTexture(texture);
 
 		sprite->SetPosition(xlist[i], ylist[i], 0);
@@ -41,7 +41,7 @@ void TestMesh::OnPostInitDevice()
 		mSprites.push_back(sprite);
 	}
 
-	mMesh = mContext->GetRenderableFac()->CreateMesh(E_MAT_SPRITE);
+	mMesh = mContext->RenderableFac()->CreateMesh(E_MAT_SPRITE);
 
 	for (int i = 0; i < spriteCount; ++i)
 		mMesh->SetVertexs((MeshVertex*)mSprites[i]->GetQuad(), 4, 4 * i);
@@ -60,9 +60,9 @@ void TestMesh::OnPostInitDevice()
 
 void TestMesh::OnRender()
 {
-	if (mContext->GetRenderSys()->BeginScene()) {
-		mContext->GetRenderSys()->Draw(mMesh.get());
-		mContext->GetRenderSys()->EndScene();
+	if (mContext->RenderSys()->BeginScene()) {
+		mContext->RenderSys()->Draw(mMesh.get());
+		mContext->RenderSys()->EndScene();
 	}
 }
 

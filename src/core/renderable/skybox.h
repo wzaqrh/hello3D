@@ -19,7 +19,7 @@ public:
 	ITexturePtr mCubeSRV;
 	MaterialPtr mMaterial;
 public:
-	SkyBox(IRenderSystem& pRenderSys, CameraPtr pCam, const std::string& imgName);
+	SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, CameraPtr pCam, const std::string& imgName);
 	~SkyBox();
 	void SetRefCamera(CameraPtr pCam);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;

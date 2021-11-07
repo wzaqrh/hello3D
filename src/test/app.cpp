@@ -28,7 +28,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 	OnInitLight();
 	OnPostInitDevice();
 
-	mInput = new mir::D3DInput(hInstance, hWnd, mContext->GetRenderSys()->GetWinSize().x, mContext->GetRenderSys()->GetWinSize().y);
+	mInput = new mir::D3DInput(hInstance, hWnd, mContext->RenderSys()->GetWinSize().x, mContext->RenderSys()->GetWinSize().y);
 	mTimer = new mir::Timer;
 	return true;
 }
@@ -44,8 +44,8 @@ void App::CleanUp()
 
 void App::Render()
 {
-	auto renderSys = mContext->GetRenderSys();
-	auto sceneMng = mContext->GetSceneMng();
+	auto renderSys = mContext->RenderSys();
+	auto sceneMng = mContext->SceneMng();
 
 	renderSys->ClearColorDepthStencil(mBackgndColor, 1.0f, 0);
 
@@ -85,7 +85,7 @@ std::string App::GetName()
 
 void App::OnInitLight()
 {
-	mContext->GetSceneMng()->AddPointLight();
+	mContext->SceneMng()->AddPointLight();
 }
 
 XMMATRIX App::GetWorldTransform()

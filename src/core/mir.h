@@ -6,7 +6,7 @@
 namespace mir {
 
 class Mir {
-	IRenderSystemPtr mRenderSys;
+	RenderSystemPtr mRenderSys;
 	MaterialFactoryPtr mMaterialFac;
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
@@ -16,10 +16,10 @@ public:
 	bool Initialize(HWND hWnd);
 	void Dispose();
 public:
-	const IRenderSystemPtr& GetRenderSys() { return mRenderSys; }
-	const MaterialFactoryPtr& GetMatFac() { return mMaterialFac; }
-	const RenderableFactoryPtr& GetRenderableFac() { return mRenderableFac; }
-	const SceneManagerPtr& GetSceneMng() { return mSceneMng; }
+	const RenderSystemPtr& RenderSys() { return mRenderSys; }
+	const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
+	const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }
+	const SceneManagerPtr& SceneMng() { return mSceneMng; }
 };
 
 }

@@ -20,10 +20,10 @@ private:
 
 void TestBloom::OnPostInitDevice()
 {
-	mContext->GetSceneMng()->SetPerspectiveCamera(45, 10, 300);
+	mContext->SceneMng()->SetPerspectiveCamera(45, 10, 300);
 
-	mContext->GetSceneMng()->SetSkyBox("images\\uffizi_cross.dds");
-	mContext->GetSceneMng()->AddPostProcess(E_PASS_POSTPROCESS);
+	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->AddPostProcess(E_PASS_POSTPROCESS);
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
 	{
@@ -35,7 +35,7 @@ void TestBloom::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
+	mModel = new AssimpModel(mContext->RenderSys(), mMove, MAKE_MAT_NAME("Lesson3.3"), layouts);
 	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 }
 
@@ -43,9 +43,9 @@ void TestBloom::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
 
-	if (mContext->GetRenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene()) {
 		if (mModel) mModel->Draw();
-		mContext->GetRenderSys()->EndScene();
+		mContext->RenderSys()->EndScene();
 	}
 }
 

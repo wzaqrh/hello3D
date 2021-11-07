@@ -30,8 +30,6 @@ public:
 	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	MaterialPtr GetMaterial(const std::string& name, bool sharedUse) override;
-
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr) override;
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;

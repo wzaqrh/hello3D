@@ -12,7 +12,7 @@ namespace mir {
 
 RenderSystem11::RenderSystem11()
 {
-	mMaterialFac = std::make_shared<MaterialFactory>(*this);
+	//mMaterialFac = std::make_shared<MaterialFactory>(*this);
 	mThreadPump = std::make_shared<TThreadPump>();
 	mFXCDir = "d3d11\\";
 }
@@ -57,7 +57,7 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 
-	mSceneManager = MakePtr<SceneManager>(*this, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
+	//mSceneManager = MakePtr<SceneManager>(*this, *mMaterialFac, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
 
 	D3D_SHADER_MACRO Shader_Macros[] = { "SHADER_MODEL", "40000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros+ARRAYSIZE(Shader_Macros));
@@ -226,11 +226,6 @@ void RenderSystem11::SetRenderTarget(IRenderTexturePtr rendTarget)
 	mCurRenderTargetView = target11 != nullptr ? target11->GetColorBuffer11() : mBackRenderTargetView;
 	mCurDepthStencilView = target11 != nullptr ? target11->GetDepthStencilBuffer11() : mBackDepthStencilView;
 	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
-}
-
-MaterialPtr RenderSystem11::GetMaterial(const std::string& name, bool sharedUse)
-{
-	return mMaterialFac->GetMaterial(name, sharedUse);
 }
 
 ID3D11InputLayout* RenderSystem11::_CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr)

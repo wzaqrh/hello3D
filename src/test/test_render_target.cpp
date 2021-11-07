@@ -25,7 +25,7 @@ private:
 /********** TestRT **********/
 void TestRT::OnInitLight()
 {
-	auto light1 = mContext->GetSceneMng()->AddPointLight();
+	auto light1 = mContext->SceneMng()->AddPointLight();
 	light1->SetPosition(20, 0, -20);
 	light1->SetAttenuation(1.0, 0.01, 0);
 	light1->SetSpecularPower(60);
@@ -61,7 +61,7 @@ void TestRT::OnPostInitDevice()
 //#define USE_RENDER_TARGET
 void TestRT::OnRender()
 {
-	if (mContext->GetRenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene()) {
 #ifdef USE_RENDER_TARGET
 		mRenderSys->SetRenderTarget(mRendTexture);
 		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
@@ -73,7 +73,7 @@ void TestRT::OnRender()
 		if (mSprite) mSprite->Draw();
 		if (mLayerColor) mLayerColor->Draw();
 #endif
-		mContext->GetRenderSys()->EndScene();
+		mContext->RenderSys()->EndScene();
 	}
 }
 

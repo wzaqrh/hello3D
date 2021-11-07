@@ -122,11 +122,11 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem& renderSys, MovablePtr pMove, const std::string& matType)
+AssimpModel::AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, MovablePtr pMove, const std::string& matType)
 	:mRenderSys(renderSys)
 {
 	mMove = pMove ? pMove : std::make_shared<Movable>();
-	LoadMaterial(matType);
+	mMaterial = matFac.GetMaterial(matType);
 }
 
 AssimpModel::~AssimpModel()
@@ -428,11 +428,6 @@ void AssimpModel::PlayAnim(int Index)
 			}
 		}
 	}
-}
-
-void AssimpModel::LoadMaterial(const std::string& matType)
-{
-	mMaterial = mRenderSys.GetMaterial(matType);
 }
 
 void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)

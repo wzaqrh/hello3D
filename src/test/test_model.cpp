@@ -33,7 +33,7 @@ void TestModel::OnPostInitDevice()
 	};
 	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson1"), layouts);
 #else
-	mModel = new AssimpModel(*mContext->GetRenderSys(), mMove, E_MAT_MODEL);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
 #endif
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
@@ -44,9 +44,9 @@ void TestModel::OnPostInitDevice()
 void TestModel::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mContext->GetRenderSys()->BeginScene()) {
-		mContext->GetRenderSys()->Draw(mModel);
-		mContext->GetRenderSys()->EndScene();
+	if (mContext->RenderSys()->BeginScene()) {
+		mContext->RenderSys()->Draw(mModel);
+		mContext->RenderSys()->EndScene();
 	}
 }
 

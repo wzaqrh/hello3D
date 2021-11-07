@@ -73,7 +73,7 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 
 void TestRawTexture::OnPostInitDevice()
 {
-	mContext->GetSceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(100);
 
 	mSprite = std::make_shared<Sprite>(mRenderSys, E_MAT_SPRITE);
 	mSprite->SetTexture(LoadTexture("smile.bmp"));
@@ -84,9 +84,9 @@ void TestRawTexture::OnPostInitDevice()
 
 void TestRawTexture::OnRender()
 {
-	if (mContext->GetRenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene()) {
 		mRenderSys->Draw(mSprite.get());
-		mContext->GetRenderSys()->EndScene();
+		mContext->RenderSys()->EndScene();
 	}
 }
 

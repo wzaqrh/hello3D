@@ -48,7 +48,7 @@ struct cbBloom {
 };
 class Bloom : public PostProcess {
 public:
-	Bloom(IRenderSystem& RenderSys, IRenderTexturePtr mainTex);
+	Bloom(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePtr mainTex);
 };
 
 }

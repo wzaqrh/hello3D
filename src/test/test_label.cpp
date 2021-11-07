@@ -22,10 +22,10 @@ private:
 
 void TestLabel::OnPostInitDevice()
 {
-	mContext->GetSceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(100);
 
 	for (int i = 0; i < CASE_COUNT; ++i) {
-		auto label = mContext->GetRenderableFac()->CreateLabel("D:\\ProjectWork1\\hello3D\\Debug\\msyh.ttc", 24);
+		auto label = mContext->RenderableFac()->CreateLabel("D:\\ProjectWork1\\hello3D\\Debug\\msyh.ttc", 24);
 		mLabel[i] = label;
 		if (i == 0) {
 			label->SetString("HelloWorld");
@@ -46,7 +46,7 @@ void TestLabel::OnPostInitDevice()
 			label->SetSize(false, XMFLOAT2(120, 64));
 		}
 
-		auto labelBg = mContext->GetRenderableFac()->CreateColorLayer();
+		auto labelBg = mContext->RenderableFac()->CreateColorLayer();
 		mLabelBg[i] = labelBg;
 		labelBg->SetColor(XMFLOAT4(1, 0, 0, 1));
 		labelBg->SetSize(label->GetSize());
@@ -54,7 +54,7 @@ void TestLabel::OnPostInitDevice()
 	}
 #ifdef TEST_LABEL_DEBUG_SP
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LABEL);
-	mLabelDebug = std::make_shared<Sprite>(mContext->GetRenderSys(), E_MAT_SPRITE);
+	mLabelDebug = std::make_shared<Sprite>(mContext->RenderSys(), E_MAT_SPRITE);
 	mLabelDebug->SetTexture(mLabel->mCharSeq[0].texture);
 	mLabelDebug->SetPosition(0, 0, 0);
 	mLabelDebug->SetSize(512, 512);
@@ -63,16 +63,16 @@ void TestLabel::OnPostInitDevice()
 
 void TestLabel::OnRender()
 {
-	if (mContext->GetRenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene()) {
 		RenderOperationQueue opQue;
 		if (mLabelDebug) mLabelDebug->GenRenderOperation(opQue);
 		for (int i = 0; i < CASE_COUNT; ++i) {
 			if (mLabelBg[i]) mLabelBg[i]->GenRenderOperation(opQue);
 			if (mLabel[i]) mLabel[i]->GenRenderOperation(opQue);
 		}
-		mContext->GetRenderSys()->RenderQueue(opQue, E_PASS_FORWARDBASE);
+		mContext->RenderSys()->RenderQueue(opQue, E_PASS_FORWARDBASE);
 
-		mContext->GetRenderSys()->EndScene();
+		mContext->RenderSys()->EndScene();
 	}
 }
 

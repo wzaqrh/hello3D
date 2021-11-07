@@ -7,31 +7,32 @@
 
 namespace mir {
 
-RenderableFactory::RenderableFactory(IRenderSystem& renderSys)
-	:mRenderSys(renderSys) 
+RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac)
+	: mRenderSys(renderSys) 
+	, mMaterialFac(matFac)
 {
 	mFontCache = std::make_shared<FontCache>(renderSys);
 }
 
 SpritePtr RenderableFactory::CreateSprite()
 {
-	return std::make_shared<Sprite>(mRenderSys, E_MAT_SPRITE);
+	return std::make_shared<Sprite>(mRenderSys, mMaterialFac, E_MAT_SPRITE);
 }
 
 SpritePtr RenderableFactory::CreateColorLayer()
 {
-	return std::make_shared<Sprite>(mRenderSys, E_MAT_LAYERCOLOR);
+	return std::make_shared<Sprite>(mRenderSys, mMaterialFac, E_MAT_LAYERCOLOR);
 }
 
 MeshPtr RenderableFactory::CreateMesh(const std::string& matName, int vertCount /*= 1024*/, int indexCount /*= 1024*/)
 {
-	return std::make_shared<Mesh>(mRenderSys, E_MAT_SPRITE, vertCount, indexCount);
+	return std::make_shared<Mesh>(mRenderSys, mMaterialFac, E_MAT_SPRITE, vertCount, indexCount);
 }
 
 LabelPtr RenderableFactory::CreateLabel(const std::string& fontPath, int fontSize)
 {
 	TFontPtr font = mFontCache->GetFont(fontPath, fontSize);
-	return std::make_shared<Label>(mRenderSys, font);
+	return std::make_shared<Label>(mRenderSys, mMaterialFac, font);
 }
 
 }

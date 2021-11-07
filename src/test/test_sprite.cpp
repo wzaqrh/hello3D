@@ -39,9 +39,9 @@ void TestSprite::OnPostInitDevice()
 
 void TestSprite::OnRender()
 {
-	if (mContext->GetRenderSys()->BeginScene()) {
-		mContext->GetRenderSys()->Draw(mSprite.get());
-		mContext->GetRenderSys()->EndScene();
+	if (mContext->RenderSys()->BeginScene()) {
+		mContext->RenderSys()->Draw(mSprite.get());
+		mContext->RenderSys()->EndScene();
 	}
 }
 

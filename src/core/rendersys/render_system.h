@@ -27,9 +27,6 @@ interface IRenderSystem
 	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
-	typedef std::map<std::string, int> MaterialTags;
-	virtual MaterialPtr GetMaterial(const std::string& name, bool sharedUse = false) = 0;
-
 	virtual IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 
@@ -66,6 +63,7 @@ typedef std::shared_ptr<IRenderSystem> IRenderSystemPtr;
 struct __declspec(align(16)) RenderSystem : IRenderSystem
 {
 protected:
+public:
 	size_t mDrawCount = 0, mDrawLimit = INT_MAX;
 	int mScreenWidth, mScreenHeight;
 
@@ -78,8 +76,8 @@ protected:
 	bool mCastShdowFlag = false;
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
 	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
-
-	MaterialFactoryPtr mMaterialFac;
+public:
+	//MaterialFactoryPtr mMaterialFac;
 	SceneManagerPtr mSceneManager;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
@@ -105,5 +103,6 @@ public:
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube) = 0;
 };
+typedef std::shared_ptr<RenderSystem> RenderSystemPtr;
 
 }

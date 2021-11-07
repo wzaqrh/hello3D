@@ -29,7 +29,7 @@ private:
 
 void TestShadowMap::OnInitLight()
 {
-	mLight = mContext->GetSceneMng()->AddPointLight();//1, -1, 1
+	mLight = mContext->SceneMng()->AddPointLight();//1, -1, 1
 	float ddd = 10;
 	mLight->SetPosition(ddd, ddd, -ddd);
 	mLight->SetAttenuation(1, 0.001, 0);
@@ -41,8 +41,8 @@ void TestShadowMap::OnInitLight()
 void TestShadowMap::OnPostInitDevice()
 {
 #if 1
-	mContext->GetSceneMng()->SetPerspectiveCamera(45, 30, 300);
-	mContext->GetSceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->SetPerspectiveCamera(45, 30, 300);
+	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
 
 	float dd = 3;
 	mMove->SetDefScale(SCALE_BASE * 0.2); mMove->SetPosition(0, 0, -dd);
@@ -62,10 +62,10 @@ void TestShadowMap::OnPostInitDevice()
 
 	auto move1 = std::make_shared<Movable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new AssimpModel(mContext->GetRenderSys(), move1, matName);
+	mModel1 = new AssimpModel(mContext->RenderSys(), move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new AssimpModel(mContext->GetRenderSys(), mMove, matName);
+	mModel2 = new AssimpModel(mContext->RenderSys(), mMove, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 
@@ -79,16 +79,16 @@ void TestShadowMap::OnRender()
 	mModel1->GenRenderOperation(opQueue);
 	mModel2->GenRenderOperation(opQueue);
 
-	if (mContext->GetRenderSys()->BeginScene()) {
-		mContext->GetRenderSys()->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mContext->GetRenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
-		mContext->GetRenderSys()->EndScene();
+	if (mContext->RenderSys()->BeginScene()) {
+		mContext->RenderSys()->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
+		mContext->RenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderSys()->EndScene();
 	}
 #else
 	//pass1
 	mRenderSys->SetRenderTarget(mPass1RT);
 	mRenderSys->ClearColorDepthStencil(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
-	auto LightCam = mLight->GetLightCamera(*mContext->GetSceneMng()->GetDefCamera());
+	auto LightCam = mLight->GetLightCamera(*mContext->SceneMng()->GetDefCamera());
 	{
 		mModel1->Update(mTimer.mDeltaTime);
 		float s = SCALE_BASE;

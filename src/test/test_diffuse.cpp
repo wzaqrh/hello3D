@@ -20,7 +20,7 @@ private:
 
 void TestDiffuse::OnInitLight()
 {
-	auto light = mContext->GetSceneMng()->AddPointLight();
+	auto light = mContext->SceneMng()->AddPointLight();
 	light->SetDiffuseColor(1, 1, 1, 1);
 	light->SetPosition(0, 0, -200);
 }
@@ -37,7 +37,7 @@ void TestDiffuse::OnPostInitDevice()
 		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson2"), layouts);
+	mModel = new AssimpModel(mContext->RenderSys(), mMove, MAKE_MAT_NAME("Lesson2"), layouts);
 	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); mScale = 0.05;
 	//mModel->PlayAnim(0);
@@ -46,9 +46,9 @@ void TestDiffuse::OnPostInitDevice()
 void TestDiffuse::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mContext->GetRenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene()) {
 		mModel->Draw();
-		mContext->GetRenderSys()->EndScene();
+		mContext->RenderSys()->EndScene();
 	}
 }
 

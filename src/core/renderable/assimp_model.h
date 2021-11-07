@@ -29,7 +29,7 @@ typedef std::shared_ptr<struct IRenderSystem> IRenderSystemPtr;
 typedef std::shared_ptr<struct Movable> MovablePtr;
 class AssimpModel : public IRenderable {
 public:
-	AssimpModel(IRenderSystem& RenderSys, MovablePtr pMove, const std::string& matType);
+	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, MovablePtr pMove, const std::string& matType);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
@@ -41,7 +41,6 @@ public:
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 	void DoDraw(aiNode* node, RenderOperationQueue& opList);
-	void LoadMaterial(const std::string& matType);
 	void processNode(aiNode * node, const aiScene * scene);
 	AssimpMeshPtr processMesh(aiMesh * mesh, const aiScene * scene);
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);

@@ -43,13 +43,13 @@ void TestPBR::OnInitLight()
 
 #if 1
 	{
-		auto light = mContext->GetSceneMng()->AddDirectLight();
+		auto light = mContext->SceneMng()->AddDirectLight();
 		light->SetDirection(1, -1, 1);
 		float i = 0.7;
 		light->SetDiffuseColor(i, i, i, 1.0);
 	}
 	{
-		auto light = mContext->GetSceneMng()->AddDirectLight();
+		auto light = mContext->SceneMng()->AddDirectLight();
 		light->SetDirection(-1, -1, 0);
 		float i = 1.0;
 		light->SetDiffuseColor(i, i, i, 1.0);
@@ -76,10 +76,10 @@ void TestPBR::OnInitLight()
 /********** Lesson6 **********/
 void TestPBR::OnPostInitDevice()
 {
-	mContext->GetSceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
-	mContext->GetSceneMng()->SetPerspectiveCamera(45, 30, 1000);
+	mContext->SceneMng()->SetPerspectiveCamera(45, 30, 1000);
 
 #if 0
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
@@ -118,7 +118,7 @@ void TestPBR::OnPostInitDevice()
 		}
 	}
 #else
-	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, E_MAT_MODEL);
+	mModel = new AssimpModel(mContext->RenderSys(), mMove, E_MAT_MODEL);
 	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
 	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
@@ -128,14 +128,14 @@ void TestPBR::OnPostInitDevice()
 void TestPBR::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
-	if (mContext->GetRenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene()) {
 		RenderOperationQueue opQueue;
 		if (mModel) mModel->GenRenderOperation(opQueue);
 
 		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mContext->GetRenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
 
-		mContext->GetRenderSys()->EndScene();
+		mContext->RenderSys()->EndScene();
 	}
 }
 
