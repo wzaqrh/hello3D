@@ -13,12 +13,6 @@
     <ClInclude Include="src\core\base\utility.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\renderable\assimp_mesh.h">
-      <Filter>src\core\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\renderable\assimp_model.h">
-      <Filter>src\core\renderable</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\renderable\mesh.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
@@ -29,9 +23,6 @@
       <Filter>src\core\renderable</Filter>
     </ClInclude>
     <ClInclude Include="src\core\renderable\renderable_factory.h">
-      <Filter>src\core\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\renderable\renderable_pred.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
     <ClInclude Include="src\core\renderable\skybox.h">
@@ -47,9 +38,6 @@
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
     <ClInclude Include="src\core\rendersys\scene_manager.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\scene_manager_pred.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
     <ClInclude Include="src\core\rendersys\d3d9\interface_type9.h">
@@ -73,15 +61,6 @@
     <ClInclude Include="src\core\rendersys\d3d11\thread_pump.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\pre_define.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\renderable\font.h">
-      <Filter>src\core\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\renderable\label.h">
-      <Filter>src\core\renderable</Filter>
-    </ClInclude>
     <ClInclude Include="src\test\app.h">
       <Filter>src\test</Filter>
     </ClInclude>
@@ -94,16 +73,10 @@
     <ClInclude Include="src\core\rendersys\material_cb.h">
       <Filter>src\core\rendersys\material</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\rendersys\material_pred.h">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\rendersys\base_type.h">
       <Filter>src\core\rendersys\type</Filter>
     </ClInclude>
     <ClInclude Include="src\core\rendersys\interface_type.h">
-      <Filter>src\core\rendersys\type</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\rendersys\interface_type_pred.h">
       <Filter>src\core\rendersys\type</Filter>
     </ClInclude>
     <ClInclude Include="src\core\rendersys\const_buffer_decl.h">
@@ -113,6 +86,27 @@
       <Filter>src\core\rendersys\material</Filter>
     </ClInclude>
     <ClInclude Include="src\core\mir.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendersys\predeclare.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\renderable\predeclare.h">
+      <Filter>src\core\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\renderable\assimp_model.h">
+      <Filter>src\core\renderable\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\renderable\assimp_mesh.h">
+      <Filter>src\core\renderable\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\renderable\font.h">
+      <Filter>src\core\renderable\label</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\renderable\label.h">
+      <Filter>src\core\renderable\label</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\predeclare.h">
       <Filter>src\core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -125,12 +119,6 @@
     </ClCompile>
     <ClCompile Include="src\core\base\utility.cpp">
       <Filter>src\core\base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\renderable\assimp_mesh.cpp">
-      <Filter>src\core\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\renderable\assimp_model.cpp">
-      <Filter>src\core\renderable</Filter>
     </ClCompile>
     <ClCompile Include="src\core\renderable\mesh.cpp">
       <Filter>src\core\renderable</Filter>
@@ -173,12 +161,6 @@
     </ClCompile>
     <ClCompile Include="src\core\rendersys\d3d11\thread_pump.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\renderable\font.cpp">
-      <Filter>src\core\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\renderable\label.cpp">
-      <Filter>src\core\renderable</Filter>
     </ClCompile>
     <ClCompile Include="src\test\app.cpp">
       <Filter>src\test</Filter>
@@ -240,6 +222,18 @@
     <ClCompile Include="src\core\mir.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\renderable\assimp_model.cpp">
+      <Filter>src\core\renderable\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\renderable\assimp_mesh.cpp">
+      <Filter>src\core\renderable\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\renderable\font.cpp">
+      <Filter>src\core\renderable\label</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\renderable\label.cpp">
+      <Filter>src\core\renderable\label</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -277,6 +271,12 @@
     </Filter>
     <Filter Include="src\core\rendersys\type">
       <UniqueIdentifier>{405177f7-1d50-43ab-b4c2-1e9583ab70c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\renderable\assimp">
+      <UniqueIdentifier>{90719977-f5fd-4594-810d-5d56035572d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\renderable\label">
+      <UniqueIdentifier>{4f2df5f0-039c-4b83-928b-29bddbdb363f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

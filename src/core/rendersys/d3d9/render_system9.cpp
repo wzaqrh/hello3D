@@ -508,13 +508,13 @@ void RenderSystem9::BindPass(PassPtr pass, const cbGlobalParam& globalParam)
 	VertexShader9* vs = PtrRaw(program->mVertex);
 
 	if (pass->mConstantBuffers.size() > 0) {
-		UpdateConstBuffer(pass->mConstantBuffers[0].buffer, (void*)&globalParam, sizeof(globalParam));
+		UpdateConstBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
 	}
 
 	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
-		IContantBufferPtr buffer = pass->mConstantBuffers[i].buffer;
+		IContantBufferPtr buffer = pass->mConstantBuffers[i].Buffer;
 		char* buffer9 = (char*)std::static_pointer_cast<ContantBuffer9>(buffer)->GetBuffer9();
-		TConstBufferDeclPtr decl = buffer->GetDecl();
+		ConstBufferDeclPtr decl = buffer->GetDecl();
 		vs->mConstTable.SetValue(mDevice9, buffer9, *decl);
 		ps->mConstTable.SetValue(mDevice9, buffer9, *decl);
 	}

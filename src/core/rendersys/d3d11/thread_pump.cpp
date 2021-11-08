@@ -29,25 +29,25 @@ bool ThreadPumpEntry::IsAttached() const
 }
 
 /********** TThreadPump **********/
-TThreadPump::TThreadPump(ID3DX11ThreadPump* threadPump)
+ThreadPump::ThreadPump(ID3DX11ThreadPump* threadPump)
 {
 	if (threadPump == nullptr)
 		CheckHR(D3DX11CreateThreadPump(2, 5, &threadPump));
 	mThreadPump = threadPump;
 }
 
-TThreadPump::~TThreadPump()
+ThreadPump::~ThreadPump()
 {
 	ClearWorkItems();
 }
 
-void TThreadPump::ClearWorkItems()
+void ThreadPump::ClearWorkItems()
 {
 	CheckHR(mThreadPump->PurgeAllItems());
 	mEntries.clear();
 }
 
-HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, ThreadPumpCallback callback)
+HRESULT ThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, ThreadPumpCallback callback)
 {
 	ThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -68,7 +68,7 @@ HRESULT TThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID
 	return mThreadPump->AddWorkItem(loader, processor, (HRESULT*)&entry->hr, (void**)res->GetDeviceObject());
 }
 
-HRESULT TThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, ThreadPumpEntryPtr entry)> addItemCB, ThreadPumpCallback callback)
+HRESULT ThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, ThreadPumpEntryPtr entry)> addItemCB, ThreadPumpCallback callback)
 {
 	ThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -89,7 +89,7 @@ HRESULT TThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11
 	return addItemCB(mThreadPump, entry);
 }
 
-bool TThreadPump::RemoveWorkItem(IResourcePtr res)
+bool ThreadPump::RemoveWorkItem(IResourcePtr res)
 {
 	bool result = false;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -102,7 +102,7 @@ bool TThreadPump::RemoveWorkItem(IResourcePtr res)
 	return result;
 }
 
-void TThreadPump::Update(float dt)
+void ThreadPump::Update(float dt)
 {
 	UINT ioCount = 0, proceeCount = 0, deviceObjectCount = 0;
 	CheckHR(mThreadPump->GetQueueStatus(&ioCount, &proceeCount, &deviceObjectCount));

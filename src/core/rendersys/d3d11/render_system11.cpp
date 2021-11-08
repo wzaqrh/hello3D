@@ -13,7 +13,7 @@ namespace mir {
 RenderSystem11::RenderSystem11()
 {
 	//mMaterialFac = std::make_shared<MaterialFactory>(*this);
-	mThreadPump = std::make_shared<TThreadPump>();
+	mThreadPump = std::make_shared<ThreadPump>();
 	mFXCDir = "d3d11\\";
 }
 
@@ -609,7 +609,7 @@ IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDec
 	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
 	if (CheckHR(hr))
 		return nullptr;
-	TConstBufferDeclPtr declPtr = std::make_shared<ConstBufferDecl>(cbDecl);
+	ConstBufferDeclPtr declPtr = std::make_shared<ConstBufferDecl>(cbDecl);
 	IContantBufferPtr ret = MakePtr<ContantBuffer11>(pConstantBuffer, declPtr);
 
 	if (data) UpdateConstBuffer(ret, data, ret->GetBufferSize());
@@ -753,10 +753,10 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
 }
 
-static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<ContantBufferInfo>& bufferInfos) {
+static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<CBufferEntry>& bufferInfos) {
 	std::vector<ID3D11Buffer*> ret;
 	for (auto& iter : bufferInfos)
-		ret.push_back(std::static_pointer_cast<ContantBuffer11>(iter.buffer)->GetBuffer11());
+		ret.push_back(std::static_pointer_cast<ContantBuffer11>(iter.Buffer)->GetBuffer11());
 	return ret;
 }
 static std::vector<ID3D11SamplerState*> GetSampler11List(const std::vector<ISamplerStatePtr>& samplers) {

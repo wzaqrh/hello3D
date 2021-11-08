@@ -233,7 +233,7 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	// Data to fill
 	std::vector<AssimpMeshVertex> vertices;
 	std::vector<UINT> indices;
-	TTextureBySlotPtr texturesPtr = std::make_shared<TextureBySlot>();
+	TextureBySlotPtr texturesPtr = std::make_shared<TextureBySlot>();
 	TextureBySlot& textures = *texturesPtr;
 	textures.Resize(4);
 
@@ -455,7 +455,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
 			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
-			mesh->Material->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), make_data(weightedSkin));
+			mesh->Material->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
 
 #ifdef USE_RENDER_OP
 			mesh->GenRenderOperation(opList);

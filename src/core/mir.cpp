@@ -7,8 +7,10 @@ namespace mir {
 
 Mir::Mir()
 {}
+
 Mir::~Mir()
 {}
+
 bool Mir::Initialize(HWND hWnd) {
 #if 0
 	mRenderSys = std::static_pointer_cast<RenderSystem>(std::make_shared<TRenderSystem9>());
@@ -31,6 +33,7 @@ bool Mir::Initialize(HWND hWnd) {
 	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys, *mMaterialFac);
 	return true;
 }
+
 void Mir::Dispose() {
 	mRenderableFac = nullptr;
 	mMaterialFac = nullptr;

@@ -1,15 +1,13 @@
 #pragma once
-#include "core/rendersys/scene_manager_pred.h"
-#include "core/rendersys/interface_type_pred.h"
-#include "core/renderable/renderable_pred.h"
-#include "core/rendersys/material_pred.h"
+#include "core/rendersys/predeclare.h"
+#include "core/renderable/predeclare.h"
 #include "core/rendersys/base_type.h"
+#include "core/rendersys/material_cb.h"
 
 namespace mir {
 
-typedef std::shared_ptr<struct Transform> TransformPtr;
-
-struct __declspec(align(16)) CameraBase {
+struct __declspec(align(16)) CameraBase 
+{
 public:
 	XMMATRIX mView_;
 	XMMATRIX mProjection_;
@@ -26,7 +24,8 @@ public:
 	virtual const XMMATRIX& GetProjection();
 };
 
-struct __declspec(align(16)) Camera : public CameraBase {
+struct __declspec(align(16)) Camera : public CameraBase 
+{
 public:
 	TransformPtr mTransform;
 	bool mTransformDirty;
@@ -92,4 +91,5 @@ public:
 
 	PostProcessPtr AddPostProcess(const std::string& name);
 };
+
 };

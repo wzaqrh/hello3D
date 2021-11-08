@@ -1,7 +1,6 @@
 #pragma once
+#include "core/rendersys/predeclare.h"
 #include "core/renderable/renderable.h"
-#include "core/rendersys/scene_manager_pred.h"
-#include "core/rendersys/interface_type.h"
 
 namespace mir {
 
@@ -9,7 +8,8 @@ struct SkyboxVertex {
 	XMFLOAT4 pos;
 };
 
-class SkyBox : public IRenderable {
+class SkyBox : public IRenderable 
+{
 private:
 	CameraPtr mRefCam;
 	IRenderSystem& mRenderSys;
@@ -25,6 +25,5 @@ public:
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 	void Draw();
 };
-typedef std::shared_ptr<SkyBox> SkyBoxPtr;
 
 }

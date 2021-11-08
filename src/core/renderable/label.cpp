@@ -33,7 +33,7 @@ Label::Label(IRenderSystem& renderSys, MaterialFactory& matFac, TFontPtr font)
 	Material = matFac.GetMaterial(E_MAT_LABEL);
 
 	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, DXGI_FORMAT_R32_UINT, (void*)&sIndiceData.Indices[0]);
-	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(Quad) * MAX_STRING_LENGTH, sizeof(Pos3Color3Tex2), 0);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SpriteVertexQuad) * MAX_STRING_LENGTH, sizeof(SpriteVertex), 0);
 }
 
 int Label::GenRenderOperation(RenderOperationQueue& opList)
@@ -189,7 +189,7 @@ void Label::ForceLayout()
 
 	if (mCharSeq.size() > 0) 
 	{
-		std::vector<Quad> quadArray;
+		std::vector<SpriteVertexQuad> quadArray;
 		for (int i = 0; i < mCharSeqOrder.size(); ++i) {
 			int idx = mCharSeqOrder[i];
 			assert(idx >= 0 && idx < mCharSeq.size());
@@ -198,7 +198,7 @@ void Label::ForceLayout()
 			quadArray.push_back(quad);
 		}
 
-		mRenderSys.UpdateBuffer((mVertexBuffer), &quadArray[0], quadArray.size() * sizeof(Quad));
+		mRenderSys.UpdateBuffer((mVertexBuffer), &quadArray[0], quadArray.size() * sizeof(SpriteVertexQuad));
 	}
 }
 

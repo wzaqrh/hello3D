@@ -1,12 +1,12 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
 #include "core/renderable/renderable.h"
 #include "core/renderable/font.h"
 #include "core/renderable/sprite.h"
 
 namespace mir {
 
-class Label : public IRenderable {
+class Label : public IRenderable 
+{
 	IRenderSystem& mRenderSys;
 	TFontPtr mFont;
 
@@ -19,7 +19,7 @@ public:
 public:
 	std::string mString;
 	struct CharEntry {
-		Quad quad;
+		SpriteVertexQuad quad;
 		FontCharactorPtr charInfo;
 		ITexturePtr texture;
 		XMINT2 pen;//dot space
@@ -43,6 +43,5 @@ private:
 	void UpdateBBox();
 	void ForceLayout();
 };
-typedef std::shared_ptr<Label> LabelPtr;
 
 }

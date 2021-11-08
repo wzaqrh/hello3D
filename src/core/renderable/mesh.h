@@ -1,5 +1,4 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -10,7 +9,8 @@ struct MeshVertex {
 	XMFLOAT2 UV;
 };
 
-class Mesh : public IRenderable {
+class Mesh : public IRenderable 
+{
 	IRenderSystem& mRenderSys;
 public:
 	MaterialPtr Material;
@@ -42,6 +42,5 @@ public:
 	void SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
 	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
 };
-typedef std::shared_ptr<Mesh> MeshPtr;
 
 }

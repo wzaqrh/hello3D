@@ -193,13 +193,13 @@ DXGI_FORMAT IndexBuffer11::GetFormat()
 }
 
 /********** TContantBuffer11 **********/
-ContantBuffer11::ContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl)
+ContantBuffer11::ContantBuffer11(ID3D11Buffer* __buffer, ConstBufferDeclPtr decl)
 	: hd(__buffer, decl->BufferSize)
 	, mDecl(decl)
 {
 }
 
-TConstBufferDeclPtr ContantBuffer11::GetDecl()
+ConstBufferDeclPtr ContantBuffer11::GetDecl()
 {
 	return mDecl;
 }

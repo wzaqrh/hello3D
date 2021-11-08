@@ -1,6 +1,5 @@
 #pragma once
 #include "core/renderable/renderable.h"
-//INCLUDE_PREDEFINE_H
 
 namespace mir {
 
@@ -23,7 +22,8 @@ public:
 	void SetFlipY(bool flipY);
 	void SetZ(float z);
 };
-class PostProcess : public IRenderable {
+class PostProcess : public IRenderable 
+{
 protected:
 	IRenderSystem& mRenderSys;
 	IRenderTexturePtr mMainTex;
@@ -38,15 +38,8 @@ public:
 	void Draw();
 };
 
-struct cbBloom {
-	XMFLOAT4 SampleOffsets[16];
-	XMFLOAT4 SampleWeights[16];
-	static cbBloom CreateDownScale2x2Offsets(int dwWidth, int dwHeight);
-	static cbBloom CreateDownScale3x3Offsets(int dwWidth, int dwHeight);
-	static cbBloom CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier);
-	static ConstBufferDecl& GetDesc();
-};
-class Bloom : public PostProcess {
+class Bloom : public PostProcess 
+{
 public:
 	Bloom(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePtr mainTex);
 };

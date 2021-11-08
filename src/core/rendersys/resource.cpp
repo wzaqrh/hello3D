@@ -24,7 +24,7 @@ IUnknown** Resource::GetDeviceObject()
 
 void Resource::AddOnLoadedListener(std::function<void(IResource*)> lis)
 {
-	OnLoadeds.push_back(lis);
+	mOnLoadeds.push_back(lis);
 }
 
 void Resource::SetLoaded()
@@ -32,7 +32,7 @@ void Resource::SetLoaded()
 	mCurState = kResourceStateLoaded;
 
 	std::vector<std::function<void(IResource*)>> cbs;
-	cbs.swap(OnLoadeds);
+	cbs.swap(mOnLoadeds);
 	for (auto& cb : cbs)
 		cb(this);
 }

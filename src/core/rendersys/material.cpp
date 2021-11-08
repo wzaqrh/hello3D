@@ -9,7 +9,8 @@
 namespace mir {
 
 /********** TextureBySlot **********/
-void TextureBySlot::Merge(const TextureBySlot& other) {
+void TextureBySlot::Merge(const TextureBySlot& other) 
+{
 	if (Textures.size() < other.Textures.size())
 		Textures.resize(other.Textures.size());
 
@@ -20,14 +21,6 @@ void TextureBySlot::Merge(const TextureBySlot& other) {
 	}
 }
 
-/********** TContantBufferInfo **********/
-ContantBufferInfo::ContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name, bool __isUnique)
-	:buffer(__buffer)
-	,name(__name)
-	,isUnique(__isUnique)
-{
-}
-
 /********** TPass **********/
 Pass::Pass(const std::string& lightMode, const std::string& name)
 	:mLightMode(lightMode)
@@ -35,10 +28,10 @@ Pass::Pass(const std::string& lightMode, const std::string& name)
 {
 }
 
-IContantBufferPtr Pass::AddConstBuffer(const ContantBufferInfo& cbuffer)
+IContantBufferPtr Pass::AddConstBuffer(const CBufferEntry& cbuffer)
 {
 	mConstantBuffers.push_back(cbuffer);
-	return cbuffer.buffer;
+	return cbuffer.Buffer;
 }
 
 ISamplerStatePtr Pass::AddSampler(ISamplerStatePtr sampler)
@@ -62,7 +55,7 @@ IContantBufferPtr Pass::GetConstBufferByIdx(size_t idx)
 {
 	IContantBufferPtr ret = nullptr;
 	if (idx < mConstantBuffers.size())
-		ret = mConstantBuffers[idx].buffer;
+		ret = mConstantBuffers[idx].Buffer;
 	return ret;
 }
 
@@ -70,19 +63,19 @@ IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
 {
 	IContantBufferPtr ret = nullptr;
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
-		if (mConstantBuffers[i].name == name) {
-			ret = mConstantBuffers[i].buffer;
+		if (mConstantBuffers[i].Name == name) {
+			ret = mConstantBuffers[i].Buffer;
 			break;
 		}
 	}
 	return ret;
 }
 
-void Pass::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data)
+void Pass::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data)
 {
 	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer)
-		pRenderSys.UpdateConstBuffer(buffer, data.Data, data.DataSize);
+		pRenderSys.UpdateConstBuffer(buffer, data.Datas, data.DataSize);
 }
 
 std::shared_ptr<Pass> Pass::Clone(IRenderSystem& pRenderSys)
@@ -97,8 +90,8 @@ std::shared_ptr<Pass> Pass::Clone(IRenderSystem& pRenderSys)
 
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
 		auto buffer = mConstantBuffers[i];
-		if (!buffer.isUnique)
-			buffer.buffer = pRenderSys.CloneConstBuffer(buffer.buffer);
+		if (!buffer.IsUnique)
+			buffer.Buffer = pRenderSys.CloneConstBuffer(buffer.Buffer);
 		pass->AddConstBuffer(buffer);
 	}
 
@@ -118,11 +111,11 @@ void Technique::AddPass(PassPtr pass)
 	mPasses.push_back(pass);
 }
 
-IContantBufferPtr Technique::AddConstBuffer(const ContantBufferInfo& cbuffer)
+IContantBufferPtr Technique::AddConstBuffer(const CBufferEntry& cbuffer)
 {
 	for (auto& pass : mPasses)
 		pass->AddConstBuffer(cbuffer);
-	return cbuffer.buffer;
+	return cbuffer.Buffer;
 }
 
 ISamplerStatePtr Technique::AddSampler(ISamplerStatePtr sampler)
@@ -161,7 +154,7 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 	return std::move(passVec);
 }
 
-void Technique::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data)
+void Technique::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data)
 {
 	for (int i = 0; i < mPasses.size(); ++i)
 		mPasses[i]->UpdateConstBufferByName(pRenderSys, name, data);
@@ -202,11 +195,11 @@ void Material::SetCurTechByName(const std::string& name)
 		}
 }
 
-IContantBufferPtr Material::AddConstBuffer(const ContantBufferInfo& cbuffer)
+IContantBufferPtr Material::AddConstBuffer(const CBufferEntry& cbuffer)
 {
 	for (auto& tech : mTechniques)
 		tech->AddConstBuffer(cbuffer);
-	return cbuffer.buffer;
+	return cbuffer.Buffer;
 }
 
 ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)

@@ -1,5 +1,4 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
 #include "core/rendersys/interface_type.h"
 #include "ft2build.h"
 #include "freetype.h"

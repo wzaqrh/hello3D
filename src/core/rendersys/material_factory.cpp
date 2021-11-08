@@ -17,6 +17,8 @@
 #include "core/renderable/post_process.h"
 #include "core/base/utility.h"
 
+#define MATERIAL_FROM_XML
+
 namespace boost_filesystem = boost::filesystem;
 namespace boost_property_tree = boost::property_tree;
 
@@ -93,11 +95,11 @@ public:
 		return *this;
 	}
 	TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
-		mCurPass->AddConstBuffer(ContantBufferInfo(buffer, name, isUnique));
+		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
 		return *this;
 	}
 	TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
-		mCurTech->AddConstBuffer(ContantBufferInfo(buffer, name, isUnique));
+		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
 		return *this;
 	}
 	TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target) {
@@ -827,7 +829,7 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
 		};
 
 		//pass DownScale3x3
@@ -844,7 +846,7 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
 		};
 
 		//pass DownScale3x3_BrightPass
@@ -858,7 +860,7 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
 		};
 
 		//pass Bloom
@@ -875,7 +877,7 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
 			auto mainTex = textures[0];
 			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex->GetWidth(), 3.0f, 1.25f);
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), make_data(bloom));
+			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
 		};
 
 		//pass FinalPass

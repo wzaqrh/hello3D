@@ -1,8 +1,8 @@
 #pragma once
 #include "core/base/std.h"
-#include "core/renderable/renderable_pred.h"
+#include "core/renderable/predeclare.h"
+#include "core/rendersys/predeclare.h"
 #include "core/rendersys/material.h"
-#include "core/rendersys/interface_type_pred.h"
 
 namespace mir {
 

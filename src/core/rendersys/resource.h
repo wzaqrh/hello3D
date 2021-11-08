@@ -1,10 +1,8 @@
 #pragma once
 #include "core/base/std.h"
+#include "core/rendersys/predeclare.h"
 
 namespace mir {
-
-typedef std::shared_ptr<struct IResource> IResourcePtr;
-typedef std::shared_ptr<struct Resource> ResourcePtr;
 
 enum ResourceState {
 	kResourceStateNone,
@@ -33,14 +31,12 @@ public:
 struct Resource : public IResource {
 	IUnknown** mDeviceObj;
 	ResourceState mCurState;
-	std::vector<std::function<void(IResource*)>> OnLoadeds;
+	std::vector<std::function<void(IResource*)>> mOnLoadeds;
 	std::vector<ResourcePtr> mDepends;
 public:
 	Resource() :mCurState(kResourceStateNone),mDeviceObj(nullptr) {}
 	Resource(IUnknown** deviceObj);
-	ResourceState GetCurState() override {
-		return mCurState;
-	}
+	ResourceState GetCurState() override { return mCurState; }
 	void SetCurState(ResourceState state) override;
 
 	void SetLoaded() override;

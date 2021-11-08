@@ -8,7 +8,7 @@ namespace mir {
 AssimpMesh::AssimpMesh(const aiMesh* data,
 	std::vector<AssimpMeshVertex>& vertices,
 	std::vector<UINT>& indices,
-	TTextureBySlotPtr textures,
+	TextureBySlotPtr textures,
 	MaterialPtr material,
 	IRenderSystem& renderSys)
 {

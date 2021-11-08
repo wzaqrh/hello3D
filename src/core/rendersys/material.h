@@ -1,12 +1,13 @@
 #pragma once
-#include "core/rendersys/material_pred.h"
-#include "core/rendersys/interface_type_pred.h"
+#include "core/rendersys/predeclare.h"
+#include "core/rendersys/base_type.h"
 #include "core/rendersys/resource.h"
 #include "core/rendersys/material_cb.h"
 
 namespace mir {
 
-struct TextureBySlot {
+struct TextureBySlot 
+{
 public:
 	void Clear() {
 		Textures.clear();
@@ -37,19 +38,18 @@ public:
 	std::vector<ITexturePtr> Textures;
 };
 
-struct ContantBufferInfo 
+struct CBufferEntry 
 {
-	IContantBufferPtr buffer;
-	bool isUnique;
-	std::string name;
+	IContantBufferPtr Buffer;
+	std::string Name;
+	bool IsUnique;
 public:
-	ContantBufferInfo() :buffer(nullptr), isUnique(false) {}
-	ContantBufferInfo(IContantBufferPtr __buffer, const std::string& __name = "", bool __isUnique = true);
+	static CBufferEntry Make(IContantBufferPtr buffer, const std::string& name, bool isUnique) {
+		return CBufferEntry{buffer, name, isUnique};
+	}
 };
 #define MAKE_CBNAME(V) #V
 
-struct TData;
-struct IRenderSystem;
 struct Pass 
 {
 	std::string mLightMode,mName;
@@ -59,7 +59,7 @@ struct Pass
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
 
-	std::vector<ContantBufferInfo> mConstantBuffers;
+	std::vector<CBufferEntry> mConstantBuffers;
 
 	IRenderTexturePtr mRenderTarget;
 	std::vector<IRenderTexturePtr> mIterTargets;
@@ -70,14 +70,14 @@ struct Pass
 public:
 	Pass(const std::string& lightMode, const std::string& name);
 	std::shared_ptr<Pass> Clone(IRenderSystem& pRenderSys);
-	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
 	IRenderTexturePtr AddIterTarget(IRenderTexturePtr target);
 	
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data);
+	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);
 };
 
 struct Technique
@@ -87,14 +87,14 @@ struct Technique
 public:
 	void AddPass(PassPtr pass);
 	std::shared_ptr<Technique> Clone(IRenderSystem& pRenderSys);
-	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
 
 	PassPtr GetPassByLightMode(const std::string& lightMode);
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 
-	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const TData& data);
+	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);
 };
 
 class Material : public Resource 
@@ -109,7 +109,7 @@ public:
 	TechniquePtr SetCurTechByIdx(int idx);
 	void SetCurTechByName(const std::string& name);
 
-	IContantBufferPtr AddConstBuffer(const ContantBufferInfo& cbuffer);
+	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 };
 

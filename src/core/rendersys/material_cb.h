@@ -1,12 +1,13 @@
 #pragma once
-#include "core/rendersys/material_pred.h"
+#include "core/rendersys/predeclare.h"
 
 namespace mir {
 
-struct CameraBase;
-struct Camera;
-struct ConstBufferDecl;
-
+enum LightType {
+	kLightDirectional,
+	kLightPoint,
+	kLightSpot
+};
 struct cbDirectLight {
 public:
 	XMFLOAT4 LightPos;//world space
@@ -44,7 +45,6 @@ public:
 	static ConstBufferDecl& GetDesc();
 };
 
-#define MAX_LIGHTS 4
 struct __declspec(align(16)) cbGlobalParam
 {
 	XMMATRIX World;
@@ -67,7 +67,7 @@ public:
 	static ConstBufferDecl MKDesc();
 };
 
-struct cbFogExp 
+struct __declspec(align(16)) cbFogExp 
 {
 	XMFLOAT4 FogColorExp;
 public:
@@ -113,6 +113,16 @@ struct __declspec(align(16)) cbUnityGlobal
 	cbUnityGlobal();
 	static ConstBufferDecl& GetDesc();
 	static ConstBufferDecl MKDesc();
+};
+
+struct cbBloom {
+	XMFLOAT4 SampleOffsets[16];
+	XMFLOAT4 SampleWeights[16];
+public:
+	static cbBloom CreateDownScale2x2Offsets(int dwWidth, int dwHeight);
+	static cbBloom CreateDownScale3x3Offsets(int dwWidth, int dwHeight);
+	static cbBloom CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier);
+	static ConstBufferDecl& GetDesc();
 };
 
 }

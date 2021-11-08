@@ -1,15 +1,17 @@
 #pragma once
-#include "core/rendersys/interface_type_pred.h"
+#include "core/rendersys/predeclare.h"
 
 namespace mir {
 
 /********** Program **********/
-interface IBlobData  {
+interface IBlobData  
+{
 	virtual char* GetBufferPointer() = 0;
 	virtual size_t GetBufferSize() = 0;
 };
 
-interface BlobDataStandard : public IBlobData {
+interface BlobDataStandard : public IBlobData 
+{
 	std::vector<char> mBuffer;
 public:
 	BlobDataStandard(const std::vector<char>& buffer);
@@ -17,22 +19,26 @@ public:
 	size_t GetBufferSize() override;
 };
 
-interface IInputLayout  {
+interface IInputLayout  
+{
 	virtual IResourcePtr AsRes() = 0;
 };
 
-interface IVertexShader {
+interface IVertexShader 
+{
 	virtual IBlobDataPtr GetBlob() = 0;
 	virtual IResourcePtr AsRes() = 0;
 };
 
-interface IPixelShader {
+interface IPixelShader 
+{
 public:
 	virtual IBlobDataPtr GetBlob() = 0;
 	virtual IResourcePtr AsRes() = 0;
 };
 
-interface IProgram {
+interface IProgram 
+{
 	virtual IVertexShaderPtr GetVertex() = 0;
 	virtual IPixelShaderPtr GetPixel() = 0;
 	virtual IResourcePtr AsRes() = 0;
@@ -44,24 +50,28 @@ enum HardwareBufferType {
 	kHWBufferVertex,
 	kHWBufferIndex
 };
-interface IHardwareBuffer  {
+interface IHardwareBuffer 
+{
 	virtual HardwareBufferType GetType() = 0;
 	virtual unsigned int GetBufferSize() = 0;
 };
 
-interface IVertexBuffer : public IHardwareBuffer {
+interface IVertexBuffer : public IHardwareBuffer 
+{
 	virtual unsigned int GetStride() = 0;
 	virtual unsigned int GetOffset() = 0;
 };
 
-interface IIndexBuffer : public IHardwareBuffer {
+interface IIndexBuffer : public IHardwareBuffer 
+{
 	virtual int GetWidth() = 0;
 	virtual DXGI_FORMAT GetFormat() = 0;
 	int GetCount();
 };
 
-interface IContantBuffer : public IHardwareBuffer {
-	virtual TConstBufferDeclPtr GetDecl() = 0;
+interface IContantBuffer : public IHardwareBuffer 
+{
+	virtual ConstBufferDeclPtr GetDecl() = 0;
 };
 
 /********** Texture **********/
@@ -80,7 +90,8 @@ enum TexturePbrType {
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
 
-interface ITexture {
+interface ITexture 
+{
 	virtual IResourcePtr AsRes() = 0;
 	virtual bool HasSRV() = 0;
 
@@ -91,12 +102,13 @@ interface ITexture {
 	virtual int GetMipmapCount() = 0;
 };
 
-interface IRenderTexture  {
+interface IRenderTexture  
+{
 	virtual ITexturePtr GetColorTexture() = 0;
 };
 
-interface ISamplerState {
-
+interface ISamplerState 
+{
 };
 
 }

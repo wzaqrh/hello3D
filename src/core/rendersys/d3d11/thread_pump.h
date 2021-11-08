@@ -17,13 +17,13 @@ public:
 };
 typedef std::shared_ptr<ThreadPumpEntry> ThreadPumpEntryPtr;
 
-class TThreadPump
+class ThreadPump
 {
 	std::vector<ThreadPumpEntryPtr> mEntries;
 	ID3DX11ThreadPump* mThreadPump;
 public:
-	TThreadPump(ID3DX11ThreadPump* threadPump = nullptr);
-	~TThreadPump();
+	ThreadPump(ID3DX11ThreadPump* threadPump = nullptr);
+	~ThreadPump();
 
 	HRESULT AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, ThreadPumpEntryPtr entry)> addItemCB, ThreadPumpCallback callback=nullptr);
 	HRESULT AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, ThreadPumpCallback callback=nullptr);
@@ -31,7 +31,7 @@ public:
 	void ClearWorkItems();
 	void Update(float dt);
 };
-typedef std::shared_ptr<TThreadPump> ThreadPumpPtr;
+//typedef std::shared_ptr<ThreadPump> ThreadPumpPtr;
 
 }
 

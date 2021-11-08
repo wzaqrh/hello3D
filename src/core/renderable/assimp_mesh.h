@@ -1,5 +1,4 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -25,7 +24,7 @@ public:
 	const aiMesh* Data = nullptr;
 	std::vector<AssimpMeshVertex> Vertices;
 	std::vector<UINT> Indices;
-	TTextureBySlotPtr Textures;
+	TextureBySlotPtr Textures;
 	IVertexBufferPtr VertexBuffer;
 	IIndexBufferPtr IndexBuffer;
 	MaterialPtr Material;
@@ -33,7 +32,7 @@ public:
 	AssimpMesh(const aiMesh* data, 
 		std::vector<AssimpMeshVertex>& vertices, 
 		std::vector<UINT>& indices,
-		TTextureBySlotPtr textures,
+		TextureBySlotPtr textures,
 		MaterialPtr material,
 		IRenderSystem& renderSys);
 	bool HasTexture(int slot);

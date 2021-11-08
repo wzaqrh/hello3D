@@ -1,6 +1,5 @@
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/material_cb.h"
-#include "core/rendersys/const_buffer_decl.h"
 #include "core/base/utility.h"
 
 namespace mir {
@@ -31,31 +30,6 @@ ConstBufferDeclElement& ConstBufferDecl::Last()
 	return Elements.back();
 }
 
-/********** TConstBufferDeclBuilder **********/
-ConstBufferDeclBuilder::ConstBufferDeclBuilder(ConstBufferDecl& decl)
-	:mDecl(decl)
-{
-}
-
-ConstBufferDeclBuilder& ConstBufferDeclBuilder::Add(const ConstBufferDeclElement& elem)
-{
-	mDecl.Add(elem).Offset = mDecl.BufferSize;
-	mDecl.BufferSize += elem.Size;
-	return *this;
-}
-
-ConstBufferDeclBuilder& ConstBufferDeclBuilder::Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl)
-{
-	mDecl.Add(elem, subDecl).Offset = mDecl.BufferSize;
-	mDecl.BufferSize += elem.Size;
-	return *this;
-}
-
-ConstBufferDecl& ConstBufferDeclBuilder::Build()
-{
-	return mDecl;
-}
-
 /********** TBlendFunc **********/
 BlendFunc::BlendFunc(D3D11_BLEND __src, D3D11_BLEND __dst)
 {
@@ -78,12 +52,5 @@ DepthState::DepthState(bool __depthEnable, D3D11_COMPARISON_FUNC __depthFunc /*=
 
 DepthState DepthState::For2D = DepthState(false, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ZERO);
 DepthState DepthState::For3D = DepthState(true, D3D11_COMPARISON_LESS, D3D11_DEPTH_WRITE_MASK_ALL);
-
-/********** TData **********/
-TData::TData(void* __data, unsigned int __dataSize)
-	:Data(__data)
-	, DataSize(__dataSize)
-{
-}
 
 }

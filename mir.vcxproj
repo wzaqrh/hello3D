@@ -32,16 +32,16 @@
     <ClInclude Include="src\core\base\transform.h" />
     <ClInclude Include="src\core\base\utility.h" />
     <ClInclude Include="src\core\mir.h" />
-    <ClInclude Include="src\core\pre_define.h" />
+    <ClInclude Include="src\core\predeclare.h" />
     <ClInclude Include="src\core\renderable\assimp_mesh.h" />
     <ClInclude Include="src\core\renderable\assimp_model.h" />
     <ClInclude Include="src\core\renderable\font.h" />
     <ClInclude Include="src\core\renderable\label.h" />
     <ClInclude Include="src\core\renderable\mesh.h" />
     <ClInclude Include="src\core\renderable\post_process.h" />
+    <ClInclude Include="src\core\renderable\predeclare.h" />
     <ClInclude Include="src\core\renderable\renderable.h" />
     <ClInclude Include="src\core\renderable\renderable_factory.h" />
-    <ClInclude Include="src\core\renderable\renderable_pred.h" />
     <ClInclude Include="src\core\renderable\skybox.h" />
     <ClInclude Include="src\core\renderable\sprite.h" />
     <ClInclude Include="src\core\rendersys\base_type.h" />
@@ -54,15 +54,13 @@
     <ClInclude Include="src\core\rendersys\d3d9\render_system9.h" />
     <ClInclude Include="src\core\rendersys\d3d9\stddx9.h" />
     <ClInclude Include="src\core\rendersys\interface_type.h" />
-    <ClInclude Include="src\core\rendersys\interface_type_pred.h" />
     <ClInclude Include="src\core\rendersys\material.h" />
     <ClInclude Include="src\core\rendersys\material_cb.h" />
     <ClInclude Include="src\core\rendersys\material_factory.h" />
-    <ClInclude Include="src\core\rendersys\material_pred.h" />
+    <ClInclude Include="src\core\rendersys\predeclare.h" />
     <ClInclude Include="src\core\rendersys\render_system.h" />
     <ClInclude Include="src\core\rendersys\resource.h" />
     <ClInclude Include="src\core\rendersys\scene_manager.h" />
-    <ClInclude Include="src\core\rendersys\scene_manager_pred.h" />
     <ClInclude Include="src\test\app.h" />
     <ClInclude Include="src\test\test_case.h" />
   </ItemGroup>

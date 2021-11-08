@@ -26,8 +26,6 @@ namespace mir {
 #define E_PASS_FORWARDADD "ForwardAdd"
 #define E_PASS_POSTPROCESS "PostProcess"
 
-#define MATERIAL_FROM_XML
-struct RenderSystem;
 struct MaterialFactory
 {
 	RenderSystem& mRenderSys;

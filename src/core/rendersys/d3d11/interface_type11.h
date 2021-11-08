@@ -117,13 +117,13 @@ public:
 };
 
 struct ContantBuffer11 : public IContantBuffer {
-	TConstBufferDeclPtr mDecl;
+	ConstBufferDeclPtr mDecl;
 	HardwareBuffer hd;
 public:
 	ContantBuffer11() {}
-	ContantBuffer11(ID3D11Buffer* __buffer, TConstBufferDeclPtr decl);
+	ContantBuffer11(ID3D11Buffer* __buffer, ConstBufferDeclPtr decl);
 public:
-	TConstBufferDeclPtr GetDecl() override;
+	ConstBufferDeclPtr GetDecl() override;
 	HardwareBufferType GetType() override { return kHWBufferConstant; }
 
 	ID3D11Buffer*& GetBuffer11();

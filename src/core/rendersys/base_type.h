@@ -5,13 +5,12 @@ namespace mir {
 
 template<class T> T clamp(T minVal, T maxVal, T v) { return min(max(v, minVal),maxVal); }
 
-struct TData 
+struct Data 
 {
-	void* Data;
+	void* Datas;
 	unsigned int DataSize;
-	TData(void* __data, unsigned int __dataSize);
+	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
 };
-template <class T> inline TData make_data(const T& v) { return TData((void*)&v, sizeof(v)); }
 
 struct BlendFunc 
 {
@@ -69,6 +68,5 @@ public:
 	ConstBufferDeclElement& Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl);
 	ConstBufferDeclElement& Last();
 };
-typedef std::shared_ptr<ConstBufferDecl> TConstBufferDeclPtr;
 
 }

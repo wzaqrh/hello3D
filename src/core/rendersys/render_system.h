@@ -1,15 +1,9 @@
 #pragma once
-#include "core/rendersys/interface_type_pred.h"
-#include "core/rendersys/scene_manager_pred.h"
-#include "core/rendersys/material_pred.h"
+#include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
-
-struct RenderOperation;
-struct RenderOperationQueue;
-struct IRenderable;
 
 interface IRenderSystem 
 {
@@ -58,7 +52,6 @@ interface IRenderSystem
 	virtual void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode) = 0;
 	virtual void Draw(IRenderable* renderable) = 0;
 };
-typedef std::shared_ptr<IRenderSystem> IRenderSystemPtr;
 
 struct __declspec(align(16)) RenderSystem : IRenderSystem
 {
@@ -103,6 +96,5 @@ public:
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube) = 0;
 };
-typedef std::shared_ptr<RenderSystem> RenderSystemPtr;
 
 }

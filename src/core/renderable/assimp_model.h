@@ -1,7 +1,6 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
-#include "core/renderable/assimp_mesh.h"
 #include "core/renderable/renderable.h"
+#include "core/renderable/assimp_mesh.h"
 
 namespace mir {
 

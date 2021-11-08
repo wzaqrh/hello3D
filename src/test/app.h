@@ -1,7 +1,6 @@
 #pragma once
 #include "core/mir.h"
-#include "core/rendersys/interface_type_pred.h"
-#include "core/rendersys/material_pred.h"
+#include "core/rendersys/predeclare.h"
 
 namespace mir {
 	struct aiNode;

@@ -129,15 +129,15 @@ public:
 };
 
 struct ContantBuffer9 : public IContantBuffer {
-	TConstBufferDeclPtr mDecl;
+	ConstBufferDeclPtr mDecl;
 	std::vector<char> mBuffer9;
 public:
-	ContantBuffer9(TConstBufferDeclPtr decl);
+	ContantBuffer9(ConstBufferDeclPtr decl);
 public:
 	HardwareBufferType GetType() override { return kHWBufferConstant; }
 	unsigned int GetBufferSize() override;
 
-	TConstBufferDeclPtr GetDecl() override;
+	ConstBufferDeclPtr GetDecl() override;
 	char* GetBuffer9();
 	void SetBuffer9(char* data, int dataSize);
 };

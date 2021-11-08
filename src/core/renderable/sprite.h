@@ -1,26 +1,26 @@
 #pragma once
+#include "core/rendersys/predeclare.h"
 #include "core/renderable/renderable.h"
-#include "core/rendersys/interface_type_pred.h"
 
 namespace mir {
 
-struct Pos3Color3Tex2 {
+struct SpriteVertex {
 	XMFLOAT3 Pos;
 	unsigned int Color;
 	XMFLOAT2 Tex;
 };
 
-struct Quad {
+struct SpriteVertexQuad {
 #if _MSC_VER <= 1800
-	Pos3Color3Tex2 lb, lt, rt, rb;
+	SpriteVertex lb, lt, rt, rb;
 #else
 	union {
-		Pos3Color3Tex2 m[4];
-		struct { Pos3Color3Tex2 lb,lt,rt,rb; };
+		SpriteVertex m[4];
+		struct { SpriteVertex lb,lt,rt,rb; };
 	};
 #endif
-	Quad();
-	Quad(float x, float y, float w, float h);
+	SpriteVertexQuad();
+	SpriteVertexQuad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
 	void SetColor(const XMFLOAT4& color);
 	void SetZ(float z);
@@ -30,9 +30,10 @@ private:
 	void DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt);
 };
 
-class Sprite : public IRenderable {
+class Sprite : public IRenderable 
+{
 private:
-	Quad mQuad;
+	SpriteVertexQuad mQuad;
 	bool mQuadDirty;
 	XMFLOAT2 mPosition;
 	XMFLOAT2 mSize;
@@ -57,8 +58,7 @@ public:
 	void SetTexture(ITexturePtr Texture);
 	void SetColor(XMFLOAT4 color);
 	void SetFlipY(bool flipY);
-	const Quad* GetQuad() { return &mQuad; }
+	const SpriteVertexQuad* GetQuad() { return &mQuad; }
 };
-typedef std::shared_ptr<Sprite> SpritePtr;
 
 }

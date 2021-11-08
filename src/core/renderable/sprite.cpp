@@ -7,20 +7,20 @@
 namespace mir {
 
 /********** Quad **********/
-Quad::Quad()
+SpriteVertexQuad::SpriteVertexQuad()
 {
 	DoSetTexCoords(XMFLOAT2(0, 0), XMFLOAT2(1, 1));
 	SetColor(XMFLOAT4(1, 1, 1, 1));
 }
 
-Quad::Quad(float x, float y, float w, float h)
+SpriteVertexQuad::SpriteVertexQuad(float x, float y, float w, float h)
 {
 	SetRect(x, y, w, h);
 	DoSetTexCoords(XMFLOAT2(0, 0), XMFLOAT2(1, 1));
 	SetColor(XMFLOAT4(1, 1, 1, 1));
 }
 
-void Quad::SetRect(float x, float y, float w, float h)
+void SpriteVertexQuad::SetRect(float x, float y, float w, float h)
 {
 	lb.Pos = XMFLOAT3(x, y, 0);
 	lt.Pos = XMFLOAT3(x, y + h, 0);
@@ -28,7 +28,7 @@ void Quad::SetRect(float x, float y, float w, float h)
 	rb.Pos = XMFLOAT3(x + w, y, 0);
 }
 
-void Quad::SetColor(const XMFLOAT4& color)
+void SpriteVertexQuad::SetColor(const XMFLOAT4& color)
 {
 	unsigned char c[4] = {
 		static_cast<unsigned char>(color.x * 255),
@@ -42,7 +42,7 @@ void Quad::SetColor(const XMFLOAT4& color)
 	rb.Color = *((int*)c);
 }
 
-void Quad::SetZ(float z)
+void SpriteVertexQuad::SetZ(float z)
 {
 	lb.Pos.z = z;
 	lt.Pos.z = z;
@@ -50,13 +50,13 @@ void Quad::SetZ(float z)
 	rb.Pos.z = z;
 }
 
-void Quad::FlipY()
+void SpriteVertexQuad::FlipY()
 {
 	std::swap(lb.Tex.y, rt.Tex.y);
 	DoSetTexCoords(lb.Tex, rt.Tex);
 }
 
-void Quad::DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt)
+void SpriteVertexQuad::DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt)
 {
 	lb.Tex = XMFLOAT2(plb.x, plb.y);
 	lt.Tex = XMFLOAT2(plb.x, prt.y);
@@ -64,7 +64,7 @@ void Quad::DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt)
 	rb.Tex = XMFLOAT2(prt.x, plb.y);
 }
 
-void Quad::SetTexCoord(const XMFLOAT2& uv0, const XMFLOAT2& uv1)
+void SpriteVertexQuad::SetTexCoord(const XMFLOAT2& uv0, const XMFLOAT2& uv1)
 {
 	DoSetTexCoords(uv0, uv1);
 }
@@ -86,7 +86,7 @@ Sprite::Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::str
 	Transform = std::make_shared<Movable>();
 	Material = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
 	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
-	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(Quad), sizeof(Pos3Color3Tex2), 0);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0);
 
 	if (mFlipY) mQuad.FlipY();
 }

@@ -4,7 +4,6 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/material_factory.h"
-#include "core/rendersys/const_buffer_decl.h"
 
 namespace mir {
 
@@ -109,87 +108,6 @@ Bloom::Bloom(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePt
 			}
 		}
 	}
-}
-
-cbBloom cbBloom::CreateDownScale2x2Offsets(int dwWidth, int dwHeight)
-{
-	cbBloom bloom = {};
-	float tU = 1.0f / dwWidth;// / 2.0f;
-	float tV = 1.0f / dwHeight;// / 2.0f;
-	// Sample from 4 surrounding points. 
-	int index = 0;
-	for (int y = 0; y < 2; y++)
-	{
-		for (int x = 0; x < 2; x++)
-		{
-			bloom.SampleOffsets[index].x = (x - 0.5f) * tU;
-			bloom.SampleOffsets[index].y = (y - 0.5f) * tV;
-			index++;
-		}
-	}
-	//return bloom;
-	return CreateDownScale3x3Offsets(dwWidth, dwHeight);
-}
-
-cbBloom cbBloom::CreateDownScale3x3Offsets(int dwWidth, int dwHeight)
-{
-	cbBloom bloom = {};
-	float tU = 1.0f / dwWidth;
-	float tV = 1.0f / dwHeight;
-	// Sample from the 9 surrounding points. 
-	int index = 0;
-	for (int y = -1; y <= 1; y++)
-	{
-		for (int x = -1; x <= 1; x++)
-		{
-			bloom.SampleOffsets[index].x = x * tU;
-			bloom.SampleOffsets[index].y = y * tV;
-			index++;
-		}
-	}
-	return bloom;
-}
-inline float GaussianDistribution(float x, float y, float rho)
-{
-	float g = 1.0f / sqrtf(2.0f * 3.141592654f * rho * rho);
-	g *= expf(-(x * x + y * y) / (2 * rho * rho));
-	return g;
-}
-
-cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier)
-{
-	cbBloom bloom = {};
-	int i = 0;
-	float tu = 1.0f / (float)dwD3DTexSize;
-
-	// Fill the center texel
-	float weight = 1.0f * GaussianDistribution(0, 0, fDeviation);
-	bloom.SampleOffsets[0] = XMFLOAT4(0.0f, 0, 0, 0);
-	bloom.SampleWeights[0] = XMFLOAT4(weight, weight, weight, 1.0f);
-
-	// Fill the right side
-	for (i = 1; i < 8; i++)
-	{
-		weight = fMultiplier * GaussianDistribution((float)i, 0, fDeviation);
-		bloom.SampleOffsets[i] = XMFLOAT4(i * tu,0, 0, 0);
-		bloom.SampleWeights[i] = XMFLOAT4(weight, weight, weight, 1.0f);
-	}
-
-	// Copy to the left side
-	for (i = 8; i < 15; i++)
-	{
-		bloom.SampleOffsets[i] = XMFLOAT4(-bloom.SampleOffsets[i - 7].x, 0, 0, 0);
-		bloom.SampleWeights[i] = bloom.SampleWeights[i - 7];
-	}
-	return bloom;
-}
-
-ConstBufferDecl& cbBloom::GetDesc()
-{
-	CBBEGIN(cbBloom);
-	builder.Add(CBELEMNTS(SampleOffsets));
-	builder.Add(CBELEMNTS(SampleWeights));
-	return builder.Build();
 }
 
 }

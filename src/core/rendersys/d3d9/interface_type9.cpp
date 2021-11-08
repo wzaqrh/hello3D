@@ -323,14 +323,14 @@ std::map<D3DSAMPLERSTATETYPE, DWORD>& SamplerState9::GetSampler9()
 }
 
 /********** TContantBuffer9 **********/
-ContantBuffer9::ContantBuffer9(TConstBufferDeclPtr decl)
+ContantBuffer9::ContantBuffer9(ConstBufferDeclPtr decl)
 	:mDecl(decl)
 {
 	assert(mDecl != nullptr);
 	mBuffer9.resize(mDecl->BufferSize);
 }
 
-TConstBufferDeclPtr ContantBuffer9::GetDecl()
+ConstBufferDeclPtr ContantBuffer9::GetDecl()
 {
 	return mDecl;
 }
