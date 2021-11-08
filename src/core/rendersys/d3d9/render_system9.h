@@ -65,10 +65,10 @@ protected:
 	void _DoPostProcess();
 
 	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
-	TVertexShader9Ptr _CreateVS(const char* filename, const char* entry = nullptr);
-	TPixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);
-	TVertexShader9Ptr _CreateVSByFXC(const char* filename);
-	TPixelShader9Ptr _CreatePSByFXC(const char* filename);
+	VertexShader9Ptr _CreateVS(const char* filename, const char* entry = nullptr);
+	PixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);
+	VertexShader9Ptr _CreateVSByFXC(const char* filename);
+	PixelShader9Ptr _CreatePSByFXC(const char* filename);
 	IDirect3DVertexDeclaration9* _CreateInputLayout(Program9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:
 	bool _GetDeviceCaps();

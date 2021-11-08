@@ -137,14 +137,14 @@ void RenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, U
 
 IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
 {
-	TTexture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
+	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
 	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
 	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
-	TRenderTexture9Ptr ret = MakePtr<RenderTexture9>(pTextureRV, pSurfaceDepthStencil);
+	RenderTexture9Ptr ret = MakePtr<RenderTexture9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;
 }
 
@@ -164,20 +164,20 @@ void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 
 IContantBufferPtr RenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
 {
-	TContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(buffer->GetDecl());
+	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(buffer->GetDecl());
 	return ret;
 }
 
 IContantBufferPtr RenderSystem9::CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
-	TContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));
+	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));
 	if (data) UpdateBuffer((ret), data, ret->GetBufferSize());
 	return ret;
 }
 
 IIndexBufferPtr RenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
 {
-	TIndexBuffer9Ptr ret;
+	IndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
 	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
@@ -194,7 +194,7 @@ void RenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 
 IVertexBufferPtr RenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
-	TVertexBuffer9Ptr ret;
+	VertexBuffer9Ptr ret;
 	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
 	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, D3DUSAGE_WRITEONLY, 0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
 		ret = MakePtr<VertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
@@ -248,8 +248,8 @@ void RenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int 
 	UpdateBuffer((buffer), data, dataSize);
 }
 
-static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
-	TVertexShader9Ptr ret = MakePtr< VertexShader9>();
+static VertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
+	VertexShader9Ptr ret = MakePtr< VertexShader9>();
 
 	if (CheckHR(pDevice9->CreateVertexShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
 
@@ -261,28 +261,28 @@ static TVertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPt
 	ret->AsRes()->SetLoaded();
 	return ret;
 }
-TVertexShader9Ptr RenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
+VertexShader9Ptr RenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
 	entry = entry ? entry : "VS";
-	TBlobDataD3d9Ptr blob = MakePtr<BlobData9>(nullptr);
-	TBlobDataD3d9Ptr errBlob = MakePtr<BlobData9>(nullptr);
+	BlobData9Ptr blob = MakePtr<BlobData9>(nullptr);
+	BlobData9Ptr errBlob = MakePtr<BlobData9>(nullptr);
 	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
 	}
 
-	TVertexShader9Ptr ret = _CreateVSByBlob(mDevice9, blob);
+	VertexShader9Ptr ret = _CreateVSByBlob(mDevice9, blob);
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-TVertexShader9Ptr RenderSystem9::_CreateVSByFXC(const char* filename)
+VertexShader9Ptr RenderSystem9::_CreateVSByFXC(const char* filename)
 {
-	TVertexShader9Ptr ret;
+	VertexShader9Ptr ret;
 	std::vector<char> buffer = ReadFile(filename, "rb");
 	if (!buffer.empty()) {
 		ret = _CreateVSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
@@ -290,8 +290,8 @@ TVertexShader9Ptr RenderSystem9::_CreateVSByFXC(const char* filename)
 	return ret;
 }
 
-static TPixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
-	TPixelShader9Ptr ret = MakePtr<PixelShader9>();
+static PixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
+	PixelShader9Ptr ret = MakePtr<PixelShader9>();
 	ret->mBlob = pBlob;
 	
 	if (CheckHR(pDevice9->CreatePixelShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
@@ -303,28 +303,28 @@ static TPixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr
 	ret->AsRes()->SetLoaded();
 	return ret;
 }
-TPixelShader9Ptr RenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
+PixelShader9Ptr RenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
 	entry = entry ? entry : "PS";
-	TBlobDataD3d9Ptr blob = MakePtr<BlobData9>(nullptr);
-	TBlobDataD3d9Ptr errBlob = MakePtr<BlobData9>(nullptr);
+	BlobData9Ptr blob = MakePtr<BlobData9>(nullptr);
+	BlobData9Ptr errBlob = MakePtr<BlobData9>(nullptr);
 	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
 	}
 
-	TPixelShader9Ptr ret = _CreatePSByBlob(mDevice9, blob);
+	PixelShader9Ptr ret = _CreatePSByBlob(mDevice9, blob);
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-TPixelShader9Ptr RenderSystem9::_CreatePSByFXC(const char* filename)
+PixelShader9Ptr RenderSystem9::_CreatePSByFXC(const char* filename)
 {
-	TPixelShader9Ptr ret;
+	PixelShader9Ptr ret;
 	std::vector<char> buffer = ReadFile(filename, "rb");
 	if (!buffer.empty()) {
 		ret = _CreatePSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
@@ -336,7 +336,7 @@ IProgramPtr RenderSystem9::CreateProgramByCompile(const char* vsPath, const char
 {
 	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
 	psPath = psPath ? psPath : vsPath;
-	TProgram9Ptr program = MakePtr<Program9>();
+	Program9Ptr program = MakePtr<Program9>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
 	program->SetPixel(_CreatePS(psPath, psEntry));
 	program->AsRes()->CheckAndSetLoaded();
@@ -346,7 +346,7 @@ IProgramPtr RenderSystem9::CreateProgramByCompile(const char* vsPath, const char
 IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
-	TProgram9Ptr program = MakePtr<Program9>();
+	Program9Ptr program = MakePtr<Program9>();
 
 	vsEntry = vsEntry ? vsEntry : "VS";
 	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
@@ -362,7 +362,7 @@ IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name, const cha
 
 ISamplerStatePtr RenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
 {
-	TSamplerState9Ptr ret = MakePtr<SamplerState9>();
+	SamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
 	ret->mStates[D3DSAMP_ADDRESSU] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
 	ret->mStates[D3DSAMP_ADDRESSV] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
@@ -389,7 +389,7 @@ IDirect3DVertexDeclaration9* RenderSystem9::_CreateInputLayout(Program9* _, cons
 
 IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
 {
-	TInputLayout9Ptr ret = MakePtr<InputLayout9>();
+	InputLayout9Ptr ret = MakePtr<InputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)
 		ret->mInputDescs.push_back(D3dEnumConvert::d3d11To9(descArray[i]));
 	ret->mInputDescs.push_back(D3DDECL_END());
@@ -422,7 +422,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 #endif
 	pSrcFile = imgPath.c_str();
 
-	TTexture9Ptr pTextureRV;
+	Texture9Ptr pTextureRV;
 	if (IsFileExist(pSrcFile)) {
 		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
 		if (isCube) {
@@ -450,7 +450,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 ITexturePtr RenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap)
 {
 	assert(mipmap == 1);
-	TTexture9Ptr texture = MakePtr<Texture9>(width, height, format, mipmap);
+	Texture9Ptr texture = MakePtr<Texture9>(width, height, format, mipmap);
 	IDirect3DTexture9* pTexture = nullptr;
 	if (FAILED(mDevice9->CreateTexture(width, height, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
 		return nullptr;
@@ -461,7 +461,7 @@ ITexturePtr RenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT form
 bool RenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
 	assert(dataStep * texture->GetHeight() <= dataSize);
-	TTexture9Ptr tex9 = std::static_pointer_cast<Texture9>(texture);
+	Texture9Ptr tex9 = std::static_pointer_cast<Texture9>(texture);
 
 	int width = texture->GetWidth(), height = texture->GetHeight();
 	IDirect3DTexture9* pTexture = tex9->GetSRV9();
@@ -503,7 +503,7 @@ void RenderSystem9::SetDepthState(const DepthState& depthState)
 
 void RenderSystem9::BindPass(PassPtr pass, const cbGlobalParam& globalParam)
 {
-	TProgram9Ptr program = std::static_pointer_cast<Program9>(pass->mProgram);
+	Program9Ptr program = std::static_pointer_cast<Program9>(pass->mProgram);
 	PixelShader9* ps = PtrRaw(program->mPixel);
 	VertexShader9* vs = PtrRaw(program->mVertex);
 

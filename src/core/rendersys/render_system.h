@@ -15,8 +15,6 @@ interface IRenderSystem : boost::noncopyable
 
 	virtual XMINT4 GetWinSize() = 0;
 
-	virtual SceneManagerPtr GetSceneManager() = 0;
-
 	virtual void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth = 1.0, UINT8 Stencil = 0) = 0;
 
 	virtual IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT) = 0;
@@ -83,11 +81,7 @@ protected:
 	void _PopRenderTarget();
 	void MakeAutoParam(cbGlobalParam& param, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, LightType lightType);
 public:
-	XMINT4 GetWinSize() {
-		XMINT4 ret = { mScreenWidth, mScreenHeight, 0, 0 };
-		return ret;
-	}
-	SceneManagerPtr GetSceneManager();
+	XMINT4 GetWinSize() { return XMINT4{ mScreenWidth, mScreenHeight, 0, 0 }; }
 	IProgramPtr CreateProgram(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 public:
 	ITexturePtr LoadTexture(const std::string& __imgPath, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN, bool async = true, bool isCube = false);

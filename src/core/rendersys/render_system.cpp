@@ -116,9 +116,4 @@ void RenderSystem::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightC
 	}
 }
 
-SceneManagerPtr RenderSystem::GetSceneManager()
-{
-	return mSceneManager;
-}
-
 }

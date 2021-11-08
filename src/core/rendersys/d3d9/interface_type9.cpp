@@ -103,7 +103,7 @@ unsigned int VertexBuffer9::GetOffset()
 }
 
 /********** TRenderTexture9 **********/
-RenderTexture9::RenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
+RenderTexture9::RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;
 	mColorTexture->AsRes()->SetLoaded();
@@ -168,7 +168,7 @@ void ConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int 
 			mHandleByName.insert(handleName);
 
 			if (constDesc.Class == D3DXPC_STRUCT) {
-				TConstantTablePtr subTab = std::make_shared<ConstantTable>();
+				ConstantTablePtr subTab = std::make_shared<ConstantTable>();
 				subTab->Init(constTable, handleName.second, constDesc.StructMembers);
 				mSubByName[handleName.first] = subTab;
 			}
@@ -201,7 +201,7 @@ D3DXHANDLE ConstantTable::GetHandle(const std::string& name) const
 	else return NULL;
 }
 
-TConstantTablePtr ConstantTable::At(const std::string& name)
+ConstantTablePtr ConstantTable::At(const std::string& name)
 {
 	auto iter = mSubByName.find(name);
 	if (iter != mSubByName.end()) {
@@ -356,11 +356,11 @@ Program9::Program9()
 	mRes = MakePtr<Resource>((IUnknown**)0);
 }
 
-void Program9::SetVertex(TVertexShader9Ptr pVertex) {
+void Program9::SetVertex(VertexShader9Ptr pVertex) {
 	mVertex = pVertex;
 	mRes->AddDependency(pVertex->AsRes());
 }
-void Program9::SetPixel(TPixelShader9Ptr pPixel) {
+void Program9::SetPixel(PixelShader9Ptr pPixel) {
 	mPixel = pPixel;
 	mRes->AddDependency(pPixel->AsRes());
 }

@@ -3,18 +3,18 @@
 
 namespace mir {
 
-typedef std::shared_ptr<struct BlobData9> TBlobDataD3d9Ptr;
-typedef std::shared_ptr<struct InputLayout9> TInputLayout9Ptr;
-typedef std::shared_ptr<struct ConstantTable> TConstantTablePtr;
-typedef std::shared_ptr<struct VertexShader9> TVertexShader9Ptr;
-typedef std::shared_ptr<struct PixelShader9> TPixelShader9Ptr;
-typedef std::shared_ptr<struct Program9> TProgram9Ptr;
-typedef std::shared_ptr<struct IndexBuffer9> TIndexBuffer9Ptr;
-typedef std::shared_ptr<struct VertexBuffer9> TVertexBuffer9Ptr;
-typedef std::shared_ptr<struct ContantBuffer9> TContantBuffer9Ptr;
-typedef std::shared_ptr<struct Texture9> TTexture9Ptr;
-typedef std::shared_ptr<struct RenderTexture9> TRenderTexture9Ptr;
-typedef std::shared_ptr<struct SamplerState9> TSamplerState9Ptr;
+typedef std::shared_ptr<struct BlobData9> BlobData9Ptr;
+typedef std::shared_ptr<struct InputLayout9> InputLayout9Ptr;
+typedef std::shared_ptr<struct ConstantTable> ConstantTablePtr;
+typedef std::shared_ptr<struct VertexShader9> VertexShader9Ptr;
+typedef std::shared_ptr<struct PixelShader9> PixelShader9Ptr;
+typedef std::shared_ptr<struct Program9> Program9Ptr;
+typedef std::shared_ptr<struct IndexBuffer9> IndexBuffer9Ptr;
+typedef std::shared_ptr<struct VertexBuffer9> VertexBuffer9Ptr;
+typedef std::shared_ptr<struct ContantBuffer9> ContantBuffer9Ptr;
+typedef std::shared_ptr<struct Texture9> Texture9Ptr;
+typedef std::shared_ptr<struct RenderTexture9> RenderTexture9Ptr;
+typedef std::shared_ptr<struct SamplerState9> SamplerState9Ptr;
 
 struct BlobData9 : public IBlobData {
 	ID3DXBuffer* mBlob = nullptr;
@@ -82,14 +82,14 @@ public:
 };
 
 struct Program9 : public IProgram {
-	TVertexShader9Ptr mVertex;
-	TPixelShader9Ptr mPixel;
+	VertexShader9Ptr mVertex;
+	PixelShader9Ptr mPixel;
 	IResourcePtr mRes;
 public:
 	Program9();
 	IResourcePtr AsRes() override { return mRes; }
-	void SetVertex(TVertexShader9Ptr pVertex);
-	void SetPixel(TPixelShader9Ptr pPixel);
+	void SetVertex(VertexShader9Ptr pVertex);
+	void SetPixel(PixelShader9Ptr pPixel);
 	IVertexShaderPtr GetVertex() override { return mVertex; }
 	IPixelShaderPtr GetPixel() override { return mPixel; }
 };
@@ -173,9 +173,9 @@ private:
 struct RenderTexture9 : public IRenderTexture {
 	IDirect3DSurface9* mDepthStencilBuffer;
 	IDirect3DSurface9* mColorBuffer;
-	TTexture9Ptr mColorTexture;
+	Texture9Ptr mColorTexture;
 public:
-	RenderTexture9(TTexture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
+	RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
 	ITexturePtr GetColorTexture() override;
 	IDirect3DSurface9*& GetColorBuffer9();
 	IDirect3DSurface9*& GetDepthStencilBuffer9();
