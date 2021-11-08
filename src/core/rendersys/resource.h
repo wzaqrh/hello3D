@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/noncopyable.hpp>
 #include "core/base/std.h"
 #include "core/rendersys/predeclare.h"
 
@@ -11,7 +12,7 @@ enum ResourceState {
 	kResourceStateLoaded,
 	kResourceStateUnloading
 };
-interface IResource  {
+interface IResource : boost::noncopyable {
 public:
 	bool IsLoaded() { return GetCurState() == kResourceStateLoaded; }
 	bool IsLoading() { return GetCurState() == kResourceStateLoading; }

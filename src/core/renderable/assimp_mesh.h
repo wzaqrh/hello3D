@@ -1,4 +1,5 @@
 #pragma once
+#include <assimp/mesh.h>
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -7,16 +8,12 @@ namespace mir {
 struct AssimpMeshVertex
 {
 	XMFLOAT3 Pos;
-#ifndef MESH_VETREX_POSTEX
 	XMFLOAT3 Normal;
 	XMFLOAT3 Tangent;
-#endif
 	XMFLOAT2 Tex;
-#ifndef MESH_VETREX_POSTEX
 	XMFLOAT4 BlendWeights;
-	unsigned int  BlendIndices[4];
+	unsigned int BlendIndices[4];
 	XMFLOAT3 BiTangent;
-#endif
 };
 
 class AssimpMesh : public IRenderable {

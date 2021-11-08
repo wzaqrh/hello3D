@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/noncopyable.hpp>
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/base_type.h"
@@ -59,7 +60,7 @@ public:
 	static std::shared_ptr<Camera> CreateOthogonal(int width, int height, double far1 = 100);
 };
 
-class SceneManager 
+class SceneManager : boost::noncopyable 
 {
 public:
 	IRenderSystem& mRenderSys;

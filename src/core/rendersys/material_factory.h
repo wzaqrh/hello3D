@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/noncopyable.hpp>
 #include "core/rendersys/material.h"
 #include "core/rendersys/render_system.h"
 
@@ -26,7 +27,7 @@ namespace mir {
 #define E_PASS_FORWARDADD "ForwardAdd"
 #define E_PASS_POSTPROCESS "PostProcess"
 
-struct MaterialFactory
+struct MaterialFactory : boost::noncopyable
 {
 	RenderSystem& mRenderSys;
 	std::map<std::string, MaterialPtr> mMaterials;

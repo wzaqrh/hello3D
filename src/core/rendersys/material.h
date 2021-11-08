@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/noncopyable.hpp>
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/resource.h"
@@ -6,8 +7,7 @@
 
 namespace mir {
 
-struct TextureBySlot 
-{
+struct TextureBySlot {
 public:
 	void Clear() {
 		Textures.clear();
@@ -38,8 +38,7 @@ public:
 	std::vector<ITexturePtr> Textures;
 };
 
-struct CBufferEntry 
-{
+struct CBufferEntry {
 	IContantBufferPtr Buffer;
 	std::string Name;
 	bool IsUnique;
@@ -50,7 +49,7 @@ public:
 };
 #define MAKE_CBNAME(V) #V
 
-struct Pass 
+struct Pass : boost::noncopyable 
 {
 	std::string mLightMode,mName;
 	IInputLayoutPtr mInputLayout;
@@ -80,7 +79,7 @@ public:
 	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);
 };
 
-struct Technique
+struct Technique : boost::noncopyable
 {
 	std::string mName;
 	std::vector<PassPtr> mPasses;

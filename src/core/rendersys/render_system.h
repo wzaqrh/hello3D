@@ -1,11 +1,12 @@
 #pragma once
+#include <boost/noncopyable.hpp>
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
 
-interface IRenderSystem 
+interface IRenderSystem : boost::noncopyable 
 {
 	virtual bool Initialize(HWND hWnd, RECT vp = { 0,0,0,0 }) = 0;
 	virtual void Update(float dt) = 0;
@@ -70,7 +71,6 @@ public:
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
 	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
 public:
-	//MaterialFactoryPtr mMaterialFac;
 	SceneManagerPtr mSceneManager;
 public:
 	void* operator new(size_t i){ return _mm_malloc(i,16); }
