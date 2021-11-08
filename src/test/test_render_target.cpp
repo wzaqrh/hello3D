@@ -61,7 +61,7 @@ void TestRT::OnPostInitDevice()
 //#define USE_RENDER_TARGET
 void TestRT::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene1()) {
 #ifdef USE_RENDER_TARGET
 		mRenderSys->SetRenderTarget(mRendTexture);
 		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0));
@@ -73,7 +73,7 @@ void TestRT::OnRender()
 		if (mSprite) mSprite->Draw();
 		if (mLayerColor) mLayerColor->Draw();
 #endif
-		mContext->RenderSys()->EndScene();
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

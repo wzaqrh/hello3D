@@ -35,7 +35,6 @@ public:
 	PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex);
 	~PostProcess();
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-	void Draw();
 };
 
 class Bloom : public PostProcess 

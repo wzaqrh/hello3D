@@ -43,9 +43,9 @@ void TestBloom::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
 
-	if (mContext->RenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene1()) {
 		if (mModel) mModel->Draw();
-		mContext->RenderSys()->EndScene();
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

@@ -44,9 +44,9 @@ void TestModel::OnPostInitDevice()
 void TestModel::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mContext->RenderSys()->BeginScene()) {
-		mContext->RenderSys()->Draw(mModel);
-		mContext->RenderSys()->EndScene();
+	if (mContext->RenderPipe()->BeginFrame()) {
+		mContext->RenderPipe()->Draw(*mModel);
+		mContext->RenderPipe()->EndFrame();
 	}
 }
 

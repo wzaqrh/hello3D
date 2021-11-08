@@ -65,11 +65,6 @@ PostProcess::~PostProcess()
 {
 }
 
-void PostProcess::Draw()
-{
-	mRenderSys.Draw(this);
-}
-
 int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 {
 	RenderOperation op = {};

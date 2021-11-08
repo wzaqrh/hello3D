@@ -47,7 +47,6 @@ public:
 	void PlayAnim(int Index);
 
 	void Update(float dt);
-	void Draw();
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);

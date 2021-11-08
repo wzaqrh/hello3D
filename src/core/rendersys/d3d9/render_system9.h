@@ -40,30 +40,32 @@ public:
 
 	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
 	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
+	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program);
 
 	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
 	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
+	void SetProgram(IProgramPtr program);
 
 	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
+	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count);
+
 	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
+	void SetVertexLayout(IInputLayoutPtr layout);
 
 	void SetBlendFunc(const BlendFunc& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
 	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
-public:
+	void SetTexture(size_t slot, ITexturePtr texture) override;
+	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
+
+	void DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) override;
+	void DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) override;
+
 	bool BeginScene() override;
 	void EndScene() override;
-	void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode) override;
 protected:
-	void BindPass(PassPtr pass, const cbGlobalParam& globalParam);
-	void RenderPass(PassPtr pass, TextureBySlot& texturs, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam);
-	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
-	void _RenderSkyBox();
-	void _DoPostProcess();
-
 	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 	VertexShader9Ptr _CreateVS(const char* filename, const char* entry = nullptr);
 	PixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);

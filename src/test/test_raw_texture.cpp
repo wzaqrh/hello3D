@@ -84,9 +84,9 @@ void TestRawTexture::OnPostInitDevice()
 
 void TestRawTexture::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene1()) {
 		mRenderSys->Draw(mSprite.get());
-		mContext->RenderSys()->EndScene();
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

@@ -23,7 +23,6 @@ public:
 	~SkyBox();
 	void SetRefCamera(CameraPtr pCam);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-	void Draw();
 };
 
 }

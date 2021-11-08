@@ -26,6 +26,7 @@ DECLARE_STRUCT(ConstBufferDecl);
 
 DECLARE_STRUCT(IRenderSystem);
 DECLARE_STRUCT(RenderSystem);
+DECLARE_STRUCT(RenderPipeline);
 
 DECLARE_STRUCT(IResource);
 DECLARE_STRUCT(Resource);

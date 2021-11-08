@@ -156,6 +156,7 @@ public:
 	Texture9(IDirect3DTexture9* texture, const std::string& __path);
 	IResourcePtr AsRes() override { return mRes; }
 
+	bool IsCube() const { return mTextureCube != nullptr; }
 	bool HasSRV() override { return mTexture != nullptr || mTextureCube != nullptr; }
 	void SetSRV9(IDirect3DTexture9* __texture);
 	IDirect3DTexture9*& GetSRV9() { return mTexture; }

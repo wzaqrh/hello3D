@@ -7,6 +7,7 @@
 #include "core/renderable/post_process.h"
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"
+#include <boost/assert.hpp>
 
 namespace mir {
 
@@ -50,12 +51,6 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 
 	mScreenWidth = vpWidth;
 	mScreenHeight = vpHeight;
-
-	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
-	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
-
-	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
-	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 
 	//mSceneManager = MakePtr<SceneManager>(*this, *mMaterialFac, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
 
@@ -256,6 +251,9 @@ IInputLayoutPtr RenderSystem11::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_E
 		});
 	}
 	return ret;
+}
+void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout) {
+	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(layout)->GetLayout11());
 }
 
 bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
@@ -753,240 +751,74 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
 }
 
-static std::vector<ID3D11Buffer*> GetConstBuffer11List(const std::vector<CBufferEntry>& bufferInfos) {
-	std::vector<ID3D11Buffer*> ret;
-	for (auto& iter : bufferInfos)
-		ret.push_back(std::static_pointer_cast<ContantBuffer11>(iter.Buffer)->GetBuffer11());
-	return ret;
-}
-static std::vector<ID3D11SamplerState*> GetSampler11List(const std::vector<ISamplerStatePtr>& samplers) {
-	std::vector<ID3D11SamplerState*> ret;
-	for (auto& iter : samplers)
-		ret.push_back(std::static_pointer_cast<SamplerState11>(iter)->GetSampler11());
-	return ret;
-}
-
-void RenderSystem11::BindPass(const PassPtr& pass, const cbGlobalParam& globalParam)
+void RenderSystem11::SetProgram(IProgramPtr program)
 {
-	std::vector<ID3D11Buffer*> passConstBuffers = GetConstBuffer11List(pass->mConstantBuffers);
-	mDeviceContext->UpdateSubresource(passConstBuffers[0], 0, NULL, &globalParam, 0, 0);
+	mDeviceContext->VSSetShader(std::static_pointer_cast<VertexShader11>(program->GetVertex())->GetShader11(), NULL, 0);
+	mDeviceContext->PSSetShader(std::static_pointer_cast<PixelShader11>(program->GetPixel())->GetShader11(), NULL, 0);
+}
 
-	mDeviceContext->VSSetShader(std::static_pointer_cast<VertexShader11>(pass->mProgram->GetVertex())->GetShader11(), NULL, 0);
-	mDeviceContext->PSSetShader(std::static_pointer_cast<PixelShader11>(pass->mProgram->GetPixel())->GetShader11(), NULL, 0);
+void RenderSystem11::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program)
+{
+	std::vector<ID3D11Buffer*> passConstBuffers(count);
+	for (size_t i = 0; i < count; ++i)
+		passConstBuffers[i] = buffers[i] ? std::static_pointer_cast<ContantBuffer11>(buffers[i])->GetBuffer11() : nullptr;
+	mDeviceContext->VSSetConstantBuffers(slot, count, &passConstBuffers[0]);
+	mDeviceContext->PSSetConstantBuffers(slot, count, &passConstBuffers[0]);
+}
 
-	mDeviceContext->VSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
-	mDeviceContext->PSSetConstantBuffers(0, passConstBuffers.size(), &passConstBuffers[0]);
-	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(pass->mInputLayout)->GetLayout11());
+void RenderSystem11::DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
+	//if (_CanDraw())
+	mDeviceContext->IASetPrimitiveTopology(topo);
+	mDeviceContext->Draw(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0);
+}
+void RenderSystem11::DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
+	//if (_CanDraw())
+	mDeviceContext->IASetPrimitiveTopology(topo);
+	int indexCount = op.mIndexCount != 0 ? op.mIndexCount : op.mIndexBuffer->GetBufferSize() / op.mIndexBuffer->GetWidth();
+	mDeviceContext->DrawIndexed(indexCount, op.mIndexPos, op.mIndexBase);
+}
 
-	mDeviceContext->IASetPrimitiveTopology(pass->mTopoLogy);
+void RenderSystem11::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count)
+{
+	BOOST_ASSERT(count > 0);
+	std::vector<ID3D11SamplerState*> passSamplers(count);
+	for (size_t i = 0; i < count; ++i)
+		passSamplers[i] = samplers[i] ? std::static_pointer_cast<SamplerState11>(samplers[i])->GetSampler11() : nullptr;
+	mDeviceContext->PSSetSamplers(0, passSamplers.size(), &passSamplers[0]);
+}
 
-	if (!pass->mSamplers.empty()) {
-		std::vector<ID3D11SamplerState*> passSamplers = GetSampler11List(pass->mSamplers);
-		mDeviceContext->PSSetSamplers(0, passSamplers.size(), &passSamplers[0]);
+void RenderSystem11::SetTexture(size_t slot, ITexturePtr texture) {
+	if (texture) {
+		auto texture11 = std::static_pointer_cast<Texture11>(texture);
+		ID3D11ShaderResourceView* srv11 = texture11->GetSRV11();
+		mDeviceContext->PSSetShaderResources(slot, 1, &srv11);
+	}
+	else {
+		ID3D11ShaderResourceView* srv11 = nullptr;
+		mDeviceContext->PSSetShaderResources(slot, 1, &srv11);
 	}
 }
 
-std::vector<ID3D11ShaderResourceView*> GetTextureViews11(std::vector<ITexturePtr>& textures) {
-	std::vector<ID3D11ShaderResourceView*> views(textures.size());
+std::vector<ID3D11ShaderResourceView*> GetTextureViews11(ITexturePtr textures[], size_t count) {
+	std::vector<ID3D11ShaderResourceView*> views(count);
 	for (int i = 0; i < views.size(); ++i) {
 		auto iTex = std::static_pointer_cast<Texture11>(textures[i]);
-		if (iTex != nullptr) {
-			views[i] = iTex->GetSRV11();
-		}
+		if (iTex != nullptr) views[i] = iTex->GetSRV11();
 	}
 	return views;
 }
-
-void RenderSystem11::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam)
-{
-	if (iterCnt >= 0) {
-		_PushRenderTarget(pass->mIterTargets[iterCnt]);
-	}
-	else {
-		if (pass->mRenderTarget)
-			_PushRenderTarget(pass->mRenderTarget);
-	}
-
-	if (iterCnt >= 0) {
-		if (iterCnt + 1 < pass->mIterTargets.size())
-			textures[0] = pass->mIterTargets[iterCnt + 1]->GetColorTexture();
-	}
-	else {
-		if (!pass->mIterTargets.empty())
-			textures[0] = pass->mIterTargets[0]->GetColorTexture();
-	}
-
-	{
-		if (textures.Count() > 0) {
-			std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures.Textures);
-			mDeviceContext->PSSetShaderResources(0, texViews.size(), &texViews[0]);
-		}
-
-		if (pass->OnBind)
-			pass->OnBind(*pass, *this, textures);
-
-		BindPass(pass, globalParam);
-
-		if (op.mIndexBuffer) {
-			//if (_CanDraw())
-			int indexCount = op.mIndexCount != 0 ? op.mIndexCount : op.mIndexBuffer->GetBufferSize() / op.mIndexBuffer->GetWidth();
-			mDeviceContext->DrawIndexed(indexCount, op.mIndexPos, op.mIndexBase);
-		}
-		else {
-			//if (_CanDraw())
-			mDeviceContext->Draw(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0);
-		}
-
-		if (pass->OnUnbind)
-			pass->OnUnbind(*pass, *this, textures);
-	}
-
-	if (iterCnt >= 0) {
-		_PopRenderTarget();
-	}
-	else {
-		if (pass->mRenderTarget)
-			_PopRenderTarget();
-	}
-}
-
-void RenderSystem11::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
-{
-	TechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
-	for (auto& pass : passes)
-	{
-		SetVertexBuffer(op.mVertexBuffer);
-		SetIndexBuffer(op.mIndexBuffer);
-
-		TextureBySlot textures = op.mTextures;
-		textures.Merge(pass->mTextures);
-
-		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
-			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
-			if (iter != op.mVertBufferByPass.end()) {
-				SetVertexBuffer(iter->second);
-			}
-			else {
-				SetVertexBuffer(op.mVertexBuffer);
-			}
-			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
-			RenderPass(pass, textures, i, op, globalParam);
-			textures[0] = first;
-		}
-		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
-		if (iter != op.mVertBufferByPass.end()) {
-			SetVertexBuffer(iter->second);
-		}
-		else {
-			SetVertexBuffer(op.mVertexBuffer);
-		}
-		RenderPass(pass, textures, -1, op, globalParam);
-	}
-}
-
-void RenderSystem11::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
-{
-	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
-	cbGlobalParam globalParam;
-	MakeAutoParam(globalParam, LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
-	for (int i = 0; i < opQueue.Count(); ++i)
-		if (opQueue[i].mMaterial->IsLoaded()) {
-			globalParam.World = opQueue[i].mWorldTransform;
-			globalParam.WorldInv = XM::Inverse(globalParam.World);
-			RenderOp(opQueue[i], lightMode, globalParam);
-		}
-}
-
-void RenderSystem11::RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
-{
-	mDrawCount = 0;
-	DepthState orgState = mCurDepthState;
-	BlendFunc orgBlend = mCurBlendFunc;
-
-	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PushRenderTarget(mShadowPassRT);
-		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
-		SetDepthState(DepthState(false));
-		SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
-		mCastShdowFlag = true;
-	}
-	else if (lightMode == E_PASS_FORWARDBASE) {
-		ID3D11ShaderResourceView* depthMapView = std::static_pointer_cast<Texture11>(mShadowPassRT->GetColorTexture())->GetSRV11();
-		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &depthMapView);
-		auto skybox = mSceneManager->mSkyBox;
-		if (skybox && skybox->mCubeSRV) {
-			auto texture = std::static_pointer_cast<Texture11>(skybox->mCubeSRV)->GetSRV11();
-			mDeviceContext->PSSetShaderResources(E_TEXTURE_ENV, 1, &texture);
-		}
-	}
-	else if (lightMode == E_PASS_POSTPROCESS) {
-		ID3D11ShaderResourceView* pSRV = std::static_pointer_cast<Texture11>(mPostProcessRT->GetColorTexture())->GetSRV11();
-		mDeviceContext->PSSetShaderResources(0, 1, &pSRV);
-	}
-
-	auto& lightsOrder = mSceneManager->mLightsByOrder;
-	if (!lightsOrder.empty()) {
-		BlendFunc orgBlend = mCurBlendFunc;
-		SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
-		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
-
-		for (int i = 1; i < lightsOrder.size(); ++i) {
-			auto order = lightsOrder[i];
-			SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
-			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
-			RenderLight(order.first, order.second, opQueue, __lightMode);
-		}
-		SetBlendFunc(orgBlend);
-	}
-
-	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PopRenderTarget();
-		SetDepthState(orgState);
-		SetBlendFunc(orgBlend);
-	}
-	else if (lightMode == E_PASS_FORWARDBASE) {
-		ID3D11ShaderResourceView* texViewNull = nullptr;
-		mDeviceContext->PSSetShaderResources(E_TEXTURE_DEPTH_MAP, 1, &texViewNull);
-	}
-}
-
-void RenderSystem11::_RenderSkyBox()
-{
-	if (mSceneManager->mSkyBox) mSceneManager->mSkyBox->Draw();
-}
-
-void RenderSystem11::_DoPostProcess()
-{
-	DepthState orgState = mCurDepthState;
-	SetDepthState(DepthState(false));
-
-	RenderOperationQueue opQue;
-	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
-		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
-	RenderQueue(opQue, E_PASS_POSTPROCESS);
-
-	SetDepthState(orgState);
+void RenderSystem11::SetTextures(size_t slot, ITexturePtr textures[], size_t count) {
+	std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures, count);
+	mDeviceContext->PSSetShaderResources(slot, texViews.size(), &texViews[0]);
 }
 
 bool RenderSystem11::BeginScene()
 {
-	mCastShdowFlag = false;
-
-	if (!mSceneManager->mPostProcs.empty()) {
-		SetRenderTarget(mPostProcessRT);
-		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
-	}
-	_RenderSkyBox();
 	return true;
 }
 
 void RenderSystem11::EndScene()
 {
-	if (!mSceneManager->mPostProcs.empty()) {
-		SetRenderTarget(nullptr);
-	}
-	_DoPostProcess();
 	mSwapChain->Present(0, 0);
 }
 

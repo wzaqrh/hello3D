@@ -128,14 +128,14 @@ void TestPBR::OnPostInitDevice()
 void TestPBR::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
-	if (mContext->RenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene1()) {
 		RenderOperationQueue opQueue;
 		if (mModel) mModel->GenRenderOperation(opQueue);
 
 		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mContext->RenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderSys()->RenderQueue1(opQueue, E_PASS_FORWARDBASE);
 
-		mContext->RenderSys()->EndScene();
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

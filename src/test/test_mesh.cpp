@@ -60,9 +60,9 @@ void TestMesh::OnPostInitDevice()
 
 void TestMesh::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene()) {
-		mContext->RenderSys()->Draw(mMesh.get());
-		mContext->RenderSys()->EndScene();
+	if (mContext->RenderSys()->BeginScene1()) {
+		mContext->RenderSys()->Draw1(mMesh.get());
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

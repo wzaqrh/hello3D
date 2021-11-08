@@ -57,9 +57,4 @@ int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 	return 1;
 }
 
-void SkyBox::Draw()
-{
-	mRenderSys.Draw(this);
-}
-
 }

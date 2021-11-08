@@ -63,16 +63,16 @@ void TestLabel::OnPostInitDevice()
 
 void TestLabel::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene1()) {
 		RenderOperationQueue opQue;
 		if (mLabelDebug) mLabelDebug->GenRenderOperation(opQue);
 		for (int i = 0; i < CASE_COUNT; ++i) {
 			if (mLabelBg[i]) mLabelBg[i]->GenRenderOperation(opQue);
 			if (mLabel[i]) mLabel[i]->GenRenderOperation(opQue);
 		}
-		mContext->RenderSys()->RenderQueue(opQue, E_PASS_FORWARDBASE);
+		mContext->RenderSys()->RenderQueue1(opQue, E_PASS_FORWARDBASE);
 
-		mContext->RenderSys()->EndScene();
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

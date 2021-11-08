@@ -544,9 +544,4 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 	return opList.Count() - count;
 }
 
-void AssimpModel::Draw()
-{
-	mRenderSys.Draw(this);
-}
-
 }

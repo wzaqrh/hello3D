@@ -51,22 +51,31 @@ public:
 
 	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize);
 	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize);
+	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program);
 
 	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
 	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
+	void SetProgram(IProgramPtr program);
 
 	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
+	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count);
+
 	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
+	void SetVertexLayout(IInputLayoutPtr layout);
 
 	void SetBlendFunc(const BlendFunc& blendFunc);
 	void SetDepthState(const DepthState& depthState);
 
 	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap);
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep);
-public:
-	bool BeginScene();
-	void EndScene();
-	void RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode);
+	void SetTexture(size_t slot, ITexturePtr texture) override;
+	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
+
+	void DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) override;
+	void DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) override;
+
+	bool BeginScene() override;
+	void EndScene() override;
 protected:
 	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 private:
@@ -85,13 +94,6 @@ protected:
 	PixelShader11Ptr _CreatePSByFXC(const char* filename);
 
 	ID3D11InputLayout* _CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
-protected:
-	void BindPass(const PassPtr& pass, const cbGlobalParam& globalParam);
-	void RenderPass(const PassPtr& pass, TextureBySlot& texturs, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam);
-	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
-	void _RenderSkyBox();
-	void _DoPostProcess();
 };
 
 }

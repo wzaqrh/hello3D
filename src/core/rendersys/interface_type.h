@@ -87,6 +87,7 @@ enum TexturePbrType {
 	kTexturePbrRoughness,
 	kTexturePbrAo
 };
+#define E_TEXTURE_MAIN 0
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
 

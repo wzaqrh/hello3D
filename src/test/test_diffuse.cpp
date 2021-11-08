@@ -46,9 +46,9 @@ void TestDiffuse::OnPostInitDevice()
 void TestDiffuse::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mContext->RenderSys()->BeginScene()) {
+	if (mContext->RenderSys()->BeginScene1()) {
 		mModel->Draw();
-		mContext->RenderSys()->EndScene();
+		mContext->RenderSys()->EndScene1();
 	}
 }
 

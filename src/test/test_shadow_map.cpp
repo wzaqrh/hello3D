@@ -79,10 +79,10 @@ void TestShadowMap::OnRender()
 	mModel1->GenRenderOperation(opQueue);
 	mModel2->GenRenderOperation(opQueue);
 
-	if (mContext->RenderSys()->BeginScene()) {
-		mContext->RenderSys()->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mContext->RenderSys()->RenderQueue(opQueue, E_PASS_FORWARDBASE);
-		mContext->RenderSys()->EndScene();
+	if (mContext->RenderSys()->BeginScene1()) {
+		mContext->RenderSys()->RenderQueue1(opQueue, E_PASS_SHADOWCASTER);
+		mContext->RenderSys()->RenderQueue1(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderSys()->EndScene1();
 	}
 #else
 	//pass1

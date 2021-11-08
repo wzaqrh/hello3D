@@ -9,6 +9,7 @@ namespace mir {
 
 class Mir {
 	RenderSystemPtr mRenderSys;
+	RenderPipelinePtr mRenderPipe;
 	MaterialFactoryPtr mMaterialFac;
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
@@ -18,6 +19,7 @@ public:
 	bool Initialize(HWND hWnd);
 	void Dispose();
 public:
+	RenderPipeline* RenderPipe() { return mRenderPipe.get(); }
 	const RenderSystemPtr& RenderSys() { return mRenderSys; }
 	const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
 	const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }

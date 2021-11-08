@@ -50,7 +50,6 @@ public:
 	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");
 	~Sprite();
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-	void Draw();
 public:
 	void SetPosition(float x, float y, float z);
 	void SetSize(const XMFLOAT2& size);

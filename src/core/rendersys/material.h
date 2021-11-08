@@ -74,6 +74,7 @@ public:
 	void ClearSamplers();
 	IRenderTexturePtr AddIterTarget(IRenderTexturePtr target);
 	
+	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
 	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);

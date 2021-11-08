@@ -152,11 +152,6 @@ void Sprite::SetTexture(ITexturePtr Texture)
 	}
 }
 
-void Sprite::Draw()
-{
-	mRenderSys.Draw(this);
-}
-
 int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (mQuadDirty) {

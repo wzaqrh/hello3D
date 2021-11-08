@@ -6,6 +6,7 @@
 #include "core/renderable/post_process.h"
 #include "core/renderable/skybox.h"
 #include "core/base/utility.h"
+#include <boost/assert.hpp>
 
 namespace mir {
 
@@ -45,12 +46,6 @@ bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 
 	mScreenWidth = width;
 	mScreenHeight = height;
-
-	mShadowPassRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
-	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
-
-	mPostProcessRT = CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
-	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 
 	//mSceneManager = MakePtr<SceneManager>(*this, *mMaterialFac, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
 
@@ -407,6 +402,10 @@ IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_EL
 	}
 	return ret;
 }
+void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
+{
+	mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(layout)->GetLayout9());
+}
 
 ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
 {
@@ -501,48 +500,40 @@ void RenderSystem9::SetDepthState(const DepthState& depthState)
 	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.DepthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
-void RenderSystem9::BindPass(PassPtr pass, const cbGlobalParam& globalParam)
+void RenderSystem9::SetProgram(IProgramPtr program) 
 {
-	Program9Ptr program = std::static_pointer_cast<Program9>(pass->mProgram);
-	PixelShader9* ps = PtrRaw(program->mPixel);
-	VertexShader9* vs = PtrRaw(program->mVertex);
+	Program9Ptr program9 = std::static_pointer_cast<Program9>(program);
+	PixelShader9* ps = PtrRaw(program9->mPixel);
+	VertexShader9* vs = PtrRaw(program9->mVertex);
 
-	if (pass->mConstantBuffers.size() > 0) {
-		UpdateConstBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
-	}
+	mDevice9->SetVertexShader(vs->GetShader9());
+	mDevice9->SetPixelShader(ps->GetShader9());
+}
 
-	for (size_t i = 0; i < pass->mConstantBuffers.size(); ++i) {
-		IContantBufferPtr buffer = pass->mConstantBuffers[i].Buffer;
+void RenderSystem9::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program)
+{
+	Program9Ptr program9 = std::static_pointer_cast<Program9>(program);
+	PixelShader9* ps = PtrRaw(program9->mPixel);
+	VertexShader9* vs = PtrRaw(program9->mVertex);
+
+	for (size_t i = 0; i < count; ++i) {
+		IContantBufferPtr buffer = buffers[i];
 		char* buffer9 = (char*)std::static_pointer_cast<ContantBuffer9>(buffer)->GetBuffer9();
 		ConstBufferDeclPtr decl = buffer->GetDecl();
 		vs->mConstTable.SetValue(mDevice9, buffer9, *decl);
 		ps->mConstTable.SetValue(mDevice9, buffer9, *decl);
 	}
+}
 
-	mDevice9->SetVertexShader(vs->GetShader9());
-	mDevice9->SetPixelShader(ps->GetShader9());
-
-#if 1
-	if (!pass->mSamplers.empty()) {
-		for (size_t i = 0; i < pass->mSamplers.size(); ++i) {
-			ISamplerStatePtr sampler = pass->mSamplers[i];
-			std::map<D3DSAMPLERSTATETYPE, DWORD>& states = std::static_pointer_cast<SamplerState9>(sampler)->GetSampler9();
-			for (auto& pair : states) {
-				mDevice9->SetSamplerState(i, pair.first, pair.second);
-			}
-		}
+void RenderSystem9::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count)
+{
+	BOOST_ASSERT(count > 0);
+	for (size_t i = 0; i < count; ++i) {
+		ISamplerStatePtr sampler = samplers[i];
+		std::map<D3DSAMPLERSTATETYPE, DWORD>& states = std::static_pointer_cast<SamplerState9>(sampler)->GetSampler9();
+		for (auto& pair : states)
+			mDevice9->SetSamplerState(i, pair.first, pair.second);
 	}
-#else
-	for (size_t slot = 0; slot < 8; ++slot) {
-		mDevice9->SetSamplerState(slot, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-		mDevice9->SetSamplerState(slot, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-		mDevice9->SetSamplerState(slot, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
-
-		mDevice9->SetSamplerState(slot, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-		mDevice9->SetSamplerState(slot, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-		mDevice9->SetSamplerState(slot, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-	}
-#endif
 }
 
 inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
@@ -559,211 +550,53 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 	assert(FALSE);
 	return 0;
 }
-void RenderSystem9::RenderPass(PassPtr pass, TextureBySlot& textures, int iterCnt, IIndexBufferPtr indexBuffer, IVertexBufferPtr vertexBuffer, const cbGlobalParam& globalParam)
+void RenderSystem9::DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
+	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(topo);
+	//if (_CanDraw())
+	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), topo9));
+}
+void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
+	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(topo);
+	//if (_CanDraw())
+	mDevice9->DrawIndexedPrimitive(topo9, 
+		0, 0, op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0, 
+		CalPrimCount(op.mIndexBuffer->GetCount(), topo9));
+}
+
+void RenderSystem9::SetTexture(size_t slot, ITexturePtr texture) 
 {
-	if (iterCnt >= 0) {
-		_PushRenderTarget(pass->mIterTargets[iterCnt]);
+	if (texture) {
+		auto texture9 = std::static_pointer_cast<Texture9>(texture);
+		if (texture9->IsCube()) mDevice9->SetTexture(slot, texture9->GetSRVCube9());
+		else mDevice9->SetTexture(slot, texture9->GetSRV9()); 
 	}
-	else if (pass->mRenderTarget) {
-		_PushRenderTarget(pass->mRenderTarget);
+	else {
+		mDevice9->SetTexture(slot, nullptr);
 	}
+}
 
-	if (iterCnt >= 0) {
-		if (iterCnt + 1 < pass->mIterTargets.size())
-			textures[0] = pass->mIterTargets[iterCnt + 1]->GetColorTexture();
-	}
-	else if (!pass->mIterTargets.empty()) {
-		textures[0] = pass->mIterTargets[0]->GetColorTexture();
-	}
-
-	{
-		for (size_t i = 0; i < textures.Count(); ++i) {
-			auto iTex = std::static_pointer_cast<Texture9>(textures[i]);
-			if (iTex) {
-				IDirect3DTexture9* texture = iTex->GetSRV9();
-				IDirect3DCubeTexture9* textureCube = iTex->GetSRVCube9();
-				if (texture) mDevice9->SetTexture(i, texture);
-				else if (textureCube) mDevice9->SetTexture(i, textureCube);
-			}
-		}
-
-		if (pass->OnBind)
-			pass->OnBind(*pass, *this, textures);
-
-		BindPass(pass, globalParam);
-
-		if (indexBuffer) {
-			D3DPRIMITIVETYPE topo = D3dEnumConvert::d3d11To9(pass->mTopoLogy);
-			if (_CanDraw())
-			mDevice9->DrawIndexedPrimitive(topo,
-				0, 0, vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(),
-				0, CalPrimCount(indexBuffer->GetCount(), topo));
+void RenderSystem9::SetTextures(size_t slot, ITexturePtr textures[], size_t count) {
+	for (size_t i = 0; i < count; ++i) {
+		auto iTex = std::static_pointer_cast<Texture9>(textures[i]);
+		if (iTex) {
+			if (iTex->IsCube()) mDevice9->SetTexture(i, iTex->GetSRVCube9());
+			else mDevice9->SetTexture(i, iTex->GetSRV9());
 		}
 		else {
-			D3DPRIMITIVETYPE topo = D3dEnumConvert::d3d11To9(pass->mTopoLogy);
-			if (_CanDraw())
-			mDevice9->DrawPrimitive(topo, 0, CalPrimCount(vertexBuffer->GetBufferSize() / vertexBuffer->GetStride(), topo));
-		}
-
-		if (pass->OnUnbind)
-			pass->OnUnbind(*pass, *this, textures);
-	}
-
-	if (iterCnt >= 0) {
-		_PopRenderTarget();
-	}
-	else if (pass->mRenderTarget) {
-		_PopRenderTarget();
-	}
-}
-
-void RenderSystem9::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
-{
-	TechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
-	for (auto& pass : passes)
-	{
-		mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(pass->mInputLayout)->GetLayout9());
-		SetVertexBuffer(op.mVertexBuffer);
-		SetIndexBuffer(op.mIndexBuffer);
-
-		TextureBySlot textures = op.mTextures;
-		textures.Merge(pass->mTextures);
-
-		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
-			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
-			if (iter != op.mVertBufferByPass.end()) {
-				SetVertexBuffer(iter->second);
-			}
-			else {
-				SetVertexBuffer(op.mVertexBuffer);
-			}
-			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
-			RenderPass(pass, textures, i, op.mIndexBuffer, op.mVertexBuffer, globalParam);
-			textures[0] = first;
-		}
-		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
-		if (iter != op.mVertBufferByPass.end()) {
-			SetVertexBuffer(iter->second);
-		}
-		else {
-			SetVertexBuffer(op.mVertexBuffer);
-		}
-		RenderPass(pass, textures, -1, op.mIndexBuffer, op.mVertexBuffer, globalParam);
-	}
-}
-
-void RenderSystem9::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
-{
-	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
-	
-	cbGlobalParam globalParam;
-	MakeAutoParam(globalParam, LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
-
-	for (int i = 0; i < opQueue.Count(); ++i)
-		if (opQueue[i].mMaterial->IsLoaded()) {
-			globalParam.World = opQueue[i].mWorldTransform;
-			globalParam.WorldInv = XM::Inverse(globalParam.World);
-			RenderOp(opQueue[i], lightMode, globalParam);
-		}
-}
-
-void RenderSystem9::RenderQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
-{
-	mDrawCount = 0;
-	DepthState orgState = mCurDepthState;
-	BlendFunc orgBlend = mCurBlendFunc;
-
-	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PushRenderTarget(mShadowPassRT);
-		ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
-		SetDepthState(DepthState(false));
-		SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
-		mCastShdowFlag = true;
-	}
-	else if (lightMode == E_PASS_FORWARDBASE) {
-		IDirect3DTexture9* depthMapView = std::static_pointer_cast<Texture9>(mShadowPassRT->GetColorTexture())->GetSRV9();
-		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, depthMapView);
-
-		auto& skyBox = mSceneManager->mSkyBox;
-		if (skyBox && skyBox->mCubeSRV) {
-			IDirect3DCubeTexture9* texture = std::static_pointer_cast<Texture9>(skyBox->mCubeSRV)->GetSRVCube9();
-			mDevice9->SetTexture(E_TEXTURE_ENV, texture);
+			mDevice9->SetTexture(i, nullptr);
 		}
 	}
-	else if (lightMode == E_PASS_POSTPROCESS) {
-		IDirect3DTexture9* pSRV = std::static_pointer_cast<Texture9>(mPostProcessRT->GetColorTexture())->GetSRV9();
-		mDevice9->SetTexture(0, pSRV);
-	}
-
-	auto& lightsOrder = mSceneManager->mLightsByOrder;
-	if (!lightsOrder.empty()) {
-		BlendFunc orgBlend = mCurBlendFunc;
-		SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
-		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
-
-		for (int i = 1; i < lightsOrder.size(); ++i) {
-			auto order = lightsOrder[i];
-			SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
-			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
-			RenderLight(order.first, order.second, opQueue, __lightMode);
-		}
-		SetBlendFunc(orgBlend);
-	}
-
-	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PopRenderTarget();
-		SetDepthState(orgState);
-		SetBlendFunc(orgBlend);
-
-		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
-	}
-	else if (lightMode == E_PASS_FORWARDBASE) {
-		IDirect3DTexture9* texViewNull = nullptr;
-		mDevice9->SetTexture(E_TEXTURE_DEPTH_MAP, texViewNull);
-	}
-}
-
-void RenderSystem9::_RenderSkyBox()
-{
-	if (mSceneManager->mSkyBox) mSceneManager->mSkyBox->Draw();
-}
-
-void RenderSystem9::_DoPostProcess()
-{
-	DepthState orgState = mCurDepthState;
-	SetDepthState(DepthState(false));
-
-	RenderOperationQueue opQue;
-	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
-		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
-	RenderQueue(opQue, E_PASS_POSTPROCESS);
-
-	SetDepthState(orgState);
 }
 
 bool RenderSystem9::BeginScene()
 {
 	if (FAILED(mDevice9->BeginScene()))
 		return false;
-
-	mCastShdowFlag = false;
-
-	if (!mSceneManager->mPostProcs.empty()) {
-		SetRenderTarget(mPostProcessRT);
-		ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
-	}
-	_RenderSkyBox();
 	return true;
 }
 
 void RenderSystem9::EndScene()
 {
-	if (!mSceneManager->mPostProcs.empty()) {
-		SetRenderTarget(nullptr);
-	}
-	_DoPostProcess();
-
 	mDevice9->EndScene();
 	mDevice9->Present(NULL, NULL, NULL, NULL);
 }

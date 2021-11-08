@@ -51,6 +51,14 @@ IRenderTexturePtr Pass::AddIterTarget(IRenderTexturePtr target)
 	return target;
 }
 
+std::vector<IContantBufferPtr> Pass::GetConstBuffers() const
+{
+	std::vector<IContantBufferPtr> buffers(mConstantBuffers.size());
+	for (size_t i = 0; i < mConstantBuffers.size(); ++i)
+		buffers[i] = mConstantBuffers[i].Buffer;
+	return buffers;
+}
+
 IContantBufferPtr Pass::GetConstBufferByIdx(size_t idx)
 {
 	IContantBufferPtr ret = nullptr;

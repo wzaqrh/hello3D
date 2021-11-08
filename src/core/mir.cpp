@@ -22,14 +22,18 @@ bool Mir::Initialize(HWND hWnd) {
 		return false;
 	}
 
+	mRenderPipe = std::make_shared<RenderPipeline>(mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
+
 	mMaterialFac = std::make_shared<MaterialFactory>(*mRenderSys);
-	auto rs = std::static_pointer_cast<RenderSystem11>(mRenderSys);
+
 	mSceneMng = MakePtr<SceneManager>(*mRenderSys, 
 		*mMaterialFac, 
-		XMINT2(rs->mScreenWidth, rs->mScreenHeight), 
-		rs->mPostProcessRT, 
-		Camera::CreatePerspective(rs->mScreenWidth, rs->mScreenHeight));
-	rs->mSceneManager = mSceneMng;
+		XMINT2(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight), 
+		mRenderPipe->mPostProcessRT, 
+		Camera::CreatePerspective(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight));
+
+	mRenderPipe->mSceneManager = mSceneMng;
+
 	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys, *mMaterialFac);
 	return true;
 }
