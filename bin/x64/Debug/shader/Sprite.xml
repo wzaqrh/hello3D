@@ -1,0 +1,18 @@
+<Shader Name="Sprite">
+	<Include>Standard</Include>
+	
+	<PROGRAM>
+		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
+		<UseUniform>cbGlobalParam</UseUniform>
+		<UseSampler>samStandard</UseSampler>
+		
+		<FileName>Sprite</FileName>
+		<VertexEntry>VS</VertexEntry>
+	</PROGRAM>
+	
+	<SubShader>
+		<Pass>
+			<PROGRAM> <PixelEntry>PS</PixelEntry> </PROGRAM>
+		</Pass>
+	</SubShader>
+</Shader>

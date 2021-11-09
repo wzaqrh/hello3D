@@ -1,0 +1,46 @@
+<Shader Name="Model">
+	<Include>Standard</Include>
+	<Include>Skeleton</Include>
+	
+	<PROGRAM>
+		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbWeightedSkin</UseUniform>
+		<UseSampler>samStandard</UseSampler>
+		<Attribute Name="attrPos3NormalTangentTexBlendWeightBlendIndicesBitangent">
+			<Element Format="6"  SemanticName="POSITION"></Element>
+			<Element Format="6"  SemanticName="NORMAL"></Element>
+			<Element Format="6"  SemanticName="NORMAL" SemanticIndex="1"></Element>
+			<Element Format="16" SemanticName="TEXCOORD"></Element>
+			<Element Format="2"  SemanticName="BLENDWEIGHT"></Element>
+			<Element Format="3"  SemanticName="BLENDINDICES"></Element>
+			<Element Format="6"  SemanticName="NORMAL" SemanticIndex="2"></Element>
+		</Attribute>
+		
+		<FileName>Model</FileName>
+		<VertexEntry>VS</VertexEntry>
+	</PROGRAM>
+	
+	<SubShader>
+		<Pass>
+			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
+			<PROGRAM> 
+				<VertexEntry>VSShadowCaster</VertexEntry> 
+				<PixelEntry>PSShadowCaster</PixelEntry>
+			</PROGRAM>
+		</Pass>
+		<Pass>
+			<Tags> <LightMode>ForwardBase</LightMode> </Tags>
+			<PROGRAM> 
+				<VertexEntry>VS</VertexEntry> 
+				<PixelEntry>PS</PixelEntry> 
+			</PROGRAM>
+		</Pass>
+		<Pass>
+			<Tags> <LightMode>ForwardAdd</LightMode> </Tags>
+			<PROGRAM> 
+				<VertexEntry>VS</VertexEntry>
+				<PixelEntry>PSAdd</PixelEntry> 
+			</PROGRAM>
+		</Pass>
+	</SubShader>
+</Shader>
