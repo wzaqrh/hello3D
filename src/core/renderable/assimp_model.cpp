@@ -533,7 +533,6 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
 	int count = opList.Count();
-	mDrawCount = 0;
 	DoDraw(mRootNode, opList);
 
 	XMMATRIX world = mMove->GetWorldTransform();

@@ -62,53 +62,27 @@ void TestShadowMap::OnPostInitDevice()
 
 	auto move1 = std::make_shared<Movable>();
 	move1->SetScale(SCALE_BASE);
-	mModel1 = new AssimpModel(mContext->RenderSys(), move1, matName);
+	mModel1 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new AssimpModel(mContext->RenderSys(), mMove, matName);
+	mModel2 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 
 void TestShadowMap::OnRender()
 {
-#if 1
-	mModel1->Update(mTimer->mDeltaTime);
-	mModel2->Update(mTimer->mDeltaTime);
+	if (mContext->RenderPipe()->BeginFrame()) {
+		mModel1->Update(mTimer->mDeltaTime);
+		mModel2->Update(mTimer->mDeltaTime);
 
-	RenderOperationQueue opQueue;
-	mModel1->GenRenderOperation(opQueue);
-	mModel2->GenRenderOperation(opQueue);
+		RenderOperationQueue opQueue;
+		mModel1->GenRenderOperation(opQueue);
+		mModel2->GenRenderOperation(opQueue);
 
-	if (mContext->RenderSys()->BeginScene1()) {
-		mContext->RenderSys()->RenderQueue1(opQueue, E_PASS_SHADOWCASTER);
-		mContext->RenderSys()->RenderQueue1(opQueue, E_PASS_FORWARDBASE);
-		mContext->RenderSys()->EndScene1();
+		mContext->RenderPipe()->RenderOpQueue(opQueue, E_PASS_SHADOWCASTER);
+		mContext->RenderPipe()->RenderOpQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderPipe()->EndFrame();
 	}
-#else
-	//pass1
-	mRenderSys->SetRenderTarget(mPass1RT);
-	mRenderSys->ClearColorDepthStencil(mPass1RT, XMFLOAT4(1, 1, 1, 1.0f));
-	auto LightCam = mLight->GetLightCamera(*mContext->SceneMng()->GetDefCamera());
-	{
-		mModel1->Update(mTimer.mDeltaTime);
-		float s = SCALE_BASE;
-		mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), &LightCam);
-		mModel1->Draw();
-
-		mModel2->Update(mTimer.mDeltaTime);
-		mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), &LightCam);
-		mModel2->Draw();
-	}
-	mRenderSys->SetRenderTarget(nullptr);
-
-	mRenderSys->UpdateConstBuffer(mModel1->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
-	mRenderSys->ApplyMaterial(mModel1->mMaterial, XMMatrixScaling(s, s, s), nullptr, mProgShadowMap);
-	mModel1->DrawShadow(mPass1RT->mRenderTargetSRV);
-
-	mRenderSys->UpdateConstBuffer(mModel2->mMaterial->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
-	mRenderSys->ApplyMaterial(mModel2->mMaterial, GetWorldTransform(), nullptr, mProgShadowMap);
-	mModel2->DrawShadow(mPass1RT->mRenderTargetSRV);
-#endif
 }
 
 auto reg = AppRegister<TestShadowMap>("Lesson7: ShadowMap");

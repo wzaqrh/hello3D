@@ -45,6 +45,7 @@
     <ClInclude Include="src\core\renderable\skybox.h" />
     <ClInclude Include="src\core\renderable\sprite.h" />
     <ClInclude Include="src\core\rendersys\base_type.h" />
+    <ClInclude Include="src\core\rendersys\camera.h" />
     <ClInclude Include="src\core\rendersys\const_buffer_decl.h" />
     <ClInclude Include="src\core\rendersys\d3d11\interface_type11.h" />
     <ClInclude Include="src\core\rendersys\d3d11\render_system11.h" />
@@ -81,6 +82,7 @@
     <ClCompile Include="src\core\renderable\skybox.cpp" />
     <ClCompile Include="src\core\renderable\sprite.cpp" />
     <ClCompile Include="src\core\rendersys\base_type.cpp" />
+    <ClCompile Include="src\core\rendersys\camera.cpp" />
     <ClCompile Include="src\core\rendersys\d3d11\interface_type11.cpp" />
     <ClCompile Include="src\core\rendersys\d3d11\render_system11.cpp" />
     <ClCompile Include="src\core\rendersys\d3d11\thread_pump.cpp" />
@@ -97,8 +99,6 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\test\app.cpp" />
     <ClCompile Include="src\test\test_bloom.cpp" />
-    <ClCompile Include="src\test\test_diffuse.cpp" />
-    <ClCompile Include="src\test\test_fog.cpp" />
     <ClCompile Include="src\test\test_label.cpp" />
     <ClCompile Include="src\test\test_mesh.cpp" />
     <ClCompile Include="src\test\test_model.cpp" />

@@ -62,9 +62,6 @@ interface IRenderSystem : boost::noncopyable
 	virtual void EndScene() = 0;
 };
 
-
-typedef std::shared_ptr<RenderPipeline> RenderPipelinePtr;
-
 struct __declspec(align(16)) RenderSystem : public IRenderSystem
 {
 public:

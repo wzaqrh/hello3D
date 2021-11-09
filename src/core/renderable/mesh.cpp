@@ -90,8 +90,15 @@ void Mesh::SetColors(const XMFLOAT4* colorData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
-	for (int i = 0; i < VertPos; ++i)
-		Vertices[i].Color = colorData[i];
+	for (int i = 0; i < VertPos; ++i) {
+		unsigned char c[4] = {
+			static_cast<unsigned char>(colorData[i].x * 255),
+			static_cast<unsigned char>(colorData[i].y * 255),
+			static_cast<unsigned char>(colorData[i].z * 255),
+			static_cast<unsigned char>(colorData[i].w * 255),
+		};
+		Vertices[i].Color = *((int*)c);
+	}
 }
 
 void Mesh::SetUVs(const XMFLOAT2* uvData, int count)

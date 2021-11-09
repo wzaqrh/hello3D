@@ -112,6 +112,9 @@
     <ClInclude Include="src\core\rendersys\render_pipeline.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\rendersys\camera.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\base\d3d_enum_convert.cpp">
@@ -174,12 +177,6 @@
     <ClCompile Include="src\test\test_bloom.cpp">
       <Filter>src\test\test_cases</Filter>
     </ClCompile>
-    <ClCompile Include="src\test\test_diffuse.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="src\test\test_fog.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
     <ClCompile Include="src\test\test_label.cpp">
       <Filter>src\test\test_cases</Filter>
     </ClCompile>
@@ -238,6 +235,9 @@
       <Filter>src\core\renderable\label</Filter>
     </ClCompile>
     <ClCompile Include="src\core\rendersys\render_pipeline.cpp">
+      <Filter>src\core\rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\rendersys\camera.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
   </ItemGroup>

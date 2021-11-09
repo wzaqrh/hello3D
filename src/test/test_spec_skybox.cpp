@@ -1,6 +1,7 @@
 #include "test/test_case.h"
 #if defined TEST_SPEC_SKYBOX && TEST_CASE == TEST_SPEC_SKYBOX
 #include "test/app.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/assimp_model.h"
 #include "core/base/transform.h"
@@ -44,24 +45,17 @@ void TestSpecSkybox::OnPostInitDevice()
 {
 	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
 	
-	//mModel = new TAssimpModel(mRenderSys, mMove, E_MAT_MODEL);
-	//mModel = new AssimpModel(mRenderSys, mMove, "shader\\Lesson3.3.fx", "shader\\Lesson3.3.fx");
-	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.2.fx", "shader\\Lesson3.2.fx");
-	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.1.fx", "shader\\Lesson3.1.fx");
-	//mModel = new AssimpModel(mRenderSys, "shader\\Lesson3.fx", "shader\\Lesson3.fx");
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
 	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
-	//gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mScale = 0.03; mPosition = XMFLOAT3(0, -5, 0);
-	//mModel->PlayAnim(0);
 }
 
 void TestSpecSkybox::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene1()) {
-		if (mModel) mModel->Update(mTimer->mDeltaTime);
-		if (mModel) mModel->Draw();
-		mContext->RenderSys()->EndScene1();
+	if (mModel) {
+		mModel->Update(mTimer->mDeltaTime);
+		mContext->RenderPipe()->Draw(*mModel);
 	}
 }
 
-auto reg = AppRegister<TestSpecSkybox>("TAppLesson3: Specular Light + skybox");
+auto reg = AppRegister<TestSpecSkybox>("Skybox");
 #endif

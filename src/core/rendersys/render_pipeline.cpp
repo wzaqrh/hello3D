@@ -10,13 +10,10 @@
 namespace mir {
 
 RenderPipeline::RenderPipeline(IRenderSystemPtr renderSys, int width, int height)
+	:mRenderSys(renderSys)
+	,mScreenWidth(width)
+	,mScreenHeight(height)
 {
-	mDrawLimit = 4;
-	mScreenWidth = width;
-	mScreenHeight = height;
-
-	mRenderSys = renderSys;
-
 	mShadowPassRT = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
 	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
 
@@ -26,9 +23,12 @@ RenderPipeline::RenderPipeline(IRenderSystemPtr renderSys, int width, int height
 
 void RenderPipeline::Draw(IRenderable& renderable)
 {
-	RenderOperationQueue opQue;
-	renderable.GenRenderOperation(opQue);
-	RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+	if (BeginFrame()) {
+		RenderOperationQueue opQue;
+		renderable.GenRenderOperation(opQue);
+		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+		EndFrame();
+	}
 }
 bool RenderPipeline::BeginFrame()
 {
@@ -54,7 +54,11 @@ void RenderPipeline::EndFrame()
 }
 void RenderPipeline::_RenderSkyBox()
 {
-	if (mSceneManager->mSkyBox) Draw(*mSceneManager->mSkyBox);
+	if (mSceneManager->mSkyBox) {
+		RenderOperationQueue opQue;
+		mSceneManager->mSkyBox->GenRenderOperation(opQue);
+		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+	}
 }
 void RenderPipeline::_DoPostProcess()
 {
@@ -138,7 +142,6 @@ void RenderPipeline::BindPass(const PassPtr& pass, const cbGlobalParam& globalPa
 
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
-	mDrawCount = 0;
 	DepthState orgState = mRenderSys->GetDepthState();
 	BlendFunc orgBlend = mRenderSys->GetBlendFunc();
 

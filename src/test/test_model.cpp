@@ -20,21 +20,9 @@ private:
 
 void TestModel::OnPostInitDevice()
 {
-#if 0
-	std::vector<D3D11_INPUT_ELEMENT_DESC> layouts =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	mModel = new AssimpModel(mContext->GetRenderSys(), mMove, MAKE_MAT_NAME("Lesson1"), layouts);
-#else
+	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
-#endif
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
 	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mMove->SetDefScale(0.01);
@@ -44,10 +32,7 @@ void TestModel::OnPostInitDevice()
 void TestModel::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	if (mContext->RenderPipe()->BeginFrame()) {
-		mContext->RenderPipe()->Draw(*mModel);
-		mContext->RenderPipe()->EndFrame();
-	}
+	mContext->RenderPipe()->Draw(*mModel);
 }
 
 auto reg = AppRegister<TestModel>("TestModel: Assimp Model");

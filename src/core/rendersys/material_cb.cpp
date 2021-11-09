@@ -1,6 +1,7 @@
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/const_buffer_decl.h"
+#include "core/rendersys/camera.h"
 
 namespace mir {
 
@@ -69,7 +70,16 @@ ConstBufferDecl& cbDirectLight::GetDesc()
 	return builder.Build();
 }
 
-/********** TLight **********/
+/********** cbDirectLight **********/
+CameraBase* cbDirectLight::GetLightCamera(Camera& otherCam)
+{
+	static Camera ret;
+	ret = otherCam;
+	ret.SetLookAt(XMFLOAT3(LightPos.x, LightPos.y, LightPos.z), ret.mAt);
+	return &ret;
+}
+
+/********** cbPointLight **********/
 cbPointLight::cbPointLight()
 {
 	SetPosition(0, 0, -10);
@@ -97,7 +107,7 @@ ConstBufferDecl& cbPointLight::GetDesc()
 	return builder.Build();
 }
 
-/********** TSpotLight **********/
+/********** cbSpotLight **********/
 cbSpotLight::cbSpotLight()
 {
 	SetDirection(0, 0, 1);

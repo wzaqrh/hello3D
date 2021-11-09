@@ -5,7 +5,7 @@ namespace mir {
 
 struct MeshVertex {
 	XMFLOAT3 Position;
-	XMFLOAT4 Color;
+	int Color;
 	XMFLOAT2 UV;
 };
 
