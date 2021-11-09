@@ -115,6 +115,9 @@
     <ClInclude Include="..\src\core\rendersys\camera.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\mir_export.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\d3d_enum_convert.cpp">
