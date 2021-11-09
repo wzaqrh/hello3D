@@ -1,11 +1,7 @@
-#include "render_system11.h"
-#include "interface_type11.h"
-#include "thread_pump.h"
-#include "core/rendersys/scene_manager.h"
-#include "core/rendersys/material_cb.h"
+#include "core/rendersys/d3d11/render_system11.h"
+#include "core/rendersys/d3d11/interface_type11.h"
+#include "core/rendersys/d3d11/thread_pump.h"
 #include "core/rendersys/material_factory.h"
-#include "core/renderable/post_process.h"
-#include "core/renderable/skybox.h"
 #include "core/base/utility.h"
 #include <boost/assert.hpp>
 
@@ -616,7 +612,7 @@ IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDec
 
 IContantBufferPtr RenderSystem11::CloneConstBuffer(IContantBufferPtr buffer)
 {
-	return CreateConstBuffer(*buffer->GetDecl());
+	return CreateConstBuffer(*buffer->GetDecl(), nullptr);
 }
 
 void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)

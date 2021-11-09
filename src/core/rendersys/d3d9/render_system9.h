@@ -23,34 +23,34 @@ public:
 	bool Initialize(HWND hWnd, RECT vp) override;
 	void Update(float dt) override;
 	void CleanUp() override;
-	void SetViewPort(int x, int y, int w, int h);
+	void SetViewPort(int x, int y, int w, int h) override;
 public:
-	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil) override;
+	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT depth, UINT8 stencil) override;
 
-	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format=DXGI_FORMAT_R32G32B32A32_FLOAT) override;
+	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
-	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr) override;
+	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) override;
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
-	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer=nullptr) override;
+	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer) override;
 	void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
 	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
 	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
-	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program);
+	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
-	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
-	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr) override;
-	void SetProgram(IProgramPtr program);
+	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry) override;
+	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry) override;
+	void SetProgram(IProgramPtr program) override;
 
-	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER) override;
-	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count);
+	ISamplerStatePtr CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp) override;
+	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
 	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
-	void SetVertexLayout(IInputLayoutPtr layout);
+	void SetVertexLayout(IInputLayoutPtr layout) override;
 
 	void SetBlendFunc(const BlendFunc& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
@@ -65,7 +65,7 @@ public:
 
 	bool BeginScene() override;
 	void EndScene() override;
-protected:
+private:
 	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
 	VertexShader9Ptr _CreateVS(const char* filename, const char* entry = nullptr);
 	PixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);

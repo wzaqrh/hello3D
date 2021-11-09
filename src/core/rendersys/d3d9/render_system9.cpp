@@ -1,10 +1,6 @@
-#include "render_system9.h"
-#include "interface_type9.h"
-#include "core/rendersys/scene_manager.h"
-#include "core/rendersys/material_cb.h"
+#include "core/rendersys/d3d9/render_system9.h"
+#include "core/rendersys/d3d9/interface_type9.h"
 #include "core/rendersys/material_factory.h"
-#include "core/renderable/post_process.h"
-#include "core/renderable/skybox.h"
 #include "core/base/utility.h"
 #include <boost/assert.hpp>
 
@@ -12,7 +8,6 @@ namespace mir {
 
 RenderSystem9::RenderSystem9()
 {
-	//mMaterialFac = std::make_shared<MaterialFactory>(*this);
 	mFXCDir = "d3d9\\";
 }
 
@@ -46,8 +41,6 @@ bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 
 	mScreenWidth = width;
 	mScreenHeight = height;
-
-	//mSceneManager = MakePtr<SceneManager>(*this, *mMaterialFac, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
 
 	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));

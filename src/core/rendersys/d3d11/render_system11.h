@@ -30,44 +30,44 @@ public:
 	RenderSystem11();
 	~RenderSystem11();
 public:
-	bool Initialize(HWND hWnd, RECT vp);
-	void Update(float dt);
-	void CleanUp();
-	void SetViewPort(int x, int y, int w, int h);
+	bool Initialize(HWND hWnd, RECT vp) override;
+	void Update(float dt) override;
+	void CleanUp() override;
+	void SetViewPort(int x, int y, int w, int h) override;
 public:
-	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil);
+	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT depth, UINT8 stencil) override;
 
-	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
+	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format) override;
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth=1.0, UINT8 Stencil=0);
-	void SetRenderTarget(IRenderTexturePtr rendTarget);
+	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer);
-	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data = nullptr);
-	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer);
-	void SetIndexBuffer(IIndexBufferPtr indexBuffer);
+	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
+	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) override;
+	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
+	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
-	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer = nullptr);
-	void SetVertexBuffer(IVertexBufferPtr vertexBuffer);
+	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer) override;
+	void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
-	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize);
-	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize);
-	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program);
+	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
+	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
+	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
-	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath = nullptr, const char* vsEntry = nullptr, const char* psEntry = nullptr);
-	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry = nullptr, const char* psEntry = nullptr);
-	void SetProgram(IProgramPtr program);
+	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry) override;
+	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry) override;
+	void SetProgram(IProgramPtr program) override;
 
-	ISamplerStatePtr CreateSampler(D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC comp = D3D11_COMPARISON_NEVER);
-	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count);
+	ISamplerStatePtr CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp) override;
+	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
-	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount);
-	void SetVertexLayout(IInputLayoutPtr layout);
+	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
+	void SetVertexLayout(IInputLayoutPtr layout) override;
 
-	void SetBlendFunc(const BlendFunc& blendFunc);
-	void SetDepthState(const DepthState& depthState);
+	void SetBlendFunc(const BlendFunc& blendFunc) override;
+	void SetDepthState(const DepthState& depthState) override;
 
-	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap);
-	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep);
+	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) override;
+	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTexture(size_t slot, ITexturePtr texture) override;
 	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
 
@@ -84,7 +84,7 @@ private:
 	HRESULT _CreateBackDepthStencilView(int width, int height);
 	void _SetViewports(int width, int height, int x = 0, int y = 0);
 	HRESULT _SetRasterizerState(); 
-protected:
+private:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 

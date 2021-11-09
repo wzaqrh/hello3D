@@ -16,6 +16,9 @@ DECLARE_CLASS(Mesh);
 DECLARE_CLASS(Label);
 DECLARE_CLASS(FontCache);
 
+DECLARE_STRUCT(RenderOperation);
+DECLARE_STRUCT(RenderOperationQueue);
+DECLARE_STRUCT(IRenderable);
 DECLARE_CLASS(RenderableFactory);
 
 }

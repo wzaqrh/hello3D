@@ -109,6 +109,9 @@
     <ClInclude Include="src\core\predeclare.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\rendersys\render_pipeline.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\base\d3d_enum_convert.cpp">
@@ -233,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="src\core\renderable\label.cpp">
       <Filter>src\core\renderable\label</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\rendersys\render_pipeline.cpp">
+      <Filter>src\core\rendersys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
