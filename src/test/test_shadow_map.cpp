@@ -81,8 +81,7 @@ void TestShadowMap::OnRender()
 		mModel1->GenRenderOperation(opQueue);
 		mModel2->GenRenderOperation(opQueue);
 
-		mContext->RenderPipe()->RenderOpQueue(opQueue, E_PASS_SHADOWCASTER);
-		mContext->RenderPipe()->RenderOpQueue(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderPipe()->Render(opQueue, *mContext->SceneMng());
 		mContext->RenderPipe()->EndFrame();
 	}
 }

@@ -53,7 +53,7 @@ void TestSpecSkybox::OnRender()
 {
 	if (mModel) {
 		mModel->Update(mTimer->mDeltaTime);
-		mContext->RenderPipe()->Draw(*mModel);
+		mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
 	}
 }
 

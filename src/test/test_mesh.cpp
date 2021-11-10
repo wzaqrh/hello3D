@@ -60,7 +60,7 @@ void TestMesh::OnPostInitDevice()
 
 void TestMesh::OnRender()
 {
-	mContext->RenderPipe()->Draw(*mMesh);
+	mContext->RenderPipe()->Draw(*mMesh, *mContext->SceneMng());
 }
 
 #if defined TEST_MESH && TEST_CASE == TEST_MESH

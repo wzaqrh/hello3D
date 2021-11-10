@@ -53,7 +53,7 @@ void TestRT::OnPostInitDevice()
 void TestRT::OnRender()
 {
 	mModel->Update(mTimer->mDeltaTime);
-	mContext->RenderPipe()->Draw(*mModel);
+	mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
 }
 
 #if defined TEST_RT && TEST_CASE == TEST_RT

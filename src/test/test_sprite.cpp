@@ -40,7 +40,7 @@ void TestSprite::OnPostInitDevice()
 
 void TestSprite::OnRender()
 {
-	mContext->RenderPipe()->Draw(*mSprite);
+	mContext->RenderPipe()->Draw(*mSprite, *mContext->SceneMng());
 }
 
 #if defined TEST_SPRITE && TEST_CASE == TEST_SPRITE

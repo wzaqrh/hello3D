@@ -115,19 +115,32 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 	}
 }
 
-void RenderPipeline::MakeAutoParam(cbGlobalParam& globalParam, bool castShadow, cbDirectLight* light, LightType lightType)
+void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, cbGlobalParam& globalParam)
 {
+	for (int i = 0; i < opQueue.Count(); ++i) {
+		if (opQueue[i].mMaterial->IsLoaded()) {
+			globalParam.World = opQueue[i].mWorldTransform;
+			globalParam.WorldInv = XM::Inverse(globalParam.World);
+			RenderOp(opQueue[i], lightMode, globalParam);
+		}
+	}
+}
+
+cbGlobalParam MakeAutoParam(const Camera& camera, bool castShadow, 
+	cbDirectLight* light, LightType lightType)
+{
+	cbGlobalParam globalParam;
 	memset(&globalParam, 0, sizeof(globalParam));
 
 	if (castShadow) {
-		light->CalculateLightingViewProjection(*mSceneManager->GetDefCamera(), globalParam.View, globalParam.Projection);
+		light->CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
 	}
 	else {
-		globalParam.View = mSceneManager->GetDefCamera()->GetView();
-		globalParam.Projection = mSceneManager->GetDefCamera()->GetProjection();
-		light->CalculateLightingViewProjection(*mSceneManager->GetDefCamera(), globalParam.LightView, globalParam.LightProjection);
+		globalParam.View = camera.GetView();
+		globalParam.Projection = camera.GetProjection();
+		light->CalculateLightingViewProjection(camera, globalParam.LightView, globalParam.LightProjection);
 	}
-	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
+	globalParam.HasDepthMap = castShadow ? TRUE : FALSE;
 
 	globalParam.WorldInv = XM::Inverse(globalParam.World);
 	globalParam.ViewInv = XM::Inverse(globalParam.View);
@@ -147,22 +160,11 @@ void RenderPipeline::MakeAutoParam(cbGlobalParam& globalParam, bool castShadow, 
 	default:
 		break;
 	}
-}
-void RenderPipeline::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
-{
-	cbGlobalParam globalParam;
-	MakeAutoParam(globalParam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
-
-	for (int i = 0; i < opQueue.Count(); ++i) {
-		if (opQueue[i].mMaterial->IsLoaded()) {
-			globalParam.World = opQueue[i].mWorldTransform;
-			globalParam.WorldInv = XM::Inverse(globalParam.World);
-			RenderOp(opQueue[i], lightMode, globalParam);
-		}
-	}
+	return globalParam;
 }
 
-void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
+void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
+	const std::vector<std::pair<cbDirectLight*, LightType>>& lightsOrder, const std::string& lightMode)
 {
 	if (opQueue.IsEmpty()) return;
 
@@ -174,31 +176,32 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 		mRenderSys.ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
 		mRenderSys.SetDepthState(DepthState(false));
 		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
-		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
 
-		auto& skyBox = mSceneManager->GetDefCamera()->SkyBox();
+		auto& skyBox = camera.SkyBox();
 		if (skyBox && skyBox->mCubeSRV)
 			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		if (mSceneManager->GetDefCamera()->mPostProcessInput) 
-			mRenderSys.SetTexture(E_TEXTURE_MAIN, mSceneManager->GetDefCamera()->mPostProcessInput->GetColorTexture());
+		if (camera.mPostProcessInput) 
+			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.mPostProcessInput->GetColorTexture());
 	}
 
-	auto& lightsOrder = mSceneManager->mLightsByOrder;
 	if (!lightsOrder.empty()) {
 		BlendFunc orgBlend = mRenderSys.GetBlendFunc();
 		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
-		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
+		
+		cbGlobalParam globalParam = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, 
+			lightsOrder[0].first, lightsOrder[0].second);
+		RenderLight(opQueue, lightMode, globalParam);
 
 		for (int i = 1; i < lightsOrder.size(); ++i) {
-			auto order = lightsOrder[i];
 			mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
-			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
-			RenderLight(order.first, order.second, opQueue, __lightMode);
+			auto lightModeEx = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
+			globalParam = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, lightsOrder[i].first, lightsOrder[i].second);
+			RenderLight(opQueue, lightModeEx, globalParam);
 		}
 		mRenderSys.SetBlendFunc(orgBlend);
 	}
@@ -216,21 +219,62 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 	}
 }
 
+void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera, 
+	const std::vector<std::pair<cbDirectLight*, LightType>>& lights)
+{
+	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
+	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
+	RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+}
+
 void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& scene)
 {
+	for (auto& camera : scene.mCameras) 
+	{
+		//setup framebuffer as camera's post_process_input 
+		if (!camera->PostProcessEffects().empty() && camera->mPostProcessInput) {
+			mRenderSys.SetRenderTarget(camera->mPostProcessInput);
+			mRenderSys.ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
+		}
 
+		//camera's skybox
+		if (camera->SkyBox()) {
+			RenderOperationQueue opQue;
+			camera->SkyBox()->GenRenderOperation(opQue);
+			RenderOpQueue(opQue, *camera, scene.mLightsByOrder, E_PASS_FORWARDBASE);
+		}
+
+		RenderCamera(opQueue, *camera, scene.mLightsByOrder);
+
+		//camera's postprocess
+		{
+			DepthState orgState = mRenderSys.GetDepthState();
+			mRenderSys.SetDepthState(DepthState(false));
+
+			RenderOperationQueue opQue;
+			auto& postProcessEffects = camera->PostProcessEffects();
+			for (size_t i = 0; i < postProcessEffects.size(); ++i)
+				postProcessEffects[i]->GenRenderOperation(opQue);
+			RenderOpQueue(opQue, *camera, scene.mLightsByOrder, E_PASS_POSTPROCESS);
+
+			mRenderSys.SetDepthState(orgState);
+		}
+	}
 }
 
 void RenderPipeline::_RenderSkyBox()
 {
+#if REFACTOR
 	if (mSceneManager->GetDefCamera()->SkyBox()) {
 		RenderOperationQueue opQue;
 		mSceneManager->GetDefCamera()->SkyBox()->GenRenderOperation(opQue);
 		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
 	}
+#endif
 }
 void RenderPipeline::_DoPostProcess()
 {
+#if REFACTOR
 	DepthState orgState = mRenderSys.GetDepthState();
 	mRenderSys.SetDepthState(DepthState(false));
 
@@ -241,37 +285,39 @@ void RenderPipeline::_DoPostProcess()
 	RenderOpQueue(opQue, E_PASS_POSTPROCESS);
 
 	mRenderSys.SetDepthState(orgState);
+#endif
 }
 
 bool RenderPipeline::BeginFrame()
 {
 	if (!mRenderSys.BeginScene()) return false;
 
-	mCastShdowFlag = false;
-
+#if REFACTOR
 	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mSceneManager->GetDefCamera()->mPostProcessInput) {
 		mRenderSys.SetRenderTarget(mSceneManager->GetDefCamera()->mPostProcessInput);
 		mRenderSys.ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
 	_RenderSkyBox();
+#endif
 	return true;
 }
 void RenderPipeline::EndFrame()
 {
+#if REFACTOR
 	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty()) {
 		mRenderSys.SetRenderTarget(nullptr);
 	}
 	_DoPostProcess();
-
+#endif
 	mRenderSys.EndScene();
 }
 
-void RenderPipeline::Draw(IRenderable& renderable)
+void RenderPipeline::Draw(IRenderable& renderable, SceneManager& scene)
 {
 	if (BeginFrame()) {
 		RenderOperationQueue opQue;
 		renderable.GenRenderOperation(opQue);
-		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+		Render(opQue, scene);
 		EndFrame();
 	}
 }

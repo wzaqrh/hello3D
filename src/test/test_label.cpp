@@ -71,7 +71,7 @@ void TestLabel::OnRender()
 			if (mLabelBg[i]) mLabelBg[i]->GenRenderOperation(opQue);
 			if (mLabel[i]) mLabel[i]->GenRenderOperation(opQue);
 		}
-		mContext->RenderPipe()->RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+		mContext->RenderPipe()->Render(opQue, *mContext->SceneMng());
 		mContext->RenderPipe()->EndFrame();
 	}
 }

@@ -85,7 +85,7 @@ void TestRawTexture::OnPostInitDevice()
 
 void TestRawTexture::OnRender()
 {
-	mContext->RenderPipe()->Draw(*mSprite);
+	mContext->RenderPipe()->Draw(*mSprite, *mContext->SceneMng());
 }
 
 #if defined TEST_RAW_TEXTURE && TEST_CASE == TEST_RAW_TEXTURE

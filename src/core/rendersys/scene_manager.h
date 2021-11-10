@@ -20,7 +20,8 @@ public:
 	std::vector<cbDirectLightPtr> mDirectLights;
 	std::vector<cbPointLightPtr> mPointLights;
 	std::vector<cbSpotLightPtr> mSpotLights;
-	std::vector<std::pair<cbDirectLight*, LightType>> mLightsByOrder;
+	typedef std::vector<std::pair<cbDirectLight*, LightType>> LightsByOrder;
+	LightsByOrder mLightsByOrder;
 public:
 	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
 

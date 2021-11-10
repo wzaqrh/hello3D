@@ -32,7 +32,7 @@ public:
 	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
 	const std::vector<PostProcessPtr>& PostProcessEffects() const { return mPostProcessEffects; }
 
-	const XMMATRIX& GetView();
+	const XMMATRIX& GetView() const;
 	const XMMATRIX& GetProjection() const  { return mProjection; }
 	
 	int GetWidth() const { return mWidth; }
@@ -47,10 +47,10 @@ private:
 	std::vector<PostProcessPtr> mPostProcessEffects;
 
 	TransformPtr mTransform;
-	bool mTransformDirty;
+	mutable bool mTransformDirty;
 
 	bool mFlipY;
-	XMMATRIX mView, mProjection, mWorldView;
+	mutable XMMATRIX mView, mProjection, mWorldView;
 public:
 	IRenderTexturePtr mPostProcessInput;
 

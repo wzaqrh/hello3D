@@ -27,7 +27,6 @@ bool Mir::Initialize(HWND hWnd) {
 	mSceneMng = MakePtr<SceneManager>(*mRenderSys, *mMaterialFac, 
 		XMINT2(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight), 
 		Camera::CreatePerspective(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight));
-	mRenderPipe->mSceneManager = mSceneMng;
 
 	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys, *mMaterialFac);
 	return true;

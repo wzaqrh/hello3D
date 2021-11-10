@@ -107,7 +107,7 @@ TransformPtr Camera::GetTransform()
 	return mTransform;
 }
 
-const XMMATRIX& Camera::GetView()
+const XMMATRIX& Camera::GetView() const
 {
 	if (mTransformDirty) {
 		mTransformDirty = false;
