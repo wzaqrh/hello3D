@@ -13,18 +13,16 @@ class SceneManager : boost::noncopyable
 public:
 	IRenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
-	IRenderTexturePtr mPostProcessRT;
 	int mScreenWidth, mScreenHeight;
 	
 	CameraPtr mDefCamera;
-	std::vector<PostProcessPtr> mPostProcs;
 
 	std::vector<cbDirectLightPtr> mDirectLights;
 	std::vector<cbPointLightPtr> mPointLights;
 	std::vector<cbSpotLightPtr> mSpotLights;
 	std::vector<std::pair<cbDirectLight*, LightType>> mLightsByOrder;
 public:
-	SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera);
+	SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
 
 	CameraPtr SetOthogonalCamera(const XMFLOAT3& eyePos, double far1);
 	CameraPtr SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov);
@@ -33,8 +31,6 @@ public:
 	cbSpotLightPtr AddSpotLight();
 	cbPointLightPtr AddPointLight();
 	cbDirectLightPtr AddDirectLight();
-
-	PostProcessPtr AddPostProcess(const std::string& name);
 };
 
 };

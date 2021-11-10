@@ -7,13 +7,12 @@
 
 namespace mir {
 
-SceneManager::SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera)
+SceneManager::SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera)
 	:mRenderSys(renderSys)
 	,mMaterialFac(matFac)
 {
 	mScreenWidth  = screenSize.x;
 	mScreenHeight = screenSize.y;
-	mPostProcessRT = postRT;
 	mDefCamera = defCamera;
 }
 
@@ -51,17 +50,6 @@ CameraPtr SceneManager::SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1
 {
 	mDefCamera = Camera::CreatePerspective(mScreenWidth, mScreenHeight, eyePos, far1, fov);
 	return mDefCamera;
-}
-
-PostProcessPtr SceneManager::AddPostProcess(const std::string& name)
-{
-	PostProcessPtr process;
-	if (name == E_PASS_POSTPROCESS) {
-		process = std::make_shared<Bloom>(mRenderSys, mMaterialFac, mPostProcessRT);
-	}
-
-	if (process) mPostProcs.push_back(process);
-	return process;
 }
 
 }

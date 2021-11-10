@@ -14,11 +14,11 @@ RenderPipeline::RenderPipeline(IRenderSystemPtr renderSys, int width, int height
 	,mScreenWidth(width)
 	,mScreenHeight(height)
 {
-	mShadowPassRT = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
-	SET_DEBUG_NAME(mShadowPassRT->mDepthStencilView, "mShadowPassRT");
+	mShadowCasterOutput = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+	SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 
-	mPostProcessRT = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
-	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
+	mPostProcessInput = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+	SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
 }
 
 void RenderPipeline::_PushRenderTarget(IRenderTexturePtr rendTarget)
@@ -171,21 +171,21 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 	BlendFunc orgBlend = mRenderSys->GetBlendFunc();
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PushRenderTarget(mShadowPassRT);
+		_PushRenderTarget(mShadowCasterOutput);
 		mRenderSys->ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
 		mRenderSys->SetDepthState(DepthState(false));
 		mRenderSys->SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, mShadowPassRT->GetColorTexture());
+		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
 
 		auto& skyBox = mSceneManager->GetDefCamera()->SkyBox();
 		if (skyBox && skyBox->mCubeSRV)
 			mRenderSys->SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		mRenderSys->SetTexture(E_TEXTURE_MAIN, mPostProcessRT->GetColorTexture());
+		mRenderSys->SetTexture(E_TEXTURE_MAIN, mPostProcessInput->GetColorTexture());
 	}
 
 	auto& lightsOrder = mSceneManager->mLightsByOrder;
@@ -230,8 +230,9 @@ void RenderPipeline::_DoPostProcess()
 	mRenderSys->SetDepthState(DepthState(false));
 
 	RenderOperationQueue opQue;
-	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
-		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
+	auto& postProcessEffects = mSceneManager->GetDefCamera()->PostProcessEffects();
+	for (size_t i = 0; i < postProcessEffects.size(); ++i)
+		postProcessEffects[i]->GenRenderOperation(opQue);
 	RenderOpQueue(opQue, E_PASS_POSTPROCESS);
 
 	mRenderSys->SetDepthState(orgState);
@@ -243,8 +244,8 @@ bool RenderPipeline::BeginFrame()
 
 	mCastShdowFlag = false;
 
-	if (!mSceneManager->mPostProcs.empty()) {
-		mRenderSys->SetRenderTarget(mPostProcessRT);
+	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty()) {
+		mRenderSys->SetRenderTarget(mPostProcessInput);
 		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
 	_RenderSkyBox();
@@ -252,7 +253,7 @@ bool RenderPipeline::BeginFrame()
 }
 void RenderPipeline::EndFrame()
 {
-	if (!mSceneManager->mPostProcs.empty()) {
+	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty()) {
 		mRenderSys->SetRenderTarget(nullptr);
 	}
 	_DoPostProcess();

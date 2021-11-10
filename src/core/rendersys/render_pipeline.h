@@ -14,7 +14,7 @@ class RenderPipeline
 	bool mCastShdowFlag = false;
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
 public:
-	IRenderTexturePtr mShadowPassRT, mPostProcessRT;
+	IRenderTexturePtr mShadowCasterOutput, mPostProcessInput;
 	SceneManagerPtr mSceneManager;
 public:
 	RenderPipeline(IRenderSystemPtr renderSys, int width, int height);

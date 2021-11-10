@@ -133,4 +133,9 @@ void Camera::SetSkyBox(const SkyBoxPtr& skybox)
 	mSkyBox = skybox;
 }
 
+void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
+{
+	mPostProcessEffects.push_back(postEffect);
+}
+
 }

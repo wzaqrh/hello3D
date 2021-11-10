@@ -24,7 +24,8 @@ void TestBloom::OnPostInitDevice()
 	mContext->SceneMng()->SetPerspectiveCamera(XMFLOAT3(0,0,-10), 300, 45);
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
-	mContext->SceneMng()->AddPostProcess(E_PASS_POSTPROCESS);
+	mContext->SceneMng()->GetDefCamera()->AddPostProcessEffect(
+		mContext->RenderableFac()->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM));
 
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
 	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);

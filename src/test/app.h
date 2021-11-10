@@ -52,12 +52,11 @@ public:
 
 
 IApp* CreateApp(std::string name);
-void RegisterApp(std::string name, std::function<IApp*()> appCls);
+void RegisterApp(const char* name, std::function<IApp*()> appCls);
+std::string& GetCurrentAppName();
 
-extern std::string gCurrentAppName;
 template<class T> struct AppRegister {
-	AppRegister(std::string name) {
-		gCurrentAppName = name;
+	AppRegister(const char* name) {
 		RegisterApp(name, [name]()->IApp* {
 			T* app = new T;
 			app->mName = name;

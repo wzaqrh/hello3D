@@ -14,6 +14,11 @@ App::App()
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 	mContext = new mir::Mir;
 }
+App::~App()
+{
+	delete mContext;
+}
+
 void App::Create()
 {}
 bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
@@ -32,10 +37,9 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 	mTimer = new mir::Timer;
 	return true;
 }
-
-App::~App()
+void App::OnInitLight()
 {
-	delete mContext;
+	mContext->SceneMng()->AddPointLight();
 }
 void App::CleanUp()
 {
@@ -83,27 +87,29 @@ std::string App::GetName()
 {
 	return mName;
 }
-
-void App::OnInitLight()
-{
-	mContext->SceneMng()->AddPointLight();
-}
-
 XMMATRIX App::GetWorldTransform()
 {
 	return mMove->GetWorldTransform();
 }
 
-
-std::map<std::string, std::function<IApp*()>> gRegAppClasses;
-void RegisterApp(std::string name, std::function<IApp*()> appCls) {
-	gRegAppClasses[name] = appCls;
+std::string& GetCurrentAppName() {
+	static std::string gCurrentAppName;
+	return gCurrentAppName;
 }
 
-std::string gCurrentAppName;
+typedef std::map<std::string, std::function<IApp*()>> AppCreatorByName;
+AppCreatorByName& RegAppClasses() {
+	static AppCreatorByName gRegAppClasses;
+	return gRegAppClasses;
+}
+void RegisterApp(const char* name, std::function<IApp*()> appCls) {
+	GetCurrentAppName() = name;
+	RegAppClasses()[name] = appCls;
+}
+
 IApp* CreateApp(std::string name)
 {
-	auto entry = gRegAppClasses[name];
+	auto entry = RegAppClasses()[name];
 	assert(entry);
 	IApp* gApp = entry();
 	gApp->Create();

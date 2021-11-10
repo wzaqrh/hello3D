@@ -24,8 +24,11 @@ public:
 	
 	void SetFlipY(bool flip);
 	void SetSkyBox(const SkyBoxPtr& skybox);
+	void AddPostProcessEffect(const PostProcessPtr& postEffect);
 public:
 	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
+	const std::vector<PostProcessPtr>& PostProcessEffects() const { return mPostProcessEffects; }
+	
 	TransformPtr GetTransform();
 
 	const XMMATRIX& GetView();
@@ -42,8 +45,8 @@ private:
 
 	bool mTransformDirty;
 	TransformPtr mTransform;
-
 	SkyBoxPtr mSkyBox;
+	std::vector<PostProcessPtr> mPostProcessEffects;
 public:
 	int mWidth, mHeight;
 	XMFLOAT3 mEyePos, mLookAtPos, mUpVector;
