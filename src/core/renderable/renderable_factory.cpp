@@ -48,7 +48,7 @@ PostProcessPtr RenderableFactory::CreatePostProcessEffect(const std::string& eff
 {
 	PostProcessPtr process;
 	if (effectName == E_MAT_POSTPROC_BLOOM) {
-		process = std::make_shared<Bloom>(mRenderSys, mMaterialFac, camera.RenderPipe()->FetchPostProcessInput());
+		process = std::make_shared<Bloom>(mRenderSys, mMaterialFac, camera.FetchPostProcessInput());
 	}
 	return process;
 }

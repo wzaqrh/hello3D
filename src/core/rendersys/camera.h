@@ -25,8 +25,8 @@ public:
 	void SetFlipY(bool flip);
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
+	IRenderTexturePtr FetchPostProcessInput();
 public:
-	RenderPipelinePtr RenderPipe() const { return mRenderPipeline; }
 	TransformPtr GetTransform();
 
 	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
@@ -42,7 +42,6 @@ public:
 	XMFLOAT4 ProjectPoint(XMFLOAT4 worldpos);
 private:
 	RenderSystem& mRenderSys;
-	RenderPipelinePtr mRenderPipeline;
 
 	SkyBoxPtr mSkyBox;
 	std::vector<PostProcessPtr> mPostProcessEffects;
@@ -53,6 +52,8 @@ private:
 	bool mFlipY;
 	XMMATRIX mView, mProjection, mWorldView;
 public:
+	IRenderTexturePtr mPostProcessInput;
+
 	int mWidth, mHeight;
 	XMFLOAT3 mEyePos, mLookAtPos, mUpVector;
 

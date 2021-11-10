@@ -33,8 +33,6 @@ Camera::Camera(RenderSystem& renderSys)
 
 	mTransform = std::make_shared<Transform>();
 	mUpVector = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-	mRenderPipeline = std::make_shared<RenderPipeline>(mRenderSys, mRenderSys.mScreenWidth, mRenderSys.mScreenHeight);
 }
 
 XMFLOAT3 Camera::ProjectPoint(XMFLOAT3 pos)
@@ -141,6 +139,15 @@ void Camera::SetSkyBox(const SkyBoxPtr& skybox)
 void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
 {
 	mPostProcessEffects.push_back(postEffect);
+}
+
+IRenderTexturePtr Camera::FetchPostProcessInput()
+{
+	if (mPostProcessInput == nullptr) {
+		mPostProcessInput = mRenderSys.CreateRenderTexture(mWidth, mHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+		SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
+	}
+	return mPostProcessInput;
 }
 
 }

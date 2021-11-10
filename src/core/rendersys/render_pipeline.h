@@ -14,7 +14,7 @@ class RenderPipeline
 	bool mCastShdowFlag = false;
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
 
-	IRenderTexturePtr mShadowCasterOutput, mPostProcessInput;
+	IRenderTexturePtr mShadowCasterOutput;
 public:
 	SceneManagerPtr mSceneManager;
 public:
@@ -23,7 +23,6 @@ public:
 	void EndFrame();
 	void Draw(IRenderable& renderable);
 	void RenderOpQueue(const RenderOperationQueue& opQueue, const std::string& lightMode);
-	IRenderTexturePtr FetchPostProcessInput();
 private:
 	void _RenderSkyBox();
 	void _DoPostProcess();

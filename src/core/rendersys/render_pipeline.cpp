@@ -18,15 +18,6 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, int width, int height)
 	SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
-IRenderTexturePtr RenderPipeline::FetchPostProcessInput()
-{
-	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mRenderSys.CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
-		SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
-	}
-	return mPostProcessInput;
-}
-
 void RenderPipeline::_PushRenderTarget(IRenderTexturePtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
@@ -193,8 +184,8 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		if (mPostProcessInput) 
-			mRenderSys.SetTexture(E_TEXTURE_MAIN, mPostProcessInput->GetColorTexture());
+		if (mSceneManager->GetDefCamera()->mPostProcessInput) 
+			mRenderSys.SetTexture(E_TEXTURE_MAIN, mSceneManager->GetDefCamera()->mPostProcessInput->GetColorTexture());
 	}
 
 	auto& lightsOrder = mSceneManager->mLightsByOrder;
@@ -253,8 +244,8 @@ bool RenderPipeline::BeginFrame()
 
 	mCastShdowFlag = false;
 
-	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mPostProcessInput) {
-		mRenderSys.SetRenderTarget(mPostProcessInput);
+	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mSceneManager->GetDefCamera()->mPostProcessInput) {
+		mRenderSys.SetRenderTarget(mSceneManager->GetDefCamera()->mPostProcessInput);
 		mRenderSys.ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
 	_RenderSkyBox();

@@ -7,7 +7,6 @@ namespace mir {
 
 Mir::Mir()
 {}
-
 Mir::~Mir()
 {}
 
@@ -23,14 +22,11 @@ bool Mir::Initialize(HWND hWnd) {
 	}
 
 	mMaterialFac = std::make_shared<MaterialFactory>(*mRenderSys);
-
-	auto camera = Camera::CreatePerspective(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
-	mRenderPipe = camera->RenderPipe();
-
+	
+	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
 	mSceneMng = MakePtr<SceneManager>(*mRenderSys, *mMaterialFac, 
 		XMINT2(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight), 
-		camera);
-
+		Camera::CreatePerspective(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight));
 	mRenderPipe->mSceneManager = mSceneMng;
 
 	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys, *mMaterialFac);
