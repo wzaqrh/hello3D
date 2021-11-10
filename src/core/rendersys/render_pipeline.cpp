@@ -180,7 +180,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, mShadowPassRT->GetColorTexture());
 
-		auto& skyBox = mSceneManager->mSkyBox;
+		auto& skyBox = mSceneManager->GetDefCamera()->SkyBox();
 		if (skyBox && skyBox->mCubeSRV)
 			mRenderSys->SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
 	}
@@ -218,9 +218,9 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 
 void RenderPipeline::_RenderSkyBox()
 {
-	if (mSceneManager->mSkyBox) {
+	if (mSceneManager->GetDefCamera()->SkyBox()) {
 		RenderOperationQueue opQue;
-		mSceneManager->mSkyBox->GenRenderOperation(opQue);
+		mSceneManager->GetDefCamera()->SkyBox()->GenRenderOperation(opQue);
 		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
 	}
 }

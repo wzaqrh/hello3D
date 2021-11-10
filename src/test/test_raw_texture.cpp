@@ -1,6 +1,6 @@
 #include "test/test_case.h"
-#if defined TEST_RAW_TEXTURE && TEST_CASE == TEST_RAW_TEXTURE
 #include "test/app.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/sprite.h"
@@ -47,7 +47,7 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 
 	if (bmpInfo.biClrImportant != 0) return nullptr;
 
-	ITexturePtr texture = mRenderSys->CreateTexture(bmpInfo.biWidth, bmpInfo.biHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 4);
+	ITexturePtr texture = mContext->RenderSys()->CreateTexture(bmpInfo.biWidth, bmpInfo.biHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 4);
 
 	std::vector<char> imgBuf;
 	imgBuf.resize(bmpInfo.biWidth * bmpInfo.biHeight * 4);
@@ -65,7 +65,7 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 			dst += 4;
 		}
 	}
-	mRenderSys->LoadRawTextureData(texture, &imgBuf[0], imgBuf.size(), bmpInfo.biWidth * 4);
+	mContext->RenderSys()->LoadRawTextureData(texture, &imgBuf[0], imgBuf.size(), bmpInfo.biWidth * 4);
 
 	fclose(fd);
 	return texture;
@@ -73,22 +73,20 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 
 void TestRawTexture::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
-	mSprite = std::make_shared<Sprite>(mRenderSys, E_MAT_SPRITE);
+	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
 	mSprite->SetTexture(LoadTexture("smile.bmp"));
 
-	mSprite->SetPosition(-mRenderSys->GetWinSize().x / 2, -mRenderSys->GetWinSize().y / 2, 0);
-	mSprite->SetSize(mRenderSys->GetWinSize().x, mRenderSys->GetWinSize().y);
+	mSprite->SetPosition(-mContext->RenderSys()->GetWinSize().x / 2, -mContext->RenderSys()->GetWinSize().y / 2, 0);
+	mSprite->SetSize(mContext->RenderSys()->GetWinSize().x, mContext->RenderSys()->GetWinSize().y);
 }
 
 void TestRawTexture::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene1()) {
-		mRenderSys->Draw(mSprite.get());
-		mContext->RenderSys()->EndScene1();
-	}
+	mContext->RenderPipe()->Draw(*mSprite);
 }
 
+#if defined TEST_RAW_TEXTURE && TEST_CASE == TEST_RAW_TEXTURE
 auto reg = AppRegister<TestRawTexture>("Sprite: RawTexture");
 #endif

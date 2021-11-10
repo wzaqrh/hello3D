@@ -1,5 +1,5 @@
 #include "test/test_case.h"
-#if defined TEST_SHADOW_MAP && TEST_CASE == TEST_SHADOW_MAP
+
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
@@ -42,7 +42,8 @@ void TestShadowMap::OnPostInitDevice()
 {
 #if 1
 	mContext->SceneMng()->SetPerspectiveCamera(XMFLOAT3(0,0,-30), 300, 45);
-	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
+		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 
 	float dd = 3;
 	mMove->SetDefScale(SCALE_BASE * 0.2); mMove->SetPosition(0, 0, -dd);
@@ -85,5 +86,6 @@ void TestShadowMap::OnRender()
 	}
 }
 
+#if defined TEST_SHADOW_MAP && TEST_CASE == TEST_SHADOW_MAP
 auto reg = AppRegister<TestShadowMap>("Lesson7: ShadowMap");
 #endif

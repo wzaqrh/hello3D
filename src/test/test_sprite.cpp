@@ -1,5 +1,5 @@
 #include "test/test_case.h"
-#if defined TEST_SPRITE && TEST_CASE == TEST_SPRITE
+
 #include "test/app.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/rendersys/material_factory.h"
@@ -24,10 +24,10 @@ void TestSprite::OnPostInitDevice()
 	mSprite->SetPosition(-5, -5, 0);
 	mSprite->SetSize(5, 5);
 #else
-	mContext->SceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LAYERCOLOR);
-	mSprite = std::make_shared<Sprite>(mContext->RenderSys(), E_MAT_SPRITE);
+	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
 	mSprite->SetTexture(mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg"));
 
 	int win_width = mContext->RenderSys()->GetWinSize().x;
@@ -42,5 +42,6 @@ void TestSprite::OnRender()
 	mContext->RenderPipe()->Draw(*mSprite);
 }
 
+#if defined TEST_SPRITE && TEST_CASE == TEST_SPRITE
 auto reg = AppRegister<TestSprite>("Sprite");
 #endif

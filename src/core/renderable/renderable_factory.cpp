@@ -1,5 +1,6 @@
 #include "core/renderable/renderable_factory.h"
 #include "core/renderable/sprite.h"
+#include "core/renderable/skybox.h"
 #include "core/renderable/mesh.h"
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
@@ -33,6 +34,11 @@ LabelPtr RenderableFactory::CreateLabel(const std::string& fontPath, int fontSiz
 {
 	TFontPtr font = mFontCache->GetFont(fontPath, fontSize);
 	return std::make_shared<Label>(mRenderSys, mMaterialFac, font);
+}
+
+SkyBoxPtr RenderableFactory::CreateSkybox(const std::string& imgName)
+{
+	return std::make_shared<SkyBox>(mRenderSys, mMaterialFac, imgName);
 }
 
 }

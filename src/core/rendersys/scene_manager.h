@@ -17,7 +17,6 @@ public:
 	int mScreenWidth, mScreenHeight;
 	
 	CameraPtr mDefCamera;
-	SkyBoxPtr mSkyBox;
 	std::vector<PostProcessPtr> mPostProcs;
 
 	std::vector<cbDirectLightPtr> mDirectLights;
@@ -34,9 +33,6 @@ public:
 	cbSpotLightPtr AddSpotLight();
 	cbPointLightPtr AddPointLight();
 	cbDirectLightPtr AddDirectLight();
-
-	SkyBoxPtr SetSkyBox(const std::string& imgName);
-	SkyBoxPtr GetSkyBox() { return mSkyBox; };
 
 	PostProcessPtr AddPostProcess(const std::string& name);
 };

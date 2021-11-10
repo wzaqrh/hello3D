@@ -4,11 +4,9 @@
 
 namespace mir {
 
-SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, CameraPtr pCam, const std::string& imgName)
+SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& imgName)
 	:mRenderSys(renderSys)
 {
-	mRefCam = pCam;
-
 	mMaterial = matFac.GetMaterial(E_MAT_SKYBOX);
 	mIndexBuffer = nullptr;
 
@@ -38,11 +36,6 @@ SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, CameraPtr pCam
 
 SkyBox::~SkyBox()
 {
-}
-
-void SkyBox::SetRefCamera(CameraPtr pCam)
-{
-	mRefCam = pCam;
 }
 
 int SkyBox::GenRenderOperation(RenderOperationQueue& opList)

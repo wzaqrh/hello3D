@@ -1,5 +1,4 @@
 #include "test/test_case.h"
-#if defined TEST_MESH && TEST_CASE == TEST_MESH
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
@@ -23,7 +22,7 @@ private:
 
 void TestMesh::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
 	auto texture = mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
 
@@ -63,5 +62,6 @@ void TestMesh::OnRender()
 	mContext->RenderPipe()->Draw(*mMesh);
 }
 
+#if defined TEST_MESH && TEST_CASE == TEST_MESH
 auto reg = AppRegister<TestMesh>("TestMesh");
 #endif

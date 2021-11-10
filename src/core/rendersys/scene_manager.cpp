@@ -44,21 +44,13 @@ cbDirectLightPtr SceneManager::AddDirectLight()
 CameraPtr SceneManager::SetOthogonalCamera(const XMFLOAT3& eyePos, double far1)
 {
 	mDefCamera = Camera::CreateOthogonal(mScreenWidth, mScreenHeight, eyePos, far1);
-	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }
 
 CameraPtr SceneManager::SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov)
 {
 	mDefCamera = Camera::CreatePerspective(mScreenWidth, mScreenHeight, eyePos, far1, fov);
-	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
-}
-
-SkyBoxPtr SceneManager::SetSkyBox(const std::string& imgName)
-{
-	mSkyBox = std::make_shared<SkyBox>(mRenderSys, mMaterialFac, mDefCamera, imgName);
-	return mSkyBox;
 }
 
 PostProcessPtr SceneManager::AddPostProcess(const std::string& name)

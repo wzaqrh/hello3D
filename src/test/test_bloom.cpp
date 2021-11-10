@@ -1,5 +1,5 @@
 #include "test/test_case.h"
-#if defined TEST_BLOOM && TEST_CASE == TEST_BLOOM
+
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
@@ -21,8 +21,9 @@ private:
 
 void TestBloom::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetPerspectiveCamera(45, 10, 300);
-	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->SetPerspectiveCamera(XMFLOAT3(0,0,-10), 300, 45);
+	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
+		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	mContext->SceneMng()->AddPostProcess(E_PASS_POSTPROCESS);
 
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
@@ -37,5 +38,6 @@ void TestBloom::OnRender()
 	}
 }
 
+#if defined TEST_BLOOM && TEST_CASE == TEST_BLOOM
 auto reg = AppRegister<TestBloom>("TestBloom: PostProcess Bloom");
 #endif

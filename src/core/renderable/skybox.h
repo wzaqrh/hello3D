@@ -11,7 +11,6 @@ struct SkyboxVertex {
 class SkyBox : public IRenderable 
 {
 private:
-	CameraPtr mRefCam;
 	IRenderSystem& mRenderSys;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
@@ -19,9 +18,8 @@ public:
 	ITexturePtr mCubeSRV;
 	MaterialPtr mMaterial;
 public:
-	SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, CameraPtr pCam, const std::string& imgName);
+	SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& imgName);
 	~SkyBox();
-	void SetRefCamera(CameraPtr pCam);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 };
 

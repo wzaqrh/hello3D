@@ -128,4 +128,9 @@ const XMMATRIX& Camera::GetView()
 	return mWorldView;
 }
 
+void Camera::SetSkyBox(const SkyBoxPtr& skybox)
+{
+	mSkyBox = skybox;
+}
+
 }

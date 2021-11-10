@@ -1,9 +1,9 @@
 #include "test/test_case.h"
-#if defined TEST_LABEL && TEST_CASE == TEST_LABEL
 #include "test/app.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/base/transform.h"
-#include "label/core/renderable/label.h"
+#include "core/renderable/label.h"
 
 using namespace mir;
 
@@ -22,7 +22,7 @@ private:
 
 void TestLabel::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetOthogonalCamera(100);
+	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
 	for (int i = 0; i < CASE_COUNT; ++i) {
 		auto label = mContext->RenderableFac()->CreateLabel("D:\\ProjectWork1\\hello3D\\Debug\\msyh.ttc", 24);
@@ -63,19 +63,18 @@ void TestLabel::OnPostInitDevice()
 
 void TestLabel::OnRender()
 {
-	if (mContext->RenderSys()->BeginScene1()) {
+	if (mContext->RenderPipe()->BeginFrame()) {
 		RenderOperationQueue opQue;
 		if (mLabelDebug) mLabelDebug->GenRenderOperation(opQue);
 		for (int i = 0; i < CASE_COUNT; ++i) {
 			if (mLabelBg[i]) mLabelBg[i]->GenRenderOperation(opQue);
 			if (mLabel[i]) mLabel[i]->GenRenderOperation(opQue);
 		}
-		mContext->RenderSys()->RenderQueue1(opQue, E_PASS_FORWARDBASE);
-
-		mContext->RenderSys()->EndScene1();
+		mContext->RenderPipe()->RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+		mContext->RenderPipe()->EndFrame();
 	}
 }
 
+#if defined TEST_LABEL && TEST_CASE == TEST_LABEL
 auto reg = AppRegister<TestLabel>("Label");
-
 #endif

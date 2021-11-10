@@ -1,8 +1,8 @@
 #include "test/test_case.h"
-#if defined TEST_PBR && TEST_CASE == TEST_PBR
+
 #include "test/app.h"
 #include "core/rendersys/scene_manager.h"
-#include "core/rendersys/material.h"
+#include "core/rendersys/material_factory.h"
 #include "core/renderable/renderable.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
@@ -76,10 +76,11 @@ void TestPBR::OnInitLight()
 /********** Lesson6 **********/
 void TestPBR::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
+		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
-	mContext->SceneMng()->SetPerspectiveCamera(45, 30, 1000);
+	mContext->SceneMng()->SetPerspectiveCamera(XMFLOAT3(0,0,-30), 1000, 45);
 
 #if 0
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
@@ -118,7 +119,7 @@ void TestPBR::OnPostInitDevice()
 		}
 	}
 #else
-	mModel = new AssimpModel(mContext->RenderSys(), mMove, E_MAT_MODEL);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
 	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
 	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
 	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
@@ -128,16 +129,17 @@ void TestPBR::OnPostInitDevice()
 void TestPBR::OnRender()
 {
 	if (mModel) mModel->Update(mTimer->mDeltaTime);
-	if (mContext->RenderSys()->BeginScene1()) {
+	if (mContext->RenderPipe()->BeginFrame()) {
 		RenderOperationQueue opQueue;
 		if (mModel) mModel->GenRenderOperation(opQueue);
 
 		//mRenderSys->RenderQueue(opQueue, E_PASS_SHADOWCASTER);
-		mContext->RenderSys()->RenderQueue1(opQueue, E_PASS_FORWARDBASE);
+		mContext->RenderPipe()->RenderOpQueue(opQueue, E_PASS_FORWARDBASE);
 
-		mContext->RenderSys()->EndScene1();
+		mContext->RenderPipe()->EndFrame();
 	}
 }
 
+#if defined TEST_PBR && TEST_CASE == TEST_PBR
 auto reg = AppRegister<TestPBR>("TestPBR: PBR");
 #endif

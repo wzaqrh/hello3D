@@ -1,5 +1,4 @@
 #include "test/test_case.h"
-#if defined TEST_SPEC_SKYBOX && TEST_CASE == TEST_SPEC_SKYBOX
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
@@ -43,7 +42,8 @@ void TestSpecSkybox::OnInitLight()
 
 void TestSpecSkybox::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
+		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
 	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
@@ -57,5 +57,6 @@ void TestSpecSkybox::OnRender()
 	}
 }
 
+#if defined TEST_SPEC_SKYBOX && TEST_CASE == TEST_SPEC_SKYBOX
 auto reg = AppRegister<TestSpecSkybox>("Skybox");
 #endif

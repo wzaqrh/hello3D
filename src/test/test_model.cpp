@@ -1,5 +1,4 @@
 #include "test/test_case.h"
-#if defined TEST_MODEL && TEST_CASE == TEST_MODEL
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
 #include "core/renderable/assimp_model.h"
@@ -20,7 +19,8 @@ private:
 
 void TestModel::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetSkyBox("images\\uffizi_cross.dds");
+	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
+		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mModel->PlayAnim(0);
@@ -35,5 +35,6 @@ void TestModel::OnRender()
 	mContext->RenderPipe()->Draw(*mModel);
 }
 
+#if defined TEST_MODEL && TEST_CASE == TEST_MODEL
 auto reg = AppRegister<TestModel>("TestModel: Assimp Model");
 #endif
