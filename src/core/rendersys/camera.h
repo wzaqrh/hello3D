@@ -8,16 +8,14 @@ namespace mir {
 struct __declspec(align(16)) CameraBase
 {
 public:
-	XMMATRIX mView_;
-	XMMATRIX mProjection_;
+	XMMATRIX mView;
+	XMMATRIX mProjection;
 	XMMATRIX mWorldView;
 public:
-	void* operator new(size_t i) { return _mm_malloc(i, 16); }
-	void operator delete(void* p) { _mm_free(p); }
 	CameraBase();
 public:
-	XMFLOAT3 CalNDC(XMFLOAT3 pos);
-	XMFLOAT4 CalNDC(XMFLOAT4 pos);
+	XMFLOAT3 ProjectPoint(XMFLOAT3 worldpos);//world -> ndc
+	XMFLOAT4 ProjectPoint(XMFLOAT4 worldpos);
 
 	virtual const XMMATRIX& GetView();
 	virtual const XMMATRIX& GetProjection();
@@ -36,8 +34,6 @@ public:
 	int mWidth, mHeight;
 	double mFOV, mFar;
 public:
-	void* operator new(size_t i) { return _mm_malloc(i, 16); }
-	void operator delete(void* p) { _mm_free(p); }
 	Camera();
 	Camera(const Camera& other);
 public:

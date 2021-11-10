@@ -71,12 +71,12 @@ ConstBufferDecl& cbDirectLight::GetDesc()
 }
 
 /********** cbDirectLight **********/
-CameraBase* cbDirectLight::GetLightCamera(Camera& otherCam)
-{
-	static Camera ret;
-	ret = otherCam;
-	ret.SetLookAt(XMFLOAT3(LightPos.x, LightPos.y, LightPos.z), ret.mAt);
-	return &ret;
+void cbDirectLight::CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj) {
+	XMVECTOR Eye = XMVectorSet(LightPos.x, LightPos.y, LightPos.z, 0.0f);
+	XMVECTOR At = XMVectorSet(camera.mAt.x, camera.mAt.y, camera.mAt.z, 0.0f);
+	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	view = XMMatrixLookAtLH(Eye, At, Up);
+	proj = XMMatrixOrthographicOffCenterLH(0, camera.mWidth, 0, camera.mHeight, 0.01, camera.mFar);
 }
 
 /********** cbPointLight **********/

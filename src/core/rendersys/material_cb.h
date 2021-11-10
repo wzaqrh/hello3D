@@ -20,7 +20,7 @@ public:
 	void SetSpecularColor(float r, float g, float b, float a);
 	void SetSpecularPower(float power);
 public:
-	CameraBase* GetLightCamera(Camera& otherCam);
+	void CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj);
 	static ConstBufferDecl& GetDesc();
 };
 struct cbPointLight : public cbDirectLight {

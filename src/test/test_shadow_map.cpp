@@ -50,8 +50,8 @@ void TestShadowMap::OnPostInitDevice()
 	auto LightCam = mLight->GetLightCamera(*mContext->GetSceneMng()->GetDefCamera());
 	//auto pCam = &LightCam;
 	auto pCam = mContext->GetSceneMng()->GetDefCamera();
-	XMFLOAT4 p0 = pCam->CalNDC(XMFLOAT4(30, 30, 0, 1));
-	//XMFLOAT3 p1 = pCam->CalNDC(mPosition);
+	XMFLOAT4 p0 = pCam->ProjectPoint(XMFLOAT4(30, 30, 0, 1));
+	//XMFLOAT3 p1 = pCam->ProjectPoint(mPosition);
 #endif
 #else
 	mScale = 0.01;

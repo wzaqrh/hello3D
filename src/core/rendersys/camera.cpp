@@ -6,25 +6,24 @@ namespace mir {
 /********** TCameraBase **********/
 CameraBase::CameraBase()
 {
-	mView_ = XMMatrixIdentity();
-	mProjection_ = XMMatrixIdentity();
+	mView = XMMatrixIdentity();
+	mProjection = XMMatrixIdentity();
 }
 
-XMFLOAT3 CameraBase::CalNDC(XMFLOAT3 pos)
+XMFLOAT3 CameraBase::ProjectPoint(XMFLOAT3 pos)
 {
 	XMFLOAT3 ret = XMFLOAT3(0, 0, 0);
-	XMMATRIX vp = mView_ * mProjection_;
+	XMMATRIX vp = mView * mProjection;
 	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, 1), vp);
 	auto w = XMVectorGetW(vec);
-	if (w != 0) {
+	if (w != 0) 
 		ret = XMFLOAT3(XMVectorGetX(vec) / w, XMVectorGetY(vec) / w, XMVectorGetZ(vec) / w);
-	}
 	return ret;
 }
 
-XMFLOAT4 CameraBase::CalNDC(XMFLOAT4 pos)
+XMFLOAT4 CameraBase::ProjectPoint(XMFLOAT4 pos)
 {
-	XMMATRIX vp = mView_ * mProjection_;
+	XMMATRIX vp = mView * mProjection;
 	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, pos.z), vp);
 	XMFLOAT4 ret = XMFLOAT4(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec), XMVectorGetW(vec));
 	return ret;
@@ -32,23 +31,13 @@ XMFLOAT4 CameraBase::CalNDC(XMFLOAT4 pos)
 
 const XMMATRIX& CameraBase::GetView()
 {
-	return mView_;
+	return mView;
 }
-
-//void TCameraBase::SetView(const XMMATRIX& view)
-//{
-//	mView_ = view;
-//}
 
 const XMMATRIX& CameraBase::GetProjection()
 {
-	return mProjection_;
+	return mProjection;
 }
-
-//void TCameraBase::SetProjection(const XMMATRIX& projection)
-//{
-//	mProjection_ = projection;
-//}
 
 /********** TCamera **********/
 Camera::Camera()
@@ -69,8 +58,8 @@ Camera::Camera(const Camera& other)
 	mFOV = other.mFOV;
 	mFar = other.mFar;
 
-	mView_ = other.mView_;
-	mProjection_ = other.mProjection_;
+	mView = other.mView;
+	mProjection = other.mProjection;
 
 	mTransformDirty = true;
 	mTransform = std::make_shared<Transform>(*other.mTransform);
@@ -112,7 +101,7 @@ void Camera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at, XMFLOAT3 up)
 	XMVECTOR Eye = XMVectorSet(eye.x, eye.y, eye.z, 0.0f);
 	XMVECTOR At = XMVectorSet(at.x, at.y, at.z, 0.0f);
 	XMVECTOR Up = XMVectorSet(up.x, up.y, up.z, 0.0f);
-	mView_ = XMMatrixLookAtLH(Eye, At, Up);
+	mView = XMMatrixLookAtLH(Eye, At, Up);
 	mTransformDirty = true;
 }
 
@@ -122,10 +111,10 @@ void Camera::SetPerspectiveProj(int width, int height, double fov, double far1)
 	mHeight = height;
 	mFar = far1;
 	mFOV = fov / 180.0 * XM_PI;
-	mProjection_ = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
+	mProjection = XMMatrixPerspectiveFovLH(mFOV, mWidth * 1.0 / mHeight, 0.01f, mFar);
 	mIsPespective = true;
 
-	if (mFlipY) mProjection_ = mProjection_ * XMMatrixScaling(1, -1, 1);
+	if (mFlipY) mProjection = mProjection * XMMatrixScaling(1, -1, 1);
 
 	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
@@ -137,10 +126,10 @@ void Camera::SetOthogonalProj(int width, int height, double far1)
 	mHeight = height;
 	mFar = far1;
 	//mProjection_ = XMMatrixOrthographicLH(mWidth, mHeight, 0.01, mFar);
-	mProjection_ = XMMatrixOrthographicOffCenterLH(0, mWidth, 0, mHeight, 0.01, mFar);
+	mProjection = XMMatrixOrthographicOffCenterLH(0, mWidth, 0, mHeight, 0.01, mFar);
 	mIsPespective = false;
 
-	if (mFlipY) mProjection_ = mProjection_ * XMMatrixScaling(1, -1, 1);
+	if (mFlipY) mProjection = mProjection * XMMatrixScaling(1, -1, 1);
 
 	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
@@ -168,7 +157,7 @@ const XMMATRIX& Camera::GetView()
 
 			auto srt = mTransform->GetMatrixSRT();
 			auto worldInv = XM::Inverse(srt);
-			auto view = mView_;
+			auto view = mView;
 			mWorldView = worldInv * view;
 		}
 		mTransform->SetPosition(position);
@@ -178,7 +167,7 @@ const XMMATRIX& Camera::GetView()
 
 const XMMATRIX& Camera::GetProjection()
 {
-	return mProjection_;
+	return mProjection;
 }
 
 }

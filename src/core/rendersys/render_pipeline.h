@@ -27,7 +27,7 @@ private:
 	void _DoPostProcess();
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
-	void MakeAutoParam(cbGlobalParam& param, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, LightType lightType);
+	void MakeAutoParam(cbGlobalParam& param, bool castShadow, cbDirectLight* light, LightType lightType);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
 	void RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode);
 	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam);

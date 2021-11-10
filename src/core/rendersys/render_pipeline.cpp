@@ -21,57 +21,6 @@ RenderPipeline::RenderPipeline(IRenderSystemPtr renderSys, int width, int height
 	SET_DEBUG_NAME(mPostProcessRT->mDepthStencilView, "mPostProcessRT");
 }
 
-void RenderPipeline::Draw(IRenderable& renderable)
-{
-	if (BeginFrame()) {
-		RenderOperationQueue opQue;
-		renderable.GenRenderOperation(opQue);
-		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
-		EndFrame();
-	}
-}
-bool RenderPipeline::BeginFrame()
-{
-	if (!mRenderSys->BeginScene()) return false;
-
-	mCastShdowFlag = false;
-
-	if (!mSceneManager->mPostProcs.empty()) {
-		mRenderSys->SetRenderTarget(mPostProcessRT);
-		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
-	}
-	_RenderSkyBox();
-	return true;
-}
-void RenderPipeline::EndFrame()
-{
-	if (!mSceneManager->mPostProcs.empty()) {
-		mRenderSys->SetRenderTarget(nullptr);
-	}
-	_DoPostProcess();
-
-	mRenderSys->EndScene();
-}
-void RenderPipeline::_RenderSkyBox()
-{
-	if (mSceneManager->mSkyBox) {
-		RenderOperationQueue opQue;
-		mSceneManager->mSkyBox->GenRenderOperation(opQue);
-		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
-	}
-}
-void RenderPipeline::_DoPostProcess()
-{
-	DepthState orgState = mRenderSys->GetDepthState();
-	mRenderSys->SetDepthState(DepthState(false));
-
-	RenderOperationQueue opQue;
-	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
-		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
-	RenderOpQueue(opQue, E_PASS_POSTPROCESS);
-
-	mRenderSys->SetDepthState(orgState);
-}
 void RenderPipeline::_PushRenderTarget(IRenderTexturePtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
@@ -140,6 +89,82 @@ void RenderPipeline::BindPass(const PassPtr& pass, const cbGlobalParam& globalPa
 		mRenderSys->SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
 }
 
+void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+{
+	TechniquePtr tech = op.mMaterial->CurTech();
+	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
+	for (auto& pass : passes) {
+		//SetVertexLayout(pass->mInputLayout);
+		mRenderSys->SetVertexBuffer(op.mVertexBuffer);
+		mRenderSys->SetIndexBuffer(op.mIndexBuffer);
+
+		TextureBySlot textures = op.mTextures;
+		textures.Merge(pass->mTextures);
+
+		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
+			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
+			if (iter != op.mVertBufferByPass.end()) mRenderSys->SetVertexBuffer(iter->second);
+			else mRenderSys->SetVertexBuffer(op.mVertexBuffer);
+			
+			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
+			RenderPass(pass, textures, i, op, globalParam);
+			textures[0] = first;
+		}
+		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
+		if (iter != op.mVertBufferByPass.end()) mRenderSys->SetVertexBuffer(iter->second);
+		else mRenderSys->SetVertexBuffer(op.mVertexBuffer);
+		
+		RenderPass(pass, textures, -1, op, globalParam);
+	}
+}
+
+void RenderPipeline::MakeAutoParam(cbGlobalParam& globalParam, bool castShadow, cbDirectLight* light, LightType lightType)
+{
+	memset(&globalParam, 0, sizeof(globalParam));
+
+	if (castShadow) {
+		light->CalculateLightingViewProjection(*mSceneManager->mDefCamera, globalParam.View, globalParam.Projection);
+	}
+	else {
+		globalParam.View = mSceneManager->mDefCamera->GetView();
+		globalParam.Projection = mSceneManager->mDefCamera->GetProjection();
+		light->CalculateLightingViewProjection(*mSceneManager->mDefCamera, globalParam.LightView, globalParam.LightProjection);
+	}
+	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
+
+	globalParam.WorldInv = XM::Inverse(globalParam.World);
+	globalParam.ViewInv = XM::Inverse(globalParam.View);
+	globalParam.ProjectionInv = XM::Inverse(globalParam.Projection);
+
+	globalParam.LightType = lightType + 1;
+	switch (lightType) {
+	case kLightDirectional:
+		static_cast<cbDirectLight&>(globalParam.Light) = *light;
+		break;
+	case kLightPoint:
+		static_cast<cbPointLight&>(globalParam.Light) = *(cbPointLight*)light;
+		break;
+	case kLightSpot:
+		globalParam.Light = *(cbSpotLight*)light;
+		break;
+	default:
+		break;
+	}
+}
+void RenderPipeline::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
+{
+	cbGlobalParam globalParam;
+	MakeAutoParam(globalParam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+
+	for (int i = 0; i < opQueue.Count(); ++i) {
+		if (opQueue[i].mMaterial->IsLoaded()) {
+			globalParam.World = opQueue[i].mWorldTransform;
+			globalParam.WorldInv = XM::Inverse(globalParam.World);
+			RenderOp(opQueue[i], lightMode, globalParam);
+		}
+	}
+}
+
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
 	DepthState orgState = mRenderSys->GetDepthState();
@@ -190,90 +215,58 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
 	}
 }
-void RenderPipeline::MakeAutoParam(cbGlobalParam& globalParam, CameraBase* pLightCam, bool castShadow, cbDirectLight* light, LightType lightType)
+
+void RenderPipeline::_RenderSkyBox()
 {
-	memset(&globalParam, 0, sizeof(globalParam));
-
-	if (castShadow) {
-		globalParam.View = COPY_TO_GPU(pLightCam->GetView());
-		globalParam.Projection = COPY_TO_GPU(pLightCam->GetProjection());
-	}
-	else {
-		globalParam.View = COPY_TO_GPU(mSceneManager->mDefCamera->GetView());
-		globalParam.Projection = COPY_TO_GPU(mSceneManager->mDefCamera->GetProjection());
-
-		globalParam.LightView = COPY_TO_GPU(pLightCam->GetView());
-		globalParam.LightProjection = COPY_TO_GPU(pLightCam->GetProjection());
-	}
-	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
-
-	globalParam.WorldInv = XM::Inverse(globalParam.World);
-	globalParam.ViewInv = XM::Inverse(globalParam.View);
-	globalParam.ProjectionInv = XM::Inverse(globalParam.Projection);
-
-	globalParam.LightType = lightType + 1;
-	switch (lightType) {
-	case kLightDirectional:
-		static_cast<cbDirectLight&>(globalParam.Light) = *light;
-		break;
-	case kLightPoint:
-		static_cast<cbPointLight&>(globalParam.Light) = *(cbPointLight*)light;
-		break;
-	case kLightSpot:
-		globalParam.Light = *(cbSpotLight*)light;
-		break;
-	default:
-		break;
+	if (mSceneManager->mSkyBox) {
+		RenderOperationQueue opQue;
+		mSceneManager->mSkyBox->GenRenderOperation(opQue);
+		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
 	}
 }
-void RenderPipeline::RenderLight(cbDirectLight* light, LightType lightType, const RenderOperationQueue& opQueue, const std::string& lightMode)
+void RenderPipeline::_DoPostProcess()
 {
-	auto LightCam = light->GetLightCamera(*mSceneManager->mDefCamera);
+	DepthState orgState = mRenderSys->GetDepthState();
+	mRenderSys->SetDepthState(DepthState(false));
 
-	cbGlobalParam globalParam;
-	MakeAutoParam(globalParam, LightCam, lightMode == E_PASS_SHADOWCASTER, light, lightType);
+	RenderOperationQueue opQue;
+	for (size_t i = 0; i < mSceneManager->mPostProcs.size(); ++i)
+		mSceneManager->mPostProcs[i]->GenRenderOperation(opQue);
+	RenderOpQueue(opQue, E_PASS_POSTPROCESS);
 
-	for (int i = 0; i < opQueue.Count(); ++i) {
-		if (opQueue[i].mMaterial->IsLoaded()) {
-			globalParam.World = opQueue[i].mWorldTransform;
-			globalParam.WorldInv = XM::Inverse(globalParam.World);
-			RenderOp(opQueue[i], lightMode, globalParam);
-		}
-	}
+	mRenderSys->SetDepthState(orgState);
 }
 
-void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+bool RenderPipeline::BeginFrame()
 {
-	TechniquePtr tech = op.mMaterial->CurTech();
-	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
-	for (auto& pass : passes) {
-		//SetVertexLayout(pass->mInputLayout);
-		mRenderSys->SetVertexBuffer(op.mVertexBuffer);
-		mRenderSys->SetIndexBuffer(op.mIndexBuffer);
+	if (!mRenderSys->BeginScene()) return false;
 
-		TextureBySlot textures = op.mTextures;
-		textures.Merge(pass->mTextures);
+	mCastShdowFlag = false;
 
-		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
-			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
-			if (iter != op.mVertBufferByPass.end()) {
-				mRenderSys->SetVertexBuffer(iter->second);
-			}
-			else {
-				mRenderSys->SetVertexBuffer(op.mVertexBuffer);
-			}
-			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
-			RenderPass(pass, textures, i, op, globalParam);
-			textures[0] = first;
-		}
-		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
-		if (iter != op.mVertBufferByPass.end()) {
-			mRenderSys->SetVertexBuffer(iter->second);
-		}
-		else {
-			mRenderSys->SetVertexBuffer(op.mVertexBuffer);
-		}
-		RenderPass(pass, textures, -1, op, globalParam);
+	if (!mSceneManager->mPostProcs.empty()) {
+		mRenderSys->SetRenderTarget(mPostProcessRT);
+		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
+	}
+	_RenderSkyBox();
+	return true;
+}
+void RenderPipeline::EndFrame()
+{
+	if (!mSceneManager->mPostProcs.empty()) {
+		mRenderSys->SetRenderTarget(nullptr);
+	}
+	_DoPostProcess();
+
+	mRenderSys->EndScene();
+}
+
+void RenderPipeline::Draw(IRenderable& renderable)
+{
+	if (BeginFrame()) {
+		RenderOperationQueue opQue;
+		renderable.GenRenderOperation(opQue);
+		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
+		EndFrame();
 	}
 }
 

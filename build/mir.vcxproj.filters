@@ -37,9 +37,6 @@
     <ClInclude Include="..\src\core\rendersys\resource.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\scene_manager.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\interface_type9.h">
       <Filter>src\core\rendersys\d3d9</Filter>
     </ClInclude>
@@ -106,9 +103,6 @@
     <ClInclude Include="..\src\core\rendersys\render_pipeline.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\camera.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\mir_export.h">
       <Filter>src\core</Filter>
     </ClInclude>
@@ -117,6 +111,12 @@
     </ClInclude>
     <ClInclude Include="..\src\test\test_case.h">
       <Filter>src\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\camera.h">
+      <Filter>src\core\rendersys\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\scene_manager.h">
+      <Filter>src\core\rendersys\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -151,9 +151,6 @@
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\resource.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\scene_manager.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp">
@@ -204,9 +201,6 @@
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\camera.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\dllmain.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
@@ -245,6 +239,12 @@
     </ClCompile>
     <ClCompile Include="..\src\test\test_sprite.cpp">
       <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\camera.cpp">
+      <Filter>src\core\rendersys\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\scene_manager.cpp">
+      <Filter>src\core\rendersys\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +286,9 @@
     </Filter>
     <Filter Include="src\test\test_cases">
       <UniqueIdentifier>{847eea9e-8503-48c3-9b13-6c204a3ae34a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\scene">
+      <UniqueIdentifier>{8f2345f8-6cfd-4906-80e5-411c4a84a6db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -28,10 +28,10 @@ SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, CameraPtr pCam
 	mCubeSRV = mRenderSys.LoadTexture(imgName, format, true, true);
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
-	XMFLOAT3 pos0 = pCam->CalNDC(XMFLOAT3(fLowW, fLowH, 1.0f));
-	XMFLOAT3 pos1 = pCam->CalNDC(XMFLOAT3(fLowW, fHighH, 1.0f));
-	XMFLOAT3 pos2 = pCam->CalNDC(XMFLOAT3(fHighW, fLowH, 1.0f));
-	XMFLOAT3 pos3 = pCam->CalNDC(XMFLOAT3(fHighW, fHighH, 1.0f));
+	XMFLOAT3 pos0 = pCam->ProjectPoint(XMFLOAT3(fLowW, fLowH, 1.0f));
+	XMFLOAT3 pos1 = pCam->ProjectPoint(XMFLOAT3(fLowW, fHighH, 1.0f));
+	XMFLOAT3 pos2 = pCam->ProjectPoint(XMFLOAT3(fHighW, fLowH, 1.0f));
+	XMFLOAT3 pos3 = pCam->ProjectPoint(XMFLOAT3(fHighW, fHighH, 1.0f));
 	pCam1 = pCam1;
 #endif
 }
