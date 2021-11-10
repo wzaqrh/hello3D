@@ -60,7 +60,7 @@ void App::Render()
 		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
 
 		auto eye = sceneMng->GetDefCamera()->mEye;
-		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, -sceneMng->GetDefCamera()->mEyeDistance, 1), euler);
+		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, sceneMng->GetDefCamera()->mEye.z, 1), euler);
 		eye = XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec));
 		sceneMng->GetDefCamera()->SetLookAt(eye, sceneMng->GetDefCamera()->mAt);
 	}

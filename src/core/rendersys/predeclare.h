@@ -19,7 +19,6 @@ DECLARE_STRUCT(Technique);
 DECLARE_STRUCT(Material);
 DECLARE_STRUCT(MaterialFactory);
 
-DECLARE_STRUCT(CameraBase);
 DECLARE_STRUCT(Camera);
 DECLARE_STRUCT(SceneManager);
 

@@ -48,8 +48,6 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	mScreenWidth = vpWidth;
 	mScreenHeight = vpHeight;
 
-	//mSceneManager = MakePtr<SceneManager>(*this, *mMaterialFac, XMINT2(mScreenWidth, mScreenHeight), mPostProcessRT, Camera::CreatePerspective(mScreenWidth, mScreenHeight));
-
 	D3D_SHADER_MACRO Shader_Macros[] = { "SHADER_MODEL", "40000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros+ARRAYSIZE(Shader_Macros));
 	return true;

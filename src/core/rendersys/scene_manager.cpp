@@ -41,16 +41,16 @@ cbDirectLightPtr SceneManager::AddDirectLight()
 	return light;
 }
 
-CameraPtr SceneManager::SetOthogonalCamera(double far1)
+CameraPtr SceneManager::SetOthogonalCamera(const XMFLOAT3& eyePos, double far1)
 {
-	mDefCamera = Camera::CreateOthogonal(mScreenWidth, mScreenHeight, far1);
+	mDefCamera = Camera::CreateOthogonal(mScreenWidth, mScreenHeight, eyePos, far1);
 	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }
 
-CameraPtr SceneManager::SetPerspectiveCamera(double fov, int eyeDistance, double far1)
+CameraPtr SceneManager::SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov)
 {
-	mDefCamera = Camera::CreatePerspective(mScreenWidth, mScreenHeight, fov, eyeDistance, far1);
+	mDefCamera = Camera::CreatePerspective(mScreenWidth, mScreenHeight, eyePos, far1, fov);
 	if (mSkyBox) mSkyBox->SetRefCamera(mDefCamera);
 	return mDefCamera;
 }

@@ -27,8 +27,8 @@ public:
 public:
 	SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, IRenderTexturePtr postRT, CameraPtr defCamera);
 
-	CameraPtr SetOthogonalCamera(double far1);
-	CameraPtr SetPerspectiveCamera(double fov, int eyeDistance, double far1);
+	CameraPtr SetOthogonalCamera(const XMFLOAT3& eyePos, double far1);
+	CameraPtr SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov);
 	CameraPtr GetDefCamera() { return mDefCamera; }
 
 	cbSpotLightPtr AddSpotLight();
