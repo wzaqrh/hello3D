@@ -13,7 +13,28 @@ SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMI
 {
 	mScreenWidth  = screenSize.x;
 	mScreenHeight = screenSize.y;
-	mDefCamera = defCamera;
+	if (defCamera) mCameras.push_back(defCamera);
+}
+
+void SceneManager::RemoveAllCameras()
+{
+	mCameras.clear();
+}
+CameraPtr SceneManager::GetDefCamera() const 
+{
+	return (! mCameras.empty()) ? mCameras[0] : nullptr;
+}
+CameraPtr SceneManager::AddOthogonalCamera(const XMFLOAT3& eyePos, double far1)
+{
+	CameraPtr camera = Camera::CreateOthogonal(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1);
+	mCameras.push_back(camera);
+	return camera;
+}
+CameraPtr SceneManager::AddPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov)
+{
+	CameraPtr camera = Camera::CreatePerspective(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1, fov);
+	mCameras.push_back(camera);
+	return camera;
 }
 
 cbSpotLightPtr SceneManager::AddSpotLight()
@@ -23,7 +44,6 @@ cbSpotLightPtr SceneManager::AddSpotLight()
 	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightSpot));
 	return light;
 }
-
 cbPointLightPtr SceneManager::AddPointLight()
 {
 	cbPointLightPtr light = std::make_shared<cbPointLight>();
@@ -31,25 +51,12 @@ cbPointLightPtr SceneManager::AddPointLight()
 	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightPoint));
 	return light;
 }
-
 cbDirectLightPtr SceneManager::AddDirectLight()
 {
 	cbDirectLightPtr light = std::make_shared<cbDirectLight>();
 	mDirectLights.push_back(light);
 	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightDirectional));
 	return light;
-}
-
-CameraPtr SceneManager::SetOthogonalCamera(const XMFLOAT3& eyePos, double far1)
-{
-	mDefCamera = Camera::CreateOthogonal(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1);
-	return mDefCamera;
-}
-
-CameraPtr SceneManager::SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov)
-{
-	mDefCamera = Camera::CreatePerspective(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1, fov);
-	return mDefCamera;
 }
 
 }

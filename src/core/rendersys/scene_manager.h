@@ -15,7 +15,7 @@ public:
 	MaterialFactory& mMaterialFac;
 	int mScreenWidth, mScreenHeight;
 	
-	CameraPtr mDefCamera;
+	std::vector<CameraPtr> mCameras;
 
 	std::vector<cbDirectLightPtr> mDirectLights;
 	std::vector<cbPointLightPtr> mPointLights;
@@ -24,9 +24,10 @@ public:
 public:
 	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
 
-	CameraPtr SetOthogonalCamera(const XMFLOAT3& eyePos, double far1);
-	CameraPtr SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov);
-	CameraPtr GetDefCamera() { return mDefCamera; }
+	void RemoveAllCameras();
+	CameraPtr AddOthogonalCamera(const XMFLOAT3& eyePos, double far1);
+	CameraPtr AddPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov);
+	CameraPtr GetDefCamera() const;
 
 	cbSpotLightPtr AddSpotLight();
 	cbPointLightPtr AddPointLight();

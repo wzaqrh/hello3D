@@ -22,7 +22,8 @@ private:
 
 void TestLabel::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
+	mContext->SceneMng()->RemoveAllCameras();
+	mContext->SceneMng()->AddOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
 	for (int i = 0; i < CASE_COUNT; ++i) {
 		auto label = mContext->RenderableFac()->CreateLabel("D:\\ProjectWork1\\hello3D\\Debug\\msyh.ttc", 24);

@@ -24,7 +24,8 @@ void TestSprite::OnPostInitDevice()
 	mSprite->SetPosition(-5, -5, 0);
 	mSprite->SetSize(5, 5);
 #else
-	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
+	mContext->SceneMng()->RemoveAllCameras();
+	mContext->SceneMng()->AddOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LAYERCOLOR);
 	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);

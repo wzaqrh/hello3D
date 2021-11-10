@@ -22,7 +22,8 @@ private:
 
 void TestMesh::OnPostInitDevice()
 {
-	mContext->SceneMng()->SetOthogonalCamera(XMFLOAT3(0,0,-10), 100);
+	mContext->SceneMng()->RemoveAllCameras();
+	mContext->SceneMng()->AddOthogonalCamera(XMFLOAT3(0,0,-10), 100);
 
 	auto texture = mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
 

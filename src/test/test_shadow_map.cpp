@@ -41,7 +41,8 @@ void TestShadowMap::OnInitLight()
 void TestShadowMap::OnPostInitDevice()
 {
 #if 1
-	mContext->SceneMng()->SetPerspectiveCamera(XMFLOAT3(0,0,-30), 300, 45);
+	mContext->SceneMng()->RemoveAllCameras();
+	mContext->SceneMng()->AddPerspectiveCamera(XMFLOAT3(0,0,-30), 300, 45);
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 

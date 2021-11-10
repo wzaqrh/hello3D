@@ -76,12 +76,12 @@ void TestPBR::OnInitLight()
 /********** Lesson6 **********/
 void TestPBR::OnPostInitDevice()
 {
+	mContext->SceneMng()->RemoveAllCameras();
+	mContext->SceneMng()->AddPerspectiveCamera(XMFLOAT3(0, 0, -30), 1000, 45);
+
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
-
-	mContext->SceneMng()->SetPerspectiveCamera(XMFLOAT3(0,0,-30), 1000, 45);
-
 #if 0
 	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
 	//auto fileName = "Male02.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);

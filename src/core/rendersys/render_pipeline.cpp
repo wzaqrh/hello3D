@@ -120,12 +120,12 @@ void RenderPipeline::MakeAutoParam(cbGlobalParam& globalParam, bool castShadow, 
 	memset(&globalParam, 0, sizeof(globalParam));
 
 	if (castShadow) {
-		light->CalculateLightingViewProjection(*mSceneManager->mDefCamera, globalParam.View, globalParam.Projection);
+		light->CalculateLightingViewProjection(*mSceneManager->GetDefCamera(), globalParam.View, globalParam.Projection);
 	}
 	else {
-		globalParam.View = mSceneManager->mDefCamera->GetView();
-		globalParam.Projection = mSceneManager->mDefCamera->GetProjection();
-		light->CalculateLightingViewProjection(*mSceneManager->mDefCamera, globalParam.LightView, globalParam.LightProjection);
+		globalParam.View = mSceneManager->GetDefCamera()->GetView();
+		globalParam.Projection = mSceneManager->GetDefCamera()->GetProjection();
+		light->CalculateLightingViewProjection(*mSceneManager->GetDefCamera(), globalParam.LightView, globalParam.LightProjection);
 	}
 	globalParam.HasDepthMap = mCastShdowFlag ? TRUE : FALSE;
 
@@ -214,6 +214,11 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const st
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
 	}
+}
+
+void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& scene)
+{
+
 }
 
 void RenderPipeline::_RenderSkyBox()
