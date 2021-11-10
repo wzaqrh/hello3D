@@ -32,6 +32,7 @@ public:
 		mOps.push_back(op);
 	}
 	size_t Count() const { return mOps.size(); }
+	bool IsEmpty() const { return mOps.empty(); }
 
 	RenderOperation& At(size_t pos) { return mOps[pos]; }
 	RenderOperation& operator[](size_t pos) { return At(pos); }

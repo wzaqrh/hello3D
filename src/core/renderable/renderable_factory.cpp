@@ -5,14 +5,15 @@
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
 #include "core/renderable/post_process.h"
+#include "core/rendersys/camera.h"
 #include "core/rendersys/material_factory.h"
+#include "core/rendersys/render_pipeline.h"
 
 namespace mir {
 
-RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePtr PPEInput)
+RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac)
 	: mRenderSys(renderSys) 
 	, mMaterialFac(matFac)
-	, mPPEInput(PPEInput)
 {
 	mFontCache = std::make_shared<FontCache>(renderSys);
 }
@@ -43,11 +44,11 @@ SkyBoxPtr RenderableFactory::CreateSkybox(const std::string& imgName)
 	return std::make_shared<SkyBox>(mRenderSys, mMaterialFac, imgName);
 }
 
-PostProcessPtr RenderableFactory::CreatePostProcessEffect(const std::string& effectName)
+PostProcessPtr RenderableFactory::CreatePostProcessEffect(const std::string& effectName, Camera& camera)
 {
 	PostProcessPtr process;
 	if (effectName == E_MAT_POSTPROC_BLOOM) {
-		process = std::make_shared<Bloom>(mRenderSys, mMaterialFac, mPPEInput);
+		process = std::make_shared<Bloom>(mRenderSys, mMaterialFac, camera.RenderPipe()->FetchPostProcessInput());
 	}
 	return process;
 }

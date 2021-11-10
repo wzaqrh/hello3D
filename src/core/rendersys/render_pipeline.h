@@ -8,20 +8,22 @@ namespace mir {
 
 class RenderPipeline
 {
-	IRenderSystemPtr mRenderSys;
+	RenderSystem& mRenderSys;
 	const int mScreenWidth, mScreenHeight;
 
 	bool mCastShdowFlag = false;
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
-public:
+
 	IRenderTexturePtr mShadowCasterOutput, mPostProcessInput;
+public:
 	SceneManagerPtr mSceneManager;
 public:
-	RenderPipeline(IRenderSystemPtr renderSys, int width, int height);
+	RenderPipeline(RenderSystem& renderSys, int width, int height);
 	bool BeginFrame();
 	void EndFrame();
 	void Draw(IRenderable& renderable);
 	void RenderOpQueue(const RenderOperationQueue& opQueue, const std::string& lightMode);
+	IRenderTexturePtr FetchPostProcessInput();
 private:
 	void _RenderSkyBox();
 	void _DoPostProcess();

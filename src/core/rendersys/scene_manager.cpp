@@ -7,7 +7,7 @@
 
 namespace mir {
 
-SceneManager::SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera)
+SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera)
 	:mRenderSys(renderSys)
 	,mMaterialFac(matFac)
 {
@@ -42,13 +42,13 @@ cbDirectLightPtr SceneManager::AddDirectLight()
 
 CameraPtr SceneManager::SetOthogonalCamera(const XMFLOAT3& eyePos, double far1)
 {
-	mDefCamera = Camera::CreateOthogonal(mScreenWidth, mScreenHeight, eyePos, far1);
+	mDefCamera = Camera::CreateOthogonal(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1);
 	return mDefCamera;
 }
 
 CameraPtr SceneManager::SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov)
 {
-	mDefCamera = Camera::CreatePerspective(mScreenWidth, mScreenHeight, eyePos, far1, fov);
+	mDefCamera = Camera::CreatePerspective(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1, fov);
 	return mDefCamera;
 }
 

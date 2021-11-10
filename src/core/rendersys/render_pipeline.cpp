@@ -9,29 +9,35 @@
 
 namespace mir {
 
-RenderPipeline::RenderPipeline(IRenderSystemPtr renderSys, int width, int height)
+RenderPipeline::RenderPipeline(RenderSystem& renderSys, int width, int height)
 	:mRenderSys(renderSys)
 	,mScreenWidth(width)
 	,mScreenHeight(height)
 {
-	mShadowCasterOutput = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+	mShadowCasterOutput = mRenderSys.CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
 	SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
+}
 
-	mPostProcessInput = mRenderSys->CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
-	SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
+IRenderTexturePtr RenderPipeline::FetchPostProcessInput()
+{
+	if (mPostProcessInput == nullptr) {
+		mPostProcessInput = mRenderSys.CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+		SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
+	}
+	return mPostProcessInput;
 }
 
 void RenderPipeline::_PushRenderTarget(IRenderTexturePtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
-	mRenderSys->SetRenderTarget(rendTarget);
+	mRenderSys.SetRenderTarget(rendTarget);
 }
 void RenderPipeline::_PopRenderTarget()
 {
 	if (!mRenderTargetStk.empty())
 		mRenderTargetStk.pop_back();
 
-	mRenderSys->SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
+	mRenderSys.SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
 void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam)
@@ -50,18 +56,18 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 
 	{
 		if (textures.Count() > 0)
-			mRenderSys->SetTextures(E_TEXTURE_MAIN, &textures.Textures[0], textures.Textures.size());
+			mRenderSys.SetTextures(E_TEXTURE_MAIN, &textures.Textures[0], textures.Textures.size());
 
 		if (pass->OnBind)
-			pass->OnBind(*pass, *mRenderSys, textures);
+			pass->OnBind(*pass, mRenderSys, textures);
 
 		BindPass(pass, globalParam);
 
-		if (op.mIndexBuffer) mRenderSys->DrawIndexedPrimitive(op, pass->mTopoLogy);
-		else mRenderSys->DrawPrimitive(op, pass->mTopoLogy);
+		if (op.mIndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
+		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
 
 		if (pass->OnUnbind)
-			pass->OnUnbind(*pass, *mRenderSys, textures);
+			pass->OnUnbind(*pass, mRenderSys, textures);
 	}
 
 	if (iterCnt >= 0) {
@@ -75,18 +81,18 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 
 void RenderPipeline::BindPass(const PassPtr& pass, const cbGlobalParam& globalParam)
 {
-	mRenderSys->SetProgram(pass->mProgram);
+	mRenderSys.SetProgram(pass->mProgram);
 
 	if (pass->mConstantBuffers.size() > 0)
-		mRenderSys->UpdateConstBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
+		mRenderSys.UpdateConstBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
 
 	auto cbuffers = pass->GetConstBuffers();
-	mRenderSys->SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
+	mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
 
-	mRenderSys->SetVertexLayout(pass->mInputLayout);
+	mRenderSys.SetVertexLayout(pass->mInputLayout);
 
 	if (!pass->mSamplers.empty())
-		mRenderSys->SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
+		mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
 }
 
 void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
@@ -95,24 +101,24 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes) {
 		//SetVertexLayout(pass->mInputLayout);
-		mRenderSys->SetVertexBuffer(op.mVertexBuffer);
-		mRenderSys->SetIndexBuffer(op.mIndexBuffer);
+		mRenderSys.SetVertexBuffer(op.mVertexBuffer);
+		mRenderSys.SetIndexBuffer(op.mIndexBuffer);
 
 		TextureBySlot textures = op.mTextures;
 		textures.Merge(pass->mTextures);
 
 		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
 			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
-			if (iter != op.mVertBufferByPass.end()) mRenderSys->SetVertexBuffer(iter->second);
-			else mRenderSys->SetVertexBuffer(op.mVertexBuffer);
+			if (iter != op.mVertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
+			else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
 			
 			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
 			RenderPass(pass, textures, i, op, globalParam);
 			textures[0] = first;
 		}
 		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
-		if (iter != op.mVertBufferByPass.end()) mRenderSys->SetVertexBuffer(iter->second);
-		else mRenderSys->SetVertexBuffer(op.mVertexBuffer);
+		if (iter != op.mVertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
+		else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
 		
 		RenderPass(pass, textures, -1, op, globalParam);
 	}
@@ -167,52 +173,55 @@ void RenderPipeline::RenderLight(cbDirectLight* light, LightType lightType, cons
 
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const std::string& lightMode)
 {
-	DepthState orgState = mRenderSys->GetDepthState();
-	BlendFunc orgBlend = mRenderSys->GetBlendFunc();
+	if (opQueue.IsEmpty()) return;
+
+	DepthState orgState = mRenderSys.GetDepthState();
+	BlendFunc orgBlend = mRenderSys.GetBlendFunc();
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowCasterOutput);
-		mRenderSys->ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
-		mRenderSys->SetDepthState(DepthState(false));
-		mRenderSys->SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
+		mRenderSys.ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
+		mRenderSys.SetDepthState(DepthState(false));
+		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
 		mCastShdowFlag = true;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
 
 		auto& skyBox = mSceneManager->GetDefCamera()->SkyBox();
 		if (skyBox && skyBox->mCubeSRV)
-			mRenderSys->SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
+			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		mRenderSys->SetTexture(E_TEXTURE_MAIN, mPostProcessInput->GetColorTexture());
+		if (mPostProcessInput) 
+			mRenderSys.SetTexture(E_TEXTURE_MAIN, mPostProcessInput->GetColorTexture());
 	}
 
 	auto& lightsOrder = mSceneManager->mLightsByOrder;
 	if (!lightsOrder.empty()) {
-		BlendFunc orgBlend = mRenderSys->GetBlendFunc();
-		mRenderSys->SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
+		BlendFunc orgBlend = mRenderSys.GetBlendFunc();
+		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
 		RenderLight(lightsOrder[0].first, lightsOrder[0].second, opQueue, lightMode);
 
 		for (int i = 1; i < lightsOrder.size(); ++i) {
 			auto order = lightsOrder[i];
-			mRenderSys->SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
+			mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
 			auto __lightMode = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
 			RenderLight(order.first, order.second, opQueue, __lightMode);
 		}
-		mRenderSys->SetBlendFunc(orgBlend);
+		mRenderSys.SetBlendFunc(orgBlend);
 	}
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PopRenderTarget();
-		mRenderSys->SetDepthState(orgState);
-		mRenderSys->SetBlendFunc(orgBlend);
+		mRenderSys.SetDepthState(orgState);
+		mRenderSys.SetBlendFunc(orgBlend);
 
-		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
-		mRenderSys->SetTexture(E_TEXTURE_ENV, nullptr);
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
+		mRenderSys.SetTexture(E_TEXTURE_ENV, nullptr);
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys->SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
 	}
 }
 
@@ -226,8 +235,8 @@ void RenderPipeline::_RenderSkyBox()
 }
 void RenderPipeline::_DoPostProcess()
 {
-	DepthState orgState = mRenderSys->GetDepthState();
-	mRenderSys->SetDepthState(DepthState(false));
+	DepthState orgState = mRenderSys.GetDepthState();
+	mRenderSys.SetDepthState(DepthState(false));
 
 	RenderOperationQueue opQue;
 	auto& postProcessEffects = mSceneManager->GetDefCamera()->PostProcessEffects();
@@ -235,18 +244,18 @@ void RenderPipeline::_DoPostProcess()
 		postProcessEffects[i]->GenRenderOperation(opQue);
 	RenderOpQueue(opQue, E_PASS_POSTPROCESS);
 
-	mRenderSys->SetDepthState(orgState);
+	mRenderSys.SetDepthState(orgState);
 }
 
 bool RenderPipeline::BeginFrame()
 {
-	if (!mRenderSys->BeginScene()) return false;
+	if (!mRenderSys.BeginScene()) return false;
 
 	mCastShdowFlag = false;
 
-	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty()) {
-		mRenderSys->SetRenderTarget(mPostProcessInput);
-		mRenderSys->ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
+	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mPostProcessInput) {
+		mRenderSys.SetRenderTarget(mPostProcessInput);
+		mRenderSys.ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
 	}
 	_RenderSkyBox();
 	return true;
@@ -254,11 +263,11 @@ bool RenderPipeline::BeginFrame()
 void RenderPipeline::EndFrame()
 {
 	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty()) {
-		mRenderSys->SetRenderTarget(nullptr);
+		mRenderSys.SetRenderTarget(nullptr);
 	}
 	_DoPostProcess();
 
-	mRenderSys->EndScene();
+	mRenderSys.EndScene();
 }
 
 void RenderPipeline::Draw(IRenderable& renderable)

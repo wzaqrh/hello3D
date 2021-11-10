@@ -1,9 +1,28 @@
 #include "core/rendersys/camera.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/render_pipeline.h"
 #include "core/base/utility.h"
 
 namespace mir {
 
-Camera::Camera()
+CameraPtr Camera::CreatePerspective(RenderSystem& renderSys, int width, int height, XMFLOAT3 eyePos, double far1, double fov)
+{
+	CameraPtr pCam = std::make_shared<Camera>(renderSys);
+	pCam->SetLookAt(eyePos, XMFLOAT3(0, 0, 0));
+	pCam->SetPerspectiveProj(width, height, fov, far1);
+	return pCam;
+}
+
+CameraPtr Camera::CreateOthogonal(RenderSystem& renderSys, int width, int height, XMFLOAT3 eyePos, double far1)
+{
+	CameraPtr pCam = std::make_shared<Camera>(renderSys);
+	pCam->SetLookAt(eyePos, XMFLOAT3(0, 0, 0));
+	pCam->SetOthogonalProj(width, height, far1);
+	return pCam;
+}
+
+Camera::Camera(RenderSystem& renderSys)
+	:mRenderSys(renderSys)
 {
 	mFlipY = false;
 	mTransformDirty = true;
@@ -14,22 +33,8 @@ Camera::Camera()
 
 	mTransform = std::make_shared<Transform>();
 	mUpVector = XMFLOAT3(0.0f, 1.0f, 0.0f);
-}
 
-CameraPtr Camera::CreatePerspective(int width, int height, XMFLOAT3 eyePos, double far1, double fov)
-{
-	CameraPtr pCam = std::make_shared<Camera>();
-	pCam->SetLookAt(eyePos, XMFLOAT3(0, 0, 0));
-	pCam->SetPerspectiveProj(width, height, fov, far1);
-	return pCam;
-}
-
-CameraPtr Camera::CreateOthogonal(int width, int height, XMFLOAT3 eyePos, double far1)
-{
-	CameraPtr pCam = std::make_shared<Camera>();
-	pCam->SetLookAt(eyePos, XMFLOAT3(0, 0, 0));
-	pCam->SetOthogonalProj(width, height, far1);
-	return pCam;
+	mRenderPipeline = std::make_shared<RenderPipeline>(mRenderSys, mRenderSys.mScreenWidth, mRenderSys.mScreenHeight);
 }
 
 XMFLOAT3 Camera::ProjectPoint(XMFLOAT3 pos)

@@ -11,7 +11,7 @@ namespace mir {
 class SceneManager : boost::noncopyable 
 {
 public:
-	IRenderSystem& mRenderSys;
+	RenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
 	int mScreenWidth, mScreenHeight;
 	
@@ -22,7 +22,7 @@ public:
 	std::vector<cbSpotLightPtr> mSpotLights;
 	std::vector<std::pair<cbDirectLight*, LightType>> mLightsByOrder;
 public:
-	SceneManager(IRenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
+	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
 
 	CameraPtr SetOthogonalCamera(const XMFLOAT3& eyePos, double far1);
 	CameraPtr SetPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov);
