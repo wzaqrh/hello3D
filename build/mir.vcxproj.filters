@@ -61,12 +61,6 @@
     <ClInclude Include="..\src\core\rendersys\d3d11\thread_pump.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\test\app.h">
-      <Filter>src\test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\test\test_case.h">
-      <Filter>src\test</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\material.h">
       <Filter>src\core\rendersys\material</Filter>
     </ClInclude>
@@ -117,6 +111,12 @@
     </ClInclude>
     <ClInclude Include="..\src\core\mir_export.h">
       <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\test\app.h">
+      <Filter>src\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\test\test_case.h">
+      <Filter>src\test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -171,42 +171,6 @@
     <ClCompile Include="..\src\core\rendersys\d3d11\thread_pump.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\test\app.cpp">
-      <Filter>src\test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\main.cpp">
-      <Filter>src\test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_bloom.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_label.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_mesh.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_model.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_model_pbr.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_raw_texture.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_render_target.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_shadow_map.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_spec_skybox.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_sprite.cpp">
-      <Filter>src\test\test_cases</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rendersys\material.cpp">
       <Filter>src\core\rendersys\material</Filter>
     </ClCompile>
@@ -243,6 +207,45 @@
     <ClCompile Include="..\src\core\rendersys\camera.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\dllmain.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\app.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\main.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_bloom.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_label.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_mesh.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_model.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_model_pbr.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_raw_texture.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_render_target.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_shadow_map.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_spec_skybox.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\test_sprite.cpp">
+      <Filter>src\test\test_cases</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -266,15 +269,6 @@
     <Filter Include="src\core\rendersys\d3d11">
       <UniqueIdentifier>{f250c8ce-8ba6-4cb0-9e90-5df274b393e2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\export">
-      <UniqueIdentifier>{db8870e8-0d37-4823-91ee-0761c34bc996}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\test">
-      <UniqueIdentifier>{fb2f6257-caf8-441e-96a6-da8e2faedd5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\test\test_cases">
-      <UniqueIdentifier>{669d16a2-ce5b-4c1f-a67a-d38a8e2be48e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\rendersys\material">
       <UniqueIdentifier>{9ffd0cd2-2f97-41ba-8427-ac868b8ac017}</UniqueIdentifier>
     </Filter>
@@ -286,6 +280,12 @@
     </Filter>
     <Filter Include="src\core\renderable\label">
       <UniqueIdentifier>{4f2df5f0-039c-4b83-928b-29bddbdb363f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\test">
+      <UniqueIdentifier>{a7d36e2b-83a5-495b-9ac1-7233cd9be0eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\test\test_cases">
+      <UniqueIdentifier>{847eea9e-8503-48c3-9b13-6c204a3ae34a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

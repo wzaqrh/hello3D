@@ -71,6 +71,7 @@
     <ClCompile Include="..\src\core\base\d3d_enum_convert.cpp" />
     <ClCompile Include="..\src\core\base\transform.cpp" />
     <ClCompile Include="..\src\core\base\utility.cpp" />
+    <ClCompile Include="..\src\core\dllmain.cpp" />
     <ClCompile Include="..\src\core\mir.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_mesh.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp" />
@@ -97,8 +98,8 @@
     <ClCompile Include="..\src\core\rendersys\render_system.cpp" />
     <ClCompile Include="..\src\core\rendersys\resource.cpp" />
     <ClCompile Include="..\src\core\rendersys\scene_manager.cpp" />
-    <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\test\app.cpp" />
+    <ClCompile Include="..\src\test\main.cpp" />
     <ClCompile Include="..\src\test\test_bloom.cpp" />
     <ClCompile Include="..\src\test\test_label.cpp" />
     <ClCompile Include="..\src\test\test_mesh.cpp" />
