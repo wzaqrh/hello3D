@@ -1,34 +1,8 @@
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/base_type.h"
-#include "core/rendersys/const_buffer_decl.h"
 #include "core/rendersys/camera.h"
 
 namespace mir {
-
-/********** TConstBufferDeclBuilder **********/
-ConstBufferDeclBuilder::ConstBufferDeclBuilder(ConstBufferDecl& decl)
-	:mDecl(decl)
-{
-}
-
-ConstBufferDeclBuilder& ConstBufferDeclBuilder::Add(const ConstBufferDeclElement& elem)
-{
-	mDecl.Add(elem).Offset = mDecl.BufferSize;
-	mDecl.BufferSize += elem.Size;
-	return *this;
-}
-
-ConstBufferDeclBuilder& ConstBufferDeclBuilder::Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl)
-{
-	mDecl.Add(elem, subDecl).Offset = mDecl.BufferSize;
-	mDecl.BufferSize += elem.Size;
-	return *this;
-}
-
-ConstBufferDecl& ConstBufferDeclBuilder::Build()
-{
-	return mDecl;
-}
 
 /********** TDirectLight **********/
 cbDirectLight::cbDirectLight()
@@ -41,24 +15,25 @@ cbDirectLight::cbDirectLight()
 
 void cbDirectLight::SetDirection(float x, float y, float z)
 {
-	LightPos = XMFLOAT4(x, y, z, 0);
+	LightPos = Eigen::Vector4f(x, y, z, 0);
 }
 
 void cbDirectLight::SetDiffuseColor(float r, float g, float b, float a)
 {
-	DiffuseColor = XMFLOAT4(r, g, b, a);
+	DiffuseColor = Eigen::Vector4f(r, g, b, a);
 }
 
 void cbDirectLight::SetSpecularColor(float r, float g, float b, float a)
 {
-	SpecularColorPower = XMFLOAT4(r, g, b, SpecularColorPower.w);
+	SpecularColorPower = Eigen::Vector4f(r, g, b, SpecularColorPower.w());
 }
 
 void cbDirectLight::SetSpecularPower(float power)
 {
-	SpecularColorPower.w = power;
+	SpecularColorPower.w() = power;
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbDirectLight::GetDesc()
 {
 	static ConstBufferDecl decl;
@@ -69,10 +44,11 @@ ConstBufferDecl& cbDirectLight::GetDesc()
 	BUILD_ADD(SpecularColorPower);
 	return builder.Build();
 }
+#endif
 
 /********** cbDirectLight **********/
 void cbDirectLight::CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj) {
-	XMVECTOR Eye = XMVectorSet(LightPos.x, LightPos.y, LightPos.z, 0.0f);
+	XMVECTOR Eye = XMVectorSet(LightPos.x(), LightPos.y(), LightPos.z(), 0.0f);
 	XMVECTOR At = XMVectorSet(camera.mLookAtPos.x, camera.mLookAtPos.y, camera.mLookAtPos.z, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	view = XMMatrixLookAtLH(Eye, At, Up);
@@ -88,14 +64,15 @@ cbPointLight::cbPointLight()
 
 void cbPointLight::SetPosition(float x, float y, float z)
 {
-	LightPos = XMFLOAT4(x, y, z, 1);
+	LightPos = Eigen::Vector4f(x, y, z, 1);
 }
 
 void cbPointLight::SetAttenuation(float a, float b, float c)
 {
-	Attenuation = XMFLOAT4(a, b, c, 0);
+	Attenuation = Eigen::Vector4f(a, b, c, 0);
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbPointLight::GetDesc()
 {
 	static ConstBufferDecl decl;
@@ -106,6 +83,7 @@ ConstBufferDecl& cbPointLight::GetDesc()
 	BUILD_ADD(Attenuation);
 	return builder.Build();
 }
+#endif
 
 /********** cbSpotLight **********/
 cbSpotLight::cbSpotLight()
@@ -116,12 +94,12 @@ cbSpotLight::cbSpotLight()
 
 void cbSpotLight::SetDirection(float x, float y, float z)
 {
-	DirectionCutOff = XMFLOAT4(x, y, z, DirectionCutOff.w);
+	DirectionCutOff = Eigen::Vector4f(x, y, z, DirectionCutOff.w());
 }
 
 void cbSpotLight::SetCutOff(float cutoff)
 {
-	DirectionCutOff.w = cutoff;
+	DirectionCutOff.w() = cutoff;
 }
 
 void cbSpotLight::SetAngle(float radian)
@@ -129,6 +107,7 @@ void cbSpotLight::SetAngle(float radian)
 	SetCutOff(cos(radian));
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbSpotLight::GetDesc()
 {
 	static ConstBufferDecl decl;
@@ -139,16 +118,18 @@ ConstBufferDecl& cbSpotLight::GetDesc()
 	BUILD_ADD(DirectionCutOff);
 	return builder.Build();
 }
+#endif
 
 /********** cbGlobalParam **********/
 cbGlobalParam::cbGlobalParam()
 {
 	auto Ident = XMMatrixIdentity();
-	World = Ident;
-	View = Ident;
-	Projection = Ident;
+	World = Eigen::Matrix4f::Identity();
+	View = Eigen::Matrix4f::Identity();
+	Projection = Eigen::Matrix4f::Identity();
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbGlobalParam::GetDesc()
 {
 	static ConstBufferDecl desc = MKDesc();
@@ -174,6 +155,7 @@ ConstBufferDecl cbGlobalParam::MKDesc()
 	BUILD_ADD(HasDepthMap);
 	return builder.Build();
 }
+#endif
 
 /********** TFogExp **********/
 cbFogExp::cbFogExp()
@@ -184,22 +166,25 @@ cbFogExp::cbFogExp()
 
 void cbFogExp::SetColor(float r, float g, float b)
 {
-	FogColorExp = XMFLOAT4(r, g, b, FogColorExp.w);
+	FogColorExp = Eigen::Vector4f(r, g, b, FogColorExp.w());
 }
 
 void cbFogExp::SetExp(float exp)
 {
-	FogColorExp.w = exp;
+	FogColorExp.w() = exp;
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbFogExp::GetDesc()
 {
 	CBBEGIN(cbFogExp);
 	BUILD_ADD(FogColorExp);
 	return builder.Build();
 }
+#endif
 
 /********** cbWeightedSkin **********/
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbWeightedSkin::GetDesc()
 {
 	static ConstBufferDecl desc = MKDesc();
@@ -217,17 +202,19 @@ ConstBufferDecl cbWeightedSkin::MKDesc()
 	BUILD_ADD(hasAO);
 	return builder.Build();
 }
+#endif
 
 /********** cbUnityMaterial **********/
 cbUnityMaterial::cbUnityMaterial()
 {
-	_SpecColor = XMFLOAT4(1, 1, 1, 1);
-	_Color = XMFLOAT4(1, 1, 1, 1);
+	_SpecColor = Eigen::Vector4f(1, 1, 1, 1);
+	_Color = Eigen::Vector4f(1, 1, 1, 1);
 	_GlossMapScale = 1;
 	_OcclusionStrength = 1;
 	_SpecLightOff = 0;
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbUnityMaterial::GetDesc()
 {
 	static ConstBufferDecl desc = MKDesc();
@@ -244,20 +231,23 @@ ConstBufferDecl cbUnityMaterial::MKDesc()
 	BUILD_ADD(_SpecLightOff);
 	return builder.Build();
 }
+#endif
 
 /********** cbUnityGlobal **********/
 cbUnityGlobal::cbUnityGlobal()
 {
-	_Unity_IndirectSpecColor = XMFLOAT4(0, 0, 0, 0);
-	_AmbientOrLightmapUV = XMFLOAT4(0.01, 0.01, 0.01, 1);
-	_Unity_SpecCube0_HDR = XMFLOAT4(0.5, 1, 0, 0);
+	_Unity_IndirectSpecColor = Eigen::Vector4f(0, 0, 0, 0);
+	_AmbientOrLightmapUV = Eigen::Vector4f(0.01, 0.01, 0.01, 1);
+	_Unity_SpecCube0_HDR = Eigen::Vector4f(0.5, 1, 0, 0);
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbUnityGlobal::GetDesc()
 {
 	static ConstBufferDecl desc = MKDesc();
 	return desc;
 }
+
 
 ConstBufferDecl cbUnityGlobal::MKDesc()
 {
@@ -267,6 +257,7 @@ ConstBufferDecl cbUnityGlobal::MKDesc()
 	BUILD_ADD(_Unity_SpecCube0_HDR);
 	return builder.Build();
 }
+#endif
 
 /********** cbBloom **********/
 cbBloom cbBloom::CreateDownScale2x2Offsets(int dwWidth, int dwHeight)
@@ -278,8 +269,8 @@ cbBloom cbBloom::CreateDownScale2x2Offsets(int dwWidth, int dwHeight)
 	int index = 0;
 	for (int y = 0; y < 2; y++) {
 		for (int x = 0; x < 2; x++) {
-			bloom.SampleOffsets[index].x = (x - 0.5f) * tU;
-			bloom.SampleOffsets[index].y = (y - 0.5f) * tV;
+			bloom.SampleOffsets[index].x() = (x - 0.5f) * tU;
+			bloom.SampleOffsets[index].y() = (y - 0.5f) * tV;
 			index++;
 		}
 	}
@@ -296,8 +287,8 @@ cbBloom cbBloom::CreateDownScale3x3Offsets(int dwWidth, int dwHeight)
 	int index = 0;
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
-			bloom.SampleOffsets[index].x = x * tU;
-			bloom.SampleOffsets[index].y = y * tV;
+			bloom.SampleOffsets[index].x() = x * tU;
+			bloom.SampleOffsets[index].y() = y * tV;
 			index++;
 		}
 	}
@@ -318,24 +309,25 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 
 	// Fill the center texel
 	float weight = 1.0f * GaussianDistribution(0, 0, fDeviation);
-	bloom.SampleOffsets[0] = XMFLOAT4(0.0f, 0, 0, 0);
-	bloom.SampleWeights[0] = XMFLOAT4(weight, weight, weight, 1.0f);
+	bloom.SampleOffsets[0] = Eigen::Vector4f(0.0f, 0, 0, 0);
+	bloom.SampleWeights[0] = Eigen::Vector4f(weight, weight, weight, 1.0f);
 
 	// Fill the right side
 	for (i = 1; i < 8; i++) {
 		weight = fMultiplier * GaussianDistribution((float)i, 0, fDeviation);
-		bloom.SampleOffsets[i] = XMFLOAT4(i * tu, 0, 0, 0);
-		bloom.SampleWeights[i] = XMFLOAT4(weight, weight, weight, 1.0f);
+		bloom.SampleOffsets[i] = Eigen::Vector4f(i * tu, 0, 0, 0);
+		bloom.SampleWeights[i] = Eigen::Vector4f(weight, weight, weight, 1.0f);
 	}
 
 	// Copy to the left side
 	for (i = 8; i < 15; i++) {
-		bloom.SampleOffsets[i] = XMFLOAT4(-bloom.SampleOffsets[i - 7].x, 0, 0, 0);
+		bloom.SampleOffsets[i] = Eigen::Vector4f(-bloom.SampleOffsets[i - 7].x(), 0, 0, 0);
 		bloom.SampleWeights[i] = bloom.SampleWeights[i - 7];
 	}
 	return bloom;
 }
 
+#if !defined MATERIAL_FROM_XML
 ConstBufferDecl& cbBloom::GetDesc()
 {
 	CBBEGIN(cbBloom);
@@ -343,4 +335,5 @@ ConstBufferDecl& cbBloom::GetDesc()
 	builder.Add(CBELEMNTS(SampleWeights));
 	return builder.Build();
 }
+#endif
 }

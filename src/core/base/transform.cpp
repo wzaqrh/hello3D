@@ -1,8 +1,6 @@
 #include "core/base/transform.h"
 #include <boost/assert.hpp>
 
-typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
-
 namespace mir {
 
 //TTransform

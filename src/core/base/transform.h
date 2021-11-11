@@ -3,11 +3,8 @@
 
 namespace mir {
 
-#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
-
 struct __declspec(align(16)) Transform {
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 	Transform();
 public:
 	void SetScaleX(float sx);

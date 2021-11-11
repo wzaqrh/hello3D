@@ -477,7 +477,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 	auto& meshes = mNodeInfos[node];
 	if (meshes.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
-		weightedSkin.Model = ToXM(mNodeInfos[node].mGlobalTransform);
+		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, mNodeInfos[node].mGlobalTransform);
 		//mRenderSys.mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.MeshCount(); i++) {
@@ -487,10 +487,10 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 				size_t boneSize = boneMats.size(); 
 				//assert(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
-					weightedSkin.Models[j] = ToXM(boneMats[j]);
+					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMats[j]);
 			}
 			else {
-				weightedSkin.Models[0] = XMMatrixIdentity();
+				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();
 			}
 
 			weightedSkin.hasNormal = mesh->HasTexture(kTexturePbrNormal);

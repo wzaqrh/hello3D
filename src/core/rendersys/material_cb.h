@@ -10,9 +10,9 @@ enum LightType {
 };
 struct cbDirectLight {
 public:
-	XMFLOAT4 LightPos;//world space
-	XMFLOAT4 DiffuseColor;
-	XMFLOAT4 SpecularColorPower;
+	Eigen::Vector4f LightPos;//world space
+	Eigen::Vector4f DiffuseColor;
+	Eigen::Vector4f SpecularColorPower;
 public:
 	cbDirectLight();
 	void SetDirection(float x, float y, float z);
@@ -21,108 +21,126 @@ public:
 	void SetSpecularPower(float power);
 public:
 	void CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj);
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
+#endif
 };
 struct cbPointLight : public cbDirectLight {
 public:
-	XMFLOAT4 Attenuation;
+	Eigen::Vector4f Attenuation;
 public:
 	cbPointLight();
 	void SetPosition(float x, float y, float z);
 	void SetAttenuation(float a, float b, float c);
 public:
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
+#endif
 };
 struct cbSpotLight : public cbPointLight {
 public:
-	XMFLOAT4 DirectionCutOff;
+	Eigen::Vector4f DirectionCutOff;
 public:
 	cbSpotLight();
 	void SetDirection(float x, float y, float z);
 	void SetCutOff(float cutoff);
 	void SetAngle(float radian);
 public:
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
+#endif
 };
 
 struct __declspec(align(16)) cbGlobalParam
 {
-	XMMATRIX World;
-	XMMATRIX View;
-	XMMATRIX Projection;
+	Eigen::Matrix4f World;
+	Eigen::Matrix4f View;
+	Eigen::Matrix4f Projection;
 
-	XMMATRIX WorldInv;
-	XMMATRIX ViewInv;
-	XMMATRIX ProjectionInv;
+	Eigen::Matrix4f WorldInv;
+	Eigen::Matrix4f ViewInv;
+	Eigen::Matrix4f ProjectionInv;
 
-	XMMATRIX LightView;
-	XMMATRIX LightProjection;
+	Eigen::Matrix4f LightView;
+	Eigen::Matrix4f LightProjection;
 	cbSpotLight Light;
 	
 	unsigned int LightType;//directional=1,point=2,spot=3
 	unsigned int HasDepthMap;
 public:
 	cbGlobalParam();
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
 	static ConstBufferDecl MKDesc();
+#endif
 };
 
 struct __declspec(align(16)) cbFogExp 
 {
-	XMFLOAT4 FogColorExp;
+	Eigen::Vector4f FogColorExp;
 public:
 	cbFogExp();
 	void SetColor(float r, float g, float b);
 	void SetExp(float exp);
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
+#endif
 };
 
 constexpr int MAX_MATRICES = 56;
 struct __declspec(align(16)) cbWeightedSkin
 {
-	XMMATRIX Model;
-	XMMATRIX Models[MAX_MATRICES];
+	Eigen::Matrix4f Model;
+	Eigen::Matrix4f Models[MAX_MATRICES];
 	unsigned int hasNormal;
 	unsigned int hasMetalness;
 	unsigned int hasRoughness;
 	unsigned int hasAO;
 
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
 	static ConstBufferDecl MKDesc();
+#endif
 };
 
 struct __declspec(align(16))  cbUnityMaterial
 {
-	XMFLOAT4 _SpecColor;
-	XMFLOAT4 _Color;
+	Eigen::Vector4f _SpecColor;
+	Eigen::Vector4f _Color;
 	float _GlossMapScale;
 	float _OcclusionStrength;
 	unsigned int _SpecLightOff;
 
 	cbUnityMaterial();
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
 	static ConstBufferDecl MKDesc();
+#endif
 };
 
 struct __declspec(align(16)) cbUnityGlobal
 {
-	XMFLOAT4 _Unity_IndirectSpecColor;
-	XMFLOAT4 _AmbientOrLightmapUV;
-	XMFLOAT4 _Unity_SpecCube0_HDR;
+	Eigen::Vector4f _Unity_IndirectSpecColor;
+	Eigen::Vector4f _AmbientOrLightmapUV;
+	Eigen::Vector4f _Unity_SpecCube0_HDR;
 
 	cbUnityGlobal();
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
 	static ConstBufferDecl MKDesc();
+#endif
 };
 
 struct cbBloom {
-	XMFLOAT4 SampleOffsets[16];
-	XMFLOAT4 SampleWeights[16];
+	Eigen::Vector4f SampleOffsets[16];
+	Eigen::Vector4f SampleWeights[16];
 public:
 	static cbBloom CreateDownScale2x2Offsets(int dwWidth, int dwHeight);
 	static cbBloom CreateDownScale3x3Offsets(int dwWidth, int dwHeight);
 	static cbBloom CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier);
+#if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
+#endif
 };
 
 }

@@ -13,65 +13,84 @@
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
-#include "core/rendersys/const_buffer_decl.h"
 #include "core/renderable/post_process.h"
 #include "core/base/utility.h"
-
-#define MATERIAL_FROM_XML
 
 namespace boost_filesystem = boost::filesystem;
 namespace boost_property_tree = boost::property_tree;
 
 namespace mir {
 
-/********** TMaterialBuilder **********/
-struct TMaterialBuilder
+/********** ConstBufferDeclBuilder **********/
+struct ConstBufferDeclBuilder
+{
+	ConstBufferDecl& mDecl;
+public:
+	ConstBufferDeclBuilder(ConstBufferDecl& decl) :mDecl(decl) {}
+	ConstBufferDeclBuilder& Add(const ConstBufferDeclElement& elem) {
+		mDecl.Add(elem).Offset = mDecl.BufferSize;
+		mDecl.BufferSize += elem.Size;
+		return *this;
+	}
+	ConstBufferDeclBuilder& Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl) {
+		mDecl.Add(elem, subDecl).Offset = mDecl.BufferSize;
+		mDecl.BufferSize += elem.Size;
+		return *this;
+	}
+	ConstBufferDecl& Build() {
+		return mDecl;
+	}
+};
+#define MAKE_CBDESC(CB) (CB::GetDesc())
+
+/********** MaterialBuilder **********/
+struct MaterialBuilder
 {
 	MaterialPtr mMaterial;
 	TechniquePtr mCurTech;
 	PassPtr mCurPass;
 public:
-	TMaterialBuilder(bool addTechPass = true) {
+	MaterialBuilder(bool addTechPass = true) {
 		mMaterial = std::make_shared<Material>();
 		if (addTechPass) {
 			AddTechnique();
 			AddPass(E_PASS_FORWARDBASE, "");
 		}
 	}
-	TMaterialBuilder(MaterialPtr material) {
+	MaterialBuilder(MaterialPtr material) {
 		mMaterial = material;
 		mCurTech = material->CurTech();
 		mCurPass = mCurTech->mPasses.empty() ? nullptr : mCurTech->mPasses[mCurTech->mPasses.size() - 1];
 	}
-	TMaterialBuilder& AddTechnique(const std::string& name = "d3d11") {
+	MaterialBuilder& AddTechnique(const std::string& name = "d3d11") {
 		mCurTech = std::make_shared<Technique>();
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
 	}
-	TMaterialBuilder& CloneTechnique(IRenderSystem& pRenderSys, const std::string& name) {
+	MaterialBuilder& CloneTechnique(IRenderSystem& pRenderSys, const std::string& name) {
 		mCurTech = mCurTech->Clone(pRenderSys);
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
 	}
-	TMaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
+	MaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
 		mCurPass = std::make_shared<Pass>(lightMode, passName);
 		mCurTech->AddPass(mCurPass);
 		return *this;
 	}
-	TMaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName) {
+	MaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName) {
 		mCurPass->mLightMode = lightMode;
 		mCurPass->mName = passName;
 		return *this;
 	}
 
-	TMaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
+	MaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
 		mCurPass->mInputLayout = inputLayout;
 		mMaterial->AddDependency(inputLayout->AsRes());
 		return *this;
 	}
-	TMaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology) {
+	MaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology) {
 		mCurPass->mTopoLogy = topology;
 		return *this;
 	}
@@ -80,37 +99,37 @@ public:
 		mMaterial->AddDependency(program->AsRes());
 		return program;
 	}
-	TMaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
+	MaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
 		while (count-- > 0)
 			mCurPass->AddSampler(sampler);
 		return *this;
 	}
-	TMaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1) {
+	MaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1) {
 		while (count-- > 0)
 			mCurTech->AddSampler(sampler);
 		return *this;
 	}
-	TMaterialBuilder& ClearSamplersToTech() {
+	MaterialBuilder& ClearSamplersToTech() {
 		mCurTech->ClearSamplers();
 		return *this;
 	}
-	TMaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
+	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
 		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
 		return *this;
 	}
-	TMaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
+	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
 		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
 		return *this;
 	}
-	TMaterialBuilder& SetRenderTarget(IRenderTexturePtr target) {
+	MaterialBuilder& SetRenderTarget(IRenderTexturePtr target) {
 		mCurPass->mRenderTarget = target;
 		return *this;
 	}
-	TMaterialBuilder& AddIterTarget(IRenderTexturePtr target) {
+	MaterialBuilder& AddIterTarget(IRenderTexturePtr target) {
 		mCurPass->AddIterTarget(target);
 		return *this;
 	}
-	TMaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
+	MaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
 		mCurPass->mTextures[slot] = texture;
 		mMaterial->AddDependency(texture->AsRes());
 		return *this;
@@ -123,145 +142,125 @@ public:
 
 /********** MaterialAssetManager **********/
 struct XmlAttributeInfo {
-		std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
-		std::vector<std::string> LayoutStr;
-	public:
-		XmlAttributeInfo() {}
-		XmlAttributeInfo(const XmlAttributeInfo& other) {
-			LayoutStr = other.LayoutStr;
-			Layout = other.Layout;
-			for (size_t i = 0; i < Layout.size(); ++i)
-				Layout[i].SemanticName = LayoutStr[i].c_str();
-		}
-		XmlAttributeInfo& operator=(const XmlAttributeInfo& other) {
-			LayoutStr = other.LayoutStr;
-			Layout = other.Layout;
-			for (size_t i = 0; i < Layout.size(); ++i)
-				Layout[i].SemanticName = LayoutStr[i].c_str();
-			return *this;
-		}
-	};
+	std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
+	std::vector<std::string> LayoutStr;
+public:
+	XmlAttributeInfo() {}
+	XmlAttributeInfo(const XmlAttributeInfo& other) {
+		LayoutStr = other.LayoutStr;
+		Layout = other.Layout;
+		for (size_t i = 0; i < Layout.size(); ++i)
+			Layout[i].SemanticName = LayoutStr[i].c_str();
+	}
+	XmlAttributeInfo& operator=(const XmlAttributeInfo& other) {
+		LayoutStr = other.LayoutStr;
+		Layout = other.Layout;
+		for (size_t i = 0; i < Layout.size(); ++i)
+			Layout[i].SemanticName = LayoutStr[i].c_str();
+		return *this;
+	}
+};
 struct XmlUniformInfo {
-		ConstBufferDecl Decl;
-		std::string ShortName;
-		std::vector<float> Data;
-		bool IsUnique;
-	};
+	ConstBufferDecl Decl;
+	std::string ShortName;
+	std::vector<float> Data;
+	bool IsUnique;
+};
 struct XmlSamplersInfo {
-		std::vector<std::pair<int, int>> Samplers;
-		void Add(const XmlSamplersInfo& other) {
-			Samplers.insert(Samplers.end(), other.Samplers.begin(), other.Samplers.end());
-		}
-		size_t size() const { return Samplers.size(); }
-		const std::pair<int, int>& operator[](size_t pos) const { return Samplers[pos]; }
-	};
+	std::vector<std::pair<int, int>> Samplers;
+	void Add(const XmlSamplersInfo& other) {
+		Samplers.insert(Samplers.end(), other.Samplers.begin(), other.Samplers.end());
+	}
+	size_t size() const { return Samplers.size(); }
+	const std::pair<int, int>& operator[](size_t pos) const { return Samplers[pos]; }
+};
 struct XmlProgramInfo {
-		D3D_PRIMITIVE_TOPOLOGY Topo;
-		XmlAttributeInfo Attr;
-		std::vector<XmlUniformInfo> Uniforms;
-		XmlSamplersInfo Samplers;
-		std::string FxName, VsEntry;
-	public:
-		void AddUniform(const XmlUniformInfo& uniform) {
-			Uniforms.push_back(uniform);
-		}
-		void AddAttribute(const XmlAttributeInfo& attr) {
-			Attr = attr;
-		}
-		void AddSamplers(const XmlSamplersInfo& samplers) {
-			Samplers.Add(samplers);
-		}
-	};
+	D3D_PRIMITIVE_TOPOLOGY Topo;
+	XmlAttributeInfo Attr;
+	std::vector<XmlUniformInfo> Uniforms;
+	XmlSamplersInfo Samplers;
+	std::string FxName, VsEntry;
+public:
+	void AddUniform(const XmlUniformInfo& uniform) {
+		Uniforms.push_back(uniform);
+	}
+	void AddAttribute(const XmlAttributeInfo& attr) {
+		Attr = attr;
+	}
+	void AddSamplers(const XmlSamplersInfo& samplers) {
+		Samplers.Add(samplers);
+	}
+};
 struct XmlPassInfo {
-		std::string LightMode, Name, ShortName, PSEntry;
-	public:
-		XmlPassInfo() {}
-		/*XmlPassInfo(XmlPassInfo&& other) {
-			LightMode = std::move(other.LightMode);
-			Name	  = std::move(other.Name);
-			ShortName = std::move(other.ShortName);
-			PSEntry   = std::move(other.PSEntry);
-		}
-		XmlPassInfo& operator=(XmlPassInfo&& other) {
-			LightMode = std::move(other.LightMode);
-			Name	  = std::move(other.Name);
-			ShortName = std::move(other.ShortName);
-			PSEntry   = std::move(other.PSEntry);
-			return *this;
-		}*/
-	};
+	std::string LightMode, Name, ShortName, PSEntry;
+public:
+	XmlPassInfo() {}
+};
 struct XmlSubShaderInfo {
-		std::vector<XmlPassInfo> Passes;
-	public:
-		/*XmlSubShaderInfo(XmlSubShaderInfo&& other) {
-			Passes = std::move(other.Passes);
-		}
-		XmlSubShaderInfo& operator=(XmlSubShaderInfo&& other) {
-			Passes = std::move(other.Passes);
-			return *this;
-		}*/
-		void AddPass(XmlPassInfo&& pass) {
-			Passes.push_back((pass));
-		}
-	};
+	std::vector<XmlPassInfo> Passes;
+public:
+	void AddPass(XmlPassInfo&& pass) {
+		Passes.push_back((pass));
+	}
+};
 struct XmlShaderInfo {
-		XmlProgramInfo Program;
-		std::vector<XmlSubShaderInfo> SubShaders;
-	public:
-		void AddSubShader(XmlSubShaderInfo&& subShader) {
-			SubShaders.push_back((subShader));
-		}
-	};
+	XmlProgramInfo Program;
+	std::vector<XmlSubShaderInfo> SubShaders;
+public:
+	void AddSubShader(XmlSubShaderInfo&& subShader) {
+		SubShaders.push_back((subShader));
+	}
+};
 
 struct MaterialAssetEntry {
-		std::string ShaderName;
-		std::string VariantName;
-	};
+	std::string ShaderName;
+	std::string VariantName;
+};
 class MaterialNameToAssetMapping : boost::noncopyable {
-		std::unordered_map<std::string, MaterialAssetEntry> mMatEntryByMatName;
-	public:
-		bool InitFromXmlFile(const std::string& xmlFilePath) {
-			bool result = false;
-			std::string filename = xmlFilePath;
-			if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
-				boost_property_tree::ptree pt;
-				boost_property_tree::read_xml(filename, pt);
-				VisitConfig(pt);
-				result = true;
-			}
-			return result;
+	std::unordered_map<std::string, MaterialAssetEntry> mMatEntryByMatName;
+public:
+	bool InitFromXmlFile(const std::string& xmlFilePath) {
+		bool result = false;
+		std::string filename = xmlFilePath;
+		if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
+			boost_property_tree::ptree pt;
+			boost_property_tree::read_xml(filename, pt);
+			VisitConfig(pt);
+			result = true;
 		}
+		return result;
+	}
 
-		MaterialAssetEntry MaterialAssetEntryByMatName(const std::string& matName) const {
-			auto find_iter = mMatEntryByMatName.find(matName);
-			if (find_iter != mMatEntryByMatName.end()) {
-				return find_iter->second;
-			}
-			else {
-				return MaterialAssetEntry{matName, ""};
-			}
+	MaterialAssetEntry MaterialAssetEntryByMatName(const std::string& matName) const {
+		auto find_iter = mMatEntryByMatName.find(matName);
+		if (find_iter != mMatEntryByMatName.end()) {
+			return find_iter->second;
 		}
-		MaterialAssetEntry operator()(const std::string& matName) const {
-			return MaterialAssetEntryByMatName(matName);
+		else {
+			return MaterialAssetEntry{ matName, "" };
 		}
-	private:
-		void Clear() {
-			mMatEntryByMatName.clear();
+	}
+	MaterialAssetEntry operator()(const std::string& matName) const {
+		return MaterialAssetEntryByMatName(matName);
+	}
+private:
+	void Clear() {
+		mMatEntryByMatName.clear();
+	}
+	void VisitMaterial(const boost_property_tree::ptree& nodeMaterial) {
+		for (auto& it : nodeMaterial) {
+			MaterialAssetEntry entry;
+			entry.ShaderName = it.second.get<std::string>("ShaderName", it.first);
+			entry.VariantName = it.second.get<std::string>("ShaderVariantName", "");
+			mMatEntryByMatName.insert(std::make_pair(it.first, entry));
 		}
-		void VisitMaterial(const boost_property_tree::ptree& nodeMaterial) {
-			for (auto& it : nodeMaterial) {
-				MaterialAssetEntry entry;
-				entry.ShaderName = it.second.get<std::string>("ShaderName", it.first);
-				entry.VariantName = it.second.get<std::string>("ShaderVariantName", "");
-				mMatEntryByMatName.insert(std::make_pair(it.first, entry));
-			}
+	}
+	void VisitConfig(const boost_property_tree::ptree& nodeConfig) {
+		for (auto& it : boost::make_iterator_range(nodeConfig.equal_range("Config.Material"))) {
+			VisitMaterial(it.second);
 		}
-		void VisitConfig(const boost_property_tree::ptree& nodeConfig) {
-			for (auto& it : boost::make_iterator_range(nodeConfig.equal_range("Config.Material"))) {
-				VisitMaterial(it.second);
-			}
-		}
-	};
+	}
+};
 
 class MaterialAssetManager
 {
@@ -583,7 +582,7 @@ private:
 	MaterialPtr CreateMaterial(RenderSystem& renderSys,
 		const std::string& name,
 		XmlShaderInfo& shaderInfo) {
-		TMaterialBuilder builder(false);
+		MaterialBuilder builder(false);
 		builder.AddTechnique("d3d11");
 
 		for (size_t i = 0; i < shaderInfo.SubShaders.size(); ++i) {
@@ -647,7 +646,7 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
 	return mMatAssetMng->LoadMaterial(mRenderSys, entry.ShaderName, entry.VariantName);
 }
 #else
-void SetCommonField(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
+void SetCommonField(MaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
@@ -655,12 +654,12 @@ void SetCommonField(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
 }
 
-void SetCommonField2(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
+void SetCommonField2(MaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
 }
 
-void AddD3D9Technique(TMaterialBuilder& builder, RenderSystem* pRenderSys) {
+void AddD3D9Technique(MaterialBuilder& builder, RenderSystem* pRenderSys) {
 	builder.CloneTechnique(pRenderSys, "d3d9");
 	builder.ClearSamplersToTech();
 	builder.AddSamplerToTech(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS), 8);
@@ -670,7 +669,7 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 	TIME_PROFILE2(CreateStdMaterial, name);
 
 	MaterialPtr material;
-	TMaterialBuilder builder;
+	MaterialBuilder builder;
 	if (name == E_MAT_SPRITE || name == E_MAT_LAYERCOLOR || name == E_MAT_LABEL) {
 		SetCommonField(builder, mRenderSys);
 		D3D11_INPUT_ELEMENT_DESC layout[] =

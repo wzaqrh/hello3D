@@ -2,7 +2,6 @@
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
-#include "core/rendersys/const_buffer_decl.h"
 #include "core/renderable/post_process.h"
 #include "core/base/utility.h"
 
