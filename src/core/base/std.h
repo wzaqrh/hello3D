@@ -9,6 +9,13 @@
 #include <functional>
 #include <type_traits>
 
+#define EIGEN_DONT_ALIGN_STATICALLY
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <Eigen/SVD>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 #include "core/rendersys/d3d9/stddx9.h"
 #include "core/rendersys/d3d11/stddx11.h"
 

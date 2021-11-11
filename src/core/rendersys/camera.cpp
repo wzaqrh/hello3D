@@ -121,7 +121,7 @@ const XMMATRIX& Camera::GetView() const
 			newpos.z = position.z;
 			mTransform->SetPosition(newpos);
 
-			auto srt = mTransform->GetMatrixSRT();
+			auto srt = mTransform->SetMatrixSRT();
 			auto worldInv = XM::Inverse(srt);
 			auto view = mView;
 			mWorldView = worldInv * view;

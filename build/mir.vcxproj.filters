@@ -246,6 +246,9 @@
     <ClCompile Include="..\src\core\rendersys\scene_manager.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\test\unit_test\test_eigen.cpp">
+      <Filter>src\test\unit_test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -286,6 +289,9 @@
     </Filter>
     <Filter Include="src\test\test_cases">
       <UniqueIdentifier>{847eea9e-8503-48c3-9b13-6c204a3ae34a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\test\unit_test">
+      <UniqueIdentifier>{cdd69705-991f-47e3-93a0-c38a5203813a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

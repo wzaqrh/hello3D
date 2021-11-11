@@ -110,6 +110,7 @@
     <ClCompile Include="..\src\test\test_shadow_map.cpp" />
     <ClCompile Include="..\src\test\test_spec_skybox.cpp" />
     <ClCompile Include="..\src\test\test_sprite.cpp" />
+    <ClCompile Include="..\src\test\unit_test\test_eigen.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>mir</ProjectName>

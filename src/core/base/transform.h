@@ -3,16 +3,11 @@
 
 namespace mir {
 
+#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
+
 struct __declspec(align(16)) Transform {
-	XMMATRIX mMatrix;
-	XMFLOAT3 mScale;
-	XMFLOAT3 mPosition;
-	XMFLOAT3 mEuler;//ZXY
-	XMFLOAT3 mFlip;
-	bool mDirty = false;
 public:
-	void* operator new(size_t i) { return _mm_malloc(i, 16); }
-	void operator delete(void* p) { _mm_free(p); }
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 	Transform();
 public:
 	void SetScaleX(float sx);
@@ -24,20 +19,28 @@ public:
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& position);
-	const XMFLOAT3& GetPosition() { return mPosition; }
+	const XMFLOAT3& GetPosition() { return AS_CONST_REF(XMFLOAT3, mPosition) ; }
 
 	void SetEulerZ(float angle);
 	void SetEulerX(float angle);
 	void SetEulerY(float angle);
 	void SetEuler(const XMFLOAT3& euler);
-	const XMFLOAT3& GetEuler() { return mEuler; }
+	const XMFLOAT3& GetEuler() { return AS_CONST_REF(XMFLOAT3, mEuler); }
 
 	void SetFlipY(bool flip);
 	bool IsFlipY();
 
-	const XMMATRIX& GetMatrixSRT();
-	const XMMATRIX& GetMatrixTSR();
 	const XMMATRIX& Matrix();
+	const XMMATRIX& SetMatrixSRT();
+	const XMMATRIX& SetMatrixTSR();
+private:
+	Eigen::Matrix4f mMatrix;
+
+	Eigen::Vector3f mScale;
+	Eigen::Vector3f mPosition;
+	Eigen::Vector3f mEuler;//ZXY
+	Eigen::Vector3f mFlip;
+	bool mDirty = false;
 };
 typedef std::shared_ptr<Transform> TransformPtr;
 
