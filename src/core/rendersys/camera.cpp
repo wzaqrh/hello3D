@@ -28,40 +28,62 @@ Camera::Camera(RenderSystem& renderSys)
 	mTransformDirty = true;
 	mIsPespective = true;
 
-	mView = XMMatrixIdentity();
-	mProjection = XMMatrixIdentity();
+	mView = Eigen::Matrix4f::Identity();
+	mProjection = Eigen::Matrix4f::Identity();
 
 	mTransform = std::make_shared<Transform>();
 	mUpVector = Eigen::Vector3f(0.0f, 1.0f, 0.0f);
 }
 
-Eigen::Vector3f Camera::ProjectPoint(const Eigen::Vector3f& pos) const
-{
-	XMMATRIX vp  = mView * mProjection;
-	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x(), pos.y(), pos.z(), 1), vp);
-	auto w = XMVectorGetW(vec);
-
-	Eigen::Vector3f ret = (w != 0) 
-		? Eigen::Vector3f(XMVectorGetX(vec) / w, XMVectorGetY(vec) / w, XMVectorGetZ(vec) / w)
-		: Eigen::Vector3f(0, 0, 0);
-	return ret;
-}
 Eigen::Vector4f Camera::ProjectPoint(const Eigen::Vector4f& pos) const
 {
-	XMMATRIX vp  = mView * mProjection;
-	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x(), pos.y(), pos.z(), pos.z()), vp);
-	Eigen::Vector4f ret = Eigen::Vector4f(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec), XMVectorGetW(vec));
-	return ret;
+	Transform3fAffine t(mView * mProjection);
+	Eigen::Vector4f perspective = t * pos;
+
+	if (perspective.w() != 0) {
+		perspective.head<3>() /= perspective.w();
+		perspective.w() = 1;
+	}
+	else {
+		perspective = Eigen::Vector4f(0, 0, 0, 0);
+	}
+	return perspective;
+}
+
+Eigen::Vector3f Camera::ProjectPoint(const Eigen::Vector3f& pos) const
+{
+	return ProjectPoint(Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1.0)).head<3>();
+}
+
+Eigen::Matrix4f MakeLookAt(const Eigen::Vector3f& eye, 
+	const Eigen::Vector3f& target, 
+	const Eigen::Vector3f& up)
+{
+	Eigen::Matrix4f view;
+
+	Eigen::Vector3f n = (eye - target).normalized();//z' = n = normalize(at-eye)
+	Eigen::Vector3f u = up.cross(n).normalized();	//x' = u = normalize(up x z');
+	Eigen::Vector3f v = n.cross(u);					//y' = v = z' x x'
+	view.block<3, 1>(0, 0) = u;
+	view.block<3, 1>(0, 1) = v;
+	view.block<3, 1>(0, 2) = n;
+
+	view(0, 3) = -u.dot(eye);
+	view(1, 3) = -v.dot(eye);
+	view(2, 3) = -n.dot(eye);
+
+	view(3,0) = 0;
+	view(3,1) = 0;
+	view(3,2) = 0;
+	view(3,3) = 1;
+	return view;
 }
 
 void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 {
 	mEyePos = eye;
 	mLookAtPos = at;
-	XMVECTOR Eye = XMVectorSet(eye.x(), eye.y(), eye.z(), 0.0f);
-	XMVECTOR At = XMVectorSet(at.x(), at.y(), at.z(), 0.0f);
-	XMVECTOR Up = XMVectorSet(mUpVector.x(), mUpVector.y(), mUpVector.z(), 0.0f);
-	mView = XMMatrixLookAtLH(Eye, At, Up);
+	mView = MakeLookAt(mEyePos, mLookAtPos, mUpVector);
 	mTransformDirty = true;
 }
 
@@ -72,8 +94,26 @@ void Camera::SetFlipY(bool flip)
 	else SetOthogonalProj(mWidth, mHeight, mZFar);
 }
 
+#if 0
+Eigen::Matrix4f MakePerspective(float fovY, float aspect, float near1, float far1)
+{
+	float theta = fovY * 0.5;
+	float range = far1 - near1;
+	float invtan = 1. / tan(theta);
+
+	Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
+	projection(0, 0) = invtan / aspect;
+	projection(1, 1) = invtan;
+	projection(2, 2) = -(near1 + far1) / range;
+	projection(3, 2) = -1;
+	projection(2, 3) = -2 * near1 * far1 / range;
+	projection(3, 3) = 0;
+}
+#endif
+
 void Camera::SetPerspectiveProj(int width, int height, double fov, double zFar)
 {
+#if 0
 	mWidth = width;
 	mHeight = height;
 	mZFar = zFar;
@@ -85,10 +125,12 @@ void Camera::SetPerspectiveProj(int width, int height, double fov, double zFar)
 
 	mTransform->SetPosition(Eigen::Vector3f(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
+#endif
 }
 
 void Camera::SetOthogonalProj(int width, int height, double zFar)
 {
+#if 0
 	mWidth = width;
 	mHeight = height;
 	mZFar = zFar;
@@ -100,6 +142,7 @@ void Camera::SetOthogonalProj(int width, int height, double zFar)
 
 	mTransform->SetPosition(Eigen::Vector3f(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
+#endif
 }
 
 const TransformPtr& Camera::GetTransform() const
@@ -110,6 +153,7 @@ const TransformPtr& Camera::GetTransform() const
 
 const XMMATRIX& Camera::GetView() const
 {
+#if 0
 	if (mTransformDirty) {
 		mTransformDirty = false;
 
@@ -129,7 +173,8 @@ const XMMATRIX& Camera::GetView() const
 		}
 		mTransform->SetPosition(position);
 	}
-	return mWorldView;
+#endif
+	return AS_CONST_REF(XMMATRIX, mWorldView);
 }
 
 void Camera::SetSkyBox(const SkyBoxPtr& skybox)

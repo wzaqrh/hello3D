@@ -20,6 +20,7 @@
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
+typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
 
 #include "core/rendersys/d3d9/stddx9.h"
 #include "core/rendersys/d3d11/stddx11.h"

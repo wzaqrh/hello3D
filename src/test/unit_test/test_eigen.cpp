@@ -8,31 +8,42 @@
 #include <Eigen/Geometry>
 #include "catch.hpp"
 
+
+typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
+typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
+#define AS_REF(TYPE, V) *(TYPE*)(&V)
+#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
+
+static bool CHECK_EQUAL(const Eigen::Matrix4f& m0, const XMMATRIX& m1) {
+	float* arr0 = (float*)&m0;
+	float* arr1 = (float*)&m1;
+	for (size_t i = 0; i < 16; ++i) {
+		if (std::abs<float>(arr0[i] - arr1[1]) >= 0.000001)
+			return false;
+	}
+	return true;
+}
+
 static_assert(sizeof(Eigen::Matrix4f) == sizeof(XMMATRIX), "");
-
-#define CHECK_EQUAL(L, R) CHECK(sizeof(L) == sizeof(R)); CHECK(memcmp(&L, &R, sizeof(L)) == 0);
-
 Eigen::Matrix4f SetMatrixSRT0(Eigen::Vector3f mScale,
 	Eigen::Vector3f mPosition,
 	Eigen::Vector3f mEuler,
 	Eigen::Vector3f mFlip)
 {
-	typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
 	Transform3fAffine srt = Transform3fAffine::Identity();
-	srt.scale(mScale);
+	srt.prescale(mScale);
 	if (mFlip.x() != 1 || mFlip.y() != 1 || mFlip.z() != 1)
-		srt.scale(mFlip);
+		srt.prescale(mFlip);
 	if (mEuler.x() != 0 || mEuler.x() != 0 || mEuler.z() != 0) {
 		auto euler = Eigen::AngleAxisf(mEuler.z(), Eigen::Vector3f::UnitZ())
 			* Eigen::AngleAxisf(mEuler.x(), Eigen::Vector3f::UnitX())
 			* Eigen::AngleAxisf(mEuler.y(), Eigen::Vector3f::UnitY());
-		srt.rotate(euler);
+		srt.prerotate(euler);
 	}
 	if (mPosition.x() != 0 || mPosition.y() != 0 || mPosition.z() != 0)
 		srt.pretranslate(mPosition);
 	return srt.matrix();
 }
-
 XMMATRIX GetMatrixSRT1(Eigen::Vector3f mScale,
 	Eigen::Vector3f mPosition,
 	Eigen::Vector3f mEuler,
@@ -49,13 +60,77 @@ XMMATRIX GetMatrixSRT1(Eigen::Vector3f mScale,
 		mMatrix *= XMMatrixTranslation(mPosition.x(), mPosition.y(), mPosition.z());
 	return mMatrix;
 }
-
 TEST_CASE("eigen is right hand", "[eigen_is_right_hand]") 
 {
 	Eigen::Vector3f mScale(1,0.07,0.5);
 	Eigen::Vector3f mPosition(0,-5,0);
 	Eigen::Vector3f mEuler(0,0,0);
 	Eigen::Vector3f mFlip(1,-1,1);
-	CHECK_EQUAL(SetMatrixSRT0(mScale, mPosition, mEuler, mFlip), 
-			    GetMatrixSRT1(mScale, mPosition, mEuler, mFlip));
+	Eigen::Matrix4f m0 = SetMatrixSRT0(mScale, mPosition, mEuler, mFlip);
+	XMMATRIX m1 = GetMatrixSRT1(mScale, mPosition, mEuler, mFlip);
+	CHECK_EQUAL(m0, m1);
+}
+
+TEST_CASE("eigen matrix translate", "eigen_matrix_translate")
+{
+	Transform3Projective t0 = Transform3Projective::Identity();
+	t0.pretranslate(Eigen::Vector3f(100, 0, 0));
+
+	Eigen::Matrix4f m0 = t0.matrix();
+	CHECK(m0(0,3) == 100);
+
+	XMMATRIX m1 = AS_CONST_REF(XMMATRIX, m0);
+	CHECK(m1._41 == 100);
+}
+
+TEST_CASE("eigen matrix block", "eigen_matrix_block")
+{
+	Eigen::Matrix4f m0 = Eigen::Matrix4f::Identity();
+
+	{
+		m0.topLeftCorner<3, 1>() = Eigen::Vector3f(10, 20, 30);//m[(0,0):(0,3)]
+		XMMATRIX m1 = AS_CONST_REF(XMMATRIX, m0);
+		CHECK(m1._11 == 10);
+		CHECK(m1._12 == 20);
+		CHECK(m1._13 == 30);
+	}
+
+	{
+		m0 = Eigen::Matrix4f::Identity();
+		m0.col(0) = Eigen::Vector4f(10, 20, 30, 40);
+		XMMATRIX m1 = AS_CONST_REF(XMMATRIX, m0);
+		CHECK(m1._11 == 10);
+		CHECK(m1._12 == 20);
+		CHECK(m1._13 == 30);
+		CHECK(m1._14 == 40);
+	}
+
+	{
+		m0 = Eigen::Matrix4f::Identity();
+		m0.block<3, 1>(0, 1) = Eigen::Vector3f(10, 20, 30);//m[(1,0):(1,3)]
+		XMMATRIX m1 = AS_CONST_REF(XMMATRIX, m0);
+		CHECK(m1._21 == 10);
+		CHECK(m1._22 == 20);
+		CHECK(m1._23 == 30);
+	}
+}
+
+namespace mir {
+Eigen::Matrix4f MakeLookAt(const Eigen::Vector3f& eye,
+	const Eigen::Vector3f& target,
+	const Eigen::Vector3f& up);
+}
+
+TEST_CASE("mir camera functions", "mir_camera_functions") {
+	Eigen::Vector3f eye(0, 0, -10);
+	Eigen::Vector3f target(0, 0, 0);
+	Eigen::Vector3f up(0, 1, 0);
+	Eigen::Matrix4f m0 = mir::MakeLookAt(eye, target, up);
+
+	XMVECTOR Eye = XMVectorSet(eye.x(), eye.y(), eye.z(), 0.0f);
+	XMVECTOR At = XMVectorSet(target.x(), target.y(), target.z(), 0.0f);
+	XMVECTOR Up = XMVectorSet(up.x(), up.y(), up.z(), 0.0f);
+	XMMATRIX m1 = XMMatrixLookAtLH(Eye, At, Up);
+
+	CHECK_EQUAL(m0, m1);
 }

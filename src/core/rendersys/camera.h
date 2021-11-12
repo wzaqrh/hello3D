@@ -32,7 +32,7 @@ public:
 	const std::vector<PostProcessPtr>& PostProcessEffects() const { return mPostProcessEffects; }
 
 	const XMMATRIX& GetView() const;
-	const XMMATRIX& GetProjection() const  { return mProjection; }
+	const XMMATRIX& GetProjection() const  { return AS_CONST_REF(XMMATRIX, mProjection); }
 	
 	int GetWidth() const { return mWidth; }
 	int GetHeight() const  { return mHeight; }
@@ -49,7 +49,7 @@ private:
 	mutable bool mTransformDirty;
 
 	bool mFlipY;
-	mutable XMMATRIX mView, mProjection, mWorldView;
+	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 public:
 	IRenderTexturePtr mPostProcessInput;
 

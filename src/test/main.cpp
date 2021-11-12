@@ -21,14 +21,17 @@
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
+#define MIR_UNIT_TEST
+int main(int argc, const char* argv[]) {
+#if defined MIR_UNIT_TEST
+	//int argc = 0; LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
+	//Catch::Session().run<wchar_t>(argc, argv);
+	return Catch::Session().run<char>(argc, argv);;
+#endif
+}
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-#if defined MIR_UNIT_TEST
-	int argc = 0;
-	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
-	Catch::Session().run<wchar_t>(argc, argv);
-#endif
-
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
