@@ -806,11 +806,11 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
 			SET_DEBUG_NAME(TexToneMaps[i]->mDepthStencilView, "TexToneMaps" + i);
 			nSampleLen *= 2;
 		}
-		IRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->GetWinSize().x / 8, mRenderSys->GetWinSize().y / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
+		IRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->WinSize().x() / 8, mRenderSys->WinSize().y() / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
 		SET_DEBUG_NAME(TexBrightPass->mDepthStencilView, "TexBrightPass");
 		std::vector<IRenderTexturePtr> TexBlooms(NUM_BLOOM_TEXTURES);
 		for (size_t i = 0; i < NUM_BLOOM_TEXTURES; i++) {
-			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->GetWinSize().x / 8, mRenderSys->GetWinSize().y / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
+			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->WinSize().x() / 8, mRenderSys->WinSize().y() / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
 			SET_DEBUG_NAME(TexBlooms[i]->mDepthStencilView, "TexBlooms" + i);
 		}
 

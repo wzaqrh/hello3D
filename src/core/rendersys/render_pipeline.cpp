@@ -177,7 +177,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowCasterOutput);
-		mRenderSys.ClearColorDepthStencil(XMFLOAT4(1, 1, 1, 1), 1.0, 0);
+		mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
 		mRenderSys.SetDepthState(DepthState(false));
 		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
 	}
@@ -238,7 +238,7 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 		//setup framebuffer as camera's post_process_input 
 		if (!camera->PostProcessEffects().empty() && camera->mPostProcessInput) {
 			mRenderSys.SetRenderTarget(camera->mPostProcessInput);
-			mRenderSys.ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
+			mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
 		}
 
 		//camera's skybox

@@ -28,19 +28,19 @@ void TestMesh::OnPostInitDevice()
 	auto texture = mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
 
 	constexpr int spriteCount = 4;
-	auto size = mContext->RenderSys()->GetWinSize();
+	auto size = mContext->RenderSys()->WinSize();
 	Eigen::Vector2f points[spriteCount] = {
 		Eigen::Vector2f(0, 0),
-		Eigen::Vector2f(size.x / 2, 0),
-		Eigen::Vector2f(size.x / 2, size.y / 2),
-		Eigen::Vector2f(0, size.y / 2)
+		Eigen::Vector2f(size.x() / 2, 0),
+		Eigen::Vector2f(size.x() / 2, size.y() / 2),
+		Eigen::Vector2f(0, size.y() / 2)
 	};
 	for (int i = 0; i < spriteCount; ++i) {
 		auto sprite = mContext->RenderableFac()->CreateSprite();
 		sprite->SetTexture(texture);
 
 		sprite->SetPosition(Eigen::Vector3f(points[i].x(), points[i].y(), 0.0f));
-		sprite->SetSize(Eigen::Vector2f(size.x / 4, size.y / 4));
+		sprite->SetSize(Eigen::Vector2f(size.x() / 4, size.y() / 4));
 
 		mSprites.push_back(sprite);
 	}

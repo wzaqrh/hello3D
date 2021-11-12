@@ -42,7 +42,7 @@ protected:
 	class mir::Timer* mTimer;
 	mir::TransformPtr mTransform;
 	float mMoveDefScale;
-	XMFLOAT4 mBackgndColor;
+	Eigen::Vector4f mBackgndColor;
 public:
 	std::string mName;
 	HWND mHnd;

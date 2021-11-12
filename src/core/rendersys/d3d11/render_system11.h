@@ -35,10 +35,10 @@ public:
 	void CleanUp() override;
 	void SetViewPort(int x, int y, int w, int h) override;
 public:
-	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT depth, UINT8 stencil) override;
+	void ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil) override;
 
 	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format) override;
-	void _ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth=1.0, UINT8 Stencil=0);
+	void _ClearRenderTexture(IRenderTexturePtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil);
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
@@ -53,14 +53,19 @@ public:
 	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
-	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry) override;
-	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry) override;
+	IProgramPtr CreateProgramByCompile(const std::string& vsPath, 
+		const std::string& psPath, 
+		const std::string& vsEntry, 
+		const std::string& psEntry) override;
+	IProgramPtr CreateProgramByFXC(const std::string& name, 
+		const std::string& vsEntry, 
+		const std::string& psEntry) override;
 	void SetProgram(IProgramPtr program) override;
 
 	ISamplerStatePtr CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp) override;
 	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
-	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount) override;
+	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC descArray[], size_t descCount) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
 
 	void SetBlendFunc(const BlendFunc& blendFunc) override;
@@ -88,10 +93,10 @@ private:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
 
-	VertexShader11Ptr _CreateVS(const char* filename, const char* entry = nullptr, bool async = true);
-	VertexShader11Ptr _CreateVSByFXC(const char* filename);
-	PixelShader11Ptr _CreatePS(const char* filename, const char* entry = nullptr, bool async = true);
-	PixelShader11Ptr _CreatePSByFXC(const char* filename);
+	VertexShader11Ptr _CreateVS(const std::string& filename, const std::string& entry, bool async = true);
+	VertexShader11Ptr _CreateVSByFXC(const std::string& filename);
+	PixelShader11Ptr _CreatePS(const std::string& filename, const std::string& entry, bool async = true);
+	PixelShader11Ptr _CreatePSByFXC(const std::string& filename);
 
 	ID3D11InputLayout* _CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 };

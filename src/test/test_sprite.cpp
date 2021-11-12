@@ -31,8 +31,8 @@ void TestSprite::OnPostInitDevice()
 	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
 	mSprite->SetTexture(mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg"));
 
-	int win_width = mContext->RenderSys()->GetWinSize().x;
-	int win_height = mContext->RenderSys()->GetWinSize().y;
+	int win_width = mContext->RenderSys()->WinSize().x();
+	int win_height = mContext->RenderSys()->WinSize().y();
 	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
 	mSprite->SetSize(Eigen::Vector2f(win_width / 2, win_height / 2));
 #endif

@@ -11,7 +11,7 @@ RenderSystem::~RenderSystem()
 {
 }
 
-IProgramPtr RenderSystem::CreateProgram(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr RenderSystem::CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
 	std::string ext = GetFileExt(name);
 	if (ext.empty()) {

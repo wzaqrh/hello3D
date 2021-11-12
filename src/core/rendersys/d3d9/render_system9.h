@@ -25,7 +25,7 @@ public:
 	void CleanUp() override;
 	void SetViewPort(int x, int y, int w, int h) override;
 public:
-	void ClearColorDepthStencil(const XMFLOAT4& color, FLOAT depth, UINT8 stencil) override;
+	void ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil) override;
 
 	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
@@ -42,8 +42,13 @@ public:
 	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
-	IProgramPtr CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry) override;
-	IProgramPtr CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry) override;
+	IProgramPtr CreateProgramByCompile(const std::string& vsPath, 
+		const std::string& psPath, 
+		const std::string& vsEntry, 
+		const std::string& psEntry) override;
+	IProgramPtr CreateProgramByFXC(const std::string& name, 
+		const std::string& vsEntry, 
+		const std::string& psEntry) override;
 	void SetProgram(IProgramPtr program) override;
 
 	ISamplerStatePtr CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp) override;
@@ -66,11 +71,11 @@ public:
 	bool BeginScene() override;
 	void EndScene() override;
 private:
-	ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
-	VertexShader9Ptr _CreateVS(const char* filename, const char* entry = nullptr);
-	PixelShader9Ptr _CreatePS(const char* filename, const char* entry = nullptr);
-	VertexShader9Ptr _CreateVSByFXC(const char* filename);
-	PixelShader9Ptr _CreatePSByFXC(const char* filename);
+	ITexturePtr _CreateTexture(const std::string& srcFile, DXGI_FORMAT format, bool async, bool isCube);
+	VertexShader9Ptr _CreateVS(const std::string& filename, const std::string& entry);
+	PixelShader9Ptr _CreatePS(const std::string& filename, const std::string& entry);
+	VertexShader9Ptr _CreateVSByFXC(const std::string& filename);
+	PixelShader9Ptr _CreatePSByFXC(const std::string& filename);
 	IDirect3DVertexDeclaration9* _CreateInputLayout(Program9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:
 	bool _GetDeviceCaps();

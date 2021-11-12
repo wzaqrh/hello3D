@@ -9,11 +9,9 @@ namespace mir {
 
 RenderSystem11::RenderSystem11()
 {
-	//mMaterialFac = std::make_shared<MaterialFactory>(*this);
 	mThreadPump = std::make_shared<ThreadPump>();
 	mFXCDir = "d3d11\\";
 }
-
 RenderSystem11::~RenderSystem11()
 {
 }
@@ -182,9 +180,9 @@ void RenderSystem11::CleanUp()
 {
 }
 
-void RenderSystem11::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
+void RenderSystem11::ClearColorDepthStencil(const Eigen::Vector4f& color, float Depth, unsigned char Stencil)
 {
-	float colorArr[4] = { color.x, color.y, color.z, color.w }; // red, green, blue, alpha
+	float colorArr[4] = { color.x(), color.y(), color.z(), color.w() };
 	mDeviceContext->ClearRenderTargetView(mCurRenderTargetView, colorArr);
 	mDeviceContext->ClearDepthStencilView(mCurDepthStencilView, D3D11_CLEAR_DEPTH, Depth, Stencil);
 }
@@ -194,11 +192,12 @@ IRenderTexturePtr RenderSystem11::CreateRenderTexture(int width, int height, DXG
 	return MakePtr<RenderTexture11>(mDevice, width, height, format);
 }
 
-void RenderSystem11::_ClearRenderTexture(IRenderTexturePtr rendTarget, XMFLOAT4 color, FLOAT Depth/* = 1.0*/, UINT8 Stencil/* = 0*/)
+void RenderSystem11::_ClearRenderTexture(IRenderTexturePtr rendTarget, const Eigen::Vector4f& color, 
+	float depth, unsigned char stencil)
 {
 	auto target11 = std::static_pointer_cast<RenderTexture11>(rendTarget);
 	mDeviceContext->ClearRenderTargetView(target11->GetColorBuffer11(), (const float*)&color);
-	mDeviceContext->ClearDepthStencilView(target11->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, Depth, Stencil);
+	mDeviceContext->ClearDepthStencilView(target11->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, depth, stencil);
 }
 
 void RenderSystem11::SetViewPort(int x, int y, int w, int h)
@@ -287,7 +286,7 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	return true;
 }
 
-ISamplerStatePtr RenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp)
+ISamplerStatePtr RenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC cmpFunc)
 {
 	HRESULT hr = S_OK;
 
@@ -299,7 +298,7 @@ ISamplerStatePtr RenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPAR
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.MipLODBias = 0.0f;
 	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
-	sampDesc.ComparisonFunc = comp;
+	sampDesc.ComparisonFunc = cmpFunc;
 	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -333,10 +332,10 @@ bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
 	}
 	return ret;
 }
-PixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* szEntry, bool async)
+PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const std::string& entry, bool async)
 {
 	PixelShader11Ptr ret = MakePtr<PixelShader11>(MakePtr<BlobData11>(nullptr));
-	szEntry = szEntry ? szEntry : "PS";
+	std::string psEntry = !entry.empty() ? entry : "PS";
 	const char* shaderModel = "ps_4_0";
 	DWORD dwShaderFlags = GetShaderFlag();
 
@@ -345,13 +344,14 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* szE
 		hr = mThreadPump->AddWorkItem(ret->AsRes(), [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
 			const D3D10_SHADER_MACRO* pDefines = nullptr;
 			LPD3D10INCLUDE pInclude = new IncludeStdIo("shader\\");
-			return D3DX11CompileFromFileA(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0, pump,
+			return D3DX11CompileFromFileA(filename.c_str(), pDefines, pInclude, psEntry.c_str(), 
+				shaderModel, dwShaderFlags, 0, pump,
 				&static_cast<BlobData11*>(PtrRaw(ret->mBlob))->mBlob, &ret->mErrBlob, (HRESULT*)&entry->hr);
 		}, [=](IResource* res, HRESULT hr) {
 			if (!FAILED(hr)) {
-				//TPixelShader11* ret = static_cast<TPixelShader11*>(res);
 				assert(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
-				if (!CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+				if (!CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
+					nullptr, &ret->mShader))) {
 					res->SetLoaded();
 				}
 			}
@@ -362,10 +362,12 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* szE
 	}
 	else {
 		ret->mBlob = MakePtr<BlobData11>(nullptr);
-		hr = D3DX11CompileFromFileA(filename, &mShaderMacros[0], NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr,
+		hr = D3DX11CompileFromFileA(filename.c_str(), &mShaderMacros[0], NULL, psEntry.c_str(), 
+			shaderModel, dwShaderFlags, 0, nullptr,
 			&static_cast<BlobData11*>(PtrRaw(ret->mBlob))->mBlob, &ret->mErrBlob, NULL);
 		if (CheckCompileError(hr, ret->mErrBlob)
-			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
+				NULL, &ret->mShader))) {
 			ret->AsRes()->SetLoaded();
 		}
 		else {
@@ -375,10 +377,10 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const char* filename, const char* szE
 	return ret;
 }
 
-PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const char* filename)
+PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const std::string& filename)
 {
 	PixelShader11Ptr ret = MakePtr<PixelShader11>(nullptr);
-	std::vector<char> buffer = ReadFile(filename, "rb");
+	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty()) {
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
 		HRESULT hr = mDevice->CreatePixelShader(&buffer[0], buffer.size(), NULL, &ret->mShader);
@@ -397,10 +399,10 @@ PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const char* filename)
 	return ret;
 }
 
-VertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* szEntry, bool async)
+VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const std::string& entry, bool async)
 {
 	VertexShader11Ptr ret = MakePtr<VertexShader11>(MakePtr<BlobData11>(nullptr));
-	szEntry = szEntry ? szEntry : "VS";
+	std::string vsEntry = !entry.empty() ? entry : "VS";
 	const char* shaderModel = "vs_4_0";
 	DWORD dwShaderFlags = GetShaderFlag();
 
@@ -410,14 +412,15 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* sz
 		ID3DX11DataLoader* pDataLoader = nullptr;
 		const D3D10_SHADER_MACRO* pDefines = nullptr;
 		LPD3D10INCLUDE pInclude = new IncludeStdIo("shader\\");
-		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename, pDefines, pInclude, szEntry, shaderModel, dwShaderFlags, 0,
+		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename.c_str(), pDefines, pInclude, vsEntry.c_str(), 
+			shaderModel, dwShaderFlags, 0,
 			&std::static_pointer_cast<BlobData11>(ret->mBlob)->mBlob, &ret->mErrBlob, &pProcessor))
-			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename, &pDataLoader))) {
+			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename.c_str(), &pDataLoader))) {
 			hr = mThreadPump->AddWorkItem(ret->AsRes(), pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
 				if (!FAILED(hr))  {
-					//TVertexShader11* ret = static_cast<TVertexShader11*>(res);
 					assert(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
-					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
+						NULL, &ret->mShader))) {
 						res->SetLoaded();
 					}
 				}
@@ -429,10 +432,12 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* sz
 		}
 	}
 	else {
-		hr = D3DX11CompileFromFileA(filename, &mShaderMacros[0], NULL, szEntry, shaderModel, dwShaderFlags, 0, nullptr,
+		hr = D3DX11CompileFromFileA(filename.c_str(), &mShaderMacros[0], NULL, vsEntry.c_str(), 
+			shaderModel, dwShaderFlags, 0, nullptr,
 			&std::static_pointer_cast<BlobData11>(ret->mBlob)->mBlob, &ret->mErrBlob, NULL);
 		if (CheckCompileError(hr, ret->mErrBlob)
-			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), NULL, &ret->mShader))) {
+			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
+				NULL, &ret->mShader))) {
 			ret->AsRes()->SetLoaded();
 		}
 		else {
@@ -442,10 +447,10 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const char* filename, const char* sz
 	return ret;
 }
 
-VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const char* filename)
+VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const std::string& filename)
 {
 	VertexShader11Ptr ret = MakePtr<VertexShader11>(nullptr);
-	std::vector<char> buffer = ReadFile(filename, "rb");
+	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty()) {
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
 		auto buffer_size = buffer.size();
@@ -465,28 +470,29 @@ VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const char* filename)
 	return ret;
 }
 
-IProgramPtr RenderSystem11::CreateProgramByCompile(const char* vsPath, const char* psPath, const char* vsEntry, const char* psEntry)
+IProgramPtr RenderSystem11::CreateProgramByCompile(const std::string& vsPath, const std::string& psPath, 
+	const std::string& vsEntry, const std::string& psEntry)
 {
 	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
-	psPath = psPath ? psPath : vsPath;
+
 	Program11Ptr program = MakePtr<Program11>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry, false));
-	program->SetPixel(_CreatePS(psPath, psEntry, false));
+	program->SetPixel(_CreatePS(!psPath.empty() ? psPath : vsPath, psEntry, false));
 	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
-IProgramPtr RenderSystem11::CreateProgramByFXC(const std::string& name, const char* vsEntry, const char* psEntry)
+IProgramPtr RenderSystem11::CreateProgramByFXC(const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
 	Program11Ptr program = MakePtr<Program11>();
 
-	vsEntry = vsEntry ? vsEntry : "VS";
-	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
+	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
+	std::string vsName = name + "_" + vsEntryOrVS + FILE_EXT_CSO;
 	program->SetVertex(_CreateVSByFXC(vsName.c_str()));
 
-	psEntry = psEntry ? psEntry : "PS";
-	std::string psName = (name)+"_" + psEntry + FILE_EXT_CSO;
+	std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
+	std::string psName = name + "_" + psEntryOrPS + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
 	program->AsRes()->CheckAndSetLoaded();
@@ -578,12 +584,11 @@ IIndexBufferPtr RenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT fo
 
 void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-	if (indexBuffer) {
-		mDeviceContext->IASetIndexBuffer(std::static_pointer_cast<IndexBuffer11>(indexBuffer)->GetBuffer11(), indexBuffer->GetFormat(), 0);
-	}
-	else {
-		mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
-	}
+	if (indexBuffer) mDeviceContext->IASetIndexBuffer(
+		std::static_pointer_cast<IndexBuffer11>(indexBuffer)->GetBuffer11(), 
+		indexBuffer->GetFormat(),
+		0);
+	else mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
 }
 
 IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data)

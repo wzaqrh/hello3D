@@ -11,10 +11,10 @@ SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, const std::str
 	mIndexBuffer = nullptr;
 
 	SkyboxVertex Vertexs[4];
-	float fHighW = -1.0f - (1.0f / (float)mRenderSys.GetWinSize().x);
-	float fHighH = -1.0f - (1.0f / (float)mRenderSys.GetWinSize().y);
-	float fLowW = 1.0f + (1.0f / (float)mRenderSys.GetWinSize().x);
-	float fLowH = 1.0f + (1.0f / (float)mRenderSys.GetWinSize().y);
+	float fHighW = -1.0f - (1.0f / (float)mRenderSys.WinSize().x());
+	float fHighH = -1.0f - (1.0f / (float)mRenderSys.WinSize().y());
+	float fLowW = 1.0f + (1.0f / (float)mRenderSys.WinSize().x());
+	float fLowH = 1.0f + (1.0f / (float)mRenderSys.WinSize().y());
 	Vertexs[0].pos = Eigen::Vector4f(fLowW, fLowH, 1.0f, 1.0f);
 	Vertexs[1].pos = Eigen::Vector4f(fLowW, fHighH, 1.0f, 1.0f);
 	Vertexs[2].pos = Eigen::Vector4f(fHighW, fLowH, 1.0f, 1.0f);

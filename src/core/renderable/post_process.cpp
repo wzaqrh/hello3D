@@ -79,8 +79,8 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 /********** TBloom **********/
 IVertexBufferPtr GetVertBufByRT(IRenderSystem& RenderSys, IRenderTexturePtr target) {
 	auto srv = target->GetColorTexture();
-	float sx = srv->GetWidth() * 1.0 / RenderSys.GetWinSize().x;
-	float sy = srv->GetHeight() * 1.0 / RenderSys.GetWinSize().y;
+	float sx = srv->GetWidth() * 1.0 / RenderSys.WinSize().x();
+	float sy = srv->GetHeight() * 1.0 / RenderSys.WinSize().y();
 	assert(sx <= 1 && sy <= 1);
 	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
 	IVertexBufferPtr vertBuf = RenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);

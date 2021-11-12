@@ -16,7 +16,7 @@ App::App()
 	mMoveDefScale = 1.0f;
 
 	mTransform = MakePtr<mir::Transform>();
-	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
+	mBackgndColor = Eigen::Vector4f(0.0f, 0.125f, 0.3f, 1.0f);
 	mContext = new mir::Mir;
 }
 App::~App()
@@ -38,7 +38,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 	OnInitLight();
 	OnPostInitDevice();
 
-	mInput = new mir::D3DInput(hInstance, hWnd, mContext->RenderSys()->GetWinSize().x, mContext->RenderSys()->GetWinSize().y);
+	mInput = new mir::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
 	mTimer = new mir::Timer;
 	return true;
 }
@@ -70,8 +70,8 @@ void App::Render()
 		Eigen::Vector3f cpos;
 		{
 			mir::Int4 m = mInput->GetMouseLocation(false);
-			float eulerY = 3.14 * m.x / renderSys->GetWinSize().x;
-			float eulerX = 3.14 * m.y / renderSys->GetWinSize().y;
+			float eulerY = 3.14 * m.x / renderSys->WinSize().x();
+			float eulerX = 3.14 * m.y / renderSys->WinSize().y();
 
 			Eigen::Quaternion<float> euler = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
 				* Eigen::AngleAxisf(eulerX, Eigen::Vector3f::UnitX())
@@ -85,7 +85,7 @@ void App::Render()
 	{
 		mir::Int4 m = mInput->GetMouseLocation(true);
 		float scalez = mir::clamp(0.00001f, 10.0f, mMoveDefScale * (1000 + m.z) / 1000.0f);
-		float angy = 3.14 * -m.x / renderSys->GetWinSize().x, angx = 3.14 * -m.y / renderSys->GetWinSize().y;
+		float angy = 3.14 * -m.x / renderSys->WinSize().x(), angx = 3.14 * -m.y / renderSys->WinSize().y();
 		
 		mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));
 		mTransform->SetEuler(Eigen::Vector3f(angx, angy, 0));

@@ -111,19 +111,19 @@ void RenderSystem9::CleanUp()
 {
 }
 
-static inline D3DCOLOR XMFLOAT2D3DCOLOR(XMFLOAT4 color) {
-	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x * 255), int(color.y * 255), int(color.z * 255), int(color.w * 255));
+static inline D3DCOLOR XMFLOAT2D3DCOLOR(Eigen::Vector4f color) {
+	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x() * 255), int(color.y() * 255), int(color.z() * 255), int(color.w() * 255));
 	return dc;
 }
-void RenderSystem9::ClearColorDepthStencil(const XMFLOAT4& color, FLOAT Depth, UINT8 Stencil)
+void RenderSystem9::ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil)
 {
 	if (mCurColorBuffer != mBackColorBuffer) {
 		//mDevice9->ColorFill(mCurColorBuffer, NULL, XMFLOAT2D3DCOLOR(color));
 	}
-	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), Depth, Stencil);
+	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), depth, stencil);
 }
 
-IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format/*=DXGI_FORMAT_R32G32B32A32_FLOAT*/)
+IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
 {
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
 	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
@@ -249,16 +249,19 @@ static VertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr
 	ret->AsRes()->SetLoaded();
 	return ret;
 }
-VertexShader9Ptr RenderSystem9::_CreateVS(const char* filename, const char* entry /*= nullptr*/)
+VertexShader9Ptr RenderSystem9::_CreateVS(const std::string& filename, const std::string& entry)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
-	entry = entry ? entry : "VS";
+	std::string vsEntry = !entry.empty() ? entry : "VS";
 	BlobData9Ptr blob = MakePtr<BlobData9>(nullptr);
 	BlobData9Ptr errBlob = MakePtr<BlobData9>(nullptr);
-	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "vs_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename.c_str(), 
+		&mShaderMacros[0], nullptr, 
+		vsEntry.c_str(), "vs_3_0", Flag, 
+		&blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
@@ -268,13 +271,12 @@ VertexShader9Ptr RenderSystem9::_CreateVS(const char* filename, const char* entr
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-VertexShader9Ptr RenderSystem9::_CreateVSByFXC(const char* filename)
+VertexShader9Ptr RenderSystem9::_CreateVSByFXC(const std::string& filename)
 {
 	VertexShader9Ptr ret;
-	std::vector<char> buffer = ReadFile(filename, "rb");
-	if (!buffer.empty()) {
+	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
+	if (!buffer.empty()) 
 		ret = _CreateVSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
-	}
 	return ret;
 }
 
@@ -291,16 +293,19 @@ static PixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr 
 	ret->AsRes()->SetLoaded();
 	return ret;
 }
-PixelShader9Ptr RenderSystem9::_CreatePS(const char* filename, const char* entry /*= nullptr*/)
+PixelShader9Ptr RenderSystem9::_CreatePS(const std::string& filename, const std::string& entry)
 {
 	DWORD Flag = 0;
 #ifdef _DEBUG
 	Flag = D3DXSHADER_DEBUG;
 #endif
-	entry = entry ? entry : "PS";
+	std::string psEntry = !entry.empty() ? entry : "PS";
 	BlobData9Ptr blob = MakePtr<BlobData9>(nullptr);
 	BlobData9Ptr errBlob = MakePtr<BlobData9>(nullptr);
-	if (FAILED(D3DXCompileShaderFromFileA(filename, &mShaderMacros[0], nullptr, entry, "ps_3_0", Flag, &blob->mBlob, &errBlob->mBlob, nullptr))) {
+	if (FAILED(D3DXCompileShaderFromFileA(filename.c_str(), 
+		&mShaderMacros[0], nullptr, 
+		psEntry.c_str(), "ps_3_0", Flag,
+		&blob->mBlob, &errBlob->mBlob, nullptr))) {
 		OutputDebugStringA((LPCSTR)errBlob->mBlob->GetBufferPointer());
 		assert(FALSE);
 		return nullptr;
@@ -310,45 +315,49 @@ PixelShader9Ptr RenderSystem9::_CreatePS(const char* filename, const char* entry
 	ret->mErrBlob = errBlob;
 	return ret;
 }
-PixelShader9Ptr RenderSystem9::_CreatePSByFXC(const char* filename)
+PixelShader9Ptr RenderSystem9::_CreatePSByFXC(const std::string& filename)
 {
 	PixelShader9Ptr ret;
-	std::vector<char> buffer = ReadFile(filename, "rb");
-	if (!buffer.empty()) {
+	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
+	if (!buffer.empty())
 		ret = _CreatePSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
-	}
 	return ret;
 }
 
-IProgramPtr RenderSystem9::CreateProgramByCompile(const char* vsPath, const char* psPath /*= nullptr*/, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr RenderSystem9::CreateProgramByCompile(const std::string& vsPath, 
+	const std::string& psPath,
+	const std::string& vsEntry,
+	const std::string& psEntry)
 {
-	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
-	psPath = psPath ? psPath : vsPath;
+	TIME_PROFILE2(CreateProgramByCompile, vsPath);
+
 	Program9Ptr program = MakePtr<Program9>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
-	program->SetPixel(_CreatePS(psPath, psEntry));
+	program->SetPixel(_CreatePS(!psPath.empty() ? psPath : vsPath, psEntry));
 	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
-IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name, const char* vsEntry /*= nullptr*/, const char* psEntry /*= nullptr*/)
+IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name, 
+	const std::string& vsEntry,
+	const std::string& psEntry)
 {
 	TIME_PROFILE2(CreateProgramByFXC, (name));
 	Program9Ptr program = MakePtr<Program9>();
 
-	vsEntry = vsEntry ? vsEntry : "VS";
-	std::string vsName = (name)+"_" + vsEntry + FILE_EXT_CSO;
+	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
+	std::string vsName = name + "_" + vsEntryOrVS + FILE_EXT_CSO;
 	program->SetVertex(_CreateVSByFXC(vsName.c_str()));
 
-	psEntry = psEntry ? psEntry : "PS";
-	std::string psName = (name)+"_" + psEntry + FILE_EXT_CSO;
+	std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
+	std::string psName = name + "_" + psEntryOrPS + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
 	program->AsRes()->CheckAndSetLoaded();
 	return program;
 }
 
-ISamplerStatePtr RenderSystem9::CreateSampler(D3D11_FILTER filter /*= D3D11_FILTER_MIN_MAG_MIP_LINEAR*/, D3D11_COMPARISON_FUNC comp /*= D3D11_COMPARISON_NEVER*/)
+ISamplerStatePtr RenderSystem9::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC cmpFunc)
 {
 	SamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
@@ -400,9 +409,9 @@ void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
 	mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(layout)->GetLayout9());
 }
 
-ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
+ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, DXGI_FORMAT format, bool async, bool isCube)
 {
-	std::string imgPath = GetModelPath() + pSrcFile;
+	std::string imgPath = GetModelPath() + srcFile;
 #ifdef USE_ONLY_PNG
 	if (!IsFileExist(imgPath)) {
 		auto pos = imgPath.find_last_of(".");
@@ -412,13 +421,13 @@ ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 		}
 	}
 #endif
-	pSrcFile = imgPath.c_str();
+	std::string pSrcFile = imgPath.c_str();
 
 	Texture9Ptr pTextureRV;
 	if (IsFileExist(pSrcFile)) {
 		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
 		if (isCube) {
-			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile, 
+			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile.c_str(), 
 				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3dEnumConvert::d3d11To9(format)/*D3DFMT_A16B16G16R16F*/,
 				D3DPOOL_MANAGED, D3DX_FILTER_NONE/*D3DX_DEFAULT */, D3DX_FILTER_NONE, 0, NULL,
 				NULL, &pTextureRV->GetSRVCube9()))) {
@@ -426,7 +435,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 			}
 		}
 		else {
-			if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile, &pTextureRV->GetSRV9()))) {
+			if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile.c_str(), &pTextureRV->GetSRV9()))) {
 				pTextureRV = nullptr;
 			}
 		}
@@ -434,7 +443,6 @@ ITexturePtr RenderSystem9::_CreateTexture(const char* pSrcFile, DXGI_FORMAT form
 	else {
 		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
 		OutputDebugStringA(szBuf);
-		//MessageBoxA(0, szBuf, "", MB_OK);
 	}
 	return pTextureRV;
 }
