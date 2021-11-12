@@ -3,7 +3,6 @@
 
 namespace mir {
 
-//TTransform
 Transform::Transform()
 {
 	mScale = Eigen::Vector3f(1, 1, 1);
@@ -13,75 +12,21 @@ Transform::Transform()
 	mMatrix = Eigen::Matrix4f::Identity();
 }
 
-void Transform::SetScaleX(float sx)
+void Transform::SetScale(const Eigen::Vector3f& s)
 {
-	mScale.x() = sx;
+	mScale = s;
 	mDirty = true;
 }
 
-void Transform::SetScaleY(float sy)
+void Transform::SetPosition(const Eigen::Vector3f& position)
 {
-	mScale.y() = sy;
+	mPosition = position;
 	mDirty = true;
 }
 
-void Transform::SetScaleZ(float sz)
+void Transform::SetEuler(const Eigen::Vector3f& euler)
 {
-	mScale.z() = sz;
-	mDirty = true;
-}
-
-void Transform::SetScale(float s)
-{
-	mScale = Eigen::Vector3f(s, s, s);
-	mDirty = true;
-}
-
-void Transform::SetScale(const XMFLOAT3& s)
-{
-	mScale = AS_CONST_REF(Eigen::Vector3f, s);
-	mDirty = true;
-}
-
-XMFLOAT3 Transform::GetScale()
-{
-	Eigen::Vector3f scale = mScale.cwiseProduct(mFlip);
-	return AS_CONST_REF(XMFLOAT3, scale);
-}
-
-void Transform::SetPosition(float x, float y, float z)
-{
-	mPosition = Eigen::Vector3f(x, y, z);
-	mDirty = true;
-}
-
-void Transform::SetPosition(const XMFLOAT3& position)
-{
-	mPosition = AS_CONST_REF(Eigen::Vector3f, position);
-	mDirty = true;
-}
-
-void Transform::SetEulerZ(float angle)
-{
-	mEuler.z() = angle;
-	mDirty = true;
-}
-
-void Transform::SetEulerX(float angle)
-{
-	mEuler.x() = angle;
-	mDirty = true;
-}
-
-void Transform::SetEulerY(float angle)
-{
-	mEuler.y() = angle;
-	mDirty = true;
-}
-
-void Transform::SetEuler(const XMFLOAT3& euler)
-{
-	mEuler = AS_CONST_REF(Eigen::Vector3f, euler);
+	mEuler = euler;
 	mDirty = true;
 }
 
@@ -91,7 +36,7 @@ void Transform::SetFlipY(bool flip)
 	mDirty = true;
 }
 
-bool Transform::IsFlipY()
+bool Transform::IsFlipY() const
 {
 	return mFlip.y() < 0;
 }
@@ -120,11 +65,6 @@ const XMMATRIX& Transform::SetMatrixSRT()
 	return AS_CONST_REF(XMMATRIX, mMatrix);
 }
 
-const XMMATRIX& Transform::Matrix()
-{
-	return AS_CONST_REF(XMMATRIX, SetMatrixSRT());
-}
-
 const XMMATRIX& Transform::SetMatrixTSR()
 {
 	if (mDirty)
@@ -149,19 +89,7 @@ const XMMATRIX& Transform::SetMatrixTSR()
 	return AS_CONST_REF(XMMATRIX, mMatrix);
 }
 
-//TMovable
-Movable::Movable()
-{
-	mDefScale = 1;
-}
-
-void Movable::SetDefScale(float s)
-{
-	mDefScale = s;
-	SetScale(s);
-}
-
-const XMMATRIX& Movable::GetWorldTransform()
+const XMMATRIX& Transform::GetMatrix()
 {
 	return AS_CONST_REF(XMMATRIX, SetMatrixSRT());
 }

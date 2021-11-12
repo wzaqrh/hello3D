@@ -24,13 +24,13 @@ CameraPtr SceneManager::GetDefCamera() const
 {
 	return (! mCameras.empty()) ? mCameras[0] : nullptr;
 }
-CameraPtr SceneManager::AddOthogonalCamera(const XMFLOAT3& eyePos, double far1)
+CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1)
 {
 	CameraPtr camera = Camera::CreateOthogonal(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1);
 	mCameras.push_back(camera);
 	return camera;
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov)
+CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov)
 {
 	CameraPtr camera = Camera::CreatePerspective(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1, fov);
 	mCameras.push_back(camera);

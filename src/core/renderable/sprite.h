@@ -5,59 +5,51 @@
 namespace mir {
 
 struct SpriteVertex {
-	XMFLOAT3 Pos;
+	Eigen::Vector3f Pos;
 	unsigned int Color;
-	XMFLOAT2 Tex;
+	Eigen::Vector2f Tex;
 };
 
 struct SpriteVertexQuad {
-#if _MSC_VER <= 1800
 	SpriteVertex lb, lt, rt, rb;
-#else
-	union {
-		SpriteVertex m[4];
-		struct { SpriteVertex lb,lt,rt,rb; };
-	};
-#endif
 	SpriteVertexQuad();
 	SpriteVertexQuad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
-	void SetColor(const XMFLOAT4& color);
+	void SetColor(const Eigen::Vector4f& color);
 	void SetZ(float z);
 	void FlipY();
-	void SetTexCoord(const XMFLOAT2& uv0, const XMFLOAT2& uv1);
+	void SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vector2f& uv1);
 private:
-	void DoSetTexCoords(XMFLOAT2 plb, XMFLOAT2 prt);
+	void DoSetTexCoords(Eigen::Vector2f plb, Eigen::Vector2f prt);
 };
 
 class Sprite : public IRenderable 
 {
-private:
-	SpriteVertexQuad mQuad;
-	bool mQuadDirty;
-	XMFLOAT2 mPosition;
-	XMFLOAT2 mSize;
-	bool mFlipY;
+public:
+	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");
+	~Sprite();
+	void SetPosition(const Eigen::Vector3f& pos);
+	void SetSize(const Eigen::Vector2f& size);
+	void SetTexture(ITexturePtr Texture);
+	void SetColor(const Eigen::Vector4f& color);
+	void SetFlipY(bool flipY);
+public:
+	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
+	const SpriteVertexQuad* GetQuad() const { return &mQuad; }
+public:
+	MaterialPtr mMaterial;
+	TransformPtr mTransform;
 private:
 	IRenderSystem& mRenderSys;
 	ITexturePtr mTexture = nullptr;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
-public:
-	MaterialPtr Material;
-	TransformPtr Transform;
-public:
-	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");
-	~Sprite();
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-public:
-	void SetPosition(float x, float y, float z);
-	void SetSize(const XMFLOAT2& size);
-	void SetSize(float w, float h);
-	void SetTexture(ITexturePtr Texture);
-	void SetColor(XMFLOAT4 color);
-	void SetFlipY(bool flipY);
-	const SpriteVertexQuad* GetQuad() { return &mQuad; }
+private:
+	SpriteVertexQuad mQuad;
+	bool mQuadDirty;
+	Eigen::Vector2f mPosition;
+	Eigen::Vector2f mSize;
+	bool mFlipY;
 };
 
 }

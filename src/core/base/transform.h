@@ -1,5 +1,6 @@
 #pragma once
 #include "core/rendersys/base_type.h"
+#include "core/base/predeclare.h"
 
 namespace mir {
 
@@ -7,27 +8,19 @@ struct __declspec(align(16)) Transform {
 public:
 	Transform();
 public:
-	void SetScaleX(float sx);
-	void SetScaleY(float sy);
-	void SetScaleZ(float sz);
-	void SetScale(float s);
-	void SetScale(const XMFLOAT3& s);
-	XMFLOAT3 GetScale();
+	void SetScale(const Eigen::Vector3f& s);
+	const Eigen::Vector3f& GetScale() const { return mScale; }
 
-	void SetPosition(float x, float y, float z);
-	void SetPosition(const XMFLOAT3& position);
-	const XMFLOAT3& GetPosition() { return AS_CONST_REF(XMFLOAT3, mPosition) ; }
+	void SetPosition(const Eigen::Vector3f& position);
+	const Eigen::Vector3f& GetPosition() const { return mPosition; }
 
-	void SetEulerZ(float angle);
-	void SetEulerX(float angle);
-	void SetEulerY(float angle);
-	void SetEuler(const XMFLOAT3& euler);
-	const XMFLOAT3& GetEuler() { return AS_CONST_REF(XMFLOAT3, mEuler); }
+	void SetEuler(const Eigen::Vector3f& euler);
+	const Eigen::Vector3f& GetEuler() const { return mEuler; }
 
 	void SetFlipY(bool flip);
-	bool IsFlipY();
+	bool IsFlipY() const;
 
-	const XMMATRIX& Matrix();
+	const XMMATRIX& GetMatrix();
 	const XMMATRIX& SetMatrixSRT();
 	const XMMATRIX& SetMatrixTSR();
 private:
@@ -39,15 +32,5 @@ private:
 	Eigen::Vector3f mFlip;
 	bool mDirty = false;
 };
-typedef std::shared_ptr<Transform> TransformPtr;
-
-struct Movable : public Transform {
-	float mDefScale;	
-public:
-	Movable();
-	void SetDefScale(float s);
-	const XMMATRIX& GetWorldTransform();
-};
-typedef std::shared_ptr<Movable> MovablePtr;
 
 }

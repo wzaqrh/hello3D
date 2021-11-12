@@ -7,13 +7,13 @@ namespace mir {
 //#define MESH_VETREX_POSTEX
 struct AssimpMeshVertex
 {
-	XMFLOAT3 Pos;
-	XMFLOAT3 Normal;
-	XMFLOAT3 Tangent;
-	XMFLOAT2 Tex;
-	XMFLOAT4 BlendWeights;
+	Eigen::Vector3f Pos;
+	Eigen::Vector3f Normal;
+	Eigen::Vector3f Tangent;
+	Eigen::Vector2f Tex;
+	Eigen::Vector4f BlendWeights;
 	unsigned int BlendIndices[4];
-	XMFLOAT3 BiTangent;
+	Eigen::Vector3f BiTangent;
 };
 
 class AssimpMesh : public IRenderable {

@@ -11,14 +11,14 @@ class __declspec(align(16)) Camera : boost::noncopyable
 {
 public:
 	static CameraPtr CreatePerspective(RenderSystem& renderSys,int width, int height, 
-		XMFLOAT3 eyePos = XMFLOAT3(0,0,-10), 
+		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10), 
 		double far1 = 100, double fov = 45.0);
 	static CameraPtr CreateOthogonal(RenderSystem& renderSys, int width, int height, 
-		XMFLOAT3 eyePos = XMFLOAT3(0,0,-10),
+		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10),
 		double far1 = 100);
 	Camera(RenderSystem& renderSys);
 
-	void SetLookAt(XMFLOAT3 eye, XMFLOAT3 at);
+	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
 	void SetPerspectiveProj(int width, int height, double fov, double zFar);
 	void SetOthogonalProj(int width, int height, double zFar);
 	
@@ -27,8 +27,7 @@ public:
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
 	IRenderTexturePtr FetchPostProcessInput();
 public:
-	TransformPtr GetTransform();
-
+	const TransformPtr& GetTransform() const;
 	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
 	const std::vector<PostProcessPtr>& PostProcessEffects() const { return mPostProcessEffects; }
 
@@ -38,8 +37,8 @@ public:
 	int GetWidth() const { return mWidth; }
 	int GetHeight() const  { return mHeight; }
 	
-	XMFLOAT3 ProjectPoint(XMFLOAT3 worldpos);//world -> ndc
-	XMFLOAT4 ProjectPoint(XMFLOAT4 worldpos);
+	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
+	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 private:
 	RenderSystem& mRenderSys;
 
@@ -55,7 +54,7 @@ public:
 	IRenderTexturePtr mPostProcessInput;
 
 	int mWidth, mHeight;
-	XMFLOAT3 mEyePos, mLookAtPos, mUpVector;
+	Eigen::Vector3f mEyePos, mLookAtPos, mUpVector;
 
 	bool mIsPespective;
 	double mFov, mZFar;

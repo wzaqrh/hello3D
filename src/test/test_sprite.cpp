@@ -25,7 +25,7 @@ void TestSprite::OnPostInitDevice()
 	mSprite->SetSize(5, 5);
 #else
 	mContext->SceneMng()->RemoveAllCameras();
-	mContext->SceneMng()->AddOthogonalCamera(XMFLOAT3(0,0,-10), 100);
+	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LAYERCOLOR);
 	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
@@ -33,8 +33,8 @@ void TestSprite::OnPostInitDevice()
 
 	int win_width = mContext->RenderSys()->GetWinSize().x;
 	int win_height = mContext->RenderSys()->GetWinSize().y;
-	mSprite->SetPosition(0, 0, 0);
-	mSprite->SetSize(win_width / 2, win_height / 2);
+	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
+	mSprite->SetSize(Eigen::Vector2f(win_width / 2, win_height / 2));
 #endif
 }
 

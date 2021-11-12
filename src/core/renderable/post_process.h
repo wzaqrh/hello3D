@@ -4,18 +4,11 @@
 namespace mir {
 
 struct PostProcessVertex {
-	XMFLOAT4 Pos;
-	XMFLOAT2 Tex;
+	Eigen::Vector4f Pos;
+	Eigen::Vector2f Tex;
 };
 struct PostProcessVertexQuad {
-#if _MSC_VER <= 1800
 	PostProcessVertex lb, lt, rt, rb;
-#else
-	union {
-		PostProcessVertex m[4];
-		struct { PostProcessVertex lb, lt, rt, rb; };
-	};
-#endif
 public:
 	PostProcessVertexQuad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);

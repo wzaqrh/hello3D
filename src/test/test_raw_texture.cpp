@@ -74,13 +74,18 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 void TestRawTexture::OnPostInitDevice()
 {
 	mContext->SceneMng()->RemoveAllCameras();
-	mContext->SceneMng()->AddOthogonalCamera(XMFLOAT3(0,0,-10), 100);
+	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
 	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
 	mSprite->SetTexture(LoadTexture("smile.bmp"));
 
-	mSprite->SetPosition(-mContext->RenderSys()->GetWinSize().x / 2, -mContext->RenderSys()->GetWinSize().y / 2, 0);
-	mSprite->SetSize(mContext->RenderSys()->GetWinSize().x, mContext->RenderSys()->GetWinSize().y);
+	mSprite->SetPosition(Eigen::Vector3f(
+		-mContext->RenderSys()->GetWinSize().x / 2, 
+		-mContext->RenderSys()->GetWinSize().y / 2, 
+		0));
+	mSprite->SetSize(Eigen::Vector2f(
+		mContext->RenderSys()->GetWinSize().x, 
+		mContext->RenderSys()->GetWinSize().y));
 }
 
 void TestRawTexture::OnRender()

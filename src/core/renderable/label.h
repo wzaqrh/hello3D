@@ -12,9 +12,9 @@ class Label : public IRenderable
 
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
-	MaterialPtr Material;
+	MaterialPtr mMaterial;
 public:
-	TransformPtr Transform;
+	TransformPtr mTransform;
 	enum { MAX_STRING_LENGTH = 256 };
 public:
 	std::string mString;
@@ -22,13 +22,13 @@ public:
 		SpriteVertexQuad quad;
 		FontCharactorPtr charInfo;
 		ITexturePtr texture;
-		XMINT2 pen;//dot space
+		Eigen::Vector2i pen;//dot space
 	};
 	std::vector<CharEntry> mCharSeq;
 	std::vector<int> mCharSeqOrder;
 	FT_BBox mBBox;//dot space
 	int mLineCount = 0;
-	XMFLOAT2 mConetentSize;//dot space
+	Eigen::Vector2f mConetentSize;//dot space
 	bool mAutoUptSize = true;
 	float mScale = 1;
 public:
@@ -36,8 +36,8 @@ public:
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 public:
 	void SetString(const std::string& str);
-	void SetSize(bool autoCalSize, XMFLOAT2 size);
-	XMFLOAT2 GetSize() const { return mConetentSize; }
+	void SetSize(bool autoCalSize, const Eigen::Vector2f& size);
+	const Eigen::Vector2f& GetSize() const { return mConetentSize; }
 private:
 	void AutoUpdateSize();
 	void UpdateBBox();

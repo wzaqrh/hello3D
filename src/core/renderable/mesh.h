@@ -4,9 +4,9 @@
 namespace mir {
 
 struct MeshVertex {
-	XMFLOAT3 Position;
+	Eigen::Vector3f Position;
 	int Color;
-	XMFLOAT2 UV;
+	Eigen::Vector2f UV;
 };
 
 class Mesh : public IRenderable 
@@ -20,7 +20,7 @@ public:
 	IVertexBufferPtr VertexBuffer;
 
 	int IndiceDirty = false;
-	std::vector<UINT> Indices;
+	std::vector<unsigned int> Indices;
 	IIndexBufferPtr IndexBuffer;
 
 	struct SubMesh {
@@ -35,11 +35,11 @@ public:
 	void Clear();
 	void SetVertexs(const MeshVertex* vertData, int vertCount);
 	void SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos);
-	void SetPositions(const XMFLOAT3* posData, int count);
-	void SetColors(const XMFLOAT4* colorData, int count);
-	void SetUVs(const XMFLOAT2* uvData, int count);
+	void SetPositions(const Eigen::Vector3f* posData, int count);
+	void SetColors(const Eigen::Vector4f* colorData, int count);
+	void SetUVs(const Eigen::Vector2f* uvData, int count);
 	void SetSubMeshCount(int count);
-	void SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
+	void SetIndices(const unsigned int* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
 	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
 };
 

@@ -17,10 +17,10 @@ PostProcessVertexQuad::PostProcessVertexQuad(float x, float y, float w, float h)
 
 void PostProcessVertexQuad::SetRect(float x, float y, float w, float h)
 {
-	lb.Pos = XMFLOAT4(x, y, 0, 1);
-	lt.Pos = XMFLOAT4(x, y + h, 0, 1);
-	rt.Pos = XMFLOAT4(x + w, y + h, 0, 1);
-	rb.Pos = XMFLOAT4(x + w, y, 0, 1);
+	lb.Pos = Eigen::Vector4f(x, y, 0, 1);
+	lt.Pos = Eigen::Vector4f(x, y + h, 0, 1);
+	rt.Pos = Eigen::Vector4f(x + w, y + h, 0, 1);
+	rb.Pos = Eigen::Vector4f(x + w, y, 0, 1);
 }
 
 void PostProcessVertexQuad::SetFlipY(bool flipY)
@@ -29,34 +29,32 @@ void PostProcessVertexQuad::SetFlipY(bool flipY)
 	int pr = 1;
 	int pt = 1;
 	int pb = 0;
-
 	if (flipY) std::swap(pt, pb);
 
-	lb.Tex = XMFLOAT2(pl, pb);
-	lt.Tex = XMFLOAT2(pl, pt);
-	rt.Tex = XMFLOAT2(pr, pt);
-	rb.Tex = XMFLOAT2(pr, pb);
+	lb.Tex = Eigen::Vector2f(pl, pb);
+	lt.Tex = Eigen::Vector2f(pl, pt);
+	rt.Tex = Eigen::Vector2f(pr, pt);
+	rb.Tex = Eigen::Vector2f(pr, pb);
 }
 
 void PostProcessVertexQuad::SetZ(float z)
 {
-	lb.Pos.z = z;
-	lt.Pos.z = z;
-	rt.Pos.z = z;
-	rb.Pos.z = z;
+	lb.Pos.z() = z;
+	lt.Pos.z() = z;
+	rt.Pos.z() = z;
+	rb.Pos.z() = z;
 }
 
-const unsigned int indices[] = {
+/********** PostProcess **********/
+constexpr unsigned int CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-
-/********** TPostProcess **********/
 PostProcess::PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex)
 	:mRenderSys(RenderSys) 
 {
 	mMainTex = mainTex;
 
-	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(indices), DXGI_FORMAT_R32_UINT, (void*)&indices[0]);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(CIndices), DXGI_FORMAT_R32_UINT, (void*)&CIndices[0]);
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
 	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }

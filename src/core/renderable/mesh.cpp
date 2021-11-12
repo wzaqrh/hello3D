@@ -5,7 +5,7 @@
 
 namespace mir {
 
-/********** TMesh **********/
+/********** Mesh **********/
 Mesh::Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName, int vertCount, int indexCount)
 	:mRenderSys(renderSys)
 {
@@ -78,7 +78,7 @@ void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos)
 		Vertices[i + vertPos] = vertData[i];
 }
 
-void Mesh::SetPositions(const XMFLOAT3* posData, int count)
+void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
@@ -86,22 +86,22 @@ void Mesh::SetPositions(const XMFLOAT3* posData, int count)
 		Vertices[i].Position = posData[i];
 }
 
-void Mesh::SetColors(const XMFLOAT4* colorData, int count)
+void Mesh::SetColors(const Eigen::Vector4f* colorData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
 	for (int i = 0; i < VertPos; ++i) {
 		unsigned char c[4] = {
-			static_cast<unsigned char>(colorData[i].x * 255),
-			static_cast<unsigned char>(colorData[i].y * 255),
-			static_cast<unsigned char>(colorData[i].z * 255),
-			static_cast<unsigned char>(colorData[i].w * 255),
+			static_cast<unsigned char>(colorData[i].x() * 255),
+			static_cast<unsigned char>(colorData[i].y() * 255),
+			static_cast<unsigned char>(colorData[i].z() * 255),
+			static_cast<unsigned char>(colorData[i].w() * 255),
 		};
 		Vertices[i].Color = *((int*)c);
 	}
 }
 
-void Mesh::SetUVs(const XMFLOAT2* uvData, int count)
+void Mesh::SetUVs(const Eigen::Vector2f* uvData, int count)
 {
 	VertDirty = true;
 	VertPos = max(VertPos, count);
@@ -114,7 +114,7 @@ void Mesh::SetSubMeshCount(int count)
 	SubMeshs.resize(count);
 }
 
-void Mesh::SetIndices(const UINT* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
+void Mesh::SetIndices(const unsigned int* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
 {
 	assert(subMeshIndex < SubMeshs.size());
 	IndiceDirty = true;

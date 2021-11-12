@@ -10,7 +10,12 @@ using namespace mir;
 
 App::App()
 {
-	mMove = MakePtr<mir::Movable>();
+	mContext = nullptr;
+	mInput = nullptr;
+	mTimer = nullptr;
+	mMoveDefScale = 1.0f;
+
+	mTransform = MakePtr<mir::Transform>();
 	mBackgndColor = XMFLOAT4(0.0f, 0.125f, 0.3f, 1.0f);
 	mContext = new mir::Mir;
 }
@@ -59,25 +64,31 @@ void App::Render()
 	//rotate camera
 	if (sceneMng->GetDefCamera()->mIsPespective)
 	{
-		mir::Int4 m = mInput->GetMouseLocation(false);
-		float angy = 3.14 * m.x / renderSys->GetWinSize().x, angx = 3.14 * m.y / renderSys->GetWinSize().y;
-		XMMATRIX euler = XMMatrixRotationZ(0) * XMMatrixRotationX(angx) * XMMatrixRotationY(angy);
+		float eyeDistance = sceneMng->GetDefCamera()->mEyePos.norm();
+		Eigen::Vector3f tpos(0, 0, -eyeDistance);
 
-		auto eye = sceneMng->GetDefCamera()->mEyePos; 
-		float eyeDistance = -sqrt(eye.x*eye.x + eye.y*eye.y + eye.z*eye.z);
-		XMVECTOR vec = XMVector3Transform(XMVectorSet(0, 0, eyeDistance, 1), euler);
-		eye = XMFLOAT3(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec));
-		sceneMng->GetDefCamera()->SetLookAt(eye, sceneMng->GetDefCamera()->mLookAtPos);
+		Eigen::Vector3f cpos;
+		{
+			mir::Int4 m = mInput->GetMouseLocation(false);
+			float eulerY = 3.14 * m.x / renderSys->GetWinSize().x;
+			float eulerX = 3.14 * m.y / renderSys->GetWinSize().y;
+
+			Eigen::Quaternion<float> euler = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
+				* Eigen::AngleAxisf(eulerX, Eigen::Vector3f::UnitX())
+				* Eigen::AngleAxisf(eulerY, Eigen::Vector3f::UnitY());
+			cpos = Transform3fAffine(euler) * tpos;
+		}
+
+		sceneMng->GetDefCamera()->SetLookAt(cpos, sceneMng->GetDefCamera()->mLookAtPos);
 	}
 
 	{
 		mir::Int4 m = mInput->GetMouseLocation(true);
-		float scalez = mir::clamp(0.00001f, 10.0f, mMove->mDefScale * (1000 + m.z) / 1000.0f);
+		float scalez = mir::clamp(0.00001f, 10.0f, mMoveDefScale * (1000 + m.z) / 1000.0f);
 		float angy = 3.14 * -m.x / renderSys->GetWinSize().x, angx = 3.14 * -m.y / renderSys->GetWinSize().y;
 		
-		mMove->SetScale(scalez);
-		mMove->SetEulerX(angx);
-		mMove->SetEulerY(angy);
+		mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));
+		mTransform->SetEuler(Eigen::Vector3f(angx, angy, 0));
 	}
 
 	OnRender();
@@ -89,7 +100,7 @@ std::string App::GetName()
 }
 XMMATRIX App::GetWorldTransform()
 {
-	return mMove->GetWorldTransform();
+	return mTransform->GetMatrix();
 }
 
 std::string& GetCurrentAppName() {

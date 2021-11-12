@@ -15,22 +15,20 @@ SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, const std::str
 	float fHighH = -1.0f - (1.0f / (float)mRenderSys.GetWinSize().y);
 	float fLowW = 1.0f + (1.0f / (float)mRenderSys.GetWinSize().x);
 	float fLowH = 1.0f + (1.0f / (float)mRenderSys.GetWinSize().y);
-	Vertexs[0].pos = XMFLOAT4(fLowW, fLowH, 1.0f, 1.0f);
-	Vertexs[1].pos = XMFLOAT4(fLowW, fHighH, 1.0f, 1.0f);
-	Vertexs[2].pos = XMFLOAT4(fHighW, fLowH, 1.0f, 1.0f);
-	Vertexs[3].pos = XMFLOAT4(fHighW, fHighH, 1.0f, 1.0f);
+	Vertexs[0].pos = Eigen::Vector4f(fLowW, fLowH, 1.0f, 1.0f);
+	Vertexs[1].pos = Eigen::Vector4f(fLowW, fHighH, 1.0f, 1.0f);
+	Vertexs[2].pos = Eigen::Vector4f(fHighW, fLowH, 1.0f, 1.0f);
+	Vertexs[3].pos = Eigen::Vector4f(fHighW, fHighH, 1.0f, 1.0f);
 	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
 
-	//DXGI_FORMAT format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	mCubeSRV = mRenderSys.LoadTexture(imgName, format, true, true);
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
-	XMFLOAT3 pos0 = pCam->ProjectPoint(XMFLOAT3(fLowW, fLowH, 1.0f));
-	XMFLOAT3 pos1 = pCam->ProjectPoint(XMFLOAT3(fLowW, fHighH, 1.0f));
-	XMFLOAT3 pos2 = pCam->ProjectPoint(XMFLOAT3(fHighW, fLowH, 1.0f));
-	XMFLOAT3 pos3 = pCam->ProjectPoint(XMFLOAT3(fHighW, fHighH, 1.0f));
-	pCam1 = pCam1;
+	Eigen::Vector3f pos0 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fLowH, 1.0f));
+	Eigen::Vector3f pos1 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fHighH, 1.0f));
+	Eigen::Vector3f pos2 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fLowH, 1.0f));
+	Eigen::Vector3f pos3 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fHighH, 1.0f));
 #endif
 }
 
@@ -45,7 +43,7 @@ int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
 	op.mTextures.Add(mCubeSRV);
-	op.mWorldTransform = XMMatrixIdentity();// mRefCam->mWorld;
+	op.mWorldTransform = XMMatrixIdentity();
 	opList.AddOP(op);
 	return 1;
 }

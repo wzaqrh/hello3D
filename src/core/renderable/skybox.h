@@ -5,7 +5,7 @@
 namespace mir {
 
 struct SkyboxVertex {
-	XMFLOAT4 pos;
+	Eigen::Vector4f pos;
 };
 
 class SkyBox : public IRenderable 

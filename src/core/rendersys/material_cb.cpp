@@ -49,7 +49,7 @@ ConstBufferDecl& cbDirectLight::GetDesc()
 /********** cbDirectLight **********/
 void cbDirectLight::CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj) {
 	XMVECTOR Eye = XMVectorSet(LightPos.x(), LightPos.y(), LightPos.z(), 0.0f);
-	XMVECTOR At = XMVectorSet(camera.mLookAtPos.x, camera.mLookAtPos.y, camera.mLookAtPos.z, 0.0f);
+	XMVECTOR At = XMVectorSet(camera.mLookAtPos.x(), camera.mLookAtPos.y(), camera.mLookAtPos.z(), 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	view = XMMatrixLookAtLH(Eye, At, Up);
 	proj = XMMatrixOrthographicOffCenterLH(0, camera.mWidth, 0, camera.mHeight, 0.01, camera.mZFar);

@@ -36,11 +36,9 @@ public:
 	}
 };
 
-typedef std::shared_ptr<struct IRenderSystem> IRenderSystemPtr;
-typedef std::shared_ptr<struct Movable> MovablePtr;
 class AssimpModel : public IRenderable {
 public:
-	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, MovablePtr pMove, const std::string& matType);
+	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
@@ -56,7 +54,7 @@ private:
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
 private:
 	MaterialPtr mMaterial;
-	MovablePtr mMove;
+	TransformPtr mTransform;
 public:
 	AssimpMeshPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;

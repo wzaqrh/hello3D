@@ -77,15 +77,15 @@ void TestPBR::OnInitLight()
 void TestPBR::OnPostInitDevice()
 {
 	mContext->SceneMng()->RemoveAllCameras();
-	mContext->SceneMng()->AddPerspectiveCamera(XMFLOAT3(0, 0, -30), 1000, 45);
+	mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -30), 1000, 45);
 
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 #if 0
-	mModel = new AssimpModel(mRenderSys, mMove, E_MAT_MODEL_PBR);
-	//auto fileName = "Male02.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
-	;// mMove->SetPosition(0, -5, 0);
+	mModel = new AssimpModel(mRenderSys, mTransform, E_MAT_MODEL_PBR);
+	//auto fileName = "Male02.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mTransform->SetDefScale(0.07); mTransform->SetPosition(0, -5, 0);
+	;// mTransform->SetPosition(0, -5, 0);
 	
 	for (auto& iter : mModel->mMeshes) {
 		if (!iter->mTextures->empty() && (*iter->mTextures)[0]) {
@@ -119,10 +119,13 @@ void TestPBR::OnPostInitDevice()
 		}
 	}
 #else
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
-	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
-	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
-	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mMove->SetDefScale(0.07); mModel->PlayAnim(0);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); 
+	mMoveDefScale = 0.07;
+	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));
+	//auto fileName = "Wheeler.fbx"; gModelPath = "Wheeler\\"; mModel->LoadModel(MakeModelPath(fileName)); mTransform->SetDefScale(0.07); mModel->PlayAnim(0);
+	//auto fileName = "Alien.fbx"; gModelPath = "Alien\\"; mModel->LoadModel(MakeModelPath(fileName)); mTransform->SetDefScale(0.07); mModel->PlayAnim(0);
 #endif
 }
 

@@ -3,12 +3,12 @@
 
 namespace mir {
 
-/********** TFontTexture **********/
-FontTexture::FontTexture(IRenderSystem& renderSys, XMINT2 size)
+/********** FontTexture **********/
+FontTexture::FontTexture(IRenderSystem& renderSys, Eigen::Vector2i size)
 	:mRenderSys(renderSys)
 {
-	mWidth = size.x;
-	mHeight = size.y;
+	mWidth = size.x();
+	mHeight = size.y();
 	mTexture = mRenderSys.CreateTexture(mWidth, mHeight, DXGI_FORMAT_R8_UNORM, 1);
 	mRawBuffer.resize(mWidth * mHeight);
 }
@@ -41,12 +41,13 @@ FontTextureAtlasPtr FontTexture::AddCharactor(int ch, int w, int h, unsigned cha
 		mColH = h;
 	}
 
-	XMINT2 pos0 = { mCol, mRow }, pos1 = { mCol + w, mRow + h };
-	XMFLOAT2 uv0 = { pos0.x * 1.0f / mWidth, pos0.y * 1.0f / mHeight }, uv1 = { pos1.x * 1.0f / mWidth, pos1.y * 1.0f / mHeight };
+	Eigen::Vector2i pos0(mCol, mRow), pos1(mCol + w, mRow + h);
+	Eigen::Vector2f uv0(pos0.x() * 1.0f / mWidth, pos0.y() * 1.0f / mHeight);
+	Eigen::Vector2f uv1(pos1.x() * 1.0f / mWidth, pos1.y() * 1.0f / mHeight);
 	FontTextureAtlasPtr atlas = std::make_shared<FontTextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
 
 	for (int y = 0; y < h; ++y)
-		memcpy(&mRawBuffer[(pos0.y + y) * mWidth + pos0.x], buffer + y * w, w);
+		memcpy(&mRawBuffer[(pos0.y() + y) * mWidth + pos0.x()], buffer + y * w, w);
 	mRawBufferDirty = true;
 
 	mCol += w;
@@ -64,7 +65,7 @@ ITexturePtr FontTexture::GetTexture()
 	return mTexture;
 }
 
-/********** TFontCharactorCache **********/
+/********** FontCharactorCache **********/
 FontCharactorCache::FontCharactorCache(IRenderSystem& renderSys, FT_Face ftFace)
 	:mRenderSys(renderSys)
 {
@@ -74,7 +75,7 @@ FontCharactorCache::FontCharactorCache(IRenderSystem& renderSys, FT_Face ftFace)
 
 FontTexturePtr FontCharactorCache::AllocFontTexture()
 {
-	XMINT2 size = { 512,512 };
+	Eigen::Vector2i size = { 512,512 };
 	mCurFontTexture = std::make_shared<FontTexture>(mRenderSys, size);
 	mFontTextures.push_back(mCurFontTexture);
 	return mCurFontTexture;
@@ -100,15 +101,15 @@ FontCharactorPtr FontCharactorCache::GetCharactor(int ch)
 			FT_Glyph glyph; if (!CheckError(FT_Get_Glyph(mFtFace->glyph, &glyph))) break;
 
 			charactor = std::make_shared<FontCharactor>();
-			charactor->charIndex = charIndex;
-			charactor->glyph = glyph;
+			charactor->CharIndex = charIndex;
+			charactor->Glyph = glyph;
 			
-			FT_Glyph_Get_CBox(charactor->glyph, ft_glyph_bbox_pixels, &charactor->bbox);
+			FT_Glyph_Get_CBox(charactor->Glyph, ft_glyph_bbox_pixels, &charactor->BBox);
 			charactor->Size = { (int)mFtFace->glyph->bitmap.width, (int)mFtFace->glyph->bitmap.rows };
 			charactor->Bearing = { mFtFace->glyph->bitmap_left, mFtFace->glyph->bitmap_top };
 			charactor->Advance = mFtFace->glyph->advance.x >> 6;
 
-			charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x, charactor->Size.y, mFtFace->glyph->bitmap.buffer);
+			charactor->Atlas = mCurFontTexture->AddCharactor(ch, charactor->Size.x(), charactor->Size.y(), mFtFace->glyph->bitmap.buffer);
 		} while (0);
 		mCharactors.insert(std::make_pair(ch, charactor));
 	}
@@ -120,7 +121,7 @@ void FontCharactorCache::FlushChange()
 	mCurFontTexture->GetTexture();
 }
 
-////////////////////////////////TFont//////////////////////////////////////////
+/********** Font **********/
 Font::Font(IRenderSystem& renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
 {
 	mFontName = fontPath;
@@ -145,7 +146,7 @@ FontCharactorPtr Font::GetCharactor(int ch)
 	return mCharactorCache->GetCharactor(ch);
 }
 
-////////////////////////////////TFontCache//////////////////////////////////////////
+/********** FontCache **********/
 FontCache::FontCache(IRenderSystem& renderSys, int dpi)
 	:mRenderSys(renderSys)
 {

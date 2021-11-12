@@ -5,18 +5,18 @@
 
 namespace mir {
 
-CameraPtr Camera::CreatePerspective(RenderSystem& renderSys, int width, int height, XMFLOAT3 eyePos, double far1, double fov)
+CameraPtr Camera::CreatePerspective(RenderSystem& renderSys, int width, int height, Eigen::Vector3f eyePos, double far1, double fov)
 {
 	CameraPtr pCam = std::make_shared<Camera>(renderSys);
-	pCam->SetLookAt(eyePos, XMFLOAT3(0, 0, 0));
+	pCam->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
 	pCam->SetPerspectiveProj(width, height, fov, far1);
 	return pCam;
 }
 
-CameraPtr Camera::CreateOthogonal(RenderSystem& renderSys, int width, int height, XMFLOAT3 eyePos, double far1)
+CameraPtr Camera::CreateOthogonal(RenderSystem& renderSys, int width, int height, Eigen::Vector3f eyePos, double far1)
 {
 	CameraPtr pCam = std::make_shared<Camera>(renderSys);
-	pCam->SetLookAt(eyePos, XMFLOAT3(0, 0, 0));
+	pCam->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
 	pCam->SetOthogonalProj(width, height, far1);
 	return pCam;
 }
@@ -32,34 +32,35 @@ Camera::Camera(RenderSystem& renderSys)
 	mProjection = XMMatrixIdentity();
 
 	mTransform = std::make_shared<Transform>();
-	mUpVector = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	mUpVector = Eigen::Vector3f(0.0f, 1.0f, 0.0f);
 }
 
-XMFLOAT3 Camera::ProjectPoint(XMFLOAT3 pos)
+Eigen::Vector3f Camera::ProjectPoint(const Eigen::Vector3f& pos) const
 {
-	XMFLOAT3 ret = XMFLOAT3(0, 0, 0);
 	XMMATRIX vp  = mView * mProjection;
-	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, 1), vp);
+	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x(), pos.y(), pos.z(), 1), vp);
 	auto w = XMVectorGetW(vec);
-	if (w != 0) 
-		ret = XMFLOAT3(XMVectorGetX(vec) / w, XMVectorGetY(vec) / w, XMVectorGetZ(vec) / w);
+
+	Eigen::Vector3f ret = (w != 0) 
+		? Eigen::Vector3f(XMVectorGetX(vec) / w, XMVectorGetY(vec) / w, XMVectorGetZ(vec) / w)
+		: Eigen::Vector3f(0, 0, 0);
 	return ret;
 }
-XMFLOAT4 Camera::ProjectPoint(XMFLOAT4 pos)
+Eigen::Vector4f Camera::ProjectPoint(const Eigen::Vector4f& pos) const
 {
 	XMMATRIX vp  = mView * mProjection;
-	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x, pos.y, pos.z, pos.z), vp);
-	XMFLOAT4 ret = XMFLOAT4(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec), XMVectorGetW(vec));
+	XMVECTOR vec = XMVector3Transform(XMVectorSet(pos.x(), pos.y(), pos.z(), pos.z()), vp);
+	Eigen::Vector4f ret = Eigen::Vector4f(XMVectorGetX(vec), XMVectorGetY(vec), XMVectorGetZ(vec), XMVectorGetW(vec));
 	return ret;
 }
 
-void Camera::SetLookAt(XMFLOAT3 eye, XMFLOAT3 at)
+void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 {
 	mEyePos = eye;
 	mLookAtPos = at;
-	XMVECTOR Eye = XMVectorSet(eye.x, eye.y, eye.z, 0.0f);
-	XMVECTOR At = XMVectorSet(at.x, at.y, at.z, 0.0f);
-	XMVECTOR Up = XMVectorSet(mUpVector.x, mUpVector.y, mUpVector.z, 0.0f);
+	XMVECTOR Eye = XMVectorSet(eye.x(), eye.y(), eye.z(), 0.0f);
+	XMVECTOR At = XMVectorSet(at.x(), at.y(), at.z(), 0.0f);
+	XMVECTOR Up = XMVectorSet(mUpVector.x(), mUpVector.y(), mUpVector.z(), 0.0f);
 	mView = XMMatrixLookAtLH(Eye, At, Up);
 	mTransformDirty = true;
 }
@@ -82,7 +83,7 @@ void Camera::SetPerspectiveProj(int width, int height, double fov, double zFar)
 
 	if (mFlipY) mProjection = mProjection * XMMatrixScaling(1, -1, 1);
 
-	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
+	mTransform->SetPosition(Eigen::Vector3f(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
 }
 
@@ -97,11 +98,11 @@ void Camera::SetOthogonalProj(int width, int height, double zFar)
 
 	if (mFlipY) mProjection = mProjection * XMMatrixScaling(1, -1, 1);
 
-	mTransform->SetPosition(XMFLOAT3(mWidth / 2, mHeight / 2, 0));
+	mTransform->SetPosition(Eigen::Vector3f(mWidth / 2, mHeight / 2, 0));
 	mTransformDirty = true;
 }
 
-TransformPtr Camera::GetTransform()
+const TransformPtr& Camera::GetTransform() const
 {
 	mTransformDirty = true;
 	return mTransform;
@@ -116,9 +117,9 @@ const XMMATRIX& Camera::GetView() const
 		{
 			auto newpos = position;
 			auto scale = mTransform->GetScale();
-			newpos.x = position.x - scale.x * mWidth / 2;
-			newpos.y = position.y - scale.y * mHeight / 2;
-			newpos.z = position.z;
+			newpos.x() = position.x() - scale.x() * mWidth / 2;
+			newpos.y() = position.y() - scale.y() * mHeight / 2;
+			newpos.z() = position.z();
 			mTransform->SetPosition(newpos);
 
 			auto srt = mTransform->SetMatrixSRT();

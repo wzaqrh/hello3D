@@ -45,8 +45,11 @@ void TestSpecSkybox::OnPostInitDevice()
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
-	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	gModelPath = "Spaceship\\"; 
+	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
+	mMoveDefScale = 0.01;
+	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 }
 
 void TestSpecSkybox::OnRender()

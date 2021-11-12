@@ -22,14 +22,17 @@ private:
 void TestBloom::OnPostInitDevice()
 {
 	mContext->SceneMng()->RemoveAllCameras();
-	auto camera = mContext->SceneMng()->AddPerspectiveCamera(XMFLOAT3(0,0,-10), 300, 45);
+	auto camera = mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0,0,-10), 300, 45);
 	
 	auto rendFac = mContext->RenderableFac();
 	camera->SetSkyBox(rendFac->CreateSkybox("images\\uffizi_cross.dds"));
 	camera->AddPostProcessEffect(rendFac->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM, *camera));
 
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
-	gModelPath = "Spaceship\\"; if (mModel) mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	gModelPath = "Spaceship\\"; 
+	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
+	mMoveDefScale = 0.01;
+	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 }
 
 void TestBloom::OnRender()

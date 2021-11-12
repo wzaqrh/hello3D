@@ -40,34 +40,26 @@ void TestShadowMap::OnInitLight()
 #define SCALE_BASE 0.01
 void TestShadowMap::OnPostInitDevice()
 {
-#if 1
 	mContext->SceneMng()->RemoveAllCameras();
-	mContext->SceneMng()->AddPerspectiveCamera(XMFLOAT3(0,0,-30), 300, 45);
+	mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0,0,-30), 300, 45);
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 
 	float dd = 3;
-	mMove->SetDefScale(SCALE_BASE * 0.2); mMove->SetPosition(0, 0, -dd);
-#if 0
-	auto LightCam = mLight->GetLightCamera(*mContext->GetSceneMng()->GetDefCamera());
-	//auto pCam = &LightCam;
-	auto pCam = mContext->GetSceneMng()->GetDefCamera();
-	XMFLOAT4 p0 = pCam->ProjectPoint(XMFLOAT4(30, 30, 0, 1));
-	//XMFLOAT3 p1 = pCam->ProjectPoint(mPosition);
-#endif
-#else
-	mScale = 0.01;
-#endif
-	
+	mMoveDefScale = SCALE_BASE * 0.2;
+	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	mTransform->SetPosition(Eigen::Vector3f(0, 0, -dd));
+
+
 	//std::string matName = E_MAT_MODEL_PBR;
 	std::string matName = E_MAT_MODEL;
 
-	auto move1 = std::make_shared<Movable>();
-	move1->SetScale(SCALE_BASE);
+	auto move1 = std::make_shared<Transform>();
+	move1->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
 	mModel1 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), move1, matName);
 	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, matName);
+	mModel2 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, matName);
 	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 

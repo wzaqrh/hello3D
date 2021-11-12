@@ -23,35 +23,35 @@ private:
 void TestLabel::OnPostInitDevice()
 {
 	mContext->SceneMng()->RemoveAllCameras();
-	mContext->SceneMng()->AddOthogonalCamera(XMFLOAT3(0,0,-10), 100);
+	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
 	for (int i = 0; i < CASE_COUNT; ++i) {
 		auto label = mContext->RenderableFac()->CreateLabel("D:\\ProjectWork1\\hello3D\\Debug\\msyh.ttc", 24);
 		mLabel[i] = label;
 		if (i == 0) {
 			label->SetString("HelloWorld");
-			label->Transform->SetPosition(XMFLOAT3(0, 0, 0));
+			label->mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
 		}
 		else if (i == 1) {
 			label->SetString("Hello\nWorld");
-			label->Transform->SetPosition(XMFLOAT3(200, 0, 0));
+			label->mTransform->SetPosition(Eigen::Vector3f(200, 0, 0));
 		}
 		else if (i == 2) {
-			label->SetSize(false, XMFLOAT2(120, 64));
+			label->SetSize(false, Eigen::Vector2f(120, 64));
 			label->SetString("HelloWorld");
-			label->Transform->SetPosition(XMFLOAT3(400, 0, 0));
+			label->mTransform->SetPosition(Eigen::Vector3f(400, 0, 0));
 		}
 		else if (i == 3) {
 			label->SetString("Hello\nWorld");
-			label->Transform->SetPosition(XMFLOAT3(600, 0, 0));
-			label->SetSize(false, XMFLOAT2(120, 64));
+			label->mTransform->SetPosition(Eigen::Vector3f(600, 0, 0));
+			label->SetSize(false, Eigen::Vector2f(120, 64));
 		}
 
 		auto labelBg = mContext->RenderableFac()->CreateColorLayer();
 		mLabelBg[i] = labelBg;
-		labelBg->SetColor(XMFLOAT4(1, 0, 0, 1));
+		labelBg->SetColor(Eigen::Vector4f(1, 0, 0, 1));
 		labelBg->SetSize(label->GetSize());
-		labelBg->Transform->SetPosition(label->Transform->GetPosition());
+		labelBg->mTransform->SetPosition(label->mTransform->GetPosition());
 	}
 #ifdef TEST_LABEL_DEBUG_SP
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LABEL);

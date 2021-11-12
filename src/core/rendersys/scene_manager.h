@@ -26,8 +26,8 @@ public:
 	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
 
 	void RemoveAllCameras();
-	CameraPtr AddOthogonalCamera(const XMFLOAT3& eyePos, double far1);
-	CameraPtr AddPerspectiveCamera(const XMFLOAT3& eyePos, double far1, double fov);
+	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1);
+	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov);
 	CameraPtr GetDefCamera() const;
 
 	cbSpotLightPtr AddSpotLight();

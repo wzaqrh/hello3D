@@ -33,16 +33,20 @@ void TestRT::OnInitLight()
 
 void TestRT::OnPostInitDevice()
 {
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
-	gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mMove->SetPosition(0, 0, 0);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	gModelPath = "Spaceship\\"; 
+	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
+	mMoveDefScale = 0.01;
+	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
 	
 	mRendTexture = mContext->RenderSys()->CreateRenderTexture(mContext->RenderSys()->GetWinSize().x, 
 		mContext->RenderSys()->GetWinSize().y);
 
 	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
 	mSprite->SetTexture(mRendTexture->GetColorTexture());
-	mSprite->SetPosition(0, 0, 0);
-	mSprite->SetSize(5,5);
+	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
+	mSprite->SetSize(Eigen::Vector2f(5, 5));
 
 	/*mLayerColor = std::make_shared<TSprite>(mRenderSys, E_MAT_LAYERCOLOR);
 	mLayerColor->SetPosition(-5, -5, 0);

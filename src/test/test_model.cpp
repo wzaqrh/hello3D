@@ -22,11 +22,14 @@ void TestModel::OnPostInitDevice()
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mMove, E_MAT_MODEL);
-	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mMove->SetDefScale(0.01); mModel->PlayAnim(0);
+	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mTransform->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
-	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mMove->SetDefScale(0.01);
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); mMove->SetDefScale(0.07); mMove->SetPosition(0, -5, 0);
+	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mTransform->SetDefScale(0.01);
+	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); 
+	mMoveDefScale = 0.07; 
+	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));
 }
 
 void TestModel::OnRender()

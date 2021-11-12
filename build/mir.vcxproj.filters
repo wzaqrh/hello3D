@@ -70,9 +70,6 @@
     <ClInclude Include="..\src\core\rendersys\interface_type.h">
       <Filter>src\core\rendersys\type</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\const_buffer_decl.h">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\material_factory.h">
       <Filter>src\core\rendersys\material</Filter>
     </ClInclude>
@@ -117,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\scene_manager.h">
       <Filter>src\core\rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\predeclare.h">
+      <Filter>src\core\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,11 +10,11 @@ class FontTextureAtlas
 {
 public:
 	ITexturePtr Texture;
-	XMFLOAT2 UV0, UV1;
-	XMINT2 Pos0, Pos1;
+	Eigen::Vector2f Uv0, Uv1;
+	Eigen::Vector2i Pos0, Pos1;
 public:
-	FontTextureAtlas(ITexturePtr texture, XMFLOAT2 uv0, XMFLOAT2 uv1, XMINT2 pos0, XMINT2 pos1) 
-		: Texture(texture), UV0(uv0), UV1(uv1), Pos0(pos0), Pos1(pos1) {}
+	FontTextureAtlas(ITexturePtr texture, Eigen::Vector2f uv0, Eigen::Vector2f uv1, Eigen::Vector2i pos0, Eigen::Vector2i pos1) 
+		: Texture(texture), Uv0(uv0), Uv1(uv1), Pos0(pos0), Pos1(pos1) {}
 };
 typedef std::shared_ptr<FontTextureAtlas> FontTextureAtlasPtr;
 
@@ -29,7 +29,7 @@ class FontTexture
 	std::map<int, FontTextureAtlasPtr> mAtlasByCh;
 	int mCol = 0, mRow = 0, mColH = 0;
 public:
-	FontTexture(IRenderSystem& renderSys, XMINT2 size);
+	FontTexture(IRenderSystem& renderSys, Eigen::Vector2i size);
 
 	FontTextureAtlasPtr GetCharactor(int ch);
 	bool ContainsCharactor(int ch) const;
@@ -43,12 +43,12 @@ typedef std::shared_ptr<FontTexture> FontTexturePtr;
 
 struct FontCharactor
 {
-	FT_UInt charIndex;
-	FT_Glyph glyph;
-	FT_BBox bbox;	//dot space
+	FT_UInt CharIndex;
+	FT_Glyph Glyph;
+	FT_BBox BBox;	//dot space
 
-	XMINT2 Size;	//dot space   
-	XMINT2 Bearing;	//dot space
+	Eigen::Vector2i Size;	//dot space   
+	Eigen::Vector2i Bearing;	//dot space
 	int Advance;	//dot space
 	FontTextureAtlasPtr Atlas;
 };

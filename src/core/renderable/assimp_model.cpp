@@ -38,11 +38,13 @@ XMMATRIX ToXM(const aiMatrix4x4& m) {
 	return r;
 }
 
+static_assert(sizeof(XMFLOAT3) == sizeof(aiVector3D), "");
 XMFLOAT3 ToXM(const aiVector3D& v) {
 	XMFLOAT3 r = XMFLOAT3(v.x, v.y, v.z);
 	return r;
 }
 
+static_assert(sizeof(aiMatrix4x4) == sizeof(XMMATRIX), "");
 aiMatrix4x4 FromXM(const XMMATRIX& m) {
 	aiMatrix4x4 r;
 	static_assert(sizeof(r) == sizeof(m), "");
@@ -164,10 +166,10 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, MovablePtr pMove, const std::string& matType)
+AssimpModel::AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType)
 	:mRenderSys(renderSys)
 {
-	mMove = pMove ? pMove : std::make_shared<Movable>();
+	mTransform = pMove ? pMove : std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(matType);
 }
 
@@ -244,29 +246,29 @@ void ReCalculateTangents(std::vector<AssimpMeshVertex>& vertices, const std::vec
 		AssimpMeshVertex& v2 = vertices[indices[i+2]];
 
 		// Shortcuts for UVs
-		XMFLOAT2& uv0 = v0.Tex;
-		XMFLOAT2& uv1 = v1.Tex;
-		XMFLOAT2& uv2 = v2.Tex;
+		Eigen::Vector2f& uv0 = v0.Tex;
+		Eigen::Vector2f& uv1 = v1.Tex;
+		Eigen::Vector2f& uv2 = v2.Tex;
 
 		// Edges of the triangle : postion delta
-		XMFLOAT3 deltaPos1 = v1.Pos - v0.Pos;
-		XMFLOAT3 deltaPos2 = v2.Pos - v0.Pos;
+		Eigen::Vector3f deltaPos1 = v1.Pos - v0.Pos;
+		Eigen::Vector3f deltaPos2 = v2.Pos - v0.Pos;
 
 		// UV delta
-		XMFLOAT2 deltaUV1 = uv1 - uv0;
-		XMFLOAT2 deltaUV2 = uv2 - uv0;
-#ifndef MESH_VETREX_POSTEX
-		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-		XMFLOAT3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+		Eigen::Vector2f deltaUV1 = uv1 - uv0;
+		Eigen::Vector2f deltaUV2 = uv2 - uv0;
+	#if !defined MESH_VETREX_POSTEX
+		float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
+		Eigen::Vector3f tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
 		v0.Tangent = v0.Tangent + tangent;
 		v1.Tangent = v1.Tangent + tangent;
 		v2.Tangent = v2.Tangent + tangent;
 
-		XMFLOAT3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+		Eigen::Vector3f bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
 		v0.BiTangent = v0.BiTangent + bitangent;
 		v1.BiTangent = v1.BiTangent + bitangent;
 		v2.BiTangent = v2.BiTangent + bitangent;
-#endif
+	#endif
 	}
 }
 
@@ -285,27 +287,24 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 		//if (textype.empty()) textype = determineTextureType(scene, mat);
 	}
 
-	for (UINT vertexId = 0; vertexId < mesh->mNumVertices; vertexId++)
+	for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++)
 	{
 		AssimpMeshVertex vertex;
 		memset(&vertex, 0, sizeof(vertex));
-		vertex.Pos = ToXM(mesh->mVertices[vertexId]);
+		vertex.Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
 		if (mesh->mTextureCoords[0]) {
-			vertex.Tex.x = (float)mesh->mTextureCoords[0][vertexId].x;
-			vertex.Tex.y = (float)mesh->mTextureCoords[0][vertexId].y;
+			vertex.Tex.x() = mesh->mTextureCoords[0][vertexId].x;
+			vertex.Tex.y() = mesh->mTextureCoords[0][vertexId].y;
 		}
-#ifndef MESH_VETREX_POSTEX
-		if (mesh->mNormals)
-			vertex.Normal = ToXM(mesh->mNormals[vertexId]);
-		if (mesh->mTangents)
-			vertex.Tangent = ToXM(mesh->mTangents[vertexId]);
-		if (mesh->mBitangents)
-			vertex.BiTangent = ToXM(mesh->mBitangents[vertexId]);
-#endif
+	#if !defined MESH_VETREX_POSTEX
+		if (mesh->mNormals) vertex.Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
+		if (mesh->mTangents) vertex.Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
+		if (mesh->mBitangents) vertex.BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
+	#endif
 		vertices.push_back(vertex);
 	}
 
-#ifndef MESH_VETREX_POSTEX
+#if !defined MESH_VETREX_POSTEX
 	if (mesh->HasBones()) {
 		std::map<int, int> spMap;
 		for (int boneId = 0; boneId < mesh->mNumBones; ++boneId) {
@@ -535,7 +534,7 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 	int count = opList.Count();
 	DoDraw(mRootNode, opList);
 
-	XMMATRIX world = mMove->GetWorldTransform();
+	XMMATRIX world = mTransform->GetMatrix();
 	for (int i = count; i < opList.Count(); ++i) {
 		opList[i].mWorldTransform = world;
 	}
