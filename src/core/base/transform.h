@@ -21,7 +21,7 @@ public:
 	bool IsFlipY() const;
 
 	const XMMATRIX& GetMatrix();
-	const XMMATRIX& SetMatrixSRT();
+	const Eigen::Matrix4f& SetMatrixSRT();
 	const XMMATRIX& SetMatrixTSR();
 private:
 	Eigen::Matrix4f mMatrix;

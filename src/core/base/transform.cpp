@@ -41,7 +41,7 @@ bool Transform::IsFlipY() const
 	return mFlip.y() < 0;
 }
 
-const XMMATRIX& Transform::SetMatrixSRT()
+const Eigen::Matrix4f& Transform::SetMatrixSRT()
 {
 	if (mDirty)
 	{
@@ -62,7 +62,7 @@ const XMMATRIX& Transform::SetMatrixSRT()
 
 		mMatrix = srt.matrix();
 	}
-	return AS_CONST_REF(XMMATRIX, mMatrix);
+	return mMatrix;
 }
 
 const XMMATRIX& Transform::SetMatrixTSR()

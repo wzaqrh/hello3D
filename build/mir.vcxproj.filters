@@ -118,6 +118,9 @@
     <ClInclude Include="..\src\core\base\predeclare.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\math.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\d3d_enum_convert.cpp">
