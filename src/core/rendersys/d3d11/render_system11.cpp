@@ -2,11 +2,14 @@
 #include <windows.h>
 #include <dxerr.h>
 #include <d3dcompiler.h>
+#include <wrl/client.h>
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d11/interface_type11.h"
 #include "core/rendersys/d3d11/thread_pump.h"
 #include "core/rendersys/material_factory.h"
 #include "core/base/utility.h"
+
+using Microsoft::WRL::ComPtr;
 
 namespace mir {
 

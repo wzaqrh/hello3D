@@ -1,9 +1,8 @@
 #pragma once
 #include "core/base/std.h"
+#include "core/rendersys/d3d11/stddx11.h"
 
 namespace mir {
-
-template<class T> T clamp(T minVal, T maxVal, T v) { return min(max(v, minVal),maxVal); }
 
 struct Data 
 {

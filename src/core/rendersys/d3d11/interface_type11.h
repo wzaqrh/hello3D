@@ -1,5 +1,6 @@
 #pragma once
 #include "core/rendersys/interface_type.h"
+#include "core/rendersys/d3d11/stddx11.h"
 
 namespace mir {
 

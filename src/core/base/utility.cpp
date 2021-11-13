@@ -1,10 +1,11 @@
-#include "core/base/utility.h"
 #include <windows.h>
 #include <dinput.h>
 #include <dxerr.h>
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <d3dcompiler.h>
+#include <boost/algorithm/clamp.hpp>
+#include "core/base/utility.h"
 
 #if _MSC_VER > 1800
 #pragma comment(lib, "legacy_stdio_definitions.lib")
@@ -107,13 +108,13 @@ bool D3DInput::ReadMouse()
 void D3DInput::Process()
 {
 	if (m_mouseState.rgbButtons[0] & 0x80) {//Êó±ê×ó¼ü
-		mMouseL.x = clamp(-m_screenWidth, m_screenWidth, mMouseL.x + m_mouseState.lX);
-		mMouseL.y = clamp(-m_screenHeight, m_screenHeight, mMouseL.y + m_mouseState.lY);
+		mMouseL.x = boost::algorithm::clamp(-m_screenWidth, m_screenWidth, mMouseL.x + m_mouseState.lX);
+		mMouseL.y = boost::algorithm::clamp(-m_screenHeight, m_screenHeight, mMouseL.y + m_mouseState.lY);
 		mMouseL.z += m_mouseState.lZ;
 	}
 	else if (m_mouseState.rgbButtons[1] & 0x80) {//Êó±êÓÒ¼ü
-		mMouseR.x = clamp(-m_screenWidth, m_screenWidth, mMouseR.x + m_mouseState.lX);
-		mMouseR.y = clamp(-m_screenHeight, m_screenHeight, mMouseR.y + m_mouseState.lY);
+		mMouseR.x = boost::algorithm::clamp(-m_screenWidth, m_screenWidth, mMouseR.x + m_mouseState.lX);
+		mMouseR.y = boost::algorithm::clamp(-m_screenHeight, m_screenHeight, mMouseR.y + m_mouseState.lY);
 	}
 	else {
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <Windows.h>
 #include <boost/noncopyable.hpp>
 #include "core/base/std.h"
 #include "core/rendersys/predeclare.h"

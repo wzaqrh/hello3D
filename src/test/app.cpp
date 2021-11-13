@@ -1,3 +1,4 @@
+#include <boost/algorithm/clamp.hpp>
 #include "test/app.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/d3d11/render_system11.h"
@@ -84,7 +85,7 @@ void App::Render()
 
 	{
 		mir::Int4 m = mInput->GetMouseLocation(true);
-		float scalez = mir::clamp(0.00001f, 10.0f, mMoveDefScale * (1000 + m.z) / 1000.0f);
+		float scalez = boost::algorithm::clamp(0.00001f, 10.0f, mMoveDefScale * (1000 + m.z) / 1000.0f);
 		float angy = 3.14 * -m.x / renderSys->WinSize().x(), angx = 3.14 * -m.y / renderSys->WinSize().y();
 		
 		mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));

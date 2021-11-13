@@ -1,5 +1,6 @@
 #pragma once
 #include "core/rendersys/predeclare.h"
+#include "core/rendersys/d3d11/stddx11.h"
 
 namespace mir {
 

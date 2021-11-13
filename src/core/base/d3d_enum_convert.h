@@ -1,5 +1,6 @@
 #pragma once
 #include "core/rendersys/base_type.h"
+#include "core/rendersys/d3d9/stddx9.h"
 
 namespace mir {
 
