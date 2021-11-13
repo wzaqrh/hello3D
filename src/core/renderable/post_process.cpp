@@ -54,7 +54,7 @@ PostProcess::PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex)
 {
 	mMainTex = mainTex;
 
-	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(CIndices), DXGI_FORMAT_R32_UINT, (void*)&CIndices[0]);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
 	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }

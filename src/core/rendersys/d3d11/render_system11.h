@@ -37,13 +37,13 @@ public:
 public:
 	void ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil) override;
 
-	IRenderTexturePtr CreateRenderTexture(int width, int height, DXGI_FORMAT format) override;
+	IRenderTexturePtr CreateRenderTexture(int width, int height, ResourceFormat format) override;
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil);
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) override;
-	IIndexBufferPtr CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer) override;
+	IIndexBufferPtr CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
 	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer) override;
@@ -62,27 +62,27 @@ public:
 		const std::string& psEntry) override;
 	void SetProgram(IProgramPtr program) override;
 
-	ISamplerStatePtr CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC comp) override;
+	ISamplerStatePtr CreateSampler(SamplerFilterMode filter, CompareFunc comp) override;
 	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
-	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC descArray[], size_t descCount) override;
+	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
 
-	void SetBlendFunc(const BlendFunc& blendFunc) override;
+	void SetBlendFunc(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
-	ITexturePtr CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap) override;
+	ITexturePtr CreateTexture(int width, int height, ResourceFormat format, int mipmap) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTexture(size_t slot, ITexturePtr texture) override;
 	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
 
-	void DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) override;
-	void DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) override;
+	void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
+	void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
 
 	bool BeginScene() override;
 	void EndScene() override;
 protected:
-	virtual ITexturePtr _CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube);
+	virtual ITexturePtr _CreateTexture(const char* pSrcFile, ResourceFormat format, bool async, bool isCube);
 private:
 	HRESULT _CreateDeviceAndSwapChain(int width, int height);
 	HRESULT _CreateBackRenderTargetView();

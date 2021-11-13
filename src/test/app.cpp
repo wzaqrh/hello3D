@@ -85,7 +85,7 @@ void App::Render()
 
 	{
 		mir::Int4 m = mInput->GetMouseLocation(true);
-		float scalez = boost::algorithm::clamp(0.00001f, 10.0f, mMoveDefScale * (1000 + m.z) / 1000.0f);
+		float scalez = boost::algorithm::clamp(mMoveDefScale * (1000 + m.z) / 1000.0f, 0.00001f, 10.0f);
 		float angy = 3.14 * -m.x / renderSys->WinSize().x(), angx = 3.14 * -m.y / renderSys->WinSize().y();
 		
 		mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));

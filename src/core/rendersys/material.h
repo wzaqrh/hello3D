@@ -53,7 +53,7 @@ struct Pass : boost::noncopyable
 {
 	std::string mLightMode,mName;
 	IInputLayoutPtr mInputLayout;
-	D3D11_PRIMITIVE_TOPOLOGY mTopoLogy;
+	PrimitiveTopology mTopoLogy;
 	
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;

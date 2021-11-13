@@ -1,6 +1,7 @@
 #pragma once
+#include <Windows.h>
 #include "core/rendersys/predeclare.h"
-#include "core/rendersys/d3d11/stddx11.h"
+#include "core/rendersys/base_type.h"
 
 namespace mir {
 
@@ -66,7 +67,7 @@ interface IVertexBuffer : public IHardwareBuffer
 interface IIndexBuffer : public IHardwareBuffer 
 {
 	virtual int GetWidth() = 0;
-	virtual DXGI_FORMAT GetFormat() = 0;
+	virtual ResourceFormat GetFormat() = 0;
 	int GetCount();
 };
 
@@ -100,7 +101,7 @@ interface ITexture
 	virtual const char* GetPath() = 0;
 	virtual int GetWidth() = 0;
 	virtual int GetHeight() = 0;
-	virtual DXGI_FORMAT GetFormat() = 0;
+	virtual ResourceFormat GetFormat() = 0;
 	virtual int GetMipmapCount() = 0;
 };
 

@@ -371,7 +371,7 @@ std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTe
 		aiString str; mat->GetTexture(type, i, &str);
 		std::string key = str.C_Str();
 
-		ITexturePtr texInfo = mRenderSys.LoadTexture(key, DXGI_FORMAT_UNKNOWN, true, false);
+		ITexturePtr texInfo = mRenderSys.LoadTexture(key, kFormatUnknown, true, false);
 		textures.push_back(texInfo);
 		mLoadedTexture[key] = texInfo;
 	}
@@ -500,30 +500,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
 			mesh->Material->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
 
-#ifdef USE_RENDER_OP
 			mesh->GenRenderOperation(opList);
-#else
-//#define DEBUG_UNITY_PBR 1
-#if DEBUG_UNITY_PBR
-			if (mesh->Indices.size() == 18258) {
-				cbUnityMaterial cb;
-				//cb._Color = XMFLOAT4(1, 0, 0, 0);
-				//cb._SpecLightOff = 1;
-				//cb._OcclusionStrength = 0;
-				//cb._GlossMapScale = 0;
-				mRenderSys.UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
-			}
-			else {
-				cbUnityMaterial cb;
-				//cb._Color = XMFLOAT4(0, 0, 0, 0);
-				//cb._SpecLightOff = 1;
-				//cb._OcclusionStrength = 0;
-				//cb._GlossMapScale = 0;
-				mRenderSys.UpdateConstBuffer(mesh->Material->CurTech()->mPasses[0]->mConstantBuffers[2], &cb);
-			}
-#endif
-			mesh->Draw(mRenderSys);
-#endif
 		}
 	}
 

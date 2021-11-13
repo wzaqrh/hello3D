@@ -6,53 +6,41 @@
 namespace mir {
 
 /********** TTexture9 **********/
-Texture9::Texture9(IDirect3DTexture9 *__texture, const std::string& __path)
-	: mTexture(__texture)
+Texture9::Texture9(IDirect3DTexture9 *texture, const std::string& path)
+	: mTexture(texture)
 	, mTextureCube(nullptr)
-	, mPath(__path)
+	, mPath(path)
 {
+	mWidth = 0, mHeight = 0, mMipCount = 0;
+	mFormat = kFormatUnknown;
+
 	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
 	mRes->AddOnLoadedListener([this](IResource*) {
 		D3DSURFACE_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
-		mFormat = D3dEnumConvert::d3d9To11(desc.Format);
+		mFormat = static_cast<ResourceFormat>(D3dEnumConvert::d3d9To11(desc.Format));
 		mMipCount = mTexture->GetLevelCount();
 	});
 }
 
-Texture9::Texture9(int width, int height, DXGI_FORMAT format, int mipmap)
+Texture9::Texture9(int width, int height, ResourceFormat format, int mipmap)
 	: mTexture(nullptr)
 	, mTextureCube(nullptr)
 	, mPath()
 {
 	mWidth = width;
 	mHeight = height;
-	mFormat = format;
 	mMipCount = mipmap;
+	mFormat = format;
 	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
 }
 
-void Texture9::SetSRV9(IDirect3DTexture9* __texture)
+void Texture9::SetSRV9(IDirect3DTexture9* texture)
 {
-	mTexture = __texture;
+	mTexture = texture;
 }
 
-const char* Texture9::GetPath() {
-	return mPath.c_str();
-}
-int Texture9::GetWidth() {
-	return mWidth;
-}
-int Texture9::GetHeight() {
-	return mHeight;
-}
-DXGI_FORMAT Texture9::GetFormat() {
-	return mFormat;// D3DEnumCT::d3d9To11(GetDesc().Format);
-}
-int Texture9::GetMipmapCount() {
-	return mMipCount;
-}
 D3DSURFACE_DESC Texture9::GetDesc()
 {
 	D3DSURFACE_DESC desc;
@@ -61,45 +49,9 @@ D3DSURFACE_DESC Texture9::GetDesc()
 }
 
 /********** TIndexBuffer9 **********/
-IDirect3DIndexBuffer9*& IndexBuffer9::GetBuffer9()
-{
-	return Buffer;
-}
-
-unsigned int IndexBuffer9::GetBufferSize()
-{
-	return BufferSize;
-}
-
 int IndexBuffer9::GetWidth()
 {
-	return D3dEnumConvert::GetWidth(Format);
-}
-
-DXGI_FORMAT IndexBuffer9::GetFormat()
-{
-	return Format;
-}
-
-/********** TVertexShader9 **********/
-unsigned int VertexBuffer9::GetBufferSize()
-{
-	return BufferSize;
-}
-
-IDirect3DVertexBuffer9*& VertexBuffer9::GetBuffer9()
-{
-	return Buffer;
-}
-
-unsigned int VertexBuffer9::GetStride()
-{
-	return Stride;
-}
-
-unsigned int VertexBuffer9::GetOffset()
-{
-	return Offset;
+	return D3dEnumConvert::GetWidth(static_cast<DXGI_FORMAT>(Format));
 }
 
 /********** TRenderTexture9 **********/
@@ -111,11 +63,6 @@ RenderTexture9::RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* dept
 	mDepthStencilBuffer = depthStencilBuffer;
 }
 
-ITexturePtr RenderTexture9::GetColorTexture()
-{
-	return mColorTexture;
-}
-
 IDirect3DSurface9*& RenderTexture9::GetColorBuffer9()
 {
 	mColorBuffer = nullptr;
@@ -123,20 +70,17 @@ IDirect3DSurface9*& RenderTexture9::GetColorBuffer9()
 	return mColorBuffer;
 }
 
-IDirect3DSurface9*& RenderTexture9::GetDepthStencilBuffer9()
-{
-	return mDepthStencilBuffer;
-}
-
 /********** TInputLayout9 **********/
 InputLayout9::InputLayout9()
 {
+	mLayout = nullptr;
 	mRes = MakePtr<Resource>((IUnknown**)&mLayout);
 }
 
-IDirect3DVertexDeclaration9*& InputLayout9::GetLayout9()
+/********** TConstantTable **********/
+ConstantTable::ConstantTable()
 {
-	return mLayout;
+	mTable = nullptr;
 }
 
 void ConstantTable::ReInit()
@@ -146,7 +90,6 @@ void ConstantTable::ReInit()
 	Init(mTable);
 }
 
-/********** TConstantTable **********/
 void ConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int constCount)
 {
 	mTable = constTable;
@@ -175,16 +118,6 @@ void ConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int 
 		}
 		mHandles.push_back(handleName.second);
 	}
-}
-
-ID3DXConstantTable* ConstantTable::get()
-{
-	return mTable;
-}
-
-size_t ConstantTable::size() const
-{
-	return mHandles.size();
 }
 
 D3DXHANDLE ConstantTable::GetHandle(size_t pos) const
@@ -261,17 +194,8 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBuffe
 /********** TPixelShader9 **********/
 PixelShader9::PixelShader9()
 {
+	mShader = nullptr;
 	mRes = MakePtr<Resource>((IUnknown**)&mShader);
-}
-
-IBlobDataPtr PixelShader9::GetBlob()
-{
-	return mBlob;
-}
-
-IDirect3DPixelShader9*& PixelShader9::GetShader9()
-{
-	return mShader;
 }
 
 void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
@@ -282,17 +206,8 @@ void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
 /********** TVertexShader9 **********/
 VertexShader9::VertexShader9()
 {
+	mShader = nullptr;
 	mRes = MakePtr<Resource>((IUnknown**)&mShader);
-}
-
-IBlobDataPtr VertexShader9::GetBlob()
-{
-	return mBlob;
-}
-
-IDirect3DVertexShader9*& VertexShader9::GetShader9()
-{
-	return mShader;
 }
 
 void VertexShader9::SetConstTable(ID3DXConstantTable* constTable)
@@ -328,11 +243,6 @@ ContantBuffer9::ContantBuffer9(ConstBufferDeclPtr decl)
 {
 	assert(mDecl != nullptr);
 	mBuffer9.resize(mDecl->BufferSize);
-}
-
-ConstBufferDeclPtr ContantBuffer9::GetDecl()
-{
-	return mDecl;
 }
 
 unsigned int ContantBuffer9::GetBufferSize()

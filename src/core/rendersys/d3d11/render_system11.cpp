@@ -46,8 +46,8 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 
 	if (CheckHR(_SetRasterizerState())) return false;
 
-	SetDepthState(DepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
-	SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
+	SetDepthState(DepthState{ true, kCompareLessEqual, kDepthWriteMaskAll });
+	SetBlendFunc(BlendState::MakeAlphaPremultiplied());
 
 	mScreenWidth = vpWidth;
 	mScreenHeight = vpHeight;
@@ -193,7 +193,7 @@ void RenderSystem11::ClearColorDepthStencil(const Eigen::Vector4f& color, float 
 	mDeviceContext->ClearDepthStencilView(mCurDepthStencilView, D3D11_CLEAR_DEPTH, Depth, Stencil);
 }
 
-IRenderTexturePtr RenderSystem11::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
+IRenderTexturePtr RenderSystem11::CreateRenderTexture(int width, int height, ResourceFormat format)
 {
 	return MakePtr<RenderTexture11>(mDevice, width, height, format);
 }
@@ -233,10 +233,23 @@ ID3D11InputLayout* RenderSystem11::_CreateInputLayout(Program11* pProgram, const
 	}
 	return pVertexLayout;
 }
-IInputLayoutPtr RenderSystem11::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+IInputLayoutPtr RenderSystem11::CreateLayout(IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount)
 {
 	InputLayout11Ptr ret = MakePtr<InputLayout11>();
-	ret->mInputDescs.assign(descArray, descArray + descCount);
+	//ret->mInputDescs.assign(descArray, descArray + descCount);
+	ret->mInputDescs.resize(descCount);
+	for (size_t i = 0; i < descCount; ++i) {
+		LayoutInputElement& descI = descArray[i];
+		ret->mInputDescs[i] = D3D11_INPUT_ELEMENT_DESC {
+			descI.SemanticName.c_str(),
+			descI.SemanticIndex,
+			static_cast<DXGI_FORMAT>(descI.Format),
+			descI.InputSlot,
+			descI.AlignedByteOffset,
+			static_cast<D3D11_INPUT_CLASSIFICATION>(descI.InputSlotClass),
+			descI.InstanceDataStepRate
+		};
+	}
 
 	auto resource = pProgram->AsRes();
 	if (resource->IsLoaded()) {
@@ -292,19 +305,19 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	return true;
 }
 
-ISamplerStatePtr RenderSystem11::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC cmpFunc)
+ISamplerStatePtr RenderSystem11::CreateSampler(SamplerFilterMode filter, CompareFunc cmpFunc)
 {
 	HRESULT hr = S_OK;
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = filter;
+	sampDesc.Filter = static_cast<D3D11_FILTER>(filter);
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;//D3D11_TEXTURE_ADDRESS_MIRROR
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.MipLODBias = 0.0f;
 	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
-	sampDesc.ComparisonFunc = cmpFunc;
+	sampDesc.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(cmpFunc);
 	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -564,7 +577,7 @@ void RenderSystem11::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 	mDeviceContext->IASetVertexBuffers(0, 1, &std::static_pointer_cast<VertexBuffer11>(vertexBuffer)->GetBuffer11(), &stride, &offset);
 }
 
-IIndexBufferPtr RenderSystem11::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
+IIndexBufferPtr RenderSystem11::CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer)
 {
 	HRESULT hr = S_OK;
 
@@ -592,15 +605,13 @@ void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
 	if (indexBuffer) mDeviceContext->IASetIndexBuffer(
 		std::static_pointer_cast<IndexBuffer11>(indexBuffer)->GetBuffer11(), 
-		indexBuffer->GetFormat(),
+		static_cast<DXGI_FORMAT>(indexBuffer->GetFormat()),
 		0);
 	else mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
 }
 
 IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data)
 {
-	HRESULT hr = S_OK;
-
 	ID3D11Buffer* pConstantBuffer = nullptr;
 	// Create the constant buffer
 	D3D11_BUFFER_DESC bd;
@@ -611,7 +622,7 @@ IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDec
 		: (cbDecl.BufferSize / sizeof(Eigen::Vector4f) + 1) * sizeof(Eigen::Vector4f);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
+	HRESULT hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
 	if (CheckHR(hr))
 		return nullptr;
 	ConstBufferDeclPtr declPtr = std::make_shared<ConstBufferDecl>(cbDecl);
@@ -631,7 +642,7 @@ void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int
 	mDeviceContext->UpdateSubresource(std::static_pointer_cast<ContantBuffer11>(buffer)->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
-ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT format, bool async, bool isCube)
+ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, ResourceFormat format, bool async, bool isCube)
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
@@ -649,8 +660,8 @@ ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 	if (IsFileExist(pSrcFile))
 	{
 		D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
-		LoadInfo.Format = format;
-		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != DXGI_FORMAT_UNKNOWN ? &LoadInfo : nullptr;
+		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
+		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
 
 		pTextureRV = MakePtr<Texture11>(nullptr, imgPath);
 		IResourcePtr resource = pTextureRV->AsRes();
@@ -679,7 +690,7 @@ ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, DXGI_FORMAT for
 	return pTextureRV;
 }
 
-ITexturePtr RenderSystem11::CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap)
+ITexturePtr RenderSystem11::CreateTexture(int width, int height, ResourceFormat format, int mipmap)
 {
 	assert(mipmap > 0);
 	return MakePtr<Texture11>(width, height, format, mipmap);
@@ -693,7 +704,7 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 	desc.Width = texture->GetWidth();
 	desc.Height = texture->GetHeight();
 	desc.MipLevels = desc.ArraySize = texture->GetMipmapCount();
-	desc.Format = texture->GetFormat();
+	desc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
 	desc.SampleDesc.Count = 1;
 	desc.Usage = D3D11_USAGE_IMMUTABLE;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -704,7 +715,7 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 	if (SUCCEEDED(hr))
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = texture->GetFormat();
+		SRVDesc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
 		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Texture2D.MipLevels = texture->GetMipmapCount();
 
@@ -722,22 +733,21 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 	return SUCCEEDED(hr);
 }
 
-void RenderSystem11::SetBlendFunc(const BlendFunc& blendFunc)
+void RenderSystem11::SetBlendFunc(const BlendState& blendFunc)
 {
 	mCurBlendFunc = blendFunc;
 
 	D3D11_BLEND_DESC blendDesc = { 0 };
 	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlend = blendFunc.Src;
-	blendDesc.RenderTarget[0].DestBlend = blendFunc.Dst;
+	blendDesc.RenderTarget[0].SrcBlend = static_cast<D3D11_BLEND>(blendFunc.Src);
+	blendDesc.RenderTarget[0].DestBlend = static_cast<D3D11_BLEND>(blendFunc.Dst);
 	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	if (CheckHR(mDevice->CreateBlendState(&blendDesc, &mBlendState)))
-		return;
+	if (CheckHR(mDevice->CreateBlendState(&blendDesc, &mBlendState))) return;
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	mDeviceContext->OMSetBlendState(mBlendState, blendFactor, 0xffffffff);
@@ -750,8 +760,8 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 	D3D11_DEPTH_STENCIL_DESC DSDesc;
 	ZeroMemory(&DSDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 	DSDesc.DepthEnable = depthState.DepthEnable;
-	DSDesc.DepthWriteMask = depthState.DepthWriteMask;
-	DSDesc.DepthFunc = depthState.DepthFunc;
+	DSDesc.DepthWriteMask = static_cast<D3D11_DEPTH_WRITE_MASK>(depthState.WriteMask);
+	DSDesc.DepthFunc = static_cast<D3D11_COMPARISON_FUNC>(depthState.CmpFunc);
 	DSDesc.StencilEnable = FALSE;
 	if (CheckHR(mDevice->CreateDepthStencilState(&DSDesc, &mDepthStencilState)))
 		return;
@@ -773,14 +783,14 @@ void RenderSystem11::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], s
 	mDeviceContext->PSSetConstantBuffers(slot, count, &passConstBuffers[0]);
 }
 
-void RenderSystem11::DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
+void RenderSystem11::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	//if (_CanDraw())
-	mDeviceContext->IASetPrimitiveTopology(topo);
+	mDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	mDeviceContext->Draw(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0);
 }
-void RenderSystem11::DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
+void RenderSystem11::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	//if (_CanDraw())
-	mDeviceContext->IASetPrimitiveTopology(topo);
+	mDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	int indexCount = op.mIndexCount != 0 ? op.mIndexCount : op.mIndexBuffer->GetBufferSize() / op.mIndexBuffer->GetWidth();
 	mDeviceContext->DrawIndexed(indexCount, op.mIndexPos, op.mIndexBase);
 }

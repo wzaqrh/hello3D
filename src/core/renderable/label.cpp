@@ -32,7 +32,7 @@ Label::Label(IRenderSystem& renderSys, MaterialFactory& matFac, TFontPtr font)
 	mTransform = std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(E_MAT_LABEL);
 
-	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, DXGI_FORMAT_R32_UINT, (void*)&sIndiceData.Indices[0]);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
 	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SpriteVertexQuad) * MAX_STRING_LENGTH, sizeof(SpriteVertex), 0, nullptr);
 }
 

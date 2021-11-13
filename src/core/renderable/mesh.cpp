@@ -15,7 +15,7 @@ Mesh::Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string&
 	VertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
 	
 	Indices.resize(indexCount);
-	IndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(UINT) * indexCount, DXGI_FORMAT_R32_UINT, &Indices[0]);
+	IndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(UINT) * indexCount, kFormatR32UInt, &Indices[0]);
 	
 	SubMeshs.resize(1);
 }

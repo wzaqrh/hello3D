@@ -9,7 +9,7 @@ FontTexture::FontTexture(IRenderSystem& renderSys, Eigen::Vector2i size)
 {
 	mWidth = size.x();
 	mHeight = size.y();
-	mTexture = mRenderSys.CreateTexture(mWidth, mHeight, DXGI_FORMAT_R8_UNORM, 1);
+	mTexture = mRenderSys.CreateTexture(mWidth, mHeight, kFormatR8UNorm, 1);
 	mRawBuffer.resize(mWidth * mHeight);
 }
 

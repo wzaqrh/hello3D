@@ -24,13 +24,13 @@ IProgramPtr RenderSystem::CreateProgram(const std::string& name, const std::stri
 	}
 }
 
-ITexturePtr RenderSystem::LoadTexture(const std::string& __imgPath, DXGI_FORMAT format /*= DXGI_FORMAT_UNKNOWN*/, bool async/* = true*/, bool isCube/* = false*/)
+ITexturePtr RenderSystem::LoadTexture(const std::string& filepath, ResourceFormat format, bool async, bool isCube)
 {
-	const char* pSrc = __imgPath.c_str();
-	std::string imgPath = __imgPath;
-	auto pos = __imgPath.find_last_of("\\");
+	const char* pSrc = filepath.c_str();
+	std::string imgPath = filepath;
+	auto pos = filepath.find_last_of("\\");
 	if (pos != std::string::npos) {
-		imgPath = __imgPath.substr(pos + 1, std::string::npos);
+		imgPath = filepath.substr(pos + 1, std::string::npos);
 	}
 
 	ITexturePtr texView = nullptr;

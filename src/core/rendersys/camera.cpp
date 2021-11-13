@@ -145,7 +145,7 @@ void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
 IRenderTexturePtr Camera::FetchPostProcessInput()
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mRenderSys.CreateRenderTexture(mWidth, mHeight, DXGI_FORMAT_R16G16B16A16_UNORM);// , DXGI_FORMAT_R8G8B8A8_UNORM);
+		mPostProcessInput = mRenderSys.CreateRenderTexture(mWidth, mHeight, kFormatR16G16B16A16UNorm);
 		SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
 	}
 	return mPostProcessInput;

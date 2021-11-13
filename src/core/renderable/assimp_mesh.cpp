@@ -24,7 +24,7 @@ AssimpMesh::AssimpMesh(const aiMesh* data,
 bool AssimpMesh::setupMesh(IRenderSystem& renderSys)
 {
 	VertexBuffer = renderSys.CreateVertexBuffer(sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
-	IndexBuffer = renderSys.CreateIndexBuffer(sizeof(UINT) * Indices.size(), DXGI_FORMAT_R32_UINT, &Indices[0]);
+	IndexBuffer = renderSys.CreateIndexBuffer(sizeof(UINT) * Indices.size(), kFormatR32UInt, &Indices[0]);
 	return true;
 }
 

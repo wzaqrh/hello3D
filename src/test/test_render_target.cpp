@@ -43,7 +43,7 @@ void TestRT::OnPostInitDevice()
 	mRendTexture = mContext->RenderSys()->CreateRenderTexture(
 		mContext->RenderSys()->WinSize().x(), 
 		mContext->RenderSys()->WinSize().y(), 
-		DXGI_FORMAT_R32G32B32A32_FLOAT);
+		kFormatR32G32B32A32Float);
 
 	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
 	mSprite->SetTexture(mRendTexture->GetColorTexture());

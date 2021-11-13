@@ -21,8 +21,7 @@ SkyBox::SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, const std::str
 	Vertexs[3].pos = Eigen::Vector4f(fHighW, fHighH, 1.0f, 1.0f);
 	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
 
-	DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	mCubeSRV = mRenderSys.LoadTexture(imgName, format, true, true);
+	mCubeSRV = mRenderSys.LoadTexture(imgName, kFormatR32G32B32A32Float, true, true);
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
 	Eigen::Vector3f pos0 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fLowH, 1.0f));

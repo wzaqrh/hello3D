@@ -43,16 +43,10 @@
     <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h">
       <Filter>src\core\rendersys\d3d9</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\stddx9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\interface_type11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d11\stddx11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\thread_pump.h">

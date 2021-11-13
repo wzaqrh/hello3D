@@ -4,33 +4,12 @@ namespace mir {
 
 D3DBLEND D3dEnumConvert::d3d11To9(D3D11_BLEND blend)
 {
-	switch (blend)
-	{
-	case D3D11_BLEND_ZERO: return D3DBLEND_ZERO;
-	case D3D11_BLEND_ONE: return D3DBLEND_ONE;
-	case D3D11_BLEND_SRC_COLOR: return D3DBLEND_SRCCOLOR;
-	case D3D11_BLEND_INV_SRC_COLOR: return D3DBLEND_INVSRCCOLOR;
-	case D3D11_BLEND_SRC_ALPHA: return D3DBLEND_SRCALPHA;
-	case D3D11_BLEND_INV_SRC_ALPHA: return D3DBLEND_INVSRCALPHA;
-	case D3D11_BLEND_DEST_ALPHA: return D3DBLEND_DESTALPHA;
-	case D3D11_BLEND_INV_DEST_ALPHA: return D3DBLEND_INVDESTALPHA;
-	case D3D11_BLEND_DEST_COLOR: return D3DBLEND_DESTCOLOR;
-	case D3D11_BLEND_INV_DEST_COLOR: return D3DBLEND_INVDESTCOLOR;
-	case D3D11_BLEND_SRC_ALPHA_SAT: return D3DBLEND_SRCALPHASAT;
-	case D3D11_BLEND_BLEND_FACTOR: return D3DBLEND_BOTHSRCALPHA;
-	case D3D11_BLEND_INV_BLEND_FACTOR: return D3DBLEND_BOTHINVSRCALPHA;
-	case D3D11_BLEND_SRC1_COLOR:
-	case D3D11_BLEND_INV_SRC1_COLOR:
-	case D3D11_BLEND_SRC1_ALPHA:
-	case D3D11_BLEND_INV_SRC1_ALPHA:
-	default:
-		return D3DBLEND_FORCE_DWORD;
-	}
+	return static_cast<D3DBLEND>(blend);
 }
 
 D3DCMPFUNC D3dEnumConvert::d3d11To9(D3D11_COMPARISON_FUNC cmp)
 {
-	return static_cast<_D3DCMPFUNC>(cmp);
+	return static_cast<D3DCMPFUNC>(cmp);
 }
 
 D3DFORMAT D3dEnumConvert::d3d11To9(DXGI_FORMAT fmt)
@@ -357,12 +336,12 @@ static D3DDECLTYPE __d3d11To9(DXGI_FORMAT fmt) {
 	return ret;
 }
 
-D3DVERTEXELEMENT9 D3dEnumConvert::d3d11To9(const D3D11_INPUT_ELEMENT_DESC& desc)
+D3DVERTEXELEMENT9 D3dEnumConvert::d3d11To9(const LayoutInputElement& desc)
 {
 	D3DVERTEXELEMENT9 ret;
 	ret.Stream = desc.InputSlot;
 	ret.Offset = desc.AlignedByteOffset;     
-	ret.Type = (D3DDECLTYPE)__d3d11To9(desc.Format);
+	ret.Type = (D3DDECLTYPE)__d3d11To9(static_cast<DXGI_FORMAT>(desc.Format));
 	ret.Method = D3DDECLMETHOD_DEFAULT;
 	ret.Usage = __d3d11To9(desc.SemanticName);
 	ret.UsageIndex = desc.SemanticIndex;

@@ -33,8 +33,8 @@ bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 	if (!_CreateDeviceAndSwapChain()) return false;
 	_SetRasterizerState();
 
-	SetDepthState(DepthState(TRUE, D3D11_COMPARISON_LESS_EQUAL, D3D11_DEPTH_WRITE_MASK_ALL));
-	SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA));
+	SetDepthState(DepthState::MakeFor3D());
+	SetBlendFunc(BlendState::MakeAlphaPremultiplied());
 
 	mDevice9->GetRenderTarget(0, &mBackColorBuffer); mCurColorBuffer = mBackColorBuffer;
 	mDevice9->GetDepthStencilSurface(&mBackDepthStencilBuffer); mCurDepthStencilBuffer = mBackDepthStencilBuffer;
@@ -123,10 +123,10 @@ void RenderSystem9::ClearColorDepthStencil(const Eigen::Vector4f& color, float d
 	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), depth, stencil);
 }
 
-IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, DXGI_FORMAT format)
+IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, ResourceFormat format)
 {
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
-	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
+	D3DFORMAT Format = D3dEnumConvert::d3d11To9(static_cast<DXGI_FORMAT>(format));
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
@@ -163,11 +163,11 @@ IContantBufferPtr RenderSystem9::CreateConstBuffer(const ConstBufferDecl& cbDecl
 	return ret;
 }
 
-IIndexBufferPtr RenderSystem9::CreateIndexBuffer(int bufferSize, DXGI_FORMAT format, void* buffer)
+IIndexBufferPtr RenderSystem9::CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer)
 {
 	IndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
-	D3DFORMAT Format = D3dEnumConvert::d3d11To9(format);
+	D3DFORMAT Format = D3dEnumConvert::d3d11To9(static_cast<DXGI_FORMAT>(format));
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
 		ret = MakePtr<IndexBuffer9>(pIndexBuffer, bufferSize, format);
 	}
@@ -357,7 +357,7 @@ IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name,
 	return program;
 }
 
-ISamplerStatePtr RenderSystem9::CreateSampler(D3D11_FILTER filter, D3D11_COMPARISON_FUNC cmpFunc)
+ISamplerStatePtr RenderSystem9::CreateSampler(SamplerFilterMode filter, CompareFunc cmpFunc)
 {
 	SamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
@@ -366,7 +366,7 @@ ISamplerStatePtr RenderSystem9::CreateSampler(D3D11_FILTER filter, D3D11_COMPARI
 	ret->mStates[D3DSAMP_ADDRESSW] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
 	ret->mStates[D3DSAMP_BORDERCOLOR] = D3DCOLOR_ARGB(0,0,0,0);
 
-	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = D3dEnumConvert::d3d11To9(filter);
+	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = D3dEnumConvert::d3d11To9(static_cast<D3D11_FILTER>(filter));
 	for (auto& iter : fts)
 		ret->mStates[iter.first] = iter.second;
 
@@ -384,7 +384,7 @@ IDirect3DVertexDeclaration9* RenderSystem9::_CreateInputLayout(Program9* _, cons
 	return ret;
 }
 
-IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, D3D11_INPUT_ELEMENT_DESC* descArray, size_t descCount)
+IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount)
 {
 	InputLayout9Ptr ret = MakePtr<InputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)
@@ -409,7 +409,7 @@ void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
 	mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(layout)->GetLayout9());
 }
 
-ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, DXGI_FORMAT format, bool async, bool isCube)
+ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFormat format, bool async, bool isCube)
 {
 	std::string imgPath = GetModelPath() + srcFile;
 #ifdef USE_ONLY_PNG
@@ -428,7 +428,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, DXGI_FORMA
 		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
 		if (isCube) {
 			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile.c_str(), 
-				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3dEnumConvert::d3d11To9(format)/*D3DFMT_A16B16G16R16F*/,
+				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3dEnumConvert::d3d11To9(static_cast<DXGI_FORMAT>(format)),
 				D3DPOOL_MANAGED, D3DX_FILTER_NONE/*D3DX_DEFAULT */, D3DX_FILTER_NONE, 0, NULL,
 				NULL, &pTextureRV->GetSRVCube9()))) {
 				pTextureRV = nullptr;
@@ -447,7 +447,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, DXGI_FORMA
 	return pTextureRV;
 }
 
-ITexturePtr RenderSystem9::CreateTexture(int width, int height, DXGI_FORMAT format, int mipmap)
+ITexturePtr RenderSystem9::CreateTexture(int width, int height, ResourceFormat format, int mipmap)
 {
 	assert(mipmap == 1);
 	Texture9Ptr texture = MakePtr<Texture9>(width, height, format, mipmap);
@@ -485,20 +485,20 @@ bool RenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int data
 	return true;
 }
 
-void RenderSystem9::SetBlendFunc(const BlendFunc& blendFunc)
+void RenderSystem9::SetBlendFunc(const BlendState& blendFunc)
 {
 	mCurBlendFunc = blendFunc;
-	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.Src == D3D11_BLEND_ONE && blendFunc.Dst == D3D11_BLEND_ZERO) ? FALSE : TRUE);
-	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3dEnumConvert::d3d11To9(blendFunc.Src));
-	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3dEnumConvert::d3d11To9(blendFunc.Dst));
+	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.Src == kBlendOne && blendFunc.Dst == kBlendZero) ? FALSE : TRUE);
+	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3dEnumConvert::d3d11To9(static_cast<D3D11_BLEND>(blendFunc.Src)));
+	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3dEnumConvert::d3d11To9(static_cast<D3D11_BLEND>(blendFunc.Dst)));
 }
 
 void RenderSystem9::SetDepthState(const DepthState& depthState)
 {
 	mCurDepthState = depthState;
 	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.DepthEnable);
-	mDevice9->SetRenderState(D3DRS_ZFUNC, D3dEnumConvert::d3d11To9(depthState.DepthFunc));
-	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.DepthWriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
+	mDevice9->SetRenderState(D3DRS_ZFUNC, D3dEnumConvert::d3d11To9(static_cast<D3D11_COMPARISON_FUNC>(depthState.CmpFunc)));
+	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.WriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
 void RenderSystem9::SetProgram(IProgramPtr program) 
@@ -551,13 +551,13 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 	assert(FALSE);
 	return 0;
 }
-void RenderSystem9::DrawPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
-	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(topo);
+void RenderSystem9::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
+	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
 	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), topo9));
 }
-void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, D3D11_PRIMITIVE_TOPOLOGY topo) {
-	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(topo);
+void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
+	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
 	mDevice9->DrawIndexedPrimitive(topo9, 
 		0, 0, op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0, 

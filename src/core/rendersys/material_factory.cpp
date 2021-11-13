@@ -90,7 +90,7 @@ public:
 		mMaterial->AddDependency(inputLayout->AsRes());
 		return *this;
 	}
-	MaterialBuilder& SetTopology(D3D11_PRIMITIVE_TOPOLOGY topology) {
+	MaterialBuilder& SetTopology(PrimitiveTopology topology) {
 		mCurPass->mTopoLogy = topology;
 		return *this;
 	}
@@ -142,7 +142,7 @@ public:
 
 /********** MaterialAssetManager **********/
 struct XmlAttributeInfo {
-	std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
+	std::vector<LayoutInputElement> Layout;
 	std::vector<std::string> LayoutStr;
 public:
 	XmlAttributeInfo() {}
@@ -175,7 +175,7 @@ struct XmlSamplersInfo {
 	const std::pair<int, int>& operator[](size_t pos) const { return Samplers[pos]; }
 };
 struct XmlProgramInfo {
-	D3D_PRIMITIVE_TOPOLOGY Topo;
+	PrimitiveTopology Topo;
 	XmlAttributeInfo Attr;
 	std::vector<XmlUniformInfo> Uniforms;
 	XmlSamplersInfo Samplers;
@@ -346,16 +346,16 @@ private:
 			for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
 				attribute.LayoutStr[j] = element.second.get<std::string>("<xmlattr>.SemanticName");
 				auto& layoutJ = attribute.Layout[j];
-				layoutJ = D3D11_INPUT_ELEMENT_DESC{
-					attribute.LayoutStr[j].c_str(),
+				layoutJ = LayoutInputElement{
+					attribute.LayoutStr[j],
 					element.second.get<UINT>("<xmlattr>.SemanticIndex", 0),
-					(DXGI_FORMAT)element.second.get<UINT>("<xmlattr>.Format"),
+					static_cast<ResourceFormat>(element.second.get<UINT>("<xmlattr>.Format")),
 					element.second.get<UINT>("<xmlattr>.InputSlot", 0),
 					element.second.get<UINT>("<xmlattr>.ByteOffset", byteOffset),
-					D3D11_INPUT_PER_VERTEX_DATA,
+					kLayoutInputPerVertexData,
 					0
 				};
-				byteOffset = layoutJ.AlignedByteOffset + D3dEnumConvert::GetWidth(layoutJ.Format);
+				byteOffset = layoutJ.AlignedByteOffset + D3dEnumConvert::GetWidth(static_cast<DXGI_FORMAT>(layoutJ.Format));
 				++j;
 			}
 
@@ -461,8 +461,8 @@ private:
 	void VisitProgram(const PropertyTreePath& nodeProgram, Visitor& vis) {
 		vis.shaderInfo.Program.FxName = nodeProgram->get<std::string>("FileName", "");
 		vis.shaderInfo.Program.VsEntry = nodeProgram->get<std::string>("VertexEntry", "");
-		vis.shaderInfo.Program.Topo = static_cast<D3D_PRIMITIVE_TOPOLOGY>(
-			nodeProgram->get<int>("Topology", D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		vis.shaderInfo.Program.Topo = static_cast<PrimitiveTopology>(
+			nodeProgram->get<int>("Topology", kPrimTopologyTriangleList));
 		VisitAttributes(nodeProgram, vis);
 		VisitUniforms(nodeProgram, vis);
 		VisitSamplers(nodeProgram, vis);
@@ -524,7 +524,7 @@ private:
 		for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("Variant"))) {
 			std::string name = it.second.get<std::string>("<xmlattr>.Name");
 			if (name == variantName) {
-				shaderInfo.Program.Topo = static_cast<D3D_PRIMITIVE_TOPOLOGY>(
+				shaderInfo.Program.Topo = static_cast<PrimitiveTopology>(
 					it.second.get<int>("Topology"), shaderInfo.Program.Topo);
 			}
 		}
@@ -604,8 +604,8 @@ private:
 				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 					auto& elem = shaderInfo.Program.Samplers[k];
 					builder.AddSampler(renderSys.CreateSampler(
-						D3D11_FILTER(elem.first),
-						D3D11_COMPARISON_NEVER)
+						static_cast<SamplerFilterMode>(elem.first),
+						kCompareNever)
 					);
 				}
 			}
@@ -619,7 +619,7 @@ private:
 
 		builder.CloneTechnique(renderSys, "d3d9");
 		builder.ClearSamplersToTech();
-		builder.AddSamplerToTech(renderSys.CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_NEVER));
+		builder.AddSamplerToTech(renderSys.CreateSampler(kSamplerFilterMinMagMipLinear, kCompareNever));
 
 		return builder.Build();
 	}

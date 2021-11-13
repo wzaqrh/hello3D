@@ -1,6 +1,8 @@
 #pragma once
+#include <windows.h>
+#include <d3d11.h>
+#include <d3dx11.h>
 #include "core/rendersys/interface_type.h"
-#include "core/rendersys/d3d11/stddx11.h"
 
 namespace mir {
 
@@ -29,49 +31,49 @@ struct InputLayout11 : public IInputLayout {
 public:
 	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
 	ID3D11InputLayout* mLayout = nullptr;
-	ResourcePtr mRes;
+	IResourcePtr mRes;
 public:
 	InputLayout11();
-	ID3D11InputLayout*& GetLayout11();
-	IResourcePtr AsRes() override;
+	ID3D11InputLayout*& GetLayout11() { return mLayout; }
+	IResourcePtr AsRes() override { return mRes; }
 };
 
 struct VertexShader11 : public IVertexShader {
 	ID3D11VertexShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	ResourcePtr mRes;
+	IResourcePtr mRes;
 public:
 	VertexShader11(IBlobDataPtr pBlob);
-	IResourcePtr AsRes() override;
+	IResourcePtr AsRes() override { return mRes; }
 
-	IBlobDataPtr GetBlob() override;
-	ID3D11VertexShader*& GetShader11();
+	IBlobDataPtr GetBlob() override { return mBlob; }
+	ID3D11VertexShader*& GetShader11() { return mShader; }
 };
 
 struct PixelShader11 : public IPixelShader {
 	ID3D11PixelShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	ResourcePtr mRes;
+	IResourcePtr mRes;
 public:
 	PixelShader11(IBlobDataPtr pBlob);
-	IResourcePtr AsRes() override;
-	IBlobDataPtr GetBlob() override;
-	ID3D11PixelShader*& GetShader11();
+	IResourcePtr AsRes() override { return mRes; }
+	IBlobDataPtr GetBlob() override { return mBlob; }
+	ID3D11PixelShader*& GetShader11() { return mShader; }
 };
 
 struct Program11 : public IProgram {
 	VertexShader11Ptr mVertex;
 	PixelShader11Ptr mPixel;
-	ResourcePtr mRes;
+	IResourcePtr mRes;
 public:
 	Program11();
-	IResourcePtr AsRes() override;
+	IResourcePtr AsRes() override { return mRes; }
 	void SetVertex(VertexShader11Ptr pVertex);
 	void SetPixel(PixelShader11Ptr pPixel);
-	IVertexShaderPtr GetVertex() override;
-	IPixelShaderPtr GetPixel() override;
+	IVertexShaderPtr GetVertex() override { return mVertex; }
+	IPixelShaderPtr GetPixel() override { return mPixel; }
 };
 
 /********** HardwareBuffer **********/
@@ -84,37 +86,35 @@ public:
 };
 
 struct VertexBuffer11 : public IVertexBuffer {
-	unsigned int stride, offset;
+	unsigned int Stride, Offset;
 	HardwareBuffer hd;
 public:
-	VertexBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize, unsigned int __stride, unsigned int __offset)
-		:hd(__buffer, __bufferSize), stride(__stride), offset(__offset) {};
-	VertexBuffer11() :stride(0), offset(0) {};
+	VertexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
+		:hd(buffer, bufferSize), Stride(stride), Offset(offset) {};
+	VertexBuffer11() :Stride(0), Offset(0) {};
 	int GetCount();
 public:
-	ID3D11Buffer*& GetBuffer11();
-	unsigned int GetBufferSize() override;
-	HardwareBufferType GetType() override {
-		return kHWBufferVertex;
-	}
-	unsigned int GetStride() override;
-	unsigned int GetOffset() override;
+	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
+	unsigned int GetBufferSize() override { return hd.bufferSize; }
+	HardwareBufferType GetType() override { return kHWBufferVertex; }
+	unsigned int GetStride() override { return Stride; }
+	unsigned int GetOffset() override { return Offset; }
 };
 
 struct IndexBuffer11 : public IIndexBuffer {
-	DXGI_FORMAT format;
+	ResourceFormat Format;
 	HardwareBuffer hd;
 public:
-	IndexBuffer11(ID3D11Buffer* __buffer, unsigned int __bufferSize, DXGI_FORMAT __format)
-		:hd(__buffer, __bufferSize), format(__format) {};
-	IndexBuffer11() :format(DXGI_FORMAT_UNKNOWN) {};
+	IndexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, ResourceFormat format)
+		:hd(buffer, bufferSize), Format(format) {};
+	IndexBuffer11() :Format(kFormatUnknown) {};
 public:
-	ID3D11Buffer*& GetBuffer11();
-	unsigned int GetBufferSize() override;
+	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
+	unsigned int GetBufferSize() override { return hd.bufferSize; }
 	HardwareBufferType GetType() override { return kHWBufferIndex; }
 
 	int GetWidth() override;
-	DXGI_FORMAT GetFormat() override;
+	ResourceFormat GetFormat() override { return Format; }
 };
 
 struct ContantBuffer11 : public IContantBuffer {
@@ -122,59 +122,58 @@ struct ContantBuffer11 : public IContantBuffer {
 	HardwareBuffer hd;
 public:
 	ContantBuffer11() {}
-	ContantBuffer11(ID3D11Buffer* __buffer, ConstBufferDeclPtr decl);
+	ContantBuffer11(ID3D11Buffer* buffer, ConstBufferDeclPtr decl);
 public:
-	ConstBufferDeclPtr GetDecl() override;
+	ConstBufferDeclPtr GetDecl() override { return mDecl; }
 	HardwareBufferType GetType() override { return kHWBufferConstant; }
 
-	ID3D11Buffer*& GetBuffer11();
-	unsigned int GetBufferSize() override;
+	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
+	unsigned int GetBufferSize() override { return hd.bufferSize; }
 };
 
 /********** Texture **********/
 struct Texture11 : public ITexture {
 private:
-	int mWidth = 0, mHeight = 0, mMipCount = 0;
-	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
-	ID3D11ShaderResourceView *mTexture = nullptr;
+	int mWidth, mHeight, mMipCount;
+	ResourceFormat mFormat;
+	ID3D11ShaderResourceView* mTexture;
 	IResourcePtr mRes;
 	std::string mPath;
 public:
-	Texture11(int width, int height, DXGI_FORMAT format, int mipmap);
-
-	Texture11(ID3D11ShaderResourceView* __texture, const std::string& __path);
+	Texture11(int width, int height, ResourceFormat format, int mipmap);
+	Texture11(ID3D11ShaderResourceView* texture, const std::string& path);
 	IResourcePtr AsRes() override { return mRes; }
 
 	bool HasSRV() override { return mTexture != nullptr; }
-	void SetSRV11(ID3D11ShaderResourceView* __texture);
-	ID3D11ShaderResourceView*& GetSRV11();
+	void SetSRV11(ID3D11ShaderResourceView* texture);
+	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
 
-	const char* GetPath() override;
-	int GetWidth() override;
-	int GetHeight() override;
-	DXGI_FORMAT GetFormat() override;
-	int GetMipmapCount() override;
+	const char* GetPath() override { return mPath.c_str(); }
+	int GetWidth() override { return mWidth; }
+	int GetHeight() override { return mHeight; }
+	ResourceFormat GetFormat() override { return mFormat; }
+	int GetMipmapCount() override { return mMipCount; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 };
 
 struct RenderTexture11 : public IRenderTexture {
 private:
-	ID3D11Texture2D* mRenderTargetTexture = nullptr;
-	ID3D11ShaderResourceView* mRenderTargetSRV = nullptr;
 	ITexturePtr mRenderTargetPtr;
-	ID3D11RenderTargetView* mRenderTargetView = nullptr;
+	ID3D11Texture2D* mRenderTargetTexture;
+	ID3D11ShaderResourceView* mRenderTargetSRV;
+	ID3D11RenderTargetView* mRenderTargetView;
 
-	ID3D11Texture2D* mDepthStencilTexture = nullptr;
-	ID3D11DepthStencilView* mDepthStencilView = nullptr;
+	ID3D11Texture2D* mDepthStencilTexture;
+	ID3D11DepthStencilView* mDepthStencilView;
 
-	DXGI_FORMAT mFormat = DXGI_FORMAT_UNKNOWN;
+	ResourceFormat mFormat;
 public:
-	RenderTexture11(ID3D11Device* pDevice, int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT);
-	ITexturePtr GetColorTexture() override;
+	RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format = kFormatR32G32B32A32Float);
+	ITexturePtr GetColorTexture() override { return mRenderTargetPtr; }
 
-	ID3D11RenderTargetView*& GetColorBuffer11();
-	ID3D11DepthStencilView*& GetDepthStencilBuffer11();
+	ID3D11RenderTargetView*& GetColorBuffer11() { 	return mRenderTargetView; }
+	ID3D11DepthStencilView*& GetDepthStencilBuffer11() { return mDepthStencilView; }
 private:
 	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
 	bool InitRenderTextureView(ID3D11Device* pDevice);
@@ -188,7 +187,7 @@ struct SamplerState11 : public ISamplerState {
 	ID3D11SamplerState* mSampler = nullptr;
 public:
 	SamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
-	ID3D11SamplerState*& GetSampler11();
+	ID3D11SamplerState*& GetSampler11() { return mSampler; }
 };
 
 }

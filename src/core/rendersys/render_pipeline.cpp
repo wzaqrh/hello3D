@@ -14,7 +14,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, int width, int height)
 	,mScreenWidth(width)
 	,mScreenHeight(height)
 {
-	mShadowCasterOutput = mRenderSys.CreateRenderTexture(mScreenWidth, mScreenHeight, DXGI_FORMAT_R32_FLOAT);
+	mShadowCasterOutput = mRenderSys.CreateRenderTexture(mScreenWidth, mScreenHeight, kFormatR32Float);
 	SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
@@ -169,13 +169,13 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	if (opQueue.IsEmpty()) return;
 
 	DepthState orgState = mRenderSys.GetDepthState();
-	BlendFunc orgBlend = mRenderSys.GetBlendFunc();
+	BlendState orgBlend = mRenderSys.GetBlendFunc();
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowCasterOutput);
 		mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
-		mRenderSys.SetDepthState(DepthState(false));
-		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_ONE, D3D11_BLEND_ZERO));
+		mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
+		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
@@ -190,15 +190,15 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	}
 
 	if (!lightsOrder.empty()) {
-		BlendFunc orgBlend = mRenderSys.GetBlendFunc();
-		mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA));
+		BlendState orgBlend = mRenderSys.GetBlendFunc();
+		mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 		
 		cbGlobalParam globalParam = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, 
 			lightsOrder[0].first, lightsOrder[0].second);
 		RenderLight(opQueue, lightMode, globalParam);
 
 		for (int i = 1; i < lightsOrder.size(); ++i) {
-			mRenderSys.SetBlendFunc(BlendFunc(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE));
+			mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 			auto lightModeEx = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
 			globalParam = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, lightsOrder[i].first, lightsOrder[i].second);
 			RenderLight(opQueue, lightModeEx, globalParam);
@@ -249,7 +249,7 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 		//camera's postprocess
 		{
 			DepthState orgState = mRenderSys.GetDepthState();
-			mRenderSys.SetDepthState(DepthState(false));
+			mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
 
 			RenderOperationQueue opQue;
 			auto& postProcessEffects = camera->PostProcessEffects();
