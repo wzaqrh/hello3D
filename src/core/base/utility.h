@@ -1,5 +1,6 @@
 #pragma once
-//INCLUDE_PREDEFINE_H
+#include <windows.h>
+#include <dinput.h>
 #include "core/rendersys/base_type.h"
 #include "d3d_enum_convert.h"
 

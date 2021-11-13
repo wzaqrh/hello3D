@@ -9,6 +9,8 @@
 
 namespace mir {
 
+#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
+
 void OutPutMatrix(FILE* fd, const aiMatrix4x4& m) {
 	if (fd == nullptr) return;
 

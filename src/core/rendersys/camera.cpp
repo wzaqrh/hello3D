@@ -1,8 +1,10 @@
+#include <boost/math/constants/constants.hpp>
 #include "core/rendersys/camera.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/base/utility.h"
 #include "core/base/math.h"
+
 
 namespace mir {
 
@@ -78,7 +80,7 @@ void Camera::SetPerspectiveProj(int width, int height, double fov, double zFar)
 	mWidth = width;
 	mHeight = height;
 	mZFar = zFar;
-	mFov = fov / 180.0 * XM_PI;
+	mFov = fov / 180.0 * boost::math::constants::pi<float>();
 	mProjection = math::MakePerspectiveFovLH(mFov, mWidth * 1.0 / mHeight, 0.01f, mZFar);
 
 	if (mFlipY) mProjection = Transform3Projective(mProjection).scale(Eigen::Vector3f(1, -1, 1)).matrix();

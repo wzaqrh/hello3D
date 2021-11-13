@@ -16,9 +16,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-#define AS_REF(TYPE, V) *(TYPE*)(&V)
-#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
-
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
 typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
 

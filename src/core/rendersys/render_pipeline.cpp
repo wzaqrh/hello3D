@@ -119,7 +119,7 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 {
 	for (int i = 0; i < opQueue.Count(); ++i) {
 		if (opQueue[i].mMaterial->IsLoaded()) {
-			globalParam.World = AS_CONST_REF(Eigen::Matrix4f, opQueue[i].mWorldTransform);
+			globalParam.World = opQueue[i].mWorldTransform;
 			globalParam.WorldInv = globalParam.World.inverse();
 			RenderOp(opQueue[i], lightMode, globalParam);
 		}
@@ -136,8 +136,8 @@ cbGlobalParam MakeAutoParam(const Camera& camera, bool castShadow,
 		light->CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
 	}
 	else {
-		globalParam.View = AS_CONST_REF(Eigen::Matrix4f, camera.GetView());
-		globalParam.Projection = AS_CONST_REF(Eigen::Matrix4f, camera.GetProjection());
+		globalParam.View = camera.GetView();
+		globalParam.Projection = camera.GetProjection();
 		light->CalculateLightingViewProjection(camera, globalParam.LightView, globalParam.LightProjection);
 	}
 	globalParam.HasDepthMap = castShadow ? TRUE : FALSE;

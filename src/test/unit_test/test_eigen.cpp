@@ -3,6 +3,8 @@
 #include "core/base/math.h"
 #include "catch.hpp"
 
+#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
+
 static bool IsEqual(const Eigen::Matrix4f& m0, const XMMATRIX& m1) {
 	float* arr0 = (float*)&m0;
 	float* arr1 = (float*)&m1;
