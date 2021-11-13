@@ -1,6 +1,7 @@
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/camera.h"
+#include "core/base/math.h"
 
 namespace mir {
 
@@ -47,12 +48,9 @@ ConstBufferDecl& cbDirectLight::GetDesc()
 #endif
 
 /********** cbDirectLight **********/
-void cbDirectLight::CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj) {
-	XMVECTOR Eye = XMVectorSet(LightPos.x(), LightPos.y(), LightPos.z(), 0.0f);
-	XMVECTOR At = XMVectorSet(camera.mLookAtPos.x(), camera.mLookAtPos.y(), camera.mLookAtPos.z(), 0.0f);
-	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	view = XMMatrixLookAtLH(Eye, At, Up);
-	proj = XMMatrixOrthographicOffCenterLH(0, camera.mWidth, 0, camera.mHeight, 0.01, camera.mZFar);
+void cbDirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) {
+	view = math::MakeLookAtLH(LightPos.head<3>(), camera.mLookAtPos, Eigen::Vector3f(0, 1, 0));
+	proj = math::MakeOrthographicOffCenterLH(0, camera.mWidth, 0, camera.mHeight, 0.01, camera.mZFar);
 }
 
 /********** cbPointLight **********/
@@ -123,7 +121,6 @@ ConstBufferDecl& cbSpotLight::GetDesc()
 /********** cbGlobalParam **********/
 cbGlobalParam::cbGlobalParam()
 {
-	auto Ident = XMMatrixIdentity();
 	World = Eigen::Matrix4f::Identity();
 	View = Eigen::Matrix4f::Identity();
 	Projection = Eigen::Matrix4f::Identity();

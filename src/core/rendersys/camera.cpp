@@ -108,7 +108,7 @@ const TransformPtr& Camera::GetTransform() const
 	return mTransform;
 }
 
-const XMMATRIX& Camera::GetView() const
+const Eigen::Matrix4f& Camera::GetView() const
 {
 	if (mTransformDirty) {
 		mTransformDirty = false;
@@ -127,7 +127,7 @@ const XMMATRIX& Camera::GetView() const
 		}
 		mTransform->SetPosition(position);
 	}
-	return AS_CONST_REF(XMMATRIX, mWorldView);
+	return mWorldView;
 }
 
 void Camera::SetSkyBox(const SkyBoxPtr& skybox)

@@ -20,7 +20,7 @@ public:
 	void SetSpecularColor(float r, float g, float b, float a);
 	void SetSpecularPower(float power);
 public:
-	void CalculateLightingViewProjection(const Camera& camera, XMMATRIX& view, XMMATRIX& proj);
+	void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj);
 #if !defined MATERIAL_FROM_XML
 	static ConstBufferDecl& GetDesc();
 #endif

@@ -13,13 +13,11 @@ struct RenderOperation {
 	IVertexBufferPtr mVertexBuffer;
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 	IIndexBufferPtr mIndexBuffer;
-	short mIndexPos = 0, mIndexCount = 0, mIndexBase = 0;
+	short mIndexPos, mIndexCount, mIndexBase;
 	TextureBySlot mTextures;
-	XMMATRIX mWorldTransform;
+	Eigen::Matrix4f mWorldTransform;
 public:
-	RenderOperation(): mIndexPos(0), mIndexCount(0), mIndexBase(0) {
-		mWorldTransform = XMMatrixIdentity();
-	}
+	RenderOperation(): mIndexPos(0), mIndexCount(0), mIndexBase(0),mWorldTransform(Eigen::Matrix4f::Identity()) {}
 };
 
 struct RenderOperationQueue {

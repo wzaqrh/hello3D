@@ -21,31 +21,31 @@ void OutPutMatrix(FILE* fd, const aiMatrix4x4& m) {
 	fflush(fd);
 }
 
-void OutPutMatrix(FILE* fd, const XMMATRIX& m) {
+void OutPutMatrix(FILE* fd, const Eigen::Matrix4f& m) {
 	if (fd == nullptr) return;
 
 	for (int i = 0; i < 4; ++i)
-		fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.m[i][0], m.m[i][1], m.m[i][2], m.m[i][3]);
+		fprintf(fd, "%.3f %.3f %.3f %.3f\n", m(0,i), m(1,i), m(2,i), m(3,i));
 	fprintf(fd, "\n\n");
 	fflush(fd);
 }
 
-XMMATRIX ToXM(const aiMatrix4x4& m) {
-	XMMATRIX r;
+Eigen::Matrix4f ToXM(const aiMatrix4x4& m) {
+	Eigen::Matrix4f r;
 	static_assert(sizeof(r) == sizeof(m), "");
 	aiMatrix4x4 mm = m;
 	memcpy(&r, &mm, sizeof(mm));
 	return r;
 }
 
-static_assert(sizeof(XMFLOAT3) == sizeof(aiVector3D), "");
-XMFLOAT3 ToXM(const aiVector3D& v) {
-	XMFLOAT3 r = XMFLOAT3(v.x, v.y, v.z);
+static_assert(sizeof(Eigen::Vector3f) == sizeof(aiVector3D), "");
+Eigen::Vector3f ToXM(const aiVector3D& v) {
+	Eigen::Vector3f r = Eigen::Vector3f(v.x, v.y, v.z);
 	return r;
 }
 
-static_assert(sizeof(aiMatrix4x4) == sizeof(XMMATRIX), "");
-aiMatrix4x4 FromXM(const XMMATRIX& m) {
+static_assert(sizeof(aiMatrix4x4) == sizeof(Eigen::Matrix4f), "");
+aiMatrix4x4 FromXM(const Eigen::Matrix4f& m) {
 	aiMatrix4x4 r;
 	static_assert(sizeof(r) == sizeof(m), "");
 	memcpy(&r, &m, sizeof(m));
@@ -534,10 +534,9 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 	int count = opList.Count();
 	DoDraw(mRootNode, opList);
 
-	XMMATRIX world = mTransform->GetMatrix();
-	for (int i = count; i < opList.Count(); ++i) {
+	Eigen::Matrix4f world = mTransform->GetMatrix();
+	for (int i = count; i < opList.Count(); ++i)
 		opList[i].mWorldTransform = world;
-	}
 
 	return opList.Count() - count;
 }

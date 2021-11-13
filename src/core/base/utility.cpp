@@ -273,34 +273,6 @@ double Timer::Update()
 	return mDeltaTime;
 }
 
-XMFLOAT3 operator-(XMFLOAT3 lhs, XMFLOAT3 rht) {
-	XMFLOAT3 ret;
-	ret.x = lhs.x - rht.x;
-	ret.y = lhs.y - rht.y;
-	ret.z = lhs.z - rht.z;
-	return ret;
-}
-XMFLOAT3 operator+(XMFLOAT3 lhs, XMFLOAT3 rht) {
-	XMFLOAT3 ret;
-	ret.x = lhs.x + rht.x;
-	ret.y = lhs.y + rht.y;
-	ret.z = lhs.z + rht.z;
-	return ret;
-}
-XMFLOAT3 operator*(XMFLOAT3 lhs, float d) {
-	XMFLOAT3 ret;
-	ret.x = lhs.x * d;
-	ret.y = lhs.y * d;
-	ret.z = lhs.z * d;
-	return ret;
-}
-XMFLOAT2 operator-(XMFLOAT2 lhs, XMFLOAT2 rht) {
-	XMFLOAT2 ret;
-	ret.x = lhs.x - rht.x;
-	ret.y = lhs.y - rht.y;
-	return ret;
-}
-
 void SetDebugName(ID3D11DeviceChild* child, const std::string& name)
 {
 	if (child != nullptr && name != "")
@@ -406,13 +378,6 @@ void __log(const D3DCAPS9& caps)
 	CAPD(MaxPixelShader30InstructionSlots);
 
 	__log(ss.c_str());
-}
-
-XMMATRIX XM::Inverse(const XMMATRIX& m)
-{
-	XMVECTOR det = XMMatrixDeterminant(COPY_TO_GPU(m));
-	XMMATRIX ret = COPY_TO_GPU(XMMatrixInverse(&det, m));
-	return ret;
 }
 
 }

@@ -70,7 +70,7 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
 	op.mTextures.Add(mMainTex->GetColorTexture());
-	op.mWorldTransform = XMMatrixIdentity();
+	op.mWorldTransform = Eigen::Matrix4f::Identity();
 	op.mVertBufferByPass = mVertBufferByPass;
 	opList.AddOP(op);
 	return 1;

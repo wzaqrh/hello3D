@@ -43,7 +43,7 @@ int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
 	op.mTextures.Add(mCubeSRV);
-	op.mWorldTransform = XMMatrixIdentity();
+	op.mWorldTransform = Eigen::Matrix4f::Identity();
 	opList.AddOP(op);
 	return 1;
 }

@@ -7,12 +7,12 @@
 
 namespace mir {
 
-SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera)
+SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, Eigen::Vector2i screenSize, CameraPtr defCamera)
 	:mRenderSys(renderSys)
 	,mMaterialFac(matFac)
 {
-	mScreenWidth  = screenSize.x;
-	mScreenHeight = screenSize.y;
+	mScreenWidth  = screenSize.x();
+	mScreenHeight = screenSize.y();
 	if (defCamera) mCameras.push_back(defCamera);
 }
 

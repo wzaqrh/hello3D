@@ -12,8 +12,8 @@ using namespace mir;
 
 struct cbShadowMap
 {
-	XMMATRIX LightView;
-	XMMATRIX LightProjection;
+	Eigen::Matrix4f LightView;
+	Eigen::Matrix4f LightProjection;
 };
 
 class TestShadowMap : public App

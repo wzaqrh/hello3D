@@ -23,7 +23,7 @@ public:
 	typedef std::vector<std::pair<cbDirectLight*, LightType>> LightsByOrder;
 	LightsByOrder mLightsByOrder;
 public:
-	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, XMINT2 screenSize, CameraPtr defCamera);
+	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, Eigen::Vector2i screenSize, CameraPtr defCamera);
 
 	void RemoveAllCameras();
 	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1);

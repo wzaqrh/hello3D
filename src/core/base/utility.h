@@ -74,15 +74,6 @@ public:
 
 std::vector<char> ReadFile(const char* fileName, const char* mode);
 
-XMFLOAT3 operator-(XMFLOAT3 lhs, XMFLOAT3 rht);
-XMFLOAT3 operator+(XMFLOAT3 lhs, XMFLOAT3 rht);
-XMFLOAT3 operator*(XMFLOAT3 lhs, float d);
-XMFLOAT2 operator-(XMFLOAT2 lhs, XMFLOAT2 rht);
-
-struct XM {
-	static XMMATRIX Inverse(const XMMATRIX& m);
-};
-
 #define COPY_TO_GPU(M) (M)
 
 #define C_WINDOW_WIDTH 1024

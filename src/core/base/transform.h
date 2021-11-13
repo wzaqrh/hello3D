@@ -20,9 +20,9 @@ public:
 	void SetFlipY(bool flip);
 	bool IsFlipY() const;
 
-	const XMMATRIX& GetMatrix();
+	const Eigen::Matrix4f& GetMatrix();
 	const Eigen::Matrix4f& SetMatrixSRT();
-	const XMMATRIX& SetMatrixTSR();
+	const Eigen::Matrix4f& SetMatrixTSR();
 private:
 	Eigen::Matrix4f mMatrix;
 

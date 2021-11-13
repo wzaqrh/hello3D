@@ -133,16 +133,12 @@ cbGlobalParam MakeAutoParam(const Camera& camera, bool castShadow,
 	memset(&globalParam, 0, sizeof(globalParam));
 
 	if (castShadow) {
-		light->CalculateLightingViewProjection(camera, 
-			AS_REF(XMMATRIX, globalParam.View), 
-			AS_REF(XMMATRIX, globalParam.Projection));
+		light->CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
 	}
 	else {
 		globalParam.View = AS_CONST_REF(Eigen::Matrix4f, camera.GetView());
 		globalParam.Projection = AS_CONST_REF(Eigen::Matrix4f, camera.GetProjection());
-		light->CalculateLightingViewProjection(camera, 
-			AS_REF(XMMATRIX, globalParam.LightView), 
-			AS_REF(XMMATRIX, globalParam.LightProjection));
+		light->CalculateLightingViewProjection(camera, globalParam.LightView, globalParam.LightProjection);
 	}
 	globalParam.HasDepthMap = castShadow ? TRUE : FALSE;
 
@@ -299,7 +295,7 @@ bool RenderPipeline::BeginFrame()
 #if REFACTOR
 	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mSceneManager->GetDefCamera()->mPostProcessInput) {
 		mRenderSys.SetRenderTarget(mSceneManager->GetDefCamera()->mPostProcessInput);
-		mRenderSys.ClearColorDepthStencil(XMFLOAT4(0, 0, 0, 0), 1.0, 0);
+		mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
 	}
 	_RenderSkyBox();
 #endif

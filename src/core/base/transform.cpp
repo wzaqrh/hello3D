@@ -65,7 +65,7 @@ const Eigen::Matrix4f& Transform::SetMatrixSRT()
 	return mMatrix;
 }
 
-const XMMATRIX& Transform::SetMatrixTSR()
+const Eigen::Matrix4f& Transform::SetMatrixTSR()
 {
 	if (mDirty)
 	{
@@ -86,12 +86,12 @@ const XMMATRIX& Transform::SetMatrixTSR()
 
 		mMatrix = tsr.matrix();
 	}
-	return AS_CONST_REF(XMMATRIX, mMatrix);
+	return mMatrix;
 }
 
-const XMMATRIX& Transform::GetMatrix()
+const Eigen::Matrix4f& Transform::GetMatrix()
 {
-	return AS_CONST_REF(XMMATRIX, SetMatrixSRT());
+	return SetMatrixSRT();
 }
 
 }

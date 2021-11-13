@@ -31,8 +31,8 @@ public:
 	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
 	const std::vector<PostProcessPtr>& PostProcessEffects() const { return mPostProcessEffects; }
 
-	const XMMATRIX& GetView() const;
-	const XMMATRIX& GetProjection() const  { return AS_CONST_REF(XMMATRIX, mProjection); }
+	const Eigen::Matrix4f& GetView() const;
+	const Eigen::Matrix4f& GetProjection() const  { return mProjection; }
 	
 	int GetWidth() const { return mWidth; }
 	int GetHeight() const  { return mHeight; }

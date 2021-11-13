@@ -35,7 +35,7 @@ protected:
 	virtual void OnRender() = 0;
 	virtual void OnInitLight();
 protected:
-	XMMATRIX GetWorldTransform();
+	Eigen::Matrix4f GetWorldTransform();
 protected:
 	mir::Mir* mContext = nullptr;
 	class mir::D3DInput* mInput = nullptr;

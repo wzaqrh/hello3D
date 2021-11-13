@@ -98,7 +98,7 @@ std::string App::GetName()
 {
 	return mName;
 }
-XMMATRIX App::GetWorldTransform()
+Eigen::Matrix4f App::GetWorldTransform()
 {
 	return mTransform->GetMatrix();
 }

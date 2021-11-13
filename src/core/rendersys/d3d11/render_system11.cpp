@@ -600,7 +600,9 @@ IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDec
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = cbDecl.BufferSize % sizeof(XMFLOAT4) == 0 ? cbDecl.BufferSize : (cbDecl.BufferSize / sizeof(XMFLOAT4) + 1) * sizeof(XMFLOAT4);
+	bd.ByteWidth = cbDecl.BufferSize % sizeof(Eigen::Vector4f) == 0 
+		? cbDecl.BufferSize 
+		: (cbDecl.BufferSize / sizeof(Eigen::Vector4f) + 1) * sizeof(Eigen::Vector4f);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	hr = mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer);
