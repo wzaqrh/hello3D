@@ -7,7 +7,7 @@
 
 namespace mir {
 
-class __declspec(align(16)) Camera : boost::noncopyable
+class Camera : boost::noncopyable
 {
 public:
 	static CameraPtr CreatePerspective(RenderSystem& renderSys,int width, int height, 

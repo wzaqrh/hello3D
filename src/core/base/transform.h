@@ -4,7 +4,7 @@
 
 namespace mir {
 
-struct __declspec(align(16)) Transform {
+struct Transform {
 public:
 	Transform();
 public:

@@ -69,7 +69,7 @@ interface IRenderSystem : boost::noncopyable
 	virtual void EndScene() = 0;
 };
 
-struct __declspec(align(16)) RenderSystem : public IRenderSystem
+struct RenderSystem : public IRenderSystem
 {
 public:
 	RenderSystem();

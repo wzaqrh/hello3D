@@ -51,7 +51,7 @@ public:
 #endif
 };
 
-struct __declspec(align(16)) cbGlobalParam
+struct cbGlobalParam
 {
 	Eigen::Matrix4f World;
 	Eigen::Matrix4f View;
@@ -75,7 +75,7 @@ public:
 #endif
 };
 
-struct __declspec(align(16)) cbFogExp 
+struct  cbFogExp 
 {
 	Eigen::Vector4f FogColorExp;
 public:
@@ -88,7 +88,7 @@ public:
 };
 
 constexpr int MAX_MATRICES = 56;
-struct __declspec(align(16)) cbWeightedSkin
+struct  cbWeightedSkin
 {
 	Eigen::Matrix4f Model;
 	Eigen::Matrix4f Models[MAX_MATRICES];
@@ -103,7 +103,7 @@ struct __declspec(align(16)) cbWeightedSkin
 #endif
 };
 
-struct __declspec(align(16))  cbUnityMaterial
+struct   cbUnityMaterial
 {
 	Eigen::Vector4f _SpecColor;
 	Eigen::Vector4f _Color;
@@ -118,7 +118,7 @@ struct __declspec(align(16))  cbUnityMaterial
 #endif
 };
 
-struct __declspec(align(16)) cbUnityGlobal
+struct  cbUnityGlobal
 {
 	Eigen::Vector4f _Unity_IndirectSpecColor;
 	Eigen::Vector4f _AmbientOrLightmapUV;
