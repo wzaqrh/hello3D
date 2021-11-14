@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 
 namespace mir {
@@ -8,7 +9,7 @@ enum LightType {
 	kLightPoint,
 	kLightSpot
 };
-struct cbDirectLight {
+struct MIR_CORE_API cbDirectLight {
 public:
 	Eigen::Vector4f LightPos;//world space
 	Eigen::Vector4f DiffuseColor;
@@ -25,7 +26,7 @@ public:
 	static ConstBufferDecl& GetDesc();
 #endif
 };
-struct cbPointLight : public cbDirectLight {
+struct MIR_CORE_API cbPointLight : public cbDirectLight {
 public:
 	Eigen::Vector4f Attenuation;
 public:
@@ -37,7 +38,7 @@ public:
 	static ConstBufferDecl& GetDesc();
 #endif
 };
-struct cbSpotLight : public cbPointLight {
+struct MIR_CORE_API cbSpotLight : public cbPointLight {
 public:
 	Eigen::Vector4f DirectionCutOff;
 public:

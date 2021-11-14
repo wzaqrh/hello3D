@@ -1,27 +1,27 @@
 #pragma once
 #include <windows.h>
 #include <dinput.h>
+#include "core/mir_export.h"
 #include "core/rendersys/base_type.h"
-#include "d3d_enum_convert.h"
+#include "core/base/d3d_enum_convert.h"
 
 namespace mir {
 
 bool CheckHR(HRESULT result);
 
-extern std::string gDefRenderSystem;
-extern std::string gModelPath;
-std::string GetCurDirectory();
-std::string GetModelPath();
-std::string MakeModelPath(const char* name);
-std::string GetFileExt(const std::string& fileName);
+MIR_CORE_API std::string GetCurDirectory();
+MIR_CORE_API void SetModelPath(const std::string& modelPath);
+MIR_CORE_API std::string GetModelPath();
+MIR_CORE_API std::string MakeModelPath(const char* name);
+MIR_CORE_API std::string GetFileExt(const std::string& fileName);
 
-bool IsFileExist(const std::string& fileName);
+MIR_CORE_API bool IsFileExist(const std::string& fileName);
 
 struct Int4 {
 	int x, y, z, w;
 };
 
-class D3DInput {
+class MIR_CORE_API D3DInput {
 public:
 	D3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
 	~D3DInput();
@@ -44,7 +44,7 @@ private:
 	Int4 mMouseL, mMouseR;
 };
 
-class TimeProfile {
+class MIR_CORE_API TimeProfile {
 	std::string mName;
 	unsigned int mCurTime;
 public:
@@ -54,7 +54,7 @@ public:
 #define TIME_PROFILE(NAME) TimeProfile NAME(#NAME)
 #define TIME_PROFILE2(NAME1,NAME2) TimeProfile NAME(#NAME1+(":"+NAME2))
 
-class Timer {
+class MIR_CORE_API Timer {
 	double mLastTime = 0.0;
 public:
 	double mDeltaTime = 0.0;

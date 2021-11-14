@@ -57,10 +57,10 @@ void TestShadowMap::OnPostInitDevice()
 	auto move1 = std::make_shared<Transform>();
 	move1->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
 	mModel1 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), move1, matName);
-	gModelPath = "Spaceship\\"; mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
+	SetModelPath("Spaceship\\"); mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
 	mModel2 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, matName);
-	gModelPath = "Spaceship\\"; mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
+	SetModelPath("Spaceship\\"); mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 
 void TestShadowMap::OnRender()

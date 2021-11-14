@@ -120,7 +120,7 @@ void TestPBR::OnPostInitDevice()
 	}
 #else
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
-	auto fileName = "Male03.FBX"; gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath(fileName)); 
+	auto fileName = "Male03.FBX"; SetModelPath("Male03\\"); mModel->LoadModel(MakeModelPath(fileName)); 
 	mMoveDefScale = 0.07;
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));

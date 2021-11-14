@@ -1,9 +1,10 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
 
-class RenderableFactory 
+class MIR_CORE_API RenderableFactory 
 {
 	IRenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;

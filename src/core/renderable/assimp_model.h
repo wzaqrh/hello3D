@@ -10,7 +10,7 @@
 #include <assimp/IOStream.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
-
+#include "core/mir_export.h"
 #include "core/renderable/renderable.h"
 #include "core/renderable/assimp_mesh.h"
 
@@ -36,7 +36,7 @@ public:
 	}
 };
 
-class AssimpModel : public IRenderable {
+class MIR_CORE_API AssimpModel : public IRenderable {
 public:
 	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
 	~AssimpModel();

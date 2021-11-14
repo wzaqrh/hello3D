@@ -1,12 +1,13 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
 
-interface IRenderSystem : boost::noncopyable 
+interface MIR_CORE_API IRenderSystem : boost::noncopyable 
 {
 	virtual bool Initialize(HWND hWnd, RECT vp = { 0,0,0,0 }) = 0;
 	virtual void Update(float dt) = 0;
@@ -69,7 +70,7 @@ interface IRenderSystem : boost::noncopyable
 	virtual void EndScene() = 0;
 };
 
-struct RenderSystem : public IRenderSystem
+struct MIR_CORE_API RenderSystem : public IRenderSystem
 {
 public:
 	RenderSystem();

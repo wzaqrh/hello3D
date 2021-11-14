@@ -163,9 +163,9 @@ FontCache::~FontCache()
 	FT_Done_FreeType(mFtLib);
 }
 
-TFontPtr FontCache::GetFont(std::string fontPath, int fontSize)
+FontPtr FontCache::GetFont(std::string fontPath, int fontSize)
 {
-	TFontPtr font = nullptr;
+	FontPtr font = nullptr;
 	FontKey key = { fontPath, fontSize };
 	auto iter = mFonts.find(key);
 	if (iter != mFonts.end()) {

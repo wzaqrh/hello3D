@@ -26,7 +26,7 @@ void TestModel::OnPostInitDevice()
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mTransform->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
 	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mTransform->SetDefScale(0.01);
-	gModelPath = "Male03\\"; mModel->LoadModel(MakeModelPath("Male02.FBX")); 
+	SetModelPath("Male03\\"); mModel->LoadModel(MakeModelPath("Male02.FBX")); 
 	mMoveDefScale = 0.07; 
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));

@@ -1,12 +1,13 @@
 #pragma once
 #include "core/base/std.h"
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/material_cb.h"
 
 namespace mir {
 
-class RenderPipeline
+class MIR_CORE_API RenderPipeline
 {
 	RenderSystem& mRenderSys;
 	const int mScreenWidth, mScreenHeight;

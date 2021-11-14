@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/mir_export.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
@@ -7,7 +8,7 @@
 
 namespace mir {
 
-class Camera : boost::noncopyable
+class MIR_CORE_API Camera : boost::noncopyable
 {
 public:
 	static CameraPtr CreatePerspective(RenderSystem& renderSys,int width, int height, 

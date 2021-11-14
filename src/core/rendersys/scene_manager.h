@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/base_type.h"
@@ -8,7 +9,7 @@
 
 namespace mir {
 
-class SceneManager : boost::noncopyable 
+class MIR_CORE_API SceneManager : boost::noncopyable 
 {
 public:
 	RenderSystem& mRenderSys;

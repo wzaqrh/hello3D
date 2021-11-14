@@ -1,10 +1,11 @@
 #pragma once
-#include "core/rendersys/base_type.h"
+#include "core/mir_export.h"
 #include "core/base/predeclare.h"
+#include "core/rendersys/base_type.h"
 
 namespace mir {
 
-struct Transform {
+struct MIR_CORE_API Transform {
 public:
 	Transform();
 public:

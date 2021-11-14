@@ -6,32 +6,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 #include <windows.h>
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dcompiler.h>
-#include <xnamath.h>
-#include <dinput.h>
 #include "core/rendersys/render_system.h"
 #include "core/base/utility.h"
 #include "test/app.h"
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-
-#define MIR_UNIT_TEST
-#if defined MIR_UNIT_TEST
-int main(int argc, const char* argv[]) {
-	//int argc = 0; LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
-	//Catch::Session().run<wchar_t>(argc, argv);
-	int result = Catch::Session().run<char>(argc, argv);
-	if (result)
-		system("pause");
-	return result;
-}
-#endif
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
@@ -48,15 +28,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		return 0;
 
 	MSG msg = { 0 };
-	while (WM_QUIT != msg.message)
-	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
+	while (WM_QUIT != msg.message) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
+		else {
 			AppDraw->Render();
 		}
 	}
@@ -94,7 +71,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pH
 	auto HWnd = CreateWindowA("TutorialWindowClass", name, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
 		NULL);
-	if (! HWnd)
+	if (!HWnd)
 		return E_FAIL;
 
 	*pHandle = HWnd;
@@ -112,8 +89,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 
-	switch (message)
-	{
+	switch (message) {
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);

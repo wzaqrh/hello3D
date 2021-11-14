@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/renderable.h"
 
@@ -8,7 +9,7 @@ struct SkyboxVertex {
 	Eigen::Vector4f pos;
 };
 
-class SkyBox : public IRenderable 
+class MIR_CORE_API SkyBox : public IRenderable 
 {
 private:
 	IRenderSystem& mRenderSys;

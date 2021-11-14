@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
 #include "core/renderable/renderable_factory.h"
@@ -8,7 +9,7 @@
 
 namespace mir {
 
-class Mir {
+class MIR_CORE_API Mir {
 	RenderSystemPtr mRenderSys;
 	RenderPipelinePtr mRenderPipe;
 	MaterialFactoryPtr mMaterialFac;
@@ -20,11 +21,11 @@ public:
 	bool Initialize(HWND hWnd);
 	void Dispose();
 public:
-	RenderPipeline* RenderPipe() { return mRenderPipe.get(); }
-	const RenderSystemPtr& RenderSys() { return mRenderSys; }
-	const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
-	const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }
-	const SceneManagerPtr& SceneMng() { return mSceneMng; }
+	inline const RenderPipelinePtr& RenderPipe() { return mRenderPipe; }
+	inline const RenderSystemPtr& RenderSys() { return mRenderSys; }
+	inline const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
+	inline const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }
+	inline const SceneManagerPtr& SceneMng() { return mSceneMng; }
 };
 
 }

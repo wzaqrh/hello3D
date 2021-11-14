@@ -84,7 +84,7 @@ public:
 	FontCharactorPtr GetCharactor(int ch);
 	void Flush();
 };
-typedef std::shared_ptr<Font> TFontPtr;
+typedef std::shared_ptr<Font> FontPtr;
 
 class FontCache
 {
@@ -99,11 +99,11 @@ class FontCache
 			return size < other.size;
 		}
 	};
-	std::map<FontKey, TFontPtr> mFonts;
+	std::map<FontKey, FontPtr> mFonts;
 public:
 	FontCache(IRenderSystem& renderSys, int dpi = 72);
 	~FontCache();
-	TFontPtr GetFont(std::string fontPath, int fontSize);
+	FontPtr GetFont(std::string fontPath, int fontSize);
 };
 typedef std::shared_ptr<FontCache> FontCachePtr;
 

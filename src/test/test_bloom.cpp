@@ -29,7 +29,7 @@ void TestBloom::OnPostInitDevice()
 	camera->AddPostProcessEffect(rendFac->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM, *camera));
 
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
-	gModelPath = "Spaceship\\"; 
+	SetModelPath("Spaceship\\"); 
 	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
 	mMoveDefScale = 0.01;
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));

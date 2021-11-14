@@ -35,7 +35,7 @@ MeshPtr RenderableFactory::CreateMesh(const std::string& matName, int vertCount 
 
 LabelPtr RenderableFactory::CreateLabel(const std::string& fontPath, int fontSize)
 {
-	TFontPtr font = mFontCache->GetFont(fontPath, fontSize);
+	FontPtr font = mFontCache->GetFont(fontPath, fontSize);
 	return std::make_shared<Label>(mRenderSys, mMaterialFac, font);
 }
 

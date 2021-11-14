@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/resource.h"
@@ -97,7 +98,7 @@ public:
 	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);
 };
 
-class Material : public Resource 
+class MIR_CORE_API Material : public Resource 
 {
 	std::vector<TechniquePtr> mTechniques;
 	int mCurTechIdx = 0;

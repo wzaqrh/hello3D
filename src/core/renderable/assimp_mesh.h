@@ -1,5 +1,6 @@
 #pragma once
 #include <assimp/mesh.h>
+#include "core/mir_export.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -16,7 +17,7 @@ struct AssimpMeshVertex
 	Eigen::Vector3f BiTangent;
 };
 
-class AssimpMesh : public IRenderable {
+class MIR_CORE_API AssimpMesh : public IRenderable {
 public:
 	const aiMesh* Data = nullptr;
 	std::vector<AssimpMeshVertex> Vertices;

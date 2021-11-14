@@ -239,6 +239,9 @@ std::string GetCurDirectory()
 }
 
 std::string gModelPath;
+void SetModelPath(const std::string& modelPath) {
+	gModelPath = modelPath;
+}
 std::string GetModelPath() {
 	return GetCurDirectory() + "\\model\\" + gModelPath;
 }

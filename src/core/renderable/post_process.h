@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -15,7 +16,7 @@ public:
 	void SetFlipY(bool flipY);
 	void SetZ(float z);
 };
-class PostProcess : public IRenderable 
+class MIR_CORE_API PostProcess : public IRenderable 
 {
 protected:
 	IRenderSystem& mRenderSys;
@@ -30,7 +31,7 @@ public:
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 };
 
-class Bloom : public PostProcess 
+class MIR_CORE_API Bloom : public PostProcess 
 {
 public:
 	Bloom(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePtr mainTex);

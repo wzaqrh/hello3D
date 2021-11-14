@@ -46,7 +46,7 @@ void TestSpecSkybox::OnPostInitDevice()
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	
 	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
-	gModelPath = "Spaceship\\"; 
+	SetModelPath("Spaceship\\"); 
 	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
 	mMoveDefScale = 0.01;
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));

@@ -1,6 +1,7 @@
 #pragma once
-#include "core/base/std.h"
 #include <boost/noncopyable.hpp>
+#include "core/mir_export.h"
+#include "core/base/std.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/material.h"
@@ -39,7 +40,7 @@ public:
 	const RenderOperation& operator[](size_t pos) const { return At(pos); }
 };
 
-interface IRenderable : boost::noncopyable {
+interface MIR_CORE_API IRenderable : boost::noncopyable {
 	virtual int GenRenderOperation(RenderOperationQueue& opList) = 0;
 };
 

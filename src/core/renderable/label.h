@@ -1,14 +1,17 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/renderable/renderable.h"
-#include "core/renderable/font.h"
 #include "core/renderable/sprite.h"
 
 namespace mir {
 
-class Label : public IRenderable 
+typedef std::shared_ptr<class Font> FontPtr;
+typedef std::shared_ptr<struct FontCharactor> FontCharactorPtr;
+
+class MIR_CORE_API Label : public IRenderable 
 {
 	IRenderSystem& mRenderSys;
-	TFontPtr mFont;
+	FontPtr mFont;
 
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
@@ -24,15 +27,19 @@ public:
 		ITexturePtr texture;
 		Eigen::Vector2i pen;//dot space
 	};
+	struct BBox {
+		long xMin, yMin;
+		long xMax, yMax;
+	};
 	std::vector<CharEntry> mCharSeq;
 	std::vector<int> mCharSeqOrder;
-	FT_BBox mBBox;//dot space
+	BBox mBBox;//dot space
 	int mLineCount = 0;
 	Eigen::Vector2f mConetentSize;//dot space
 	bool mAutoUptSize = true;
 	float mScale = 1;
 public:
-	Label(IRenderSystem& renderSys, MaterialFactory& matFac, TFontPtr font);
+	Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font);
 	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 public:
 	void SetString(const std::string& str);

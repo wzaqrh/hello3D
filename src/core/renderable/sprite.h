@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/renderable.h"
 
@@ -23,7 +24,7 @@ private:
 	void DoSetTexCoords(Eigen::Vector2f plb, Eigen::Vector2f prt);
 };
 
-class Sprite : public IRenderable 
+class MIR_CORE_API Sprite : public IRenderable 
 {
 public:
 	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");

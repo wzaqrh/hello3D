@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <boost/noncopyable.hpp>
 #include "core/base/std.h"
+#include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 
 namespace mir {
@@ -13,7 +14,7 @@ enum ResourceState {
 	kResourceStateLoaded,
 	kResourceStateUnloading
 };
-interface IResource : boost::noncopyable {
+interface MIR_CORE_API IResource : boost::noncopyable {
 public:
 	bool IsLoaded() { return GetCurState() == kResourceStateLoaded; }
 	bool IsLoading() { return GetCurState() == kResourceStateLoading; }
@@ -30,7 +31,7 @@ public:
 	virtual void AddDependency(IResourcePtr res) = 0;
 };
 
-struct Resource : public IResource {
+struct MIR_CORE_API Resource : public IResource {
 	IUnknown** mDeviceObj;
 	ResourceState mCurState;
 	std::vector<std::function<void(IResource*)>> mOnLoadeds;

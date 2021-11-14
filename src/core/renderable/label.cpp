@@ -1,6 +1,7 @@
 #include "freetype2/freetype/ftglyph.h"
-#include "core/renderable/label.h"
 #include "core/base/transform.h"
+#include "core/renderable/font.h"
+#include "core/renderable/label.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
@@ -24,7 +25,7 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-Label::Label(IRenderSystem& renderSys, MaterialFactory& matFac, TFontPtr font)
+Label::Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font)
 	:mRenderSys(renderSys)
 {
 	mFont = font;
