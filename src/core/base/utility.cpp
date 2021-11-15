@@ -249,25 +249,6 @@ std::string MakeModelPath(const char* name) {
 	return GetModelPath() + name;
 }
 
-std::string GetFileExt(const std::string& fileName)
-{
-	std::string ext;
-	size_t pos = fileName.find_last_of(".");
-	if (pos != std::string::npos) {
-		ext = fileName.substr(pos + 1);
-	}
-	return ext;
-}
-
-bool IsFileExist(const std::string& fileName)
-{
-	WIN32_FIND_DATAA wfd;
-	HANDLE hFind = FindFirstFileA(fileName.c_str(), &wfd);
-	if (INVALID_HANDLE_VALUE != hFind) {
-		return true;
-	}
-	return false;
-}
 
 double Timer::Update()
 {

@@ -12,15 +12,9 @@ bool CheckHR(HRESULT result);
 MIR_CORE_API std::string GetCurDirectory();
 MIR_CORE_API void SetModelPath(const std::string& modelPath);
 MIR_CORE_API std::string GetModelPath();
-MIR_CORE_API std::string MakeModelPath(const char* name);
-MIR_CORE_API std::string GetFileExt(const std::string& fileName);
-
-MIR_CORE_API bool IsFileExist(const std::string& fileName);
-
-struct Int4 {
+MIR_CORE_API std::string MakeModelPath(const char* name);struct Int4 {
 	int x, y, z, w;
 };
-
 class MIR_CORE_API D3DInput {
 public:
 	D3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);

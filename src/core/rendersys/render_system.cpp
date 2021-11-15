@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include "core/rendersys/render_system.h"
 #include "core/base/utility.h"
 
@@ -13,8 +14,7 @@ RenderSystem::~RenderSystem()
 
 IProgramPtr RenderSystem::CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
-	std::string ext = GetFileExt(name);
-	if (ext.empty()) {
+	if (boost::filesystem::path(name).extension().empty()) {
 		std::string fullname = "shader\\" + mFXCDir + name;
 		return CreateProgramByFXC(fullname, vsEntry, psEntry);
 	}

@@ -119,7 +119,7 @@
     <IncludePath>$(IncludePath);$(SolutionDir)src;$(SolutionDir)include</IncludePath>
     <OutDir>$(SolutionDir)bin\x86\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\test\</IntDir>
-    <LibraryPath>$(SolutionDir)bin\x86\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)bin\x86\$(Configuration)\;$(SolutionDir)lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

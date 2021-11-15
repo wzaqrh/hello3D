@@ -1,4 +1,5 @@
 #include <boost/assert.hpp>
+#include <boost/filesystem.hpp>
 #include <windows.h>
 #include <dxerr.h>
 #include <d3dcompiler.h>
@@ -646,7 +647,7 @@ ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, ResourceFormat 
 {
 	std::string imgPath = GetModelPath() + pSrcFile;
 #ifdef USE_ONLY_PNG
-	if (!IsFileExist(imgPath)) {
+	if (!boost::filesystem::exists(imgPath)) {
 		auto pos = imgPath.find_last_of(".");
 		if (pos != std::string::npos) {
 			imgPath = imgPath.substr(0, pos);
@@ -657,8 +658,7 @@ ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, ResourceFormat 
 	pSrcFile = imgPath.c_str();
 
 	ITexturePtr pTextureRV;
-	if (IsFileExist(pSrcFile))
-	{
+	if (boost::filesystem::exists(pSrcFile)) {
 		D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
 		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;

@@ -1,4 +1,5 @@
 #include <boost/algorithm/clamp.hpp>
+#include <boost/filesystem.hpp>
 #include "core/base/transform.h"
 #include "core/base/utility.h"
 #include "core/rendersys/render_system.h"
@@ -6,6 +7,8 @@
 #include "test/app.h"
 
 using namespace mir;
+
+
 
 App::App()
 {

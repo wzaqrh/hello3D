@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include "test/test_case.h"
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
@@ -22,7 +23,7 @@ private:
 
 ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 {
-	std::string path = GetCurDirectory() + "\\model\\" + filename;
+	std::string path = boost::filesystem::current_path().string() + "\\model\\" + filename;
 	
 	FILE* fd = fopen(path.c_str(), "rb");
 	assert(fd);

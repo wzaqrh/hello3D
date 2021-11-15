@@ -1,8 +1,9 @@
+#include <boost/assert.hpp>
+#include <boost/filesystem.hpp>
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/d3d9/interface_type9.h"
 #include "core/rendersys/material_factory.h"
 #include "core/base/utility.h"
-#include <boost/assert.hpp>
 
 namespace mir {
 
@@ -413,7 +414,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFo
 {
 	std::string imgPath = GetModelPath() + srcFile;
 #ifdef USE_ONLY_PNG
-	if (!IsFileExist(imgPath)) {
+	if (! boost::filesystem::exists(imgPath)) {
 		auto pos = imgPath.find_last_of(".");
 		if (pos != std::string::npos) {
 			imgPath = imgPath.substr(0, pos);
@@ -424,7 +425,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFo
 	std::string pSrcFile = imgPath.c_str();
 
 	Texture9Ptr pTextureRV;
-	if (IsFileExist(pSrcFile)) {
+	if (boost::filesystem::exists(pSrcFile)) {
 		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
 		if (isCube) {
 			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile.c_str(), 

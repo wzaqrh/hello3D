@@ -2,7 +2,8 @@
 #include "core/mir.h"
 #include "core/predeclare.h"
 
-namespace mir {
+namespace mir 
+{
 	struct aiNode;
 	class AssimpModel;
 	class D3DInput;
