@@ -1,7 +1,8 @@
 #include "core/renderable/renderable_factory.h"
-#include "core/renderable/sprite.h"
 #include "core/renderable/skybox.h"
+#include "core/renderable/sprite.h"
 #include "core/renderable/mesh.h"
+#include "core/renderable/assimp_model.h"
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
 #include "core/renderable/post_process.h"
@@ -11,6 +12,8 @@
 
 namespace mir {
 
+#define NotEmptyOr(Str, DefStr) (!Str.empty() ? Str : DefStr)
+
 RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac)
 	: mRenderSys(renderSys) 
 	, mMaterialFac(matFac)
@@ -18,37 +21,45 @@ RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& 
 	mFontCache = std::make_shared<FontCache>(renderSys);
 }
 
-SpritePtr RenderableFactory::CreateSprite()
+SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matName)
 {
-	return std::make_shared<Sprite>(mRenderSys, mMaterialFac, E_MAT_SPRITE);
+	SpritePtr sprite = Sprite::Create(mRenderSys, mMaterialFac, NotEmptyOr(matName, E_MAT_SPRITE));
+	if (! imgpath.empty()) 
+		sprite->SetTexture(mRenderSys.LoadTexture("model\\theyKilledKenny.jpg", kFormatUnknown, true, false));
+	return sprite;
 }
 
-SpritePtr RenderableFactory::CreateColorLayer()
+SpritePtr RenderableFactory::CreateColorLayer(string_cref matName)
 {
-	return std::make_shared<Sprite>(mRenderSys, mMaterialFac, E_MAT_LAYERCOLOR);
+	return Sprite::Create(mRenderSys, mMaterialFac, NotEmptyOr(matName, E_MAT_LAYERCOLOR));
 }
 
-MeshPtr RenderableFactory::CreateMesh(const std::string& matName, int vertCount /*= 1024*/, int indexCount /*= 1024*/)
+MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, string_cref matName)
 {
-	return std::make_shared<Mesh>(mRenderSys, mMaterialFac, E_MAT_SPRITE, vertCount, indexCount);
+	return Mesh::Create(mRenderSys, mMaterialFac, NotEmptyOr(matName, E_MAT_SPRITE), vertCount, indexCount);
 }
 
-LabelPtr RenderableFactory::CreateLabel(const std::string& fontPath, int fontSize)
+AssimpModelPtr RenderableFactory::CreateAssimpModel(const TransformPtr& transform, string_cref matName)
+{
+	return AssimpModel::Create(mRenderSys, mMaterialFac, transform, NotEmptyOr(matName, E_MAT_MODEL));
+}
+
+LabelPtr RenderableFactory::CreateLabel(string_cref fontPath, int fontSize)
 {
 	FontPtr font = mFontCache->GetFont(fontPath, fontSize);
-	return std::make_shared<Label>(mRenderSys, mMaterialFac, font);
+	return Label::Create(mRenderSys, mMaterialFac, font);
 }
 
-SkyBoxPtr RenderableFactory::CreateSkybox(const std::string& imgName)
+SkyBoxPtr RenderableFactory::CreateSkybox(string_cref imgpath)
 {
-	return std::make_shared<SkyBox>(mRenderSys, mMaterialFac, imgName);
+	return SkyBox::Create(mRenderSys, mMaterialFac, imgpath);
 }
 
-PostProcessPtr RenderableFactory::CreatePostProcessEffect(const std::string& effectName, Camera& camera)
+PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName, Camera& camera)
 {
 	PostProcessPtr process;
 	if (effectName == E_MAT_POSTPROC_BLOOM) {
-		process = std::make_shared<Bloom>(mRenderSys, mMaterialFac, camera.FetchPostProcessInput());
+		process = Bloom::Create(mRenderSys, mMaterialFac, camera.FetchPostProcessInput());
 	}
 	return process;
 }

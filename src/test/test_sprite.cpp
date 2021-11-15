@@ -18,24 +18,16 @@ private:
 
 void TestSprite::OnPostInitDevice()
 {
-#if 0
-	mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_SPRITE);
-	mSprite->SetTexture(mContext->GetRenderSys()->GetTexByPath("image\\smile.png"));
-	mSprite->SetPosition(-5, -5, 0);
-	mSprite->SetSize(5, 5);
-#else
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LAYERCOLOR);
-	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
+	mSprite = mContext->RenderableFac()->CreateSprite();
 	mSprite->SetTexture(mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg"));
 
 	int win_width = mContext->RenderSys()->WinSize().x();
 	int win_height = mContext->RenderSys()->WinSize().y();
 	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
 	mSprite->SetSize(Eigen::Vector2f(win_width / 2, win_height / 2));
-#endif
 }
 
 void TestSprite::OnRender()

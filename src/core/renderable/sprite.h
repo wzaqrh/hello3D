@@ -12,7 +12,6 @@ struct SpriteVertex {
 };
 
 struct SpriteVertexQuad {
-	SpriteVertex lb, lt, rt, rb;
 	SpriteVertexQuad();
 	SpriteVertexQuad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
@@ -22,29 +21,34 @@ struct SpriteVertexQuad {
 	void SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vector2f& uv1);
 private:
 	void DoSetTexCoords(Eigen::Vector2f plb, Eigen::Vector2f prt);
+public:
+	SpriteVertex lb, lt, rt, rb;
 };
 
 class MIR_CORE_API Sprite : public IRenderable 
 {
-public:
+	friend class RenderableFactory;
+	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
 	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");
+public:
 	~Sprite();
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetSize(const Eigen::Vector2f& size);
-	void SetTexture(ITexturePtr Texture);
+	void SetTexture(const ITexturePtr& Texture);
 	void SetColor(const Eigen::Vector4f& color);
 	void SetFlipY(bool flipY);
 public:
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-	const SpriteVertexQuad* GetQuad() const { return &mQuad; }
-public:
-	MaterialPtr mMaterial;
-	TransformPtr mTransform;
+	int GenRenderOperation(RenderOperationQueue& opList) override;
+	const SpriteVertexQuad* GetVertexData() const { return &mQuad; }
+	const MaterialPtr& GetMaterial() const { return mMaterial; }
+	const TransformPtr& GetTransform() const { return mTransform; }
 private:
 	IRenderSystem& mRenderSys;
 	ITexturePtr mTexture = nullptr;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
+	MaterialPtr mMaterial;
+	TransformPtr mTransform;
 private:
 	SpriteVertexQuad mQuad;
 	bool mQuadDirty;

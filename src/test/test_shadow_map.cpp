@@ -23,7 +23,7 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModel *mModel1, *mModel2 = nullptr;
+	AssimpModelPtr mModel1, mModel2 = nullptr;
 	cbPointLightPtr mLight;
 };
 
@@ -56,10 +56,10 @@ void TestShadowMap::OnPostInitDevice()
 
 	auto move1 = std::make_shared<Transform>();
 	move1->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
-	mModel1 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), move1, matName);
+	mModel1 = mContext->RenderableFac()->CreateAssimpModel(move1, matName);
 	SetModelPath("Spaceship\\"); mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
 
-	mModel2 = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, matName);
+	mModel2 = mContext->RenderableFac()->CreateAssimpModel(mTransform, matName);
 	SetModelPath("Spaceship\\"); mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
 }
 

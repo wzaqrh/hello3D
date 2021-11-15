@@ -18,7 +18,7 @@ struct RenderOperation {
 	TextureBySlot mTextures;
 	Eigen::Matrix4f mWorldTransform;
 public:
-	RenderOperation(): mIndexPos(0), mIndexCount(0), mIndexBase(0),mWorldTransform(Eigen::Matrix4f::Identity()) {}
+	RenderOperation(): mIndexPos(0), mIndexCount(0), mIndexBase(0), mWorldTransform(Eigen::Matrix4f::Identity()) {}
 };
 
 struct RenderOperationQueue {

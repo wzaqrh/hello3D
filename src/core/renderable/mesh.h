@@ -12,8 +12,24 @@ struct MeshVertex {
 
 class MIR_CORE_API Mesh : public IRenderable 
 {
-	IRenderSystem& mRenderSys;
+	friend class RenderableFactory;
+	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
+	Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName, 
+		int vertCount = 1024, int indexCount = 1024);
 public:
+	void Clear();
+	void SetVertexs(const MeshVertex* vertData, int vertCount);
+	void SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos);
+	void SetPositions(const Eigen::Vector3f* posData, int count);
+	void SetColors(const Eigen::Vector4f* colorData, int count);
+	void SetUVs(const Eigen::Vector2f* uvData, int count);
+	void SetSubMeshCount(int count);
+	void SetIndices(const unsigned int* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
+	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
+public:
+	int GenRenderOperation(RenderOperationQueue& opList) override;
+private:
+	IRenderSystem& mRenderSys;
 	MaterialPtr Material;
 
 	int VertPos = 0, VertDirty = false;
@@ -25,23 +41,10 @@ public:
 	IIndexBufferPtr IndexBuffer;
 
 	struct SubMesh {
-		short IndicePos,IndiceCount,IndiceBase;
+		short IndicePos, IndiceCount, IndiceBase;
 		TextureBySlot Textures;
 	};
 	std::vector<SubMesh> SubMeshs;
-public:
-	Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName, int vertCount = 1024, int indexCount = 1024);
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-
-	void Clear();
-	void SetVertexs(const MeshVertex* vertData, int vertCount);
-	void SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos);
-	void SetPositions(const Eigen::Vector3f* posData, int count);
-	void SetColors(const Eigen::Vector4f* colorData, int count);
-	void SetUVs(const Eigen::Vector2f* uvData, int count);
-	void SetSubMeshCount(int count);
-	void SetIndices(const unsigned int* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
-	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
 };
 
 }

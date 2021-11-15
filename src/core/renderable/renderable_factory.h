@@ -10,13 +10,15 @@ class MIR_CORE_API RenderableFactory
 	MaterialFactory& mMaterialFac;
 	FontCachePtr mFontCache;
 public:
+	typedef const std::string& string_cref;
 	RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac);
-	SpritePtr CreateSprite();
-	SpritePtr CreateColorLayer();
-	MeshPtr CreateMesh(const std::string& matName, int vertCount = 1024, int indexCount = 1024);
-	LabelPtr CreateLabel(const std::string& fontPath, int fontSize);
-	SkyBoxPtr CreateSkybox(const std::string& imgName);
-	PostProcessPtr CreatePostProcessEffect(const std::string& effectName, Camera& camera);
+	SkyBoxPtr CreateSkybox(string_cref imgpath);
+	SpritePtr CreateColorLayer(string_cref matName = "");
+	SpritePtr CreateSprite(string_cref imgpath = "", string_cref matName = "");
+	MeshPtr CreateMesh(int vertCount = 1024, int indexCount = 1024, string_cref matName = "");
+	AssimpModelPtr CreateAssimpModel(const TransformPtr& transform, string_cref matName = "");
+	LabelPtr CreateLabel(string_cref fontPath, int fontSize);
+	PostProcessPtr CreatePostProcessEffect(string_cref effectName, Camera& camera);
 };
 
 }

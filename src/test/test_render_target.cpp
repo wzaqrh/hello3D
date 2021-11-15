@@ -17,7 +17,7 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModel* mModel = nullptr;
+	AssimpModelPtr mModel = nullptr;
 	IRenderTexturePtr mRendTexture = nullptr;
 	SpritePtr mSprite, mLayerColor;
 };
@@ -33,7 +33,7 @@ void TestRT::OnInitLight()
 
 void TestRT::OnPostInitDevice()
 {
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
 	SetModelPath("Spaceship\\"); 
 	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
 	mMoveDefScale = 0.01;
@@ -45,7 +45,7 @@ void TestRT::OnPostInitDevice()
 		mContext->RenderSys()->WinSize().y(), 
 		kFormatR32G32B32A32Float);
 
-	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
+	mSprite = mContext->RenderableFac()->CreateSprite();
 	mSprite->SetTexture(mRendTexture->GetColorTexture());
 	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
 	mSprite->SetSize(Eigen::Vector2f(5, 5));

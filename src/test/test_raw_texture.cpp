@@ -76,8 +76,7 @@ void TestRawTexture::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	mSprite = std::make_shared<Sprite>(*mContext->RenderSys(), *mContext->MaterialFac(), E_MAT_SPRITE);
-	mSprite->SetTexture(LoadTexture("smile.bmp"));
+	mSprite = mContext->RenderableFac()->CreateSprite("smile.bmp", E_MAT_SPRITE);
 
 	mSprite->SetPosition(Eigen::Vector3f(
 		-mContext->RenderSys()->WinSize().x() / 2, 

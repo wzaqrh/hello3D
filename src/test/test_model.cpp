@@ -14,7 +14,7 @@ protected:
 	virtual void OnPostInitDevice() override;
 private:
 	int mDrawFlag = 0;
-	AssimpModel* mModel = nullptr;
+	AssimpModelPtr mModel = nullptr;
 };
 
 void TestModel::OnPostInitDevice()
@@ -22,7 +22,7 @@ void TestModel::OnPostInitDevice()
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
 	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mTransform->SetDefScale(0.01); mModel->PlayAnim(0);
 	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
 	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mTransform->SetDefScale(0.01);

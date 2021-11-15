@@ -8,11 +8,13 @@
 
 namespace mir {
 
+constexpr int CMaxStringLength = 256;
+
 struct IndicesData {
-	unsigned int Indices[Label::MAX_STRING_LENGTH * 6];
+	unsigned int Indices[CMaxStringLength * 6];
 	IndicesData() {
 		unsigned int c_indices[6] = { 0, 1, 2, 0, 2, 3 };
-		for (size_t i = 0; i < Label::MAX_STRING_LENGTH; ++i) {
+		for (size_t i = 0; i < CMaxStringLength; ++i) {
 			int base = i * 6, off = i * 4;
 			Indices[base + 0] = c_indices[0] + off;
 			Indices[base + 1] = c_indices[1] + off;
@@ -33,8 +35,8 @@ Label::Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font)
 	mTransform = std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(E_MAT_LABEL);
 
-	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(unsigned int) * 6 * MAX_STRING_LENGTH, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
-	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SpriteVertexQuad) * MAX_STRING_LENGTH, sizeof(SpriteVertex), 0, nullptr);
+	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(unsigned int) * 6 * CMaxStringLength, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
+	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SpriteVertexQuad) * CMaxStringLength, sizeof(SpriteVertex), 0, nullptr);
 }
 
 int Label::GenRenderOperation(RenderOperationQueue& opList)

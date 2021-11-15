@@ -21,6 +21,8 @@ typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
 #define MakePtr std::make_shared
 #define PtrRaw(T) T.get()
 
-//#define PRELOAD_SHADER
-
 #define interface struct
+
+#define DECLARE_STATIC_CREATE_CONSTRUCTOR(CLASS) \
+	template <typename... T> static std::shared_ptr<CLASS> \
+	Create(T &&...args) { return std::shared_ptr<CLASS>(new CLASS(std::forward<T>(args)...)); }

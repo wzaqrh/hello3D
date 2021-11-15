@@ -15,7 +15,7 @@ protected:
 	virtual void OnInitLight() override;
 	virtual void OnPostInitDevice() override;
 private:
-	AssimpModel* mModel = nullptr;
+	AssimpModelPtr mModel = nullptr;
 };
 
 void TestSpecSkybox::OnInitLight()
@@ -45,7 +45,7 @@ void TestSpecSkybox::OnPostInitDevice()
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
 	
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
 	SetModelPath("Spaceship\\"); 
 	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
 	mMoveDefScale = 0.01;

@@ -36,25 +36,25 @@ public:
 	}
 };
 
-class MIR_CORE_API AssimpModel : public IRenderable {
-public:
+class MIR_CORE_API AssimpModel : public IRenderable 
+{
+	friend class RenderableFactory;
+	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
 	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
+public:
 	~AssimpModel();
 public:
 	void LoadModel(const std::string& imgPath);
 	void PlayAnim(int Index);
 
 	void Update(float dt);
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
+	int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex);
 	void DoDraw(aiNode* node, RenderOperationQueue& opList);
 	void processNode(aiNode * node, const aiScene * scene);
 	AssimpMeshPtr processMesh(aiMesh * mesh, const aiScene * scene);
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
-private:
-	MaterialPtr mMaterial;
-	TransformPtr mTransform;
 public:
 	AssimpMeshPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
@@ -68,6 +68,8 @@ private:
 	float mElapse = 0.0f;
 	Assimp::Importer* mImporter = nullptr;
 	IRenderSystem& mRenderSys;
+	MaterialPtr mMaterial;
+	TransformPtr mTransform;
 };
 
 }

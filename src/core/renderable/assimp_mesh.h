@@ -5,7 +5,6 @@
 
 namespace mir {
 
-//#define MESH_VETREX_POSTEX
 struct AssimpMeshVertex
 {
 	Eigen::Vector3f Pos;
@@ -17,8 +16,25 @@ struct AssimpMeshVertex
 	Eigen::Vector3f BiTangent;
 };
 
-class MIR_CORE_API AssimpMesh : public IRenderable {
+class MIR_CORE_API AssimpMesh : public IRenderable 
+{
+	friend class AssimpModel;
+	friend class RenderableFactory;
+	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpMesh);
+	AssimpMesh(const aiMesh* data, 
+		std::vector<AssimpMeshVertex>& vertices, 
+		std::vector<UINT>& indices,
+		TextureBySlotPtr textures,
+		MaterialPtr material,
+		IRenderSystem& renderSys);
 public:
+	int GenRenderOperation(RenderOperationQueue& opList) override;
+	bool HasTexture(int slot);
+	const aiMesh* GetAiMesh() const { return Data; }
+	const MaterialPtr& GetMaterial() const { return Material; }
+private:
+	bool setupMesh(IRenderSystem& renderSys);
+private:
 	const aiMesh* Data = nullptr;
 	std::vector<AssimpMeshVertex> Vertices;
 	std::vector<UINT> Indices;
@@ -26,17 +42,6 @@ public:
 	IVertexBufferPtr VertexBuffer;
 	IIndexBufferPtr IndexBuffer;
 	MaterialPtr Material;
-public:
-	AssimpMesh(const aiMesh* data, 
-		std::vector<AssimpMeshVertex>& vertices, 
-		std::vector<UINT>& indices,
-		TextureBySlotPtr textures,
-		MaterialPtr material,
-		IRenderSystem& renderSys);
-	bool HasTexture(int slot);
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-private:
-	bool setupMesh(IRenderSystem& renderSys);
 };
 typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
 typedef std::vector<AssimpMeshPtr> AssimpMeshPtrVector;

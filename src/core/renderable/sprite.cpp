@@ -128,7 +128,7 @@ void Sprite::SetColor(const Eigen::Vector4f& color)
 	mQuadDirty = true;
 }
 
-void Sprite::SetTexture(ITexturePtr texture)
+void Sprite::SetTexture(const ITexturePtr& texture)
 {
 	mTexture = texture;
 	if (texture != nullptr && (mSize.x() == 0 || mSize.y() == 0)) {

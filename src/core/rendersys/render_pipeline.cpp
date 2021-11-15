@@ -181,8 +181,8 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
 
 		auto& skyBox = camera.SkyBox();
-		if (skyBox && skyBox->mCubeSRV)
-			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->mCubeSRV);
+		if (skyBox && skyBox->GetTexture())
+			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->GetTexture());
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
 		if (camera.mPostProcessInput) 

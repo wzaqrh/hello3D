@@ -30,20 +30,20 @@ void TestLabel::OnPostInitDevice()
 		mLabel[i] = label;
 		if (i == 0) {
 			label->SetString("HelloWorld");
-			label->mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
+			label->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
 		}
 		else if (i == 1) {
 			label->SetString("Hello\nWorld");
-			label->mTransform->SetPosition(Eigen::Vector3f(200, 0, 0));
+			label->GetTransform()->SetPosition(Eigen::Vector3f(200, 0, 0));
 		}
 		else if (i == 2) {
 			label->SetSize(false, Eigen::Vector2f(120, 64));
 			label->SetString("HelloWorld");
-			label->mTransform->SetPosition(Eigen::Vector3f(400, 0, 0));
+			label->GetTransform()->SetPosition(Eigen::Vector3f(400, 0, 0));
 		}
 		else if (i == 3) {
 			label->SetString("Hello\nWorld");
-			label->mTransform->SetPosition(Eigen::Vector3f(600, 0, 0));
+			label->GetTransform()->SetPosition(Eigen::Vector3f(600, 0, 0));
 			label->SetSize(false, Eigen::Vector2f(120, 64));
 		}
 
@@ -51,7 +51,7 @@ void TestLabel::OnPostInitDevice()
 		mLabelBg[i] = labelBg;
 		labelBg->SetColor(Eigen::Vector4f(1, 0, 0, 1));
 		labelBg->SetSize(label->GetSize());
-		labelBg->mTransform->SetPosition(label->mTransform->GetPosition());
+		labelBg->GetTransform()->SetPosition(label->GetTransform()->GetPosition());
 	}
 #ifdef TEST_LABEL_DEBUG_SP
 	//mSprite = std::make_shared<TSprite>(mContext->GetRenderSys(), E_MAT_LABEL);

@@ -360,7 +360,7 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 	auto material = mMaterial->Clone(mRenderSys);
 	//if (mMatCb) mMatCb(material);
-	return std::make_shared<AssimpMesh>(mesh, vertices, indices, texturesPtr, material, mRenderSys);
+	return AssimpMesh::Create(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
 std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
@@ -483,7 +483,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 
 		for (int i = 0; i < meshes.MeshCount(); i++) {
 			auto mesh = meshes[i];
-			if (mesh->Data->HasBones()) {
+			if (mesh->GetAiMesh()->HasBones()) {
 				const auto& boneMats = GetBoneMatrices(node, i);
 				size_t boneSize = boneMats.size(); 
 				//assert(boneSize <= MAX_MATRICES);
@@ -498,7 +498,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
 			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
-			mesh->Material->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
+			mesh->GetMaterial()->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
 
 			mesh->GenRenderOperation(opList);
 		}

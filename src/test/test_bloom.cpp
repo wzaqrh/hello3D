@@ -16,7 +16,7 @@ protected:
 	virtual void OnRender() override;
 	virtual void OnPostInitDevice() override;
 private:
-	AssimpModel* mModel = nullptr;
+	AssimpModelPtr mModel = nullptr;
 };
 
 void TestBloom::OnPostInitDevice()
@@ -28,7 +28,7 @@ void TestBloom::OnPostInitDevice()
 	camera->SetSkyBox(rendFac->CreateSkybox("images\\uffizi_cross.dds"));
 	camera->AddPostProcessEffect(rendFac->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM, *camera));
 
-	mModel = new AssimpModel(*mContext->RenderSys(), *mContext->MaterialFac(), mTransform, E_MAT_MODEL);
+	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
 	SetModelPath("Spaceship\\"); 
 	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
 	mMoveDefScale = 0.01;

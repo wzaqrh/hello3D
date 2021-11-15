@@ -10,16 +10,29 @@ typedef std::shared_ptr<struct FontCharactor> FontCharactorPtr;
 
 class MIR_CORE_API Label : public IRenderable 
 {
+	friend class RenderableFactory;
+	DECLARE_STATIC_CREATE_CONSTRUCTOR(Label);
+	Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font);
+public:
+	void SetString(const std::string& str);
+	void SetSize(bool autoCalSize, const Eigen::Vector2f& size);
+public:
+	int GenRenderOperation(RenderOperationQueue& opList) override;
+	const MaterialPtr& GetMaterial() const { return mMaterial; }
+	const TransformPtr& GetTransform() const { return mTransform; }
+	const Eigen::Vector2f& GetSize() const { return mConetentSize; }
+private:
+	void AutoUpdateSize();
+	void UpdateBBox();
+	void ForceLayout();
+private:
 	IRenderSystem& mRenderSys;
 	FontPtr mFont;
-
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 	MaterialPtr mMaterial;
-public:
 	TransformPtr mTransform;
-	enum { MAX_STRING_LENGTH = 256 };
-public:
+
 	std::string mString;
 	struct CharEntry {
 		SpriteVertexQuad quad;
@@ -38,17 +51,6 @@ public:
 	Eigen::Vector2f mConetentSize;//dot space
 	bool mAutoUptSize = true;
 	float mScale = 1;
-public:
-	Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font);
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
-public:
-	void SetString(const std::string& str);
-	void SetSize(bool autoCalSize, const Eigen::Vector2f& size);
-	const Eigen::Vector2f& GetSize() const { return mConetentSize; }
-private:
-	void AutoUpdateSize();
-	void UpdateBBox();
-	void ForceLayout();
 };
 
 }

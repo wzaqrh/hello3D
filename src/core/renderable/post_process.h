@@ -18,6 +18,12 @@ public:
 };
 class MIR_CORE_API PostProcess : public IRenderable 
 {
+	friend class RenderableFactory;
+protected:
+	PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex);
+public:
+	~PostProcess();
+	int GenRenderOperation(RenderOperationQueue& opList) override;
 protected:
 	IRenderSystem& mRenderSys;
 	IRenderTexturePtr mMainTex;
@@ -25,16 +31,14 @@ protected:
 	IIndexBufferPtr mIndexBuffer;
 	MaterialPtr mMaterial;
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
-public:
-	PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex);
-	~PostProcess();
-	virtual int GenRenderOperation(RenderOperationQueue& opList) override;
 };
 
 class MIR_CORE_API Bloom : public PostProcess 
 {
-public:
+	friend class RenderableFactory;
+	DECLARE_STATIC_CREATE_CONSTRUCTOR(Bloom);
 	Bloom(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePtr mainTex);
+public:
 };
 
 }
