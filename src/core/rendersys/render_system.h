@@ -33,15 +33,8 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
 	virtual void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) = 0;
 
-	virtual IProgramPtr CreateProgramByCompile(const std::string& vsPath, 
-		const std::string& psPath, 
-		const std::string& vsEntry, 
-		const std::string& psEntry) = 0;
-	virtual IProgramPtr CreateProgramByFXC(const std::string& name, 
-		const std::string& vsEntry, 
-		const std::string& psEntry) = 0;
-	virtual IProgramPtr CreateProgram(const std::string& name, 
-		const std::string& vsEntry, 
+	virtual IProgramPtr CreateProgram(const std::string& name,
+		const std::string& vsEntry,
 		const std::string& psEntry) = 0;
 	virtual void SetProgram(IProgramPtr program) = 0;
 
@@ -75,16 +68,25 @@ public:
 	RenderSystem();
 	virtual ~RenderSystem();
 public:
+	Eigen::Vector4i WinSize() { return Eigen::Vector4i{ mScreenWidth, mScreenHeight, 0, 0 }; }
 	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }
-
-	Eigen::Vector4i WinSize() { return Eigen::Vector4i{ mScreenWidth, mScreenHeight, 0, 0 }; }
-	IProgramPtr CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry);
-public:
+	
+	IProgramPtr CreateProgram(const std::string& name, 
+		const std::string& vsEntry, 
+		const std::string& psEntry) override final;
 	ITexturePtr LoadTexture(const std::string& imgPath, ResourceFormat format = kFormatUnknown, 
-		bool async = true, bool isCube = false);
+		bool async = true, bool isCube = false) override final;
 protected:
-	virtual ITexturePtr _CreateTexture(const char* pSrcFile, ResourceFormat format, bool async, bool isCube) = 0;
+	virtual ITexturePtr _CreateTexture(const char* pSrcFile, ResourceFormat format, 
+		bool async, bool isCube) = 0;
+	virtual IProgramPtr CreateProgramByCompile(const std::string& vsPath,
+		const std::string& psPath,
+		const std::string& vsEntry,
+		const std::string& psEntry) = 0;
+	virtual IProgramPtr CreateProgramByFXC(const std::string& name,
+		const std::string& vsEntry,
+		const std::string& psEntry) = 0;
 public:
 	int mScreenWidth, mScreenHeight;
 
