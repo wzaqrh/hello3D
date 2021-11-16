@@ -8,8 +8,8 @@
 
 namespace mir {
 
-struct TextureBySlot {
-public:
+struct TextureBySlot 
+{
 	void Clear() {
 		Textures.clear();
 	}
@@ -39,34 +39,20 @@ public:
 	std::vector<ITexturePtr> Textures;
 };
 
-struct CBufferEntry {
-	IContantBufferPtr Buffer;
-	std::string Name;
-	bool IsUnique;
-public:
+struct CBufferEntry 
+{
 	static CBufferEntry Make(IContantBufferPtr buffer, const std::string& name, bool isUnique) {
 		return CBufferEntry{buffer, name, isUnique};
 	}
+public:
+	IContantBufferPtr Buffer;
+	std::string Name;
+	bool IsUnique;
 };
 #define MAKE_CBNAME(V) #V
 
-struct Pass : boost::noncopyable 
+class Pass : boost::noncopyable 
 {
-	std::string mLightMode,mName;
-	IInputLayoutPtr mInputLayout;
-	PrimitiveTopology mTopoLogy;
-	
-	IProgramPtr mProgram;
-	std::vector<ISamplerStatePtr> mSamplers;
-
-	std::vector<CBufferEntry> mConstantBuffers;
-
-	IRenderTexturePtr mRenderTarget;
-	std::vector<IRenderTexturePtr> mIterTargets;
-	TextureBySlot mTextures;
-
-	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnBind;
-	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnUnbind;
 public:
 	Pass(const std::string& lightMode, const std::string& name);
 	std::shared_ptr<Pass> Clone(IRenderSystem& pRenderSys);
@@ -78,13 +64,29 @@ public:
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);
+	void UpdateConstBufferByName(IRenderSystem& pRenderSys, 
+		const std::string& name, 
+		const Data& data);
+public:
+	std::string mLightMode, mName;
+	IInputLayoutPtr mInputLayout;
+	PrimitiveTopology mTopoLogy;
+
+	IProgramPtr mProgram;
+	std::vector<ISamplerStatePtr> mSamplers;
+
+	std::vector<CBufferEntry> mConstantBuffers;
+
+	IRenderTexturePtr mRenderTarget;
+	std::vector<IRenderTexturePtr> mIterTargets;
+	TextureBySlot mTextures;
+
+	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnBind;
+	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnUnbind;
 };
 
-struct Technique : boost::noncopyable
+class Technique : boost::noncopyable
 {
-	std::string mName;
-	std::vector<PassPtr> mPasses;
 public:
 	void AddPass(PassPtr pass);
 	std::shared_ptr<Technique> Clone(IRenderSystem& pRenderSys);
@@ -95,13 +97,16 @@ public:
 	PassPtr GetPassByLightMode(const std::string& lightMode);
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 
-	void UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data);
+	void UpdateConstBufferByName(IRenderSystem& pRenderSys, 
+		const std::string& name, 
+		const Data& data);
+public:
+	std::string mName;
+	std::vector<PassPtr> mPasses;
 };
 
-class MIR_CORE_API Material : public Resource 
+class MIR_CORE_API Material : public TImplResource<IResource> 
 {
-	std::vector<TechniquePtr> mTechniques;
-	int mCurTechIdx = 0;
 public:
 	std::shared_ptr<Material> Clone(IRenderSystem& pRenderSys);
 	void AddTechnique(TechniquePtr technique);
@@ -112,6 +117,9 @@ public:
 
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
+private:
+	std::vector<TechniquePtr> mTechniques;
+	int mCurTechIdx = 0;
 };
 
 }

@@ -337,7 +337,9 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	return AssimpMesh::Create(mesh, vertices, indices, texturesPtr, material, mRenderSys);
 }
 
-std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
+std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, 
+	aiTextureType type, 
+	const aiScene* scene)
 {
 	boost::filesystem::path redirectPath(mRedirectResourceDir);
 	std::vector<ITexturePtr> textures;
@@ -393,7 +395,11 @@ const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const aiNode* pNode
 	return mTransforms;
 }
 
-void VisitNode(aiNode* cur, std::map<const aiNode*, AiNodeInfo>& mNodeInfos, std::vector<aiNode*>& vec, EvaluateTransforms& eval) {
+void VisitNode(aiNode* cur, 
+	std::map<const aiNode*, AiNodeInfo>& mNodeInfos, 
+	std::vector<aiNode*>& vec, 
+	EvaluateTransforms& eval) 
+{
 	vec.push_back(cur);
 
 	auto& nodeInfo = mNodeInfos[cur];
@@ -440,7 +446,8 @@ void AssimpModel::Update(float dt)
 		nodeInfo.mGlobalTransform = (nodeInfo.mLocalTransform);
 		aiNode* iter = cur->mParent;
 		while (iter) {
-			nodeInfo.mGlobalTransform = (mNodeInfos[iter].mLocalTransform * nodeInfo.mGlobalTransform);
+			nodeInfo.mGlobalTransform = mNodeInfos[iter].mLocalTransform 
+									  * nodeInfo.mGlobalTransform;
 			iter = iter->mParent;
 		}
 	}
@@ -471,7 +478,8 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 	if (meshes.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, mNodeInfos[node].mGlobalTransform);
-		//mRenderSys.mDeviceContext->UpdateSubresource(mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
+		//mRenderSys.mDeviceContext->UpdateSubresource(
+		//	mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
 		for (int i = 0; i < meshes.MeshCount(); i++) {
 			auto mesh = meshes[i];
@@ -490,7 +498,8 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
 			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
-			mesh->GetMaterial()->CurTech()->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
+			mesh->GetMaterial()->CurTech()->UpdateConstBufferByName(
+				mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
 
 			mesh->GenRenderOperation(opList);
 		}

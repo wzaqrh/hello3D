@@ -118,6 +118,9 @@
     <ClInclude Include="..\src\core\base\stl.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\object.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">

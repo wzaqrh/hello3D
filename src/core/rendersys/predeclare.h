@@ -11,8 +11,8 @@ DECLARE_STRUCT(cbPointLight);
 DECLARE_STRUCT(cbSpotLight);
 DECLARE_STRUCT(cbGlobalParam);
 
+DECLARE_STRUCT(IObject);
 DECLARE_STRUCT(IResource);
-DECLARE_STRUCT(Resource);
 
 DECLARE_STRUCT(Pass);
 DECLARE_STRUCT(Technique);

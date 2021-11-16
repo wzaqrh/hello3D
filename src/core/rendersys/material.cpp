@@ -218,14 +218,9 @@ ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
 std::shared_ptr<Material> Material::Clone(IRenderSystem& pRenderSys)
 {
 	MaterialPtr material = std::make_shared<Material>();
-	
-	for (auto& depend : mDepends)
-		material->AddDependency(depend);
-	material->mCurState = mCurState;
-
-	for (int i = 0; i < mTechniques.size(); ++i) {
+	material->Assign(*this, pRenderSys);
+	for (int i = 0; i < mTechniques.size(); ++i)
 		material->AddTechnique(mTechniques[i]->Clone(pRenderSys));
-	}
 	material->mCurTechIdx = mCurTechIdx;
 	return material;
 }

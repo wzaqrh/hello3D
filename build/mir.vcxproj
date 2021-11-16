@@ -68,6 +68,7 @@
     <ClInclude Include="..\src\core\rendersys\material.h" />
     <ClInclude Include="..\src\core\rendersys\material_cb.h" />
     <ClInclude Include="..\src\core\rendersys\material_factory.h" />
+    <ClInclude Include="..\src\core\rendersys\object.h" />
     <ClInclude Include="..\src\core\rendersys\predeclare.h" />
     <ClInclude Include="..\src\core\rendersys\render_pipeline.h" />
     <ClInclude Include="..\src\core\rendersys\render_system.h" />

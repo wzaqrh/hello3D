@@ -18,8 +18,9 @@ Texture9::Texture9(IDirect3DTexture9 *texture, const std::string& path)
 	mWidth = 0, mHeight = 0, mMipCount = 0;
 	mFormat = kFormatUnknown;
 
-	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
-	mRes->AddOnLoadedListener([this](IResource*) {
+	SetDeviceObject((IUnknown**)&mTexture);
+
+	AsRes(this)->AddOnLoadedListener([this](IResource*) {
 		D3DSURFACE_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
@@ -37,7 +38,7 @@ Texture9::Texture9(int width, int height, ResourceFormat format, int mipmap)
 	mHeight = height;
 	mMipCount = mipmap;
 	mFormat = format;
-	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
+	SetDeviceObject((IUnknown**)&mTexture);
 }
 
 void Texture9::SetSRV9(IDirect3DTexture9* texture)
@@ -62,7 +63,7 @@ int IndexBuffer9::GetWidth()
 RenderTexture9::RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;
-	mColorTexture->AsRes()->SetLoaded();
+	AsRes(mColorTexture)->SetLoaded();
 	mColorBuffer = nullptr;
 	mDepthStencilBuffer = depthStencilBuffer;
 }
@@ -78,7 +79,7 @@ IDirect3DSurface9*& RenderTexture9::GetColorBuffer9()
 InputLayout9::InputLayout9()
 {
 	mLayout = nullptr;
-	mRes = MakePtr<Resource>((IUnknown**)&mLayout);
+	SetDeviceObject((IUnknown**)&mLayout);
 }
 
 /********** TConstantTable **********/
@@ -199,7 +200,7 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBuffe
 PixelShader9::PixelShader9()
 {
 	mShader = nullptr;
-	mRes = MakePtr<Resource>((IUnknown**)&mShader);
+	SetDeviceObject((IUnknown**)&mShader);
 }
 
 void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
@@ -211,7 +212,7 @@ void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
 VertexShader9::VertexShader9()
 {
 	mShader = nullptr;
-	mRes = MakePtr<Resource>((IUnknown**)&mShader);
+	SetDeviceObject((IUnknown**)&mShader);
 }
 
 void VertexShader9::SetConstTable(ID3DXConstantTable* constTable)
@@ -267,16 +268,16 @@ void ContantBuffer9::SetBuffer9(char* data, int dataSize)
 /********** TProgram9 **********/
 Program9::Program9()
 {
-	mRes = MakePtr<Resource>((IUnknown**)0);
+	SetDeviceObject((IUnknown**)0);
 }
 
 void Program9::SetVertex(VertexShader9Ptr pVertex) {
 	mVertex = pVertex;
-	mRes->AddDependency(pVertex->AsRes());
+	AsRes(this)->AddDependency(AsRes(pVertex));
 }
 void Program9::SetPixel(PixelShader9Ptr pPixel) {
 	mPixel = pPixel;
-	mRes->AddDependency(pPixel->AsRes());
+	AsRes(this)->AddDependency(AsRes(pPixel));
 }
 
 }

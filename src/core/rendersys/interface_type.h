@@ -1,12 +1,14 @@
 #pragma once
 #include <Windows.h>
+#include <boost/noncopyable.hpp>
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
+#include "core/rendersys/resource.h"
 
 namespace mir {
 
 /********** Program **********/
-interface IBlobData  
+interface IBlobData : boost::noncopyable  
 {
 	virtual char* GetBufferPointer() = 0;
 	virtual size_t GetBufferSize() = 0;
@@ -21,29 +23,29 @@ public:
 	size_t GetBufferSize() override;
 };
 
-interface IInputLayout  
+interface IInputLayout : public IResource  
 {
-	virtual IResourcePtr AsRes() = 0;
+	//virtual IResourcePtr AsRes() = 0;
 };
 
-interface IVertexShader 
+interface IVertexShader : public IResource 
 {
 	virtual IBlobDataPtr GetBlob() = 0;
-	virtual IResourcePtr AsRes() = 0;
+	//virtual IResourcePtr AsRes() = 0;
 };
 
-interface IPixelShader 
+interface IPixelShader : public IResource 
 {
 public:
 	virtual IBlobDataPtr GetBlob() = 0;
-	virtual IResourcePtr AsRes() = 0;
+	//virtual IResourcePtr AsRes() = 0;
 };
 
-interface IProgram 
+interface IProgram : public IResource 
 {
 	virtual IVertexShaderPtr GetVertex() = 0;
 	virtual IPixelShaderPtr GetPixel() = 0;
-	virtual IResourcePtr AsRes() = 0;
+	//virtual IResourcePtr AsRes() = 0;
 };
 
 /********** HardwareBuffer **********/
@@ -52,7 +54,7 @@ enum HardwareBufferType {
 	kHWBufferVertex,
 	kHWBufferIndex
 };
-interface IHardwareBuffer 
+interface IHardwareBuffer : public IResource  
 {
 	virtual HardwareBufferType GetType() = 0;
 	virtual unsigned int GetBufferSize() = 0;
@@ -93,9 +95,9 @@ enum TexturePbrType {
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
 
-interface ITexture 
+interface ITexture : public IResource  
 {
-	virtual IResourcePtr AsRes() = 0;
+	//virtual IResourcePtr AsRes() = 0;
 	virtual bool HasSRV() = 0;
 
 	virtual const char* GetPath() = 0;
@@ -105,12 +107,12 @@ interface ITexture
 	virtual int GetMipmapCount() = 0;
 };
 
-interface IRenderTexture  
+interface IRenderTexture : public IResource   
 {
 	virtual ITexturePtr GetColorTexture() = 0;
 };
 
-interface ISamplerState 
+interface ISamplerState : public IResource 
 {
 };
 

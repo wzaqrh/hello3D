@@ -86,7 +86,7 @@ public:
 
 	MaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
 		mCurPass->mInputLayout = inputLayout;
-		mMaterial->AddDependency(inputLayout->AsRes());
+		mMaterial->AddDependency(AsRes(inputLayout));
 		return *this;
 	}
 	MaterialBuilder& SetTopology(PrimitiveTopology topology) {
@@ -95,7 +95,7 @@ public:
 	}
 	IProgramPtr SetProgram(IProgramPtr program) {
 		mCurPass->mProgram = program;
-		mMaterial->AddDependency(program->AsRes());
+		mMaterial->AddDependency(AsRes(program));
 		return program;
 	}
 	MaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
@@ -130,7 +130,7 @@ public:
 	}
 	MaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
 		mCurPass->mTextures[slot] = texture;
-		mMaterial->AddDependency(texture->AsRes());
+		mMaterial->AddDependency(AsRes(texture));
 		return *this;
 	}
 	MaterialPtr Build() {

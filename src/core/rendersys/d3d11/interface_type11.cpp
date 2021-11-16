@@ -31,21 +31,21 @@ size_t BlobData11::GetBufferSize()
 /********** TInputLayout11 **********/
 InputLayout11::InputLayout11()
 {
-	mRes = MakePtr<Resource>((IUnknown**)&mLayout);
+	SetDeviceObject((IUnknown**)&mLayout);
 }
 
 /********** VertexShader11 **********/
 VertexShader11::VertexShader11(IBlobDataPtr pBlob)
 	:mBlob(pBlob)
 {
-	mRes = MakePtr<Resource>((IUnknown**)&mErrBlob);
+	SetDeviceObject((IUnknown**)&mErrBlob);
 }
 
 /********** PixelShader11 **********/
 PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 	: mBlob(pBlob)
 {
-	mRes = MakePtr<Resource>((IUnknown**)&mErrBlob);
+	SetDeviceObject((IUnknown**)&mErrBlob);
 }
 
 /********** Texture11 **********/
@@ -57,8 +57,8 @@ Texture11::Texture11(ID3D11ShaderResourceView* texture, const std::string& path)
 	mPath = path;
 	mTexture = texture;
 
-	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
-	mRes->AddOnLoadedListener([this](IResource* pRes) {
+	SetDeviceObject((IUnknown**)&mTexture);
+	AsRes(this)->AddOnLoadedListener([this](IResource* pRes) {
 		D3D11_TEXTURE2D_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
@@ -75,7 +75,7 @@ Texture11::Texture11(int width, int height, ResourceFormat format, int mipmap)
 	mHeight = height;
 	mMipCount = mipmap;
 	mFormat = format;
-	mRes = MakePtr<Resource>((IUnknown**)&mTexture);
+	SetDeviceObject((IUnknown**)&mTexture);
 }
 
 void Texture11::SetSRV11(ID3D11ShaderResourceView* texture) 
@@ -190,7 +190,7 @@ bool RenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 		return false;
 	}
 	mRenderTargetPtr = MakePtr<Texture11>(mRenderTargetSRV, "RenderTexture");
-	mRenderTargetPtr->AsRes()->SetLoaded();
+	AsRes(mRenderTargetPtr)->SetLoaded();
 	return true;
 }
 
@@ -239,19 +239,19 @@ bool RenderTexture11::InitDepthStencilView(ID3D11Device* pDevice)
 /********** TProgram11 **********/
 Program11::Program11()
 {
-	mRes = MakePtr<Resource>((IUnknown**)0);
+	//SetDeviceObject((IUnknown**)0);
 }
 
 void Program11::SetVertex(VertexShader11Ptr pVertex)
 {
 	mVertex = pVertex;
-	mRes->AddDependency(pVertex->AsRes());
+	AsRes(this)->AddDependency(AsRes(pVertex));
 }
 
 void Program11::SetPixel(PixelShader11Ptr pPixel)
 {
 	mPixel = pPixel;
-	mRes->AddDependency(pPixel->AsRes());
+	AsRes(this)->AddDependency(AsRes(pPixel));
 }
 
 }

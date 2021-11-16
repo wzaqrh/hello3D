@@ -19,75 +19,87 @@ typedef std::shared_ptr< struct RenderTexture11> RenderTexture11Ptr;
 typedef std::shared_ptr< struct SamplerState11> SamplerState11Ptr;
 
 /********** Program **********/
-struct BlobData11 : public IBlobData {
-	ID3DBlob* mBlob = nullptr;
+class BlobData11 : public IBlobData {
 public:
 	BlobData11(ID3DBlob* pBlob);
 	char* GetBufferPointer() override;
 	size_t GetBufferSize() override;
+public:
+	ID3DBlob* mBlob = nullptr;
 };
 
-struct InputLayout11 : public IInputLayout {
+class InputLayout11 : public TImplResource<IInputLayout> 
+{
+public:
+	InputLayout11();
+	//IResourcePtr AsRes() override { return mRes; }
+
+	ID3D11InputLayout*& GetLayout11() { return mLayout; }
 public:
 	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
 	ID3D11InputLayout* mLayout = nullptr;
-	IResourcePtr mRes;
-public:
-	InputLayout11();
-	ID3D11InputLayout*& GetLayout11() { return mLayout; }
-	IResourcePtr AsRes() override { return mRes; }
+	//IResourcePtr mRes;
 };
 
-struct VertexShader11 : public IVertexShader {
+class VertexShader11 : public TImplResource<IVertexShader> 
+{
+public:
 	ID3D11VertexShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	IResourcePtr mRes;
+	//IResourcePtr mRes;
 public:
 	VertexShader11(IBlobDataPtr pBlob);
-	IResourcePtr AsRes() override { return mRes; }
+	//IResourcePtr AsRes() override { return mRes; }
 
 	IBlobDataPtr GetBlob() override { return mBlob; }
 	ID3D11VertexShader*& GetShader11() { return mShader; }
 };
 
-struct PixelShader11 : public IPixelShader {
+class PixelShader11 : public TImplResource<IPixelShader> 
+{
+public:
+	PixelShader11(IBlobDataPtr pBlob);
+	//IResourcePtr AsRes() override { return mRes; }
+	
+	IBlobDataPtr GetBlob() override { return mBlob; }
+	ID3D11PixelShader*& GetShader11() { return mShader; }
+public:
 	ID3D11PixelShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	IResourcePtr mRes;
-public:
-	PixelShader11(IBlobDataPtr pBlob);
-	IResourcePtr AsRes() override { return mRes; }
-	IBlobDataPtr GetBlob() override { return mBlob; }
-	ID3D11PixelShader*& GetShader11() { return mShader; }
+	//IResourcePtr mRes;
 };
 
-struct Program11 : public IProgram {
-	VertexShader11Ptr mVertex;
-	PixelShader11Ptr mPixel;
-	IResourcePtr mRes;
+class Program11 : public TImplResource<IProgram> 
+{
 public:
 	Program11();
-	IResourcePtr AsRes() override { return mRes; }
+	//IResourcePtr AsRes() override { return mRes; }
+	
 	void SetVertex(VertexShader11Ptr pVertex);
 	void SetPixel(PixelShader11Ptr pPixel);
 	IVertexShaderPtr GetVertex() override { return mVertex; }
 	IPixelShaderPtr GetPixel() override { return mPixel; }
+public:
+	VertexShader11Ptr mVertex;
+	PixelShader11Ptr mPixel;
+	//IResourcePtr mRes;
 };
 
 /********** HardwareBuffer **********/
-struct HardwareBuffer {
-	ID3D11Buffer* buffer;
-	unsigned int bufferSize;
+class HardwareBuffer 
+{
 public:
 	HardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :buffer(__buffer), bufferSize(__bufferSize) {};
-	HardwareBuffer() :buffer(nullptr), bufferSize(0) {};
+	HardwareBuffer() :buffer(nullptr), bufferSize(0) {}
+public:
+	ID3D11Buffer* buffer;
+	unsigned int bufferSize;
 };
 
-struct VertexBuffer11 : public IVertexBuffer {
-	unsigned int Stride, Offset;
-	HardwareBuffer hd;
+class VertexBuffer11 : public TImplResource<IVertexBuffer> 
+{
 public:
 	VertexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
 		:hd(buffer, bufferSize), Stride(stride), Offset(offset) {};
@@ -99,15 +111,17 @@ public:
 	HardwareBufferType GetType() override { return kHWBufferVertex; }
 	unsigned int GetStride() override { return Stride; }
 	unsigned int GetOffset() override { return Offset; }
+public:
+	unsigned int Stride, Offset;
+	HardwareBuffer hd;
 };
 
-struct IndexBuffer11 : public IIndexBuffer {
-	ResourceFormat Format;
-	HardwareBuffer hd;
+class IndexBuffer11 : public TImplResource<IIndexBuffer> 
+{
 public:
 	IndexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, ResourceFormat format)
-		:hd(buffer, bufferSize), Format(format) {};
-	IndexBuffer11() :Format(kFormatUnknown) {};
+		:hd(buffer, bufferSize), Format(format) {}
+	IndexBuffer11() :Format(kFormatUnknown) {}
 public:
 	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
 	unsigned int GetBufferSize() override { return hd.bufferSize; }
@@ -115,11 +129,13 @@ public:
 
 	int GetWidth() override;
 	ResourceFormat GetFormat() override { return Format; }
+public:
+	ResourceFormat Format;
+	HardwareBuffer hd;
 };
 
-struct ContantBuffer11 : public IContantBuffer {
-	ConstBufferDeclPtr mDecl;
-	HardwareBuffer hd;
+class ContantBuffer11 : public TImplResource<IContantBuffer> 
+{
 public:
 	ContantBuffer11() {}
 	ContantBuffer11(ID3D11Buffer* buffer, ConstBufferDeclPtr decl);
@@ -129,20 +145,18 @@ public:
 
 	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
 	unsigned int GetBufferSize() override { return hd.bufferSize; }
+public:
+	ConstBufferDeclPtr mDecl;
+	HardwareBuffer hd;
 };
 
 /********** Texture **********/
-struct Texture11 : public ITexture {
-private:
-	int mWidth, mHeight, mMipCount;
-	ResourceFormat mFormat;
-	ID3D11ShaderResourceView* mTexture;
-	IResourcePtr mRes;
-	std::string mPath;
+class Texture11 : public TImplResource<ITexture> 
+{
 public:
 	Texture11(int width, int height, ResourceFormat format, int mipmap);
 	Texture11(ID3D11ShaderResourceView* texture, const std::string& path);
-	IResourcePtr AsRes() override { return mRes; }
+	//IResourcePtr AsRes() override { return mRes; }
 
 	bool HasSRV() override { return mTexture != nullptr; }
 	void SetSRV11(ID3D11ShaderResourceView* texture);
@@ -155,19 +169,16 @@ public:
 	int GetMipmapCount() override { return mMipCount; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
+private:
+	int mWidth, mHeight, mMipCount;
+	ResourceFormat mFormat;
+	ID3D11ShaderResourceView* mTexture;
+	//IResourcePtr mRes;
+	std::string mPath;
 };
 
-struct RenderTexture11 : public IRenderTexture {
-private:
-	ITexturePtr mRenderTargetPtr;
-	ID3D11Texture2D* mRenderTargetTexture;
-	ID3D11ShaderResourceView* mRenderTargetSRV;
-	ID3D11RenderTargetView* mRenderTargetView;
-
-	ID3D11Texture2D* mDepthStencilTexture;
-	ID3D11DepthStencilView* mDepthStencilView;
-
-	ResourceFormat mFormat;
+class RenderTexture11 : public TImplResource<IRenderTexture>
+{
 public:
 	RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format = kFormatR32G32B32A32Float);
 	ITexturePtr GetColorTexture() override { return mRenderTargetPtr; }
@@ -181,13 +192,24 @@ private:
 
 	bool InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height);
 	bool InitDepthStencilView(ID3D11Device* pDevice);
+private:
+	ITexturePtr mRenderTargetPtr;
+	ID3D11Texture2D* mRenderTargetTexture;
+	ID3D11ShaderResourceView* mRenderTargetSRV;
+	ID3D11RenderTargetView* mRenderTargetView;
+
+	ID3D11Texture2D* mDepthStencilTexture;
+	ID3D11DepthStencilView* mDepthStencilView;
+
+	ResourceFormat mFormat;
 };
 
-struct SamplerState11 : public ISamplerState {
-	ID3D11SamplerState* mSampler = nullptr;
+class SamplerState11 : public TImplResource<ISamplerState> {
 public:
-	SamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {};
+	SamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {}
 	ID3D11SamplerState*& GetSampler11() { return mSampler; }
+public:
+	ID3D11SamplerState* mSampler = nullptr;
 };
 
 }

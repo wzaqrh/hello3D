@@ -256,7 +256,7 @@ IInputLayoutPtr RenderSystem11::CreateLayout(IProgramPtr pProgram, LayoutInputEl
 		};
 	}
 
-	auto resource = pProgram->AsRes();
+	auto resource = AsRes(pProgram);
 	if (resource->IsLoaded()) {
 		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program11>(pProgram).get(), ret->mInputDescs);
 		resource->SetLoaded();
@@ -399,7 +399,7 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const st
 
 	HRESULT hr;
 	if (async) {
-		hr = mThreadPump->AddWorkItem(ret->AsRes(), [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
+		hr = mThreadPump->AddWorkItem(AsRes(ret), [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
 			const D3D10_SHADER_MACRO* pDefines = nullptr;
 			LPD3D10INCLUDE pInclude = new IncludeStdIo("shader\\");
 			return D3DX11CompileFromFileA(filename.c_str(), pDefines, pInclude, psEntry.c_str(), 
@@ -426,7 +426,7 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const st
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
 				NULL, &ret->mShader))) {
-			ret->AsRes()->SetLoaded();
+			AsRes(ret)->SetLoaded();
 		}
 		else {
 			ret = nullptr;
@@ -443,7 +443,7 @@ PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const std::string& filename)
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
 		HRESULT hr = mDevice->CreatePixelShader(&buffer[0], buffer.size(), NULL, &ret->mShader);
 		if (!FAILED(hr)) {
-			ret->AsRes()->SetLoaded();
+			AsRes(ret)->SetLoaded();
 		}
 		else {
 			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
@@ -474,7 +474,7 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const s
 			shaderModel, dwShaderFlags, 0,
 			&std::static_pointer_cast<BlobData11>(ret->mBlob)->mBlob, &ret->mErrBlob, &pProcessor))
 			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename.c_str(), &pDataLoader))) {
-			hr = mThreadPump->AddWorkItem(ret->AsRes(), pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
+			hr = mThreadPump->AddWorkItem(AsRes(ret), pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
 				if (!FAILED(hr))  {
 					assert(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
 					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
@@ -496,7 +496,7 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const s
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
 				NULL, &ret->mShader))) {
-			ret->AsRes()->SetLoaded();
+			AsRes(ret)->SetLoaded();
 		}
 		else {
 			ret = nullptr;
@@ -514,7 +514,7 @@ VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const std::string& filename)
 		auto buffer_size = buffer.size();
 		HRESULT hr = mDevice->CreateVertexShader(&buffer[0], buffer_size, NULL, &ret->mShader);
 		if (!FAILED(hr)) {
-			ret->AsRes()->SetLoaded();
+			AsRes(ret)->SetLoaded();
 		}
 		else {
 			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
@@ -536,7 +536,7 @@ IProgramPtr RenderSystem11::CreateProgramByCompile(const std::string& vsPath, co
 	Program11Ptr program = MakePtr<Program11>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry, false));
 	program->SetPixel(_CreatePS(!psPath.empty() ? psPath : vsPath, psEntry, false));
-	program->AsRes()->CheckAndSetLoaded();
+	AsRes(program)->CheckAndSetLoaded();
 	return program;
 }
 
@@ -553,7 +553,7 @@ IProgramPtr RenderSystem11::CreateProgramByFXC(const std::string& name, const st
 	std::string psName = name + "_" + psEntryOrPS + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
-	program->AsRes()->CheckAndSetLoaded();
+	AsRes(program)->CheckAndSetLoaded();
 	return program;
 }
 
@@ -685,7 +685,7 @@ ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, ResourceFormat 
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
 
 		pTextureRV = MakePtr<Texture11>(nullptr, pSrcFile);
-		IResourcePtr resource = pTextureRV->AsRes();
+		IResourcePtr resource = AsRes(pTextureRV);
 		HRESULT hr;
 		if (async) {
 			hr = mThreadPump->AddWorkItem(resource, [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
@@ -747,7 +747,7 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 			Texture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
 			tex11->SetSRV11(texSRV);
 
-			tex11->AsRes()->CheckAndSetLoaded();
+			AsRes(tex11)->CheckAndSetLoaded();
 		}
 	}
 

@@ -246,7 +246,7 @@ static VertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr
 	ret->SetConstTable(constTable);
 
 	ret->mBlob = pBlob;
-	ret->AsRes()->SetLoaded();
+	AsRes(ret)->SetLoaded();
 	return ret;
 }
 VertexShader9Ptr RenderSystem9::_CreateVS(const std::string& filename, const std::string& entry)
@@ -290,7 +290,7 @@ static PixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr 
 	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)pBlob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
 	ret->SetConstTable(constTable);
 
-	ret->AsRes()->SetLoaded();
+	AsRes(ret)->SetLoaded();
 	return ret;
 }
 PixelShader9Ptr RenderSystem9::_CreatePS(const std::string& filename, const std::string& entry)
@@ -334,7 +334,7 @@ IProgramPtr RenderSystem9::CreateProgramByCompile(const std::string& vsPath,
 	Program9Ptr program = MakePtr<Program9>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
 	program->SetPixel(_CreatePS(!psPath.empty() ? psPath : vsPath, psEntry));
-	program->AsRes()->CheckAndSetLoaded();
+	AsRes(program)->CheckAndSetLoaded();
 	return program;
 }
 
@@ -353,7 +353,7 @@ IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name,
 	std::string psName = name + "_" + psEntryOrPS + FILE_EXT_CSO;
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
-	program->AsRes()->CheckAndSetLoaded();
+	AsRes(program)->CheckAndSetLoaded();
 	return program;
 }
 
@@ -391,7 +391,7 @@ IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, LayoutInputEle
 		ret->mInputDescs.push_back(d3d::convert11To9(descArray[i]));
 	ret->mInputDescs.push_back(D3DDECL_END());
 
-	auto resource = pProgram->AsRes();
+	auto resource = AsRes(pProgram);
 	if (resource->IsLoaded()) {
 		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program9>(pProgram).get(), ret->mInputDescs);
 		resource->SetLoaded();
