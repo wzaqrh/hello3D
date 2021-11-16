@@ -41,7 +41,6 @@ public:
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil);
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) override;
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;

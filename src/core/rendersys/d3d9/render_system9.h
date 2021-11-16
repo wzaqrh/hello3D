@@ -30,7 +30,6 @@ public:
 	IRenderTexturePtr CreateRenderTexture(int width, int height, ResourceFormat format) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) override;
 	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) override;
 	IIndexBufferPtr CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;

@@ -668,11 +668,6 @@ IContantBufferPtr RenderSystem11::CreateConstBuffer(const ConstBufferDecl& cbDec
 	return ret;
 }
 
-IContantBufferPtr RenderSystem11::CloneConstBuffer(IContantBufferPtr buffer)
-{
-	return CreateConstBuffer(*buffer->GetDecl(), nullptr);
-}
-
 void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
 {
 	mDeviceContext->UpdateSubresource(std::static_pointer_cast<ContantBuffer11>(buffer)->GetBuffer11(), 0, NULL, data, 0, 0);

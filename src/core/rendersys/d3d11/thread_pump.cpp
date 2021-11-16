@@ -47,7 +47,10 @@ void ThreadPump::ClearWorkItems()
 	mEntries.clear();
 }
 
-HRESULT ThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3DX11DataProcessor* processor, ThreadPumpCallback callback)
+HRESULT ThreadPump::AddWorkItem(IResourcePtr res, 
+	ID3DX11DataLoader* loader, 
+	ID3DX11DataProcessor* processor, 
+	ThreadPumpCallback callback)
 {
 	ThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {
@@ -68,7 +71,9 @@ HRESULT ThreadPump::AddWorkItem(IResourcePtr res, ID3DX11DataLoader* loader, ID3
 	return mThreadPump->AddWorkItem(loader, processor, (HRESULT*)&entry->hr, (void**)res->GetDeviceObject());
 }
 
-HRESULT ThreadPump::AddWorkItem(IResourcePtr res, std::function<HRESULT(ID3DX11ThreadPump*, ThreadPumpEntryPtr entry)> addItemCB, ThreadPumpCallback callback)
+HRESULT ThreadPump::AddWorkItem(IResourcePtr res, 
+	std::function<HRESULT(ID3DX11ThreadPump*, ThreadPumpEntryPtr entry)> addItemCB, 
+	ThreadPumpCallback callback)
 {
 	ThreadPumpEntryPtr entry;
 	for (size_t i = 0; i < mEntries.size(); ++i) {

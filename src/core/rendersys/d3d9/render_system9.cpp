@@ -153,12 +153,6 @@ void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-IContantBufferPtr RenderSystem9::CloneConstBuffer(IContantBufferPtr buffer)
-{
-	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(buffer->GetDecl());
-	return ret;
-}
-
 IContantBufferPtr RenderSystem9::CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
 	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));

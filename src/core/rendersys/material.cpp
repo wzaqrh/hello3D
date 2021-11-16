@@ -97,7 +97,7 @@ std::shared_ptr<Pass> Pass::Clone(IRenderSystem& pRenderSys)
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
 		auto buffer = mConstantBuffers[i];
 		if (!buffer.IsUnique)
-			buffer.Buffer = pRenderSys.CloneConstBuffer(buffer.Buffer);
+			buffer.Buffer = pRenderSys.CreateConstBuffer(*buffer.Buffer->GetDecl(), nullptr);
 		pass->AddConstBuffer(buffer);
 	}
 

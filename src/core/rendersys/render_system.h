@@ -27,7 +27,6 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer) = 0;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
 	
-	virtual IContantBufferPtr CloneConstBuffer(IContantBufferPtr buffer) = 0;
 	virtual IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) = 0;
 
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
