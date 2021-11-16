@@ -12,6 +12,8 @@ D3DInput::D3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHe
 	memset(&m_mouseState, 0, sizeof(m_mouseState));
 	memset(&mMouseL, 0, sizeof(mMouseL));
 	memset(&mMouseR, 0, sizeof(mMouseR));
+	mMouseWheel = 0;
+	mMouseMiddleDown = false;
 	Init(hinstance, hwnd, screenWidth, screenHeight);
 }
 D3DInput::~D3DInput()
@@ -76,15 +78,13 @@ void D3DInput::Process()
 	if (m_mouseState.rgbButtons[0] & 0x80) {//Êó±ê×ó¼ü
 		mMouseL.x() = boost::algorithm::clamp(mMouseL.x() + m_mouseState.lX, -m_screenWidth, m_screenWidth);
 		mMouseL.y() = boost::algorithm::clamp(mMouseL.y() + m_mouseState.lY, -m_screenHeight, m_screenHeight);
-		mMouseL.z() += m_mouseState.lZ;
 	}
 	else if (m_mouseState.rgbButtons[1] & 0x80) {//Êó±êÓÒ¼ü
 		mMouseR.x() = boost::algorithm::clamp(mMouseR.x() + m_mouseState.lX, -m_screenWidth, m_screenWidth);
 		mMouseR.y() = boost::algorithm::clamp(mMouseR.y() + m_mouseState.lY, -m_screenHeight, m_screenHeight);
 	}
-	else {
-
-	}
+	mMouseWheel = m_mouseState.lZ;
+	mMouseMiddleDown = (m_mouseState.rgbButtons[2] & 0x80);
 }
 
 void D3DInput::Frame()

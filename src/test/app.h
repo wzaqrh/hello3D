@@ -47,7 +47,7 @@ protected:
 	mir::input::D3DInput* mInput = nullptr;
 	mir::debug::Timer* mTimer;
 	mir::TransformPtr mTransform;
-	float mMoveDefScale;
+	float mMoveDefScale, mOriginCameraDistance;
 	Eigen::Vector4f mBackgndColor;
 public:
 	std::string mName;

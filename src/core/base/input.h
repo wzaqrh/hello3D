@@ -14,8 +14,9 @@ public:
 	~D3DInput();
 	bool Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
 	void Frame();
-	Eigen::Vector4i GetMouseLeftLocation() const { return mMouseL; }
-	Eigen::Vector4i GetMouseRightLocation() const { return mMouseR; }
+	Eigen::Vector2i GetMouseLeftLocation() const { return mMouseL; }
+	Eigen::Vector2i GetMouseRightLocation() const { return mMouseR; }
+	float GetMouseWheel() const { return mMouseWheel; }
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();
@@ -29,7 +30,9 @@ private:
 	DIMOUSESTATE m_mouseState;
 
 	long m_screenWidth = 0, m_screenHeight = 0;
-	Eigen::Vector4i mMouseL, mMouseR;
+	Eigen::Vector2i mMouseL, mMouseR;
+	float mMouseWheel;
+	bool mMouseMiddleDown;
 };
 
 std::vector<char> ReadFile(const char* fileName, const char* mode);
