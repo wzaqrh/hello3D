@@ -1,14 +1,19 @@
 #pragma once
 #include "core/mir.h"
+#include "core/base/input.h"
+#include "core/base/debug.h"
 #include "core/predeclare.h"
 
-namespace mir 
-{
-	struct aiNode;
-	class AssimpModel;
-	class D3DInput;
-	class Timer;
-}
+//namespace mir {
+//namespace debug {
+//class Timer;
+//}
+//namespace input {
+//class D3DInput;
+//}
+////struct aiNode;
+////class AssimpModel;
+//}
 
 struct IApp
 {
@@ -39,8 +44,8 @@ protected:
 	Eigen::Matrix4f GetWorldTransform();
 protected:
 	mir::Mir* mContext = nullptr;
-	class mir::D3DInput* mInput = nullptr;
-	class mir::Timer* mTimer;
+	mir::input::D3DInput* mInput = nullptr;
+	mir::debug::Timer* mTimer;
 	mir::TransformPtr mTransform;
 	float mMoveDefScale;
 	Eigen::Vector4f mBackgndColor;

@@ -43,8 +43,7 @@ class MIR_CORE_API AssimpModel : public IRenderable
 	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
 public:
 	~AssimpModel();
-public:
-	void LoadModel(const std::string& imgPath);
+	void LoadModel(const std::string& imgPath, const std::string& redirectResource = "");
 	void PlayAnim(int Index);
 
 	void Update(float dt);
@@ -55,7 +54,7 @@ private:
 	void processNode(aiNode * node, const aiScene * scene);
 	AssimpMeshPtr processMesh(aiMesh * mesh, const aiScene * scene);
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene);
-public:
+private:
 	AssimpMeshPtrVector mMeshes;
 	std::map<std::string, const aiNode*> mBoneNodesByName;
 	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
@@ -67,6 +66,7 @@ private:
 	std::vector<aiMatrix4x4> mTransforms;
 	float mElapse = 0.0f;
 	Assimp::Importer* mImporter = nullptr;
+	std::string mRedirectResourceDir, mRedirectResourceExt;
 	IRenderSystem& mRenderSys;
 	MaterialPtr mMaterial;
 	TransformPtr mTransform;

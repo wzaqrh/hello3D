@@ -1,12 +1,10 @@
 #include "test/test_case.h"
-
 #include "test/app.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
-#include "core/base/utility.h"
 
 using namespace mir;
 
@@ -43,7 +41,7 @@ void TestShadowMap::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0,0,-30), 300, 45);
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
-		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
+		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
 
 	float dd = 3;
 	mMoveDefScale = SCALE_BASE * 0.2;
@@ -57,10 +55,10 @@ void TestShadowMap::OnPostInitDevice()
 	auto move1 = std::make_shared<Transform>();
 	move1->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
 	mModel1 = mContext->RenderableFac()->CreateAssimpModel(move1, matName);
-	SetModelPath("Spaceship\\"); mModel1->LoadModel(MakeModelPath("Spaceship.fbx"));
+	mModel1->LoadModel("model/Spaceship/Spaceship.fbx");
 
 	mModel2 = mContext->RenderableFac()->CreateAssimpModel(mTransform, matName);
-	SetModelPath("Spaceship\\"); mModel2->LoadModel(MakeModelPath("Spaceship.fbx"));
+	mModel2->LoadModel("model/Spaceship/Spaceship.fbx");
 }
 
 void TestShadowMap::OnRender()

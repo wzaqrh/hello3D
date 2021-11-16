@@ -7,14 +7,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/post_process.h"
-#include "core/base/utility.h"
+#include "core/base/d3d.h"
 
 namespace boost_filesystem = boost::filesystem;
 namespace boost_property_tree = boost::property_tree;
@@ -355,7 +354,7 @@ private:
 					kLayoutInputPerVertexData,
 					0
 				};
-				byteOffset = layoutJ.AlignedByteOffset + D3dEnumConvert::GetWidth(static_cast<DXGI_FORMAT>(layoutJ.Format));
+				byteOffset = layoutJ.AlignedByteOffset + d3d::GetFormatWidthByte(static_cast<DXGI_FORMAT>(layoutJ.Format));
 				++j;
 			}
 
@@ -444,7 +443,7 @@ private:
 			for (auto& element : it.second.get_child("Element")) {
 				sampler.Samplers.emplace_back(std::make_pair(
 					element.second.get<int>("<xmlattr>.Slot", 0),
-					element.second.get<int>("<xmlattr>.Filter", D3D11_FILTER_MIN_MAG_MIP_LINEAR)
+					element.second.get<int>("<xmlattr>.Filter", kSamplerFilterMinMagMipLinear)
 				));
 			}
 

@@ -3,7 +3,6 @@
 #include "core/rendersys/material_factory.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
-#include "core/base/utility.h"
 
 namespace mir {
 

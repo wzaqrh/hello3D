@@ -7,8 +7,10 @@
 //--------------------------------------------------------------------------------------
 #include <windows.h>
 #include "core/rendersys/render_system.h"
-#include "core/base/utility.h"
 #include "test/app.h"
+
+#define C_WINDOW_WIDTH 1024
+#define C_WINDOW_HEIGHT 768
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

@@ -1,3 +1,6 @@
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include "core/renderable/assimp_model.h"
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
@@ -5,55 +8,11 @@
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
 #include "core/base/transform.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
 
 namespace mir {
 
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
-
-void OutPutMatrix(FILE* fd, const aiMatrix4x4& m) {
-	if (fd == nullptr) return;
-
-	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.a1, m.a2, m.a3, m.a4);
-	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.b1, m.b2, m.b3, m.b4);
-	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.c1, m.c2, m.c3, m.c4);
-	fprintf(fd, "%.3f %.3f %.3f %.3f\n", m.d1, m.d2, m.d3, m.d4);
-
-	fprintf(fd, "\n\n");
-	fflush(fd);
-}
-
-void OutPutMatrix(FILE* fd, const Eigen::Matrix4f& m) {
-	if (fd == nullptr) return;
-
-	for (int i = 0; i < 4; ++i)
-		fprintf(fd, "%.3f %.3f %.3f %.3f\n", m(0,i), m(1,i), m(2,i), m(3,i));
-	fprintf(fd, "\n\n");
-	fflush(fd);
-}
-
-Eigen::Matrix4f ToXM(const aiMatrix4x4& m) {
-	Eigen::Matrix4f r;
-	static_assert(sizeof(r) == sizeof(m), "");
-	aiMatrix4x4 mm = m;
-	memcpy(&r, &mm, sizeof(mm));
-	return r;
-}
-
-static_assert(sizeof(Eigen::Vector3f) == sizeof(aiVector3D), "");
-Eigen::Vector3f ToXM(const aiVector3D& v) {
-	Eigen::Vector3f r = Eigen::Vector3f(v.x, v.y, v.z);
-	return r;
-}
-
-static_assert(sizeof(aiMatrix4x4) == sizeof(Eigen::Matrix4f), "");
-aiMatrix4x4 FromXM(const Eigen::Matrix4f& m) {
-	aiMatrix4x4 r;
-	static_assert(sizeof(r) == sizeof(m), "");
-	memcpy(&r, &m, sizeof(m));
-	r.Transpose();
-	return r;
-}
 
 struct EvaluateTransforms
 {
@@ -181,26 +140,41 @@ AssimpModel::~AssimpModel()
 }
 
 const unsigned int ImportFlags =
-aiProcess_ConvertToLeftHanded |
-aiProcess_Triangulate |
-aiProcess_CalcTangentSpace;/* |
-aiProcess_SortByPType |
-aiProcess_PreTransformVertices |
-aiProcess_GenNormals |
-aiProcess_GenUVCoords |
-aiProcess_OptimizeMeshes |
-aiProcess_Debone |
-aiProcess_ValidateDataStructure;*/
-
-void AssimpModel::LoadModel(const std::string& imgPath)
+	aiProcess_ConvertToLeftHanded |
+	aiProcess_Triangulate |
+	aiProcess_CalcTangentSpace;/* |
+	aiProcess_SortByPType |
+	aiProcess_PreTransformVertices |
+	aiProcess_GenNormals |
+	aiProcess_GenUVCoords |
+	aiProcess_OptimizeMeshes |
+	aiProcess_Debone |
+	aiProcess_ValidateDataStructure;*/
+void AssimpModel::LoadModel(const std::string& imgPath, const std::string& redirectResource)
 {
 	TIME_PROFILE(AssimpModel_LoadModel);
+
+	boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
+
+	namespace boost_property_tree = boost::property_tree;
+	boost_property_tree::ptree pt;
+	boost_property_tree::read_json(std::stringstream(redirectResource), pt);
+	mRedirectResourceDir = pt.get<std::string>("dir", "");
+	mRedirectResourceExt = pt.get<std::string>("ext", "");
+
+	if (!mRedirectResourceDir.empty()) {
+		mRedirectResourceDir = boost::filesystem::system_complete(mRedirectResourceDir).string();
+	}
+	else {
+		mRedirectResourceDir = imgFullpath.parent_path().string();
+	}
+	BOOST_ASSERT(mRedirectResourceDir.empty() || mRedirectResourceDir.back() != '/');
 
 	{
 		TIME_PROFILE(Assimp_Importer);
 		delete mImporter;
 		mImporter = new Assimp::Importer;
-		mScene = mImporter->ReadFile(imgPath, ImportFlags);
+		mScene = mImporter->ReadFile(imgFullpath.string(), ImportFlags);
 	}
 
 	assert(mScene != nullptr);
@@ -365,11 +339,29 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene)
 {
+	boost::filesystem::path redirectPath(mRedirectResourceDir);
 	std::vector<ITexturePtr> textures;
 	for (UINT i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str; mat->GetTexture(type, i, &str);
 		std::string key = str.C_Str();
+
+		if (!mRedirectResourceDir.empty()) {
+			boost::filesystem::path texturePath(key);
+			if (texturePath.is_relative()) texturePath = redirectPath.append(texturePath.string());
+			else texturePath = redirectPath.append(texturePath.filename().string());
+
+			if (!mRedirectResourceExt.empty()) 
+				texturePath = texturePath.replace_extension(mRedirectResourceExt);
+
+			if (!boost::filesystem::exists(texturePath)) 
+				texturePath = texturePath.replace_extension("png");
+
+			if (!boost::filesystem::exists(texturePath))
+				continue;
+
+			key = texturePath.string();
+		}
 
 		ITexturePtr texInfo = mRenderSys.LoadTexture(key, kFormatUnknown, true, false);
 		textures.push_back(texInfo);

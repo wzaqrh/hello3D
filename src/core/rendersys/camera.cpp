@@ -2,7 +2,7 @@
 #include "core/rendersys/camera.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/render_pipeline.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
 #include "core/base/math.h"
 
 
@@ -146,7 +146,7 @@ IRenderTexturePtr Camera::FetchPostProcessInput()
 {
 	if (mPostProcessInput == nullptr) {
 		mPostProcessInput = mRenderSys.CreateRenderTexture(mWidth, mHeight, kFormatR16G16B16A16UNorm);
-		SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
+		//SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
 	}
 	return mPostProcessInput;
 }

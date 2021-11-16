@@ -1,5 +1,5 @@
 #include "core/rendersys/render_pipeline.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
 #include "core/rendersys/interface_type.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/material_factory.h"
@@ -15,7 +15,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, int width, int height)
 	,mScreenHeight(height)
 {
 	mShadowCasterOutput = mRenderSys.CreateRenderTexture(mScreenWidth, mScreenHeight, kFormatR32Float);
-	SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
+	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
 void RenderPipeline::_PushRenderTarget(IRenderTexturePtr rendTarget)

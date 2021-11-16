@@ -3,7 +3,6 @@
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/post_process.h"
-#include "core/base/utility.h"
 
 namespace mir {
 

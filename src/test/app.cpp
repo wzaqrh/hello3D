@@ -1,14 +1,12 @@
 #include <boost/algorithm/clamp.hpp>
 #include <boost/filesystem.hpp>
 #include "core/base/transform.h"
-#include "core/base/utility.h"
+#include "core/base/input.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/scene_manager.h"
 #include "test/app.h"
 
 using namespace mir;
-
-
 
 App::App()
 {
@@ -40,8 +38,8 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 	OnInitLight();
 	OnPostInitDevice();
 
-	mInput = new mir::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
-	mTimer = new mir::Timer;
+	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
+	mTimer = new mir::debug::Timer;
 	return true;
 }
 void App::OnInitLight()
@@ -71,9 +69,9 @@ void App::Render()
 
 		Eigen::Vector3f cpos;
 		{
-			mir::Int4 m = mInput->GetMouseLocation(false);
-			float eulerY = 3.14 * m.x / renderSys->WinSize().x();
-			float eulerX = 3.14 * m.y / renderSys->WinSize().y();
+			Eigen::Vector4i m = mInput->GetMouseRightLocation();
+			float eulerY = 3.14 * m.x() / renderSys->WinSize().x();
+			float eulerX = 3.14 * m.y() / renderSys->WinSize().y();
 
 			Eigen::Quaternion<float> euler = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
 				* Eigen::AngleAxisf(eulerX, Eigen::Vector3f::UnitX())
@@ -85,9 +83,9 @@ void App::Render()
 	}
 
 	{
-		mir::Int4 m = mInput->GetMouseLocation(true);
-		float scalez = boost::algorithm::clamp(mMoveDefScale * (1000 + m.z) / 1000.0f, 0.00001f, 10.0f);
-		float angy = 3.14 * -m.x / renderSys->WinSize().x(), angx = 3.14 * -m.y / renderSys->WinSize().y();
+		Eigen::Vector4i m = mInput->GetMouseLeftLocation();
+		float scalez = boost::algorithm::clamp(mMoveDefScale * (1000 + m.z()) / 1000.0f, 0.00001f, 10.0f);
+		float angy = 3.14 * -m.x() / renderSys->WinSize().x(), angx = 3.14 * -m.y() / renderSys->WinSize().y();
 		
 		mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));
 		mTransform->SetEuler(Eigen::Vector3f(angx, angy, 0));

@@ -3,7 +3,9 @@
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/d3d9/interface_type9.h"
 #include "core/rendersys/material_factory.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
+#include "core/base/input.h"
+#include "core/base/d3d.h"
 
 namespace mir {
 
@@ -94,7 +96,7 @@ bool RenderSystem9::_CreateDeviceAndSwapChain()
 bool RenderSystem9::_GetDeviceCaps()
 {
 	if (CheckHR(mD3D9->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &mD3DCaps))) return false;
-	__log(mD3DCaps);
+	debug::Log(mD3DCaps);
 	return true;
 }
 
@@ -127,7 +129,7 @@ void RenderSystem9::ClearColorDepthStencil(const Eigen::Vector4f& color, float d
 IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, ResourceFormat format)
 {
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
-	D3DFORMAT Format = D3dEnumConvert::d3d11To9(static_cast<DXGI_FORMAT>(format));
+	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
@@ -168,7 +170,7 @@ IIndexBufferPtr RenderSystem9::CreateIndexBuffer(int bufferSize, ResourceFormat 
 {
 	IndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
-	D3DFORMAT Format = D3dEnumConvert::d3d11To9(static_cast<DXGI_FORMAT>(format));
+	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
 		ret = MakePtr<IndexBuffer9>(pIndexBuffer, bufferSize, format);
 	}
@@ -275,7 +277,7 @@ VertexShader9Ptr RenderSystem9::_CreateVS(const std::string& filename, const std
 VertexShader9Ptr RenderSystem9::_CreateVSByFXC(const std::string& filename)
 {
 	VertexShader9Ptr ret;
-	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
+	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty()) 
 		ret = _CreateVSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
 	return ret;
@@ -319,7 +321,7 @@ PixelShader9Ptr RenderSystem9::_CreatePS(const std::string& filename, const std:
 PixelShader9Ptr RenderSystem9::_CreatePSByFXC(const std::string& filename)
 {
 	PixelShader9Ptr ret;
-	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
+	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty())
 		ret = _CreatePSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
 	return ret;
@@ -362,12 +364,12 @@ ISamplerStatePtr RenderSystem9::CreateSampler(SamplerFilterMode filter, CompareF
 {
 	SamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
-	ret->mStates[D3DSAMP_ADDRESSU] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
-	ret->mStates[D3DSAMP_ADDRESSV] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
-	ret->mStates[D3DSAMP_ADDRESSW] = D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSU] = d3d::convert11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSV] = d3d::convert11To9(D3D11_TEXTURE_ADDRESS_WRAP);
+	ret->mStates[D3DSAMP_ADDRESSW] = d3d::convert11To9(D3D11_TEXTURE_ADDRESS_WRAP);
 	ret->mStates[D3DSAMP_BORDERCOLOR] = D3DCOLOR_ARGB(0,0,0,0);
 
-	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = D3dEnumConvert::d3d11To9(static_cast<D3D11_FILTER>(filter));
+	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = d3d::convert11To9(static_cast<D3D11_FILTER>(filter));
 	for (auto& iter : fts)
 		ret->mStates[iter.first] = iter.second;
 
@@ -389,7 +391,7 @@ IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, LayoutInputEle
 {
 	InputLayout9Ptr ret = MakePtr<InputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)
-		ret->mInputDescs.push_back(D3dEnumConvert::d3d11To9(descArray[i]));
+		ret->mInputDescs.push_back(d3d::convert11To9(descArray[i]));
 	ret->mInputDescs.push_back(D3DDECL_END());
 
 	auto resource = pProgram->AsRes();
@@ -412,7 +414,7 @@ void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
 
 ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFormat format, bool async, bool isCube)
 {
-	std::string imgPath = GetModelPath() + srcFile;
+	std::string imgPath = srcFile;
 #ifdef USE_ONLY_PNG
 	if (! boost::filesystem::exists(imgPath)) {
 		auto pos = imgPath.find_last_of(".");
@@ -429,7 +431,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFo
 		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
 		if (isCube) {
 			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile.c_str(), 
-				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, D3dEnumConvert::d3d11To9(static_cast<DXGI_FORMAT>(format)),
+				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, d3d::convert11To9(static_cast<DXGI_FORMAT>(format)),
 				D3DPOOL_MANAGED, D3DX_FILTER_NONE/*D3DX_DEFAULT */, D3DX_FILTER_NONE, 0, NULL,
 				NULL, &pTextureRV->GetSRVCube9()))) {
 				pTextureRV = nullptr;
@@ -490,15 +492,15 @@ void RenderSystem9::SetBlendFunc(const BlendState& blendFunc)
 {
 	mCurBlendFunc = blendFunc;
 	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.Src == kBlendOne && blendFunc.Dst == kBlendZero) ? FALSE : TRUE);
-	mDevice9->SetRenderState(D3DRS_SRCBLEND, D3dEnumConvert::d3d11To9(static_cast<D3D11_BLEND>(blendFunc.Src)));
-	mDevice9->SetRenderState(D3DRS_DESTBLEND, D3dEnumConvert::d3d11To9(static_cast<D3D11_BLEND>(blendFunc.Dst)));
+	mDevice9->SetRenderState(D3DRS_SRCBLEND, d3d::convert11To9(static_cast<D3D11_BLEND>(blendFunc.Src)));
+	mDevice9->SetRenderState(D3DRS_DESTBLEND, d3d::convert11To9(static_cast<D3D11_BLEND>(blendFunc.Dst)));
 }
 
 void RenderSystem9::SetDepthState(const DepthState& depthState)
 {
 	mCurDepthState = depthState;
 	mDevice9->SetRenderState(D3DRS_ZENABLE, depthState.DepthEnable);
-	mDevice9->SetRenderState(D3DRS_ZFUNC, D3dEnumConvert::d3d11To9(static_cast<D3D11_COMPARISON_FUNC>(depthState.CmpFunc)));
+	mDevice9->SetRenderState(D3DRS_ZFUNC, d3d::convert11To9(static_cast<D3D11_COMPARISON_FUNC>(depthState.CmpFunc)));
 	mDevice9->SetRenderState(D3DRS_ZWRITEENABLE, depthState.WriteMask == D3D11_DEPTH_WRITE_MASK_ALL ? TRUE : FALSE);
 }
 
@@ -553,12 +555,12 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 	return 0;
 }
 void RenderSystem9::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
-	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
+	D3DPRIMITIVETYPE topo9 = d3d::convert11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
 	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), topo9));
 }
 void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
-	D3DPRIMITIVETYPE topo9 = D3dEnumConvert::d3d11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
+	D3DPRIMITIVETYPE topo9 = d3d::convert11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
 	mDevice9->DrawIndexedPrimitive(topo9, 
 		0, 0, op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0, 

@@ -1,7 +1,7 @@
 #include "interface_type11.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/resource.h"
-#include "core/base/utility.h"
+#include "core/base/d3d.h"
 
 namespace mir {
 
@@ -107,7 +107,7 @@ int VertexBuffer11::GetCount()
 /********** IndexBuffer11 **********/
 int IndexBuffer11::GetWidth()
 {
-	return D3dEnumConvert::GetWidth(static_cast<DXGI_FORMAT>(Format));
+	return d3d::GetFormatWidthByte(static_cast<DXGI_FORMAT>(Format));
 }
 
 /********** ContantBuffer11 **********/

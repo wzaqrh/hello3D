@@ -1,22 +1,22 @@
-#include "d3d_enum_convert.h"
+#include "core/base/d3d.h"
 
 namespace mir {
+namespace d3d {
 
-D3DBLEND D3dEnumConvert::d3d11To9(D3D11_BLEND blend)
+D3DBLEND convert11To9(D3D11_BLEND blend)
 {
 	return static_cast<D3DBLEND>(blend);
 }
 
-D3DCMPFUNC D3dEnumConvert::d3d11To9(D3D11_COMPARISON_FUNC cmp)
+D3DCMPFUNC convert11To9(D3D11_COMPARISON_FUNC cmp)
 {
 	return static_cast<D3DCMPFUNC>(cmp);
 }
 
-D3DFORMAT D3dEnumConvert::d3d11To9(DXGI_FORMAT fmt)
+D3DFORMAT convert11To9(DXGI_FORMAT fmt)
 {
 	D3DFORMAT ret = D3DFMT_UNKNOWN;
-	switch (fmt)
-	{
+	switch (fmt) {
 	case DXGI_FORMAT_UNKNOWN:
 		return D3DFMT_UNKNOWN;
 	case DXGI_FORMAT_R32G32B32A32_TYPELESS:
@@ -220,11 +220,10 @@ D3DFORMAT D3dEnumConvert::d3d11To9(DXGI_FORMAT fmt)
 	return ret;
 }
 
-D3DPRIMITIVETYPE D3dEnumConvert::d3d11To9(D3D11_PRIMITIVE_TOPOLOGY topo)
+D3DPRIMITIVETYPE convert11To9(D3D11_PRIMITIVE_TOPOLOGY topo)
 {
 	D3DPRIMITIVETYPE ret = D3DPT_FORCE_DWORD;
-	switch (topo)
-	{
+	switch (topo) {
 	case D3D_PRIMITIVE_TOPOLOGY_POINTLIST:
 		return D3DPT_POINTLIST;
 	case D3D_PRIMITIVE_TOPOLOGY_LINELIST:
@@ -244,7 +243,7 @@ D3DPRIMITIVETYPE D3dEnumConvert::d3d11To9(D3D11_PRIMITIVE_TOPOLOGY topo)
 	return ret;
 }
 
-static D3DDECLUSAGE __d3d11To9(const std::string& semantic) {
+static D3DDECLUSAGE __convert11To9(const std::string& semantic) {
 	D3DDECLUSAGE ret;
 	if (semantic.find("POSITION") != std::string::npos) {
 		ret = D3DDECLUSAGE_POSITION;
@@ -291,10 +290,9 @@ static D3DDECLUSAGE __d3d11To9(const std::string& semantic) {
 	return ret;
 }
 
-static D3DDECLTYPE __d3d11To9(DXGI_FORMAT fmt) {
+static D3DDECLTYPE __convert11To9(DXGI_FORMAT fmt) {
 	D3DDECLTYPE ret = D3DDECLTYPE_UNUSED;
-	switch (fmt)
-	{
+	switch (fmt) {
 	case DXGI_FORMAT_R32_FLOAT:
 		return D3DDECLTYPE_FLOAT1;
 	case DXGI_FORMAT_R32G32_FLOAT:
@@ -336,28 +334,27 @@ static D3DDECLTYPE __d3d11To9(DXGI_FORMAT fmt) {
 	return ret;
 }
 
-D3DVERTEXELEMENT9 D3dEnumConvert::d3d11To9(const LayoutInputElement& desc)
+D3DVERTEXELEMENT9 convert11To9(const LayoutInputElement& desc)
 {
 	D3DVERTEXELEMENT9 ret;
 	ret.Stream = desc.InputSlot;
-	ret.Offset = desc.AlignedByteOffset;     
-	ret.Type = (D3DDECLTYPE)__d3d11To9(static_cast<DXGI_FORMAT>(desc.Format));
+	ret.Offset = desc.AlignedByteOffset;
+	ret.Type = (D3DDECLTYPE)__convert11To9(static_cast<DXGI_FORMAT>(desc.Format));
 	ret.Method = D3DDECLMETHOD_DEFAULT;
-	ret.Usage = __d3d11To9(desc.SemanticName);
+	ret.Usage = __convert11To9(desc.SemanticName);
 	ret.UsageIndex = desc.SemanticIndex;
 	return ret;
 }
 
-D3DTEXTUREADDRESS D3dEnumConvert::d3d11To9(D3D11_TEXTURE_ADDRESS_MODE addrMode)
+D3DTEXTUREADDRESS convert11To9(D3D11_TEXTURE_ADDRESS_MODE addrMode)
 {
 	return static_cast<D3DTEXTUREADDRESS>(addrMode);
 }
 
-std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> D3dEnumConvert::d3d11To9(D3D11_FILTER filter)
+std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> convert11To9(D3D11_FILTER filter)
 {
 	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> ret;
-	switch (filter)
-	{
+	switch (filter) {
 	case D3D11_FILTER_MIN_MAG_MIP_POINT:
 		ret[D3DSAMP_MINFILTER] = D3DTEXF_POINT;
 		ret[D3DSAMP_MAGFILTER] = D3DTEXF_POINT;
@@ -409,11 +406,10 @@ std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> D3dEnumConvert::d3d11To9(D3D
 	return ret;
 }
 
-DXGI_FORMAT D3dEnumConvert::d3d9To11(D3DFORMAT fmt)
+DXGI_FORMAT convert9To11(D3DFORMAT fmt)
 {
 	DXGI_FORMAT ret = DXGI_FORMAT_UNKNOWN;
-	switch (fmt)
-	{
+	switch (fmt) {
 	case D3DFMT_A8R8G8B8:
 		return DXGI_FORMAT_B8G8R8A8_UNORM;
 	case D3DFMT_R5G6B5:
@@ -432,18 +428,17 @@ DXGI_FORMAT D3dEnumConvert::d3d9To11(D3DFORMAT fmt)
 	return ret;
 }
 
-int D3dEnumConvert::GetWidth(DXGI_FORMAT format)
+int GetFormatWidthByte(DXGI_FORMAT format)
 {
 #define WIDTH(W) width = W; break
 #define CASE_FMT_WIDTH(FMT, W) case FMT: WIDTH(W)
 	int width = 4;
-	switch (format)
-	{
+	switch (format) {
 	case DXGI_FORMAT_R32G32B32A32_TYPELESS:
 	case DXGI_FORMAT_R32G32B32A32_FLOAT:
 	case DXGI_FORMAT_R32G32B32A32_UINT:
 	case DXGI_FORMAT_R32G32B32A32_SINT:
-		WIDTH(16);	
+		WIDTH(16);
 	case DXGI_FORMAT_R32G32B32_TYPELESS:
 	case DXGI_FORMAT_R32G32B32_FLOAT:
 	case DXGI_FORMAT_R32G32B32_UINT:
@@ -563,4 +558,5 @@ int D3dEnumConvert::GetWidth(DXGI_FORMAT format)
 	return width;
 }
 
+}
 }

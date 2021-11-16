@@ -4,7 +4,6 @@
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/assimp_model.h"
 #include "core/base/transform.h"
-#include "core/base/utility.h"
 
 using namespace mir;
 
@@ -43,11 +42,10 @@ void TestSpecSkybox::OnInitLight()
 void TestSpecSkybox::OnPostInitDevice()
 {
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
-		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
+		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
 	
 	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
-	SetModelPath("Spaceship\\"); 
-	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
+	mModel->LoadModel("model/Spaceship/Spaceship.fbx"); 
 	mMoveDefScale = 0.01;
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 }

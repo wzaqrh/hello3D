@@ -1,6 +1,5 @@
 #include <boost/filesystem.hpp>
 #include "core/rendersys/render_system.h"
-#include "core/base/utility.h"
 
 namespace mir {
 
@@ -26,12 +25,7 @@ IProgramPtr RenderSystem::CreateProgram(const std::string& name, const std::stri
 
 ITexturePtr RenderSystem::LoadTexture(const std::string& filepath, ResourceFormat format, bool async, bool isCube)
 {
-	const char* pSrc = filepath.c_str();
 	std::string imgPath = filepath;
-	auto pos = filepath.find_last_of("\\");
-	if (pos != std::string::npos) {
-		imgPath = filepath.substr(pos + 1, std::string::npos);
-	}
 
 	ITexturePtr texView = nullptr;
 	if (mTexByPath.find(imgPath) == mTexByPath.end()) {

@@ -6,7 +6,6 @@
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
-#include "core/base/utility.h"
 
 using namespace mir;
 
@@ -34,8 +33,7 @@ void TestRT::OnInitLight()
 void TestRT::OnPostInitDevice()
 {
 	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
-	SetModelPath("Spaceship\\"); 
-	mModel->LoadModel(MakeModelPath("Spaceship.fbx")); 
+	mModel->LoadModel("model/Spaceship/Spaceship.fbx"); 
 	mMoveDefScale = 0.01;
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));

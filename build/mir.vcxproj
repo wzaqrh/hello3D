@@ -35,12 +35,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\core\base\d3d_enum_convert.h" />
+    <ClInclude Include="..\src\core\base\d3d.h" />
+    <ClInclude Include="..\src\core\base\debug.h" />
+    <ClInclude Include="..\src\core\base\input.h" />
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
     <ClInclude Include="..\src\core\base\std.h" />
     <ClInclude Include="..\src\core\base\transform.h" />
-    <ClInclude Include="..\src\core\base\utility.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_export.h" />
     <ClInclude Include="..\src\core\predeclare.h" />
@@ -73,9 +74,10 @@
     <ClInclude Include="..\src\core\rendersys\scene_manager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\core\base\d3d_enum_convert.cpp" />
+    <ClCompile Include="..\src\core\base\d3d.cpp" />
+    <ClCompile Include="..\src\core\base\debug.cpp" />
+    <ClCompile Include="..\src\core\base\input.cpp" />
     <ClCompile Include="..\src\core\base\transform.cpp" />
-    <ClCompile Include="..\src\core\base\utility.cpp" />
     <ClCompile Include="..\src\core\dllmain.cpp" />
     <ClCompile Include="..\src\core\mir.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_mesh.cpp" />

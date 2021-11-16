@@ -1,7 +1,8 @@
 #include "interface_type9.h"
 #include "core/rendersys/resource.h"
 #include "core/rendersys/render_system.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
+#include "core/base/d3d.h"
 
 namespace mir {
 
@@ -19,7 +20,7 @@ Texture9::Texture9(IDirect3DTexture9 *texture, const std::string& path)
 		D3DSURFACE_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
-		mFormat = static_cast<ResourceFormat>(D3dEnumConvert::d3d9To11(desc.Format));
+		mFormat = static_cast<ResourceFormat>(d3d::convert9To11(desc.Format));
 		mMipCount = mTexture->GetLevelCount();
 	});
 }
@@ -51,7 +52,7 @@ D3DSURFACE_DESC Texture9::GetDesc()
 /********** TIndexBuffer9 **********/
 int IndexBuffer9::GetWidth()
 {
-	return D3dEnumConvert::GetWidth(static_cast<DXGI_FORMAT>(Format));
+	return d3d::GetFormatWidthByte(static_cast<DXGI_FORMAT>(Format));
 }
 
 /********** TRenderTexture9 **********/

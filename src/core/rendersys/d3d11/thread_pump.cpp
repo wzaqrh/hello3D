@@ -1,6 +1,6 @@
 #include "thread_pump.h"
 #include "core/rendersys/resource.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
 
 namespace mir {
 

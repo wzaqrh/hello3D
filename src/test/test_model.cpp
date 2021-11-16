@@ -3,7 +3,6 @@
 #include "core/rendersys/material_factory.h"
 #include "core/renderable/assimp_model.h"
 #include "core/base/transform.h"
-#include "core/base/utility.h"
 
 using namespace mir;
 
@@ -20,13 +19,10 @@ private:
 void TestModel::OnPostInitDevice()
 {
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
-		mContext->RenderableFac()->CreateSkybox("images\\uffizi_cross.dds"));
+		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
 
 	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
-	//gModelPath = "Spaceship\\"; mModel->LoadModel(MakeModelPath("Spaceship.fbx")); mTransform->SetDefScale(0.01); mModel->PlayAnim(0);
-	//gModelPath = "Normal\\"; mModel->LoadModel(MakeModelPath("Deer.fbx")); 
-	//gModelPath = "handgun\\"; mModel->LoadModel(MakeModelPath("handgun.fbx")); mTransform->SetDefScale(0.01);
-	SetModelPath("Male03\\"); mModel->LoadModel(MakeModelPath("Male02.FBX")); 
+	mModel->LoadModel("model/Male03/Male02.FBX", R"({"ext":"png","dir":"model/Male03/"})"); 
 	mMoveDefScale = 0.07; 
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));

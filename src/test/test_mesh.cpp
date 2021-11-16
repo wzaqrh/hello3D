@@ -6,7 +6,6 @@
 #include "core/renderable/mesh.h"
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
-#include "core/base/utility.h"
 
 using namespace mir;
 

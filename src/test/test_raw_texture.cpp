@@ -5,7 +5,6 @@
 #include "core/rendersys/scene_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/sprite.h"
-#include "core/base/utility.h"
 #include "WINGDI.h"
 
 using namespace mir;

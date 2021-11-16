@@ -8,7 +8,8 @@
 #include "core/rendersys/d3d11/interface_type11.h"
 #include "core/rendersys/d3d11/thread_pump.h"
 #include "core/rendersys/material_factory.h"
-#include "core/base/utility.h"
+#include "core/base/debug.h"
+#include "core/base/input.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -332,6 +333,40 @@ ISamplerStatePtr RenderSystem11::CreateSampler(SamplerFilterMode filter, Compare
 	return ret;
 }
 
+struct IncludeStdIo : public ID3DInclude
+{
+	std::string mModelPath;
+	std::vector<char> mBuffer;
+	std::vector<std::string> mStrBuffer;
+public:
+	IncludeStdIo(const std::string& modelPath) :mModelPath(modelPath) {}
+	STDMETHOD(Open)(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, 
+		LPCVOID *ppData, UINT *pBytes) 
+	{
+		std::string fullPath = mModelPath + pFileName;
+		FILE* fd = fopen(fullPath.c_str(), "r");
+		if (fd) {
+			fseek(fd, 0, SEEK_END);
+			size_t size = ftell(fd);
+			fseek(fd, 0, SEEK_SET);
+			size_t first = mBuffer.size();
+			mBuffer.resize(first + size);
+			fread(&mBuffer[first], sizeof(char), size, fd);
+			fclose(fd);
+
+			mStrBuffer.push_back(std::string(mBuffer.begin(), mBuffer.end()));
+			if (ppData) *ppData = mStrBuffer.back().c_str();
+			if (pBytes) *pBytes = mStrBuffer.back().size();
+
+			//OutputDebugStringA(mStrBuffer.back().c_str());
+			return S_OK;
+		}
+		return S_FALSE;
+	}
+	STDMETHOD(Close)(THIS_ LPCVOID pData) {
+		return S_OK;
+	}
+};
 DWORD GetShaderFlag() {
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(_DEBUG) && defined(D3D11_DEBUG)
@@ -400,7 +435,7 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const st
 PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const std::string& filename)
 {
 	PixelShader11Ptr ret = MakePtr<PixelShader11>(nullptr);
-	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
+	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty()) {
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
 		HRESULT hr = mDevice->CreatePixelShader(&buffer[0], buffer.size(), NULL, &ret->mShader);
@@ -470,7 +505,7 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const s
 VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const std::string& filename)
 {
 	VertexShader11Ptr ret = MakePtr<VertexShader11>(nullptr);
-	std::vector<char> buffer = ReadFile(filename.c_str(), "rb");
+	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty()) {
 		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
 		auto buffer_size = buffer.size();
@@ -645,25 +680,13 @@ void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int
 
 ITexturePtr RenderSystem11::_CreateTexture(const char* pSrcFile, ResourceFormat format, bool async, bool isCube)
 {
-	std::string imgPath = GetModelPath() + pSrcFile;
-#ifdef USE_ONLY_PNG
-	if (!boost::filesystem::exists(imgPath)) {
-		auto pos = imgPath.find_last_of(".");
-		if (pos != std::string::npos) {
-			imgPath = imgPath.substr(0, pos);
-			imgPath += ".png";
-		}
-	}
-#endif
-	pSrcFile = imgPath.c_str();
-
 	ITexturePtr pTextureRV;
 	if (boost::filesystem::exists(pSrcFile)) {
 		D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
 		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
 
-		pTextureRV = MakePtr<Texture11>(nullptr, imgPath);
+		pTextureRV = MakePtr<Texture11>(nullptr, pSrcFile);
 		IResourcePtr resource = pTextureRV->AsRes();
 		HRESULT hr;
 		if (async) {
