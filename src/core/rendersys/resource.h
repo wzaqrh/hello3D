@@ -1,8 +1,8 @@
 #pragma once
 #include <Windows.h>
 #include <boost/noncopyable.hpp>
-#include "core/base/std.h"
 #include "core/mir_export.h"
+#include "core/base/stl.h"
 #include "core/rendersys/predeclare.h"
 
 namespace mir {

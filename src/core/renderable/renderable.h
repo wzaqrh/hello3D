@@ -1,7 +1,8 @@
 #pragma once
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
-#include "core/base/std.h"
+#include "core/base/stl.h"
+#include "core/base/math.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/material.h"

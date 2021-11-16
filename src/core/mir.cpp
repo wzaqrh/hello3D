@@ -24,7 +24,7 @@ bool Mir::Initialize(HWND hWnd) {
 	mMaterialFac = std::make_shared<MaterialFactory>(*mRenderSys);
 	
 	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
-	mSceneMng = MakePtr<SceneManager>(*mRenderSys, *mMaterialFac, 
+	mSceneMng = std::make_shared<SceneManager>(*mRenderSys, *mMaterialFac, 
 		Eigen::Vector2i(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight), 
 		Camera::CreatePerspective(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight));
 

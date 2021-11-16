@@ -9,6 +9,9 @@
 
 namespace mir {
 
+#define MakePtr std::make_shared
+#define PtrRaw(T) T.get()
+
 RenderSystem9::RenderSystem9()
 {
 	mFXCDir = "d3d9\\";

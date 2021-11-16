@@ -6,7 +6,10 @@
 
 namespace mir {
 
-/********** TTexture9 **********/
+#define MakePtr std::make_shared
+#define PtrRaw(T) T.get()
+
+/********** Texture9 **********/
 Texture9::Texture9(IDirect3DTexture9 *texture, const std::string& path)
 	: mTexture(texture)
 	, mTextureCube(nullptr)

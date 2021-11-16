@@ -37,10 +37,11 @@
   <ItemGroup>
     <ClInclude Include="..\src\core\base\d3d.h" />
     <ClInclude Include="..\src\core\base\debug.h" />
+    <ClInclude Include="..\src\core\base\declare_macros.h" />
     <ClInclude Include="..\src\core\base\input.h" />
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
-    <ClInclude Include="..\src\core\base\std.h" />
+    <ClInclude Include="..\src\core\base\stl.h" />
     <ClInclude Include="..\src\core\base\transform.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_export.h" />
@@ -71,6 +72,7 @@
     <ClInclude Include="..\src\core\rendersys\render_pipeline.h" />
     <ClInclude Include="..\src\core\rendersys\render_system.h" />
     <ClInclude Include="..\src\core\rendersys\resource.h" />
+    <ClInclude Include="..\src\core\rendersys\resource_manager.h" />
     <ClInclude Include="..\src\core\rendersys\scene_manager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -86,7 +88,6 @@
     <ClCompile Include="..\src\core\renderable\label.cpp" />
     <ClCompile Include="..\src\core\renderable\mesh.cpp" />
     <ClCompile Include="..\src\core\renderable\post_process.cpp" />
-    <ClCompile Include="..\src\core\renderable\renderable.cpp" />
     <ClCompile Include="..\src\core\renderable\renderable_factory.cpp" />
     <ClCompile Include="..\src\core\renderable\skybox.cpp" />
     <ClCompile Include="..\src\core\renderable\sprite.cpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp" />
     <ClCompile Include="..\src\core\rendersys\render_system.cpp" />
     <ClCompile Include="..\src\core\rendersys\resource.cpp" />
+    <ClCompile Include="..\src\core\rendersys\resource_manager.cpp" />
     <ClCompile Include="..\src\core\rendersys\scene_manager.cpp" />
     <ClCompile Include="..\src\test\unit_test\main.cpp" />
     <ClCompile Include="..\src\test\unit_test\test_eigen.cpp" />

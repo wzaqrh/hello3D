@@ -15,7 +15,7 @@ App::App()
 	mTimer = nullptr;
 	mMoveDefScale = 1.0f;
 
-	mTransform = MakePtr<mir::Transform>();
+	mTransform = std::make_shared<mir::Transform>();
 	mBackgndColor = Eigen::Vector4f(0.0f, 0.125f, 0.3f, 1.0f);
 	mContext = new mir::Mir;
 }

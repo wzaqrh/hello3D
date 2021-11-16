@@ -2,8 +2,8 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <d3d9.h>
-#include <string>
 #include "core/mir_export.h"
+#include "core/base/stl.h"
 
 namespace mir {
 namespace debug {

@@ -15,6 +15,9 @@ using Microsoft::WRL::ComPtr;
 
 namespace mir {
 
+#define MakePtr std::make_shared
+#define PtrRaw(T) T.get()
+
 RenderSystem11::RenderSystem11()
 {
 	mThreadPump = std::make_shared<ThreadPump>();

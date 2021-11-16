@@ -1,8 +1,9 @@
 #pragma once
 #include <windows.h>
 #include <dinput.h>
-#include "core/base/std.h"
 #include "core/mir_export.h"
+#include "core/base/stl.h"
+#include "core/base/math.h"
 
 namespace mir {
 namespace input {

@@ -1,6 +1,7 @@
 #pragma once
 #include <assimp/mesh.h>
 #include "core/mir_export.h"
+#include "core/base/declare_macros.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {

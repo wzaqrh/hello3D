@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\src\core\base\std.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\transform.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
@@ -28,9 +25,6 @@
     <ClInclude Include="..\src\core\rendersys\render_system.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\resource.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\interface_type9.h">
       <Filter>src\core\rendersys\d3d9</Filter>
     </ClInclude>
@@ -51,12 +45,6 @@
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\material_cb.h">
       <Filter>src\core\rendersys\material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\base_type.h">
-      <Filter>src\core\rendersys\type</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\interface_type.h">
-      <Filter>src\core\rendersys\type</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\material_factory.h">
       <Filter>src\core\rendersys\material</Filter>
@@ -91,12 +79,6 @@
     <ClInclude Include="..\src\core\mir_export.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\camera.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\scene_manager.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\predeclare.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
@@ -112,6 +94,30 @@
     <ClInclude Include="..\src\core\base\d3d.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\interface_type.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base_type.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\scene_manager.h">
+      <Filter>src\core\rendersys\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\camera.h">
+      <Filter>src\core\rendersys\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\resource.h">
+      <Filter>src\core\rendersys\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\resource_manager.h">
+      <Filter>src\core\rendersys\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\declare_macros.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\stl.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -121,9 +127,6 @@
       <Filter>src\core\renderable</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\post_process.cpp">
-      <Filter>src\core\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\renderable\renderable.cpp">
       <Filter>src\core\renderable</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\renderable_factory.cpp">
@@ -136,9 +139,6 @@
       <Filter>src\core\renderable</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\render_system.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\resource.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp">
@@ -161,12 +161,6 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\material_cb.cpp">
       <Filter>src\core\rendersys\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\base_type.cpp">
-      <Filter>src\core\rendersys\type</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\interface_type.cpp">
-      <Filter>src\core\rendersys\type</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\material_factory.cpp">
       <Filter>src\core\rendersys\material</Filter>
@@ -192,12 +186,6 @@
     <ClCompile Include="..\src\core\dllmain.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\camera.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\scene_manager.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\test\unit_test\test_eigen.cpp">
       <Filter>src\unit_test</Filter>
     </ClCompile>
@@ -212,6 +200,24 @@
     </ClCompile>
     <ClCompile Include="..\src\core\base\d3d.cpp">
       <Filter>src\core\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\interface_type.cpp">
+      <Filter>src\core\rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\base_type.cpp">
+      <Filter>src\core\rendersys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\scene_manager.cpp">
+      <Filter>src\core\rendersys\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\camera.cpp">
+      <Filter>src\core\rendersys\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\resource.cpp">
+      <Filter>src\core\rendersys\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\resource_manager.cpp">
+      <Filter>src\core\rendersys\resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,9 +245,6 @@
     <Filter Include="src\core\rendersys\material">
       <UniqueIdentifier>{9ffd0cd2-2f97-41ba-8427-ac868b8ac017}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\rendersys\type">
-      <UniqueIdentifier>{405177f7-1d50-43ab-b4c2-1e9583ab70c1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\renderable\assimp">
       <UniqueIdentifier>{90719977-f5fd-4594-810d-5d56035572d6}</UniqueIdentifier>
     </Filter>
@@ -250,6 +253,12 @@
     </Filter>
     <Filter Include="src\unit_test">
       <UniqueIdentifier>{cdd69705-991f-47e3-93a0-c38a5203813a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\scene">
+      <UniqueIdentifier>{7ebe8e76-3d1f-4395-86f8-a69cfe8b1719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\resource">
+      <UniqueIdentifier>{74518239-6bce-4478-a63b-64f8e36d17d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

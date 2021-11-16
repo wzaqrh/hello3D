@@ -1,5 +1,6 @@
 #pragma once
 #include "core/mir_export.h"
+#include "core/base/declare_macros.h"
 #include "core/renderable/renderable.h"
 #include "core/renderable/sprite.h"
 

@@ -5,13 +5,14 @@
 
 namespace mir {
 
-template<class T>
-static IUnknown*& MakeDeviceObjectRef(T*& ref) {
+#define MakePtr std::make_shared
+#define PtrRaw(T) T.get()
+template<class T> static IUnknown*& MakeDeviceObjectRef(T*& ref) {
 	IUnknown** ppDeviceObj = (IUnknown**)&ref;
 	return *ppDeviceObj;
 }
 
-/********** TBlobDataD3d11 **********/
+/********** BlobData11 **********/
 BlobData11::BlobData11(ID3DBlob* pBlob)
 	:mBlob(pBlob)
 {
