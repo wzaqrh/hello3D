@@ -442,7 +442,7 @@ void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
 	mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(layout)->GetLayout9());
 }
 
-ITexturePtr RenderSystem9::_CreateTexture(IResourcePtr res, const std::string& srcFile, 
+ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, const std::string& srcFile, 
 	ResourceFormat format, bool async, bool isCube)
 {
 	std::string imgPath = srcFile;

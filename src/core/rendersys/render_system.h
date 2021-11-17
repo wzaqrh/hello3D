@@ -82,18 +82,11 @@ public:
 	Eigen::Vector4i WinSize() { return Eigen::Vector4i{ mScreenWidth, mScreenHeight, 0, 0 }; }
 	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }
-	
-	IProgramPtr LoadProgram(IResourcePtr res, const std::string& name, 
-		const std::string& vsEntry, 
+
+	IProgramPtr LoadProgram(IResourcePtr res, const std::string& name,
+		const std::string& vsEntry,
 		const std::string& psEntry) override final;
-	ITexturePtr LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data) override {
-		return nullptr;
-	}
-	ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format = kFormatUnknown, 
-		bool async = true, bool isCube = false) override final;
 protected:
-	virtual ITexturePtr _CreateTexture(IResourcePtr res, const char* pSrcFile, ResourceFormat format, 
-		bool async, bool isCube) = 0;
 	virtual IProgramPtr CreateProgramByCompile(IResourcePtr res, const std::string& vsPath,
 		const std::string& psPath,
 		const std::string& vsEntry,
@@ -107,7 +100,6 @@ public:
 	BlendState mCurBlendFunc;
 	DepthState mCurDepthState;
 
-	std::map<std::string, ITexturePtr> mTexByPath;
 	std::string mFXCDir;
 };
 

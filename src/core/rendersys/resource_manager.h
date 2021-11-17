@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/assert.hpp>
 #include "core/base/stl.h"
 #include "core/mir_export.h"
@@ -62,14 +63,25 @@ public:
 	}
 
 	template <typename... T>
-	ITexturePtr CreateTexture(int firstParam, T &&...args) {
+	ITexturePtr CreateTexture(int width, T &&...args) {
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
-		return mRenderSys.LoadTexture(res, firstParam, std::forward<T>(args)...);
+		return mRenderSys.LoadTexture(res, width, std::forward<T>(args)...);
 	}
 	template <typename... T>
-	ITexturePtr CreateTexture(const std::string& firstParam, T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
-		return mRenderSys.LoadTexture(res, firstParam, std::forward<T>(args)...);
+	ITexturePtr CreateTexture(const std::string& filepath, T &&...args) {
+		std::string imgPath = boost::filesystem::system_complete(filepath).string();
+
+		ITexturePtr texView = nullptr;
+		if (mTexByPath.find(imgPath) == mTexByPath.end()) {
+			IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
+			texView = mRenderSys.LoadTexture(res, imgPath, std::forward<T>(args)...);
+			
+			mTexByPath.insert(std::make_pair(imgPath, texView));
+		}
+		else {
+			texView = mTexByPath[imgPath];
+		}
+		return texView;
 	}
 
 	template <typename... T>
@@ -128,6 +140,8 @@ private:
 	};
 	ResourceDependencyTree mResDependencyTree;
 	std::map<IResourcePtr, ResourceLoadTask> mLoadTaskByRes;
+private:
+	std::map<std::string, ITexturePtr> mTexByPath;
 };
 
 }

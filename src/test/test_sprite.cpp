@@ -21,8 +21,7 @@ void TestSprite::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	mSprite = mContext->RenderableFac()->CreateSprite();
-	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/theyKilledKenny.png"));
+	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
 
 	int win_width = mContext->ResourceMng()->WinSize().x();
 	int win_height = mContext->ResourceMng()->WinSize().y();

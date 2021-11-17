@@ -38,10 +38,9 @@ void TestRT::OnPostInitDevice()
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
 	
-	mRendTexture = mContext->RenderSys()->LoadRenderTexture(
-		nullptr, 
-		mContext->RenderSys()->WinSize().x(), 
-		mContext->RenderSys()->WinSize().y(), 
+	mRendTexture = mContext->ResourceMng()->CreateRenderTexture(
+		mContext->ResourceMng()->WinSize().x(), 
+		mContext->ResourceMng()->WinSize().y(), 
 		kFormatR32G32B32A32Float);
 
 	mSprite = mContext->RenderableFac()->CreateSprite();

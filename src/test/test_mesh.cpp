@@ -24,10 +24,10 @@ void TestMesh::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	auto texture = mContext->RenderSys()->LoadTexture(nullptr,"model\\theyKilledKenny.jpg");
+	auto texture = mContext->ResourceMng()->CreateTexture("model/theyKilledKenny.jpg", kFormatUnknown, true, false);
 
 	constexpr int spriteCount = 4;
-	auto size = mContext->RenderSys()->WinSize();
+	auto size = mContext->ResourceMng()->WinSize();
 	Eigen::Vector2f points[spriteCount] = {
 		Eigen::Vector2f(0, 0),
 		Eigen::Vector2f(size.x() / 2, 0),

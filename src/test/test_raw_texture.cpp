@@ -22,7 +22,7 @@ private:
 
 ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 {
-	std::string path = boost::filesystem::current_path().string() + "\\model\\" + filename;
+	std::string path = boost::filesystem::current_path().string() + "/model/" + filename;
 	
 	FILE* fd = fopen(path.c_str(), "rb");
 	assert(fd);

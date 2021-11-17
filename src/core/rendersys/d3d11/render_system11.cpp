@@ -701,29 +701,30 @@ void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int
 	mDeviceContext->UpdateSubresource(std::static_pointer_cast<ContantBuffer11>(buffer)->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
-ITexturePtr RenderSystem11::_CreateTexture(IResourcePtr res, const char* pSrcFile, 
+ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& pSrcFile, 
 	ResourceFormat format, bool async, bool isCube)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceTexture);
 
 	ITexturePtr pTextureRV;
 	if (boost::filesystem::exists(pSrcFile)) {
-		D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
+		static D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
 		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
+		std::string imgPath = pSrcFile;
 
 		pTextureRV = std::static_pointer_cast<Texture11>(res);
 		IResourcePtr resource = AsRes(pTextureRV);
 		HRESULT hr;
 		if (async) {
-			hr = mThreadPump->AddWorkItem(resource, [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
-				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, 
+			hr = mThreadPump->AddWorkItem(resource, [=](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
+				return D3DX11CreateShaderResourceViewFromFileA(mDevice, imgPath.c_str(), pLoadInfo, pump, 
 					&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
 			}, ResourceSetLoaded);
 			//resource->SetLoaded();
 		}
 		else {
-			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, nullptr, 
+			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, imgPath.c_str(), pLoadInfo, nullptr, 
 				&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
 			resource->SetLoaded();
 		}

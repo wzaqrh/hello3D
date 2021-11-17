@@ -70,6 +70,7 @@ public:
 	void SetBlendFunc(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
+	ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format, bool async, bool isCube) override;
 	ITexturePtr LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTexture(size_t slot, ITexturePtr texture) override;
@@ -80,9 +81,6 @@ public:
 
 	bool BeginScene() override;
 	void EndScene() override;
-protected:
-	virtual ITexturePtr _CreateTexture(IResourcePtr res, const char* pSrcFile, 
-		ResourceFormat format, bool async, bool isCube);
 private:
 	HRESULT _CreateDeviceAndSwapChain(int width, int height);
 	HRESULT _CreateBackRenderTargetView();
