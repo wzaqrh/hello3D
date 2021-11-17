@@ -27,33 +27,35 @@ public:
 public:
 	void ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil) override;
 
-	IRenderTexturePtr CreateRenderTexture(int width, int height, ResourceFormat format) override;
+	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
+
+	IRenderTexturePtr LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	IContantBufferPtr CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data) override;
-	IIndexBufferPtr CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer) override;
+	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
-	IVertexBufferPtr CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer) override;
+	IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int bufferSize, int stride, int offset, void* buffer) override;
 	void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
+	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data) override;
 	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
 	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
-	IProgramPtr CreateProgramByCompile(const std::string& vsPath, 
+	IProgramPtr CreateProgramByCompile(IResourcePtr res, const std::string& vsPath, 
 		const std::string& psPath, 
 		const std::string& vsEntry, 
 		const std::string& psEntry) override;
-	IProgramPtr CreateProgramByFXC(const std::string& name, 
+	IProgramPtr CreateProgramByFXC(IResourcePtr res, const std::string& name, 
 		const std::string& vsEntry, 
 		const std::string& psEntry) override;
 	void SetProgram(IProgramPtr program) override;
 
-	ISamplerStatePtr CreateSampler(SamplerFilterMode filter, CompareFunc comp) override;
+	ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) override;
 	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
-	IInputLayoutPtr CreateLayout(IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount) override;
+	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
 
 	void SetBlendFunc(const BlendState& blendFunc) override;
@@ -70,7 +72,7 @@ public:
 	bool BeginScene() override;
 	void EndScene() override;
 private:
-	ITexturePtr _CreateTexture(const std::string& srcFile, ResourceFormat format, bool async, bool isCube);
+	ITexturePtr _CreateTexture(IResourcePtr res, const std::string& srcFile, ResourceFormat format, bool async, bool isCube);
 	VertexShader9Ptr _CreateVS(const std::string& filename, const std::string& entry);
 	PixelShader9Ptr _CreatePS(const std::string& filename, const std::string& entry);
 	VertexShader9Ptr _CreateVSByFXC(const std::string& filename);

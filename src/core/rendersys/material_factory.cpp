@@ -592,17 +592,19 @@ private:
 				builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 				builder.SetTopology(shaderInfo.Program.Topo);
 
-				IProgramPtr program = builder.SetProgram(renderSys.CreateProgram(
+				IProgramPtr program = builder.SetProgram(renderSys.LoadProgram(
+					nullptr,
 					MAKE_MAT_NAME(shaderInfo.Program.FxName),
 					shaderInfo.Program.VsEntry.c_str(),
 					passInfo.PSEntry.c_str()));
-				builder.SetInputLayout(renderSys.CreateLayout(program,
+				builder.SetInputLayout(renderSys.LoadLayout(nullptr, program,
 					&shaderInfo.Program.Attr.Layout[0],
 					shaderInfo.Program.Attr.Layout.size()));
 
 				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 					auto& elem = shaderInfo.Program.Samplers[k];
-					builder.AddSampler(renderSys.CreateSampler(
+					builder.AddSampler(renderSys.LoadSampler(
+						nullptr,
 						static_cast<SamplerFilterMode>(elem.first),
 						kCompareNever)
 					);
@@ -612,13 +614,13 @@ private:
 
 		for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
 			auto& uniformI = shaderInfo.Program.Uniforms[i];
-			builder.AddConstBufferToTech(renderSys.CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]),
+			builder.AddConstBufferToTech(renderSys.LoadConstBuffer(nullptr, uniformI.Decl, &uniformI.Data[0]),
 				uniformI.ShortName, uniformI.IsUnique);
 		}
 
 		builder.CloneTechnique(renderSys, "d3d9");
 		builder.ClearSamplersToTech();
-		builder.AddSamplerToTech(renderSys.CreateSampler(kSamplerFilterMinMagMipLinear, kCompareNever));
+		builder.AddSamplerToTech(renderSys.LoadSampler(nullptr, kSamplerFilterMinMagMipLinear, kCompareNever));
 
 		return builder.Build();
 	}
@@ -645,252 +647,6 @@ MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
 	return mMatAssetMng->LoadMaterial(mRenderSys, entry.ShaderName, entry.VariantName);
 }
 #else
-void SetCommonField(MaterialBuilder& builder, RenderSystem* pRenderSys) {
-	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
-	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR));
-	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_ANISOTROPIC));
-	builder.AddSampler(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_POINT));
-}
 
-void SetCommonField2(MaterialBuilder& builder, RenderSystem* pRenderSys) {
-	builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	builder.AddConstBuffer(pRenderSys->CreateConstBuffer(MAKE_CBDESC(cbGlobalParam)));
-}
-
-void AddD3D9Technique(MaterialBuilder& builder, RenderSystem* pRenderSys) {
-	builder.CloneTechnique(pRenderSys, "d3d9");
-	builder.ClearSamplersToTech();
-	builder.AddSamplerToTech(pRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS), 8);
-}
-
-MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& name) {
-	TIME_PROFILE2(CreateStdMaterial, name);
-
-	MaterialPtr material;
-	MaterialBuilder builder;
-	if (name == E_MAT_SPRITE || name == E_MAT_LAYERCOLOR || name == E_MAT_LABEL) {
-		SetCommonField(builder, mRenderSys);
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 7 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME(name)));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-	else if (name == E_MAT_MODEL) {
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		//*//pass E_PASS_FORWARDBASE
-		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
-		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model")));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		//*//pass E_PASS_FORWARDADD
-		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model"), nullptr, "PSAdd"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
-
-		//*//pass E_PASS_SHADOWCASTER
-		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Model"), "VSShadowCaster", "PSShadowCaster"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-	else if (name == E_MAT_MODEL_PBR) {
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-
-		//*//pass E_PASS_FORWARDBASE
-		builder.SetPassName(E_PASS_FORWARDBASE, "ForwardBase");
-		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr")));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		//*//pass E_PASS_FORWARDADD
-		builder.AddPass(E_PASS_FORWARDADD, "ForwardAdd");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), nullptr, "PSAdd"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
-		cbUnityMaterial cbUnityMat;
-		//cbUnityMat._Color = XMFLOAT4(0,0,0,0);
-		//cbUnityMat._SpecLightOff = TRUE;
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbUnityMaterial), &cbUnityMat), MAKE_CBNAME(cbUnityMaterial));
-		cbUnityGlobal cbUnityGlb;
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbUnityGlobal), &cbUnityGlb), MAKE_CBNAME(cbUnityGlobal));
-
-		//*//pass E_PASS_SHADOWCASTER
-		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ModelPbr"), "VSShadowCaster", "PSShadowCaster"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-	else if (name == E_MAT_MODEL_SHADOW) {
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 3 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 6 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 9 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 11 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 15 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 19 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		//pass E_PASS_FORWARDBASE
-		SetCommonField(builder, mRenderSys);
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ShadowMap")));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		//pass E_PASS_SHADOWCASTER
-		builder.AddPass(E_PASS_SHADOWCASTER, "ShadowCaster");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("ShadowDepth")));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-
-		builder.AddConstBufferToTech(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbWeightedSkin)), MAKE_CBNAME(cbWeightedSkin), false);
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-	else if (name == E_MAT_SKYBOX) {
-		SetCommonField2(builder, mRenderSys);
-		D3D11_INPUT_ELEMENT_DESC layout[] = {
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Skybox")));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-		builder.AddSampler(mRenderSys->CreateSampler(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_ALWAYS));
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-	else if (name == E_MAT_POSTPROC_BLOOM) {
-#define NUM_TONEMAP_TEXTURES  10
-#define NUM_BLOOM_TEXTURES    2
-		std::vector<IRenderTexturePtr> TexToneMaps(NUM_TONEMAP_TEXTURES);
-		int nSampleLen = 1;
-		for (size_t i = 0; i < NUM_TONEMAP_TEXTURES; i++) {
-			TexToneMaps[i] = mRenderSys->CreateRenderTexture(nSampleLen, nSampleLen, DXGI_FORMAT_R16G16B16A16_UNORM);
-			SET_DEBUG_NAME(TexToneMaps[i]->mDepthStencilView, "TexToneMaps" + i);
-			nSampleLen *= 2;
-		}
-		IRenderTexturePtr TexBrightPass = mRenderSys->CreateRenderTexture(mRenderSys->WinSize().x() / 8, mRenderSys->WinSize().y() / 8, DXGI_FORMAT_B8G8R8A8_UNORM);
-		SET_DEBUG_NAME(TexBrightPass->mDepthStencilView, "TexBrightPass");
-		std::vector<IRenderTexturePtr> TexBlooms(NUM_BLOOM_TEXTURES);
-		for (size_t i = 0; i < NUM_BLOOM_TEXTURES; i++) {
-			TexBlooms[i] = mRenderSys->CreateRenderTexture(mRenderSys->WinSize().x() / 8, mRenderSys->WinSize().y() / 8, DXGI_FORMAT_R16G16B16A16_UNORM);
-			SET_DEBUG_NAME(TexBlooms[i]->mDepthStencilView, "TexBlooms" + i);
-		}
-
-		//pass DownScale2x2
-		builder.SetPassName(E_PASS_POSTPROCESS, "DownScale2x2");
-		SetCommonField(builder, mRenderSys);
-		D3D11_INPUT_ELEMENT_DESC layout[] = {
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		auto program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale2x2"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetRenderTarget(TexToneMaps[NUM_TONEMAP_TEXTURES - 1]);
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
-			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateDownScale2x2Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
-		};
-
-		//pass DownScale3x3
-		builder.AddPass(E_PASS_POSTPROCESS, "DownScale3x3");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale3x3"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetRenderTarget(TexToneMaps[0]);
-		for (int i = 1; i < NUM_TONEMAP_TEXTURES - 1; ++i) {
-			builder.AddIterTarget(TexToneMaps[i]);
-		}
-		builder.SetTexture(0, TexToneMaps[NUM_TONEMAP_TEXTURES - 1]->GetColorTexture());
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
-			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
-		};
-
-		//pass DownScale3x3_BrightPass
-		builder.AddPass(E_PASS_POSTPROCESS, "DownScale3x3_BrightPass");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "DownScale3x3_BrightPass"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetRenderTarget(TexBrightPass);
-		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
-			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateDownScale3x3Offsets(mainTex->GetWidth(), mainTex->GetHeight());
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
-		};
-
-		//pass Bloom
-		builder.AddPass(E_PASS_POSTPROCESS, "Bloom");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "BloomPS"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetRenderTarget(TexBlooms[0]);
-		for (int i = 1; i < NUM_BLOOM_TEXTURES; ++i) {
-			builder.AddIterTarget(TexBlooms[i]);
-		}
-		builder.SetTexture(1, TexBrightPass->GetColorTexture());
-		builder.AddConstBuffer(mRenderSys->CreateConstBuffer(MAKE_CBDESC(cbBloom)), MAKE_CBNAME(cbBloom));
-		builder.mCurPass->OnBind = [](Pass* pass, IRenderSystem* pRenderSys, TextureBySlot& textures) {
-			auto mainTex = textures[0];
-			cbBloom bloom = cbBloom::CreateBloomOffsets(mainTex->GetWidth(), 3.0f, 1.25f);
-			pass->UpdateConstBufferByName(pRenderSys, MAKE_CBNAME(cbBloom), Data::Make(bloom));
-		};
-
-		//pass FinalPass
-		builder.AddPass(E_PASS_POSTPROCESS, "FinalPass");
-		SetCommonField(builder, mRenderSys);
-		program = builder.SetProgram(mRenderSys->CreateProgram(MAKE_MAT_NAME("Bloom"), "VS", "FinalPass"));
-		builder.SetInputLayout(mRenderSys->CreateLayout(program, layout, ARRAYSIZE(layout)));
-		builder.SetTexture(1, TexToneMaps[0]->GetColorTexture());
-		builder.SetTexture(2, TexBlooms[0]->GetColorTexture());
-
-		AddD3D9Technique(builder, mRenderSys);
-	}
-
-	material = builder.Build();
-	return material;
-}
 #endif
 }

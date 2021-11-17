@@ -129,9 +129,34 @@ void RenderSystem9::ClearColorDepthStencil(const Eigen::Vector4f& color, float d
 	mDevice9->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, XMFLOAT2D3DCOLOR(color), depth, stencil);
 }
 
-IRenderTexturePtr RenderSystem9::CreateRenderTexture(int width, int height, ResourceFormat format)
+IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 {
-	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr, "");
+	switch (deviceResType) {
+	case mir::kDeviceResourceInputLayout:
+		return MakePtr<InputLayout9>();
+	case mir::kDeviceResourceProgram:
+		return MakePtr<Program9>();
+	case mir::kDeviceResourceVertexBuffer:
+		return MakePtr<VertexBuffer9>();
+	case mir::kDeviceResourceIndexBuffer:
+		return MakePtr<IndexBuffer9>();
+	case mir::kDeviceResourceContantBuffer:
+		return MakePtr<ContantBuffer9>();
+	case mir::kDeviceResourceTexture:
+		return MakePtr<Texture9>(nullptr);
+	case mir::kDeviceResourceRenderTexture:
+		return MakePtr<RenderTexture9>();
+	case mir::kDeviceResourceSamplerState:
+		return MakePtr<SamplerState9>();
+	default:
+		break;
+	}
+	return nullptr;
+}
+
+IRenderTexturePtr RenderSystem9::LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format)
+{
+	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr);
 	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
 	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
@@ -156,22 +181,28 @@ void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-IContantBufferPtr RenderSystem9::CreateConstBuffer(const ConstBufferDecl& cbDecl, void* data /*= nullptr*/)
+IContantBufferPtr RenderSystem9::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data /*= nullptr*/)
 {
+	if (res == nullptr) res = CreateResource(kDeviceResourceContantBuffer);
+
 	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));
 	if (data) UpdateBuffer((ret), data, ret->GetBufferSize());
 	return ret;
 }
 
-IIndexBufferPtr RenderSystem9::CreateIndexBuffer(int bufferSize, ResourceFormat format, void* buffer)
+IIndexBufferPtr RenderSystem9::LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer)
 {
+	if (res == nullptr) res = CreateResource(kDeviceResourceIndexBuffer);
+
 	IndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
 	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
 	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
-		ret = MakePtr<IndexBuffer9>(pIndexBuffer, bufferSize, format);
+		ret = std::static_pointer_cast<IndexBuffer9>(res);
+		ret->Init(pIndexBuffer, bufferSize, format);
+		if (buffer) 
+			UpdateBuffer(ret, buffer, bufferSize);
 	}
-	if (buffer) UpdateBuffer((ret), buffer, bufferSize);
 	return ret;
 }
 
@@ -180,8 +211,10 @@ void RenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 	mDevice9->SetIndices(indexBuffer ? std::static_pointer_cast<IndexBuffer9>(indexBuffer)->GetBuffer9() : nullptr);
 }
 
-IVertexBufferPtr RenderSystem9::CreateVertexBuffer(int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
+IVertexBufferPtr RenderSystem9::LoadVertexBuffer(IResourcePtr res, int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
+	if (res == nullptr) res = CreateResource(kDeviceResourceVertexBuffer);
+
 	VertexBuffer9Ptr ret;
 	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
 	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, D3DUSAGE_WRITEONLY, 0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
@@ -324,7 +357,7 @@ PixelShader9Ptr RenderSystem9::_CreatePSByFXC(const std::string& filename)
 	return ret;
 }
 
-IProgramPtr RenderSystem9::CreateProgramByCompile(const std::string& vsPath, 
+IProgramPtr RenderSystem9::CreateProgramByCompile(IResourcePtr res, const std::string& vsPath, 
 	const std::string& psPath,
 	const std::string& vsEntry,
 	const std::string& psEntry)
@@ -338,7 +371,7 @@ IProgramPtr RenderSystem9::CreateProgramByCompile(const std::string& vsPath,
 	return program;
 }
 
-IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name, 
+IProgramPtr RenderSystem9::CreateProgramByFXC(IResourcePtr res, const std::string& name, 
 	const std::string& vsEntry,
 	const std::string& psEntry)
 {
@@ -357,7 +390,7 @@ IProgramPtr RenderSystem9::CreateProgramByFXC(const std::string& name,
 	return program;
 }
 
-ISamplerStatePtr RenderSystem9::CreateSampler(SamplerFilterMode filter, CompareFunc cmpFunc)
+ISamplerStatePtr RenderSystem9::LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc cmpFunc)
 {
 	SamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
@@ -384,7 +417,7 @@ IDirect3DVertexDeclaration9* RenderSystem9::_CreateInputLayout(Program9* _, cons
 	return ret;
 }
 
-IInputLayoutPtr RenderSystem9::CreateLayout(IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount)
+IInputLayoutPtr RenderSystem9::LoadLayout(IResourcePtr res, IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount)
 {
 	InputLayout9Ptr ret = MakePtr<InputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)
@@ -409,7 +442,8 @@ void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
 	mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(layout)->GetLayout9());
 }
 
-ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFormat format, bool async, bool isCube)
+ITexturePtr RenderSystem9::_CreateTexture(IResourcePtr res, const std::string& srcFile, 
+	ResourceFormat format, bool async, bool isCube)
 {
 	std::string imgPath = srcFile;
 #ifdef USE_ONLY_PNG
@@ -425,7 +459,7 @@ ITexturePtr RenderSystem9::_CreateTexture(const std::string& srcFile, ResourceFo
 
 	Texture9Ptr pTextureRV;
 	if (boost::filesystem::exists(pSrcFile)) {
-		pTextureRV = MakePtr<Texture9>(nullptr, imgPath);
+		pTextureRV = MakePtr<Texture9>(nullptr);
 		if (isCube) {
 			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile.c_str(), 
 				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, d3d::convert11To9(static_cast<DXGI_FORMAT>(format)),

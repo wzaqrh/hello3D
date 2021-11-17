@@ -12,10 +12,10 @@ Mesh::Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string&
 	Material = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
 
 	Vertices.resize(vertCount);
-	VertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
+	VertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
 	
 	Indices.resize(indexCount);
-	IndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(UINT) * indexCount, kFormatR32UInt, &Indices[0]);
+	IndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(UINT) * indexCount, kFormatR32UInt, &Indices[0]);
 	
 	SubMeshs.resize(1);
 }

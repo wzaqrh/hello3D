@@ -49,15 +49,14 @@ PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 }
 
 /********** Texture11 **********/
-Texture11::Texture11(ID3D11ShaderResourceView* texture, const std::string& path)
+Texture11::Texture11(ID3D11ShaderResourceView* texture)
 {
 	mWidth = 0, mHeight = 0, mMipCount = 0;
 	mFormat = kFormatUnknown;
 
-	mPath = path;
 	mTexture = texture;
-
 	SetDeviceObject((IUnknown**)&mTexture);
+
 	AsRes(this)->AddOnLoadedListener([this](IResource* pRes) {
 		D3D11_TEXTURE2D_DESC desc = GetDesc();
 		mWidth = desc.Width;
@@ -69,12 +68,12 @@ Texture11::Texture11(ID3D11ShaderResourceView* texture, const std::string& path)
 
 Texture11::Texture11(int width, int height, ResourceFormat format, int mipmap)
 {
-	mTexture = nullptr;
-
 	mWidth = width;
 	mHeight = height;
 	mMipCount = mipmap;
 	mFormat = format;
+
+	mTexture = nullptr;
 	SetDeviceObject((IUnknown**)&mTexture);
 }
 
@@ -102,7 +101,7 @@ D3D11_TEXTURE2D_DESC Texture11::GetDesc()
 /********** TVertex11Buffer **********/
 int VertexBuffer11::GetCount()
 {
-	return hd.bufferSize / Stride;
+	return hd.BufferSize / Stride;
 }
 
 /********** IndexBuffer11 **********/
@@ -112,10 +111,10 @@ int IndexBuffer11::GetWidth()
 }
 
 /********** ContantBuffer11 **********/
-ContantBuffer11::ContantBuffer11(ID3D11Buffer* buffer, ConstBufferDeclPtr decl)
-	: hd(buffer, decl->BufferSize)
-	, mDecl(decl)
+void ContantBuffer11::Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl)
 {
+	hd.Init(buffer, decl->BufferSize);
+	mDecl = decl;
 }
 
 /********** RenderTexture11 **********/
@@ -129,8 +128,7 @@ RenderTexture11::RenderTexture11()
 	mDepthStencilView = nullptr;
 }
 
-RenderTexture11::RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format)
-	:RenderTexture11()
+void RenderTexture11::Init(ID3D11Device* pDevice, int width, int height, ResourceFormat format)
 {
 	mFormat = format;
 	InitRenderTexture(pDevice, width, height);
@@ -193,7 +191,7 @@ bool RenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 	if (FAILED(result)) {
 		return false;
 	}
-	mRenderTargetPtr = MakePtr<Texture11>(mRenderTargetSRV, "RenderTexture");
+	mRenderTargetPtr = MakePtr<Texture11>(mRenderTargetSRV);
 	AsRes(mRenderTargetPtr)->SetLoaded();
 	return true;
 }

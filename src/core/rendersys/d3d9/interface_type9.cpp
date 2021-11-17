@@ -10,10 +10,9 @@ namespace mir {
 #define PtrRaw(T) T.get()
 
 /********** Texture9 **********/
-Texture9::Texture9(IDirect3DTexture9 *texture, const std::string& path)
+Texture9::Texture9(IDirect3DTexture9 *texture)
 	: mTexture(texture)
 	, mTextureCube(nullptr)
-	, mPath(path)
 {
 	mWidth = 0, mHeight = 0, mMipCount = 0;
 	mFormat = kFormatUnknown;
@@ -32,12 +31,12 @@ Texture9::Texture9(IDirect3DTexture9 *texture, const std::string& path)
 Texture9::Texture9(int width, int height, ResourceFormat format, int mipmap)
 	: mTexture(nullptr)
 	, mTextureCube(nullptr)
-	, mPath()
 {
 	mWidth = width;
 	mHeight = height;
 	mMipCount = mipmap;
 	mFormat = format;
+
 	SetDeviceObject((IUnknown**)&mTexture);
 }
 
@@ -60,6 +59,12 @@ int IndexBuffer9::GetWidth()
 }
 
 /********** TRenderTexture9 **********/
+RenderTexture9::RenderTexture9()
+{
+	mColorTexture = nullptr;
+	mColorBuffer = nullptr;
+	mDepthStencilBuffer = nullptr;
+}
 RenderTexture9::RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;

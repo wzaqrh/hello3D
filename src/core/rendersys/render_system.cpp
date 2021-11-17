@@ -11,25 +11,28 @@ RenderSystem::~RenderSystem()
 {
 }
 
-IProgramPtr RenderSystem::CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+IProgramPtr RenderSystem::LoadProgram(IResourcePtr res, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
+	if (res == nullptr) res = CreateResource(kDeviceResourceProgram);
+
 	if (boost::filesystem::path(name).extension().empty()) {
 		std::string fullname = "shader\\" + mFXCDir + name;
-		return CreateProgramByFXC(fullname, vsEntry, psEntry);
+		return CreateProgramByFXC(res, fullname, vsEntry, psEntry);
 	}
 	else {
 		std::string fullname = "shader\\" + name;
-		return CreateProgramByCompile(fullname.c_str(), fullname.c_str(), vsEntry, psEntry);
+		return CreateProgramByCompile(res, fullname.c_str(), fullname.c_str(), vsEntry, psEntry);
 	}
 }
 
-ITexturePtr RenderSystem::LoadTexture(const std::string& filepath, ResourceFormat format, bool async, bool isCube)
+ITexturePtr RenderSystem::LoadTexture(IResourcePtr res, const std::string& filepath, 
+	ResourceFormat format, bool async, bool isCube)
 {
 	std::string imgPath = filepath;
 
 	ITexturePtr texView = nullptr;
 	if (mTexByPath.find(imgPath) == mTexByPath.end()) {
-		texView = _CreateTexture(imgPath.c_str(), format, async, isCube);
+		texView = _CreateTexture(res, imgPath.c_str(), format, async, isCube);
 		mTexByPath.insert(std::make_pair(imgPath, texView));
 	}
 	else {

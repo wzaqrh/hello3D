@@ -100,7 +100,6 @@ interface ITexture : public IResource
 	//virtual IResourcePtr AsRes() = 0;
 	virtual bool HasSRV() = 0;
 
-	virtual const char* GetPath() = 0;
 	virtual int GetWidth() = 0;
 	virtual int GetHeight() = 0;
 	virtual ResourceFormat GetFormat() = 0;

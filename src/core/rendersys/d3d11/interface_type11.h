@@ -91,23 +91,24 @@ public:
 class HardwareBuffer 
 {
 public:
-	HardwareBuffer(ID3D11Buffer* __buffer, unsigned int __bufferSize) :buffer(__buffer), bufferSize(__bufferSize) {};
-	HardwareBuffer() :buffer(nullptr), bufferSize(0) {}
+	HardwareBuffer(ID3D11Buffer* buffer, unsigned int bufferSize) :Buffer(buffer), BufferSize(bufferSize) {}
+	HardwareBuffer() :HardwareBuffer(nullptr, 0) {}
+	void Init(ID3D11Buffer* buffer, unsigned int bufferSize) { Buffer = buffer; BufferSize = bufferSize; }
 public:
-	ID3D11Buffer* buffer;
-	unsigned int bufferSize;
+	ID3D11Buffer* Buffer;
+	unsigned int BufferSize;
 };
 
 class VertexBuffer11 : public ImplementResource<IVertexBuffer> 
 {
 public:
 	VertexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
-		:hd(buffer, bufferSize), Stride(stride), Offset(offset) {};
-	VertexBuffer11() :Stride(0), Offset(0) {};
+		:hd(buffer, bufferSize), Stride(stride), Offset(offset) {}
+	VertexBuffer11() :Stride(0), Offset(0) {}
 	int GetCount();
 public:
-	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
-	unsigned int GetBufferSize() override { return hd.bufferSize; }
+	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
+	unsigned int GetBufferSize() override { return hd.BufferSize; }
 	HardwareBufferType GetType() override { return kHWBufferVertex; }
 	unsigned int GetStride() override { return Stride; }
 	unsigned int GetOffset() override { return Offset; }
@@ -119,12 +120,14 @@ public:
 class IndexBuffer11 : public ImplementResource<IIndexBuffer> 
 {
 public:
-	IndexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, ResourceFormat format)
-		:hd(buffer, bufferSize), Format(format) {}
 	IndexBuffer11() :Format(kFormatUnknown) {}
+	void Init(ID3D11Buffer* buffer, unsigned int bufferSize, ResourceFormat format) {
+		hd.Init(buffer, bufferSize); 
+		Format = format; 
+	}
 public:
-	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
-	unsigned int GetBufferSize() override { return hd.bufferSize; }
+	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
+	unsigned int GetBufferSize() override { return hd.BufferSize; }
 	HardwareBufferType GetType() override { return kHWBufferIndex; }
 
 	int GetWidth() override;
@@ -138,13 +141,13 @@ class ContantBuffer11 : public ImplementResource<IContantBuffer>
 {
 public:
 	ContantBuffer11() {}
-	ContantBuffer11(ID3D11Buffer* buffer, ConstBufferDeclPtr decl);
+	void Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl);
 public:
 	ConstBufferDeclPtr GetDecl() override { return mDecl; }
 	HardwareBufferType GetType() override { return kHWBufferConstant; }
 
-	ID3D11Buffer*& GetBuffer11() { return hd.buffer; }
-	unsigned int GetBufferSize() override { return hd.bufferSize; }
+	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
+	unsigned int GetBufferSize() override { return hd.BufferSize; }
 public:
 	ConstBufferDeclPtr mDecl;
 	HardwareBuffer hd;
@@ -154,15 +157,14 @@ public:
 class Texture11 : public ImplementResource<ITexture> 
 {
 public:
+	Texture11(ID3D11ShaderResourceView* texture);
 	Texture11(int width, int height, ResourceFormat format, int mipmap);
-	Texture11(ID3D11ShaderResourceView* texture, const std::string& path);
 	//IResourcePtr AsRes() override { return mRes; }
 
 	bool HasSRV() override { return mTexture != nullptr; }
 	void SetSRV11(ID3D11ShaderResourceView* texture);
 	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
 
-	const char* GetPath() override { return mPath.c_str(); }
 	int GetWidth() override { return mWidth; }
 	int GetHeight() override { return mHeight; }
 	ResourceFormat GetFormat() override { return mFormat; }
@@ -174,14 +176,13 @@ private:
 	ResourceFormat mFormat;
 	ID3D11ShaderResourceView* mTexture;
 	//IResourcePtr mRes;
-	std::string mPath;
 };
 
 class RenderTexture11 : public ImplementResource<IRenderTexture>
 {
 public:
 	RenderTexture11();
-	RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format = kFormatR32G32B32A32Float);
+	void Init(ID3D11Device* pDevice, int width, int height, ResourceFormat format = kFormatR32G32B32A32Float);
 	ITexturePtr GetColorTexture() override { return mRenderTargetPtr; }
 
 	ID3D11RenderTargetView*& GetColorBuffer11() { 	return mRenderTargetView; }
@@ -207,7 +208,7 @@ private:
 
 class SamplerState11 : public ImplementResource<ISamplerState> {
 public:
-	SamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {}
+	void Init(ID3D11SamplerState* sampler) { mSampler = sampler; }
 	ID3D11SamplerState*& GetSampler11() { return mSampler; }
 public:
 	ID3D11SamplerState* mSampler = nullptr;

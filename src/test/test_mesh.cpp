@@ -24,7 +24,7 @@ void TestMesh::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	auto texture = mContext->RenderSys()->LoadTexture("model\\theyKilledKenny.jpg");
+	auto texture = mContext->RenderSys()->LoadTexture(nullptr,"model\\theyKilledKenny.jpg");
 
 	constexpr int spriteCount = 4;
 	auto size = mContext->RenderSys()->WinSize();

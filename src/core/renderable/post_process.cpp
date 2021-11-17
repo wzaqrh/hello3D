@@ -54,9 +54,9 @@ PostProcess::PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex)
 {
 	mMainTex = mainTex;
 
-	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
+	mIndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	mVertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }
 
 PostProcess::~PostProcess()
@@ -83,7 +83,7 @@ IVertexBufferPtr GetVertBufByRT(IRenderSystem& RenderSys, IRenderTexturePtr targ
 	float sy = srv->GetHeight() * 1.0 / RenderSys.WinSize().y();
 	assert(sx <= 1 && sy <= 1);
 	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
-	IVertexBufferPtr vertBuf = RenderSys.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	IVertexBufferPtr vertBuf = RenderSys.LoadVertexBuffer(nullptr, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 	return vertBuf;
 }
 

@@ -83,8 +83,8 @@ Sprite::Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::str
 {
 	mTransform = std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
-	mIndexBuffer = mRenderSys.CreateIndexBuffer(sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
-	mVertexBuffer = mRenderSys.CreateVertexBuffer(sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
+	mIndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
+	mVertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
 
 	if (mFlipY) mQuad.FlipY();
 }

@@ -23,8 +23,8 @@ AssimpMesh::AssimpMesh(const aiMesh* data,
 
 bool AssimpMesh::setupMesh(IRenderSystem& renderSys)
 {
-	VertexBuffer = renderSys.CreateVertexBuffer(sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
-	IndexBuffer = renderSys.CreateIndexBuffer(sizeof(UINT) * Indices.size(), kFormatR32UInt, &Indices[0]);
+	VertexBuffer = renderSys.LoadVertexBuffer(nullptr, sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
+	IndexBuffer = renderSys.LoadIndexBuffer(nullptr, sizeof(UINT) * Indices.size(), kFormatR32UInt, &Indices[0]);
 	return true;
 }
 

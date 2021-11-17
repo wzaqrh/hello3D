@@ -25,7 +25,7 @@ SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matNa
 {
 	SpritePtr sprite = Sprite::Create(mRenderSys, mMaterialFac, NotEmptyOr(matName, E_MAT_SPRITE));
 	if (! imgpath.empty()) 
-		sprite->SetTexture(mRenderSys.LoadTexture("model\\theyKilledKenny.jpg", kFormatUnknown, true, false));
+		sprite->SetTexture(mRenderSys.LoadTexture(nullptr, "model\\theyKilledKenny.jpg", kFormatUnknown, true, false));
 	return sprite;
 }
 

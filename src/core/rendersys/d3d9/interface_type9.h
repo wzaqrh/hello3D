@@ -115,9 +115,12 @@ public:
 class IndexBuffer9 : public ImplementResource<IIndexBuffer> 
 {
 public:
-	IndexBuffer9(IDirect3DIndexBuffer9* buffer, unsigned int bufferSize, ResourceFormat format)
-		: Buffer(buffer), BufferSize(bufferSize), Format(format) {}
 	IndexBuffer9(): Buffer(nullptr), BufferSize(0), Format(kFormatUnknown) {}
+	void Init(IDirect3DIndexBuffer9* buffer, unsigned int bufferSize, ResourceFormat format) {
+		Buffer = buffer; 
+		BufferSize = bufferSize; 
+		Format = format;
+	}
 
 	IDirect3DIndexBuffer9*& GetBuffer9() { return Buffer; }
 	HardwareBufferType GetType() override { return kHWBufferIndex; }
@@ -136,7 +139,8 @@ class VertexBuffer9 : public ImplementResource<IVertexBuffer>
 public:
 	VertexBuffer9(IDirect3DVertexBuffer9* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
 		: Buffer(buffer), BufferSize(bufferSize), Stride(stride), Offset(offset) {}
-	
+	VertexBuffer9() :VertexBuffer9(nullptr, 0, 0, 0) {}
+
 	IDirect3DVertexBuffer9*& GetBuffer9() {	return Buffer; }
 	HardwareBufferType GetType() override { return kHWBufferVertex; }
 	unsigned int GetBufferSize() override {	return BufferSize; }
@@ -153,6 +157,7 @@ class ContantBuffer9 : public ImplementResource<IContantBuffer>
 {
 public:
 	ContantBuffer9(ConstBufferDeclPtr decl);
+	ContantBuffer9() :ContantBuffer9(nullptr) {}
 
 	HardwareBufferType GetType() override { return kHWBufferConstant; }
 	unsigned int GetBufferSize() override;
@@ -170,7 +175,7 @@ class Texture9 : public ImplementResource<ITexture>
 {
 public:
 	Texture9(int width, int height, ResourceFormat format, int mipmap);
-	Texture9(IDirect3DTexture9* texture, const std::string& path);
+	Texture9(IDirect3DTexture9* texture);
 	//IResourcePtr AsRes() override { return mRes; }
 
 	bool IsCube() const { return mTextureCube != nullptr; }
@@ -179,7 +184,6 @@ public:
 	IDirect3DTexture9*& GetSRV9() { return mTexture; }
 	IDirect3DCubeTexture9*& GetSRVCube9() { return mTextureCube; }
 
-	const char* GetPath() override { return mPath.c_str(); }
 	int GetWidth() override { return mWidth; }
 	int GetHeight() override { return mHeight; }
 	ResourceFormat GetFormat() override { return mFormat; }
@@ -192,12 +196,12 @@ private:
 	IDirect3DTexture9 *mTexture;
 	IDirect3DCubeTexture9* mTextureCube;
 	//IResourcePtr mRes;
-	std::string mPath;
 };
 
 class RenderTexture9 : public ImplementResource<IRenderTexture>
 {
 public:
+	RenderTexture9();
 	RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
 	ITexturePtr GetColorTexture() override { return mColorTexture; }
 	IDirect3DSurface9*& GetColorBuffer9();
