@@ -29,7 +29,7 @@ public:
 	ID3DXBuffer* mBlob;
 };
 
-class InputLayout9 : public TImplResource<IInputLayout> 
+class InputLayout9 : public ImplementResource<IInputLayout> 
 {
 public:
 	InputLayout9();
@@ -63,7 +63,7 @@ public:
 	std::map<std::string, std::shared_ptr<ConstantTable>> mSubByName;
 };
 
-class VertexShader9 : public TImplResource<IVertexShader> 
+class VertexShader9 : public ImplementResource<IVertexShader> 
 {
 public:
 	VertexShader9();
@@ -79,7 +79,7 @@ public:
 	//IResourcePtr mRes;
 };
 
-class PixelShader9 : public TImplResource<IPixelShader> 
+class PixelShader9 : public ImplementResource<IPixelShader> 
 {
 public:
 	PixelShader9();
@@ -95,7 +95,7 @@ public:
 	//IResourcePtr mRes;
 };
 
-class Program9 : public TImplResource<IProgram> 
+class Program9 : public ImplementResource<IProgram> 
 {
 public:
 	Program9();
@@ -112,7 +112,7 @@ public:
 };
 
 /********** HardwareBuffer **********/
-class IndexBuffer9 : public TImplResource<IIndexBuffer> 
+class IndexBuffer9 : public ImplementResource<IIndexBuffer> 
 {
 public:
 	IndexBuffer9(IDirect3DIndexBuffer9* buffer, unsigned int bufferSize, ResourceFormat format)
@@ -131,7 +131,7 @@ public:
 	ResourceFormat Format;
 };
 
-class VertexBuffer9 : public TImplResource<IVertexBuffer> 
+class VertexBuffer9 : public ImplementResource<IVertexBuffer> 
 {
 public:
 	VertexBuffer9(IDirect3DVertexBuffer9* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
@@ -149,7 +149,7 @@ public:
 	unsigned int Stride, Offset;
 };
 
-class ContantBuffer9 : public TImplResource<IContantBuffer> 
+class ContantBuffer9 : public ImplementResource<IContantBuffer> 
 {
 public:
 	ContantBuffer9(ConstBufferDeclPtr decl);
@@ -166,7 +166,7 @@ public:
 };
 
 /********** Texture **********/
-class Texture9 : public TImplResource<ITexture> 
+class Texture9 : public ImplementResource<ITexture> 
 {
 public:
 	Texture9(int width, int height, ResourceFormat format, int mipmap);
@@ -195,7 +195,7 @@ private:
 	std::string mPath;
 };
 
-class RenderTexture9 : public TImplResource<IRenderTexture>
+class RenderTexture9 : public ImplementResource<IRenderTexture>
 {
 public:
 	RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
@@ -208,7 +208,7 @@ public:
 	Texture9Ptr mColorTexture;
 };
 
-class SamplerState9 : public TImplResource<ISamplerState> 
+class SamplerState9 : public ImplementResource<ISamplerState> 
 {
 public:
 	std::map<D3DSAMPLERSTATETYPE, DWORD>& GetSampler9();

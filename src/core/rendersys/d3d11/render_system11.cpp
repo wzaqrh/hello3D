@@ -476,7 +476,7 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const s
 			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename.c_str(), &pDataLoader))) {
 			hr = mThreadPump->AddWorkItem(AsRes(ret), pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
 				if (!FAILED(hr))  {
-					assert(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
+					BOOST_ASSERT(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
 					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
 						NULL, &ret->mShader))) {
 						res->SetLoaded();

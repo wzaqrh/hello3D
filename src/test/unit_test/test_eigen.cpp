@@ -138,6 +138,8 @@ TEST_CASE("mir matrix MakePerspectiveFovLH", "mir_matrix_MakePerspectiveFovLH") 
 	CHECK(IsEqual(m0, m1));
 }
 
+#include <future>
+#include <iostream>
 TEST_CASE("mir matrix MakeOrthographicOffCenterLH", "mir_matrix_MakeOrthographicOffCenterLH") {
 	float width = 1280;
 	float height = 720;
@@ -146,4 +148,31 @@ TEST_CASE("mir matrix MakeOrthographicOffCenterLH", "mir_matrix_MakeOrthographic
 	Eigen::Matrix4f m0 = mir::math::MakeOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
 	XMMATRIX m1 = XMMatrixOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
 	CHECK(IsEqual(m0, m1));
+}
+
+TEST_CASE("std_future", "std_future") {
+#if 0
+	std::future<int> result = std::async([]()->int {
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		std::cout << "packaged_task";
+		return 7;
+});
+#else
+	std::packaged_task<int()> task([]()->int {
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		std::cout << "packaged_task finished";
+		return 7;
+	});
+	std::future<int> result = task.get_future();
+#endif
+	{
+		std::future<int> shared_result = std::move(result);
+		std::cout << "continue before packaged_task";
+	}
+	std::future<int> shared_result = std::move(result);
+	CHECK(!result.valid());
+
+	task();
+	int a = shared_result.get();
+	CHECK(!shared_result.valid());
 }

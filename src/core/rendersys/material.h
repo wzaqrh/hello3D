@@ -105,7 +105,7 @@ public:
 	std::vector<PassPtr> mPasses;
 };
 
-class MIR_CORE_API Material : public TImplResource<IResource> 
+class MIR_CORE_API Material : public ImplementResource<IResource> 
 {
 public:
 	std::shared_ptr<Material> Clone(IRenderSystem& pRenderSys);

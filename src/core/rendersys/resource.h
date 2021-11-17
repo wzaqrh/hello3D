@@ -34,13 +34,13 @@ public:
 	bool IsPrepared() { return GetCurState() >= kResourceStatePrepared; }
 };
 
-template<class Parent>
-struct TImplResource : public Parent 
+template<class _Parent>
+struct ImplementResource : public _Parent 
 {
-	static_assert(std::is_base_of<IResource, Parent>::value, "");
+	static_assert(std::is_base_of<IResource, _Parent>::value, "");
 public:
-	TImplResource() :mCurState(kResourceStateNone),mDeviceObj(nullptr) {}
-	TImplResource(IUnknown** deviceObj) :mCurState(kResourceStateNone), mDeviceObj(deviceObj) {}
+	ImplementResource() :mCurState(kResourceStateNone),mDeviceObj(nullptr) {}
+	ImplementResource(IUnknown** deviceObj) :mCurState(kResourceStateNone), mDeviceObj(deviceObj) {}
 	IObjectPtr AsObject() const override final { return mObject.lock(); }
 
 	ResourceState GetCurState() override final { return mCurState; }
@@ -88,7 +88,7 @@ public:
 		}
 	}
 
-	void Assign(TImplResource& other, IRenderSystem& pRenderSys) {
+	void Assign(ImplementResource& other, IRenderSystem& pRenderSys) {
 		this->mDepends.clear();
 		for (auto& depend : other.mDepends)
 			this->AddDependency(depend);
@@ -104,6 +104,57 @@ private:
 	ResourceState mCurState;
 	std::vector<std::function<void(IResource*)>> mOnLoadeds;
 	std::vector<IResourcePtr> mDepends;
+};
+
+template<class _Resource>
+struct ResourceContainer {
+	typedef std::future<_Resource> right_value;
+	typedef std::shared_ptr<_Resource> value_type;
+	typedef const value_type& const_reference;
+public:
+	ResourceContainer(const ResourceContainer& other) = delete;
+	ResourceContainer& operator=(const ResourceContainer& other) = delete;
+	ResourceContainer(value_type&& other) :mValue(std::forward<value_type>(other)) {}
+	ResourceContainer(right_value&& other) :mAsyncSlot(std::forward<right_value>(other)) {}
+	ResourceContainer& operator=(value_type&& other) {
+		if (mAsyncSlot.valid()) 
+			mAsyncSlot.get();//todo(fixed me): may blocked
+		mValue = std::forward<value_type>(other);
+		return *this;
+	}
+	ResourceContainer& operator=(right_value&& other) {
+		mValue = nullptr;
+		mAsyncSlot = std::forward<right_value>(other);
+		return *this;
+	}
+	const_reference operator->() const {
+		return Get();
+	}
+	bool IsReady() const {
+		return WaitFor(0) != nullptr;
+	}
+	bool operator==(std::nullptr_t) const {
+		return !IsReady();
+	}
+	bool operator!=(std::nullptr_t) const {
+		return IsReady();
+	}
+
+	const_reference WaitFor(size_t duration = 0) {
+		if (mValue == nullptr && mAsyncSlot.valid()) {
+			std::future_status status = mAsyncSlot.wait_for(std::chrono::microseconds(duration));
+			if (status == std::future_status::ready) {
+				mValue = mAsyncSlot.get();
+			}
+		}
+		return mValue;
+	}
+	const_reference Get() const {
+		return mValue;
+	}
+private:
+	std::future<value_type> mAsyncSlot;
+	value_type mValue;
 };
 
 }

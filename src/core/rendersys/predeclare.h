@@ -3,8 +3,12 @@
 
 namespace mir {
 
-#define DECLARE_STRUCT(TYPE) struct TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr
-#define DECLARE_CLASS(TYPE) class TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr
+#define DECLARE_STRUCT(TYPE) struct TYPE; \
+	typedef std::shared_ptr<TYPE> TYPE##Ptr;\
+	typedef std::future<std::shared_ptr<TYPE>> TYPE##Future;
+#define DECLARE_CLASS(TYPE) class TYPE; \
+	typedef std::shared_ptr<TYPE> TYPE##Ptr;\
+	typedef std::future<std::shared_ptr<TYPE>> TYPE##Future;
 
 DECLARE_STRUCT(cbDirectLight);
 DECLARE_STRUCT(cbPointLight);

@@ -119,7 +119,7 @@ ContantBuffer11::ContantBuffer11(ID3D11Buffer* buffer, ConstBufferDeclPtr decl)
 }
 
 /********** RenderTexture11 **********/
-RenderTexture11::RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format)
+RenderTexture11::RenderTexture11()
 {
 	mRenderTargetTexture = nullptr;
 	mRenderTargetSRV = nullptr;
@@ -127,7 +127,11 @@ RenderTexture11::RenderTexture11(ID3D11Device* pDevice, int width, int height, R
 
 	mDepthStencilTexture = nullptr;
 	mDepthStencilView = nullptr;
+}
 
+RenderTexture11::RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format)
+	:RenderTexture11()
+{
 	mFormat = format;
 	InitRenderTexture(pDevice, width, height);
 	InitRenderTargetView(pDevice);

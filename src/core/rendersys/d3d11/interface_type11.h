@@ -28,7 +28,7 @@ public:
 	ID3DBlob* mBlob = nullptr;
 };
 
-class InputLayout11 : public TImplResource<IInputLayout> 
+class InputLayout11 : public ImplementResource<IInputLayout> 
 {
 public:
 	InputLayout11();
@@ -41,7 +41,7 @@ public:
 	//IResourcePtr mRes;
 };
 
-class VertexShader11 : public TImplResource<IVertexShader> 
+class VertexShader11 : public ImplementResource<IVertexShader> 
 {
 public:
 	ID3D11VertexShader* mShader = nullptr;
@@ -56,7 +56,7 @@ public:
 	ID3D11VertexShader*& GetShader11() { return mShader; }
 };
 
-class PixelShader11 : public TImplResource<IPixelShader> 
+class PixelShader11 : public ImplementResource<IPixelShader> 
 {
 public:
 	PixelShader11(IBlobDataPtr pBlob);
@@ -71,7 +71,7 @@ public:
 	//IResourcePtr mRes;
 };
 
-class Program11 : public TImplResource<IProgram> 
+class Program11 : public ImplementResource<IProgram> 
 {
 public:
 	Program11();
@@ -98,7 +98,7 @@ public:
 	unsigned int bufferSize;
 };
 
-class VertexBuffer11 : public TImplResource<IVertexBuffer> 
+class VertexBuffer11 : public ImplementResource<IVertexBuffer> 
 {
 public:
 	VertexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
@@ -116,7 +116,7 @@ public:
 	HardwareBuffer hd;
 };
 
-class IndexBuffer11 : public TImplResource<IIndexBuffer> 
+class IndexBuffer11 : public ImplementResource<IIndexBuffer> 
 {
 public:
 	IndexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, ResourceFormat format)
@@ -134,7 +134,7 @@ public:
 	HardwareBuffer hd;
 };
 
-class ContantBuffer11 : public TImplResource<IContantBuffer> 
+class ContantBuffer11 : public ImplementResource<IContantBuffer> 
 {
 public:
 	ContantBuffer11() {}
@@ -151,7 +151,7 @@ public:
 };
 
 /********** Texture **********/
-class Texture11 : public TImplResource<ITexture> 
+class Texture11 : public ImplementResource<ITexture> 
 {
 public:
 	Texture11(int width, int height, ResourceFormat format, int mipmap);
@@ -177,9 +177,10 @@ private:
 	std::string mPath;
 };
 
-class RenderTexture11 : public TImplResource<IRenderTexture>
+class RenderTexture11 : public ImplementResource<IRenderTexture>
 {
 public:
+	RenderTexture11();
 	RenderTexture11(ID3D11Device* pDevice, int width, int height, ResourceFormat format = kFormatR32G32B32A32Float);
 	ITexturePtr GetColorTexture() override { return mRenderTargetPtr; }
 
@@ -204,7 +205,7 @@ private:
 	ResourceFormat mFormat;
 };
 
-class SamplerState11 : public TImplResource<ISamplerState> {
+class SamplerState11 : public ImplementResource<ISamplerState> {
 public:
 	SamplerState11(ID3D11SamplerState* sampler = nullptr) :mSampler(sampler) {}
 	ID3D11SamplerState*& GetSampler11() { return mSampler; }
