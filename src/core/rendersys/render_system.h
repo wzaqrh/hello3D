@@ -46,7 +46,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 		const std::string& vsEntry, const std::string& psEntry) = 0;
 	virtual void SetProgram(IProgramPtr program) = 0;
 	
-	virtual IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount) = 0;
+	virtual IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount) = 0;
 	virtual void SetVertexLayout(IInputLayoutPtr layout) = 0;
 
 	virtual ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) = 0;

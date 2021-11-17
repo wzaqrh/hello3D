@@ -21,6 +21,7 @@ bool Mir::Initialize(HWND hWnd) {
 		return false;
 	}
 
+	mResourceMng = std::make_shared<ResourceManager>(*mRenderSys);
 	mMaterialFac = std::make_shared<MaterialFactory>(*mRenderSys);
 	
 	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight);
@@ -28,7 +29,7 @@ bool Mir::Initialize(HWND hWnd) {
 		Eigen::Vector2i(mRenderSys->mScreenWidth, mRenderSys->mScreenHeight), 
 		Camera::CreatePerspective(*mRenderSys, mRenderSys->mScreenWidth, mRenderSys->mScreenHeight));
 
-	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys, *mMaterialFac);
+	mRenderableFac = std::make_shared<RenderableFactory>(*mRenderSys, *mResourceMng, *mMaterialFac);
 	return true;
 }
 

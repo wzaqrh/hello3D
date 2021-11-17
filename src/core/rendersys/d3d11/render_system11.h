@@ -64,7 +64,7 @@ public:
 	ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) override;
 	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
-	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount) override;
+	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
 
 	void SetBlendFunc(const BlendState& blendFunc) override;

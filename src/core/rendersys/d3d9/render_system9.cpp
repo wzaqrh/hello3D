@@ -417,7 +417,7 @@ IDirect3DVertexDeclaration9* RenderSystem9::_CreateInputLayout(Program9* _, cons
 	return ret;
 }
 
-IInputLayoutPtr RenderSystem9::LoadLayout(IResourcePtr res, IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount)
+IInputLayoutPtr RenderSystem9::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount)
 {
 	InputLayout9Ptr ret = MakePtr<InputLayout9>();
 	for (size_t i = 0; i < descCount; ++i)

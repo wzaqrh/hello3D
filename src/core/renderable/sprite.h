@@ -30,7 +30,7 @@ class MIR_CORE_API Sprite : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
-	Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName = "");
+	Sprite(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName = "");
 public:
 	~Sprite();
 	void SetPosition(const Eigen::Vector3f& pos);
@@ -44,7 +44,7 @@ public:
 	const MaterialPtr& GetMaterial() const { return mMaterial; }
 	const TransformPtr& GetTransform() const { return mTransform; }
 private:
-	IRenderSystem& mRenderSys;
+	ResourceManager& mResourceMng;
 	ITexturePtr mTexture = nullptr;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;

@@ -1,6 +1,6 @@
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
 
@@ -73,8 +73,8 @@ void SpriteVertexQuad::SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vect
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
-Sprite::Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName)
-	: mRenderSys(renderSys)
+Sprite::Sprite(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName)
+	: mResourceMng(resourceMng)
 	, mQuad(0, 0, 0, 0)
 	, mQuadDirty(true)
 	, mFlipY(true)
@@ -83,8 +83,8 @@ Sprite::Sprite(IRenderSystem& renderSys, MaterialFactory& matFac, const std::str
 {
 	mTransform = std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
-	mIndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
-	mVertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
+	mVertexBuffer = resourceMng.CreateVertexBuffer(sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
 
 	if (mFlipY) mQuad.FlipY();
 }
@@ -138,9 +138,12 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 
 int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 {
+	if (!mMaterial->IsLoaded() || !mVertexBuffer->IsLoaded() || !mIndexBuffer->IsLoaded())
+		return 0;
+
 	if (mQuadDirty) {
 		mQuadDirty = false;
-		mRenderSys.UpdateBuffer((mVertexBuffer), &mQuad, sizeof(mQuad));
+		mResourceMng.UpdateBuffer(mVertexBuffer, &mQuad, sizeof(mQuad));
 	}
 
 	RenderOperation op = {};

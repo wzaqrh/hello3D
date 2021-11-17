@@ -6,12 +6,13 @@ namespace mir {
 
 class MIR_CORE_API RenderableFactory 
 {
+	ResourceManager& mResourceMng;
 	IRenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
 	FontCachePtr mFontCache;
 public:
 	typedef const std::string& string_cref;
-	RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac);
+	RenderableFactory(IRenderSystem& renderSys, ResourceManager& resMng, MaterialFactory& matFac);
 	SkyBoxPtr CreateSkybox(string_cref imgpath);
 	SpritePtr CreateColorLayer(string_cref matName = "");
 	SpritePtr CreateSprite(string_cref imgpath = "", string_cref matName = "");

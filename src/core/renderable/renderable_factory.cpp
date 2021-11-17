@@ -14,8 +14,9 @@ namespace mir {
 
 #define NotEmptyOr(Str, DefStr) (!Str.empty() ? Str : DefStr)
 
-RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& matFac)
+RenderableFactory::RenderableFactory(IRenderSystem& renderSys, ResourceManager& resMng, MaterialFactory& matFac)
 	: mRenderSys(renderSys) 
+	, mResourceMng(resMng)
 	, mMaterialFac(matFac)
 {
 	mFontCache = std::make_shared<FontCache>(renderSys);
@@ -23,7 +24,7 @@ RenderableFactory::RenderableFactory(IRenderSystem& renderSys, MaterialFactory& 
 
 SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matName)
 {
-	SpritePtr sprite = Sprite::Create(mRenderSys, mMaterialFac, NotEmptyOr(matName, E_MAT_SPRITE));
+	SpritePtr sprite = Sprite::Create(mResourceMng, mMaterialFac, NotEmptyOr(matName, E_MAT_SPRITE));
 	if (! imgpath.empty()) 
 		sprite->SetTexture(mRenderSys.LoadTexture(nullptr, "model\\theyKilledKenny.jpg", kFormatUnknown, true, false));
 	return sprite;
@@ -31,7 +32,7 @@ SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matNa
 
 SpritePtr RenderableFactory::CreateColorLayer(string_cref matName)
 {
-	return Sprite::Create(mRenderSys, mMaterialFac, NotEmptyOr(matName, E_MAT_LAYERCOLOR));
+	return Sprite::Create(mResourceMng, mMaterialFac, NotEmptyOr(matName, E_MAT_LAYERCOLOR));
 }
 
 MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, string_cref matName)

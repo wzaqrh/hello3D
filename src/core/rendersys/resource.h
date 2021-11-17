@@ -31,7 +31,7 @@ interface MIR_CORE_API IResource : boost::noncopyable
 public:
 	bool IsLoaded() { return GetCurState() == kResourceStateLoaded; }
 	bool IsLoading() { return GetCurState() == kResourceStateLoading; }
-	bool IsPrepared() { return GetCurState() >= kResourceStatePrepared; }
+	bool IsPreparedNeedLoading() { return GetCurState() == kResourceStatePrepared; }
 };
 
 template<class _Parent>

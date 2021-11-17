@@ -267,7 +267,7 @@ ID3D11InputLayout* RenderSystem11::_CreateInputLayout(Program11* pProgram, const
 	}
 	return pVertexLayout;
 }
-IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, LayoutInputElement descArray[], size_t descCount)
+IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceInputLayout);
 
@@ -275,7 +275,7 @@ IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgra
 	//ret->mInputDescs.assign(descArray, descArray + descCount);
 	ret->mInputDescs.resize(descCount);
 	for (size_t i = 0; i < descCount; ++i) {
-		LayoutInputElement& descI = descArray[i];
+		const LayoutInputElement& descI = descArray[i];
 		ret->mInputDescs[i] = D3D11_INPUT_ELEMENT_DESC {
 			descI.SemanticName.c_str(),
 			descI.SemanticIndex,
