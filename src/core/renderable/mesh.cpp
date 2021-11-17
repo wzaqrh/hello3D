@@ -1,51 +1,56 @@
 #include "core/renderable/mesh.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
 
 namespace mir {
 
 /********** Mesh **********/
-Mesh::Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName, int vertCount, int indexCount)
-	:mRenderSys(renderSys)
+Mesh::Mesh(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName, int vertCount, int indexCount)
+	:mResourceMng(resourceMng)
 {
-	Material = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
+	mMaterial = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
 
-	Vertices.resize(vertCount);
-	VertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
+	mVertices.resize(vertCount);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
 	
-	Indices.resize(indexCount);
-	IndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(UINT) * indexCount, kFormatR32UInt, &Indices[0]);
+	mIndices.resize(indexCount);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(sizeof(UINT) * indexCount, kFormatR32UInt, &mIndices[0]);
 	
-	SubMeshs.resize(1);
+	mSubMeshs.resize(1);
 }
 
 int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (VertDirty)
+	if (!mMaterial->IsLoaded()
+		|| !mVertexBuffer->IsLoaded()
+		|| !mIndexBuffer->IsLoaded())
+		return 0;
+
+	if (mVertDirty)
 	{
-		VertDirty = false;
-		mRenderSys.UpdateBuffer(VertexBuffer, &Vertices[0], Vertices.size() * sizeof(MeshVertex));
+		mVertDirty = false;
+		mResourceMng.UpdateBuffer(mVertexBuffer, &mVertices[0], mVertices.size() * sizeof(MeshVertex));
 	}
 
-	if (IndiceDirty)
+	if (mIndiceDirty)
 	{
-		IndiceDirty = false;
-		mRenderSys.UpdateBuffer(IndexBuffer, &Indices[0], Indices.size() * sizeof(UINT));
+		mIndiceDirty = false;
+		mResourceMng.UpdateBuffer(mIndexBuffer, &mIndices[0], mIndices.size() * sizeof(UINT));
 	}
 
 	int opCount = 0;
-	for (int i = 0; i < SubMeshs.size(); ++i)
-	if (SubMeshs[i].IndiceCount > 0)
+	for (int i = 0; i < mSubMeshs.size(); ++i)
+	if (mSubMeshs[i].IndiceCount > 0)
 	{
 		RenderOperation op = {};
-		op.mMaterial = Material;
-		op.mIndexBuffer = IndexBuffer;
-		op.mVertexBuffer = VertexBuffer;
-		op.mTextures = SubMeshs[i].Textures;
-		op.mIndexPos = SubMeshs[i].IndicePos;
-		op.mIndexCount = SubMeshs[i].IndiceCount;
-		op.mIndexBase = SubMeshs[i].IndiceBase;
+		op.mMaterial = mMaterial;
+		op.mIndexBuffer = mIndexBuffer;
+		op.mVertexBuffer = mVertexBuffer;
+		op.mTextures = mSubMeshs[i].Textures;
+		op.mIndexPos = mSubMeshs[i].IndicePos;
+		op.mIndexCount = mSubMeshs[i].IndiceCount;
+		op.mIndexBase = mSubMeshs[i].IndiceBase;
 		opList.AddOP(op);
 		++opCount;
 	}
@@ -54,74 +59,74 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 
 void Mesh::Clear()
 {
-	VertDirty = true;
-	VertPos = 0;
+	mVertDirty = true;
+	mVertPos = 0;
 
-	IndiceDirty = true;
-	SubMeshs.resize(1);
-	SubMeshs[0].IndiceCount = 0;
-	SubMeshs[0].IndicePos = 0;
+	mIndiceDirty = true;
+	mSubMeshs.resize(1);
+	mSubMeshs[0].IndiceCount = 0;
+	mSubMeshs[0].IndicePos = 0;
 }
 
 void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount)
 {
-	VertDirty = true;
-	VertPos = vertCount;
-	Vertices.assign(vertData, vertData + vertCount);
+	mVertDirty = true;
+	mVertPos = vertCount;
+	mVertices.assign(vertData, vertData + vertCount);
 }
 
 void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos)
 {
-	VertDirty = true;
-	VertPos = max(VertPos, vertPos + vertCount);
+	mVertDirty = true;
+	mVertPos = max(mVertPos, vertPos + vertCount);
 	for (int i = 0; i < vertCount; ++i)
-		Vertices[i + vertPos] = vertData[i];
+		mVertices[i + vertPos] = vertData[i];
 }
 
 void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
 {
-	VertDirty = true;
-	VertPos = max(VertPos, count);
-	for (int i = 0; i < VertPos; ++i)
-		Vertices[i].Position = posData[i];
+	mVertDirty = true;
+	mVertPos = max(mVertPos, count);
+	for (int i = 0; i < mVertPos; ++i)
+		mVertices[i].Position = posData[i];
 }
 
 void Mesh::SetColors(const Eigen::Vector4f* colorData, int count)
 {
-	VertDirty = true;
-	VertPos = max(VertPos, count);
-	for (int i = 0; i < VertPos; ++i) {
+	mVertDirty = true;
+	mVertPos = max(mVertPos, count);
+	for (int i = 0; i < mVertPos; ++i) {
 		unsigned char c[4] = {
 			static_cast<unsigned char>(colorData[i].x() * 255),
 			static_cast<unsigned char>(colorData[i].y() * 255),
 			static_cast<unsigned char>(colorData[i].z() * 255),
 			static_cast<unsigned char>(colorData[i].w() * 255),
 		};
-		Vertices[i].Color = *((int*)c);
+		mVertices[i].Color = *((int*)c);
 	}
 }
 
 void Mesh::SetUVs(const Eigen::Vector2f* uvData, int count)
 {
-	VertDirty = true;
-	VertPos = max(VertPos, count);
-	for (int i = 0; i < VertPos; ++i)
-		Vertices[i].UV = uvData[i];
+	mVertDirty = true;
+	mVertPos = max(mVertPos, count);
+	for (int i = 0; i < mVertPos; ++i)
+		mVertices[i].UV = uvData[i];
 }
 
 void Mesh::SetSubMeshCount(int count)
 {
-	SubMeshs.resize(count);
+	mSubMeshs.resize(count);
 }
 
 void Mesh::SetIndices(const unsigned int* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex)
 {
-	assert(subMeshIndex < SubMeshs.size());
-	IndiceDirty = true;
+	assert(subMeshIndex < mSubMeshs.size());
+	mIndiceDirty = true;
 	for (int i = 0; i < indiceCount; ++i)
-		Indices[i + indicePos] = indiceData[i];
+		mIndices[i + indicePos] = indiceData[i];
 
-	auto& submesh = SubMeshs[subMeshIndex];
+	auto& submesh = mSubMeshs[subMeshIndex];
 	submesh.IndicePos = indicePos;
 	submesh.IndiceCount = indiceCount;
 	submesh.IndiceBase = indiceBase;
@@ -129,8 +134,8 @@ void Mesh::SetIndices(const unsigned int* indiceData, int indicePos, int indiceC
 
 void Mesh::SetTexture(int slot, ITexturePtr texture, int subMeshIndex)
 {
-	assert(subMeshIndex < SubMeshs.size());
-	auto& submesh = SubMeshs[subMeshIndex];
+	assert(subMeshIndex < mSubMeshs.size());
+	auto& submesh = mSubMeshs[subMeshIndex];
 	submesh.Textures[slot] = texture;
 }
 

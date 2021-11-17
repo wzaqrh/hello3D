@@ -2,7 +2,7 @@
 #include "core/base/transform.h"
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/interface_type.h"
 
@@ -27,20 +27,25 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-Label::Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font)
-	:mRenderSys(renderSys)
+Label::Label(ResourceManager& resourceMng, MaterialFactory& matFac, FontPtr font)
+	:mResourceMng(resourceMng)
 {
 	mFont = font;
 
 	mTransform = std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(E_MAT_LABEL);
 
-	mIndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(unsigned int) * 6 * CMaxStringLength, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
-	mVertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(SpriteVertexQuad) * CMaxStringLength, sizeof(SpriteVertex), 0, nullptr);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(sizeof(unsigned int) * 6 * CMaxStringLength, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(SpriteVertexQuad) * CMaxStringLength, sizeof(SpriteVertex), 0, nullptr);
 }
 
 int Label::GenRenderOperation(RenderOperationQueue& opList)
 {
+	if (!mMaterial->IsLoaded()
+		|| !mVertexBuffer->IsLoaded()
+		|| !mIndexBuffer->IsLoaded())
+		return 0;
+
 	int count = 0;
 	ITexturePtr lastTex;
 	int lastCount = 0;
@@ -201,7 +206,7 @@ void Label::ForceLayout()
 			quadArray.push_back(quad);
 		}
 
-		mRenderSys.UpdateBuffer((mVertexBuffer), &quadArray[0], quadArray.size() * sizeof(SpriteVertexQuad));
+		mResourceMng.UpdateBuffer(mVertexBuffer, &quadArray[0], quadArray.size() * sizeof(SpriteVertexQuad));
 	}
 }
 

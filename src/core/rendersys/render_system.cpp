@@ -28,7 +28,7 @@ IProgramPtr RenderSystem::LoadProgram(IResourcePtr res, const std::string& name,
 ITexturePtr RenderSystem::LoadTexture(IResourcePtr res, const std::string& filepath, 
 	ResourceFormat format, bool async, bool isCube)
 {
-	std::string imgPath = filepath;
+	std::string imgPath = boost::filesystem::system_complete(filepath).string();
 
 	ITexturePtr texView = nullptr;
 	if (mTexByPath.find(imgPath) == mTexByPath.end()) {

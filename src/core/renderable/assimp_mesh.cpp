@@ -1,5 +1,5 @@
 #include "core/renderable/assimp_mesh.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 
 namespace mir {
@@ -10,38 +10,44 @@ AssimpMesh::AssimpMesh(const aiMesh* data,
 	std::vector<UINT>& indices,
 	TextureBySlotPtr textures,
 	MaterialPtr material,
-	IRenderSystem& renderSys)
+	ResourceManager& resourceMng)
 {
-	Data = data;
-	Vertices.swap(vertices); vertices.clear();
-	Indices.swap(indices); indices.clear();
-	Textures = textures;
-	Material = material;
+	mData = data;
+	mVertices.swap(vertices); vertices.clear();
+	mIndices.swap(indices); indices.clear();
+	mTextures = textures;
+	mMaterial = material;
 
-	setupMesh(renderSys);
+	setupMesh(resourceMng);
 }
 
-bool AssimpMesh::setupMesh(IRenderSystem& renderSys)
+bool AssimpMesh::setupMesh(ResourceManager& resourceMng)
 {
-	VertexBuffer = renderSys.LoadVertexBuffer(nullptr, sizeof(AssimpMeshVertex) * Vertices.size(), sizeof(AssimpMeshVertex), 0, &Vertices[0]);
-	IndexBuffer = renderSys.LoadIndexBuffer(nullptr, sizeof(UINT) * Indices.size(), kFormatR32UInt, &Indices[0]);
+	mVertexBuffer = resourceMng.CreateVertexBuffer(sizeof(AssimpMeshVertex) * mVertices.size(), sizeof(AssimpMeshVertex), 0, &mVertices[0]);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(sizeof(UINT) * mIndices.size(), kFormatR32UInt, &mIndices[0]);
 	return true;
 }
 
 bool AssimpMesh::HasTexture(int slot)
 {
-	return (slot < Textures->Count()) 
-		&& Textures->At(slot)
-		&& Textures->At(slot)->HasSRV();
+	return (slot < mTextures->Count()) 
+		&& mTextures->At(slot)
+		&& mTextures->At(slot)->HasSRV();
 }
 
 int AssimpMesh::GenRenderOperation(RenderOperationQueue& opList)
 {
+	if (!mMaterial->IsLoaded()
+		|| !mVertexBuffer->IsLoaded()
+		|| !mIndexBuffer->IsLoaded()
+		|| !mTextures->IsLoaded())
+		return 0;
+
 	RenderOperation op = {};
-	op.mMaterial = Material;
-	op.mIndexBuffer = IndexBuffer;
-	op.mVertexBuffer = VertexBuffer;
-	op.mTextures = *Textures;
+	op.mMaterial = mMaterial;
+	op.mIndexBuffer = mIndexBuffer;
+	op.mVertexBuffer = mVertexBuffer;
+	op.mTextures = *mTextures;
 	opList.AddOP(op);
 	return 1;
 }

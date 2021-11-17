@@ -158,7 +158,7 @@ class Texture11 : public ImplementResource<ITexture>
 {
 public:
 	Texture11(ID3D11ShaderResourceView* texture);
-	Texture11(int width, int height, ResourceFormat format, int mipmap);
+	void Init(int width, int height, ResourceFormat format, int mipmap);
 	//IResourcePtr AsRes() override { return mRes; }
 
 	bool HasSRV() override { return mTexture != nullptr; }

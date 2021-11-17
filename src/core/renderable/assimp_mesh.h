@@ -27,22 +27,22 @@ class MIR_CORE_API AssimpMesh : public IRenderable
 		std::vector<UINT>& indices,
 		TextureBySlotPtr textures,
 		MaterialPtr material,
-		IRenderSystem& renderSys);
+		ResourceManager& resourceMng);
 public:
 	int GenRenderOperation(RenderOperationQueue& opList) override;
 	bool HasTexture(int slot);
-	const aiMesh* GetAiMesh() const { return Data; }
-	const MaterialPtr& GetMaterial() const { return Material; }
+	const aiMesh* GetAiMesh() const { return mData; }
+	const MaterialPtr& GetMaterial() const { return mMaterial; }
 private:
-	bool setupMesh(IRenderSystem& renderSys);
+	bool setupMesh(ResourceManager& resourceMng);
 private:
-	const aiMesh* Data = nullptr;
-	std::vector<AssimpMeshVertex> Vertices;
-	std::vector<UINT> Indices;
-	TextureBySlotPtr Textures;
-	IVertexBufferPtr VertexBuffer;
-	IIndexBufferPtr IndexBuffer;
-	MaterialPtr Material;
+	const aiMesh* mData = nullptr;
+	std::vector<AssimpMeshVertex> mVertices;
+	std::vector<UINT> mIndices;
+	TextureBySlotPtr mTextures;
+	IVertexBufferPtr mVertexBuffer;
+	IIndexBufferPtr mIndexBuffer;
+	MaterialPtr mMaterial;
 };
 typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
 typedef std::vector<AssimpMeshPtr> AssimpMeshPtrVector;

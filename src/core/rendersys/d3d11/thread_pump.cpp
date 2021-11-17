@@ -20,7 +20,7 @@ void ThreadPumpEntry::Clear()
 
 bool ThreadPumpEntry::IsNull() const
 {
-	return callback != nullptr;
+	return callback == nullptr;
 }
 
 bool ThreadPumpEntry::IsAttached() const

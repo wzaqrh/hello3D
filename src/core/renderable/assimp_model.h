@@ -40,7 +40,7 @@ class MIR_CORE_API AssimpModel : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
-	AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
+	AssimpModel(ResourceManager& resourceMng, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
 public:
 	~AssimpModel();
 	void LoadModel(const std::string& imgPath, const std::string& redirectResource = "");
@@ -67,7 +67,7 @@ private:
 	float mElapse = 0.0f;
 	Assimp::Importer* mImporter = nullptr;
 	std::string mRedirectResourceDir, mRedirectResourceExt;
-	IRenderSystem& mRenderSys;
+	ResourceManager& mResourceMng;
 	MaterialPtr mMaterial;
 	TransformPtr mTransform;
 };

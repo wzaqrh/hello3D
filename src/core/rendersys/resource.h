@@ -88,7 +88,7 @@ public:
 		}
 	}
 
-	void Assign(ImplementResource& other, IRenderSystem& pRenderSys) {
+	void Assign(ImplementResource& other) {
 		this->mDepends.clear();
 		for (auto& depend : other.mDepends)
 			this->AddDependency(depend);

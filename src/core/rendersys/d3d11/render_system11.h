@@ -70,7 +70,7 @@ public:
 	void SetBlendFunc(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
-	ITexturePtr CreateTexture(int width, int height, ResourceFormat format, int mipmap) override;
+	ITexturePtr LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTexture(size_t slot, ITexturePtr texture) override;
 	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;

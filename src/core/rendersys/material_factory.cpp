@@ -10,7 +10,7 @@
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/post_process.h"
 #include "core/base/d3d.h"
@@ -67,8 +67,8 @@ public:
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
 	}
-	MaterialBuilder& CloneTechnique(IRenderSystem& pRenderSys, const std::string& name) {
-		mCurTech = mCurTech->Clone(pRenderSys);
+	MaterialBuilder& CloneTechnique(ResourceManager& resourceMng, const std::string& name) {
+		mCurTech = mCurTech->Clone(resourceMng);
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
@@ -273,13 +273,13 @@ public:
 		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	MaterialPtr LoadMaterial(RenderSystem& renderSys,
+	MaterialPtr LoadMaterial(ResourceManager& resourceMng,
 		const std::string& shaderName,
 		const std::string& variantName) {
 		XmlShaderInfo shaderInfo;
 		if (!variantName.empty()) ParseShaderVariantXml(shaderName, variantName, shaderInfo);
 		else ParseShaderXml(shaderName, shaderInfo);
-		return CreateMaterial(renderSys, shaderName, shaderInfo);
+		return CreateMaterial(resourceMng, shaderName, shaderInfo);
 	}
 public:
 	const MaterialNameToAssetMapping& MatNameToAsset() const {
@@ -578,7 +578,7 @@ private:
 		return result;
 	}
 
-	MaterialPtr CreateMaterial(RenderSystem& renderSys,
+	MaterialPtr CreateMaterial(ResourceManager& resourceMng,
 		const std::string& name,
 		XmlShaderInfo& shaderInfo) {
 		MaterialBuilder builder(false);
@@ -592,19 +592,17 @@ private:
 				builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 				builder.SetTopology(shaderInfo.Program.Topo);
 
-				IProgramPtr program = builder.SetProgram(renderSys.LoadProgram(
-					nullptr,
+				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
 					MAKE_MAT_NAME(shaderInfo.Program.FxName),
 					shaderInfo.Program.VsEntry.c_str(),
 					passInfo.PSEntry.c_str()));
-				builder.SetInputLayout(renderSys.LoadLayout(nullptr, program,
+				builder.SetInputLayout(resourceMng.CreateLayout(program,
 					&shaderInfo.Program.Attr.Layout[0],
 					shaderInfo.Program.Attr.Layout.size()));
 
 				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 					auto& elem = shaderInfo.Program.Samplers[k];
-					builder.AddSampler(renderSys.LoadSampler(
-						nullptr,
+					builder.AddSampler(resourceMng.CreateSampler(
 						static_cast<SamplerFilterMode>(elem.first),
 						kCompareNever)
 					);
@@ -614,21 +612,21 @@ private:
 
 		for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
 			auto& uniformI = shaderInfo.Program.Uniforms[i];
-			builder.AddConstBufferToTech(renderSys.LoadConstBuffer(nullptr, uniformI.Decl, &uniformI.Data[0]),
+			builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]),
 				uniformI.ShortName, uniformI.IsUnique);
 		}
 
-		builder.CloneTechnique(renderSys, "d3d9");
+		builder.CloneTechnique(resourceMng, "d3d9");
 		builder.ClearSamplersToTech();
-		builder.AddSamplerToTech(renderSys.LoadSampler(nullptr, kSamplerFilterMinMagMipLinear, kCompareNever));
+		builder.AddSamplerToTech(resourceMng.CreateSampler(kSamplerFilterMinMagMipLinear, kCompareNever));
 
 		return builder.Build();
 	}
 };
 
 /********** TMaterialFactory **********/
-MaterialFactory::MaterialFactory(RenderSystem& renderSys)
-	:mRenderSys(renderSys)
+MaterialFactory::MaterialFactory(ResourceManager& resourceMng)
+	:mResourceMng(resourceMng)
 {
 	mMatAssetMng = std::make_shared<MaterialAssetManager>();
 }
@@ -637,14 +635,14 @@ MaterialPtr MaterialFactory::GetMaterial(const std::string& matName, bool readon
 	if (mMaterials.find(matName) == mMaterials.end())
 		mMaterials.insert(std::make_pair(matName, CreateStdMaterial(matName)));
 
-	MaterialPtr material = readonly ? mMaterials[matName] : mMaterials[matName]->Clone(mRenderSys);
+	MaterialPtr material = readonly ? mMaterials[matName] : mMaterials[matName]->Clone(mResourceMng);
 	return material;
 }
 
 #if defined MATERIAL_FROM_XML
 MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
-	return mMatAssetMng->LoadMaterial(mRenderSys, entry.ShaderName, entry.VariantName);
+	return mMatAssetMng->LoadMaterial(mResourceMng, entry.ShaderName, entry.VariantName);
 }
 #else
 

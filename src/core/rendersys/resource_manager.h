@@ -18,6 +18,8 @@ public:
 
 	IInputLayoutPtr CreateLayoutAsync(IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount);
 public:
+	Eigen::Vector4i WinSize() const { return mRenderSys.WinSize(); }
+
 	template <typename... T> 
 	IIndexBufferPtr CreateIndexBuffer(T &&...args) {
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer);
@@ -60,9 +62,19 @@ public:
 	}
 
 	template <typename... T>
-	ITexturePtr CreateTexture(T &&...args) {
+	ITexturePtr CreateTexture(int firstParam, T &&...args) {
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
-		return mRenderSys.LoadTexture(res, std::forward<T>(args)...);
+		return mRenderSys.LoadTexture(res, firstParam, std::forward<T>(args)...);
+	}
+	template <typename... T>
+	ITexturePtr CreateTexture(const std::string& firstParam, T &&...args) {
+		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
+		return mRenderSys.LoadTexture(res, firstParam, std::forward<T>(args)...);
+	}
+
+	template <typename... T>
+	bool LoadRawTextureData(T &&...args) {
+		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
 	}
 
 	template <typename... T>

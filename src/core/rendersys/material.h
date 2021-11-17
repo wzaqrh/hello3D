@@ -35,6 +35,8 @@ public:
 
 	const ITexturePtr& At(size_t pos) const { return Textures[pos]; }
 	const ITexturePtr& operator[](size_t pos) const { return At(pos); }
+
+	bool IsLoaded() const;
 public:
 	std::vector<ITexturePtr> Textures;
 };
@@ -55,7 +57,7 @@ class Pass : boost::noncopyable
 {
 public:
 	Pass(const std::string& lightMode, const std::string& name);
-	std::shared_ptr<Pass> Clone(IRenderSystem& pRenderSys);
+	PassPtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -64,7 +66,7 @@ public:
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(IRenderSystem& pRenderSys, 
+	void UpdateConstBufferByName(ResourceManager& resourceMng, 
 		const std::string& name, 
 		const Data& data);
 public:
@@ -89,7 +91,7 @@ class Technique : boost::noncopyable
 {
 public:
 	void AddPass(PassPtr pass);
-	std::shared_ptr<Technique> Clone(IRenderSystem& pRenderSys);
+	TechniquePtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -97,7 +99,7 @@ public:
 	PassPtr GetPassByLightMode(const std::string& lightMode);
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 
-	void UpdateConstBufferByName(IRenderSystem& pRenderSys, 
+	void UpdateConstBufferByName(ResourceManager& resourceMng, 
 		const std::string& name, 
 		const Data& data);
 public:
@@ -108,7 +110,7 @@ public:
 class MIR_CORE_API Material : public ImplementResource<IResource> 
 {
 public:
-	std::shared_ptr<Material> Clone(IRenderSystem& pRenderSys);
+	MaterialPtr Clone(ResourceManager& resourceMng);
 	void AddTechnique(TechniquePtr technique);
 
 	TechniquePtr CurTech();

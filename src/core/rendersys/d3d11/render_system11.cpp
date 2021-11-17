@@ -312,26 +312,21 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	switch (buffer->GetType())
 	{
 	case kHWBufferConstant: {
-		IContantBufferPtr cbuffer = std::static_pointer_cast<IContantBuffer>(buffer);
-		ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(cbuffer);
-		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
-		if (CheckHR(hr)) return false;
+		/*ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(buffer);
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
 		memcpy(MappedResource.pData, data, dataSize);
-		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);*/
+		UpdateConstBuffer(std::static_pointer_cast<ContantBuffer11>(buffer), data, dataSize);
 	}break;
 	case kHWBufferVertex:{
-		IVertexBufferPtr cbuffer = std::static_pointer_cast<IVertexBuffer>(buffer);
-		VertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(cbuffer);
-		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
-		if (CheckHR(hr)) return false;
+		VertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(buffer);
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
 		memcpy(MappedResource.pData, data, dataSize);
 		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
 	}break;
 	case kHWBufferIndex: {
-		IIndexBufferPtr cbuffer = std::static_pointer_cast<IIndexBuffer>(buffer);
-		IndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(cbuffer);
-		hr = (mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
-		if (CheckHR(hr)) return false;
+		IndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(buffer);
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
 		memcpy(MappedResource.pData, data, dataSize);
 		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
 	}break;
@@ -629,6 +624,8 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int bufferSi
 	IVertexBufferPtr vertexBuffer;
 	if (buffer) vertexBuffer = MakePtr<VertexBuffer11>(_CreateVertexBuffer(bufferSize, buffer), bufferSize, stride, offset);
 	else vertexBuffer = MakePtr<VertexBuffer11>(_CreateVertexBuffer(bufferSize), bufferSize, stride, offset);
+	
+	vertexBuffer->SetLoaded();
 	return vertexBuffer;
 }
 
@@ -660,6 +657,7 @@ IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, int bufferSize
 
 	IndexBuffer11Ptr indexBuffer = std::static_pointer_cast<IndexBuffer11>(res);
 	indexBuffer->Init(pIndexBuffer, bufferSize, format);
+	indexBuffer->SetLoaded();
 	return indexBuffer;
 }
 
@@ -720,12 +718,13 @@ ITexturePtr RenderSystem11::_CreateTexture(IResourcePtr res, const char* pSrcFil
 		if (async) {
 			hr = mThreadPump->AddWorkItem(resource, [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
 				return D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, pump, 
-					&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), NULL);
+					&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
 			}, ResourceSetLoaded);
+			//resource->SetLoaded();
 		}
 		else {
 			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, pSrcFile, pLoadInfo, nullptr, 
-				&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), NULL);
+				&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
 			resource->SetLoaded();
 		}
 		if (CheckHR(hr)) {
@@ -741,14 +740,18 @@ ITexturePtr RenderSystem11::_CreateTexture(IResourcePtr res, const char* pSrcFil
 	return pTextureRV;
 }
 
-ITexturePtr RenderSystem11::CreateTexture(int width, int height, ResourceFormat format, int mipmap)
+ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data)
 {
 	BOOST_ASSERT(mipmap > 0);
-	return MakePtr<Texture11>(width, height, format, mipmap);
+	auto ret = std::static_pointer_cast<Texture11>(res);
+	ret->Init(width, height, format, mipmap);
+	ret->SetLoaded();
+	return ret;
 }
 bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
-	assert(dataStep * texture->GetHeight() <= dataSize);
+	BOOST_ASSERT(dataStep * texture->GetHeight() <= dataSize);
+
 	D3D11_SUBRESOURCE_DATA initData = { data, dataStep, 0 };
 
 	D3D11_TEXTURE2D_DESC desc = {};

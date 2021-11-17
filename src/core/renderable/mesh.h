@@ -15,7 +15,7 @@ class MIR_CORE_API Mesh : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
-	Mesh(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& matName, 
+	Mesh(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName, 
 		int vertCount = 1024, int indexCount = 1024);
 public:
 	void Clear();
@@ -30,22 +30,22 @@ public:
 public:
 	int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
-	IRenderSystem& mRenderSys;
-	MaterialPtr Material;
+	ResourceManager& mResourceMng;
+	MaterialPtr mMaterial;
 
-	int VertPos = 0, VertDirty = false;
-	std::vector<MeshVertex> Vertices;
-	IVertexBufferPtr VertexBuffer;
+	int mVertPos = 0, mVertDirty = false;
+	std::vector<MeshVertex> mVertices;
+	IVertexBufferPtr mVertexBuffer;
 
-	int IndiceDirty = false;
-	std::vector<unsigned int> Indices;
-	IIndexBufferPtr IndexBuffer;
+	int mIndiceDirty = false;
+	std::vector<unsigned int> mIndices;
+	IIndexBufferPtr mIndexBuffer;
 
 	struct SubMesh {
 		short IndicePos, IndiceCount, IndiceBase;
 		TextureBySlot Textures;
 	};
-	std::vector<SubMesh> SubMeshs;
+	std::vector<SubMesh> mSubMeshs;
 };
 
 }

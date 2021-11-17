@@ -13,7 +13,7 @@ class MIR_CORE_API Label : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Label);
-	Label(IRenderSystem& renderSys, MaterialFactory& matFac, FontPtr font);
+	Label(ResourceManager& resourceMng, MaterialFactory& matFac, FontPtr font);
 public:
 	void SetString(const std::string& str);
 	void SetSize(bool autoCalSize, const Eigen::Vector2f& size);
@@ -27,7 +27,7 @@ private:
 	void UpdateBBox();
 	void ForceLayout();
 private:
-	IRenderSystem& mRenderSys;
+	ResourceManager& mResourceMng;
 	FontPtr mFont;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;

@@ -14,17 +14,17 @@ class MIR_CORE_API SkyBox : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(SkyBox);
-	SkyBox(IRenderSystem& renderSys, MaterialFactory& matFac, const std::string& imgName);
+	SkyBox(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& imgName);
 public:
 	~SkyBox();
 	int GenRenderOperation(RenderOperationQueue& opList) override;
-	const ITexturePtr& GetTexture() const { return mCubeSRV; }
+	const ITexturePtr& GetTexture() const { return mMainTex; }
 	const MaterialPtr& GetMaterial() const { return mMaterial; }
 private:
-	IRenderSystem& mRenderSys;
+	ResourceManager& mResourceMng;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
-	ITexturePtr mCubeSRV;
+	ITexturePtr mMainTex;
 	MaterialPtr mMaterial;
 };
 

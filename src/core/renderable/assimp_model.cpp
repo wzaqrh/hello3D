@@ -5,7 +5,7 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
 #include "core/rendersys/material_factory.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/base/transform.h"
 #include "core/base/debug.h"
@@ -127,8 +127,8 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(IRenderSystem& renderSys, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType)
-	:mRenderSys(renderSys)
+AssimpModel::AssimpModel(ResourceManager& resourceMng, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType)
+	:mResourceMng(resourceMng)
 {
 	mTransform = pMove ? pMove : std::make_shared<Transform>();
 	mMaterial = matFac.GetMaterial(matType);
@@ -332,9 +332,9 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			textures[kTextureNormal] = normalMaps[0];
 	}
 
-	auto material = mMaterial->Clone(mRenderSys);
+	auto material = mMaterial->Clone(mResourceMng);
 	//if (mMatCb) mMatCb(material);
-	return AssimpMesh::Create(mesh, vertices, indices, texturesPtr, material, mRenderSys);
+	return AssimpMesh::Create(mesh, vertices, indices, texturesPtr, material, mResourceMng);
 }
 
 std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, 
@@ -365,7 +365,7 @@ std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat,
 			key = texturePath.string();
 		}
 
-		ITexturePtr texInfo = mRenderSys.LoadTexture(nullptr, key, kFormatUnknown, true, false);
+		ITexturePtr texInfo = mResourceMng.CreateTexture(key, kFormatUnknown, true, false);
 		textures.push_back(texInfo);
 		mLoadedTexture[key] = texInfo;
 	}
@@ -499,7 +499,7 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
 			mesh->GetMaterial()->CurTech()->UpdateConstBufferByName(
-				mRenderSys, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
+				mResourceMng, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
 
 			mesh->GenRenderOperation(opList);
 		}
@@ -511,6 +511,9 @@ void AssimpModel::DoDraw(aiNode* node, RenderOperationQueue& opList)
 
 int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
+	if (!mMaterial->IsLoaded())
+		return 0;
+
 	int count = opList.Count();
 	DoDraw(mRootNode, opList);
 

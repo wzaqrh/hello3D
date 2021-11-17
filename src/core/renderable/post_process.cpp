@@ -1,5 +1,5 @@
 #include "core/renderable/post_process.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
@@ -49,14 +49,14 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr unsigned int CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(IRenderSystem& RenderSys, IRenderTexturePtr mainTex)
-	:mRenderSys(RenderSys) 
+PostProcess::PostProcess(ResourceManager& resourceMng, IRenderTexturePtr mainTex)
+	:mResourceMng(resourceMng)
 {
 	mMainTex = mainTex;
 
-	mIndexBuffer = mRenderSys.LoadIndexBuffer(nullptr, sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mRenderSys.LoadVertexBuffer(nullptr, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }
 
 PostProcess::~PostProcess()
@@ -65,6 +65,12 @@ PostProcess::~PostProcess()
 
 int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 {
+	if (!mMaterial->IsLoaded() 
+		|| !mVertexBuffer->IsLoaded() 
+		|| !mIndexBuffer->IsLoaded() 
+		|| !mMainTex->IsLoaded())
+		return 0;
+
 	RenderOperation op = {};
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
@@ -77,27 +83,27 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 }
 
 /********** TBloom **********/
-IVertexBufferPtr GetVertBufByRT(IRenderSystem& RenderSys, IRenderTexturePtr target) {
+IVertexBufferPtr GetVertBufByRT(ResourceManager& resourceMng, IRenderTexturePtr target) {
 	auto srv = target->GetColorTexture();
-	float sx = srv->GetWidth() * 1.0 / RenderSys.WinSize().x();
-	float sy = srv->GetHeight() * 1.0 / RenderSys.WinSize().y();
+	float sx = srv->GetWidth() * 1.0 / resourceMng.WinSize().x();
+	float sy = srv->GetHeight() * 1.0 / resourceMng.WinSize().y();
 	assert(sx <= 1 && sy <= 1);
 	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
-	IVertexBufferPtr vertBuf = RenderSys.LoadVertexBuffer(nullptr, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	IVertexBufferPtr vertBuf = resourceMng.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 	return vertBuf;
 }
 
-Bloom::Bloom(IRenderSystem& renderSys, MaterialFactory& matFac, IRenderTexturePtr mainTex)
-	:PostProcess(renderSys, mainTex)
+Bloom::Bloom(ResourceManager& resourceMng, MaterialFactory& matFac, IRenderTexturePtr mainTex)
+	:PostProcess(resourceMng, mainTex)
 {
 	mMaterial = matFac.GetMaterial(E_MAT_POSTPROC_BLOOM);
 
 	auto curTech = mMaterial->CurTech();
 	for (auto& pass : curTech->mPasses) {
 		if (pass->mRenderTarget) {
-			mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, -1), GetVertBufByRT(mRenderSys, pass->mRenderTarget)));
+			mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, -1), GetVertBufByRT(mResourceMng, pass->mRenderTarget)));
 			for (int i = 0; i < pass->mIterTargets.size(); ++i) {
-				mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, i), GetVertBufByRT(mRenderSys, pass->mIterTargets[i])));
+				mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, i), GetVertBufByRT(mResourceMng, pass->mIterTargets[i])));
 			}
 		}
 	}

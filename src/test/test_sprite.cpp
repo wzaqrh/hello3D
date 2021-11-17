@@ -22,10 +22,10 @@ void TestSprite::OnPostInitDevice()
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
 	mSprite = mContext->RenderableFac()->CreateSprite();
-	mSprite->SetTexture(mContext->RenderSys()->LoadTexture(nullptr, "model\\theyKilledKenny.jpg"));
+	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/theyKilledKenny.png"));
 
-	int win_width = mContext->RenderSys()->WinSize().x();
-	int win_height = mContext->RenderSys()->WinSize().y();
+	int win_width = mContext->ResourceMng()->WinSize().x();
+	int win_height = mContext->ResourceMng()->WinSize().y();
 	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
 	mSprite->SetSize(Eigen::Vector2f(win_width / 2, win_height / 2));
 }

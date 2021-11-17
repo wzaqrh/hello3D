@@ -1,15 +1,15 @@
 #include "core/renderable/font.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 
 namespace mir {
 
 /********** FontTexture **********/
-FontTexture::FontTexture(IRenderSystem& renderSys, Eigen::Vector2i size)
-	:mRenderSys(renderSys)
+FontTexture::FontTexture(ResourceManager& resourceMng, Eigen::Vector2i size)
+	:mResourceMng(resourceMng)
 {
 	mWidth = size.x();
 	mHeight = size.y();
-	mTexture = mRenderSys.CreateTexture(mWidth, mHeight, kFormatR8UNorm, 1);
+	mTexture = mResourceMng.CreateTexture(mWidth, mHeight, kFormatR8UNorm, 1, (void*)NULL);
 	mRawBuffer.resize(mWidth * mHeight);
 }
 
@@ -60,14 +60,14 @@ ITexturePtr FontTexture::GetTexture()
 {
 	if (mRawBufferDirty) {
 		mRawBufferDirty = false;
-		mRenderSys.LoadRawTextureData(mTexture, &mRawBuffer[0], mRawBuffer.size(), mWidth);
+		mResourceMng.LoadRawTextureData(mTexture, &mRawBuffer[0], mRawBuffer.size(), mWidth);
 	}
 	return mTexture;
 }
 
 /********** FontCharactorCache **********/
-FontCharactorCache::FontCharactorCache(IRenderSystem& renderSys, FT_Face ftFace)
-	:mRenderSys(renderSys)
+FontCharactorCache::FontCharactorCache(ResourceManager& resourceMng, FT_Face ftFace)
+	:mResourceMng(resourceMng)
 {
 	mFtFace = ftFace;
 	AllocFontTexture();
@@ -76,7 +76,7 @@ FontCharactorCache::FontCharactorCache(IRenderSystem& renderSys, FT_Face ftFace)
 FontTexturePtr FontCharactorCache::AllocFontTexture()
 {
 	Eigen::Vector2i size = { 512,512 };
-	mCurFontTexture = std::make_shared<FontTexture>(mRenderSys, size);
+	mCurFontTexture = std::make_shared<FontTexture>(mResourceMng, size);
 	mFontTextures.push_back(mCurFontTexture);
 	return mCurFontTexture;
 }
@@ -122,7 +122,7 @@ void FontCharactorCache::FlushChange()
 }
 
 /********** Font **********/
-Font::Font(IRenderSystem& renderSys, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
+Font::Font(ResourceManager& resourceMng, FT_Library ftLib, std::string fontPath, int fontSize, int dpi)
 {
 	mFontName = fontPath;
 	mFontSize = fontSize;
@@ -130,7 +130,7 @@ Font::Font(IRenderSystem& renderSys, FT_Library ftLib, std::string fontPath, int
 	if (!CheckError(FT_Set_Char_Size(mFtFace, fontSize * 64, 0, dpi, 0))) return;
 	if (!CheckError(FT_Select_Charmap(mFtFace, FT_ENCODING_UNICODE))) return;
 
-	mCharactorCache = std::make_shared<FontCharactorCache>(renderSys, mFtFace);
+	mCharactorCache = std::make_shared<FontCharactorCache>(resourceMng, mFtFace);
 }
 Font::~Font()
 {
@@ -147,8 +147,8 @@ FontCharactorPtr Font::GetCharactor(int ch)
 }
 
 /********** FontCache **********/
-FontCache::FontCache(IRenderSystem& renderSys, int dpi)
-	:mRenderSys(renderSys)
+FontCache::FontCache(ResourceManager& resourceMng, int dpi)
+	:mResourceMng(resourceMng)
 {
 	mDPI = dpi;
 	if (FT_Init_FreeType(&mFtLib)) {
@@ -172,7 +172,7 @@ FontPtr FontCache::GetFont(std::string fontPath, int fontSize)
 		font = iter->second;
 	}
 	else {
-		font = std::make_shared<Font>(mRenderSys, mFtLib, fontPath, fontSize, mDPI);
+		font = std::make_shared<Font>(mResourceMng, mFtLib, fontPath, fontSize, mDPI);
 		mFonts.insert(std::make_pair(key, font));
 	}
 	return font;

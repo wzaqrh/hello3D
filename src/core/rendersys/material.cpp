@@ -1,6 +1,6 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/post_process.h"
 
@@ -17,6 +17,14 @@ void TextureBySlot::Merge(const TextureBySlot& other)
 			Textures[i] = other.Textures[i];
 		}
 	}
+}
+
+bool TextureBySlot::IsLoaded() const {
+	for (size_t i = 0; i < Textures.size(); ++i) {
+		if (Textures[i] && !Textures[i]->IsLoaded())
+			return false;
+	}
+	return true;
 }
 
 /********** TPass **********/
@@ -77,14 +85,15 @@ IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
 	return ret;
 }
 
-void Pass::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data)
+void Pass::UpdateConstBufferByName(ResourceManager& resourceMng, const std::string& name, const Data& data)
 {
 	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer)
-		pRenderSys.UpdateConstBuffer(buffer, data.Datas, data.DataSize);
+		//resourceMng.UpdateConstBuffer(buffer, data.Datas, data.DataSize);
+		resourceMng.UpdateBuffer(buffer, data.Datas, data.DataSize);
 }
 
-std::shared_ptr<Pass> Pass::Clone(IRenderSystem& pRenderSys)
+std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)
 {
 	PassPtr pass = std::make_shared<Pass>(mLightMode, mName);
 	pass->mInputLayout = mInputLayout;
@@ -97,7 +106,7 @@ std::shared_ptr<Pass> Pass::Clone(IRenderSystem& pRenderSys)
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
 		auto buffer = mConstantBuffers[i];
 		if (!buffer.IsUnique)
-			buffer.Buffer = pRenderSys.LoadConstBuffer(nullptr, *buffer.Buffer->GetDecl(), nullptr);
+			buffer.Buffer = resourceMng.CreateConstBuffer(*buffer.Buffer->GetDecl(), nullptr);
 		pass->AddConstBuffer(buffer);
 	}
 
@@ -160,17 +169,17 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 	return std::move(passVec);
 }
 
-void Technique::UpdateConstBufferByName(IRenderSystem& pRenderSys, const std::string& name, const Data& data)
+void Technique::UpdateConstBufferByName(ResourceManager& resourceMng, const std::string& name, const Data& data)
 {
 	for (int i = 0; i < mPasses.size(); ++i)
-		mPasses[i]->UpdateConstBufferByName(pRenderSys, name, data);
+		mPasses[i]->UpdateConstBufferByName(resourceMng, name, data);
 }
 
-std::shared_ptr<Technique> Technique::Clone(IRenderSystem& pRenderSys)
+std::shared_ptr<Technique> Technique::Clone(ResourceManager& resourceMng)
 {
 	TechniquePtr technique = std::make_shared<Technique>();
 	for (int i = 0; i < mPasses.size(); ++i)
-		technique->AddPass(mPasses[i]->Clone(pRenderSys));
+		technique->AddPass(mPasses[i]->Clone(resourceMng));
 	technique->mName = mName;
 	return technique;
 }
@@ -215,12 +224,12 @@ ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
 	return sampler;
 }
 
-std::shared_ptr<Material> Material::Clone(IRenderSystem& pRenderSys)
+std::shared_ptr<Material> Material::Clone(ResourceManager& resourceMng)
 {
 	MaterialPtr material = std::make_shared<Material>();
-	material->Assign(*this, pRenderSys);
+	material->Assign(*this);
 	for (int i = 0; i < mTechniques.size(); ++i)
-		material->AddTechnique(mTechniques[i]->Clone(pRenderSys));
+		material->AddTechnique(mTechniques[i]->Clone(resourceMng));
 	material->mCurTechIdx = mCurTechIdx;
 	return material;
 }

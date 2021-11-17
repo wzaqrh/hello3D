@@ -52,7 +52,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) = 0;
 	virtual void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) = 0;
 
-	virtual ITexturePtr CreateTexture(int width, int height, ResourceFormat format, int mipmap) = 0;
+	virtual ITexturePtr LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data) = 0;
 	virtual ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format, bool async, bool isCube) = 0;
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
 	virtual void SetTexture(size_t slot, ITexturePtr texture) = 0;
@@ -86,6 +86,9 @@ public:
 	IProgramPtr LoadProgram(IResourcePtr res, const std::string& name, 
 		const std::string& vsEntry, 
 		const std::string& psEntry) override final;
+	ITexturePtr LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data) override {
+		return nullptr;
+	}
 	ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format = kFormatUnknown, 
 		bool async = true, bool isCube = false) override final;
 protected:

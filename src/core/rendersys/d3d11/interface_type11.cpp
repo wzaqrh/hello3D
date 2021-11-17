@@ -66,7 +66,7 @@ Texture11::Texture11(ID3D11ShaderResourceView* texture)
 	});
 }
 
-Texture11::Texture11(int width, int height, ResourceFormat format, int mipmap)
+void Texture11::Init(int width, int height, ResourceFormat format, int mipmap)
 {
 	mWidth = width;
 	mHeight = height;

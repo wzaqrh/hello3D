@@ -481,7 +481,7 @@ ITexturePtr RenderSystem9::_CreateTexture(IResourcePtr res, const std::string& s
 	return pTextureRV;
 }
 
-ITexturePtr RenderSystem9::CreateTexture(int width, int height, ResourceFormat format, int mipmap)
+ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data)
 {
 	assert(mipmap == 1);
 	Texture9Ptr texture = MakePtr<Texture9>(width, height, format, mipmap);

@@ -138,7 +138,10 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 
 int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded() || !mVertexBuffer->IsLoaded() || !mIndexBuffer->IsLoaded())
+	if (!mMaterial->IsLoaded() 
+		|| !mVertexBuffer->IsLoaded() 
+		|| !mIndexBuffer->IsLoaded()
+		|| (mTexture && !mTexture->IsLoaded()))
 		return 0;
 
 	if (mQuadDirty) {
