@@ -15,6 +15,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable {
 	typedef std::function<void(IResourcePtr)> ResourceLoadTask;
 public:
 	ResourceManager(RenderSystem& renderSys);
+	~ResourceManager();
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr node, IResourcePtr parent);
 public:

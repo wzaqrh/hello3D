@@ -8,7 +8,14 @@ namespace mir {
 
 ResourceManager::ResourceManager(RenderSystem& renderSys)
 	:mRenderSys(renderSys)
-{}
+{
+	ilInit();
+}
+
+ResourceManager::~ResourceManager()
+{
+	ilShutDown();
+}
 
 void ResourceManager::UpdateForLoading()
 {
@@ -34,7 +41,7 @@ void ResourceManager::AddResourceDependency(IResourcePtr node, IResourcePtr pare
 
 namespace il_helper {
 static const ILenum CSupportILTypes[] = {
-	IL_PNG, /*IL_JPG, IL_JP2,*/ IL_BMP, IL_TGA, IL_DDS, IL_GIF, IL_HDR, IL_ICO
+	IL_PNG, IL_JPG, IL_BMP, IL_TGA, IL_DDS, IL_GIF, IL_HDR, IL_ICO
 };
 static ILenum DetectType(FILE* fd) {
 	for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i) {
@@ -44,32 +51,6 @@ static ILenum DetectType(FILE* fd) {
 	return IL_TYPE_UNKNOWN;
 }
 };
-
-static int determineFace(int i, bool isDDS, bool isCube)
-{
-	int image = i;
-	if (isDDS) {
-		if (isCube) {
-			if (4 == image) {
-				image = 5;
-			}
-			else if (5 == image) {
-				image = 4;
-			}
-		}
-	}
-	return(image);
-}
-const wchar_t* AnsiToUnicode(const char* szStr)
-{
-	int nLen = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szStr, -1, NULL, 0);
-	if (nLen == 0) {
-		return NULL;
-	}
-	wchar_t* pResult = new wchar_t[nLen];
-	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szStr, -1, pResult, nLen);
-	return pResult;
-}
 ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, ResourceFormat format)
 {
 	ITexturePtr ret = nullptr;
@@ -78,27 +59,29 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 	if (fd) {
 		ITexturePtr texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
 
-		ILuint image = ilGenImage();
-		ilBindImage(image);
+		ILuint imageId = ilGenImage();
+		ilBindImage(imageId);
 
 		ILenum ilType = il_helper::DetectType(fd);
-		//if (ilType != IL_TYPE_UNKNOWN && ilLoadImage(AnsiToUnicode(imgFullpath.c_str()))) {
 		if (ilType != IL_TYPE_UNKNOWN && ilLoadF(ilType, fd)) {
-			if (ilType == IL_DDS) {
-				// DirectDraw Surfaces have their origin at upper left
-				ilEnable(IL_ORIGIN_SET);
-				ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
-			}
-			else {
-				ilDisable(IL_ORIGIN_SET);
-			}
-
 			ILuint width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT);
 			ILuint faceCount = ilGetInteger(IL_NUM_FACES) + 1, bpp = ilGetInteger(IL_IMAGE_BPP);
 
 			format = (format != kFormatUnknown) ? format : kFormatR8G8B8A8UNorm;
-			std::vector<unsigned char> bytes;
 			std::vector<Data> datas(faceCount, {});
+		#if 1
+			int faceSize = width * height * bpp;
+			for (int face = 0; face < faceCount; ++face) {
+				ilBindImage(imageId);
+				ilActiveImage(0);
+				ilActiveFace(face);
+				BOOST_ASSERT(IL_NO_ERROR == ilGetError());
+
+				datas[face].Bytes = ilGetData();
+				datas[face].Size = faceSize;
+			}
+		#else
+			std::vector<unsigned char> bytes;
 			switch (format) {
 			case kFormatR8G8B8A8UNorm: {
 				int faceSize = width * height * sizeof(char) * 4;
@@ -112,33 +95,14 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 				}
 			}break;
 			case kFormatR32G32B32A32Float: {
-				int faceSize = width * height * sizeof(float) * 4;
-				bytes.resize(faceSize * faceCount);
-				for (int f = 0; f < faceCount; ++f) {
-					//ilActiveFace(face);
-					////ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_FLOAT, &bytes[faceSize * face]);
-					////datas[face].Bytes = &bytes[faceSize * face];
-					//datas[face].Bytes = ilGetData();
-					//datas[face].Size = faceSize;
-
-					unsigned int format1 = ilGetInteger(IL_IMAGE_FORMAT);
-
-					int err = ilGetError();
-					BOOST_ASSERT(IL_NO_ERROR == err);
-
+				for (int face = 0; face < faceCount; ++face) {
+					ilBindImage(imageId);
 					ilActiveImage(0);
-					err = ilGetError();
-					BOOST_ASSERT(IL_NO_ERROR == err);
-
-					int face = determineFace(f, true, true);
 					ilActiveFace(face);
-					err = ilGetError();
-					BOOST_ASSERT(IL_NO_ERROR == err);
+					BOOST_ASSERT(IL_NO_ERROR == ilGetError());
 
-					datas[0].Bytes = ilGetData();
-					datas[0].Size = faceSize;
-					if (f == 4)
-						break;
+					datas[face].Bytes = ilGetData();
+					datas[face].Size = width * height * sizeof(float) * 4;;
 				}
 			} break;
 			case kFormatR16G16B16A16Float: {
@@ -148,7 +112,7 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 					ilActiveMipmap(1);
 					datas[0].Bytes = ilGetData();
 					datas[0].Size = 0;
-					if (f == 3)
+					if (f == 4)
 						break;
 				}
 			}break;
@@ -156,14 +120,13 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 				BOOST_ASSERT(false);
 				break;
 			}
-
-			faceCount = 1;
+		#endif
 			constexpr int mipCount = 1;
 			mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
 			ret = texture;
 		}
 
-		ilDeleteImage(image);
+		ilDeleteImage(imageId);
 		fclose(fd);
 	}
 	return ret;

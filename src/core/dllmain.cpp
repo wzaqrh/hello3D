@@ -25,7 +25,11 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "assimp-vc140-mt.lib")
 #pragma comment(lib, "freetype.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "DevILd.lib")
+#else
 #pragma comment(lib, "DevIL.lib")
+#endif
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

@@ -25,7 +25,6 @@ RenderSystem11::RenderSystem11()
 {
 	mThreadPump = std::make_shared<ThreadPump>();
 	mFXCDir = "d3d11\\";
-	ilInit();
 }
 RenderSystem11::~RenderSystem11()
 {

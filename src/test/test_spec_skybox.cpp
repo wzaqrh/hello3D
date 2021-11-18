@@ -13,28 +13,10 @@ protected:
 	virtual void OnRender() override;
 	virtual void OnInitLight() override;
 	virtual void OnPostInitDevice() override;
-private:
-	AssimpModelPtr mModel = nullptr;
 };
 
 void TestSpecSkybox::OnInitLight()
 {
-#if 0
-	auto light1 = mRenderSys->mPointLights[0];
-	light1->SetPosition(20, 0, -20);
-	light1->SetAttenuation(1.0, 0.1, 0);
-	light1->SetSpecularPower(60);
-	light1->SetSpecularColor(0, 0, 0, 0);
-	light1->SetDiffuseColor(0, 0, 0, 0);
-#endif
-	//auto light2 = mRenderSys->AddSpotLight();
-	////light2->SetDiffuseColor(0, 0, 0, 0);
-	////light2->SetSpecularColor(1, 0, 0, 1);
-	//light2->SetDirection(0, 0, 1);
-	//light2->SetPosition(0, 0, -10);
-	//light2->SetAttenuation(1.0, 0.1, 0);
-	//light2->SetAngle(3.14*15/180);
-
 	auto light2 = mContext->SceneMng()->AddDirectLight();
 	light2->SetDirection(0, 0, 1);
 }
@@ -43,18 +25,14 @@ void TestSpecSkybox::OnPostInitDevice()
 {
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
-	
-	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
-	mModel->LoadModel("model/Spaceship/Spaceship.fbx"); 
-	mMoveDefScale = 0.01;
-	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 }
 
 void TestSpecSkybox::OnRender()
 {
-	if (mModel) {
-		mModel->Update(mTimer->mDeltaTime);
-		mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
+	if (mContext->RenderPipe()->BeginFrame()) {
+		RenderOperationQueue opQue;
+		mContext->RenderPipe()->Render(opQue, *mContext->SceneMng());
+		mContext->RenderPipe()->EndFrame();
 	}
 }
 

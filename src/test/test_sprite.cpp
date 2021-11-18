@@ -21,9 +21,12 @@ void TestSprite::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	mSprite = mContext->RenderableFac()->CreateSprite();// "model/theyKilledKenny.png");
-	//mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR16G16B16A16Float));
-	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR32G32B32A32Float));mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR16G16B16A16Float));
+#if defined TEST_CUBEMAP
+	mSprite = mContext->RenderableFac()->CreateSprite();
+	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
+#else
+	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
+#endif
 
 	int win_width = mContext->ResourceMng()->WinSize().x();
 	int win_height = mContext->ResourceMng()->WinSize().y();
