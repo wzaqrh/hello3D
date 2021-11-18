@@ -26,12 +26,17 @@ void ResourceManager::UpdateForLoading()
 	}
 }
 
+void ResourceManager::AddResourceDependency(IResourcePtr node, IResourcePtr parent)
+{
+	mResDependencyTree.AddNode(node, parent);
+}
+
 IInputLayoutPtr ResourceManager::CreateLayoutAsync(IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount)
 {
 	BOOST_ASSERT(pProgram && descCount > 0);
 
 	IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
-	mResDependencyTree.AddNode(res, pProgram);
+	AddResourceDependency(res, pProgram);
 	
 	std::vector<LayoutInputElement> descVec(descArray, descArray + descCount);
 	mLoadTaskByRes[res] = [=](IResourcePtr res) {

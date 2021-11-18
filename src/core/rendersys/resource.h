@@ -95,6 +95,7 @@ public:
 		this->mCurState = other.mCurState;
 	}
 protected:
+	virtual void OnLoaded() {}
 	void SetDeviceObject(IUnknown** deviceObj) {
 		mDeviceObj = deviceObj;
 	}

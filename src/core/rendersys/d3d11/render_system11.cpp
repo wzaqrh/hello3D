@@ -1,9 +1,11 @@
 #include <boost/assert.hpp>
+#include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <windows.h>
 #include <dxerr.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
+#include <IL/il.h>
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d11/interface_type11.h"
 #include "core/rendersys/d3d11/thread_pump.h"
@@ -22,6 +24,7 @@ RenderSystem11::RenderSystem11()
 {
 	mThreadPump = std::make_shared<ThreadPump>();
 	mFXCDir = "d3d11\\";
+	ilInit();
 }
 RenderSystem11::~RenderSystem11()
 {
@@ -701,42 +704,107 @@ void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int
 	mDeviceContext->UpdateSubresource(std::static_pointer_cast<ContantBuffer11>(buffer)->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
-ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& pSrcFile, 
+namespace il_helper {
+	static const ILenum CSupportILTypes[] = {
+		IL_PNG, IL_JPG, IL_JP2, IL_BMP, IL_TGA, IL_DDS, IL_GIF, IL_HDR, IL_ICO
+	};
+	static inline ILenum DetectType(const void* pData, int dataSize) {
+		for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i)
+			if (ilIsValidL(CSupportILTypes[i], (void*)pData, dataSize))
+				return CSupportILTypes[i];
+		return IL_TYPE_UNKNOWN;
+	}
+	static ILenum DetectType(FILE* fd) {
+		for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i)
+			if (ilIsValidF(CSupportILTypes[i], fd))
+				return CSupportILTypes[i];
+		return IL_TYPE_UNKNOWN;
+	}
+};
+ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& filepath, 
 	ResourceFormat format, bool async, bool isCube)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceTexture);
 
-	ITexturePtr pTextureRV;
-	if (boost::filesystem::exists(pSrcFile)) {
+	ITexturePtr pTextureRV = nullptr;
+	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
+	if (boost::filesystem::exists(fullpath)) {
 		static D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
 		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
-		std::string imgPath = pSrcFile;
+		std::string imgPath = fullpath.string();
 
 		pTextureRV = std::static_pointer_cast<Texture11>(res);
 		IResourcePtr resource = AsRes(pTextureRV);
-		HRESULT hr;
+		bool success = false;
 		if (async) {
-			hr = mThreadPump->AddWorkItem(resource, [=](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
+			success = !CheckHR(mThreadPump->AddWorkItem(resource, [=](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
 				return D3DX11CreateShaderResourceViewFromFileA(mDevice, imgPath.c_str(), pLoadInfo, pump, 
 					&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
-			}, ResourceSetLoaded);
+			}, ResourceSetLoaded));
 			//resource->SetLoaded();
 		}
 		else {
+		#if 0
 			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, imgPath.c_str(), pLoadInfo, nullptr, 
 				&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
 			resource->SetLoaded();
+		#else
+			FILE* fd = fopen(imgPath.c_str(), "rb");
+			BOOST_ASSERT(fd);
+			if (fd) {
+				ILuint image = ilGenImage();
+				ilBindImage(image);
+
+				ILenum ilType = il_helper::DetectType(fd);
+				if (ilType != IL_TYPE_UNKNOWN && ilLoadF(ilType, fd)) {
+					ILuint width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT);
+					std::vector<unsigned char> bytes(width * height * 4);
+					ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, &bytes[0]);
+
+					constexpr DXGI_FORMAT bytes_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+					D3D11_TEXTURE2D_DESC desc = {};
+					desc.Width = width;
+					desc.Height = height;
+					desc.MipLevels = desc.ArraySize = 1;
+					desc.Format = bytes_format;
+					desc.SampleDesc.Count = 1;
+					desc.Usage = D3D11_USAGE_DYNAMIC;
+					desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+					desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+					desc.MiscFlags = 0;
+
+					D3D11_SUBRESOURCE_DATA initData = {};
+					initData.pSysMem = &bytes[0];
+					initData.SysMemPitch = static_cast<UINT>(width * 4);//rowPitch
+					initData.SysMemSlicePitch = static_cast<UINT>(height * width * 4);//imageSize
+
+					ID3D11Texture2D *pTexture = NULL;
+					if (!CheckHR(mDevice->CreateTexture2D(&desc, &initData, &pTexture))) {
+						D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+						memset(&srv_desc, 0, sizeof(srv_desc));
+						srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+						srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+						srv_desc.Texture2D.MipLevels = 1;
+
+						if (!CheckHR(mDevice->CreateShaderResourceView(pTexture, &srv_desc,
+							&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11()))) {
+							pTextureRV->SetLoaded();
+							success = true;
+						}
+					}
+				}
+				ilDeleteImage(image);
+				fclose(fd);
+			}
+		#endif
 		}
-		if (CheckHR(hr)) {
+		if (! success) 
 			pTextureRV = nullptr;
-		}
 	}
 	else {
-		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
-		OutputDebugStringA(szBuf);
-		MessageBoxA(0, szBuf, "", MB_OK);
-		pTextureRV = nullptr;
+		MessageBoxA(0, (boost::format("image file %s not exist\n") % filepath).str().c_str(), "", MB_OK);
 	}
 	return pTextureRV;
 }

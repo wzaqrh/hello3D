@@ -16,6 +16,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable {
 public:
 	ResourceManager(RenderSystem& renderSys);
 	void UpdateForLoading();
+	void AddResourceDependency(IResourcePtr node, IResourcePtr parent);
 
 	IInputLayoutPtr CreateLayoutAsync(IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount);
 public:
