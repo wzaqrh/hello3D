@@ -47,8 +47,9 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 
 	if (bmpInfo.biClrImportant != 0) return nullptr;
 
+	constexpr int faceCount = 1, mipCount = 1;
 	ITexturePtr texture = mContext->ResourceMng()->CreateTexture(kFormatR8G8B8A8UNorm, 
-		Eigen::Vector4i(bmpInfo.biWidth, bmpInfo.biHeight, bmpInfo.biWidth * 4, 1), Data::MakeEmpty());
+		Eigen::Vector4i(bmpInfo.biWidth, bmpInfo.biHeight, bmpInfo.biWidth * 4, faceCount), mipCount, nullptr);
 
 	std::vector<char> imgBuf;
 	imgBuf.resize(bmpInfo.biWidth * bmpInfo.biHeight * 4);

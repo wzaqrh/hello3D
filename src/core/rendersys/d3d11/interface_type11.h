@@ -158,21 +158,22 @@ class Texture11 : public ImplementResource<ITexture>
 {
 public:
 	Texture11(ID3D11ShaderResourceView* texture);
-	void Init(int width, int height, ResourceFormat format, int mipmap);
+	void Init(ResourceFormat format, int width, int height, int faceCount, int mipmap);
 	//IResourcePtr AsRes() override { return mRes; }
 
 	bool HasSRV() override { return mTexture != nullptr; }
 	void SetSRV11(ID3D11ShaderResourceView* texture);
 	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
 
+	ResourceFormat GetFormat() override { return mFormat; }
 	int GetWidth() override { return mWidth; }
 	int GetHeight() override { return mHeight; }
-	ResourceFormat GetFormat() override { return mFormat; }
+	int GetFaceCount() { return mFaceCount; }
 	int GetMipmapCount() override { return mMipCount; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 private:
-	int mWidth, mHeight, mMipCount;
+	int mWidth, mHeight, mFaceCount, mMipCount;
 	ResourceFormat mFormat;
 	ID3D11ShaderResourceView* mTexture;
 	//IResourcePtr mRes;

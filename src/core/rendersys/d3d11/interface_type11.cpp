@@ -51,7 +51,7 @@ PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 /********** Texture11 **********/
 Texture11::Texture11(ID3D11ShaderResourceView* texture)
 {
-	mWidth = 0, mHeight = 0, mMipCount = 0;
+	mWidth = 0, mHeight = 0, mFaceCount = 1, mMipCount = 1;
 	mFormat = kFormatUnknown;
 
 	mTexture = texture;
@@ -66,11 +66,12 @@ Texture11::Texture11(ID3D11ShaderResourceView* texture)
 	});
 }
 
-void Texture11::Init(int width, int height, ResourceFormat format, int mipmap)
+void Texture11::Init(ResourceFormat format, int width, int height, int faceCount, int mipmap)
 {
 	mWidth = width;
 	mHeight = height;
-	mMipCount = mipmap;
+	mFaceCount = std::max<int>(faceCount, 1);
+	mMipCount = std::max<int>(mipmap, 1);
 	mFormat = format;
 
 	mTexture = nullptr;

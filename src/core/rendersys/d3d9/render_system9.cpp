@@ -481,10 +481,11 @@ ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, const std::string& srcF
 	return pTextureRV;
 }
 
-ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size, const Data& data)
+ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, ResourceFormat format, 
+	const Eigen::Vector4i& size, int mipmap, const Data datas[])
 {
-	BOOST_ASSERT(size.w() == 1);
-	Texture9Ptr texture = MakePtr<Texture9>(size.x(), size.y(), format, size.w());
+	BOOST_ASSERT(mipmap == 1);
+	Texture9Ptr texture = MakePtr<Texture9>(size.x(), size.y(), format, mipmap);
 	IDirect3DTexture9* pTexture = nullptr;
 	if (FAILED(mDevice9->CreateTexture(size.x(), size.y(), 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
 		return nullptr;

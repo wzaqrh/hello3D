@@ -8,4 +8,4 @@
 #define TEST_MODEL 6
 #define TEST_SHADOW_MAP 7
 
-#define TEST_CASE -1
+#define TEST_CASE TEST_SPRITE

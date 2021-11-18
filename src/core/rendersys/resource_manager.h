@@ -37,7 +37,6 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceContantBuffer);
 		return mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...);
 	}
-
 	template <typename... T>
 	bool UpdateBuffer(T &&...args) {
 		return mRenderSys.UpdateBuffer(std::forward<T>(args)...);
@@ -47,6 +46,16 @@ public:
 	IProgramPtr CreateProgram(T &&...args) {
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceProgram);
 		return mRenderSys.LoadProgram(res, std::forward<T>(args)...);
+	}
+	template <typename... T>
+	IProgramPtr CreateProgramAsync(T &&...args) {
+		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceProgram);
+		AddResourceDependency(res, nullptr);
+
+		mLoadTaskByRes[res] = [=](IResourcePtr res) {
+			mRenderSys.LoadProgram(res, args...);
+		};
+		return std::static_pointer_cast<IProgram>(res);
 	}
 
 	template <typename... T>
@@ -76,6 +85,7 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		return mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
 	}
+#if 0
 	template <typename... T>
 	ITexturePtr CreateTexture(const std::string& filepath, T &&...args) {
 		std::string imgPath = boost::filesystem::system_complete(filepath).string();
@@ -92,6 +102,9 @@ public:
 		}
 		return texView;
 	}
+#else
+	ITexturePtr CreateTexture(const std::string& filepath, ResourceFormat format = kFormatUnknown);
+#endif
 
 	template <typename... T>
 	bool LoadRawTextureData(T &&...args) {
@@ -103,6 +116,8 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceRenderTexture);
 		return mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
 	}
+private:
+	ITexturePtr DoCreateTexture(const std::string& filepath, ResourceFormat format);
 private:
 	RenderSystem& mRenderSys;
 	struct ResourceDependencyTree {

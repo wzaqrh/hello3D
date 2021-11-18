@@ -761,8 +761,8 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& fil
 
 					constexpr ResourceFormat bytes_format = kFormatR8G8B8A8UNorm;
 
-					LoadTexture(texture, bytes_format, Eigen::Vector4i(width, height, 0, 1), 
-						Data::Make(&bytes[0], bytes.size()));
+					LoadTexture(texture, bytes_format, Eigen::Vector4i(width, height, 0, 1), 1, 
+						&Data::Make(&bytes[0], bytes.size()));
 					ret = texture;
 				}
 
@@ -777,33 +777,54 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& fil
 	return ret;
 }
 
-ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size, const Data& data)
+ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, 
+	const Eigen::Vector4i& size, int mipmap, const Data datas[])
 {
 	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
-	texture->Init(size.x(), size.y(), format, std::max<int>(size.w(), 1));
+	texture->Init(format, size.x(), size.y(), size.w(), mipmap);
 
+	Data defaultData = Data{};
+	if (datas == nullptr)
+		datas = &defaultData;
+
+	BOOST_ASSERT(texture->GetFaceCount() == 1 || datas[0].Bytes);
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = texture->GetWidth();
 	desc.Height = texture->GetHeight();
-	desc.MipLevels = desc.ArraySize = texture->GetMipmapCount();
+	desc.MipLevels = texture->GetMipmapCount();
+	desc.ArraySize = texture->GetFaceCount();
 	desc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
 	desc.SampleDesc.Count = 1;
-	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.MiscFlags = 0;
+	if (texture->GetFaceCount() > 1) {
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+	}
+	else {
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+	}
 
-	D3D11_SUBRESOURCE_DATA initData = {};
-	initData.pSysMem = data.Bytes;
-	initData.SysMemPitch = size.z() ? size.z() : d3d::GetFormatWidthByte(desc.Format) * size.x();//rowPitch
-	initData.SysMemSlicePitch = data.Size ? data.Size : initData.SysMemPitch * size.y();//imageSize
+	std::vector<D3D11_SUBRESOURCE_DATA> initDatas(desc.ArraySize, {});
+	for (size_t face = 0; face < desc.ArraySize; ++face) {
+		D3D11_SUBRESOURCE_DATA& res_data = initDatas[face];
+		res_data.SysMemPitch = size.z() ? size.z() : d3d::GetFormatWidthByte(desc.Format) * desc.Width;//Line width in bytes
+
+		auto& data = datas[face];
+		/*size_t faceSize = data.Size ? data.Size : res_data.SysMemPitch * desc.Height;
+		res_data.SysMemSlicePitch = faceSize; //only used for 3d textures*/
+		res_data.pSysMem = data.Bytes;
+	}
+
 
 	ID3D11Texture2D *pTexture = NULL;
-	if (CheckHR(mDevice->CreateTexture2D(&desc, data.Bytes ? &initData : nullptr, &pTexture))) return nullptr;
+	if (CheckHR(mDevice->CreateTexture2D(&desc, datas[0].Bytes ? &initDatas[0] : nullptr, &pTexture))) return nullptr;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.ViewDimension = (texture->GetFaceCount() > 1) ? D3D11_SRV_DIMENSION_TEXTURECUBE : D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = texture->GetMipmapCount();
 
 	if (CheckHR(mDevice->CreateShaderResourceView(pTexture, &srvDesc, 

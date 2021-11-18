@@ -365,7 +365,7 @@ std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat,
 			key = texturePath.string();
 		}
 
-		ITexturePtr texInfo = mResourceMng.CreateTexture(key, kFormatUnknown, true, false);
+		ITexturePtr texInfo = mResourceMng.CreateTexture(key);
 		textures.push_back(texInfo);
 		mLoadedTexture[key] = texInfo;
 	}
