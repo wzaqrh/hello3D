@@ -417,11 +417,11 @@ IDirect3DVertexDeclaration9* RenderSystem9::_CreateInputLayout(Program9* _, cons
 	return ret;
 }
 
-IInputLayoutPtr RenderSystem9::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount)
+IInputLayoutPtr RenderSystem9::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr)
 {
 	InputLayout9Ptr ret = MakePtr<InputLayout9>();
-	for (size_t i = 0; i < descCount; ++i)
-		ret->mInputDescs.push_back(d3d::convert11To9(descArray[i]));
+	for (size_t i = 0; i < descArr.size(); ++i)
+		ret->mInputDescs.push_back(d3d::convert11To9(descArr[i]));
 	ret->mInputDescs.push_back(D3DDECL_END());
 
 	auto resource = AsRes(pProgram);
@@ -481,12 +481,12 @@ ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, const std::string& srcF
 	return pTextureRV;
 }
 
-ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data)
+ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size, const Data& data)
 {
-	assert(mipmap == 1);
-	Texture9Ptr texture = MakePtr<Texture9>(width, height, format, mipmap);
+	BOOST_ASSERT(size.w() == 1);
+	Texture9Ptr texture = MakePtr<Texture9>(size.x(), size.y(), format, size.w());
 	IDirect3DTexture9* pTexture = nullptr;
-	if (FAILED(mDevice9->CreateTexture(width, height, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
+	if (FAILED(mDevice9->CreateTexture(size.x(), size.y(), 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pTexture, NULL)))
 		return nullptr;
 	texture->SetSRV9(pTexture);
 	return texture;
@@ -494,7 +494,7 @@ ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, int width, int height, 
 
 bool RenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
-	assert(dataStep * texture->GetHeight() <= dataSize);
+	BOOST_ASSERT(dataStep * texture->GetHeight() <= dataSize);
 	Texture9Ptr tex9 = std::static_pointer_cast<Texture9>(texture);
 
 	int width = texture->GetWidth(), height = texture->GetHeight();

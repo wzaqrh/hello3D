@@ -6,12 +6,13 @@
 #include <d3dcompiler.h>
 #include <wrl/client.h>
 #include <IL/il.h>
+#include "core/base/d3d.h"
+#include "core/base/debug.h"
+#include "core/base/input.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d11/interface_type11.h"
 #include "core/rendersys/d3d11/thread_pump.h"
 #include "core/rendersys/material_factory.h"
-#include "core/base/debug.h"
-#include "core/base/input.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -270,15 +271,14 @@ ID3D11InputLayout* RenderSystem11::_CreateInputLayout(Program11* pProgram, const
 	}
 	return pVertexLayout;
 }
-IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount)
+IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceInputLayout);
 
 	InputLayout11Ptr ret = std::static_pointer_cast<InputLayout11>(res);
-	//ret->mInputDescs.assign(descArray, descArray + descCount);
-	ret->mInputDescs.resize(descCount);
-	for (size_t i = 0; i < descCount; ++i) {
-		const LayoutInputElement& descI = descArray[i];
+	ret->mInputDescs.resize(descArr.size());
+	for (size_t i = 0; i < descArr.size(); ++i) {
+		const LayoutInputElement& descI = descArr[i];
 		ret->mInputDescs[i] = D3D11_INPUT_ELEMENT_DESC {
 			descI.SemanticName.c_str(),
 			descI.SemanticIndex,
@@ -726,31 +726,27 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& fil
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceTexture);
 
-	ITexturePtr pTextureRV = nullptr;
+	ITexturePtr ret = nullptr;
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	if (boost::filesystem::exists(fullpath)) {
+		std::string imgFullpath = fullpath.string();
+
 		static D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
 		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
 		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
-		std::string imgPath = fullpath.string();
 
-		pTextureRV = std::static_pointer_cast<Texture11>(res);
-		IResourcePtr resource = AsRes(pTextureRV);
-		bool success = false;
-		if (async) {
-			success = !CheckHR(mThreadPump->AddWorkItem(resource, [=](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
-				return D3DX11CreateShaderResourceViewFromFileA(mDevice, imgPath.c_str(), pLoadInfo, pump, 
-					&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
-			}, ResourceSetLoaded));
-			//resource->SetLoaded();
+		ITexturePtr texture = std::static_pointer_cast<Texture11>(res);
+		IResourcePtr resource = AsRes(texture);
+		if (!async) {
+			if (!CheckHR(mThreadPump->AddWorkItem(resource, [=](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
+				return D3DX11CreateShaderResourceViewFromFileA(mDevice, imgFullpath.c_str(), pLoadInfo, pump,
+					&std::static_pointer_cast<Texture11>(texture)->GetSRV11(), nullptr);
+			}, ResourceSetLoaded))) {
+				ret = texture;
+			}
 		}
 		else {
-		#if 0
-			hr = D3DX11CreateShaderResourceViewFromFileA(mDevice, imgPath.c_str(), pLoadInfo, nullptr, 
-				&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11(), nullptr);
-			resource->SetLoaded();
-		#else
-			FILE* fd = fopen(imgPath.c_str(), "rb");
+			FILE* fd = fopen(imgFullpath.c_str(), "rb");
 			BOOST_ASSERT(fd);
 			if (fd) {
 				ILuint image = ilGenImage();
@@ -759,63 +755,62 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& fil
 				ILenum ilType = il_helper::DetectType(fd);
 				if (ilType != IL_TYPE_UNKNOWN && ilLoadF(ilType, fd)) {
 					ILuint width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT);
+					
 					std::vector<unsigned char> bytes(width * height * 4);
 					ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, &bytes[0]);
 
-					constexpr DXGI_FORMAT bytes_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+					constexpr ResourceFormat bytes_format = kFormatR8G8B8A8UNorm;
 
-					D3D11_TEXTURE2D_DESC desc = {};
-					desc.Width = width;
-					desc.Height = height;
-					desc.MipLevels = desc.ArraySize = 1;
-					desc.Format = bytes_format;
-					desc.SampleDesc.Count = 1;
-					desc.Usage = D3D11_USAGE_DYNAMIC;
-					desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-					desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-					desc.MiscFlags = 0;
-
-					D3D11_SUBRESOURCE_DATA initData = {};
-					initData.pSysMem = &bytes[0];
-					initData.SysMemPitch = static_cast<UINT>(width * 4);//rowPitch
-					initData.SysMemSlicePitch = static_cast<UINT>(height * width * 4);//imageSize
-
-					ID3D11Texture2D *pTexture = NULL;
-					if (!CheckHR(mDevice->CreateTexture2D(&desc, &initData, &pTexture))) {
-						D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-						memset(&srv_desc, 0, sizeof(srv_desc));
-						srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-						srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-						srv_desc.Texture2D.MipLevels = 1;
-
-						if (!CheckHR(mDevice->CreateShaderResourceView(pTexture, &srv_desc,
-							&std::static_pointer_cast<Texture11>(pTextureRV)->GetSRV11()))) {
-							pTextureRV->SetLoaded();
-							success = true;
-						}
-					}
+					LoadTexture(texture, bytes_format, Eigen::Vector4i(width, height, 0, 1), 
+						Data::Make(&bytes[0], bytes.size()));
+					ret = texture;
 				}
+
 				ilDeleteImage(image);
 				fclose(fd);
 			}
-		#endif
 		}
-		if (! success) 
-			pTextureRV = nullptr;
 	}
 	else {
 		MessageBoxA(0, (boost::format("image file %s not exist\n") % filepath).str().c_str(), "", MB_OK);
 	}
-	return pTextureRV;
+	return ret;
 }
 
-ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data)
+ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size, const Data& data)
 {
-	BOOST_ASSERT(mipmap > 0);
-	auto ret = std::static_pointer_cast<Texture11>(res);
-	ret->Init(width, height, format, mipmap);
-	ret->SetLoaded();
-	return ret;
+	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
+	texture->Init(size.x(), size.y(), format, std::max<int>(size.w(), 1));
+
+	D3D11_TEXTURE2D_DESC desc = {};
+	desc.Width = texture->GetWidth();
+	desc.Height = texture->GetHeight();
+	desc.MipLevels = desc.ArraySize = texture->GetMipmapCount();
+	desc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA initData = {};
+	initData.pSysMem = data.Bytes;
+	initData.SysMemPitch = size.z() ? size.z() : d3d::GetFormatWidthByte(desc.Format) * size.x();//rowPitch
+	initData.SysMemSlicePitch = data.Size ? data.Size : initData.SysMemPitch * size.y();//imageSize
+
+	ID3D11Texture2D *pTexture = NULL;
+	if (CheckHR(mDevice->CreateTexture2D(&desc, data.Bytes ? &initData : nullptr, &pTexture))) return nullptr;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = texture->GetMipmapCount();
+
+	if (CheckHR(mDevice->CreateShaderResourceView(pTexture, &srvDesc, 
+		&std::static_pointer_cast<Texture11>(texture)->GetSRV11()))) return nullptr; 
+	
+	texture->SetLoaded();
+	return texture;
 }
 bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {

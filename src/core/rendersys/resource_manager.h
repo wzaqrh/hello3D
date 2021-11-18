@@ -17,8 +17,6 @@ public:
 	ResourceManager(RenderSystem& renderSys);
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr node, IResourcePtr parent);
-
-	IInputLayoutPtr CreateLayoutAsync(IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount);
 public:
 	Eigen::Vector4i WinSize() const { return mRenderSys.WinSize(); }
 
@@ -56,6 +54,16 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
 		return mRenderSys.LoadLayout(res, std::forward<T>(args)...);
 	}
+	template <typename... T>
+	IInputLayoutPtr CreateLayoutAsync(IProgramPtr program, T &&...args) {
+		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
+		AddResourceDependency(res, program);
+
+		mLoadTaskByRes[res] = [=](IResourcePtr res) {
+			mRenderSys.LoadLayout(res, program, args...);
+		};
+		return std::static_pointer_cast<IInputLayout>(res);
+	}
 
 	template <typename... T>
 	ISamplerStatePtr CreateSampler(T &&...args) {
@@ -64,9 +72,9 @@ public:
 	}
 
 	template <typename... T>
-	ITexturePtr CreateTexture(int width, T &&...args) {
+	ITexturePtr CreateTexture(ResourceFormat format, T &&...args) {
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
-		return mRenderSys.LoadTexture(res, width, std::forward<T>(args)...);
+		return mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
 	}
 	template <typename... T>
 	ITexturePtr CreateTexture(const std::string& filepath, T &&...args) {

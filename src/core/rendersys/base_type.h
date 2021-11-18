@@ -6,9 +6,12 @@ namespace mir {
 
 struct Data 
 {
-	void* Datas;
-	unsigned int DataSize;
+	static Data MakeEmpty() { return Data{ nullptr, 0 }; }
 	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
+	static Data Make(void* data, unsigned size) { return Data{ data, size }; }
+public:
+	void* Bytes;
+	unsigned int Size;
 };
 
 enum BlendFunc {

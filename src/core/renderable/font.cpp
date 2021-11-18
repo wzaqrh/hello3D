@@ -9,7 +9,7 @@ FontTexture::FontTexture(ResourceManager& resourceMng, Eigen::Vector2i size)
 {
 	mWidth = size.x();
 	mHeight = size.y();
-	mTexture = mResourceMng.CreateTexture(mWidth, mHeight, kFormatR8UNorm, 1, (void*)NULL);
+	mTexture = mResourceMng.CreateTexture(kFormatR8UNorm, Eigen::Vector4i(mWidth, mHeight, mWidth * sizeof(char), 1), Data::MakeEmpty());
 	mRawBuffer.resize(mWidth * mHeight);
 }
 

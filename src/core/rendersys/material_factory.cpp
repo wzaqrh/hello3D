@@ -596,9 +596,7 @@ private:
 					MAKE_MAT_NAME(shaderInfo.Program.FxName),
 					shaderInfo.Program.VsEntry.c_str(),
 					passInfo.PSEntry.c_str()));
-				builder.SetInputLayout(resourceMng.CreateLayout(program,
-					&shaderInfo.Program.Attr.Layout[0],
-					shaderInfo.Program.Attr.Layout.size()));
+				builder.SetInputLayout(resourceMng.CreateLayout(program, shaderInfo.Program.Attr.Layout));
 
 				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 					auto& elem = shaderInfo.Program.Samplers[k];

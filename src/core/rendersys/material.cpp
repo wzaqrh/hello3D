@@ -90,7 +90,7 @@ void Pass::UpdateConstBufferByName(ResourceManager& resourceMng, const std::stri
 	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer)
 		//resourceMng.UpdateConstBuffer(buffer, data.Datas, data.DataSize);
-		resourceMng.UpdateBuffer(buffer, data.Datas, data.DataSize);
+		resourceMng.UpdateBuffer(buffer, data.Bytes, data.Size);
 }
 
 std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)

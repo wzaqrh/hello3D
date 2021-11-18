@@ -64,14 +64,14 @@ public:
 	ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) override;
 	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
-	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const LayoutInputElement descArray[], size_t descCount) override;
+	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
 
 	void SetBlendFunc(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
 	ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format, bool async, bool isCube) override;
-	ITexturePtr LoadTexture(IResourcePtr res, int width, int height, ResourceFormat format, int mipmap, void* data) override;
+	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_mipmap, const Data& data) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTexture(size_t slot, ITexturePtr texture) override;
 	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
