@@ -75,7 +75,7 @@ void RenderPipeline::BindPass(const PassPtr& pass, const cbGlobalParam& globalPa
 	mRenderSys.SetProgram(pass->mProgram);
 
 	if (pass->mConstantBuffers.size() > 0)
-		mRenderSys.UpdateConstBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
+		mRenderSys.UpdateBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
 
 	auto cbuffers = pass->GetConstBuffers();
 	mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);

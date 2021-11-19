@@ -264,11 +264,6 @@ bool RenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int data
 	return true;
 }
 
-void RenderSystem9::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
-{
-	UpdateBuffer((buffer), data, dataSize);
-}
-
 static VertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
 	VertexShader9Ptr ret = MakePtr< VertexShader9>();
 

@@ -49,7 +49,6 @@ public:
 
 	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data) override;
 	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
-	void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
 	IProgramPtr CreateProgramByCompile(IResourcePtr res, const std::string& vsPath, 

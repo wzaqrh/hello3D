@@ -307,6 +307,8 @@ void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout) {
 	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(layout)->GetLayout11());
 }
 
+#define CBufferUsage D3D11_USAGE_DEFAULT;
+
 bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
 {
 	assert(buffer != nullptr);
@@ -315,21 +317,28 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 	switch (buffer->GetType())
 	{
 	case kHWBufferConstant: {
-		/*ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
+		ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(buffer);
+	#if CBufferUsage == D3D11_USAGE_DEFAULT
+		mDeviceContext->UpdateSubresource(cbuffer11->GetBuffer11(), 0,
+			NULL, data, 0, 0);
+	#else
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0,
+			D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
 		memcpy(MappedResource.pData, data, dataSize);
-		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);*/
-		UpdateConstBuffer(std::static_pointer_cast<ContantBuffer11>(buffer), data, dataSize);
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+	#endif
 	}break;
 	case kHWBufferVertex:{
 		VertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, 
+			D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
 		memcpy(MappedResource.pData, data, dataSize);
 		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
 	}break;
 	case kHWBufferIndex: {
 		IndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, 
+			D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
 		memcpy(MappedResource.pData, data, dataSize);
 		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
 	}break;
@@ -677,31 +686,25 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceContantBuffer);
 
-	// Create the constant buffer
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = cbDecl.BufferSize % sizeof(Eigen::Vector4f) == 0 
-		? cbDecl.BufferSize 
-		: (cbDecl.BufferSize / sizeof(Eigen::Vector4f) + 1) * sizeof(Eigen::Vector4f);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	
+	D3D11_BUFFER_DESC cbDesc = {};
+#if CBufferUsage == D3D11_USAGE_DEFAULT
+	cbDesc.ByteWidth = (cbDecl.BufferSize + 15) / 16 * 16;
+	cbDesc.Usage = D3D11_USAGE_DEFAULT;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = 0;
+#else
+	cbDesc.ByteWidth = (cbDecl.BufferSize + 15) / 16 * 16;
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+#endif
 	ID3D11Buffer* pConstantBuffer = nullptr;
-	if (CheckHR(mDevice->CreateBuffer(&bd, NULL, &pConstantBuffer)))
-		return nullptr;
+	if (CheckHR(mDevice->CreateBuffer(&cbDesc, NULL, &pConstantBuffer))) return nullptr;
 	
-	ConstBufferDeclPtr declPtr = std::make_shared<ConstBufferDecl>(cbDecl);
 	ContantBuffer11Ptr ret = std::static_pointer_cast<ContantBuffer11>(res);
-	ret->Init(pConstantBuffer, declPtr);
-	if (data) 
-		UpdateConstBuffer(ret, data, ret->GetBufferSize());
+	ret->Init(pConstantBuffer, std::make_shared<ConstBufferDecl>(cbDecl));
+	if (data) UpdateBuffer(ret, data, ret->GetBufferSize());
 	return ret;
-}
-
-void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize)
-{
-	mDeviceContext->UpdateSubresource(std::static_pointer_cast<ContantBuffer11>(buffer)->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
 #if 0

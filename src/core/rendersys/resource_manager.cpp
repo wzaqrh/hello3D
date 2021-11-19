@@ -105,6 +105,8 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 			if (format != kFormatUnknown || convertFormat != kFormatUnknown) {
 				std::vector<Data> datas(mipCount * faceCount, {});
 
+				if (convertFormat != kFormatUnknown)
+					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));
 				int faceSize = width * height * bpp;
 				auto& bytes = mTempBytes;
 				bytes.resize(faceSize * mipCount * faceCount);
@@ -135,7 +137,7 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 								if (sub_res_size) {
 									format = compressFormat;
 
-									BOOST_ASSERT(bytes_position + sub_res_size < bytes.size());
+									BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
 									ilGetDXTCData(&bytes[bytes_position], sub_res_size, dxtFormat);
 									
 									dataFM.Bytes = &bytes[bytes_position];
@@ -160,7 +162,7 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 							//×ª»»¸ñÊ½
 							size_t sub_res_size = mip_width * mip_height * bpp;
 							
-							BOOST_ASSERT(bytes_position + sub_res_size < bytes.size());
+							BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
 							ilCopyPixels(0, 0, 0, 
 								mip_width, mip_height, 1, 
 								convertImageFormat, convertImageType, &bytes[bytes_position]);

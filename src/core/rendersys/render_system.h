@@ -39,7 +39,6 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	
 	virtual IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data) = 0;
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
-	virtual void UpdateConstBuffer(IContantBufferPtr buffer, void* data, int dataSize) = 0;
 	virtual void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) = 0;
 
 	virtual IProgramPtr LoadProgram(IResourcePtr res, const std::string& name,
