@@ -1,5 +1,5 @@
 #include <boost/assert.hpp>
-#include <IL/il.h>
+#include "core/base/il_helper.h"
 #include "core/rendersys/resource_manager.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
@@ -39,18 +39,6 @@ void ResourceManager::AddResourceDependency(IResourcePtr node, IResourcePtr pare
 	mResDependencyTree.AddNode(node, parent);
 }
 
-namespace il_helper {
-static const ILenum CSupportILTypes[] = {
-	IL_PNG, IL_JPG, IL_BMP, IL_TGA, IL_DDS, IL_GIF, IL_HDR, IL_ICO
-};
-static ILenum DetectType(FILE* fd) {
-	for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i) {
-		if (ilIsValidF(CSupportILTypes[i], fd))
-			return CSupportILTypes[i];
-	}
-	return IL_TYPE_UNKNOWN;
-}
-};
 ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, ResourceFormat format)
 {
 	ITexturePtr ret = nullptr;
@@ -62,68 +50,95 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 		ILuint imageId = ilGenImage();
 		ilBindImage(imageId);
 
+		ilSetInteger(IL_KEEP_DXTC_DATA, IL_TRUE);
+		BOOST_ASSERT(il_helper::CheckLastError());
+
 		ILenum ilType = il_helper::DetectType(fd);
 		if (ilType != IL_TYPE_UNKNOWN && ilLoadF(ilType, fd)) {
-			ILuint width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT);
-			ILuint faceCount = ilGetInteger(IL_NUM_FACES) + 1, bpp = ilGetInteger(IL_IMAGE_BPP);
+			ILuint width = ilGetInteger(IL_IMAGE_WIDTH), 
+			height  = ilGetInteger(IL_IMAGE_HEIGHT),
+			channel = ilGetInteger(IL_IMAGE_CHANNELS), 
+			bpp		= ilGetInteger(IL_IMAGE_BPP),
+			faceCount = ilGetInteger(IL_NUM_FACES) + 1,
+			imageSize = ilGetInteger(IL_IMAGE_SIZE_OF_DATA),
+			ilFormat0 = ilGetInteger(IL_IMAGE_FORMAT),
+			ilFormat1 = ilGetInteger(IL_IMAGE_TYPE);
 
-			format = (format != kFormatUnknown) ? format : kFormatR8G8B8A8UNorm;
-			std::vector<Data> datas(faceCount, {});
-		#if 1
-			int faceSize = width * height * bpp;
-			for (int face = 0; face < faceCount; ++face) {
-				ilBindImage(imageId);
-				ilActiveImage(0);
-				ilActiveFace(face);
-				BOOST_ASSERT(IL_NO_ERROR == ilGetError());
-
-				datas[face].Bytes = ilGetData();
-				datas[face].Size = faceSize;
-			}
-		#else
-			std::vector<unsigned char> bytes;
-			switch (format) {
-			case kFormatR8G8B8A8UNorm: {
-				int faceSize = width * height * sizeof(char) * 4;
-				bytes.resize(faceSize * faceCount);
-				for (int face = 0; face < faceCount; ++face) {
-					ilActiveFace(face);
-					//memcpy(&bytes[faceSize * face], ilGetData());
-					ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, &bytes[faceSize * face]);
-					datas[face].Bytes = &bytes[faceSize * face];
-					datas[face].Size = faceSize;
+			ResourceFormat convertFormat = kFormatUnknown;//convertFormat非unknown时要转换格式
+			ILenum convertImageFormat = 0, convertImageType = 0;
+			if (format == kFormatUnknown) {
+				//检测图片格式
+				format = il_helper::ConvertImageFormatTypeToResourceFormat(ilFormat0, ilFormat1);
+				if (format == kFormatUnknown) {
+					//图片格式不能直接用于纹理，尝试转换成可用的
+					convertImageFormat = il_helper::Convert3ChannelImageFormatTo4Channel(ilFormat0);
+					convertImageType = ilFormat1;
+					convertFormat = il_helper::ConvertImageFormatTypeToResourceFormat(convertImageFormat, ilFormat1);
+					format = convertFormat;
 				}
-			}break;
-			case kFormatR32G32B32A32Float: {
+			}
+			else {
+				//检测能否 使用 或 转换成用户想要的格式
+				std::tie(convertImageFormat, convertImageType) = il_helper::ConvertResourceFormatToILImageFormatType(format);
+				if (convertImageFormat == 0) {
+					format = kFormatUnknown;//不能使用与转换
+				}
+				else if (convertImageFormat != ilFormat0 || convertImageType != ilFormat1) {
+					convertFormat = format;
+				}
+				else {
+					//直接使用, 不用转换
+				}
+			}
+
+			if (format != kFormatUnknown || convertFormat != kFormatUnknown) {
+				std::vector<Data> datas(faceCount, {});
+				std::vector<unsigned char> bytes;
+				int faceSize = width * height * bpp;
 				for (int face = 0; face < faceCount; ++face) {
 					ilBindImage(imageId);
 					ilActiveImage(0);
 					ilActiveFace(face);
-					BOOST_ASSERT(IL_NO_ERROR == ilGetError());
+					BOOST_ASSERT(il_helper::CheckLastError());
 
-					datas[face].Bytes = ilGetData();
-					datas[face].Size = width * height * sizeof(float) * 4;;
+					if (convertFormat == kFormatUnknown) {
+						ILuint compressMode = ilGetInteger(IL_COMPRESS_MODE);
+
+						size_t compressSize = 0;
+						if (ilType == IL_DDS) {
+							ILuint dxtFormat = ilGetInteger(IL_DXTC_DATA_FORMAT);
+							format = il_helper::ConvertILFormatToResourceFormat(dxtFormat);
+
+							compressSize = ilGetDXTCData(NULL, 0, dxtFormat);
+							if (compressSize) {
+								size_t position = bytes.size();
+								bytes.resize(position + compressSize);
+								ilGetDXTCData(&bytes[position], imageSize, dxtFormat);
+								datas[face].Bytes = &bytes[position];
+								datas[face].Size = faceSize;
+							}
+							il_helper::CheckLastError();
+						}
+						
+						if (compressSize == 0) {
+							datas[face].Bytes = ilGetData();
+							datas[face].Size = faceSize;
+						}
+					}
+					else {
+						if (bytes.empty()) bytes.resize(faceSize * faceCount);
+						ilCopyPixels(0, 0, 0, width, height, 1, convertImageFormat, ilFormat1, &bytes[faceSize * face]);
+						datas[face].Bytes = &bytes[faceSize * face];
+						datas[face].Size = faceSize;
+					}
 				}
-			} break;
-			case kFormatR16G16B16A16Float: {
-				for (int f = 0; f < faceCount; ++f) {
-					int face = determineFace(f, true, true);
-					ilActiveFace(face);
-					ilActiveMipmap(1);
-					datas[0].Bytes = ilGetData();
-					datas[0].Size = 0;
-					if (f == 4)
-						break;
+
+				if (format != kFormatUnknown) {
+					constexpr int mipCount = 1;
+					mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
+					ret = texture;
 				}
-			}break;
-			default:
-				BOOST_ASSERT(false);
-				break;
 			}
-		#endif
-			constexpr int mipCount = 1;
-			mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
-			ret = texture;
 		}
 
 		ilDeleteImage(imageId);

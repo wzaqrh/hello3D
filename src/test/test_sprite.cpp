@@ -25,7 +25,7 @@ void TestSprite::OnPostInitDevice()
 	mSprite = mContext->RenderableFac()->CreateSprite();
 	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
 #else
-	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
+	mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");
 #endif
 
 	int win_width = mContext->ResourceMng()->WinSize().x();

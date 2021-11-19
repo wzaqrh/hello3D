@@ -86,26 +86,7 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		return mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
 	}
-#if 0
-	template <typename... T>
-	ITexturePtr CreateTexture(const std::string& filepath, T &&...args) {
-		std::string imgPath = boost::filesystem::system_complete(filepath).string();
-
-		ITexturePtr texView = nullptr;
-		if (mTexByPath.find(imgPath) == mTexByPath.end()) {
-			IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
-			texView = mRenderSys.LoadTexture(res, imgPath, std::forward<T>(args)...);
-			
-			mTexByPath.insert(std::make_pair(imgPath, texView));
-		}
-		else {
-			texView = mTexByPath[imgPath];
-		}
-		return texView;
-	}
-#else
 	ITexturePtr CreateTexture(const std::string& filepath, ResourceFormat format = kFormatUnknown);
-#endif
 
 	template <typename... T>
 	bool LoadRawTextureData(T &&...args) {
