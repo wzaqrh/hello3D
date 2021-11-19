@@ -40,7 +40,7 @@ void ResourceManager::AddResourceDependency(IResourcePtr node, IResourcePtr pare
 	mResDependencyTree.AddNode(node, parent);
 }
 
-ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, ResourceFormat format)
+ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
 {
 	ITexturePtr ret = nullptr;
 
@@ -173,6 +173,8 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 				}//for face
 
 				if (format != kFormatUnknown) {
+					if (mipCount == 1 && autoGenMipmap)
+						mipCount = -1;
 					mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
 					ret = texture;
 				}
@@ -188,14 +190,14 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 	return ret;
 }
 
-ITexturePtr ResourceManager::CreateTexture(const std::string& filepath, ResourceFormat format)
+ITexturePtr ResourceManager::CreateTexture(const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
 {
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string imgFullpath = fullpath.string();
 
 	ITexturePtr texture = nullptr;
 	if (mTexByPath.find(imgFullpath) == mTexByPath.end()) {
-		texture = DoCreateTexture(imgFullpath, format);
+		texture = DoCreateTexture(imgFullpath, format, autoGenMipmap);
 
 		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 	}

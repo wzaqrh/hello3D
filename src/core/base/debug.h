@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/assert.hpp>
 #include <windows.h>
 #include <d3d11.h>
 #include <d3d9.h>
@@ -45,3 +46,6 @@ void Log(const D3DCAPS9& caps);
 #define TIME_PROFILE(NAME)
 #define TIME_PROFILE2(NAME1,NAME2)
 #endif
+
+#define BOOST_ASSERT_IF_THEN_ELSE(COND, AND, OR) BOOST_ASSERT((COND) ? (AND) : (OR))
+#define BOOST_ASSERT_IF_THEN(COND, AND) BOOST_ASSERT_IF_THEN_ELSE(COND, AND, true)

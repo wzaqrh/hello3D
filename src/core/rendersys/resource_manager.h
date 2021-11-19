@@ -86,7 +86,7 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		return mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
 	}
-	ITexturePtr CreateTexture(const std::string& filepath, ResourceFormat format = kFormatUnknown);
+	ITexturePtr CreateTexture(const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
 
 	template <typename... T>
 	bool LoadRawTextureData(T &&...args) {
@@ -99,7 +99,7 @@ public:
 		return mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
 	}
 private:
-	ITexturePtr DoCreateTexture(const std::string& filepath, ResourceFormat format);
+	ITexturePtr DoCreateTexture(const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
 private:
 	RenderSystem& mRenderSys;
 	struct ResourceDependencyTree {

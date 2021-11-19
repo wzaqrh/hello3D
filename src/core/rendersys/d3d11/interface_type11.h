@@ -170,13 +170,14 @@ public:
 	int GetHeight() override { return mHeight; }
 	int GetFaceCount() { return mFaceCount; }
 	int GetMipmapCount() override { return mMipCount; }
+	bool IsAutoGenMipmap() const { return mAutoGenMipmap; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 private:
+	bool mAutoGenMipmap;
 	int mWidth, mHeight, mFaceCount, mMipCount;
 	ResourceFormat mFormat;
 	ID3D11ShaderResourceView* mTexture;
-	//IResourcePtr mRes;
 };
 
 class RenderTexture11 : public ImplementResource<IRenderTexture>

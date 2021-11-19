@@ -23,10 +23,15 @@ void TestSprite::OnPostInitDevice()
 #if defined TEST_CUBEMAP
 	mSprite = mContext->RenderableFac()->CreateSprite();
 	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
-#else
-	//mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
-	//mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.hdr");//zlib
-	//mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");//bc1a
+#elif 1
+	mSprite = mContext->RenderableFac()->CreateSprite();
+	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture(
+		"model/theyKilledKenny.png", kFormatUnknown, true));//auto_gen_mipmap
+#elif 0
+	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
+#elif 0
+	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.hdr");//zlib
+#elif 0																			   //mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");//bc1a
 	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.dds");//bc1a + mipmap
 #endif
 

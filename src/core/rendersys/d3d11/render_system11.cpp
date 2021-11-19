@@ -1,6 +1,7 @@
 #include <boost/assert.hpp>
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/lambda/if.hpp>
 #include <windows.h>
 #include <dxerr.h>
 #include <d3dcompiler.h>
@@ -703,24 +704,6 @@ void RenderSystem11::UpdateConstBuffer(IContantBufferPtr buffer, void* data, int
 	mDeviceContext->UpdateSubresource(std::static_pointer_cast<ContantBuffer11>(buffer)->GetBuffer11(), 0, NULL, data, 0, 0);
 }
 
-namespace il_helper {
-	static const ILenum CSupportILTypes[] = {
-		IL_PNG, IL_JPG, IL_JP2, IL_BMP, IL_TGA, IL_DDS, IL_GIF, IL_HDR, IL_ICO
-	};
-	static inline ILenum DetectType(const void* pData, int dataSize) {
-		for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i)
-			if (ilIsValidL(CSupportILTypes[i], (void*)pData, dataSize))
-				return CSupportILTypes[i];
-		return IL_TYPE_UNKNOWN;
-	}
-	static ILenum DetectType(FILE* fd) {
-		for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i)
-			if (ilIsValidF(CSupportILTypes[i], fd))
-				return CSupportILTypes[i];
-		return IL_TYPE_UNKNOWN;
-	}
-};
-
 #if 0
 ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& filepath, 
 	ResourceFormat format, bool async, bool isCube)
@@ -790,13 +773,16 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		datas = &defaultData;
 
 	mipCount = texture->GetMipmapCount();
+	const bool autoGen = texture->IsAutoGenMipmap();
 	const size_t faceCount = texture->GetFaceCount();
-	BOOST_ASSERT(faceCount == 1 || datas[0].Bytes);
+	constexpr int imageSize = 0;//only used for 3d textures
+	BOOST_ASSERT_IF_THEN(faceCount > 1, datas[0].Bytes);
+	BOOST_ASSERT_IF_THEN(autoGen, datas[0].Bytes && faceCount == 1);
 
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = texture->GetWidth();
 	desc.Height = texture->GetHeight();
-	desc.MipLevels = mipCount;
+	desc.MipLevels = autoGen ? 0 : mipCount;
 	desc.ArraySize = faceCount;
 	desc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
 	desc.SampleDesc.Count = 1;
@@ -804,7 +790,16 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 	if (datas[0].Bytes) {
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = 0;
-		desc.MiscFlags = (faceCount > 1) ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0;
+		if (autoGen) {
+			desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+			desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+		}
+		else if (faceCount > 1) {
+			desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+		}
+		else {
+			desc.MiscFlags = 0;
+		}
 	}
 	else {
 		desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -820,21 +815,27 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 			D3D11_SUBRESOURCE_DATA& res_data = initDatas[index];
 			res_data.pSysMem = data.Bytes;
 			res_data.SysMemPitch = data.Size ? data.Size : d3d::BytePerPixel(desc.Format) * (desc.Width >> mip);//Line width in bytes
-			res_data.SysMemSlicePitch = 0; //only used for 3d textures
+			res_data.SysMemSlicePitch = imageSize; //only used for 3d textures
 		}
 	}
 
 	ID3D11Texture2D *pTexture = NULL;
-	if (CheckHR(mDevice->CreateTexture2D(&desc, datas[0].Bytes ? &initDatas[0] : nullptr, &pTexture))) return nullptr;
+	if (CheckHR(mDevice->CreateTexture2D(&desc, (datas[0].Bytes && !autoGen) ? &initDatas[0] : nullptr, &pTexture))) return nullptr;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
-	srvDesc.ViewDimension = (texture->GetFaceCount() > 1) ? D3D11_SRV_DIMENSION_TEXTURECUBE : D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = texture->GetMipmapCount();
+	srvDesc.ViewDimension = (faceCount > 1) ? D3D11_SRV_DIMENSION_TEXTURECUBE : D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = autoGen ? -1 : texture->GetMipmapCount();
 
 	if (CheckHR(mDevice->CreateShaderResourceView(pTexture, &srvDesc, 
-		&std::static_pointer_cast<Texture11>(texture)->GetSRV11()))) return nullptr; 
+		&texture->GetSRV11()))) return nullptr; 
 	
+	if (autoGen) {
+		mDeviceContext->UpdateSubresource(pTexture, 0, nullptr, 
+			datas[0].Bytes, datas[0].Size, imageSize);
+		mDeviceContext->GenerateMips(texture->GetSRV11());
+	}
+
 	texture->SetLoaded();
 	return texture;
 }
