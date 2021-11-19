@@ -108,7 +108,7 @@ int VertexBuffer11::GetCount()
 /********** IndexBuffer11 **********/
 int IndexBuffer11::GetWidth()
 {
-	return d3d::GetFormatWidthByte(static_cast<DXGI_FORMAT>(Format));
+	return d3d::BytePerPixel(static_cast<DXGI_FORMAT>(Format));
 }
 
 /********** ContantBuffer11 **********/

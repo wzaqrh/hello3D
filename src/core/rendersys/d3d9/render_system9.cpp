@@ -442,45 +442,6 @@ void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)
 	mDevice9->SetVertexDeclaration(std::static_pointer_cast<InputLayout9>(layout)->GetLayout9());
 }
 
-ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, const std::string& srcFile, 
-	ResourceFormat format, bool async, bool isCube)
-{
-	std::string imgPath = srcFile;
-#ifdef USE_ONLY_PNG
-	if (! boost::filesystem::exists(imgPath)) {
-		auto pos = imgPath.find_last_of(".");
-		if (pos != std::string::npos) {
-			imgPath = imgPath.substr(0, pos);
-			imgPath += ".png";
-		}
-	}
-#endif
-	std::string pSrcFile = imgPath.c_str();
-
-	Texture9Ptr pTextureRV;
-	if (boost::filesystem::exists(pSrcFile)) {
-		pTextureRV = MakePtr<Texture9>(nullptr);
-		if (isCube) {
-			if (CheckHR(D3DXCreateCubeTextureFromFileExA(mDevice9, pSrcFile.c_str(), 
-				D3DX_DEFAULT, 1, 0/*D3DUSAGE_RENDERTARGET|D3DUSAGE_DYNAMIC*/, d3d::convert11To9(static_cast<DXGI_FORMAT>(format)),
-				D3DPOOL_MANAGED, D3DX_FILTER_NONE/*D3DX_DEFAULT */, D3DX_FILTER_NONE, 0, NULL,
-				NULL, &pTextureRV->GetSRVCube9()))) {
-				pTextureRV = nullptr;
-			}
-		}
-		else {
-			if (CheckHR(D3DXCreateTextureFromFileA(mDevice9, pSrcFile.c_str(), &pTextureRV->GetSRV9()))) {
-				pTextureRV = nullptr;
-			}
-		}
-	}
-	else {
-		char szBuf[260]; sprintf(szBuf, "image file %s not exist\n", pSrcFile);
-		OutputDebugStringA(szBuf);
-	}
-	return pTextureRV;
-}
-
 ITexturePtr RenderSystem9::LoadTexture(IResourcePtr res, ResourceFormat format, 
 	const Eigen::Vector4i& size, int mipmap, const Data datas[])
 {

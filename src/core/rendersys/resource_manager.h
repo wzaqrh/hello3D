@@ -148,6 +148,7 @@ private:
 	std::map<IResourcePtr, ResourceLoadTask> mLoadTaskByRes;
 private:
 	std::map<std::string, ITexturePtr> mTexByPath;
+	std::vector<unsigned char> mTempBytes;
 };
 
 }

@@ -720,6 +720,8 @@ namespace il_helper {
 		return IL_TYPE_UNKNOWN;
 	}
 };
+
+#if 0
 ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& filepath, 
 	ResourceFormat format, bool async, bool isCube)
 {
@@ -775,30 +777,34 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& fil
 	}
 	return ret;
 }
+#endif
 
 ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, 
-	const Eigen::Vector4i& size, int mipmap, const Data datas[])
+	const Eigen::Vector4i& size, int mipCount, const Data datas[])
 {
 	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
-	texture->Init(format, size.x(), size.y(), size.w(), mipmap);
+	texture->Init(format, size.x(), size.y(), size.w(), mipCount);
 
 	Data defaultData = Data{};
 	if (datas == nullptr)
 		datas = &defaultData;
 
-	BOOST_ASSERT(texture->GetFaceCount() == 1 || datas[0].Bytes);
+	mipCount = texture->GetMipmapCount();
+	const size_t faceCount = texture->GetFaceCount();
+	BOOST_ASSERT(faceCount == 1 || datas[0].Bytes);
+
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = texture->GetWidth();
 	desc.Height = texture->GetHeight();
-	desc.MipLevels = texture->GetMipmapCount();
-	desc.ArraySize = texture->GetFaceCount();
+	desc.MipLevels = mipCount;
+	desc.ArraySize = faceCount;
 	desc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
 	desc.SampleDesc.Count = 1;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	if (texture->GetFaceCount() > 1) {
+	if (datas[0].Bytes) {
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = 0;
-		desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+		desc.MiscFlags = (faceCount > 1) ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0;
 	}
 	else {
 		desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -806,17 +812,17 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		desc.MiscFlags = 0;
 	}
 
-	std::vector<D3D11_SUBRESOURCE_DATA> initDatas(desc.ArraySize, {});
-	for (size_t face = 0; face < desc.ArraySize; ++face) {
-		D3D11_SUBRESOURCE_DATA& res_data = initDatas[face];
-		res_data.SysMemPitch = size.z() ? size.z() : d3d::GetFormatWidthByte(desc.Format) * desc.Width;//Line width in bytes
-
-		auto& data = datas[face];
-		/*size_t faceSize = data.Size ? data.Size : res_data.SysMemPitch * desc.Height;
-		res_data.SysMemSlicePitch = faceSize; //only used for 3d textures*/
-		res_data.pSysMem = data.Bytes;
+	std::vector<D3D11_SUBRESOURCE_DATA> initDatas(mipCount * faceCount, {});
+	for (size_t face = 0; face < faceCount; ++face) {
+		for (size_t mip = 0; mip < mipCount; ++mip) {
+			size_t index = face * mipCount + mip;
+			const Data& data = datas[index];
+			D3D11_SUBRESOURCE_DATA& res_data = initDatas[index];
+			res_data.pSysMem = data.Bytes;
+			res_data.SysMemPitch = data.Size ? data.Size : d3d::BytePerPixel(desc.Format) * (desc.Width >> mip);//Line width in bytes
+			res_data.SysMemSlicePitch = 0; //only used for 3d textures
+		}
 	}
-
 
 	ID3D11Texture2D *pTexture = NULL;
 	if (CheckHR(mDevice->CreateTexture2D(&desc, datas[0].Bytes ? &initDatas[0] : nullptr, &pTexture))) return nullptr;

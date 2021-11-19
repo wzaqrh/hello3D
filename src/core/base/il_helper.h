@@ -212,7 +212,7 @@ static ResourceFormat ConvertILFormatToResourceFormat(ILenum compressILFormat) {
 
 static bool CheckLastError() {
 	ILenum LastError = ilGetError();
-	//BOOST_ASSERT(IL_NO_ERROR == LastError);
+	BOOST_ASSERT(IL_NO_ERROR == LastError);
 	return (IL_NO_ERROR == LastError);
 }
 };

@@ -55,7 +55,7 @@ D3DSURFACE_DESC Texture9::GetDesc()
 /********** TIndexBuffer9 **********/
 int IndexBuffer9::GetWidth()
 {
-	return d3d::GetFormatWidthByte(static_cast<DXGI_FORMAT>(Format));
+	return d3d::BytePerPixel(static_cast<DXGI_FORMAT>(Format));
 }
 
 /********** TRenderTexture9 **********/

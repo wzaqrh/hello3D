@@ -52,7 +52,6 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) = 0;
 	virtual void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) = 0;
 
-	virtual ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format, bool async, bool isCube) = 0;
 	virtual ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_arrlen, int mipmap, const Data datas[]) = 0;
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;

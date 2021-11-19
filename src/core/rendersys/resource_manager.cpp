@@ -1,5 +1,6 @@
 #include <boost/assert.hpp>
 #include "core/base/il_helper.h"
+#include "core/base/d3d.h"
 #include "core/rendersys/resource_manager.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
@@ -50,19 +51,29 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 		ILuint imageId = ilGenImage();
 		ilBindImage(imageId);
 
-		ilSetInteger(IL_KEEP_DXTC_DATA, IL_TRUE);
-		BOOST_ASSERT(il_helper::CheckLastError());
+		ILenum ilFileType = il_helper::DetectType(fd);
 
-		ILenum ilType = il_helper::DetectType(fd);
-		if (ilType != IL_TYPE_UNKNOWN && ilLoadF(ilType, fd)) {
-			ILuint width = ilGetInteger(IL_IMAGE_WIDTH), 
-			height  = ilGetInteger(IL_IMAGE_HEIGHT),
-			channel = ilGetInteger(IL_IMAGE_CHANNELS), 
-			bpp		= ilGetInteger(IL_IMAGE_BPP),
-			faceCount = ilGetInteger(IL_NUM_FACES) + 1,
-			imageSize = ilGetInteger(IL_IMAGE_SIZE_OF_DATA),
-			ilFormat0 = ilGetInteger(IL_IMAGE_FORMAT),
-			ilFormat1 = ilGetInteger(IL_IMAGE_TYPE);
+		switch (ilFileType) {
+		case IL_DDS:
+		case IL_TGA:
+		case IL_HDR: 
+			ilSetInteger(IL_KEEP_DXTC_DATA, IL_TRUE); 
+			break;
+		default: 
+			break;
+		}
+		BOOST_ASSERT(il_helper::CheckLastError());
+		
+		if (ilFileType != IL_TYPE_UNKNOWN && ilLoadF(ilFileType, fd)) {
+			ILuint width = ilGetInteger(IL_IMAGE_WIDTH),
+				height = ilGetInteger(IL_IMAGE_HEIGHT),
+				channel = ilGetInteger(IL_IMAGE_CHANNELS),
+				bpp = ilGetInteger(IL_IMAGE_BPP),
+				faceCount = ilGetInteger(IL_NUM_FACES) + 1,
+				mipCount = ilGetInteger(IL_NUM_MIPMAPS) + 1,
+				imageSize = ilGetInteger(IL_IMAGE_SIZE_OF_DATA),
+				ilFormat0 = ilGetInteger(IL_IMAGE_FORMAT),
+				ilFormat1 = ilGetInteger(IL_IMAGE_TYPE);
 
 			ResourceFormat convertFormat = kFormatUnknown;//convertFormat非unknown时要转换格式
 			ILenum convertImageFormat = 0, convertImageType = 0;
@@ -92,53 +103,83 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 			}
 
 			if (format != kFormatUnknown || convertFormat != kFormatUnknown) {
-				std::vector<Data> datas(faceCount, {});
-				std::vector<unsigned char> bytes;
+				std::vector<Data> datas(mipCount * faceCount, {});
+
 				int faceSize = width * height * bpp;
+				auto& bytes = mTempBytes;
+				bytes.resize(faceSize * mipCount * faceCount);
+				size_t bytes_position = 0;
+
 				for (int face = 0; face < faceCount; ++face) {
-					ilBindImage(imageId);
-					ilActiveImage(0);
-					ilActiveFace(face);
-					BOOST_ASSERT(il_helper::CheckLastError());
+					for (int mip = 0; mip < mipCount; ++mip) {
+						ilBindImage(imageId);
+						ilActiveImage(0);
+						ilActiveFace(face);
+						ilActiveMipmap(mip);
+						BOOST_ASSERT(il_helper::CheckLastError());
 
-					if (convertFormat == kFormatUnknown) {
-						ILuint compressMode = ilGetInteger(IL_COMPRESS_MODE);
+						//size_t mip_width = width >> mip, mip_height = height >> mip;
+						ILuint mip_width = ilGetInteger(IL_IMAGE_WIDTH),
+							  mip_height = ilGetInteger(IL_IMAGE_HEIGHT);
+						auto& dataFM = datas[face * mipCount + mip];
+						if (convertFormat == kFormatUnknown) {
+							//直接使用
+							ILuint compressMode = ilGetInteger(IL_COMPRESS_MODE);
 
-						size_t compressSize = 0;
-						if (ilType == IL_DDS) {
+							size_t sub_res_size = 0;
+
 							ILuint dxtFormat = ilGetInteger(IL_DXTC_DATA_FORMAT);
-							format = il_helper::ConvertILFormatToResourceFormat(dxtFormat);
+							ResourceFormat compressFormat = il_helper::ConvertILFormatToResourceFormat(dxtFormat);
+							if (compressFormat != kFormatUnknown) {
+								sub_res_size = ilGetDXTCData(NULL, 0, dxtFormat);
+								if (sub_res_size) {
+									format = compressFormat;
 
-							compressSize = ilGetDXTCData(NULL, 0, dxtFormat);
-							if (compressSize) {
-								size_t position = bytes.size();
-								bytes.resize(position + compressSize);
-								ilGetDXTCData(&bytes[position], imageSize, dxtFormat);
-								datas[face].Bytes = &bytes[position];
-								datas[face].Size = faceSize;
+									BOOST_ASSERT(bytes_position + sub_res_size < bytes.size());
+									ilGetDXTCData(&bytes[bytes_position], sub_res_size, dxtFormat);
+									
+									dataFM.Bytes = &bytes[bytes_position];
+									
+									size_t rowPitch, slicePitch;
+									bool res = d3d::ComputePitch(static_cast<DXGI_FORMAT>(format), mip_width, mip_height,
+										rowPitch, slicePitch, 0);
+									BOOST_ASSERT(res);
+									dataFM.Size = rowPitch;
+									
+									bytes_position += sub_res_size;
+								}
+								ilGetError();
 							}
-							il_helper::CheckLastError();
+
+							if (sub_res_size == 0) {
+								dataFM.Bytes = ilGetData();
+								dataFM.Size = mip_width * bpp;
+							}
 						}
-						
-						if (compressSize == 0) {
-							datas[face].Bytes = ilGetData();
-							datas[face].Size = faceSize;
+						else {
+							//转换格式
+							size_t sub_res_size = mip_width * mip_height * bpp;
+							
+							BOOST_ASSERT(bytes_position + sub_res_size < bytes.size());
+							ilCopyPixels(0, 0, 0, 
+								mip_width, mip_height, 1, 
+								convertImageFormat, convertImageType, &bytes[bytes_position]);
+							
+							dataFM.Bytes = &bytes[bytes_position];
+							dataFM.Size = mip_width * bpp;
+							bytes_position += sub_res_size;
 						}
-					}
-					else {
-						if (bytes.empty()) bytes.resize(faceSize * faceCount);
-						ilCopyPixels(0, 0, 0, width, height, 1, convertImageFormat, ilFormat1, &bytes[faceSize * face]);
-						datas[face].Bytes = &bytes[faceSize * face];
-						datas[face].Size = faceSize;
-					}
-				}
+					}//for mip
+				}//for face
 
 				if (format != kFormatUnknown) {
-					constexpr int mipCount = 1;
 					mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
 					ret = texture;
 				}
 			}
+		}
+		else {
+			BOOST_ASSERT(il_helper::CheckLastError());
 		}
 
 		ilDeleteImage(imageId);

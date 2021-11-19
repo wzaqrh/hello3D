@@ -24,7 +24,7 @@ void TestSpecSkybox::OnInitLight()
 void TestSpecSkybox::OnPostInitDevice()
 {
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
-		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
+		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross_mip.dds"));//bc1a mipmap cube
 }
 
 void TestSpecSkybox::OnRender()

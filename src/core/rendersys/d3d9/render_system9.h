@@ -61,7 +61,6 @@ public:
 	void SetBlendFunc(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
-	ITexturePtr LoadTexture(IResourcePtr res, const std::string& imgPath, ResourceFormat format, bool async, bool isCube) override;
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_arrlen, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;

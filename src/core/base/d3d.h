@@ -7,7 +7,24 @@
 namespace mir {
 namespace d3d {
 
-int GetFormatWidthByte(DXGI_FORMAT format);
+size_t BitsPerPixel(DXGI_FORMAT fmt);
+size_t BytePerPixel(DXGI_FORMAT fmt);
+
+enum CP_FLAGS : unsigned long
+{
+	CP_FLAGS_NONE = 0x0,      // Normal operation
+	CP_FLAGS_LEGACY_DWORD = 0x1,      // Assume pitch is DWORD aligned instead of BYTE aligned
+	CP_FLAGS_PARAGRAPH = 0x2,      // Assume pitch is 16-byte aligned instead of BYTE aligned
+	CP_FLAGS_YMM = 0x4,      // Assume pitch is 32-byte aligned instead of BYTE aligned
+	CP_FLAGS_ZMM = 0x8,      // Assume pitch is 64-byte aligned instead of BYTE aligned
+	CP_FLAGS_PAGE4K = 0x200,    // Assume pitch is 4096-byte aligned instead of BYTE aligned
+	CP_FLAGS_BAD_DXTN_TAILS = 0x1000,   // BC formats with malformed mipchain blocks smaller than 4x4
+	CP_FLAGS_24BPP = 0x10000,  // Override with a legacy 24 bits-per-pixel format size
+	CP_FLAGS_16BPP = 0x20000,  // Override with a legacy 16 bits-per-pixel format size
+	CP_FLAGS_8BPP = 0x40000,  // Override with a legacy 8 bits-per-pixel format size
+};
+bool ComputePitch(DXGI_FORMAT fmt, size_t width, size_t height,
+	size_t& rowPitch, size_t& slicePitch, int flags);
 
 D3DBLEND convert11To9(D3D11_BLEND blend);
 D3DCMPFUNC convert11To9(D3D11_COMPARISON_FUNC cmp);

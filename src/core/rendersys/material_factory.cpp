@@ -354,7 +354,7 @@ private:
 					kLayoutInputPerVertexData,
 					0
 				};
-				byteOffset = layoutJ.AlignedByteOffset + d3d::GetFormatWidthByte(static_cast<DXGI_FORMAT>(layoutJ.Format));
+				byteOffset = layoutJ.AlignedByteOffset + d3d::BytePerPixel(static_cast<DXGI_FORMAT>(layoutJ.Format));
 				++j;
 			}
 

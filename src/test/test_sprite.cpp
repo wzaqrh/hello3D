@@ -1,5 +1,4 @@
 #include "test/test_case.h"
-
 #include "test/app.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/rendersys/material_factory.h"
@@ -25,7 +24,10 @@ void TestSprite::OnPostInitDevice()
 	mSprite = mContext->RenderableFac()->CreateSprite();
 	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
 #else
-	mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");
+	//mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
+	//mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.hdr");//zlib
+	//mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");//bc1a
+	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.dds");//bc1a + mipmap
 #endif
 
 	int win_width = mContext->ResourceMng()->WinSize().x();
