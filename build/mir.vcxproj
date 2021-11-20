@@ -62,7 +62,6 @@
     <ClInclude Include="..\src\core\rendersys\camera.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\interface_type11.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h" />
-    <ClInclude Include="..\src\core\rendersys\d3d11\thread_pump.h" />
     <ClInclude Include="..\src\core\rendersys\d3d9\interface_type9.h" />
     <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h" />
     <ClInclude Include="..\src\core\rendersys\interface_type.h" />
@@ -97,7 +96,6 @@
     <ClCompile Include="..\src\core\rendersys\camera.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\interface_type11.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp" />
-    <ClCompile Include="..\src\core\rendersys\d3d11\thread_pump.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d9\render_system9.cpp" />
     <ClCompile Include="..\src\core\rendersys\interface_type.cpp" />

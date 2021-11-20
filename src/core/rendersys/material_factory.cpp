@@ -48,15 +48,16 @@ struct MaterialBuilder
 	MaterialPtr mMaterial;
 	TechniquePtr mCurTech;
 	PassPtr mCurPass;
+	ResourceManager& mResourceMng;
 public:
-	MaterialBuilder(bool addTechPass = true) {
+	MaterialBuilder(ResourceManager& resMng, bool addTechPass = true) :mResourceMng(resMng) {
 		mMaterial = std::make_shared<Material>();
 		if (addTechPass) {
 			AddTechnique();
 			AddPass(E_PASS_FORWARDBASE, "");
 		}
 	}
-	MaterialBuilder(MaterialPtr material) {
+	MaterialBuilder(ResourceManager& resMng, MaterialPtr material) :mResourceMng(resMng) {
 		mMaterial = material;
 		mCurTech = material->CurTech();
 		mCurPass = mCurTech->mPasses.empty() ? nullptr : mCurTech->mPasses[mCurTech->mPasses.size() - 1];
@@ -86,7 +87,8 @@ public:
 
 	MaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
 		mCurPass->mInputLayout = inputLayout;
-		mMaterial->AddDependency(AsRes(inputLayout));
+		//mMaterial->AddDependency(AsRes(inputLayout));
+		mResourceMng.AddResourceDependency(inputLayout, mMaterial);
 		return *this;
 	}
 	MaterialBuilder& SetTopology(PrimitiveTopology topology) {
@@ -95,7 +97,8 @@ public:
 	}
 	IProgramPtr SetProgram(IProgramPtr program) {
 		mCurPass->mProgram = program;
-		mMaterial->AddDependency(AsRes(program));
+		//mMaterial->AddDependency(AsRes(program));
+		mResourceMng.AddResourceDependency(program, mMaterial);
 		return program;
 	}
 	MaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
@@ -130,11 +133,12 @@ public:
 	}
 	MaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
 		mCurPass->mTextures[slot] = texture;
-		mMaterial->AddDependency(AsRes(texture));
+		//mMaterial->AddDependency(AsRes(texture));
+		mResourceMng.AddResourceDependency(texture, mMaterial);
 		return *this;
 	}
 	MaterialPtr Build() {
-		mMaterial->CheckAndSetLoaded();
+		mMaterial->SetLoaded();
 		return mMaterial;
 	}
 };
@@ -581,7 +585,7 @@ private:
 	MaterialPtr CreateMaterial(ResourceManager& resourceMng,
 		const std::string& name,
 		XmlShaderInfo& shaderInfo) {
-		MaterialBuilder builder(false);
+		MaterialBuilder builder(resourceMng, false);
 		builder.AddTechnique("d3d11");
 
 		for (size_t i = 0; i < shaderInfo.SubShaders.size(); ++i) {

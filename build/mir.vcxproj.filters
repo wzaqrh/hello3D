@@ -37,9 +37,6 @@
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d11\thread_pump.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\material.h">
       <Filter>src\core\rendersys\material</Filter>
     </ClInclude>
@@ -157,9 +154,6 @@
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d11\thread_pump.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\material.cpp">

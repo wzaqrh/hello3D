@@ -25,9 +25,6 @@ interface MIR_CORE_API IResource : boost::noncopyable
 	virtual IUnknown** GetDeviceObject() = 0;
 
 	virtual void AddOnLoadedListener(std::function<void(IResource*)> cb) = 0;
-	virtual void CheckAndSetLoaded() = 0;
-	virtual void AddDependency(IResourcePtr res) = 0;
-	virtual bool CheckLoaded() const = 0;
 public:
 	bool IsLoaded() { return GetCurState() == kResourceStateLoaded; }
 	bool IsLoading() { return GetCurState() == kResourceStateLoading; }
@@ -65,33 +62,8 @@ public:
 	void AddOnLoadedListener(std::function<void(IResource*)> cb) override final {
 		mOnLoadeds.push_back(cb);
 	}
-	void CheckAndSetLoaded() override final {
-		if (!IsLoaded() && CheckLoaded()) {
-			SetLoaded();
-		}
-	}
-	void AddDependency(IResourcePtr res) override final {
-		mDepends.push_back(std::static_pointer_cast<IResource>(res));
-		res->AddOnLoadedListener([=](IResource* res) {
-			CheckAndSetLoaded();
-		});
-	}
-	bool CheckLoaded() const override final {
-		if (!mDepends.empty()) {
-			for (auto& depent : mDepends)
-				if (!depent->CheckLoaded())
-					return false;
-			return true;
-		}
-		else {
-			return mCurState == kResourceStateLoaded;
-		}
-	}
 
 	void Assign(ImplementResource& other) {
-		this->mDepends.clear();
-		for (auto& depend : other.mDepends)
-			this->AddDependency(depend);
 		this->mCurState = other.mCurState;
 	}
 protected:
@@ -104,7 +76,6 @@ private:
 	IUnknown** mDeviceObj;
 	ResourceState mCurState;
 	std::vector<std::function<void(IResource*)>> mOnLoadeds;
-	std::vector<IResourcePtr> mDepends;
 };
 
 template<class _Resource>

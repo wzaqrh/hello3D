@@ -250,13 +250,13 @@ Program11::Program11()
 void Program11::SetVertex(VertexShader11Ptr pVertex)
 {
 	mVertex = pVertex;
-	AsRes(this)->AddDependency(AsRes(pVertex));
+	//AsRes(this)->AddDependency(AsRes(pVertex));
 }
 
 void Program11::SetPixel(PixelShader11Ptr pPixel)
 {
 	mPixel = pPixel;
-	AsRes(this)->AddDependency(AsRes(pPixel));
+	//AsRes(this)->AddDependency(AsRes(pPixel));
 }
 
 }

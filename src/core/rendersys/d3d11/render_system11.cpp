@@ -24,8 +24,6 @@ namespace mir {
 
 RenderSystem11::RenderSystem11()
 {
-	mThreadPump = std::make_shared<ThreadPump>();
-	//mFXCDir = "d3d11\\";
 }
 RenderSystem11::~RenderSystem11()
 {
@@ -60,9 +58,6 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 
 	mScreenWidth = vpWidth;
 	mScreenHeight = vpHeight;
-
-	D3D_SHADER_MACRO Shader_Macros[] = { "SHADER_MODEL", "40000", NULL, NULL };
-	mShaderMacros.assign(Shader_Macros, Shader_Macros+ARRAYSIZE(Shader_Macros));
 	return true;
 }
 
@@ -188,7 +183,7 @@ HRESULT RenderSystem11::_SetRasterizerState()
 
 void RenderSystem11::Update(float dt)
 {
-	mThreadPump->Update(dt);
+
 }
 
 void RenderSystem11::CleanUp()
@@ -373,233 +368,6 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, SamplerFilterMode
 	ret->Init(pSamplerLinear);
 	return ret;
 }
-
-#if 0
-struct IncludeStdIo : public ID3DInclude
-{
-	std::string mModelPath;
-	std::vector<char> mBuffer;
-	std::vector<std::string> mStrBuffer;
-public:
-	IncludeStdIo(const std::string& modelPath) :mModelPath(modelPath) {}
-	STDMETHOD(Open)(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, 
-		LPCVOID *ppData, UINT *pBytes) 
-	{
-		std::string fullPath = mModelPath + pFileName;
-		FILE* fd = fopen(fullPath.c_str(), "r");
-		if (fd) {
-			fseek(fd, 0, SEEK_END);
-			size_t size = ftell(fd);
-			fseek(fd, 0, SEEK_SET);
-			size_t first = mBuffer.size();
-			mBuffer.resize(first + size);
-			fread(&mBuffer[first], sizeof(char), size, fd);
-			fclose(fd);
-
-			mStrBuffer.push_back(std::string(mBuffer.begin(), mBuffer.end()));
-			if (ppData) *ppData = mStrBuffer.back().c_str();
-			if (pBytes) *pBytes = mStrBuffer.back().size();
-
-			//OutputDebugStringA(mStrBuffer.back().c_str());
-			return S_OK;
-		}
-		return S_FALSE;
-	}
-	STDMETHOD(Close)(THIS_ LPCVOID pData) {
-		return S_OK;
-	}
-};
-bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
-	bool ret = true;
-	if (pErrorBlob != NULL) {
-		OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-		pErrorBlob->Release();
-		pErrorBlob = nullptr;
-	}
-	if (FAILED(hr)) {
-		CheckHR(hr);
-		ret = false;
-	}
-	return ret;
-}
-PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const std::string& entry, bool async)
-{
-	PixelShader11Ptr ret = MakePtr<PixelShader11>(MakePtr<BlobData11>(nullptr));
-	std::string psEntry = !entry.empty() ? entry : "PS";
-	const char* shaderModel = "ps_4_0";
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined(_DEBUG) && defined(D3D11_DEBUG)
-	dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-	HRESULT hr;
-	if (async) {
-		hr = mThreadPump->AddWorkItem(AsRes(ret), [&](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
-			const D3D10_SHADER_MACRO* pDefines = nullptr;
-			LPD3D10INCLUDE pInclude = new IncludeStdIo("shader\\");
-			return D3DX11CompileFromFileA(filename.c_str(), pDefines, pInclude, psEntry.c_str(), 
-				shaderModel, dwShaderFlags, 0, pump,
-				&static_cast<BlobData11*>(PtrRaw(ret->mBlob))->mBlob, &ret->mErrBlob, (HRESULT*)&entry->hr);
-		}, [=](IResource* res, HRESULT hr) {
-			if (!FAILED(hr)) {
-				assert(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
-				if (!CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
-					nullptr, &ret->mShader))) {
-					res->SetLoaded();
-				}
-			}
-			else {
-				CheckCompileError(hr, ret->mErrBlob);
-			}
-		});
-	}
-	else {
-		ret->mBlob = MakePtr<BlobData11>(nullptr);
-
-		std::vector<char> bytes = input::ReadFile(filename.c_str(), "rb");
-
-		hr = D3DCompile(&bytes[0], bytes.size(), filename.c_str(), 
-			&mShaderMacros[0], NULL, 
-			psEntry.c_str(), shaderModel, 
-			dwShaderFlags, 0, 
-			&static_cast<BlobData11*>(PtrRaw(ret->mBlob))->mBlob, &ret->mErrBlob);
-		if (CheckCompileError(hr, ret->mErrBlob)
-			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
-				NULL, &ret->mShader))) {
-			AsRes(ret)->SetLoaded();
-		}
-		else {
-			ret = nullptr;
-		}
-	}
-	return ret;
-}
-
-PixelShader11Ptr RenderSystem11::_CreatePSByFXC(const std::string& filename)
-{
-	PixelShader11Ptr ret = MakePtr<PixelShader11>(nullptr);
-	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
-	if (!buffer.empty()) {
-		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
-		HRESULT hr = mDevice->CreatePixelShader(&buffer[0], buffer.size(), NULL, &ret->mShader);
-		if (!FAILED(hr)) {
-			AsRes(ret)->SetLoaded();
-		}
-		else {
-			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
-			CheckCompileError(hr, ret->mErrBlob);
-			ret = nullptr;
-		}
-	}
-	else {
-		ret = nullptr;
-	}
-	return ret;
-}
-
-VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const std::string& entry, bool async)
-{
-	VertexShader11Ptr ret = MakePtr<VertexShader11>(MakePtr<BlobData11>(nullptr));
-	std::string vsEntry = !entry.empty() ? entry : "VS";
-	const char* shaderModel = "vs_4_0";
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined(_DEBUG) && defined(D3D11_DEBUG)
-	dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-	HRESULT hr;
-	if (async) {
-		ID3DX11DataProcessor* pProcessor = nullptr;
-		ID3DX11DataLoader* pDataLoader = nullptr;
-		const D3D10_SHADER_MACRO* pDefines = nullptr;
-		LPD3D10INCLUDE pInclude = new IncludeStdIo("shader\\");
-		if (!CheckHR(D3DX11CreateAsyncCompilerProcessor(filename.c_str(), pDefines, pInclude, vsEntry.c_str(), 
-			shaderModel, dwShaderFlags, 0,
-			&std::static_pointer_cast<BlobData11>(ret->mBlob)->mBlob, &ret->mErrBlob, &pProcessor))
-			&& !CheckHR(D3DX11CreateAsyncFileLoaderA(filename.c_str(), &pDataLoader))) {
-			hr = mThreadPump->AddWorkItem(AsRes(ret), pDataLoader, pProcessor, [=](IResource* res, HRESULT hr) {
-				if (!FAILED(hr))  {
-					BOOST_ASSERT(dynamic_cast<VertexShader11*>(res) && ret->mBlob);
-					if (!CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
-						NULL, &ret->mShader))) {
-						res->SetLoaded();
-					}
-				}
-				else {
-					CheckCompileError(hr, ret->mErrBlob);
-				}
-			});
-			CheckCompileError(hr, ret->mErrBlob);
-		}
-	}
-	else {
-		hr = D3DX11CompileFromFileA(filename.c_str(), &mShaderMacros[0], NULL, vsEntry.c_str(), 
-			shaderModel, dwShaderFlags, 0, nullptr,
-			&std::static_pointer_cast<BlobData11>(ret->mBlob)->mBlob, &ret->mErrBlob, NULL);
-		if (CheckCompileError(hr, ret->mErrBlob)
-			&& !CheckHR(mDevice->CreateVertexShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
-				NULL, &ret->mShader))) {
-			AsRes(ret)->SetLoaded();
-		}
-		else {
-			ret = nullptr;
-		}
-	}
-	return ret;
-}
-
-VertexShader11Ptr RenderSystem11::_CreateVSByFXC(const std::string& filename)
-{
-	VertexShader11Ptr ret = MakePtr<VertexShader11>(nullptr);
-	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
-	if (!buffer.empty()) {
-		ret->mBlob = MakePtr<BlobDataStandard>(buffer);
-		auto buffer_size = buffer.size();
-		HRESULT hr = mDevice->CreateVertexShader(&buffer[0], buffer_size, NULL, &ret->mShader);
-		if (!FAILED(hr)) {
-			AsRes(ret)->SetLoaded();
-		}
-		else {
-			D3DGetDebugInfo(&buffer[0], buffer.size(), &ret->mErrBlob);
-			CheckCompileError(hr, ret->mErrBlob);
-			ret = nullptr;
-		}
-	}
-	else {
-		ret = nullptr;
-	}
-	return ret;
-}
-
-IProgramPtr RenderSystem11::CreateProgramByCompile(IResourcePtr res, const std::string& vsPath, const std::string& psPath, 
-	const std::string& vsEntry, const std::string& psEntry)
-{
-	TIME_PROFILE2(CreateProgramByCompile, std::string(vsPath));
-
-	Program11Ptr program = std::static_pointer_cast<Program11>(res);
-	program->SetVertex(_CreateVS(vsPath, vsEntry, false));
-	program->SetPixel(_CreatePS(!psPath.empty() ? psPath : vsPath, psEntry, false));
-	AsRes(program)->CheckAndSetLoaded();
-	return program;
-}
-
-IProgramPtr RenderSystem11::CreateProgramByFXC(IResourcePtr res, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
-{
-	TIME_PROFILE2(CreateProgramByFXC, (name));
-	Program11Ptr program = std::static_pointer_cast<Program11>(res);
-
-	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
-	std::string vsName = name + "_" + vsEntryOrVS + FILE_EXT_CSO;
-	program->SetVertex(_CreateVSByFXC(vsName.c_str()));
-
-	std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
-	std::string psName = name + "_" + psEntryOrPS + FILE_EXT_CSO;
-	program->SetPixel(_CreatePSByFXC(psName.c_str()));
-
-	AsRes(program)->CheckAndSetLoaded();
-	return program;
-}
-#endif
 
 IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, const Data& data)
 {
@@ -891,7 +659,7 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 			Texture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
 			tex11->SetSRV11(texSRV);
 
-			AsRes(tex11)->CheckAndSetLoaded();
+			AsRes(tex11)->SetLoaded();
 		}
 	}
 

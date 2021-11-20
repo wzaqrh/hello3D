@@ -278,11 +278,11 @@ Program9::Program9()
 
 void Program9::SetVertex(VertexShader9Ptr pVertex) {
 	mVertex = pVertex;
-	AsRes(this)->AddDependency(AsRes(pVertex));
+	//AsRes(this)->AddDependency(AsRes(pVertex));
 }
 void Program9::SetPixel(PixelShader9Ptr pPixel) {
 	mPixel = pPixel;
-	AsRes(this)->AddDependency(AsRes(pPixel));
+	//AsRes(this)->AddDependency(AsRes(pPixel));
 }
 
 }

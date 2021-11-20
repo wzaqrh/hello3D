@@ -21,9 +21,6 @@ private:
 	ID3D11DepthStencilView* mBackDepthStencilView = NULL;
 	ID3D11RenderTargetView* mCurRenderTargetView = NULL;
 	ID3D11DepthStencilView* mCurDepthStencilView = NULL;
-
-	ThreadPumpPtr mThreadPump;
-	std::vector<D3D_SHADER_MACRO> mShaderMacros;
 public:
 	RenderSystem11();
 	~RenderSystem11();
