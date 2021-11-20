@@ -25,7 +25,7 @@ namespace mir {
 RenderSystem11::RenderSystem11()
 {
 	mThreadPump = std::make_shared<ThreadPump>();
-	mFXCDir = "d3d11\\";
+	//mFXCDir = "d3d11\\";
 }
 RenderSystem11::~RenderSystem11()
 {
@@ -374,6 +374,7 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, SamplerFilterMode
 	return ret;
 }
 
+#if 0
 struct IncludeStdIo : public ID3DInclude
 {
 	std::string mModelPath;
@@ -408,13 +409,6 @@ public:
 		return S_OK;
 	}
 };
-DWORD GetShaderFlag() {
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined(_DEBUG) && defined(D3D11_DEBUG)
-	dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-	return dwShaderFlags;
-}
 bool CheckCompileError(HRESULT hr, ID3DBlob* pErrorBlob) {
 	bool ret = true;
 	if (pErrorBlob != NULL) {
@@ -433,7 +427,10 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const st
 	PixelShader11Ptr ret = MakePtr<PixelShader11>(MakePtr<BlobData11>(nullptr));
 	std::string psEntry = !entry.empty() ? entry : "PS";
 	const char* shaderModel = "ps_4_0";
-	DWORD dwShaderFlags = GetShaderFlag();
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined(_DEBUG) && defined(D3D11_DEBUG)
+	dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
 
 	HRESULT hr;
 	if (async) {
@@ -458,9 +455,14 @@ PixelShader11Ptr RenderSystem11::_CreatePS(const std::string& filename, const st
 	}
 	else {
 		ret->mBlob = MakePtr<BlobData11>(nullptr);
-		hr = D3DX11CompileFromFileA(filename.c_str(), &mShaderMacros[0], NULL, psEntry.c_str(), 
-			shaderModel, dwShaderFlags, 0, nullptr,
-			&static_cast<BlobData11*>(PtrRaw(ret->mBlob))->mBlob, &ret->mErrBlob, NULL);
+
+		std::vector<char> bytes = input::ReadFile(filename.c_str(), "rb");
+
+		hr = D3DCompile(&bytes[0], bytes.size(), filename.c_str(), 
+			&mShaderMacros[0], NULL, 
+			psEntry.c_str(), shaderModel, 
+			dwShaderFlags, 0, 
+			&static_cast<BlobData11*>(PtrRaw(ret->mBlob))->mBlob, &ret->mErrBlob);
 		if (CheckCompileError(hr, ret->mErrBlob)
 			&& !CheckHR(mDevice->CreatePixelShader(ret->mBlob->GetBufferPointer(), ret->mBlob->GetBufferSize(), 
 				NULL, &ret->mShader))) {
@@ -500,7 +502,10 @@ VertexShader11Ptr RenderSystem11::_CreateVS(const std::string& filename, const s
 	VertexShader11Ptr ret = MakePtr<VertexShader11>(MakePtr<BlobData11>(nullptr));
 	std::string vsEntry = !entry.empty() ? entry : "VS";
 	const char* shaderModel = "vs_4_0";
-	DWORD dwShaderFlags = GetShaderFlag();
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined(_DEBUG) && defined(D3D11_DEBUG)
+	dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
 
 	HRESULT hr;
 	if (async) {
@@ -592,6 +597,76 @@ IProgramPtr RenderSystem11::CreateProgramByFXC(IResourcePtr res, const std::stri
 	program->SetPixel(_CreatePSByFXC(psName.c_str()));
 
 	AsRes(program)->CheckAndSetLoaded();
+	return program;
+}
+#endif
+
+IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, const Data& data)
+{
+	BlobData11Ptr blob = MakePtr<BlobData11>(nullptr);
+
+	std::vector<D3D_SHADER_MACRO> shaderMacros(compile.Macros.size());
+	if (!compile.Macros.empty()) {
+		for (size_t i = 0; i < compile.Macros.size(); ++i) {
+			const auto& cdm = compile.Macros[i];
+			shaderMacros[i] = D3D_SHADER_MACRO{ cdm.Name.c_str(), cdm.Definition.c_str() };
+		}
+		shaderMacros.push_back(D3D_SHADER_MACRO{ NULL, NULL });
+	}
+
+	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined(_DEBUG) && defined(D3D11_DEBUG)
+	shaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	ID3DBlob* blobError = nullptr;
+	HRESULT hr = D3DCompile(data.Bytes, data.Size, compile.SourcePath.c_str(),
+		shaderMacros.empty() ? nullptr : &shaderMacros[0], D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		compile.EntryPoint.c_str(), compile.ShaderModel.c_str(),
+		shaderFlags, 0,
+		&blob->mBlob, &blobError);
+	if (debug::CheckCompileFailed(hr, blobError)) return nullptr;
+
+	return blob;
+}
+IShaderPtr RenderSystem11::CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data)
+{
+	switch (type) {
+	case kShaderVertex: {
+		VertexShader11Ptr ret = MakePtr<VertexShader11>(data);
+		if (debug::CheckCompileFailed(
+			mDevice->CreateVertexShader(data->GetBufferPointer(), data->GetBufferSize(), NULL, &ret->mShader), data))
+			return nullptr;
+		ret->SetLoaded();
+		return ret;
+	}break;
+	case kShaderPixel: {
+		PixelShader11Ptr ret = MakePtr<PixelShader11>(data);
+		if (debug::CheckCompileFailed(
+			mDevice->CreatePixelShader(data->GetBufferPointer(), data->GetBufferSize(), NULL, &ret->mShader), data)) 
+			return nullptr;
+		ret->SetLoaded();
+		return ret;
+	}break;
+	default:
+		break;
+	}
+	return nullptr;
+}
+IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders)
+{
+	Program11Ptr program = std::static_pointer_cast<Program11>(res);
+	for (auto& iter : shaders) {
+		switch (iter->GetType()) {
+		case kShaderVertex:
+			program->SetVertex(std::static_pointer_cast<VertexShader11>(iter));
+		case kShaderPixel:
+			program->SetPixel(std::static_pointer_cast<PixelShader11>(iter));
+		default:
+			break;
+		}
+	}
+	program->SetLoaded();
 	return program;
 }
 
@@ -706,64 +781,6 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 	if (data) UpdateBuffer(ret, data, ret->GetBufferSize());
 	return ret;
 }
-
-#if 0
-ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, const std::string& filepath, 
-	ResourceFormat format, bool async, bool isCube)
-{
-	if (res == nullptr) res = CreateResource(kDeviceResourceTexture);
-
-	ITexturePtr ret = nullptr;
-	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
-	if (boost::filesystem::exists(fullpath)) {
-		std::string imgFullpath = fullpath.string();
-
-		static D3DX11_IMAGE_LOAD_INFO LoadInfo = {};
-		LoadInfo.Format = static_cast<DXGI_FORMAT>(format);
-		D3DX11_IMAGE_LOAD_INFO* pLoadInfo = format != kFormatUnknown ? &LoadInfo : nullptr;
-
-		ITexturePtr texture = std::static_pointer_cast<Texture11>(res);
-		IResourcePtr resource = AsRes(texture);
-		if (!async) {
-			if (!CheckHR(mThreadPump->AddWorkItem(resource, [=](ID3DX11ThreadPump* pump, ThreadPumpEntryPtr entry)->HRESULT {
-				return D3DX11CreateShaderResourceViewFromFileA(mDevice, imgFullpath.c_str(), pLoadInfo, pump,
-					&std::static_pointer_cast<Texture11>(texture)->GetSRV11(), nullptr);
-			}, ResourceSetLoaded))) {
-				ret = texture;
-			}
-		}
-		else {
-			FILE* fd = fopen(imgFullpath.c_str(), "rb");
-			BOOST_ASSERT(fd);
-			if (fd) {
-				ILuint image = ilGenImage();
-				ilBindImage(image);
-
-				ILenum ilType = il_helper::DetectType(fd);
-				if (ilType != IL_TYPE_UNKNOWN && ilLoadF(ilType, fd)) {
-					ILuint width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT);
-					
-					std::vector<unsigned char> bytes(width * height * 4);
-					ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, &bytes[0]);
-
-					constexpr ResourceFormat bytes_format = kFormatR8G8B8A8UNorm;
-
-					LoadTexture(texture, bytes_format, Eigen::Vector4i(width, height, 0, 1), 1, 
-						&Data::Make(&bytes[0], bytes.size()));
-					ret = texture;
-				}
-
-				ilDeleteImage(image);
-				fclose(fd);
-			}
-		}
-	}
-	else {
-		MessageBoxA(0, (boost::format("image file %s not exist\n") % filepath).str().c_str(), "", MB_OK);
-	}
-	return ret;
-}
-#endif
 
 ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, 
 	const Eigen::Vector4i& size, int mipCount, const Data datas[])

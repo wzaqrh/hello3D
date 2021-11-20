@@ -25,27 +25,32 @@ public:
 
 interface IInputLayout : public IResource  
 {
-	//virtual IResourcePtr AsRes() = 0;
 };
 
-interface IVertexShader : public IResource 
-{
-	virtual IBlobDataPtr GetBlob() = 0;
-	//virtual IResourcePtr AsRes() = 0;
+/********** Program **********/
+enum ShaderType {
+	kShaderVertex,
+	kShaderPixel
 };
 
-interface IPixelShader : public IResource 
+interface IShader : public IResource 
 {
-public:
+	virtual ShaderType GetType() = 0;
 	virtual IBlobDataPtr GetBlob() = 0;
-	//virtual IResourcePtr AsRes() = 0;
+};
+
+interface IVertexShader : public IShader 
+{	
+};
+
+interface IPixelShader : public IShader 
+{
 };
 
 interface IProgram : public IResource 
 {
 	virtual IVertexShaderPtr GetVertex() = 0;
 	virtual IPixelShaderPtr GetPixel() = 0;
-	//virtual IResourcePtr AsRes() = 0;
 };
 
 /********** HardwareBuffer **********/
@@ -97,7 +102,6 @@ enum TexturePbrType {
 
 interface ITexture : public IResource  
 {
-	//virtual IResourcePtr AsRes() = 0;
 	virtual bool HasSRV() = 0;
 
 	virtual int GetWidth() = 0;

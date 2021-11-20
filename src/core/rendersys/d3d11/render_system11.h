@@ -51,13 +51,9 @@ public:
 	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
-	IProgramPtr CreateProgramByCompile(IResourcePtr res, const std::string& vsPath, 
-		const std::string& psPath, 
-		const std::string& vsEntry, 
-		const std::string& psEntry) override;
-	IProgramPtr CreateProgramByFXC(IResourcePtr res, const std::string& name, 
-		const std::string& vsEntry, 
-		const std::string& psEntry) override;
+	IBlobDataPtr CompileShader(const ShaderCompileDesc& compileDesc, const Data& data) override;
+	IShaderPtr CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data) override;
+	IProgramPtr LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders) override;
 	void SetProgram(IProgramPtr program) override;
 
 	ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) override;
@@ -89,12 +85,6 @@ private:
 private:
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
 	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
-
-	VertexShader11Ptr _CreateVS(const std::string& filename, const std::string& entry, bool async = true);
-	VertexShader11Ptr _CreateVSByFXC(const std::string& filename);
-	PixelShader11Ptr _CreatePS(const std::string& filename, const std::string& entry, bool async = true);
-	PixelShader11Ptr _CreatePSByFXC(const std::string& filename);
-
 	ID3D11InputLayout* _CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 };
 

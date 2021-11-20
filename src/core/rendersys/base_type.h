@@ -4,14 +4,21 @@
 
 namespace mir {
 
-struct Data 
-{
+struct Data {
 	static Data MakeEmpty() { return Data{ nullptr, 0 }; }
 	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
 	static Data Make(void* data, unsigned size) { return Data{ data, size }; }
 public:
 	void* Bytes;
 	unsigned int Size;
+};
+
+struct ShaderCompileMacro {
+	std::string Name, Definition;
+};
+struct ShaderCompileDesc {
+	std::vector<ShaderCompileMacro> Macros;
+	std::string EntryPoint, ShaderModel, SourcePath;
 };
 
 enum BlendFunc {

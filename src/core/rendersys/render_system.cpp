@@ -11,6 +11,7 @@ RenderSystem::~RenderSystem()
 {
 }
 
+#if 0
 IProgramPtr RenderSystem::LoadProgram(IResourcePtr res, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceProgram);
@@ -24,5 +25,6 @@ IProgramPtr RenderSystem::LoadProgram(IResourcePtr res, const std::string& name,
 		return CreateProgramByCompile(res, fullname.c_str(), fullname.c_str(), vsEntry, psEntry);
 	}
 }
+#endif
 
 }

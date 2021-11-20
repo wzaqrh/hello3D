@@ -43,11 +43,7 @@ public:
 		return mRenderSys.UpdateBuffer(std::forward<T>(args)...);
 	}
 
-	template <typename... T>
-	IProgramPtr CreateProgram(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceProgram);
-		return mRenderSys.LoadProgram(res, std::forward<T>(args)...);
-	}
+	IProgramPtr CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry);
 	template <typename... T>
 	IProgramPtr CreateProgramAsync(T &&...args) {
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceProgram);

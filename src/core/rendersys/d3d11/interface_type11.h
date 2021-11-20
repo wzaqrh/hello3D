@@ -32,51 +32,42 @@ class InputLayout11 : public ImplementResource<IInputLayout>
 {
 public:
 	InputLayout11();
-	//IResourcePtr AsRes() override { return mRes; }
-
 	ID3D11InputLayout*& GetLayout11() { return mLayout; }
 public:
 	std::vector<D3D11_INPUT_ELEMENT_DESC> mInputDescs;
 	ID3D11InputLayout* mLayout = nullptr;
-	//IResourcePtr mRes;
 };
 
 class VertexShader11 : public ImplementResource<IVertexShader> 
 {
 public:
+	VertexShader11(IBlobDataPtr pBlob);
+	ShaderType GetType() override { return kShaderVertex; }
+	IBlobDataPtr GetBlob() override { return mBlob; }
+	ID3D11VertexShader*& GetShader11() { return mShader; }
+public:
 	ID3D11VertexShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	//IResourcePtr mRes;
-public:
-	VertexShader11(IBlobDataPtr pBlob);
-	//IResourcePtr AsRes() override { return mRes; }
-
-	IBlobDataPtr GetBlob() override { return mBlob; }
-	ID3D11VertexShader*& GetShader11() { return mShader; }
 };
 
 class PixelShader11 : public ImplementResource<IPixelShader> 
 {
 public:
 	PixelShader11(IBlobDataPtr pBlob);
-	//IResourcePtr AsRes() override { return mRes; }
-	
+	ShaderType GetType() override { return kShaderPixel; }
 	IBlobDataPtr GetBlob() override { return mBlob; }
 	ID3D11PixelShader*& GetShader11() { return mShader; }
 public:
 	ID3D11PixelShader* mShader = nullptr;
 	IBlobDataPtr mBlob;
 	ID3DBlob* mErrBlob = nullptr;
-	//IResourcePtr mRes;
 };
 
 class Program11 : public ImplementResource<IProgram> 
 {
 public:
 	Program11();
-	//IResourcePtr AsRes() override { return mRes; }
-	
 	void SetVertex(VertexShader11Ptr pVertex);
 	void SetPixel(PixelShader11Ptr pPixel);
 	IVertexShaderPtr GetVertex() override { return mVertex; }
@@ -84,7 +75,6 @@ public:
 public:
 	VertexShader11Ptr mVertex;
 	PixelShader11Ptr mPixel;
-	//IResourcePtr mRes;
 };
 
 /********** HardwareBuffer **********/
@@ -159,7 +149,6 @@ class Texture11 : public ImplementResource<ITexture>
 public:
 	Texture11(ID3D11ShaderResourceView* texture);
 	void Init(ResourceFormat format, int width, int height, int faceCount, int mipmap);
-	//IResourcePtr AsRes() override { return mRes; }
 
 	bool HasSRV() override { return mTexture != nullptr; }
 	void SetSRV11(ID3D11ShaderResourceView* texture);

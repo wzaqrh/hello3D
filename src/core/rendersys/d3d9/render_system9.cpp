@@ -14,7 +14,7 @@ namespace mir {
 
 RenderSystem9::RenderSystem9()
 {
-	mFXCDir = "d3d9\\";
+	//mFXCDir = "d3d9\\";
 }
 
 RenderSystem9::~RenderSystem9()
@@ -264,6 +264,7 @@ bool RenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int data
 	return true;
 }
 
+#if 0
 static VertexShader9Ptr _CreateVSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr pBlob) {
 	VertexShader9Ptr ret = MakePtr< VertexShader9>();
 
@@ -384,6 +385,22 @@ IProgramPtr RenderSystem9::CreateProgramByFXC(IResourcePtr res, const std::strin
 	AsRes(program)->CheckAndSetLoaded();
 	return program;
 }
+#else
+IBlobDataPtr RenderSystem9::CompileShader(const ShaderCompileDesc& compileDesc, const Data& data)
+{
+	return nullptr;
+}
+
+IShaderPtr RenderSystem9::CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data)
+{
+	return nullptr;
+}
+
+IProgramPtr RenderSystem9::LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders)
+{
+	return nullptr;
+}
+#endif
 
 ISamplerStatePtr RenderSystem9::LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc cmpFunc)
 {

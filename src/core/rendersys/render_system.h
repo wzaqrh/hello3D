@@ -3,6 +3,7 @@
 #include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
+#include "core/rendersys/interface_type.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -41,8 +42,9 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) = 0;
 	virtual void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) = 0;
 
-	virtual IProgramPtr LoadProgram(IResourcePtr res, const std::string& name,
-		const std::string& vsEntry, const std::string& psEntry) = 0;
+	virtual IBlobDataPtr CompileShader(const ShaderCompileDesc& desc, const Data& data) = 0;
+	virtual IShaderPtr CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data) = 0;
+	virtual IProgramPtr LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders) = 0;
 	virtual void SetProgram(IProgramPtr program) = 0;
 	
 	virtual IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr) = 0;
@@ -81,25 +83,11 @@ public:
 	Eigen::Vector4i WinSize() { return Eigen::Vector4i{ mScreenWidth, mScreenHeight, 0, 0 }; }
 	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }
-
-	IProgramPtr LoadProgram(IResourcePtr res, const std::string& name,
-		const std::string& vsEntry,
-		const std::string& psEntry) override final;
-protected:
-	virtual IProgramPtr CreateProgramByCompile(IResourcePtr res, const std::string& vsPath,
-		const std::string& psPath,
-		const std::string& vsEntry,
-		const std::string& psEntry) = 0;
-	virtual IProgramPtr CreateProgramByFXC(IResourcePtr res, const std::string& name,
-		const std::string& vsEntry,
-		const std::string& psEntry) = 0;
 public:
 	int mScreenWidth, mScreenHeight;
-
+protected:
 	BlendState mCurBlendFunc;
 	DepthState mCurDepthState;
-
-	std::string mFXCDir;
 };
 
 }

@@ -1,6 +1,7 @@
 #include <boost/assert.hpp>
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
+#include "core/base/input.h"
 #include "core/rendersys/resource_manager.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
@@ -38,6 +39,71 @@ void ResourceManager::UpdateForLoading()
 void ResourceManager::AddResourceDependency(IResourcePtr node, IResourcePtr parent)
 {
 	mResDependencyTree.AddNode(node, parent);
+}
+
+IProgramPtr ResourceManager::CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+{
+	if (boost::filesystem::path(name).extension().empty()) {
+		std::string fullname = boost::filesystem::system_complete("shader/d3d11/" + name).string();
+
+		auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
+		std::vector<IShaderPtr> shaders;
+		{
+			ShaderCompileDesc desc;
+			desc.EntryPoint = vsEntry;
+			desc.ShaderModel = "vs_4_0";
+			desc.SourcePath = fullname;
+
+			std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
+			std::string vsFullPath = name + "_" + vsEntryOrVS + ".cso";
+			std::vector<char> buffer = input::ReadFile(vsFullPath.c_str(), "rb");
+			auto blob = std::make_shared<BlobDataStandard>(buffer);
+			
+			shaders.push_back(mRenderSys.CreateShader(kShaderVertex, desc, blob));
+		}
+		{
+			ShaderCompileDesc desc;
+			desc.EntryPoint = psEntry;
+			desc.ShaderModel = "ps_4_0";
+			desc.SourcePath = fullname;
+
+			std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
+			std::string psFullName = name + "_" + psEntryOrPS + ".cso";
+			std::vector<char> buffer = input::ReadFile(psFullName.c_str(), "rb");
+			auto blob = std::make_shared<BlobDataStandard>(buffer);
+
+			shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
+		}
+		return mRenderSys.LoadProgram(program, shaders);
+	}
+	else {
+		std::string fullname = boost::filesystem::system_complete("shader/" + name).string();
+		std::vector<char> bytes = input::ReadFile(fullname.c_str(), "rb");
+		if (!bytes.empty()) {
+			auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
+			std::vector<IShaderPtr> shaders;
+			{
+				ShaderCompileDesc desc = {
+					{{"SHADER_MODEL", "40000"}},
+					vsEntry, "vs_4_0", fullname
+				};
+				IBlobDataPtr blob = mRenderSys.CompileShader(desc, Data::Make(&bytes[0], bytes.size()));
+
+				shaders.push_back(mRenderSys.CreateShader(kShaderVertex, desc, blob));
+			}
+			{
+				ShaderCompileDesc desc = {
+					{{"SHADER_MODEL", "40000"}},
+					psEntry, "ps_4_0", fullname
+				};
+				IBlobDataPtr blob = mRenderSys.CompileShader(desc, Data::Make(&bytes[0], bytes.size()));
+
+				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
+			}
+			return mRenderSys.LoadProgram(program, shaders);
+		}
+	}
+	return nullptr;
 }
 
 ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)

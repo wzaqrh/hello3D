@@ -1,10 +1,13 @@
 #include <Windows.h>
+#include <d3dcompiler.h>
 #include <dxerr.h>
 #include <boost/assert.hpp>
 #include "core/base/debug.h"
+#include "core/rendersys/interface_type.h"
 
 namespace mir {
 namespace debug {
+
 
 /********** TTimeProfile **********/
 TimeProfile::TimeProfile(const std::string& name)
@@ -43,6 +46,40 @@ bool CheckHResultFailed(HRESULT hr)
 		DXTRACE_ERR(DXGetErrorDescription(hr), hr);
 
 		BOOST_ASSERT(false);
+		return true;
+	}
+	return false;
+}
+
+bool CheckCompileFailed(HRESULT hr, ID3DBlob* pErrorBlob)
+{
+	if (FAILED(hr)) 
+	{
+		if (pErrorBlob != NULL) 
+		{
+			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			pErrorBlob->Release();
+			pErrorBlob = nullptr;
+		}
+		CheckHR(hr);
+		return true;
+	}
+	return false;
+}
+
+bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data)
+{
+	if (FAILED(hr)) 
+	{
+		ID3DBlob* pErrorBlob = nullptr;
+		D3DGetDebugInfo(data->GetBufferPointer(), data->GetBufferSize(), &pErrorBlob);
+		if (pErrorBlob != NULL) 
+		{
+			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			pErrorBlob->Release();
+			pErrorBlob = nullptr;
+		}
+		CheckHR(hr);
 		return true;
 	}
 	return false;

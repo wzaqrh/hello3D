@@ -5,6 +5,7 @@
 #include <d3d9.h>
 #include "core/mir_export.h"
 #include "core/base/stl.h"
+#include "core/rendersys/predeclare.h"
 
 namespace mir {
 namespace debug {
@@ -26,7 +27,8 @@ public:
 };
 
 bool CheckHResultFailed(HRESULT result);
-
+bool CheckCompileFailed(HRESULT hr, ID3DBlob* pErrorBlob);
+bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data);
 void SetDebugName(ID3D11DeviceChild* child, const std::string& name);
 
 void Log(const char* msg);

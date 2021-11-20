@@ -33,13 +33,10 @@ class InputLayout9 : public ImplementResource<IInputLayout>
 {
 public:
 	InputLayout9();
-	//IResourcePtr AsRes() override { return mRes; }
-
 	IDirect3DVertexDeclaration9*& GetLayout9() { return mLayout; }
 public:
 	std::vector<D3DVERTEXELEMENT9> mInputDescs;
 	IDirect3DVertexDeclaration9* mLayout;
-	//IResourcePtr mRes;
 };
 
 class ConstantTable 
@@ -67,8 +64,7 @@ class VertexShader9 : public ImplementResource<IVertexShader>
 {
 public:
 	VertexShader9();
-	//IResourcePtr AsRes() override { return mRes; }
-
+	ShaderType GetType() override { return kShaderVertex; }
 	IBlobDataPtr GetBlob() override { return mBlob; }
 	IDirect3DVertexShader9*& GetShader9() { return mShader; }
 	void SetConstTable(ID3DXConstantTable* constTable);
@@ -76,31 +72,26 @@ public:
 	ConstantTable mConstTable;
 	IBlobDataPtr mBlob, mErrBlob;
 	IDirect3DVertexShader9* mShader;
-	//IResourcePtr mRes;
 };
 
 class PixelShader9 : public ImplementResource<IPixelShader> 
 {
 public:
 	PixelShader9();
-	//IResourcePtr AsRes() override { return mRes; }
-
-	virtual IBlobDataPtr GetBlob() override { return mBlob; }
+	ShaderType GetType() override { return kShaderPixel; }
+	IBlobDataPtr GetBlob() override { return mBlob; }
 	IDirect3DPixelShader9*& GetShader9() { return mShader; }
 	void SetConstTable(ID3DXConstantTable* constTable);
 public:
 	ConstantTable mConstTable;
 	IBlobDataPtr mBlob, mErrBlob;
 	IDirect3DPixelShader9* mShader;
-	//IResourcePtr mRes;
 };
 
 class Program9 : public ImplementResource<IProgram> 
 {
 public:
 	Program9();
-	//IResourcePtr AsRes() override { return mRes; }
-	
 	void SetVertex(VertexShader9Ptr pVertex);
 	void SetPixel(PixelShader9Ptr pPixel);
 	IVertexShaderPtr GetVertex() override { return mVertex; }
@@ -108,7 +99,6 @@ public:
 public:
 	VertexShader9Ptr mVertex;
 	PixelShader9Ptr mPixel;
-	//IResourcePtr mRes;
 };
 
 /********** HardwareBuffer **********/
@@ -176,7 +166,6 @@ class Texture9 : public ImplementResource<ITexture>
 public:
 	Texture9(int width, int height, ResourceFormat format, int mipmap);
 	Texture9(IDirect3DTexture9* texture);
-	//IResourcePtr AsRes() override { return mRes; }
 
 	bool IsCube() const { return mTextureCube != nullptr; }
 	bool HasSRV() override { return mTexture != nullptr || mTextureCube != nullptr; }
@@ -195,7 +184,6 @@ private:
 	ResourceFormat mFormat;
 	IDirect3DTexture9 *mTexture;
 	IDirect3DCubeTexture9* mTextureCube;
-	//IResourcePtr mRes;
 };
 
 class RenderTexture9 : public ImplementResource<IRenderTexture>
