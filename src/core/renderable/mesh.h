@@ -15,7 +15,7 @@ class MIR_CORE_API Mesh : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
-	Mesh(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName, 
+	Mesh(ResourceManager& resourceMng, const std::string& matName, 
 		int vertCount = 1024, int indexCount = 1024);
 public:
 	void Clear();

@@ -127,11 +127,11 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(ResourceManager& resourceMng, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType)
+AssimpModel::AssimpModel(ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType)
 	:mResourceMng(resourceMng)
 {
 	mTransform = pMove ? pMove : std::make_shared<Transform>();
-	mMaterial = matFac.GetMaterial(matType);
+	mMaterial = resourceMng.CreateMaterial(matType);
 }
 
 AssimpModel::~AssimpModel()

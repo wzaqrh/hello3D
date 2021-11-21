@@ -6,10 +6,10 @@
 namespace mir {
 
 /********** Mesh **********/
-Mesh::Mesh(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName, int vertCount, int indexCount)
+Mesh::Mesh(ResourceManager& resourceMng, const std::string& matName, int vertCount, int indexCount)
 	:mResourceMng(resourceMng)
 {
-	mMaterial = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
+	mMaterial = resourceMng.CreateMaterial(matName != "" ? matName : E_MAT_SPRITE);
 
 	mVertices.resize(vertCount);
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);

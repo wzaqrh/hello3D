@@ -30,7 +30,7 @@ class MIR_CORE_API Sprite : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
-	Sprite(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName = "");
+	Sprite(ResourceManager& resourceMng, const std::string& matName = "");
 public:
 	~Sprite();
 	void SetPosition(const Eigen::Vector3f& pos);

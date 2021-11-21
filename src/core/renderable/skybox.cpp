@@ -5,10 +5,10 @@
 
 namespace mir {
 
-SkyBox::SkyBox(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& imgName)
+SkyBox::SkyBox(ResourceManager& resourceMng, const std::string& imgName)
 	:mResourceMng(resourceMng)
 {
-	mMaterial = matFac.GetMaterial(E_MAT_SKYBOX);
+	mMaterial = resourceMng.CreateMaterial(E_MAT_SKYBOX);
 	mIndexBuffer = nullptr;
 
 	SkyboxVertex Vertexs[4];

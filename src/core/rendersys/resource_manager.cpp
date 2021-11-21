@@ -3,13 +3,15 @@
 #include "core/base/d3d.h"
 #include "core/base/input.h"
 #include "core/rendersys/resource_manager.h"
-#include "core/rendersys/render_system.h"
 #include "core/rendersys/interface_type.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/material_factory.h"
 
 namespace mir {
 
-ResourceManager::ResourceManager(RenderSystem& renderSys)
+ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac)
 	:mRenderSys(renderSys)
+	,mMaterialFac(materialFac)
 {
 	ilInit();
 }
@@ -314,6 +316,15 @@ ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string&
 		texture = findTex->second;
 	}
 	return texture;
+}
+
+MaterialPtr ResourceManager::CreateMaterial(const std::string& matName, bool sharedUse/*readonly*/)
+{
+	if (mMaterials.find(matName) == mMaterials.end())
+		mMaterials.insert(std::make_pair(matName, mMaterialFac.CreateMaterial(*this, matName)));
+
+	MaterialPtr material = sharedUse ? mMaterials[matName] : mMaterials[matName]->Clone(*this);
+	return material;
 }
 
 }

@@ -40,7 +40,7 @@ class MIR_CORE_API AssimpModel : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
-	AssimpModel(ResourceManager& resourceMng, MaterialFactory& matFac, TransformPtr pMove, const std::string& matType);
+	AssimpModel(ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType);
 public:
 	~AssimpModel();
 	void LoadModel(const std::string& imgPath, const std::string& redirectResource = "");

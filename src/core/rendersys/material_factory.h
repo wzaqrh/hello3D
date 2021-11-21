@@ -29,13 +29,11 @@ namespace mir {
 
 struct MaterialFactory : boost::noncopyable
 {
-	ResourceManager& mResourceMng;
-	std::map<std::string, MaterialPtr> mMaterials;
 	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 public:
-	MaterialFactory(ResourceManager& resourceMng);
-	MaterialPtr GetMaterial(const std::string& matName, bool sharedUse = false);
+	MaterialFactory();
+	MaterialPtr CreateMaterial(ResourceManager& resourceMng, const std::string& matName);
 private:
-	MaterialPtr CreateStdMaterial(const std::string& matName);
+	MaterialPtr CreateStdMaterial(ResourceManager& resourceMng, const std::string& matName);
 };
 }

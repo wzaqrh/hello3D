@@ -38,7 +38,7 @@ class MIR_CORE_API Bloom : public PostProcess
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Bloom);
-	Bloom(ResourceManager& resourceMng, MaterialFactory& matFac, IRenderTexturePtr mainTex);
+	Bloom(ResourceManager& resourceMng, IRenderTexturePtr mainTex);
 public:
 };
 

@@ -27,7 +27,7 @@ public:
 	inline const RenderSystemPtr& RenderSys() { return mRenderSys; }
 	inline const ResourceManagerPtr& ResourceMng() { return mResourceMng; }
 	inline const RenderPipelinePtr& RenderPipe() { return mRenderPipe; }
-	inline const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
+	//inline const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
 	inline const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }
 	inline const SceneManagerPtr& SceneMng() { return mSceneMng; }
 };

@@ -27,13 +27,13 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-Label::Label(ResourceManager& resourceMng, MaterialFactory& matFac, FontPtr font)
+Label::Label(ResourceManager& resourceMng, FontPtr font)
 	:mResourceMng(resourceMng)
 {
 	mFont = font;
 
 	mTransform = std::make_shared<Transform>();
-	mMaterial = matFac.GetMaterial(E_MAT_LABEL);
+	mMaterial = resourceMng.CreateMaterial(E_MAT_LABEL);
 
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(sizeof(unsigned int) * 6 * CMaxStringLength, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(SpriteVertexQuad) * CMaxStringLength, sizeof(SpriteVertex), 0, nullptr);

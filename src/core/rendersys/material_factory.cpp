@@ -628,24 +628,20 @@ private:
 };
 
 /********** TMaterialFactory **********/
-MaterialFactory::MaterialFactory(ResourceManager& resourceMng)
-	:mResourceMng(resourceMng)
+MaterialFactory::MaterialFactory()
 {
 	mMatAssetMng = std::make_shared<MaterialAssetManager>();
 }
 
-MaterialPtr MaterialFactory::GetMaterial(const std::string& matName, bool readonly) {
-	if (mMaterials.find(matName) == mMaterials.end())
-		mMaterials.insert(std::make_pair(matName, CreateStdMaterial(matName)));
-
-	MaterialPtr material = readonly ? mMaterials[matName] : mMaterials[matName]->Clone(mResourceMng);
-	return material;
+MaterialPtr MaterialFactory::CreateMaterial(ResourceManager& resourceMng, const std::string& matName) 
+{
+	return CreateStdMaterial(resourceMng, matName);
 }
 
 #if defined MATERIAL_FROM_XML
-MaterialPtr MaterialFactory::CreateStdMaterial(const std::string& matName) {
+MaterialPtr MaterialFactory::CreateStdMaterial(ResourceManager& resourceMng, const std::string& matName) {
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
-	return mMatAssetMng->LoadMaterial(mResourceMng, entry.ShaderName, entry.VariantName);
+	return mMatAssetMng->LoadMaterial(resourceMng, entry.ShaderName, entry.VariantName);
 }
 #else
 

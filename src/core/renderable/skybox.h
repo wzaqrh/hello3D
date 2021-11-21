@@ -14,7 +14,7 @@ class MIR_CORE_API SkyBox : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(SkyBox);
-	SkyBox(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& imgName);
+	SkyBox(ResourceManager& resourceMng, const std::string& imgName);
 public:
 	~SkyBox();
 	int GenRenderOperation(RenderOperationQueue& opList) override;

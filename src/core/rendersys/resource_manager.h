@@ -14,7 +14,7 @@ namespace mir {
 class MIR_CORE_API ResourceManager : boost::noncopyable {
 	typedef std::function<void(IResourcePtr)> ResourceLoadTask;
 public:
-	ResourceManager(RenderSystem& renderSys);
+	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac);
 	~ResourceManager();
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from);//parent rely-on node
@@ -107,6 +107,8 @@ public:
 		res->SetLoaded();
 		return mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
 	}
+
+	MaterialPtr CreateMaterial(const std::string& matName, bool sharedUse = false);
 private:
 	IProgramPtr _CreateProgram(bool async, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
 	IProgramPtr _LoadProgram(IProgramPtr program, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
@@ -114,6 +116,7 @@ private:
 	ITexturePtr _LoadTextureByFile(ITexturePtr texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
 private:
 	RenderSystem& mRenderSys;
+	MaterialFactory& mMaterialFac;
 	struct ResourceDependencyGraph {
 		typedef IResourcePtr ValueType;
 		typedef const ValueType& ConstReference;
@@ -193,6 +196,7 @@ private:
 	ResourceDependencyGraph mResDependencyGraph;
 	std::map<IResourcePtr, ResourceLoadTask> mLoadTaskByRes;
 private:
+	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {
 		std::string name, vsEntry, psEntry;
 		bool operator<(const ProgramKey& other) const {
@@ -203,7 +207,7 @@ private:
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTexByPath;
-	std::vector<unsigned char> mTempBytes;
+	std::map<std::string, MaterialPtr> mMaterials;
 };
 
 }

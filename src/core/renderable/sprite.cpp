@@ -73,7 +73,7 @@ void SpriteVertexQuad::SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vect
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
-Sprite::Sprite(ResourceManager& resourceMng, MaterialFactory& matFac, const std::string& matName)
+Sprite::Sprite(ResourceManager& resourceMng, const std::string& matName)
 	: mResourceMng(resourceMng)
 	, mQuad(0, 0, 0, 0)
 	, mQuadDirty(true)
@@ -82,7 +82,7 @@ Sprite::Sprite(ResourceManager& resourceMng, MaterialFactory& matFac, const std:
 	, mPosition(0, 0)
 {
 	mTransform = std::make_shared<Transform>();
-	mMaterial = matFac.GetMaterial(matName != "" ? matName : E_MAT_SPRITE);
+	mMaterial = resourceMng.CreateMaterial(matName != "" ? matName : E_MAT_SPRITE);
 	mIndexBuffer = resourceMng.CreateIndexBuffer(sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
 	mVertexBuffer = resourceMng.CreateVertexBuffer(sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
 

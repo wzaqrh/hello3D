@@ -93,10 +93,10 @@ IVertexBufferPtr GetVertBufByRT(ResourceManager& resourceMng, IRenderTexturePtr 
 	return vertBuf;
 }
 
-Bloom::Bloom(ResourceManager& resourceMng, MaterialFactory& matFac, IRenderTexturePtr mainTex)
+Bloom::Bloom(ResourceManager& resourceMng, IRenderTexturePtr mainTex)
 	:PostProcess(resourceMng, mainTex)
 {
-	mMaterial = matFac.GetMaterial(E_MAT_POSTPROC_BLOOM);
+	mMaterial = resourceMng.CreateMaterial(E_MAT_POSTPROC_BLOOM);
 
 	auto curTech = mMaterial->CurTech();
 	for (auto& pass : curTech->mPasses) {
