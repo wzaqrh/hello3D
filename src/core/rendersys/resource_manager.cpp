@@ -13,7 +13,6 @@ ResourceManager::ResourceManager(RenderSystem& renderSys)
 {
 	ilInit();
 }
-
 ResourceManager::~ResourceManager()
 {
 	ilShutDown();
@@ -21,32 +20,33 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::UpdateForLoading()
 {
-	const std::vector<IResourcePtr>& topNodes = mResDependencyTree.TopNodes();
+	const std::vector<IResourcePtr>& topNodes = mResDependencyGraph.TopNodes();
 	for (auto& res : topNodes) {
 		if (res->IsPreparedNeedLoading()) {
 			auto task = mLoadTaskByRes[res];
-			task(res);
+			if (task) task(res);
+			else res->SetLoaded();
 		}
 	}
 	for (auto res : topNodes) {
 		if (res->IsLoaded()) {
-			mResDependencyTree.RemoveNode(res);
+			mResDependencyGraph.RemoveNode(res);
 			mLoadTaskByRes.erase(res);
 		}
 	}
 }
 
-void ResourceManager::AddResourceDependency(IResourcePtr node, IResourcePtr parent)
+void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
 {
-	mResDependencyTree.AddNode(node, parent);
+	if (to && !to->IsLoaded()) 
+		mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr);
 }
 
-IProgramPtr ResourceManager::CreateProgram(const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
 	if (boost::filesystem::path(name).extension().empty()) {
 		std::string fullname = boost::filesystem::system_complete("shader/d3d11/" + name).string();
-
-		auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
+		//auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
 		std::vector<IShaderPtr> shaders;
 		{
 			ShaderCompileDesc desc;
@@ -74,13 +74,15 @@ IProgramPtr ResourceManager::CreateProgram(const std::string& name, const std::s
 
 			shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
 		}
+		for (auto& it : shaders)
+			it->SetLoaded();
 		return mRenderSys.LoadProgram(program, shaders);
 	}
 	else {
 		std::string fullname = boost::filesystem::system_complete("shader/" + name).string();
 		std::vector<char> bytes = input::ReadFile(fullname.c_str(), "rb");
 		if (!bytes.empty()) {
-			auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
+			//auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
 			std::vector<IShaderPtr> shaders;
 			{
 				ShaderCompileDesc desc = {
@@ -100,10 +102,39 @@ IProgramPtr ResourceManager::CreateProgram(const std::string& name, const std::s
 
 				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
 			}
+			for (auto& it : shaders)
+				it->SetLoaded();
 			return mRenderSys.LoadProgram(program, shaders);
 		}
 	}
 	return nullptr;
+}
+IProgramPtr ResourceManager::_CreateProgram(bool async, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+{
+	IProgramPtr program = nullptr;
+	ProgramKey key{ name, vsEntry, psEntry };
+	auto findProg = mProgramByKey.find(key);
+	if (findProg == mProgramByKey.end()) {
+		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
+		mProgramByKey.insert(std::make_pair(key, program));
+
+		if (async) {
+			program->SetPrepared();
+			AddResourceDependency(program, nullptr);
+			mLoadTaskByRes[program] = [=](IResourcePtr res) {
+				_LoadProgram(program, name, vsEntry, psEntry);
+				program->SetLoaded();
+			};
+		}
+		else {
+			program = _LoadProgram(program, name, vsEntry, psEntry);
+			program->SetLoaded();
+		}
+	}
+	else {
+		program = findProg->second;
+	}
+	return program;
 }
 
 ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
@@ -255,15 +286,16 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 	}
 	return ret;
 }
-
 ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
 {
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string imgFullpath = fullpath.string();
 
 	ITexturePtr texture = nullptr;
-	if (mTexByPath.find(imgFullpath) == mTexByPath.end()) {
+	auto findTex = mTexByPath.find(imgFullpath);
+	if (findTex == mTexByPath.end()) {
 		texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
+		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 
 		if (async) {
 			texture->SetPrepared();
@@ -277,11 +309,9 @@ ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string&
 			texture = _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
 			texture->SetLoaded();
 		}
-
-		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 	}
 	else {
-		texture = mTexByPath[imgFullpath];
+		texture = findTex->second;
 	}
 	return texture;
 }

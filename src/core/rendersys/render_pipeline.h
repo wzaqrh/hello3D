@@ -16,7 +16,7 @@ class MIR_CORE_API RenderPipeline
 
 	IRenderTexturePtr mShadowCasterOutput;
 public:
-	RenderPipeline(RenderSystem& renderSys, int width, int height);
+	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, int width, int height);
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);

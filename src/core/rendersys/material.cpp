@@ -32,6 +32,7 @@ Pass::Pass(const std::string& lightMode, const std::string& name)
 	:mLightMode(lightMode)
 	,mName(name)
 {
+	SetPrepared();
 }
 
 IContantBufferPtr Pass::AddConstBuffer(const CBufferEntry& cbuffer)
@@ -94,24 +95,37 @@ void Pass::UpdateConstBufferByName(ResourceManager& resourceMng, const std::stri
 std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)
 {
 	PassPtr pass = std::make_shared<Pass>(mLightMode, mName);
-	pass->mInputLayout = mInputLayout;
 	pass->mTopoLogy = mTopoLogy;
-	pass->mProgram = mProgram;
 	
-	for (auto& sampler : mSamplers)
-		pass->AddSampler(sampler);
+	pass->mInputLayout = mInputLayout;
+	resourceMng.AddResourceDependency(pass, mInputLayout);
 
+	pass->mProgram = mProgram;
+	resourceMng.AddResourceDependency(pass, mProgram);
+
+	for (auto& sampler : mSamplers) {
+		pass->AddSampler(sampler);
+		resourceMng.AddResourceDependency(pass, sampler);
+	}
+		
 	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
 		auto buffer = mConstantBuffers[i];
 		if (!buffer.IsUnique)
 			buffer.Buffer = resourceMng.CreateConstBuffer(*buffer.Buffer->GetDecl(), nullptr);
 		pass->AddConstBuffer(buffer);
+		resourceMng.AddResourceDependency(pass, buffer.Buffer);
 	}
 
 	pass->mRenderTarget = mRenderTarget;
-	for (auto& target : mIterTargets)
+	for (auto& target : mIterTargets) {
 		pass->AddIterTarget(target);
+		resourceMng.AddResourceDependency(pass, target);
+	}
+
 	pass->mTextures = mTextures;
+	for (auto& tex : mTextures) {
+		resourceMng.AddResourceDependency(pass, tex);
+	}
 
 	pass->OnBind = OnBind;
 	pass->OnUnbind = OnUnbind;
@@ -119,6 +133,11 @@ std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)
 }
 
 /********** TTechnique **********/
+Technique::Technique()
+{
+	SetPrepared();
+}
+
 void Technique::AddPass(PassPtr pass)
 {
 	mPasses.push_back(pass);
@@ -176,8 +195,11 @@ void Technique::UpdateConstBufferByName(ResourceManager& resourceMng, const std:
 std::shared_ptr<Technique> Technique::Clone(ResourceManager& resourceMng)
 {
 	TechniquePtr technique = std::make_shared<Technique>();
-	for (int i = 0; i < mPasses.size(); ++i)
-		technique->AddPass(mPasses[i]->Clone(resourceMng));
+	for (int i = 0; i < mPasses.size(); ++i) {
+		PassPtr pass = mPasses[i]->Clone(resourceMng);
+		technique->AddPass(pass);
+		resourceMng.AddResourceDependency(technique, pass);
+	}
 	technique->mName = mName;
 	return technique;
 }
@@ -226,8 +248,11 @@ std::shared_ptr<Material> Material::Clone(ResourceManager& resourceMng)
 {
 	MaterialPtr material = std::make_shared<Material>();
 	material->Assign(*this);
-	for (int i = 0; i < mTechniques.size(); ++i)
-		material->AddTechnique(mTechniques[i]->Clone(resourceMng));
+	for (int i = 0; i < mTechniques.size(); ++i) {
+		TechniquePtr tech = mTechniques[i]->Clone(resourceMng);
+		material->AddTechnique(tech);
+		resourceMng.AddResourceDependency(material, tech);
+	}
 	material->mCurTechIdx = mCurTechIdx;
 	return material;
 }

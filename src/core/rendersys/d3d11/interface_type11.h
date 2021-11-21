@@ -92,8 +92,7 @@ public:
 class VertexBuffer11 : public ImplementResource<IVertexBuffer> 
 {
 public:
-	VertexBuffer11(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
-		:hd(buffer, bufferSize), Stride(stride), Offset(offset) {}
+	void Init(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset);
 	VertexBuffer11() :Stride(0), Offset(0) {}
 	int GetCount();
 public:

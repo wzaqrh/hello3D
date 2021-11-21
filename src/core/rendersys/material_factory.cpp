@@ -88,7 +88,7 @@ public:
 	MaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
 		mCurPass->mInputLayout = inputLayout;
 		//mMaterial->AddDependency(AsRes(inputLayout));
-		mResourceMng.AddResourceDependency(inputLayout, mMaterial);
+		mResourceMng.AddResourceDependency(mMaterial, inputLayout);
 		return *this;
 	}
 	MaterialBuilder& SetTopology(PrimitiveTopology topology) {
@@ -98,7 +98,7 @@ public:
 	IProgramPtr SetProgram(IProgramPtr program) {
 		mCurPass->mProgram = program;
 		//mMaterial->AddDependency(AsRes(program));
-		mResourceMng.AddResourceDependency(program, mMaterial);
+		mResourceMng.AddResourceDependency(mMaterial, program);
 		return program;
 	}
 	MaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
@@ -134,11 +134,12 @@ public:
 	MaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
 		mCurPass->mTextures[slot] = texture;
 		//mMaterial->AddDependency(AsRes(texture));
-		mResourceMng.AddResourceDependency(texture, mMaterial);
+		mResourceMng.AddResourceDependency(mMaterial, texture);
 		return *this;
 	}
 	MaterialPtr Build() {
-		mMaterial->SetLoaded();
+		//mMaterial->SetLoaded();
+		mMaterial->SetPrepared();
 		return mMaterial;
 	}
 };
@@ -596,11 +597,11 @@ private:
 				builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 				builder.SetTopology(shaderInfo.Program.Topo);
 
-				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
+				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgramAsync(
 					MAKE_MAT_NAME(shaderInfo.Program.FxName),
 					shaderInfo.Program.VsEntry.c_str(),
 					passInfo.PSEntry.c_str()));
-				builder.SetInputLayout(resourceMng.CreateLayout(program, shaderInfo.Program.Attr.Layout));
+				builder.SetInputLayout(resourceMng.CreateLayoutAsync(program, shaderInfo.Program.Attr.Layout));
 
 				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 					auto& elem = shaderInfo.Program.Samplers[k];

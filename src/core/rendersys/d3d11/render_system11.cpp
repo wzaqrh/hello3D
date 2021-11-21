@@ -224,7 +224,7 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 
 IRenderTexturePtr RenderSystem11::LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceRenderTexture);
+	BOOST_ASSERT(res);
 
 	RenderTexture11Ptr ret = std::static_pointer_cast<RenderTexture11>(res);
 	ret->Init(mDevice, width, height, format);
@@ -268,9 +268,10 @@ ID3D11InputLayout* RenderSystem11::_CreateInputLayout(Program11* pProgram, const
 }
 IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceInputLayout);
+	BOOST_ASSERT(res && AsRes(pProgram)->IsLoaded());
 
 	InputLayout11Ptr ret = std::static_pointer_cast<InputLayout11>(res);
+
 	ret->mInputDescs.resize(descArr.size());
 	for (size_t i = 0; i < descArr.size(); ++i) {
 		const LayoutInputElement& descI = descArr[i];
@@ -285,20 +286,11 @@ IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgra
 		};
 	}
 
-	auto resource = AsRes(pProgram);
-	if (resource->IsLoaded()) {
-		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program11>(pProgram).get(), ret->mInputDescs);
-		resource->SetLoaded();
-	}
-	else {
-		resource->AddOnLoadedListener([=](IResource* res) {
-			ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program11>(pProgram).get(), ret->mInputDescs);
-			res->SetLoaded();
-		});
-	}
+	ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program11>(pProgram).get(), ret->mInputDescs);
 	return ret;
 }
-void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout) {
+void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout) 
+{
 	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(layout)->GetLayout11());
 }
 
@@ -306,8 +298,8 @@ void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout) {
 
 bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
 {
-	assert(buffer != nullptr);
-	HRESULT hr = S_OK;
+	BOOST_ASSERT(buffer);
+
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
 	switch (buffer->GetType())
 	{
@@ -345,7 +337,7 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dat
 
 ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc cmpFunc)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceSamplerState);
+	BOOST_ASSERT(res);
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -405,7 +397,6 @@ IShaderPtr RenderSystem11::CreateShader(ShaderType type, const ShaderCompileDesc
 		if (debug::CheckCompileFailed(
 			mDevice->CreateVertexShader(data->GetBufferPointer(), data->GetBufferSize(), NULL, &ret->mShader), data))
 			return nullptr;
-		ret->SetLoaded();
 		return ret;
 	}break;
 	case kShaderPixel: {
@@ -413,7 +404,6 @@ IShaderPtr RenderSystem11::CreateShader(ShaderType type, const ShaderCompileDesc
 		if (debug::CheckCompileFailed(
 			mDevice->CreatePixelShader(data->GetBufferPointer(), data->GetBufferSize(), NULL, &ret->mShader), data)) 
 			return nullptr;
-		ret->SetLoaded();
 		return ret;
 	}break;
 	default:
@@ -434,7 +424,6 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 			break;
 		}
 	}
-	program->SetLoaded();
 	return program;
 }
 
@@ -474,14 +463,13 @@ ID3D11Buffer* RenderSystem11::_CreateVertexBuffer(int bufferSize)
 
 IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceVertexBuffer);
+	BOOST_ASSERT(res);
 
-	IVertexBufferPtr vertexBuffer;
-	if (buffer) vertexBuffer = MakePtr<VertexBuffer11>(_CreateVertexBuffer(bufferSize, buffer), bufferSize, stride, offset);
-	else vertexBuffer = MakePtr<VertexBuffer11>(_CreateVertexBuffer(bufferSize), bufferSize, stride, offset);
+	VertexBuffer11Ptr ret = std::static_pointer_cast<VertexBuffer11>(res);
+	if (buffer) ret->Init(_CreateVertexBuffer(bufferSize, buffer), bufferSize, stride, offset);
+	else ret->Init(_CreateVertexBuffer(bufferSize), bufferSize, stride, offset);
 	
-	vertexBuffer->SetLoaded();
-	return vertexBuffer;
+	return ret;
 }
 
 void RenderSystem11::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
@@ -493,7 +481,7 @@ void RenderSystem11::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
 
 IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceIndexBuffer);
+	BOOST_ASSERT(res);
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -510,10 +498,9 @@ IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, int bufferSize
 	if (CheckHR(mDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer)))
 		return nullptr;
 
-	IndexBuffer11Ptr indexBuffer = std::static_pointer_cast<IndexBuffer11>(res);
-	indexBuffer->Init(pIndexBuffer, bufferSize, format);
-	indexBuffer->SetLoaded();
-	return indexBuffer;
+	IndexBuffer11Ptr ret = std::static_pointer_cast<IndexBuffer11>(res);
+	ret->Init(pIndexBuffer, bufferSize, format);
+	return ret;
 }
 
 void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
@@ -527,7 +514,7 @@ void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 
 IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceContantBuffer);
+	BOOST_ASSERT(res);
 
 	D3D11_BUFFER_DESC cbDesc = {};
 #if CBufferUsage == D3D11_USAGE_DEFAULT
@@ -657,8 +644,6 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 		{
 			Texture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
 			tex11->SetSRV11(texSRV);
-
-			AsRes(tex11)->SetLoaded();
 		}
 	}
 

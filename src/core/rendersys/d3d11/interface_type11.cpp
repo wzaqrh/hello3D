@@ -101,6 +101,13 @@ D3D11_TEXTURE2D_DESC Texture11::GetDesc()
 	}
 }
 
+void VertexBuffer11::Init(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
+{
+	hd.Init(buffer, bufferSize);
+	Stride = stride;
+	Offset = offset;
+}
+
 /********** TVertex11Buffer **********/
 int VertexBuffer11::GetCount()
 {

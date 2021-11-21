@@ -27,6 +27,9 @@ public:
 	bool Empty() const { return Textures.empty(); }
 	size_t Count() const { return Textures.size(); }
 
+	std::vector<ITexturePtr>::iterator begin() { return Textures.begin(); }
+	std::vector<ITexturePtr>::iterator end() { return Textures.end(); }
+
 	ITexturePtr& At(size_t pos) {
 		if (pos >= Textures.size()) Textures.resize(pos + 1);
 		return Textures[pos];
@@ -53,7 +56,7 @@ public:
 };
 #define MAKE_CBNAME(V) #V
 
-class Pass : boost::noncopyable 
+class Pass : public ImplementResource<IResource>, std::enable_shared_from_this<Pass> 
 {
 public:
 	Pass(const std::string& lightMode, const std::string& name);
@@ -87,9 +90,10 @@ public:
 	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnUnbind;
 };
 
-class Technique : boost::noncopyable
+class Technique : public ImplementResource<IResource>
 {
 public:
+	Technique();
 	void AddPass(PassPtr pass);
 	TechniquePtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);

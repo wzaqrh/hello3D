@@ -1,7 +1,7 @@
 #include "core/rendersys/render_pipeline.h"
 #include "core/base/debug.h"
 #include "core/rendersys/interface_type.h"
-#include "core/rendersys/render_system.h"
+#include "core/rendersys/resource_manager.h"
 #include "core/rendersys/material_factory.h"
 #include "core/rendersys/scene_manager.h"
 #include "core/renderable/post_process.h"
@@ -9,12 +9,12 @@
 
 namespace mir {
 
-RenderPipeline::RenderPipeline(RenderSystem& renderSys, int width, int height)
+RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, int width, int height)
 	:mRenderSys(renderSys)
 	,mScreenWidth(width)
 	,mScreenHeight(height)
 {
-	mShadowCasterOutput = mRenderSys.LoadRenderTexture(nullptr, mScreenWidth, mScreenHeight, kFormatR32Float);
+	mShadowCasterOutput = resMng.CreateRenderTexture(mScreenWidth, mScreenHeight, kFormatR32Float);
 	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
