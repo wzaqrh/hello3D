@@ -17,7 +17,7 @@ Texture9::Texture9(IDirect3DTexture9 *texture)
 	mWidth = 0, mHeight = 0, mMipCount = 0;
 	mFormat = kFormatUnknown;
 
-	SetDeviceObject((IUnknown**)&mTexture);
+	//SetDeviceObject((IUnknown**)&mTexture);
 
 	AsRes(this)->AddOnLoadedListener([this](IResource*) {
 		D3DSURFACE_DESC desc = GetDesc();
@@ -37,7 +37,7 @@ Texture9::Texture9(int width, int height, ResourceFormat format, int mipmap)
 	mMipCount = mipmap;
 	mFormat = format;
 
-	SetDeviceObject((IUnknown**)&mTexture);
+	//SetDeviceObject((IUnknown**)&mTexture);
 }
 
 void Texture9::SetSRV9(IDirect3DTexture9* texture)
@@ -84,7 +84,7 @@ IDirect3DSurface9*& RenderTexture9::GetColorBuffer9()
 InputLayout9::InputLayout9()
 {
 	mLayout = nullptr;
-	SetDeviceObject((IUnknown**)&mLayout);
+	//SetDeviceObject((IUnknown**)&mLayout);
 }
 
 /********** TConstantTable **********/
@@ -205,7 +205,7 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBuffe
 PixelShader9::PixelShader9()
 {
 	mShader = nullptr;
-	SetDeviceObject((IUnknown**)&mShader);
+	//SetDeviceObject((IUnknown**)&mShader);
 }
 
 void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
@@ -217,7 +217,7 @@ void PixelShader9::SetConstTable(ID3DXConstantTable* constTable)
 VertexShader9::VertexShader9()
 {
 	mShader = nullptr;
-	SetDeviceObject((IUnknown**)&mShader);
+	//SetDeviceObject((IUnknown**)&mShader);
 }
 
 void VertexShader9::SetConstTable(ID3DXConstantTable* constTable)
@@ -273,7 +273,7 @@ void ContantBuffer9::SetBuffer9(char* data, int dataSize)
 /********** TProgram9 **********/
 Program9::Program9()
 {
-	SetDeviceObject((IUnknown**)0);
+	//SetDeviceObject((IUnknown**)0);
 }
 
 void Program9::SetVertex(VertexShader9Ptr pVertex) {

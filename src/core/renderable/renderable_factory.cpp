@@ -26,7 +26,7 @@ SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matNa
 {
 	SpritePtr sprite = Sprite::Create(mResourceMng, mMaterialFac, NotEmptyOr(matName, E_MAT_SPRITE));
 	if (! imgpath.empty()) 
-		sprite->SetTexture(mResourceMng.CreateTexture(imgpath));
+		sprite->SetTexture(mResourceMng.CreateTextureByFile(imgpath));
 	return sprite;
 }
 

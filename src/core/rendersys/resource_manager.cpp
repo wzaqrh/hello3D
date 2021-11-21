@@ -28,7 +28,7 @@ void ResourceManager::UpdateForLoading()
 			task(res);
 		}
 	}
-	for (auto& res : topNodes) {
+	for (auto res : topNodes) {
 		if (res->IsLoaded()) {
 			mResDependencyTree.RemoveNode(res);
 			mLoadTaskByRes.erase(res);
@@ -106,14 +106,12 @@ IProgramPtr ResourceManager::CreateProgram(const std::string& name, const std::s
 	return nullptr;
 }
 
-ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
+ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
 {
 	ITexturePtr ret = nullptr;
 
 	FILE* fd = fopen(imgFullpath.c_str(), "rb"); BOOST_ASSERT(fd);
 	if (fd) {
-		ITexturePtr texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
-
 		ILuint imageId = ilGenImage();
 		ilBindImage(imageId);
 
@@ -258,14 +256,27 @@ ITexturePtr ResourceManager::DoCreateTexture(const std::string& imgFullpath, Res
 	return ret;
 }
 
-ITexturePtr ResourceManager::CreateTexture(const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
+ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
 {
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string imgFullpath = fullpath.string();
 
 	ITexturePtr texture = nullptr;
 	if (mTexByPath.find(imgFullpath) == mTexByPath.end()) {
-		texture = DoCreateTexture(imgFullpath, format, autoGenMipmap);
+		texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
+
+		if (async) {
+			texture->SetPrepared();
+			AddResourceDependency(texture, nullptr);
+			mLoadTaskByRes[texture] = [=](IResourcePtr res) {
+				_LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
+				texture->SetLoaded();
+			};
+		}
+		else {
+			texture = _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
+			texture->SetLoaded();
+		}
 
 		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 	}

@@ -22,6 +22,7 @@ public:
 	~Mir();
 	bool Initialize(HWND hWnd);
 	void Dispose();
+	void Update();
 public:
 	inline const RenderSystemPtr& RenderSys() { return mRenderSys; }
 	inline const ResourceManagerPtr& ResourceMng() { return mResourceMng; }

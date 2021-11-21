@@ -61,7 +61,7 @@ void App::Render()
 
 	mTimer->Update();
 	mInput->Frame();
-	renderSys->Update(0);
+	mContext->Update();
 	//rotate camera
 	if (sceneMng->GetDefCamera()->mIsPespective)
 	{

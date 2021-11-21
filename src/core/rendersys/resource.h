@@ -16,16 +16,17 @@ enum ResourceState {
 };
 interface MIR_CORE_API IResource : boost::noncopyable 
 {
-	virtual IObjectPtr AsObject() const = 0;
-
 	virtual ResourceState GetCurState() = 0;
 	virtual void SetCurState(ResourceState state) = 0;
-
-	virtual void SetLoaded() = 0;
-	virtual IUnknown** GetDeviceObject() = 0;
-
 	virtual void AddOnLoadedListener(std::function<void(IResource*)> cb) = 0;
 public:
+	void SetLoaded() {
+		SetCurState(kResourceStateLoaded);
+	}
+	void SetPrepared() {
+		SetCurState(kResourceStatePrepared);
+	}
+
 	bool IsLoaded() { return GetCurState() == kResourceStateLoaded; }
 	bool IsLoading() { return GetCurState() == kResourceStateLoading; }
 	bool IsPreparedNeedLoading() { return GetCurState() == kResourceStatePrepared; }
@@ -36,29 +37,21 @@ struct ImplementResource : public _Parent
 {
 	static_assert(std::is_base_of<IResource, _Parent>::value, "");
 public:
-	ImplementResource() :mCurState(kResourceStateNone),mDeviceObj(nullptr) {}
-	ImplementResource(IUnknown** deviceObj) :mCurState(kResourceStateNone), mDeviceObj(deviceObj) {}
-	IObjectPtr AsObject() const override final { return mObject.lock(); }
+	ImplementResource() :mCurState(kResourceStateNone) {}
+	ImplementResource(IUnknown** deviceObj) :mCurState(kResourceStateNone) {}
 
 	ResourceState GetCurState() override final { return mCurState; }
 	void SetCurState(ResourceState state) override final {
 		if (mCurState != state) {
 			mCurState = state;
-			if (mCurState == kResourceStateLoaded)
-				SetLoaded();
+			if (mCurState == kResourceStateLoaded) {
+				std::vector<std::function<void(IResource*)>> cbs = std::move(mOnLoadeds);
+				for (auto& cb : cbs)
+					cb(this);
+				OnLoaded();
+			}
 		}
 	}
-
-	IUnknown** GetDeviceObject() override final { return mDeviceObj; }
-	void SetLoaded() override final {
-		mCurState = kResourceStateLoaded;
-
-		std::vector<std::function<void(IResource*)>> cbs;
-		cbs.swap(mOnLoadeds);
-		for (auto& cb : cbs)
-			cb(this);
-	}
-
 	void AddOnLoadedListener(std::function<void(IResource*)> cb) override final {
 		mOnLoadeds.push_back(cb);
 	}
@@ -68,12 +61,8 @@ public:
 	}
 protected:
 	virtual void OnLoaded() {}
-	void SetDeviceObject(IUnknown** deviceObj) {
-		mDeviceObj = deviceObj;
-	}
 private:
 	std::weak_ptr<IObject> mObject;
-	IUnknown** mDeviceObj;
 	ResourceState mCurState;
 	std::vector<std::function<void(IResource*)>> mOnLoadeds;
 };

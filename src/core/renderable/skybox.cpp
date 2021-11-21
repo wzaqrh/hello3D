@@ -22,7 +22,7 @@ SkyBox::SkyBox(ResourceManager& resourceMng, MaterialFactory& matFac, const std:
 	Vertexs[3].pos = Eigen::Vector4f(fHighW, fHighH, 1.0f, 1.0f);
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
 
-	mMainTex = mResourceMng.CreateTexture(imgName);
+	mMainTex = mResourceMng.CreateTextureByFile(imgName);
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
 	Eigen::Vector3f pos0 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fLowH, 1.0f));

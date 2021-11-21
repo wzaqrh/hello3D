@@ -13,6 +13,7 @@ protected:
 	virtual void OnPostInitDevice() override;
 private:
 	SpritePtr mSprite;
+	int mCaseIndex = 6;
 };
 
 void TestSprite::OnPostInitDevice()
@@ -20,21 +21,36 @@ void TestSprite::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-#if defined TEST_CUBEMAP
-	mSprite = mContext->RenderableFac()->CreateSprite();
-	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
-#elif 1
-	mSprite = mContext->RenderableFac()->CreateSprite();
-	mSprite->SetTexture(mContext->ResourceMng()->CreateTexture(
-		"model/theyKilledKenny.png", kFormatUnknown, true));//auto_gen_mipmap
-#elif 0
-	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
-#elif 0
-	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.hdr");//zlib
-#elif 0																			   //mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");//bc1a
-	mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.dds");//bc1a + mipmap
-#endif
-
+	switch (mCaseIndex) {
+	case 0: {
+		mSprite = mContext->RenderableFac()->CreateSprite();
+		mSprite->SetTexture(mContext->ResourceMng()->CreateTextureByFile("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
+	}break;
+	case 1: {
+		mSprite = mContext->RenderableFac()->CreateSprite();
+		mSprite->SetTexture(mContext->ResourceMng()->CreateTextureByFile(
+			"model/theyKilledKenny.png", kFormatUnknown, true));//auto_gen_mipmap
+	}break;
+	case 2: {
+		mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
+	}break;
+	case 3: {
+		mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.hdr");//zlib
+	}break;
+	case 4: {
+		mSprite = mContext->RenderableFac()->CreateSprite("model/lenna.dds");//bc1a
+	}break;
+	case 5: {
+		mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.dds");//bc1a + mipmap
+	}break;
+	case 6: {
+		mSprite = mContext->RenderableFac()->CreateSprite();
+		mSprite->SetTexture(mContext->ResourceMng()->CreateTextureByFileAsync(
+			"model/theyKilledKenny.png", kFormatUnknown, true));//auto_gen_mipmap
+	}break;
+	default:
+		break;
+	}
 	int win_width = mContext->ResourceMng()->WinSize().x();
 	int win_height = mContext->ResourceMng()->WinSize().y();
 	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));

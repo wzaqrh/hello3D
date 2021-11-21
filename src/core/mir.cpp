@@ -37,7 +37,14 @@ void Mir::Dispose() {
 	mRenderableFac = nullptr;
 	mMaterialFac = nullptr;
 	mSceneMng = nullptr;
+	mResourceMng = nullptr;
 	mRenderSys = nullptr;
+}
+
+void Mir::Update()
+{
+	mRenderSys->Update(0);
+	mResourceMng->UpdateForLoading();
 }
 
 }

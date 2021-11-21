@@ -31,21 +31,21 @@ size_t BlobData11::GetBufferSize()
 /********** TInputLayout11 **********/
 InputLayout11::InputLayout11()
 {
-	SetDeviceObject((IUnknown**)&mLayout);
+	//SetDeviceObject((IUnknown**)&mLayout);
 }
 
 /********** VertexShader11 **********/
 VertexShader11::VertexShader11(IBlobDataPtr pBlob)
 	:mBlob(pBlob)
 {
-	SetDeviceObject((IUnknown**)&mErrBlob);
+	//SetDeviceObject((IUnknown**)&mErrBlob);
 }
 
 /********** PixelShader11 **********/
 PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 	: mBlob(pBlob)
 {
-	SetDeviceObject((IUnknown**)&mErrBlob);
+	//SetDeviceObject((IUnknown**)&mErrBlob);
 }
 
 /********** Texture11 **********/
@@ -56,7 +56,7 @@ Texture11::Texture11(ID3D11ShaderResourceView* texture)
 	mFormat = kFormatUnknown;
 
 	mTexture = texture;
-	SetDeviceObject((IUnknown**)&mTexture);
+	//SetDeviceObject((IUnknown**)&mTexture);
 
 	AsRes(this)->AddOnLoadedListener([this](IResource* pRes) {
 		D3D11_TEXTURE2D_DESC desc = GetDesc();
@@ -77,7 +77,7 @@ void Texture11::Init(ResourceFormat format, int width, int height, int faceCount
 	mFormat = format;
 
 	mTexture = nullptr;
-	SetDeviceObject((IUnknown**)&mTexture);
+	//SetDeviceObject((IUnknown**)&mTexture);
 }
 
 void Texture11::SetSRV11(ID3D11ShaderResourceView* texture) 

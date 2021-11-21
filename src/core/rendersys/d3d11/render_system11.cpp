@@ -624,7 +624,6 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		mDeviceContext->GenerateMips(texture->GetSRV11());
 	}
 
-	texture->SetLoaded();
 	return texture;
 }
 bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)

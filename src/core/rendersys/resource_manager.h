@@ -82,7 +82,14 @@ public:
 		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		return mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
 	}
-	ITexturePtr CreateTexture(const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
+	template <typename... T>
+	ITexturePtr CreateTextureByFile(T &&...args) {
+		return _CreateTextureByFile(false, std::forward<T>(args)...);
+	}
+	template <typename... T>
+	ITexturePtr CreateTextureByFileAsync(T &&...args) {
+		return _CreateTextureByFile(true, std::forward<T>(args)...);
+	}
 
 	template <typename... T>
 	bool LoadRawTextureData(T &&...args) {
@@ -95,47 +102,49 @@ public:
 		return mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
 	}
 private:
-	ITexturePtr DoCreateTexture(const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
+	ITexturePtr _CreateTextureByFile(bool async, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
+	ITexturePtr _LoadTextureByFile(ITexturePtr texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
 private:
 	RenderSystem& mRenderSys;
 	struct ResourceDependencyTree {
 		typedef IResourcePtr ValueType;
 		typedef const ValueType& ConstReference;
-		std::map<ValueType, ValueType> mParentMap;
-		mutable std::map<ValueType, std::vector<ValueType>> mChildrenMap;
+		struct TreeNode {
+			ValueType Parent;
+			ValueType Value;
+			std::vector<ValueType> Children;
+		};
+		mutable std::map<IResourceRawPtr, TreeNode> mNodeMap;
 		mutable std::vector<ValueType> mTopNodes;
-		ConstReference NodeParent(ConstReference node) const {
-			auto iter = mParentMap.find(node);
-			return (iter != mParentMap.end()) ? iter->second : nullptr;
+		ValueType NodeParent(ConstReference node) const {
+			auto iter = mNodeMap.find(node.get());
+			return (iter != mNodeMap.end() && iter->second.Parent) ? iter->second.Parent : nullptr;
 		}
 		const std::vector<ValueType>& NodeChildren(ConstReference node) const {
-			return mChildrenMap[node];
+			return mNodeMap[node.get()].Children;
+		}
+		bool HasNode(ConstReference node) const {
+			auto iter = mNodeMap.find(node.get());
+			return iter != mNodeMap.end() && iter->second.Value;
 		}
 		void AddNode(ConstReference node, ConstReference parent) {
 			if (HasNode(parent)) {
-				mChildrenMap[parent].push_back(node);
-				mParentMap[node] = parent;
+				mNodeMap[parent.get()].Children.push_back(node);
+				mNodeMap[node.get()].Parent = parent;
+				mNodeMap[node.get()].Value = node;
 			}
 			else {
-				mParentMap[node] = nullptr;
+				mNodeMap[node.get()].Value = node;
 			}
 		}
 		void RemoveNode(ConstReference node) {
-			ValueType parent = NodeParent(node);
-			if (parent != nullptr) {
-				auto& children = mChildrenMap[parent];
-				children.erase(std::remove(children.begin(), children.end(), node), children.end());
-			}
-		}
-		bool HasNode(ConstReference node) const {
-			return mParentMap.find(node) != mParentMap.end();
+			mNodeMap.erase(node.get());
 		}
 		const std::vector<ValueType>& TopNodes() {
 			mTopNodes.clear();
-			for (auto& iter : mParentMap) {
-				ConstReference node = iter.first;
-				if (mChildrenMap[node].empty())
-					mTopNodes.push_back(node);
+			for (auto& iter : mNodeMap) {
+				if (iter.second.Value && mNodeMap[iter.first].Children.empty())
+					mTopNodes.push_back(iter.second.Value);
 			}
 			return mTopNodes;
 		}
