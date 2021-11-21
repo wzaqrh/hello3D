@@ -56,7 +56,7 @@ public:
 		mOnLoadeds.push_back(cb);
 	}
 
-	void Assign(ImplementResource& other) {
+	void Assign(const ImplementResource& other) {
 		this->mCurState = other.mCurState;
 	}
 protected:

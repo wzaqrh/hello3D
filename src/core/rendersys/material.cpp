@@ -1,5 +1,6 @@
 #include "core/rendersys/material.h"
 #include "core/rendersys/material_cb.h"
+#include "core/rendersys/material_factory.h"
 #include "core/rendersys/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/post_process.h"
@@ -92,6 +93,7 @@ void Pass::UpdateConstBufferByName(ResourceManager& resourceMng, const std::stri
 	if (buffer) resourceMng.UpdateBuffer(buffer, data.Bytes, data.Size);
 }
 
+#if 0
 std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)
 {
 	PassPtr pass = std::make_shared<Pass>(mLightMode, mName);
@@ -131,6 +133,45 @@ std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)
 	pass->OnUnbind = OnUnbind;
 	return pass;
 }
+#else
+PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
+{
+	PassPtr pass = std::make_shared<Pass>(proto.mLightMode, proto.mName);
+	pass->mTopoLogy = proto.mTopoLogy;
+
+	pass->mInputLayout = proto.mInputLayout;
+	resourceMng.AddResourceDependency(pass, pass->mInputLayout);
+
+	pass->mProgram = proto.mProgram;
+	resourceMng.AddResourceDependency(pass, pass->mProgram);
+
+	for (auto& sampler : proto.mSamplers) {
+		pass->AddSampler(sampler);
+		resourceMng.AddResourceDependency(pass, sampler);
+	}
+
+	for (size_t i = 0; i < proto.mConstantBuffers.size(); ++i) {
+		auto buffer = proto.mConstantBuffers[i];
+		if (!buffer.IsUnique) buffer.Buffer = resourceMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), nullptr);
+		pass->AddConstBuffer(buffer);
+		resourceMng.AddResourceDependency(pass, buffer.Buffer);
+	}
+
+	pass->mRenderTarget = proto.mRenderTarget;
+	for (auto& target : proto.mIterTargets) {
+		pass->AddIterTarget(target);
+		resourceMng.AddResourceDependency(pass, target);
+	}
+
+	pass->mTextures = proto.mTextures;
+	for (auto& tex : proto.mTextures)
+		resourceMng.AddResourceDependency(pass, tex);
+
+	pass->OnBind = proto.OnBind;
+	pass->OnUnbind = proto.OnUnbind;
+	return pass;
+}
+#endif
 
 /********** TTechnique **********/
 Technique::Technique()
@@ -192,7 +233,8 @@ void Technique::UpdateConstBufferByName(ResourceManager& resourceMng, const std:
 		mPasses[i]->UpdateConstBufferByName(resourceMng, name, data);
 }
 
-std::shared_ptr<Technique> Technique::Clone(ResourceManager& resourceMng)
+#if 0
+TechniquePtr Technique::Clone(ResourceManager& resourceMng)
 {
 	TechniquePtr technique = std::make_shared<Technique>();
 	for (int i = 0; i < mPasses.size(); ++i) {
@@ -203,6 +245,19 @@ std::shared_ptr<Technique> Technique::Clone(ResourceManager& resourceMng)
 	technique->mName = mName;
 	return technique;
 }
+#else
+TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
+{
+	TechniquePtr technique = std::make_shared<Technique>();
+	for (int i = 0; i < proto.mPasses.size(); ++i) {
+		PassPtr pass = this->ClonePass(launchMode, resourceMng, *proto.mPasses[i]);
+		technique->AddPass(pass);
+		resourceMng.AddResourceDependency(technique, pass);
+	}
+	technique->mName = proto.mName;
+	return technique;
+}
+#endif
 
 /********** TMaterial **********/
 void Material::AddTechnique(TechniquePtr technique)
@@ -244,7 +299,8 @@ ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
 	return sampler;
 }
 
-std::shared_ptr<Material> Material::Clone(ResourceManager& resourceMng)
+#if 0
+MaterialPtr Material::Clone(ResourceManager& resourceMng)
 {
 	MaterialPtr material = std::make_shared<Material>();
 	material->Assign(*this);
@@ -256,5 +312,19 @@ std::shared_ptr<Material> Material::Clone(ResourceManager& resourceMng)
 	material->mCurTechIdx = mCurTechIdx;
 	return material;
 }
+#else
+MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
+{
+	MaterialPtr material = std::make_shared<Material>();
+	material->Assign(proto);
+	for (int i = 0; i < proto.mTechniques.size(); ++i) {
+		TechniquePtr tech = this->CloneTechnique(launchMode, resourceMng, *proto.mTechniques[i]);
+		material->AddTechnique(tech);
+		resourceMng.AddResourceDependency(material, tech);
+	}
+	material->mCurTechIdx = proto.mCurTechIdx;
+	return material;
+}
+#endif
 
 }

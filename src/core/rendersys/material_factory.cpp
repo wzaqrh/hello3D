@@ -49,8 +49,10 @@ struct MaterialBuilder
 	TechniquePtr mCurTech;
 	PassPtr mCurPass;
 	ResourceManager& mResourceMng;
+	Launch mLaunchMode;
 public:
-	MaterialBuilder(ResourceManager& resMng, bool addTechPass = true) :mResourceMng(resMng) {
+	MaterialBuilder(ResourceManager& resMng, Launch launchMode, bool addTechPass = true) 
+		:mResourceMng(resMng), mLaunchMode(launchMode) {
 		mMaterial = std::make_shared<Material>();
 		if (addTechPass) {
 			AddTechnique();
@@ -68,8 +70,8 @@ public:
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
 	}
-	MaterialBuilder& CloneTechnique(ResourceManager& resourceMng, const std::string& name) {
-		mCurTech = mCurTech->Clone(resourceMng);
+	MaterialBuilder& CloneTechnique(MaterialFactory& matFac, const std::string& name) {
+		mCurTech = matFac.CloneTechnique(mLaunchMode, mResourceMng, *mCurTech);
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
@@ -87,7 +89,6 @@ public:
 
 	MaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
 		mCurPass->mInputLayout = inputLayout;
-		//mMaterial->AddDependency(AsRes(inputLayout));
 		mResourceMng.AddResourceDependency(mMaterial, inputLayout);
 		return *this;
 	}
@@ -171,12 +172,12 @@ struct XmlUniformInfo {
 	bool IsUnique;
 };
 struct XmlSamplersInfo {
-	std::vector<std::pair<int, int>> Samplers;
+	std::vector<std::pair<SamplerFilterMode, int>> Samplers;
 	void Add(const XmlSamplersInfo& other) {
 		Samplers.insert(Samplers.end(), other.Samplers.begin(), other.Samplers.end());
 	}
 	size_t size() const { return Samplers.size(); }
-	const std::pair<int, int>& operator[](size_t pos) const { return Samplers[pos]; }
+	const std::pair<SamplerFilterMode, int>& operator[](size_t pos) const { return Samplers[pos]; }
 };
 struct XmlProgramInfo {
 	PrimitiveTopology Topo;
@@ -266,6 +267,10 @@ private:
 	}
 };
 
+struct MaterialAsset {
+	XmlShaderInfo ShaderInfo;
+};
+
 class MaterialAssetManager
 {
 	std::map<std::string, XmlShaderInfo> mIncludeByName, mShaderByName, mShaderVariantByName;
@@ -278,13 +283,13 @@ public:
 		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	MaterialPtr LoadMaterial(ResourceManager& resourceMng,
+	void GetMaterialAsset(Launch launchMode,
+		ResourceManager& resourceMng,
 		const std::string& shaderName,
-		const std::string& variantName) {
-		XmlShaderInfo shaderInfo;
-		if (!variantName.empty()) ParseShaderVariantXml(shaderName, variantName, shaderInfo);
-		else ParseShaderXml(shaderName, shaderInfo);
-		return CreateMaterial(resourceMng, shaderName, shaderInfo);
+		const std::string& variantName,
+		MaterialAsset& materialAsset) {
+		if (!variantName.empty()) ParseShaderVariantXml(shaderName, variantName, materialAsset.ShaderInfo);
+		else ParseShaderXml(shaderName, materialAsset.ShaderInfo);
 	}
 public:
 	const MaterialNameToAssetMapping& MatNameToAsset() const {
@@ -447,7 +452,7 @@ private:
 			XmlSamplersInfo sampler;
 			for (auto& element : it.second.get_child("Element")) {
 				sampler.Samplers.emplace_back(std::make_pair(
-					element.second.get<int>("<xmlattr>.Slot", 0),
+					static_cast<SamplerFilterMode>(element.second.get<int>("<xmlattr>.Slot", 0)),
 					element.second.get<int>("<xmlattr>.Filter", kSamplerFilterMinMagMipLinear)
 				));
 			}
@@ -582,49 +587,6 @@ private:
 		}
 		return result;
 	}
-
-	MaterialPtr CreateMaterial(ResourceManager& resourceMng,
-		const std::string& name,
-		XmlShaderInfo& shaderInfo) {
-		MaterialBuilder builder(resourceMng, false);
-		builder.AddTechnique("d3d11");
-
-		for (size_t i = 0; i < shaderInfo.SubShaders.size(); ++i) {
-			auto& subShaderInfo = shaderInfo.SubShaders[i];
-			for (size_t j = 0; j < subShaderInfo.Passes.size(); ++j) {
-				auto& passInfo = subShaderInfo.Passes[j];
-
-				builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
-				builder.SetTopology(shaderInfo.Program.Topo);
-
-				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgramAsync(
-					MAKE_MAT_NAME(shaderInfo.Program.FxName),
-					shaderInfo.Program.VsEntry.c_str(),
-					passInfo.PSEntry.c_str()));
-				builder.SetInputLayout(resourceMng.CreateLayoutAsync(program, shaderInfo.Program.Attr.Layout));
-
-				for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
-					auto& elem = shaderInfo.Program.Samplers[k];
-					builder.AddSampler(resourceMng.CreateSampler(
-						static_cast<SamplerFilterMode>(elem.first),
-						kCompareNever)
-					);
-				}
-			}
-		}
-
-		for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
-			auto& uniformI = shaderInfo.Program.Uniforms[i];
-			builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(uniformI.Decl, &uniformI.Data[0]),
-				uniformI.ShortName, uniformI.IsUnique);
-		}
-
-		builder.CloneTechnique(resourceMng, "d3d9");
-		builder.ClearSamplersToTech();
-		builder.AddSamplerToTech(resourceMng.CreateSampler(kSamplerFilterMinMagMipLinear, kCompareNever));
-
-		return builder.Build();
-	}
 };
 
 /********** TMaterialFactory **********/
@@ -633,17 +595,52 @@ MaterialFactory::MaterialFactory()
 	mMatAssetMng = std::make_shared<MaterialAssetManager>();
 }
 
-MaterialPtr MaterialFactory::CreateMaterial(ResourceManager& resourceMng, const std::string& matName) 
+MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode, 
+	ResourceManager& resourceMng, const MaterialAsset& matAsset) 
 {
-	return CreateStdMaterial(resourceMng, matName);
+	MaterialBuilder builder(resourceMng, launchMode, false);
+	builder.AddTechnique("d3d11");
+
+	const auto& shaderInfo = matAsset.ShaderInfo;
+	for (size_t i = 0; i < shaderInfo.SubShaders.size(); ++i) {
+		auto& subShaderInfo = shaderInfo.SubShaders[i];
+		for (size_t j = 0; j < subShaderInfo.Passes.size(); ++j) {
+			auto& passInfo = subShaderInfo.Passes[j];
+
+			builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
+			builder.SetTopology(shaderInfo.Program.Topo);
+
+			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
+				launchMode, shaderInfo.Program.FxName, shaderInfo.Program.VsEntry, passInfo.PSEntry));
+			builder.SetInputLayout(resourceMng.CreateLayout(
+				launchMode, program, shaderInfo.Program.Attr.Layout));
+
+			for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
+				const auto& elem = shaderInfo.Program.Samplers[k];
+				builder.AddSampler(resourceMng.CreateSampler(
+					launchMode, elem.first, kCompareNever));
+			}
+		}
+	}
+
+	for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
+		auto& uniformI = shaderInfo.Program.Uniforms[i];
+		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(
+			launchMode, uniformI.Decl, (void*)&uniformI.Data[0]), uniformI.ShortName, uniformI.IsUnique);
+	}
+
+	builder.CloneTechnique(*this, "d3d9");
+	builder.ClearSamplersToTech();
+	builder.AddSamplerToTech(resourceMng.CreateSampler(launchMode, kSamplerFilterMinMagMipLinear, kCompareNever));
+
+	return builder.Build();
 }
 
-#if defined MATERIAL_FROM_XML
-MaterialPtr MaterialFactory::CreateStdMaterial(ResourceManager& resourceMng, const std::string& matName) {
+MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const std::string& matName) {
+	MaterialAsset matAsset;
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
-	return mMatAssetMng->LoadMaterial(resourceMng, entry.ShaderName, entry.VariantName);
+	mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, entry.ShaderName, entry.VariantName, matAsset);
+	return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset);
 }
-#else
 
-#endif
 }

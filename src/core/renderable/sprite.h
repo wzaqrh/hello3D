@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
+#include "core/base/launch.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/renderable.h"
 
@@ -30,7 +31,7 @@ class MIR_CORE_API Sprite : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
-	Sprite(ResourceManager& resourceMng, const std::string& matName = "");
+	Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName = "");
 public:
 	~Sprite();
 	void SetPosition(const Eigen::Vector3f& pos);

@@ -73,7 +73,7 @@ void SpriteVertexQuad::SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vect
 const unsigned int indices[] = {
 	0, 1, 2, 0, 2, 3 
 };
-Sprite::Sprite(ResourceManager& resourceMng, const std::string& matName)
+Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName)
 	: mResourceMng(resourceMng)
 	, mQuad(0, 0, 0, 0)
 	, mQuadDirty(true)
@@ -82,9 +82,9 @@ Sprite::Sprite(ResourceManager& resourceMng, const std::string& matName)
 	, mPosition(0, 0)
 {
 	mTransform = std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(matName != "" ? matName : E_MAT_SPRITE);
-	mIndexBuffer = resourceMng.CreateIndexBuffer(sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
-	mVertexBuffer = resourceMng.CreateVertexBuffer(sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
+	mMaterial = resourceMng.CreateMaterial(launchMode, matName != "" ? matName : E_MAT_SPRITE);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(launchMode, sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
+	mVertexBuffer = resourceMng.CreateVertexBuffer(launchMode, sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
 
 	if (mFlipY) mQuad.FlipY();
 }

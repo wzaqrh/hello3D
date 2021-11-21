@@ -1,13 +1,12 @@
 #pragma once
 #include "core/mir_export.h"
+#include "core/base/launch.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
 
 class MIR_CORE_API RenderableFactory 
 {
-	ResourceManager& mResourceMng;
-	FontCachePtr mFontCache;
 public:
 	typedef const std::string& string_cref;
 	RenderableFactory(ResourceManager& resMng);
@@ -18,6 +17,10 @@ public:
 	AssimpModelPtr CreateAssimpModel(const TransformPtr& transform, string_cref matName = "");
 	LabelPtr CreateLabel(string_cref fontPath, int fontSize);
 	PostProcessPtr CreatePostProcessEffect(string_cref effectName, Camera& camera);
+private:
+	Launch mLaunchMode;
+	ResourceManager& mResourceMng;
+	FontCachePtr mFontCache;
 };
 
 }

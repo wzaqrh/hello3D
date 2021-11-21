@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
+#include "core/base/launch.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -21,7 +22,7 @@ class MIR_CORE_API PostProcess : public IRenderable
 {
 	friend class RenderableFactory;
 protected:
-	PostProcess(ResourceManager& resourceMng, IRenderTexturePtr mainTex);
+	PostProcess(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr mainTex);
 public:
 	~PostProcess();
 	int GenRenderOperation(RenderOperationQueue& opList) override;
@@ -38,7 +39,7 @@ class MIR_CORE_API Bloom : public PostProcess
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Bloom);
-	Bloom(ResourceManager& resourceMng, IRenderTexturePtr mainTex);
+	Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr mainTex);
 public:
 };
 

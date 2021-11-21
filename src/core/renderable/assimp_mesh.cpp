@@ -5,12 +5,12 @@
 namespace mir {
 
 /********** TMesh **********/
-AssimpMesh::AssimpMesh(const aiMesh* data,
+AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng,
+	const aiMesh* data,
 	std::vector<AssimpMeshVertex>& vertices,
 	std::vector<UINT>& indices,
 	TextureBySlotPtr textures,
-	MaterialPtr material,
-	ResourceManager& resourceMng)
+	MaterialPtr material)
 {
 	mData = data;
 	mVertices.swap(vertices); vertices.clear();
@@ -18,14 +18,8 @@ AssimpMesh::AssimpMesh(const aiMesh* data,
 	mTextures = textures;
 	mMaterial = material;
 
-	setupMesh(resourceMng);
-}
-
-bool AssimpMesh::setupMesh(ResourceManager& resourceMng)
-{
-	mVertexBuffer = resourceMng.CreateVertexBuffer(sizeof(AssimpMeshVertex) * mVertices.size(), sizeof(AssimpMeshVertex), 0, &mVertices[0]);
-	mIndexBuffer = resourceMng.CreateIndexBuffer(sizeof(UINT) * mIndices.size(), kFormatR32UInt, &mIndices[0]);
-	return true;
+	mVertexBuffer = resourceMng.CreateVertexBuffer(launchMode, sizeof(AssimpMeshVertex) * mVertices.size(), sizeof(AssimpMeshVertex), 0, &mVertices[0]);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(launchMode, sizeof(UINT) * mIndices.size(), kFormatR32UInt, &mIndices[0]);
 }
 
 bool AssimpMesh::HasTexture(int slot)

@@ -14,7 +14,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	,mScreenWidth(width)
 	,mScreenHeight(height)
 {
-	mShadowCasterOutput = resMng.CreateRenderTexture(mScreenWidth, mScreenHeight, kFormatR32Float);
+	mShadowCasterOutput = resMng.CreateRenderTexture(Launch::Sync, mScreenWidth, mScreenHeight, kFormatR32Float);
 	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 

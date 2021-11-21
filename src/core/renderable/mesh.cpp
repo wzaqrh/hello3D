@@ -6,16 +6,16 @@
 namespace mir {
 
 /********** Mesh **********/
-Mesh::Mesh(ResourceManager& resourceMng, const std::string& matName, int vertCount, int indexCount)
+Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& matName, int vertCount, int indexCount)
 	:mResourceMng(resourceMng)
 {
-	mMaterial = resourceMng.CreateMaterial(matName != "" ? matName : E_MAT_SPRITE);
+	mMaterial = resourceMng.CreateMaterial(launchMode, matName != "" ? matName : E_MAT_SPRITE);
 
 	mVertices.resize(vertCount);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
 	
 	mIndices.resize(indexCount);
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(sizeof(UINT) * indexCount, kFormatR32UInt, &mIndices[0]);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, sizeof(UINT) * indexCount, kFormatR32UInt, &mIndices[0]);
 	
 	mSubMeshs.resize(1);
 }

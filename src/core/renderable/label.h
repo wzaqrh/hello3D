@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
+#include "core/base/launch.h"
 #include "core/renderable/renderable.h"
 #include "core/renderable/sprite.h"
 
@@ -13,7 +14,7 @@ class MIR_CORE_API Label : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Label);
-	Label(ResourceManager& resourceMng, FontPtr font);
+	Label(Launch launchMode, ResourceManager& resourceMng, FontPtr font);
 public:
 	void SetString(const std::string& str);
 	void SetSize(bool autoCalSize, const Eigen::Vector2f& size);

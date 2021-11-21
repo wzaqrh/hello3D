@@ -2,6 +2,7 @@
 #include <assimp/mesh.h>
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
+#include "core/base/launch.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -22,19 +23,17 @@ class MIR_CORE_API AssimpMesh : public IRenderable
 	friend class AssimpModel;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpMesh);
-	AssimpMesh(const aiMesh* data, 
+	AssimpMesh(Launch launchMode, ResourceManager& resourceMng,
+		const aiMesh* data, 
 		std::vector<AssimpMeshVertex>& vertices, 
 		std::vector<UINT>& indices,
 		TextureBySlotPtr textures,
-		MaterialPtr material,
-		ResourceManager& resourceMng);
+		MaterialPtr material);
 public:
 	int GenRenderOperation(RenderOperationQueue& opList) override;
 	bool HasTexture(int slot);
 	const aiMesh* GetAiMesh() const { return mData; }
 	const MaterialPtr& GetMaterial() const { return mMaterial; }
-private:
-	bool setupMesh(ResourceManager& resourceMng);
 private:
 	const aiMesh* mData = nullptr;
 	std::vector<AssimpMeshVertex> mVertices;

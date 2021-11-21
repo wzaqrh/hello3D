@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
+#include "core/base/launch.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
@@ -15,7 +16,7 @@ class MIR_CORE_API Mesh : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
-	Mesh(ResourceManager& resourceMng, const std::string& matName, 
+	Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& matName, 
 		int vertCount = 1024, int indexCount = 1024);
 public:
 	void Clear();

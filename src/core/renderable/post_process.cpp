@@ -49,14 +49,14 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr unsigned int CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(ResourceManager& resourceMng, IRenderTexturePtr mainTex)
+PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr mainTex)
 	:mResourceMng(resourceMng)
 {
 	mMainTex = mainTex;
 
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 }
 
 PostProcess::~PostProcess()
@@ -83,27 +83,27 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 }
 
 /********** TBloom **********/
-IVertexBufferPtr GetVertBufByRT(ResourceManager& resourceMng, IRenderTexturePtr target) {
+IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr target) {
 	auto srv = target->GetColorTexture();
 	float sx = srv->GetWidth() * 1.0 / resourceMng.WinSize().x();
 	float sy = srv->GetHeight() * 1.0 / resourceMng.WinSize().y();
 	assert(sx <= 1 && sy <= 1);
 	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
-	IVertexBufferPtr vertBuf = resourceMng.CreateVertexBuffer(sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	IVertexBufferPtr vertBuf = resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
 	return vertBuf;
 }
 
-Bloom::Bloom(ResourceManager& resourceMng, IRenderTexturePtr mainTex)
-	:PostProcess(resourceMng, mainTex)
+Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr mainTex)
+	:PostProcess(launchMode, resourceMng, mainTex)
 {
-	mMaterial = resourceMng.CreateMaterial(E_MAT_POSTPROC_BLOOM);
+	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_POSTPROC_BLOOM);
 
 	auto curTech = mMaterial->CurTech();
 	for (auto& pass : curTech->mPasses) {
 		if (pass->mRenderTarget) {
-			mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, -1), GetVertBufByRT(mResourceMng, pass->mRenderTarget)));
+			mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, -1), GetVertBufByRT(launchMode, mResourceMng, pass->mRenderTarget)));
 			for (int i = 0; i < pass->mIterTargets.size(); ++i) {
-				mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, i), GetVertBufByRT(mResourceMng, pass->mIterTargets[i])));
+				mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, i), GetVertBufByRT(launchMode, mResourceMng, pass->mIterTargets[i])));
 			}
 		}
 	}

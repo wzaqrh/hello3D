@@ -11,6 +11,7 @@
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include "core/mir_export.h"
+#include "core/base/launch.h"
 #include "core/renderable/renderable.h"
 #include "core/renderable/assimp_mesh.h"
 
@@ -40,7 +41,7 @@ class MIR_CORE_API AssimpModel : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
-	AssimpModel(ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType);
+	AssimpModel(Launch launchMode, ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType);
 public:
 	~AssimpModel();
 	void LoadModel(const std::string& imgPath, const std::string& redirectResource = "");
@@ -68,6 +69,7 @@ private:
 	Assimp::Importer* mImporter = nullptr;
 	std::string mRedirectResourceDir, mRedirectResourceExt;
 	ResourceManager& mResourceMng;
+	Launch mLaunchMode;
 	MaterialPtr mMaterial;
 	TransformPtr mTransform;
 };

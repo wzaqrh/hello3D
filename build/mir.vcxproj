@@ -40,6 +40,7 @@
     <ClInclude Include="..\src\core\base\declare_macros.h" />
     <ClInclude Include="..\src\core\base\il_helper.h" />
     <ClInclude Include="..\src\core\base\input.h" />
+    <ClInclude Include="..\src\core\base\launch.h" />
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
     <ClInclude Include="..\src\core\base\stl.h" />

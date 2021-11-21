@@ -2,10 +2,12 @@
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/assert.hpp>
-#include "core/base/stl.h"
 #include "core/mir_export.h"
+#include "core/base/stl.h"
+#include "core/base/declare_macros.h"
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
+#include "core/base/launch.h"
 #include "core/rendersys/resource.h"
 #include "core/rendersys/render_system.h"
 
@@ -21,98 +23,90 @@ public:
 public:
 	Eigen::Vector4i WinSize() const { return mRenderSys.WinSize(); }
 
-	template <typename... T> 
-	IIndexBufferPtr CreateIndexBuffer(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer);
+	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer);
+		mRenderSys.LoadIndexBuffer(res, std::forward<T>(args)...);
 		res->SetLoaded();
-		return mRenderSys.LoadIndexBuffer(res, std::forward<T>(args)...);
+		return std::static_pointer_cast<IIndexBuffer>(res);
 	}
+	DECLARE_RES_MNG_LAUNCH_FUNCS(IIndexBufferPtr, CreateIndexBuffer);
 
-	template <typename... T>
-	IVertexBufferPtr CreateVertexBuffer(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer);
+	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer);
+		mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...);
 		res->SetLoaded();
-		return mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...);
+		return std::static_pointer_cast<IVertexBuffer>(res);
 	}
+	DECLARE_RES_MNG_LAUNCH_FUNCS(IVertexBufferPtr, CreateVertexBuffer);
 
-	template <typename... T>
-	IContantBufferPtr CreateConstBuffer(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceContantBuffer);
+	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer);
+		mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...);
 		res->SetLoaded();
-		return mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...);
+		return std::static_pointer_cast<IContantBuffer>(res);
 	}
-	template <typename... T>
-	bool UpdateBuffer(T &&...args) {
+	DECLARE_RES_MNG_LAUNCH_FUNCS(IContantBufferPtr, CreateConstBuffer);
+
+	TemplateArgs bool UpdateBuffer(T &&...args) {
 		return mRenderSys.UpdateBuffer(std::forward<T>(args)...);
 	}
 
-	template <typename... T>
-	IInputLayoutPtr CreateLayout(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
-		res->SetLoaded();
-		return mRenderSys.LoadLayout(res, std::forward<T>(args)...);
-	}
-	template <typename... T>
-	IInputLayoutPtr CreateLayoutAsync(IProgramPtr program, T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
-
-		AddResourceDependency(res, program);
-		res->SetPrepared();
-		mLoadTaskByRes[res] = [=](IResourcePtr res) {
-			mRenderSys.LoadLayout(res, program, args...);
+	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
+		if (launchMode == Launch::Async) {
+			AddResourceDependency(res, program);
+			res->SetPrepared();
+			mLoadTaskByRes[res] = [=](IResourcePtr res) {
+				mRenderSys.LoadLayout(res, program, args...);
+				res->SetLoaded();
+			};
+		}
+		else {
+			mRenderSys.LoadLayout(res, program, std::forward<T>(args)...);
 			res->SetLoaded();
-		};
+		}
 		return std::static_pointer_cast<IInputLayout>(res);
 	}
+	DECLARE_RES_MNG_LAUNCH_FUNCS(IInputLayoutPtr, CreateLayout);
 
-	template <typename... T>
-	ISamplerStatePtr CreateSampler(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceSamplerState);
+	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState);
+		mRenderSys.LoadSampler(res, std::forward<T>(args)...);
 		res->SetLoaded();
-		return mRenderSys.LoadSampler(res, std::forward<T>(args)...);
+		return std::static_pointer_cast<ISamplerState>(res);
 	}
+	DECLARE_RES_MNG_LAUNCH_FUNCS(ISamplerStatePtr, CreateSampler);
 
-	template <typename... T>
-	IProgramPtr CreateProgram(T &&...args) {
-		return _CreateProgram(false, std::forward<T>(args)...);
-	}
-	template <typename... T>
-	IProgramPtr CreateProgramAsync(T &&...args) {
-		return _CreateProgram(true, std::forward<T>(args)...);
-	}
+	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
+	DECLARE_RES_MNG_LAUNCH_FUNCS(IProgramPtr, CreateProgram);
 
-	template <typename... T>
-	ITexturePtr CreateTexture(ResourceFormat format, T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceTexture);
+	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceTexture);
+		mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
 		res->SetLoaded();
-		return mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
+		return std::static_pointer_cast<ITexture>(res);
 	}
-	template <typename... T>
-	ITexturePtr CreateTextureByFile(T &&...args) {
-		return _CreateTextureByFile(false, std::forward<T>(args)...);
-	}
-	template <typename... T>
-	ITexturePtr CreateTextureByFileAsync(T &&...args) {
-		return _CreateTextureByFile(true, std::forward<T>(args)...);
-	}
+	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
+	DECLARE_RES_MNG_LAUNCH_FUNCS(ITexturePtr, CreateTextureByFile);
 
-	template <typename... T>
-	bool LoadRawTextureData(T &&...args) {
+	TemplateArgs bool LoadRawTextureData(T &&...args) {
 		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
 	}
 
-	template <typename... T>
-	IRenderTexturePtr CreateRenderTexture(T &&...args) {
-		IResourcePtr res = mRenderSys.CreateResource(kDeviceResourceRenderTexture);
+	TemplateArgs IRenderTexturePtr CreateRenderTexture(Launch launchMode, T &&...args) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceRenderTexture);
+		mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
 		res->SetLoaded();
-		return mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
+		return std::static_pointer_cast<IRenderTexture>(res);
 	}
+	DECLARE_RES_MNG_LAUNCH_FUNCS(IRenderTexturePtr, CreateRenderTexture);
 
-	MaterialPtr CreateMaterial(const std::string& matName, bool sharedUse = false);
+	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName, bool sharedUse = false);
+	DECLARE_RES_MNG_LAUNCH_FUNCS(MaterialPtr, CreateMaterial);
+
+	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
 private:
-	IProgramPtr _CreateProgram(bool async, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
 	IProgramPtr _LoadProgram(IProgramPtr program, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
-	ITexturePtr _CreateTextureByFile(bool async, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
 	ITexturePtr _LoadTextureByFile(ITexturePtr texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
 private:
 	RenderSystem& mRenderSys;

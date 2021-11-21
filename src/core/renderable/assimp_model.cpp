@@ -127,11 +127,11 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType)
-	:mResourceMng(resourceMng)
+AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType)
+	:mLaunchMode(launchMode), mResourceMng(resourceMng)
 {
 	mTransform = pMove ? pMove : std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(matType);
+	mMaterial = resourceMng.CreateMaterial(launchMode, matType);
 }
 
 AssimpModel::~AssimpModel()
@@ -332,9 +332,9 @@ AssimpMeshPtr AssimpModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			textures[kTextureNormal] = normalMaps[0];
 	}
 
-	auto material = mMaterial->Clone(mResourceMng);
+	auto material = mResourceMng.CloneMaterial(mLaunchMode, *mMaterial);
 	//if (mMatCb) mMatCb(material);
-	return AssimpMesh::Create(mesh, vertices, indices, texturesPtr, material, mResourceMng);
+	return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, vertices, indices, texturesPtr, material);
 }
 
 std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat, 
@@ -365,7 +365,7 @@ std::vector<ITexturePtr> AssimpModel::loadMaterialTextures(aiMaterial* mat,
 			key = texturePath.string();
 		}
 
-		ITexturePtr texInfo = mResourceMng.CreateTextureByFile(key);
+		ITexturePtr texInfo = mResourceMng.CreateTextureByFile(mLaunchMode, key);
 		textures.push_back(texInfo);
 		mLoadedTexture[key] = texInfo;
 	}

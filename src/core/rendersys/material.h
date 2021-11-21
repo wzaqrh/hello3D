@@ -27,8 +27,8 @@ public:
 	bool Empty() const { return Textures.empty(); }
 	size_t Count() const { return Textures.size(); }
 
-	std::vector<ITexturePtr>::iterator begin() { return Textures.begin(); }
-	std::vector<ITexturePtr>::iterator end() { return Textures.end(); }
+	std::vector<ITexturePtr>::const_iterator begin() const { return Textures.begin(); }
+	std::vector<ITexturePtr>::const_iterator end() const { return Textures.end(); }
 
 	ITexturePtr& At(size_t pos) {
 		if (pos >= Textures.size()) Textures.resize(pos + 1);
@@ -58,9 +58,10 @@ public:
 
 class Pass : public ImplementResource<IResource>, std::enable_shared_from_this<Pass> 
 {
+	friend class MaterialFactory;
 public:
 	Pass(const std::string& lightMode, const std::string& name);
-	PassPtr Clone(ResourceManager& resourceMng);
+	//PassPtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -92,10 +93,11 @@ public:
 
 class Technique : public ImplementResource<IResource>
 {
+	friend class MaterialFactory;
 public:
 	Technique();
 	void AddPass(PassPtr pass);
-	TechniquePtr Clone(ResourceManager& resourceMng);
+	//TechniquePtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -113,8 +115,9 @@ public:
 
 class MIR_CORE_API Material : public ImplementResource<IResource> 
 {
+	friend class MaterialFactory;
 public:
-	MaterialPtr Clone(ResourceManager& resourceMng);
+	//MaterialPtr Clone(ResourceManager& resourceMng);
 	void AddTechnique(TechniquePtr technique);
 
 	TechniquePtr CurTech();

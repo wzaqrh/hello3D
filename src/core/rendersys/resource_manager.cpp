@@ -46,32 +46,34 @@ void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
 
 IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
-	if (boost::filesystem::path(name).extension().empty()) {
-		std::string fullname = boost::filesystem::system_complete("shader/d3d11/" + name).string();
-		//auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
+	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
+	boost::filesystem::path vsAsmPath = "shader/d3d11/" + name + "_" + vsEntryOrVS + ".cso";
+	vsAsmPath = boost::filesystem::system_complete(vsAsmPath);
+
+	if (boost::filesystem::exists(vsAsmPath)) {
 		std::vector<IShaderPtr> shaders;
 		{
 			ShaderCompileDesc desc;
 			desc.EntryPoint = vsEntry;
 			desc.ShaderModel = "vs_4_0";
-			desc.SourcePath = fullname;
+			desc.SourcePath = vsAsmPath.string();
 
-			std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
-			std::string vsFullPath = name + "_" + vsEntryOrVS + ".cso";
-			std::vector<char> buffer = input::ReadFile(vsFullPath.c_str(), "rb");
+			std::vector<char> buffer = input::ReadFile(vsAsmPath.string().c_str(), "rb");
 			auto blob = std::make_shared<BlobDataStandard>(buffer);
 			
 			shaders.push_back(mRenderSys.CreateShader(kShaderVertex, desc, blob));
 		}
 		{
+			std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
+			boost::filesystem::path psAsmPath = "shader/d3d11/" + name + "_" + psEntryOrPS + ".cso";
+			psAsmPath = boost::filesystem::system_complete(psAsmPath);
+
 			ShaderCompileDesc desc;
 			desc.EntryPoint = psEntry;
 			desc.ShaderModel = "ps_4_0";
-			desc.SourcePath = fullname;
+			desc.SourcePath = psAsmPath.string();
 
-			std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
-			std::string psFullName = name + "_" + psEntryOrPS + ".cso";
-			std::vector<char> buffer = input::ReadFile(psFullName.c_str(), "rb");
+			std::vector<char> buffer = input::ReadFile(psAsmPath.string().c_str(), "rb");
 			auto blob = std::make_shared<BlobDataStandard>(buffer);
 
 			shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
@@ -81,15 +83,15 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string
 		return mRenderSys.LoadProgram(program, shaders);
 	}
 	else {
-		std::string fullname = boost::filesystem::system_complete("shader/" + name).string();
-		std::vector<char> bytes = input::ReadFile(fullname.c_str(), "rb");
+		std::string vsPsPath = boost::filesystem::system_complete("shader/" + name + ".fx").string();
+		std::vector<char> bytes = input::ReadFile(vsPsPath.c_str(), "rb");
 		if (!bytes.empty()) {
 			//auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
 			std::vector<IShaderPtr> shaders;
 			{
 				ShaderCompileDesc desc = {
 					{{"SHADER_MODEL", "40000"}},
-					vsEntry, "vs_4_0", fullname
+					vsEntry, "vs_4_0", vsPsPath
 				};
 				IBlobDataPtr blob = mRenderSys.CompileShader(desc, Data::Make(&bytes[0], bytes.size()));
 
@@ -98,7 +100,7 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string
 			{
 				ShaderCompileDesc desc = {
 					{{"SHADER_MODEL", "40000"}},
-					psEntry, "ps_4_0", fullname
+					psEntry, "ps_4_0", vsPsPath
 				};
 				IBlobDataPtr blob = mRenderSys.CompileShader(desc, Data::Make(&bytes[0], bytes.size()));
 
@@ -111,7 +113,7 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string
 	}
 	return nullptr;
 }
-IProgramPtr ResourceManager::_CreateProgram(bool async, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
 	IProgramPtr program = nullptr;
 	ProgramKey key{ name, vsEntry, psEntry };
@@ -120,7 +122,7 @@ IProgramPtr ResourceManager::_CreateProgram(bool async, const std::string& name,
 		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
 		mProgramByKey.insert(std::make_pair(key, program));
 
-		if (async) {
+		if (launchMode == Launch::Async) {
 			program->SetPrepared();
 			AddResourceDependency(program, nullptr);
 			mLoadTaskByRes[program] = [=](IResourcePtr res) {
@@ -288,7 +290,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 	}
 	return ret;
 }
-ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
+ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
 {
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string imgFullpath = fullpath.string();
@@ -299,7 +301,7 @@ ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string&
 		texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
 		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 
-		if (async) {
+		if (launchMode == Launch::Async) {
 			texture->SetPrepared();
 			AddResourceDependency(texture, nullptr);
 			mLoadTaskByRes[texture] = [=](IResourcePtr res) {
@@ -318,13 +320,18 @@ ITexturePtr ResourceManager::_CreateTextureByFile(bool async, const std::string&
 	return texture;
 }
 
-MaterialPtr ResourceManager::CreateMaterial(const std::string& matName, bool sharedUse/*readonly*/)
+MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName, bool sharedUse/*readonly*/)
 {
 	if (mMaterials.find(matName) == mMaterials.end())
-		mMaterials.insert(std::make_pair(matName, mMaterialFac.CreateMaterial(*this, matName)));
+		mMaterials.insert(std::make_pair(matName, mMaterialFac.CreateMaterial(launchMode, *this, matName)));
 
-	MaterialPtr material = sharedUse ? mMaterials[matName] : mMaterials[matName]->Clone(*this);
+	MaterialPtr material = sharedUse ? mMaterials[matName] : CloneMaterial(launchMode, *mMaterials[matName]);
 	return material;
+}
+
+MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& material)
+{
+	return mMaterialFac.CloneMaterial(launchMode, *this, material);
 }
 
 }

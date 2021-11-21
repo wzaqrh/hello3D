@@ -21,15 +21,16 @@ void TestSprite::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
+	Launch sync = Launch::Sync;
 	switch (mCaseIndex) {
 	case 0: {
 		mSprite = mContext->RenderableFac()->CreateSprite();
-		mSprite->SetTexture(mContext->ResourceMng()->CreateTextureByFile("model/uffizi_cross.dds", kFormatR32G32B32A32Float));
+		mSprite->SetTexture(mContext->ResourceMng()->CreateTextureByFile(sync, "model/uffizi_cross.dds", kFormatR32G32B32A32Float));
 	}break;
 	case 1: {
 		mSprite = mContext->RenderableFac()->CreateSprite();
 		mSprite->SetTexture(mContext->ResourceMng()->CreateTextureByFile(
-			"model/theyKilledKenny.png", kFormatUnknown, true));//auto_gen_mipmap
+			sync, "model/theyKilledKenny.png", kFormatUnknown, true));//auto_gen_mipmap
 	}break;
 	case 2: {
 		mSprite = mContext->RenderableFac()->CreateSprite("model/theyKilledKenny.png");
