@@ -26,16 +26,16 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void CleanUp() = 0;
 	virtual void SetViewPort(int x, int y, int w, int h) = 0;
 
-	virtual Eigen::Vector4i WinSize() = 0;
+	virtual Eigen::Vector2i WinSize() const = 0;
 
-	virtual void ClearColorDepthStencil(const Eigen::Vector4f& color, float Depth, unsigned char Stencil) = 0;
+	virtual void ClearColorDepthStencil(const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
 
 	virtual IResourcePtr CreateResource(DeviceResourceType deviceResType) = 0;
 
 	virtual IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 
-	virtual IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int bufferSize, int stride, int offset, void* buffer) = 0;
+	virtual IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int bufSize, int stride, int offset, void* buffer) = 0;
 	virtual void SetVertexBuffer(IVertexBufferPtr vertexBuffer) = 0;
 	
 	virtual IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data) = 0;
@@ -54,12 +54,12 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) = 0;
 
 	virtual ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
-		const Eigen::Vector4i& w_h_step_arrlen, int mipmap, const Data datas[]) = 0;
+		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) = 0;
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
 	virtual void SetTexture(size_t slot, ITexturePtr texture) = 0;
 	virtual void SetTextures(size_t slot, ITexturePtr textures[], size_t count) = 0;
 
-	virtual IRenderTexturePtr LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format) = 0;
+	virtual IRenderTexturePtr LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) = 0;
 	virtual void SetRenderTarget(IRenderTexturePtr rendTarget) = 0;
 
 	virtual const BlendState& GetBlendFunc() const = 0;
@@ -80,12 +80,11 @@ public:
 	RenderSystem();
 	virtual ~RenderSystem();
 public:
-	Eigen::Vector4i WinSize() { return Eigen::Vector4i{ mScreenWidth, mScreenHeight, 0, 0 }; }
+	Eigen::Vector2i WinSize() const override { return mScreenSize; }
 	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }
-public:
-	int mScreenWidth, mScreenHeight;
 protected:
+	Eigen::Vector2i mScreenSize;
 	BlendState mCurBlendFunc;
 	DepthState mCurDepthState;
 };

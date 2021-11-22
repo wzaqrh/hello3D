@@ -21,7 +21,7 @@ public:
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from);//parent rely-on node
 public:
-	Eigen::Vector4i WinSize() const { return mRenderSys.WinSize(); }
+	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
 
 	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer);

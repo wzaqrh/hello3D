@@ -39,8 +39,7 @@ void TestRT::OnPostInitDevice()
 	mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
 	
 	mRendTexture = mContext->ResourceMng()->CreateRenderTextureSync(
-		mContext->ResourceMng()->WinSize().x(), 
-		mContext->ResourceMng()->WinSize().y(), 
+		mContext->ResourceMng()->WinSize(), 
 		kFormatR32G32B32A32Float);
 
 	mSprite = mContext->RenderableFac()->CreateSprite();

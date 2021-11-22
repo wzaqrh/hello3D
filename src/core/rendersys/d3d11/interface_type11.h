@@ -146,7 +146,6 @@ public:
 class Texture11 : public ImplementResource<ITexture> 
 {
 public:
-	Texture11(ID3D11ShaderResourceView* texture);
 	void Init(ResourceFormat format, int width, int height, int faceCount, int mipmap);
 
 	bool HasSRV() override { return mTexture != nullptr; }
@@ -172,20 +171,20 @@ class RenderTexture11 : public ImplementResource<IRenderTexture>
 {
 public:
 	RenderTexture11();
-	void Init(ID3D11Device* pDevice, int width, int height, ResourceFormat format = kFormatR32G32B32A32Float);
+	void Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format = kFormatR32G32B32A32Float);
 	ITexturePtr GetColorTexture() override { return mRenderTargetPtr; }
 
 	ID3D11RenderTargetView*& GetColorBuffer11() { 	return mRenderTargetView; }
 	ID3D11DepthStencilView*& GetDepthStencilBuffer11() { return mDepthStencilView; }
 private:
-	bool InitRenderTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitRenderTexture(ID3D11Device* pDevice);
 	bool InitRenderTextureView(ID3D11Device* pDevice);
 	bool InitRenderTargetView(ID3D11Device* pDevice);
 
-	bool InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height);
+	bool InitDepthStencilTexture(ID3D11Device* pDevice);
 	bool InitDepthStencilView(ID3D11Device* pDevice);
 private:
-	ITexturePtr mRenderTargetPtr;
+	Texture11Ptr mRenderTargetPtr;
 	ID3D11Texture2D* mRenderTargetTexture;
 	ID3D11ShaderResourceView* mRenderTargetSRV;
 	ID3D11RenderTargetView* mRenderTargetView;
@@ -193,6 +192,7 @@ private:
 	ID3D11Texture2D* mDepthStencilTexture;
 	ID3D11DepthStencilView* mDepthStencilView;
 
+	Eigen::Vector2i mSize;
 	ResourceFormat mFormat;
 };
 

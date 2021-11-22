@@ -7,10 +7,6 @@ namespace mir {
 
 #define MakePtr std::make_shared
 #define PtrRaw(T) T.get()
-template<class T> static IUnknown*& MakeDeviceObjectRef(T*& ref) {
-	IUnknown** ppDeviceObj = (IUnknown**)&ref;
-	return *ppDeviceObj;
-}
 
 /********** BlobData11 **********/
 BlobData11::BlobData11(ID3DBlob* pBlob)
@@ -49,24 +45,6 @@ PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 }
 
 /********** Texture11 **********/
-Texture11::Texture11(ID3D11ShaderResourceView* texture)
-{
-	mAutoGenMipmap = false;
-	mWidth = 0, mHeight = 0, mFaceCount = 1, mMipCount = 1;
-	mFormat = kFormatUnknown;
-
-	mTexture = texture;
-	//SetDeviceObject((IUnknown**)&mTexture);
-
-	AsRes(this)->AddOnLoadedListener([this](IResource* pRes) {
-		D3D11_TEXTURE2D_DESC desc = GetDesc();
-		mWidth = desc.Width;
-		mHeight = desc.Height;
-		mFormat = static_cast<ResourceFormat>(desc.Format);
-		mMipCount = desc.MipLevels;
-	});
-}
-
 void Texture11::Init(ResourceFormat format, int width, int height, int faceCount, int mipmap)
 {
 	mWidth = width;
@@ -77,7 +55,6 @@ void Texture11::Init(ResourceFormat format, int width, int height, int faceCount
 	mFormat = format;
 
 	mTexture = nullptr;
-	//SetDeviceObject((IUnknown**)&mTexture);
 }
 
 void Texture11::SetSRV11(ID3D11ShaderResourceView* texture) 
@@ -138,24 +115,25 @@ RenderTexture11::RenderTexture11()
 	mDepthStencilView = nullptr;
 }
 
-void RenderTexture11::Init(ID3D11Device* pDevice, int width, int height, ResourceFormat format)
+void RenderTexture11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	mFormat = format;
-	InitRenderTexture(pDevice, width, height);
+	mSize = size;
+
+	InitRenderTexture(pDevice);
 	InitRenderTargetView(pDevice);
 	InitRenderTextureView(pDevice);
 
-	InitDepthStencilTexture(pDevice, width, height);
+	InitDepthStencilTexture(pDevice);
 	InitDepthStencilView(pDevice);
 }
 
-//const DXGI_FORMAT CTargetFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
-bool RenderTexture11::InitRenderTexture(ID3D11Device* pDevice, int width, int height)
+bool RenderTexture11::InitRenderTexture(ID3D11Device* pDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = width;
-	textureDesc.Height = height;
+	textureDesc.Width = mSize.x();
+	textureDesc.Height = mSize.y();
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
 	textureDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
@@ -165,10 +143,8 @@ bool RenderTexture11::InitRenderTexture(ID3D11Device* pDevice, int width, int he
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
-	HRESULT result = pDevice->CreateTexture2D(&textureDesc, NULL, &mRenderTargetTexture);
-	if (FAILED(result)) {
+	if (FAILED(pDevice->CreateTexture2D(&textureDesc, NULL, &mRenderTargetTexture)))
 		return false;
-	}
 	return true;
 }
 
@@ -180,11 +156,8 @@ bool RenderTexture11::InitRenderTargetView(ID3D11Device* pDevice)
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	// Create the render target view.
-	HRESULT result = pDevice->CreateRenderTargetView(mRenderTargetTexture, &renderTargetViewDesc, &mRenderTargetView);
-	if (FAILED(result)) {
+	if (FAILED(pDevice->CreateRenderTargetView(mRenderTargetTexture, &renderTargetViewDesc, &mRenderTargetView)))
 		return false;
-	}
 	return true;
 }
 
@@ -197,23 +170,22 @@ bool RenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	HRESULT result = pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mRenderTargetSRV);
-	if (FAILED(result)) {
+	if (FAILED(pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mRenderTargetSRV))) 
 		return false;
-	}
-	mRenderTargetPtr = MakePtr<Texture11>(mRenderTargetSRV);
+
+	mRenderTargetPtr = MakePtr<Texture11>();
+	mRenderTargetPtr->Init(mFormat, mSize.x(), mSize.y(), 1, 1);
+	mRenderTargetPtr->SetSRV11(mRenderTargetSRV);
 	AsRes(mRenderTargetPtr)->SetLoaded();
 	return true;
 }
 
-bool RenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice, int width, int height)
+bool RenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice)
 {
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
-
-	// Set up the description of the depth buffer.
-	depthBufferDesc.Width = width;
-	depthBufferDesc.Height = height;
+	depthBufferDesc.Width = mSize.x();
+	depthBufferDesc.Height = mSize.y();
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
 	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -224,10 +196,8 @@ bool RenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice, int width, 
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	HRESULT result = pDevice->CreateTexture2D(&depthBufferDesc, NULL, &mDepthStencilTexture);
-	if (FAILED(result)) {
+	if (FAILED(pDevice->CreateTexture2D(&depthBufferDesc, NULL, &mDepthStencilTexture)))
 		return false;
-	}
 	return true;
 }
 
@@ -235,8 +205,6 @@ bool RenderTexture11::InitDepthStencilView(ID3D11Device* pDevice)
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-
-	// Set up the depth stencil view description.
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;

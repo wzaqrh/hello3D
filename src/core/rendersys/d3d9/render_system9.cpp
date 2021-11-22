@@ -45,8 +45,8 @@ bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 	mDevice9->GetRenderTarget(0, &mBackColorBuffer); mCurColorBuffer = mBackColorBuffer;
 	mDevice9->GetDepthStencilSurface(&mBackDepthStencilBuffer); mCurDepthStencilBuffer = mBackDepthStencilBuffer;
 
-	mScreenWidth = width;
-	mScreenHeight = height;
+	mScreenSize.x() = width;
+	mScreenSize.y() = height;
 
 	D3DXMACRO Shader_Macros[] = { "SHADER_MODEL", "30000", NULL, NULL };
 	mShaderMacros.assign(Shader_Macros, Shader_Macros + ARRAYSIZE(Shader_Macros));
@@ -154,14 +154,15 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IRenderTexturePtr RenderSystem9::LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format)
+IRenderTexturePtr RenderSystem9::LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr);
 	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
-	if (CheckHR(mDevice9->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
+	if (CheckHR(mDevice9->CreateTexture(size.x(), size.y(), 1, 
+		D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
-	if (CheckHR(mDevice9->CreateDepthStencilSurface(width, height, D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
+	if (CheckHR(mDevice9->CreateDepthStencilSurface(size.x(), size.y(), D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
 	RenderTexture9Ptr ret = MakePtr<RenderTexture9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;

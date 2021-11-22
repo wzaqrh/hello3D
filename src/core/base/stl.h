@@ -1,6 +1,7 @@
 #pragma once
-#include <assert.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
+#include <cassert>
 #include <string>
 #include <vector>
 #include <map>

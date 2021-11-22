@@ -56,8 +56,8 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	SetDepthState(DepthState{ true, kCompareLessEqual, kDepthWriteMaskAll });
 	SetBlendFunc(BlendState::MakeAlphaPremultiplied());
 
-	mScreenWidth = vpWidth;
-	mScreenHeight = vpHeight;
+	mScreenSize.x() = vpWidth;
+	mScreenSize.y() = vpHeight;
 	return true;
 }
 
@@ -182,13 +182,10 @@ HRESULT RenderSystem11::_SetRasterizerState()
 }
 
 void RenderSystem11::Update(float dt)
-{
-
-}
+{}
 
 void RenderSystem11::CleanUp()
-{
-}
+{}
 
 void RenderSystem11::ClearColorDepthStencil(const Eigen::Vector4f& color, float Depth, unsigned char Stencil)
 {
@@ -211,7 +208,7 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 	case mir::kDeviceResourceContantBuffer:
 		return MakePtr<ContantBuffer11>();
 	case mir::kDeviceResourceTexture:
-		return MakePtr<Texture11>(nullptr);
+		return MakePtr<Texture11>();
 	case mir::kDeviceResourceRenderTexture:
 		return MakePtr<RenderTexture11>();
 	case mir::kDeviceResourceSamplerState:
@@ -222,12 +219,11 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IRenderTexturePtr RenderSystem11::LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format)
+IRenderTexturePtr RenderSystem11::LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	BOOST_ASSERT(res);
-
 	RenderTexture11Ptr ret = std::static_pointer_cast<RenderTexture11>(res);
-	ret->Init(mDevice, width, height, format);
+	ret->Init(mDevice, size, format);
 	return ret;
 }
 
@@ -538,7 +534,7 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 }
 
 ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, 
-	const Eigen::Vector4i& size, int mipCount, const Data datas[])
+	const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data datas[])
 {
 	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
 	texture->Init(format, size.x(), size.y(), size.w(), mipCount);

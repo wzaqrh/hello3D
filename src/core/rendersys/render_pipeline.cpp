@@ -9,12 +9,11 @@
 
 namespace mir {
 
-RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, int width, int height)
+RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size)
 	:mRenderSys(renderSys)
-	,mScreenWidth(width)
-	,mScreenHeight(height)
+	,mScreenSize(size)
 {
-	mShadowCasterOutput = resMng.CreateRenderTexture(Launch::Sync, mScreenWidth, mScreenHeight, kFormatR32Float);
+	mShadowCasterOutput = resMng.CreateRenderTexture(Launch::Sync, mScreenSize, kFormatR32Float);
 	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 

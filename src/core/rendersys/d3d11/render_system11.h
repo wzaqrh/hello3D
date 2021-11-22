@@ -34,14 +34,14 @@ public:
 
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IRenderTexturePtr LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format) override;
+	IRenderTexturePtr LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
 	void _ClearRenderTexture(IRenderTexturePtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil);
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
-	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer) override;
+	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, int bufSize, ResourceFormat format, void* buffer) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
-	IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int bufferSize, int stride, int offset, void* buffer) override;
+	IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int bufSize, int stride, int offset, void* buffer) override;
 	void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
 
 	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data) override;
@@ -63,7 +63,7 @@ public:
 	void SetDepthState(const DepthState& depthState) override;
 
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
-		const Eigen::Vector4i& w_h_step_arrlen, int mipmap, const Data datas[]) override;
+		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTexture(size_t slot, ITexturePtr texture) override;
 	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;

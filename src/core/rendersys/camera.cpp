@@ -8,20 +8,22 @@
 
 namespace mir {
 
-CameraPtr Camera::CreatePerspective(RenderSystem& renderSys, int width, int height, Eigen::Vector3f eyePos, double far1, double fov)
+CameraPtr Camera::CreatePerspective(RenderSystem& renderSys, const Eigen::Vector2i& size, 
+	Eigen::Vector3f eyePos, double far1, double fov)
 {
-	CameraPtr pCam = std::make_shared<Camera>(renderSys);
-	pCam->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
-	pCam->SetPerspectiveProj(width, height, fov, far1);
-	return pCam;
+	CameraPtr camera = std::make_shared<Camera>(renderSys);
+	camera->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
+	camera->SetPerspectiveProj(size, fov, far1);
+	return camera;
 }
 
-CameraPtr Camera::CreateOthogonal(RenderSystem& renderSys, int width, int height, Eigen::Vector3f eyePos, double far1)
+CameraPtr Camera::CreateOthogonal(RenderSystem& renderSys, const Eigen::Vector2i& size, 
+	Eigen::Vector3f eyePos, double far1)
 {
-	CameraPtr pCam = std::make_shared<Camera>(renderSys);
-	pCam->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
-	pCam->SetOthogonalProj(width, height, far1);
-	return pCam;
+	CameraPtr camera = std::make_shared<Camera>(renderSys);
+	camera->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
+	camera->SetOthogonalProj(size, far1);
+	return camera;
 }
 
 Camera::Camera(RenderSystem& renderSys)
@@ -69,38 +71,36 @@ void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 void Camera::SetFlipY(bool flip)
 {
 	mFlipY = flip;
-	if (mIsPespective) SetPerspectiveProj(mWidth, mHeight, mFov, mZFar);
-	else SetOthogonalProj(mWidth, mHeight, mZFar);
+	if (mIsPespective) SetPerspectiveProj(mSize, mFov, mZFar);
+	else SetOthogonalProj(mSize, mZFar);
 }
 
-void Camera::SetPerspectiveProj(int width, int height, double fov, double zFar)
+void Camera::SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar)
 {
 	mIsPespective = true;
 
-	mWidth = width;
-	mHeight = height;
+	mSize = size;
 	mZFar = zFar;
 	mFov = fov / 180.0 * boost::math::constants::pi<float>();
-	mProjection = math::MakePerspectiveFovLH(mFov, mWidth * 1.0 / mHeight, 0.01f, mZFar);
+	mProjection = math::MakePerspectiveFovLH(mFov, mSize.x() * 1.0 / mSize.y(), 0.01f, mZFar);
 
 	if (mFlipY) mProjection = Transform3Projective(mProjection).scale(Eigen::Vector3f(1, -1, 1)).matrix();
 
-	mTransform->SetPosition(Eigen::Vector3f(mWidth / 2, mHeight / 2, 0));
+	mTransform->SetPosition(Eigen::Vector3f(mSize.x() / 2, mSize.y() / 2, 0));
 	mTransformDirty = true;
 }
 
-void Camera::SetOthogonalProj(int width, int height, double zFar)
+void Camera::SetOthogonalProj(const Eigen::Vector2i& size, double zFar)
 {
 	mIsPespective = false;
 
-	mWidth = width;
-	mHeight = height;
+	mSize = size;
 	mZFar = zFar;
-	mProjection = math::MakeOrthographicOffCenterLH(0, mWidth, 0, mHeight, 0.01, mZFar);
+	mProjection = math::MakeOrthographicOffCenterLH(0, mSize.x(), 0, mSize.y(), 0.01, mZFar);
 
 	if (mFlipY) mProjection = Transform3Projective(mProjection).scale(Eigen::Vector3f(1, -1, 1)).matrix();
 
-	mTransform->SetPosition(Eigen::Vector3f(mWidth / 2, mHeight / 2, 0));
+	mTransform->SetPosition(Eigen::Vector3f(mSize.x() / 2, mSize.y() / 2, 0));
 	mTransformDirty = true;
 }
 
@@ -119,8 +119,8 @@ const Eigen::Matrix4f& Camera::GetView() const
 		{
 			auto newpos = position;
 			auto scale = mTransform->GetScale();
-			newpos.x() = position.x() - scale.x() * mWidth / 2;
-			newpos.y() = position.y() - scale.y() * mHeight / 2;
+			newpos.x() = position.x() - scale.x() * mSize.x() / 2;
+			newpos.y() = position.y() - scale.y() * mSize.y() / 2;
 			newpos.z() = position.z();
 			mTransform->SetPosition(newpos);
 
@@ -145,7 +145,7 @@ void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
 IRenderTexturePtr Camera::FetchPostProcessInput()
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mRenderSys.LoadRenderTexture(nullptr, mWidth, mHeight, kFormatR16G16B16A16UNorm);
+		mPostProcessInput = mRenderSys.LoadRenderTexture(nullptr, mSize, kFormatR16G16B16A16UNorm);
 		//SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
 	}
 	return mPostProcessInput;

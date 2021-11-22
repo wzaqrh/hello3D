@@ -29,7 +29,7 @@ public:
 
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IRenderTexturePtr LoadRenderTexture(IResourcePtr res, int width, int height, ResourceFormat format) override;
+	IRenderTexturePtr LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
 	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
 
 	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer) override;

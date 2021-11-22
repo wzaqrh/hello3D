@@ -4,11 +4,6 @@
 
 namespace mir {
 
-template<class T>
-static IUnknown*& MakeDeviceObjectRef(T*& ref) {
-	IUnknown** ppDeviceObj = (IUnknown**)&ref;
-	return *ppDeviceObj;
-}
 /********** TBlobDataStd **********/
 BlobDataStandard::BlobDataStandard(const std::vector<char>& buffer)
 	:mBuffer(buffer)

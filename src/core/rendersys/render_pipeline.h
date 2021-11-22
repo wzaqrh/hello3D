@@ -10,13 +10,12 @@ namespace mir {
 class MIR_CORE_API RenderPipeline
 {
 	RenderSystem& mRenderSys;
-	const int mScreenWidth, mScreenHeight;
+	const Eigen::Vector2i mScreenSize;
 
 	std::vector<IRenderTexturePtr> mRenderTargetStk;
-
 	IRenderTexturePtr mShadowCasterOutput;
 public:
-	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, int width, int height);
+	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size);
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);

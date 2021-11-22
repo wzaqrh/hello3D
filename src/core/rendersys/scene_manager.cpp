@@ -6,12 +6,11 @@
 
 namespace mir {
 
-SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, Eigen::Vector2i screenSize, CameraPtr defCamera)
+SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, const Eigen::Vector2i& screenSize, CameraPtr defCamera)
 	:mRenderSys(renderSys)
 	,mMaterialFac(matFac)
+	,mScreenSize(screenSize)
 {
-	mScreenWidth  = screenSize.x();
-	mScreenHeight = screenSize.y();
 	if (defCamera) mCameras.push_back(defCamera);
 }
 
@@ -25,13 +24,13 @@ CameraPtr SceneManager::GetDefCamera() const
 }
 CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1)
 {
-	CameraPtr camera = Camera::CreateOthogonal(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1);
+	CameraPtr camera = Camera::CreateOthogonal(mRenderSys, mScreenSize, eyePos, far1);
 	mCameras.push_back(camera);
 	return camera;
 }
 CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov)
 {
-	CameraPtr camera = Camera::CreatePerspective(mRenderSys, mScreenWidth, mScreenHeight, eyePos, far1, fov);
+	CameraPtr camera = Camera::CreatePerspective(mRenderSys, mScreenSize, eyePos, far1, fov);
 	mCameras.push_back(camera);
 	return camera;
 }
