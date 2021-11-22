@@ -1,4 +1,8 @@
 #include <boost/assert.hpp>
+#include <boost/asio.hpp>
+//#include <boost/asio/thread_pool.hpp> 
+//#include <boost/asio/io_service.hpp>
+//#include <boost/thread/thread.hpp>
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
@@ -9,40 +13,22 @@
 
 namespace mir {
 
+struct ThreadPoolImp {
+	ThreadPoolImp() :Pool(4) {}
+
+	boost::asio::thread_pool Pool;
+};
+
 ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac)
 	:mRenderSys(renderSys)
 	,mMaterialFac(materialFac)
-	//,mThreadPool(4)
 {
 	ilInit();
+	mThreadPoolImp = std::make_shared<ThreadPoolImp>();
 }
 ResourceManager::~ResourceManager()
 {
 	ilShutDown();
-}
-
-void ResourceManager::UpdateForLoading()
-{
-	const std::vector<IResourcePtr>& topNodes = mResDependencyGraph.GetTopNodes();
-	for (auto& res : topNodes) {
-		if (res->IsPreparedNeedLoading()) {
-			auto task = mLoadTaskByRes[res];
-			if (task) res->SetLoaded(task(res));
-			else res->SetLoaded(true);
-		}
-	}
-	for (auto res : topNodes) {
-		if (res->IsLoaded()) {
-			mResDependencyGraph.RemoveTopNode(res);
-			mLoadTaskByRes.erase(res);
-		}
-		else if (res->IsLoadedFailed()) {
-			mResDependencyGraph.RemoveConnectedGraphByTopNode(res, [](IResourcePtr node) {
-				node->SetLoaded(false);
-			});
-			mLoadTaskByRes.erase(res);
-		}
-	}
 }
 
 void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
@@ -51,70 +37,156 @@ void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
 		mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr);
 }
 
-IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+void ResourceManager::LoadResourceJob::Init(Launch launchMode, ResourceManager::LoadResourceCallback loadResCb) 
+{
+	if (launchMode == Launch::Async) {
+		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			this->Result = std::move(std::async(loadResCb, res, nextJob));
+		};
+	}
+	else {
+		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			std::packaged_task<bool(IResourcePtr, LoadResourceJobPtr)> pkg_task(loadResCb);
+			this->Result = std::move(pkg_task.get_future());
+			pkg_task(res, nextJob);
+		};
+	}
+}
+
+void ResourceManager::AddResourceLoadTask(const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes, Launch launchMode)
+{
+	AddResourceDependency(res, dependRes);
+	res->SetPrepared();
+	mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb);
+}
+
+void ResourceManager::UpdateForLoading()
+{
+	const std::vector<IResourcePtr>& topNodes = mResDependencyGraph.GetTopNodes();
+	for (auto& res : topNodes) {
+		if (res->IsPreparedNeedLoading()) {
+			ResourceLoadTaskContext& ctx = mLoadTaskCtxByRes[res];
+			if (ctx.Res) {
+				auto workExecute = std::move(ctx.WorkThreadJob->Execute);
+				if (workExecute) workExecute(ctx.Res, ctx.MainThreadJob);
+				BOOST_ASSERT(ctx.WorkThreadJob->Execute == nullptr);
+
+				if (ctx.WorkThreadJob->Result.valid() 
+					&& ctx.WorkThreadJob->Result.wait_for(std::chrono::milliseconds(0)) != std::future_status::timeout) 
+				{
+					if (ctx.WorkThreadJob->Result.get()) {
+						auto mainExecute = std::move(ctx.MainThreadJob->Execute);
+						if (mainExecute) {
+							mainExecute(ctx.Res, nullptr);
+							res->SetLoaded(ctx.MainThreadJob->Result.get());
+						}
+						else {
+							res->SetLoaded(true);
+						}
+					}
+					else {
+						res->SetLoaded(false);
+					}
+				}
+			}
+			else {
+				res->SetLoaded(true);
+			}
+		}
+	}
+	for (auto res : topNodes) {
+		if (res->IsLoaded()) {
+			mResDependencyGraph.RemoveTopNode(res);
+			mLoadTaskCtxByRes.erase(res);
+		}
+		else if (res->IsLoadedFailed()) {
+			mResDependencyGraph.RemoveConnectedGraphByTopNode(res, [](IResourcePtr node) {
+				node->SetLoaded(false);
+			});
+			mLoadTaskCtxByRes.erase(res);
+		}
+	}
+}
+
+IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
+	const std::string& name, const std::string& vsEntry, const std::string& psEntry)
 {
 	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
 	boost::filesystem::path vsAsmPath = "shader/d3d11/" + name + "_" + vsEntryOrVS + ".cso";
 	vsAsmPath = boost::filesystem::system_complete(vsAsmPath);
 
 	if (boost::filesystem::exists(vsAsmPath)) {
-		std::vector<IShaderPtr> shaders;
-		{
-			ShaderCompileDesc desc;
-			desc.EntryPoint = vsEntry;
-			desc.ShaderModel = "vs_4_0";
-			desc.SourcePath = vsAsmPath.string();
 
-			std::vector<char> buffer = input::ReadFile(vsAsmPath.string().c_str(), "rb");
-			auto blob = std::make_shared<BlobDataStandard>(buffer);
-			
-			shaders.push_back(mRenderSys.CreateShader(kShaderVertex, desc, blob));
+		ShaderCompileDesc descVS = {
+			{{"SHADER_MODEL", "40000"}},
+			vsEntry, "vs_4_0", vsAsmPath.string()
+		};
+		auto blobVS = std::make_shared<BlobDataStandard>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
+
+		std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
+		boost::filesystem::path psAsmPath = "shader/d3d11/" + name + "_" + psEntryOrPS + ".cso";
+		psAsmPath = boost::filesystem::system_complete(psAsmPath);
+		ShaderCompileDesc descPS = {
+			{{"SHADER_MODEL", "40000"}},
+			psEntry, "ps_4_0", psAsmPath.string()
+		};
+		auto blobPS = std::make_shared<BlobDataStandard>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
+
+		if (nextJob == nullptr) {
+			std::vector<IShaderPtr> shaders;
+			shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+			shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+			for (auto& it : shaders)
+				it->SetLoaded();
+			return mRenderSys.LoadProgram(program, shaders);
 		}
-		{
-			std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
-			boost::filesystem::path psAsmPath = "shader/d3d11/" + name + "_" + psEntryOrPS + ".cso";
-			psAsmPath = boost::filesystem::system_complete(psAsmPath);
-
-			ShaderCompileDesc desc;
-			desc.EntryPoint = psEntry;
-			desc.ShaderModel = "ps_4_0";
-			desc.SourcePath = psAsmPath.string();
-
-			std::vector<char> buffer = input::ReadFile(psAsmPath.string().c_str(), "rb");
-			auto blob = std::make_shared<BlobDataStandard>(buffer);
-
-			shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
+		else {
+			nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
+				std::vector<IShaderPtr> shaders;
+				shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+				for (auto& it : shaders)
+					it->SetLoaded();
+				return nullptr != mRenderSys.LoadProgram(program, shaders);
+			});
+			return program;
 		}
-		for (auto& it : shaders)
-			it->SetLoaded();
-		return mRenderSys.LoadProgram(program, shaders);
 	}
 	else {
 		std::string vsPsPath = boost::filesystem::system_complete("shader/" + name + ".fx").string();
 		std::vector<char> bytes = input::ReadFile(vsPsPath.c_str(), "rb");
 		if (!bytes.empty()) {
-			std::vector<IShaderPtr> shaders;
-			{
-				ShaderCompileDesc desc = {
-					{{"SHADER_MODEL", "40000"}},
-					vsEntry, "vs_4_0", vsPsPath
-				};
-				IBlobDataPtr blob = mRenderSys.CompileShader(desc, Data::Make(&bytes[0], bytes.size()));
+			ShaderCompileDesc descVS = {
+				{{"SHADER_MODEL", "40000"}},
+				vsEntry, "vs_4_0", vsPsPath
+			};
+			IBlobDataPtr blobVS = mRenderSys.CompileShader(descVS, Data::Make(&bytes[0], bytes.size()));
 
-				shaders.push_back(mRenderSys.CreateShader(kShaderVertex, desc, blob));
-			}
-			{
-				ShaderCompileDesc desc = {
-					{{"SHADER_MODEL", "40000"}},
-					psEntry, "ps_4_0", vsPsPath
-				};
-				IBlobDataPtr blob = mRenderSys.CompileShader(desc, Data::Make(&bytes[0], bytes.size()));
+			ShaderCompileDesc descPS = {
+				{{"SHADER_MODEL", "40000"}},
+				psEntry, "ps_4_0", vsPsPath
+			};
+			IBlobDataPtr blobPS = mRenderSys.CompileShader(descPS, Data::Make(&bytes[0], bytes.size()));
 
-				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, desc, blob));
+			if (nextJob == nullptr) {
+				std::vector<IShaderPtr> shaders;
+				shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+				for (auto& it : shaders)
+					it->SetLoaded();
+				return mRenderSys.LoadProgram(program, shaders);
 			}
-			for (auto& it : shaders)
-				it->SetLoaded();
-			return mRenderSys.LoadProgram(program, shaders);
+			else {
+				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
+					std::vector<IShaderPtr> shaders;
+					shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+					shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+					for (auto& it : shaders)
+						it->SetLoaded();
+					return nullptr != mRenderSys.LoadProgram(program, shaders);
+				});
+				return program;
+			}
 		}
 	}
 	return nullptr;
@@ -129,14 +201,12 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 		mProgramByKey.insert(std::make_pair(key, program));
 
 		if (launchMode == Launch::Async) {
-			program->SetPrepared();
-			AddResourceDependency(program, nullptr);
-			mLoadTaskByRes[program] = [=](IResourcePtr res) {
-				return nullptr != _LoadProgram(program, name, vsEntry, psEntry);
-			};
+			AddResourceLoadTask([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+				return nullptr != _LoadProgram(program, nextJob, name, vsEntry, psEntry);
+			}, program, nullptr);
 		}
 		else {
-			program = _LoadProgram(program, name, vsEntry, psEntry);
+			program = _LoadProgram(program, nullptr, name, vsEntry, psEntry);
 			program->SetLoaded();
 		}
 	}
@@ -146,12 +216,15 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 	return program;
 }
 
-ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
+ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
+	const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
 {
 	ITexturePtr ret = nullptr;
 
 	FILE* fd = fopen(imgFullpath.c_str(), "rb"); BOOST_ASSERT(fd);
 	if (fd) {
+		if (nextJob) mTexLock.lock();
+
 		ILuint imageId = ilGenImage();
 		ilBindImage(imageId);
 
@@ -212,7 +285,8 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 				if (convertFormat != kFormatUnknown)
 					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));
 				int faceSize = width * height * bpp;
-				auto& bytes = mTempBytes;
+				 
+				auto& bytes = nextJob ? nextJob->bytes : mTempBytes; 
 				bytes.resize(faceSize * mipCount * faceCount);
 				size_t bytes_position = 0;
 
@@ -230,10 +304,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 						auto& dataFM = datas[face * mipCount + mip];
 						if (convertFormat == kFormatUnknown) {
 							//直接使用
-							ILuint compressMode = ilGetInteger(IL_COMPRESS_MODE);
-
 							size_t sub_res_size = 0;
-
 							ILuint dxtFormat = ilGetInteger(IL_DXTC_DATA_FORMAT);
 							ResourceFormat compressFormat = il_helper::ConvertILFormatToResourceFormat(dxtFormat);
 							if (compressFormat != kFormatUnknown) {
@@ -258,14 +329,26 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 							}
 
 							if (sub_res_size == 0) {
-								dataFM.Bytes = ilGetData();
-								dataFM.Size = mip_width * bpp;
+								if (nextJob) {
+									size_t sub_res_size = mip_height * mip_width * bpp;
+									BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
+									ilCopyPixels(0, 0, 0,
+										mip_width, mip_height, 1,
+										ilFormat0, ilFormat1, &bytes[bytes_position]);
+
+									dataFM.Bytes = &bytes[bytes_position];
+									dataFM.Size = mip_width * bpp;
+									bytes_position += sub_res_size;
+								}
+								else {
+									dataFM.Bytes = ilGetData();
+									dataFM.Size = mip_width * bpp;
+								}
 							}
 						}
 						else {
 							//转换格式
-							size_t sub_res_size = mip_width * mip_height * bpp;
-							
+							size_t sub_res_size = mip_height * mip_width * bpp;
 							BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
 							ilCopyPixels(0, 0, 0, 
 								mip_width, mip_height, 1, 
@@ -281,8 +364,17 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 				if (format != kFormatUnknown) {
 					if (mipCount == 1 && autoGenMipmap)
 						mipCount = -1;
-					mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
-					ret = texture;
+					if (nextJob == nullptr) {
+						ret = mRenderSys.LoadTexture(texture, format, 
+							Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
+					}
+					else {
+						nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
+							return nullptr != mRenderSys.LoadTexture(texture, format, 
+								Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
+						});
+						ret = texture;
+					}
 				}
 			}
 		}
@@ -291,8 +383,9 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, const std::
 		}
 
 		ilDeleteImage(imageId);
+		if (nextJob) mTexLock.unlock();
 		fclose(fd);
-	}
+	}//if fd
 	return ret;
 }
 ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
@@ -307,13 +400,12 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 
 		if (launchMode == Launch::Async) {
-			texture->SetPrepared();
-			AddResourceDependency(texture, nullptr);
-			mLoadTaskByRes[texture] = [=](IResourcePtr res) {
-				return nullptr != _LoadTextureByFile(std::static_pointer_cast<ITexture>(res), imgFullpath, format, autoGenMipmap);
-			};
+			AddResourceLoadTask([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+				return nullptr != _LoadTextureByFile(std::static_pointer_cast<ITexture>(res), nextJob,
+					imgFullpath, format, autoGenMipmap);
+			}, texture, nullptr);
 		}
-		else texture->SetLoaded(nullptr != _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap));
+		else texture->SetLoaded(nullptr != _LoadTextureByFile(texture, nullptr, imgFullpath, format, autoGenMipmap));
 	}
 	else {
 		texture = findTex->second;

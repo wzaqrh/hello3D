@@ -2,9 +2,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/assert.hpp>
-//#include <boost/asio/thread_pool.hpp> 
-//#include <boost/asio/io_service.hpp>
-//#include <boost/thread/thread.hpp>
 #include "core/mir_export.h"
 #include "core/base/stl.h"
 #include "core/base/declare_macros.h"
@@ -16,8 +13,32 @@
 
 namespace mir {
 
+struct ThreadPoolImp;
 class MIR_CORE_API ResourceManager : boost::noncopyable {
-	typedef std::function<bool(IResourcePtr)> ResourceLoadTask;
+	struct LoadResourceJob;
+	typedef std::shared_ptr<LoadResourceJob> LoadResourceJobPtr;
+	typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
+	struct LoadResourceJob {
+		void Init(Launch launchMode, LoadResourceCallback loadResCb);
+		DECLARE_LAUNCH_FUNCTIONS(void, Init);
+	public:
+		std::function<void(IResourcePtr res, LoadResourceJobPtr nextJob)> Execute;
+		std::future<bool> Result;
+		std::vector<unsigned char> bytes;
+	};
+	struct ResourceLoadTaskContext {
+		ResourceLoadTaskContext() {
+			WorkThreadJob = std::make_shared<ResourceManager::LoadResourceJob>();
+			MainThreadJob = std::make_shared<ResourceManager::LoadResourceJob>();
+		}
+		void Init(Launch launchMode, IResourcePtr res, LoadResourceCallback loadResCb) {
+			Res = res;
+			WorkThreadJob->Init(launchMode, loadResCb);
+		}
+	public:
+		IResourcePtr Res;
+		LoadResourceJobPtr WorkThreadJob, MainThreadJob;
+	};
 public:
 	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac);
 	~ResourceManager();
@@ -32,21 +53,21 @@ public:
 		res->SetLoaded();
 		return std::static_pointer_cast<IIndexBuffer>(res);
 	}
-	DECLARE_RES_MNG_LAUNCH_FUNCS(IIndexBufferPtr, CreateIndexBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IIndexBufferPtr, CreateIndexBuffer);
 
 	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer);
 		res->SetLoaded(nullptr != mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IVertexBuffer>(res);
 	}
-	DECLARE_RES_MNG_LAUNCH_FUNCS(IVertexBufferPtr, CreateVertexBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IVertexBufferPtr, CreateVertexBuffer);
 
 	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer);
 		res->SetLoaded(nullptr != mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IContantBuffer>(res);
 	}
-	DECLARE_RES_MNG_LAUNCH_FUNCS(IContantBufferPtr, CreateConstBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IContantBufferPtr, CreateConstBuffer);
 
 	TemplateArgs bool UpdateBuffer(T &&...args) {
 		return mRenderSys.UpdateBuffer(std::forward<T>(args)...);
@@ -55,26 +76,24 @@ public:
 	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
 		if (launchMode == Launch::Async) {
-			AddResourceDependency(res, program);
-			res->SetPrepared();
-			mLoadTaskByRes[res] = [=](IResourcePtr res) { 
+			AddResourceLoadTask([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 				return nullptr != mRenderSys.LoadLayout(res, program, args...);
-			};
+			}, res, program, Launch::Sync);
 		}
 		else res->SetLoaded(nullptr != mRenderSys.LoadLayout(res, program, std::forward<T>(args)...));
 		return std::static_pointer_cast<IInputLayout>(res);
 	}
-	DECLARE_RES_MNG_LAUNCH_FUNCS(IInputLayoutPtr, CreateLayout);
+	DECLARE_LAUNCH_FUNCTIONS(IInputLayoutPtr, CreateLayout);
 
 	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState);
 		res->SetLoaded(nullptr != mRenderSys.LoadSampler(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<ISamplerState>(res);
 	}
-	DECLARE_RES_MNG_LAUNCH_FUNCS(ISamplerStatePtr, CreateSampler);
+	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler);
 
 	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
-	DECLARE_RES_MNG_LAUNCH_FUNCS(IProgramPtr, CreateProgram);
+	DECLARE_LAUNCH_FUNCTIONS(IProgramPtr, CreateProgram);
 
 	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceTexture);
@@ -82,7 +101,7 @@ public:
 		return std::static_pointer_cast<ITexture>(res);
 	}
 	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
-	DECLARE_RES_MNG_LAUNCH_FUNCS(ITexturePtr, CreateTextureByFile);
+	DECLARE_LAUNCH_FUNCTIONS(ITexturePtr, CreateTextureByFile);
 
 	TemplateArgs bool LoadRawTextureData(T &&...args) {
 		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
@@ -93,15 +112,18 @@ public:
 		res->SetLoaded(nullptr != mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IRenderTexture>(res);
 	}
-	DECLARE_RES_MNG_LAUNCH_FUNCS(IRenderTexturePtr, CreateRenderTexture);
+	DECLARE_LAUNCH_FUNCTIONS(IRenderTexturePtr, CreateRenderTexture);
 
 	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName, bool sharedUse = false);
-	DECLARE_RES_MNG_LAUNCH_FUNCS(MaterialPtr, CreateMaterial);
+	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial);
 
 	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
 private:
-	IProgramPtr _LoadProgram(IProgramPtr program, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
-	ITexturePtr _LoadTextureByFile(ITexturePtr texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
+	void AddResourceLoadTask(const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr, Launch launchMode = Launch::Async);
+	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
+		const std::string& name, const std::string& vsEntry, const std::string& psEntry);
+	ITexturePtr _LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
+		const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
 private:
 	RenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
@@ -202,9 +224,8 @@ private:
 		mutable std::vector<ValueType> mTopNodes;
 	};
 	ResourceDependencyGraph mResDependencyGraph;
-	std::map<IResourcePtr, ResourceLoadTask> mLoadTaskByRes;
-	//std::vector<std::tuple<IResourcePtr, std::future<bool>>> mLoadingTasks;
-	//boost::asio::thread_pool mThreadPool;
+	std::map<IResourcePtr, ResourceLoadTaskContext> mLoadTaskCtxByRes;
+	std::shared_ptr<ThreadPoolImp> mThreadPoolImp;
 private:
 	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {
@@ -217,6 +238,7 @@ private:
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTexByPath;
+	std::mutex mTexLock;
 	std::map<std::string, MaterialPtr> mMaterials;
 };
 
