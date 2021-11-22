@@ -438,16 +438,16 @@ IInputLayoutPtr RenderSystem9::LoadLayout(IResourcePtr res, IProgramPtr pProgram
 	ret->mInputDescs.push_back(D3DDECL_END());
 
 	auto resource = AsRes(pProgram);
-	if (resource->IsLoaded()) {
+	//if (resource->IsLoaded()) {
 		ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program9>(pProgram).get(), ret->mInputDescs);
 		resource->SetLoaded();
-	}
-	else {
-		resource->AddOnLoadedListener([=](IResource* res) {
-			ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program9>(pProgram).get(), ret->mInputDescs);
-			res->SetLoaded();
-		});
-	}
+		/*}
+		else {
+			resource->AddOnLoadedListener([=](IResource* res) {
+				ret->mLayout = _CreateInputLayout(std::static_pointer_cast<Program9>(pProgram).get(), ret->mInputDescs);
+				res->SetLoaded();
+			});
+		}*/
 	return ret;
 }
 void RenderSystem9::SetVertexLayout(IInputLayoutPtr layout)

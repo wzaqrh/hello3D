@@ -14,7 +14,7 @@
 namespace mir {
 
 class MIR_CORE_API ResourceManager : boost::noncopyable {
-	typedef std::function<void(IResourcePtr)> ResourceLoadTask;
+	typedef std::function<bool(IResourcePtr)> ResourceLoadTask;
 public:
 	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac);
 	~ResourceManager();
@@ -33,16 +33,14 @@ public:
 
 	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer);
-		mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...);
-		res->SetLoaded();
+		res->SetLoaded(nullptr != mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IVertexBuffer>(res);
 	}
 	DECLARE_RES_MNG_LAUNCH_FUNCS(IVertexBufferPtr, CreateVertexBuffer);
 
 	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer);
-		mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...);
-		res->SetLoaded();
+		res->SetLoaded(nullptr != mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IContantBuffer>(res);
 	}
 	DECLARE_RES_MNG_LAUNCH_FUNCS(IContantBufferPtr, CreateConstBuffer);
@@ -56,23 +54,18 @@ public:
 		if (launchMode == Launch::Async) {
 			AddResourceDependency(res, program);
 			res->SetPrepared();
-			mLoadTaskByRes[res] = [=](IResourcePtr res) {
-				mRenderSys.LoadLayout(res, program, args...);
-				res->SetLoaded();
+			mLoadTaskByRes[res] = [=](IResourcePtr res) { 
+				return nullptr != mRenderSys.LoadLayout(res, program, args...);
 			};
 		}
-		else {
-			mRenderSys.LoadLayout(res, program, std::forward<T>(args)...);
-			res->SetLoaded();
-		}
+		else res->SetLoaded(nullptr != mRenderSys.LoadLayout(res, program, std::forward<T>(args)...));
 		return std::static_pointer_cast<IInputLayout>(res);
 	}
 	DECLARE_RES_MNG_LAUNCH_FUNCS(IInputLayoutPtr, CreateLayout);
 
 	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState);
-		mRenderSys.LoadSampler(res, std::forward<T>(args)...);
-		res->SetLoaded();
+		res->SetLoaded(nullptr != mRenderSys.LoadSampler(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<ISamplerState>(res);
 	}
 	DECLARE_RES_MNG_LAUNCH_FUNCS(ISamplerStatePtr, CreateSampler);
@@ -82,8 +75,7 @@ public:
 
 	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceTexture);
-		mRenderSys.LoadTexture(res, format, std::forward<T>(args)...);
-		res->SetLoaded();
+		res->SetLoaded(nullptr != mRenderSys.LoadTexture(res, format, std::forward<T>(args)...));
 		return std::static_pointer_cast<ITexture>(res);
 	}
 	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
@@ -95,8 +87,7 @@ public:
 
 	TemplateArgs IRenderTexturePtr CreateRenderTexture(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceRenderTexture);
-		mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...);
-		res->SetLoaded();
+		res->SetLoaded(nullptr != mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IRenderTexture>(res);
 	}
 	DECLARE_RES_MNG_LAUNCH_FUNCS(IRenderTexturePtr, CreateRenderTexture);
@@ -111,7 +102,7 @@ private:
 private:
 	RenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
-	struct ResourceDependencyGraph {
+	class ResourceDependencyGraph {
 		typedef IResourcePtr ValueType;
 		typedef const ValueType& ConstReference;
 		struct GraphNode {
@@ -133,12 +124,11 @@ private:
 			}
 			size_t InDgree() const { return LinkFrom.size(); }
 			size_t OutDegree() const { return LinkTo.size(); }
+		public:
 			ValueType Value;
 			std::vector<ValueType> LinkFrom;
 			std::vector<ValueType> LinkTo;
 		};
-		mutable std::map<IResourceRawPtr, GraphNode> mNodeMap;
-		mutable std::vector<ValueType> mTopNodes;
 		GraphNode* GetGraphNode(ConstReference node) {
 			auto iter = mNodeMap.find(node.get());
 			return iter != mNodeMap.end() && iter->second.Value ? &iter->second : nullptr;
@@ -147,6 +137,11 @@ private:
 			auto iter = mNodeMap.find(node.get());
 			return iter != mNodeMap.end() && iter->second.Value;
 		}
+		void AddNode(ConstReference node) {
+			BOOST_ASSERT(node);
+			mNodeMap[node.get()].Value = node;
+		}
+	public:
 		void AddLink(ConstReference to, ConstReference from) {
 			BOOST_ASSERT(to);
 			if (from) {
@@ -159,14 +154,24 @@ private:
 				AddNode(to);
 			}
 		}
-		void AddNode(ConstReference node) {
-			BOOST_ASSERT(node);
-			mNodeMap[node.get()].Value = node;
-		}
-		void RemoveNode(ConstReference node) {
+		void RemoveTopNode(ConstReference node) {
 			BOOST_ASSERT(node);
 			auto gnode = GetGraphNode(node);
 			if (gnode) {
+				BOOST_ASSERT(gnode->LinkFrom.empty());
+				for (auto& to : gnode->LinkTo) {
+					auto gto = GetGraphNode(to);
+					if (gto) gto->RemoveLinkFrom(node);
+				}
+			}
+			mNodeMap.erase(node.get());
+		}
+		template<typename _CallBack>
+		void RemoveConnectedGraphByTopNode(ConstReference node, _CallBack cb) {
+			BOOST_ASSERT(node);
+			auto gnode = GetGraphNode(node);
+			if (gnode) {
+				cb(node);
 				for (auto& from : gnode->LinkFrom) {
 					auto gfrom = GetGraphNode(from);
 					if (gfrom) gfrom->RemoveLinkTo(node);
@@ -175,10 +180,13 @@ private:
 					auto gto = GetGraphNode(to);
 					if (gto) gto->RemoveLinkFrom(node);
 				}
+				std::vector<ValueType> linkTo = std::move(gnode->LinkTo);
+				mNodeMap.erase(node.get());
+				for (auto& to : linkTo)
+					RemoveConnectedGraphByTopNode(to, cb);
 			}
-			mNodeMap.erase(node.get());
 		}
-		const std::vector<ValueType>& TopNodes() {//入度为0
+		const std::vector<ValueType>& GetTopNodes() {//入度为0
 			mTopNodes.clear();
 			for (auto& iter : mNodeMap) {
 				if (iter.second.Value && iter.second.InDgree() == 0)
@@ -186,6 +194,9 @@ private:
 			}
 			return mTopNodes;
 		}
+	private:
+		mutable std::map<IResourceRawPtr, GraphNode> mNodeMap;
+		mutable std::vector<ValueType> mTopNodes;
 	};
 	ResourceDependencyGraph mResDependencyGraph;
 	std::map<IResourcePtr, ResourceLoadTask> mLoadTaskByRes;

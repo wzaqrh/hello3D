@@ -22,17 +22,23 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::UpdateForLoading()
 {
-	const std::vector<IResourcePtr>& topNodes = mResDependencyGraph.TopNodes();
+	const std::vector<IResourcePtr>& topNodes = mResDependencyGraph.GetTopNodes();
 	for (auto& res : topNodes) {
 		if (res->IsPreparedNeedLoading()) {
 			auto task = mLoadTaskByRes[res];
-			if (task) task(res);
-			else res->SetLoaded();
+			if (task) res->SetLoaded(task(res));
+			else res->SetLoaded(true);
 		}
 	}
 	for (auto res : topNodes) {
 		if (res->IsLoaded()) {
-			mResDependencyGraph.RemoveNode(res);
+			mResDependencyGraph.RemoveTopNode(res);
+			mLoadTaskByRes.erase(res);
+		}
+		else if (res->IsLoadedFailed()) {
+			mResDependencyGraph.RemoveConnectedGraphByTopNode(res, [](IResourcePtr node) {
+				node->SetLoaded(false);
+			});
 			mLoadTaskByRes.erase(res);
 		}
 	}
@@ -126,8 +132,7 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 			program->SetPrepared();
 			AddResourceDependency(program, nullptr);
 			mLoadTaskByRes[program] = [=](IResourcePtr res) {
-				_LoadProgram(program, name, vsEntry, psEntry);
-				program->SetLoaded();
+				return nullptr != _LoadProgram(program, name, vsEntry, psEntry);
 			};
 		}
 		else {
@@ -305,14 +310,10 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 			texture->SetPrepared();
 			AddResourceDependency(texture, nullptr);
 			mLoadTaskByRes[texture] = [=](IResourcePtr res) {
-				_LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
-				texture->SetLoaded();
+				return nullptr != _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
 			};
 		}
-		else {
-			texture = _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
-			texture->SetLoaded();
-		}
+		else texture->SetLoaded(nullptr != _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap));
 	}
 	else {
 		texture = findTex->second;

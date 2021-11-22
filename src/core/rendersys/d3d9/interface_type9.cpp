@@ -17,15 +17,14 @@ Texture9::Texture9(IDirect3DTexture9 *texture)
 	mWidth = 0, mHeight = 0, mMipCount = 0;
 	mFormat = kFormatUnknown;
 
-	//SetDeviceObject((IUnknown**)&mTexture);
-
+	/*SetDeviceObject((IUnknown**)&mTexture);
 	AsRes(this)->AddOnLoadedListener([this](IResource*) {
 		D3DSURFACE_DESC desc = GetDesc();
 		mWidth = desc.Width;
 		mHeight = desc.Height;
 		mFormat = static_cast<ResourceFormat>(d3d::convert9To11(desc.Format));
 		mMipCount = mTexture->GetLevelCount();
-	});
+	});*/
 }
 
 Texture9::Texture9(int width, int height, ResourceFormat format, int mipmap)

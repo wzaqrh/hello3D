@@ -98,18 +98,19 @@ public:
 	}
 	IProgramPtr SetProgram(IProgramPtr program) {
 		mCurPass->mProgram = program;
-		//mMaterial->AddDependency(AsRes(program));
 		mResourceMng.AddResourceDependency(mMaterial, program);
 		return program;
 	}
 	MaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
 		while (count-- > 0)
 			mCurPass->AddSampler(sampler);
+		mResourceMng.AddResourceDependency(mMaterial, sampler);
 		return *this;
 	}
 	MaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1) {
 		while (count-- > 0)
 			mCurTech->AddSampler(sampler);
+		mResourceMng.AddResourceDependency(mMaterial, sampler);
 		return *this;
 	}
 	MaterialBuilder& ClearSamplersToTech() {
@@ -118,29 +119,32 @@ public:
 	}
 	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
 		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
+		mResourceMng.AddResourceDependency(mMaterial, buffer);
 		return *this;
 	}
 	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
 		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
+		mResourceMng.AddResourceDependency(mMaterial, buffer);
 		return *this;
 	}
 	MaterialBuilder& SetRenderTarget(IRenderTexturePtr target) {
 		mCurPass->mRenderTarget = target;
+		mResourceMng.AddResourceDependency(mMaterial, target);
 		return *this;
 	}
 	MaterialBuilder& AddIterTarget(IRenderTexturePtr target) {
 		mCurPass->AddIterTarget(target);
+		mResourceMng.AddResourceDependency(mMaterial, target);
 		return *this;
 	}
 	MaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
 		mCurPass->mTextures[slot] = texture;
-		//mMaterial->AddDependency(AsRes(texture));
 		mResourceMng.AddResourceDependency(mMaterial, texture);
 		return *this;
 	}
 	MaterialPtr Build() {
-		//mMaterial->SetLoaded();
-		mMaterial->SetPrepared();
+		if (mLaunchMode == Launch::Async) mMaterial->SetPrepared();
+		else mMaterial->SetLoaded();
 		return mMaterial;
 	}
 };
@@ -283,13 +287,13 @@ public:
 		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	void GetMaterialAsset(Launch launchMode,
+	bool GetMaterialAsset(Launch launchMode,
 		ResourceManager& resourceMng,
 		const std::string& shaderName,
 		const std::string& variantName,
 		MaterialAsset& materialAsset) {
-		if (!variantName.empty()) ParseShaderVariantXml(shaderName, variantName, materialAsset.ShaderInfo);
-		else ParseShaderXml(shaderName, materialAsset.ShaderInfo);
+		if (!variantName.empty()) return ParseShaderVariantXml(shaderName, variantName, materialAsset.ShaderInfo);
+		else return ParseShaderXml(shaderName, materialAsset.ShaderInfo);
 	}
 public:
 	const MaterialNameToAssetMapping& MatNameToAsset() const {
@@ -639,8 +643,13 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const std::string& matName) {
 	MaterialAsset matAsset;
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
-	mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, entry.ShaderName, entry.VariantName, matAsset);
-	return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset);
+	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, entry.ShaderName, entry.VariantName, matAsset))
+		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset);
+	else {
+		MaterialPtr mat = std::make_shared<Material>();
+		mat->SetLoaded(false);
+		return mat;
+	}
 }
 
 }
