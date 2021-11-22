@@ -40,22 +40,22 @@ struct ImplementResource : public _Parent
 public:
 	ImplementResource() :mCurState(kResourceStateNone) {}
 
-	ResourceState GetCurState() const override final { return mCurState; }
+	ResourceState GetCurState() const override final { return mCurState.load(std::memory_order_consume); }
 	void SetCurState(ResourceState state) override final {
-		if (mCurState != state) {
-			mCurState = state;
-			if (mCurState == kResourceStateLoadedSuccess)
+		if (mCurState.load(std::memory_order_consume) != state) {
+			mCurState.store(state, std::memory_order_release);
+			if (state == kResourceStateLoadedSuccess)
 				OnLoaded();
 		}
 	}
 
 	void Assign(const ImplementResource& other) {
-		this->mCurState = other.mCurState;
+		this->mCurState.store(other.mCurState.load(std::memory_order_consume), std::memory_order_release);
 	}
 protected:
 	virtual void OnLoaded() {}
 private:
-	ResourceState mCurState;
+	std::atomic<ResourceState> mCurState;
 };
 
 }

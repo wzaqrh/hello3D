@@ -2,6 +2,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/assert.hpp>
+//#include <boost/asio/thread_pool.hpp> 
+//#include <boost/asio/io_service.hpp>
+//#include <boost/thread/thread.hpp>
 #include "core/mir_export.h"
 #include "core/base/stl.h"
 #include "core/base/declare_macros.h"
@@ -200,6 +203,8 @@ private:
 	};
 	ResourceDependencyGraph mResDependencyGraph;
 	std::map<IResourcePtr, ResourceLoadTask> mLoadTaskByRes;
+	//std::vector<std::tuple<IResourcePtr, std::future<bool>>> mLoadingTasks;
+	//boost::asio::thread_pool mThreadPool;
 private:
 	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {

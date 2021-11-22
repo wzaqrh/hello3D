@@ -12,6 +12,7 @@ namespace mir {
 ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac)
 	:mRenderSys(renderSys)
 	,mMaterialFac(materialFac)
+	//,mThreadPool(4)
 {
 	ilInit();
 }
@@ -92,7 +93,6 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, const std::string
 		std::string vsPsPath = boost::filesystem::system_complete("shader/" + name + ".fx").string();
 		std::vector<char> bytes = input::ReadFile(vsPsPath.c_str(), "rb");
 		if (!bytes.empty()) {
-			//auto program = mRenderSys.CreateResource(kDeviceResourceProgram);
 			std::vector<IShaderPtr> shaders;
 			{
 				ShaderCompileDesc desc = {
@@ -310,7 +310,7 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 			texture->SetPrepared();
 			AddResourceDependency(texture, nullptr);
 			mLoadTaskByRes[texture] = [=](IResourcePtr res) {
-				return nullptr != _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap);
+				return nullptr != _LoadTextureByFile(std::static_pointer_cast<ITexture>(res), imgFullpath, format, autoGenMipmap);
 			};
 		}
 		else texture->SetLoaded(nullptr != _LoadTextureByFile(texture, imgFullpath, format, autoGenMipmap));
