@@ -2,10 +2,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include "core/renderable/assimp_model.h"
-#include "core/rendersys/material.h"
-#include "core/rendersys/material_cb.h"
-#include "core/rendersys/material_factory.h"
-#include "core/rendersys/resource_manager.h"
+#include "core/resource/material.h"
+#include "core/resource/material_cb.h"
+#include "core/resource/material_factory.h"
+#include "core/resource/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/base/transform.h"
 #include "core/base/debug.h"

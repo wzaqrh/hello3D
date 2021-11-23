@@ -6,10 +6,10 @@
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
-#include "core/rendersys/resource_manager.h"
+#include "core/resource/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/rendersys/render_system.h"
-#include "core/rendersys/material_factory.h"
+#include "core/resource/material_factory.h"
 
 namespace mir {
 
@@ -19,6 +19,24 @@ struct ThreadPoolImp {
 	boost::asio::thread_pool Pool;
 };
 
+/********** LoadResourceJob **********/
+void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
+{
+	if (launchMode == Launch::Async) {
+		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			this->Result = std::move(std::async(loadResCb, res, nextJob));
+		};
+	}
+	else {
+		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			std::packaged_task<bool(IResourcePtr, LoadResourceJobPtr)> pkg_task(loadResCb);
+			this->Result = std::move(pkg_task.get_future());
+			pkg_task(res, nextJob);
+		};
+	}
+}
+
+/********** ResourceManager **********/
 ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac)
 	:mRenderSys(renderSys)
 	,mMaterialFac(materialFac)
@@ -37,23 +55,7 @@ void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
 		mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr);
 }
 
-void ResourceManager::LoadResourceJob::Init(Launch launchMode, ResourceManager::LoadResourceCallback loadResCb) 
-{
-	if (launchMode == Launch::Async) {
-		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			this->Result = std::move(std::async(loadResCb, res, nextJob));
-		};
-	}
-	else {
-		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			std::packaged_task<bool(IResourcePtr, LoadResourceJobPtr)> pkg_task(loadResCb);
-			this->Result = std::move(pkg_task.get_future());
-			pkg_task(res, nextJob);
-		};
-	}
-}
-
-void ResourceManager::AddResourceLoadTask(const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes, Launch launchMode)
+void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes)
 {
 	AddResourceDependency(res, dependRes);
 	res->SetPrepared();
@@ -201,7 +203,7 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 		mProgramByKey.insert(std::make_pair(key, program));
 
 		if (launchMode == Launch::Async) {
-			AddResourceLoadTask([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 				return nullptr != _LoadProgram(program, nextJob, name, vsEntry, psEntry);
 			}, program, nullptr);
 		}
@@ -400,7 +402,7 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 		mTexByPath.insert(std::make_pair(imgFullpath, texture));
 
 		if (launchMode == Launch::Async) {
-			AddResourceLoadTask([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 				return nullptr != _LoadTextureByFile(std::static_pointer_cast<ITexture>(res), nextJob,
 					imgFullpath, format, autoGenMipmap);
 			}, texture, nullptr);

@@ -37,6 +37,15 @@ public:
 	}
 };
 
+struct AiScene {
+	AssimpMeshPtrVector mMeshes;
+	std::map<std::string, const aiNode*> mBoneNodesByName;
+	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
+	std::map<std::string, ITexturePtr> mLoadedTexture;
+	aiNode* mRootNode = nullptr;
+	const aiScene* mScene = nullptr;
+};
+
 class MIR_CORE_API AssimpModel : public IRenderable 
 {
 	friend class RenderableFactory;
@@ -62,6 +71,7 @@ private:
 	std::map<std::string, ITexturePtr> mLoadedTexture;
 	aiNode* mRootNode = nullptr;
 	const aiScene* mScene = nullptr;
+	std::shared_ptr<AiScene> mAiScene;
 	int mCurrentAnimIndex = -1;
 private:
 	std::vector<aiMatrix4x4> mTransforms;

@@ -1,7 +1,7 @@
 #include "test/test_case.h"
 #include "test/app.h"
 #include "core/rendersys/scene_manager.h"
-#include "core/rendersys/material_factory.h"
+#include "core/resource/material_factory.h"
 #include "core/renderable/sprite.h"
 
 using namespace mir;

@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/noncopyable.hpp>
 #include "core/base/launch.h"
-#include "core/rendersys/material.h"
+#include "core/resource/material.h"
 #include "core/rendersys/render_system.h"
 
 namespace mir {

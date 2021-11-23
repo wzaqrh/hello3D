@@ -5,7 +5,7 @@
 #include "core/base/math.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/predeclare.h"
-#include "core/rendersys/material.h"
+#include "core/resource/material.h"
 
 namespace mir {
 

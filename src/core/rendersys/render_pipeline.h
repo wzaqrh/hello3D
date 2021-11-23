@@ -3,7 +3,7 @@
 #include "core/base/stl.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
-#include "core/rendersys/material_cb.h"
+#include "core/resource/material_cb.h"
 
 namespace mir {
 

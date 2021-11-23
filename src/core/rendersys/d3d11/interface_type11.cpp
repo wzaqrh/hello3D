@@ -1,6 +1,6 @@
 #include "interface_type11.h"
 #include "core/rendersys/render_system.h"
-#include "core/rendersys/resource.h"
+#include "core/resource/resource.h"
 #include "core/base/d3d.h"
 
 namespace mir {

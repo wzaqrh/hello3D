@@ -1,5 +1,5 @@
 #include "interface_type9.h"
-#include "core/rendersys/resource.h"
+#include "core/resource/resource.h"
 #include "core/rendersys/render_system.h"
 #include "core/base/debug.h"
 #include "core/base/d3d.h"

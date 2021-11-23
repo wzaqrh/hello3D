@@ -8,28 +8,28 @@
 #include "core/rendersys/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/base/launch.h"
-#include "core/rendersys/resource.h"
+#include "core/resource/resource.h"
 #include "core/rendersys/render_system.h"
 
 namespace mir {
 
+DECLARE_STRUCT(LoadResourceJob);
+typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
+struct LoadResourceJob {
+	void Init(Launch launchMode, LoadResourceCallback loadResCb);
+	DECLARE_LAUNCH_FUNCTIONS(void, Init);
+public:
+	std::function<void(IResourcePtr res, LoadResourceJobPtr nextJob)> Execute;
+	std::future<bool> Result;
+	std::vector<unsigned char> bytes;
+};
+
 struct ThreadPoolImp;
 class MIR_CORE_API ResourceManager : boost::noncopyable {
-	struct LoadResourceJob;
-	typedef std::shared_ptr<LoadResourceJob> LoadResourceJobPtr;
-	typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
-	struct LoadResourceJob {
-		void Init(Launch launchMode, LoadResourceCallback loadResCb);
-		DECLARE_LAUNCH_FUNCTIONS(void, Init);
-	public:
-		std::function<void(IResourcePtr res, LoadResourceJobPtr nextJob)> Execute;
-		std::future<bool> Result;
-		std::vector<unsigned char> bytes;
-	};
 	struct ResourceLoadTaskContext {
 		ResourceLoadTaskContext() {
-			WorkThreadJob = std::make_shared<ResourceManager::LoadResourceJob>();
-			MainThreadJob = std::make_shared<ResourceManager::LoadResourceJob>();
+			WorkThreadJob = std::make_shared<LoadResourceJob>();
+			MainThreadJob = std::make_shared<LoadResourceJob>();
 		}
 		void Init(Launch launchMode, IResourcePtr res, LoadResourceCallback loadResCb) {
 			Res = res;
@@ -44,6 +44,8 @@ public:
 	~ResourceManager();
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from);//parent rely-on node
+	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr);
+	DECLARE_LAUNCH_FUNCTIONS(void, AddLoadResourceJob);
 public:
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
 
@@ -76,9 +78,9 @@ public:
 	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
 		if (launchMode == Launch::Async) {
-			AddResourceLoadTask([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			AddLoadResourceJob(Launch::Sync, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 				return nullptr != mRenderSys.LoadLayout(res, program, args...);
-			}, res, program, Launch::Sync);
+			}, res, program);
 		}
 		else res->SetLoaded(nullptr != mRenderSys.LoadLayout(res, program, std::forward<T>(args)...));
 		return std::static_pointer_cast<IInputLayout>(res);
@@ -119,7 +121,6 @@ public:
 
 	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
 private:
-	void AddResourceLoadTask(const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr, Launch launchMode = Launch::Async);
 	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
 		const std::string& name, const std::string& vsEntry, const std::string& psEntry);
 	ITexturePtr _LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 

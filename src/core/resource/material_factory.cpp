@@ -7,10 +7,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include "core/rendersys/material_factory.h"
-#include "core/rendersys/material.h"
-#include "core/rendersys/material_cb.h"
-#include "core/rendersys/resource_manager.h"
+#include "core/resource/material_factory.h"
+#include "core/resource/material.h"
+#include "core/resource/material_cb.h"
+#include "core/resource/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/renderable/post_process.h"
 #include "core/base/d3d.h"

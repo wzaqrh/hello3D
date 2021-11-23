@@ -7,9 +7,9 @@
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/post_process.h"
 #include "core/rendersys/camera.h"
-#include "core/rendersys/material_factory.h"
+#include "core/resource/material_factory.h"
 #include "core/rendersys/render_pipeline.h"
-#include "core/rendersys/resource_manager.h"
+#include "core/resource/resource_manager.h"
 
 namespace mir {
 

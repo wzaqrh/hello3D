@@ -1,7 +1,7 @@
 #include "core/mir.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d9/render_system9.h"
-#include "core/rendersys/material_factory.h"
+#include "core/resource/material_factory.h"
 
 namespace mir {
 

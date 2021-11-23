@@ -2,7 +2,7 @@
 #include <boost/filesystem.hpp>
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/d3d9/interface_type9.h"
-#include "core/rendersys/material_factory.h"
+#include "core/resource/material_factory.h"
 #include "core/base/debug.h"
 #include "core/base/input.h"
 #include "core/base/d3d.h"

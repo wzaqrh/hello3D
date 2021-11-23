@@ -4,7 +4,7 @@
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/base_type.h"
-#include "core/rendersys/material_cb.h"
+#include "core/resource/material_cb.h"
 #include "core/rendersys/camera.h"
 
 namespace mir {

@@ -1,5 +1,5 @@
 #include "core/renderable/font.h"
-#include "core/rendersys/resource_manager.h"
+#include "core/resource/resource_manager.h"
 
 namespace mir {
 
