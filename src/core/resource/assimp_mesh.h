@@ -18,32 +18,29 @@ struct AssimpMeshVertex
 	Eigen::Vector3f BiTangent;
 };
 
-class MIR_CORE_API AssimpMesh : public IRenderable 
+class MIR_CORE_API AssimpMesh
 {
-	friend class AssimpModel;
-	friend class RenderableFactory;
 public:
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpMesh);
 	AssimpMesh(Launch launchMode, ResourceManager& resourceMng,
-		const aiMesh* data,
-		std::vector<AssimpMeshVertex>& vertices,
-		std::vector<UINT>& indices,
-		TextureBySlotPtr textures,
-		MaterialPtr material);
-	int GenRenderOperation(RenderOperationQueue& opList) override;
+		const aiMesh* aiMeshData,
+		std::vector<AssimpMeshVertex>&& vertices,
+		std::vector<uint32_t>&& indices,
+		TextureBySlotPtr textures);
+	bool IsLoaded() const;
 	bool HasTexture(int slot) const;
-	const aiMesh* GetAiMesh() const { return mData; }
-	const MaterialPtr& GetMaterial() const { return mMaterial; }
+	const aiMesh* GetAiMesh() const { return mAiMesh; }
+	const TextureBySlotPtr& GetTextures() const { return mTextures; }
+	const IVertexBufferPtr& GetVertexBuffer() const { return mVertexBuffer; }
+	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }
 private:
-	const aiMesh* mData = nullptr;
+	const aiMesh* mAiMesh;
 	std::vector<AssimpMeshVertex> mVertices;
-	std::vector<UINT> mIndices;
+	std::vector<uint32_t> mIndices;
 	TextureBySlotPtr mTextures;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
-	MaterialPtr mMaterial;
 };
 typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
-typedef std::vector<AssimpMeshPtr> AssimpMeshPtrVector;
 
 }

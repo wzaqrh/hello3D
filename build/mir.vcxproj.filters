@@ -26,25 +26,16 @@
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\interface_type9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
+      <Filter>src\core\d3d9</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
+      <Filter>src\core\d3d9</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\interface_type11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\material.h">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\material_cb.h">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\material_factory.h">
-      <Filter>src\core\rendersys\material</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\mir.h">
       <Filter>src\core</Filter>
@@ -54,12 +45,6 @@
     </ClInclude>
     <ClInclude Include="..\src\core\renderable\predeclare.h">
       <Filter>src\core\renderable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\renderable\assimp_model.h">
-      <Filter>src\core\renderable\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\renderable\assimp_mesh.h">
-      <Filter>src\core\renderable\assimp</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\renderable\font.h">
       <Filter>src\core\renderable\label</Filter>
@@ -103,26 +88,41 @@
     <ClInclude Include="..\src\core\rendersys\camera.h">
       <Filter>src\core\rendersys\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\resource.h">
-      <Filter>src\core\rendersys\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\resource_manager.h">
-      <Filter>src\core\rendersys\resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\declare_macros.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\base\stl.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\object.h">
-      <Filter>src\core\rendersys</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\il_helper.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\base\launch.h">
       <Filter>src\core\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\resource.h">
+      <Filter>src\core\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\resource_manager.h">
+      <Filter>src\core\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\material.h">
+      <Filter>src\core\resource\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\material_cb.h">
+      <Filter>src\core\resource\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\material_factory.h">
+      <Filter>src\core\resource\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\assimp_resource.h">
+      <Filter>src\core\resource\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\assimp_mesh.h">
+      <Filter>src\core\resource\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\renderable\assimp_model.h">
+      <Filter>src\core\renderable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -148,10 +148,10 @@
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
+      <Filter>src\core\d3d9</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\render_system9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
+      <Filter>src\core\d3d9</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\interface_type11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
@@ -159,23 +159,8 @@
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\material.cpp">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\material_cb.cpp">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\material_factory.cpp">
-      <Filter>src\core\rendersys\material</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\mir.cpp">
       <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\renderable\assimp_model.cpp">
-      <Filter>src\core\renderable\assimp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\renderable\assimp_mesh.cpp">
-      <Filter>src\core\renderable\assimp</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\font.cpp">
       <Filter>src\core\renderable\label</Filter>
@@ -216,11 +201,29 @@
     <ClCompile Include="..\src\core\rendersys\camera.cpp">
       <Filter>src\core\rendersys\scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\resource.cpp">
-      <Filter>src\core\rendersys\resource</Filter>
+    <ClCompile Include="..\src\core\resource\resource.cpp">
+      <Filter>src\core\resource</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\resource_manager.cpp">
-      <Filter>src\core\rendersys\resource</Filter>
+    <ClCompile Include="..\src\core\resource\resource_manager.cpp">
+      <Filter>src\core\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\material.cpp">
+      <Filter>src\core\resource\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\material_cb.cpp">
+      <Filter>src\core\resource\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\material_factory.cpp">
+      <Filter>src\core\resource\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\assimp_resource.cpp">
+      <Filter>src\core\resource\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\assimp_mesh.cpp">
+      <Filter>src\core\resource\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\renderable\assimp_model.cpp">
+      <Filter>src\core\renderable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,17 +242,8 @@
     <Filter Include="src\core\rendersys">
       <UniqueIdentifier>{993128c3-5fee-4bc0-affc-ad669474108b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\rendersys\d3d9">
-      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\rendersys\d3d11">
       <UniqueIdentifier>{f250c8ce-8ba6-4cb0-9e90-5df274b393e2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\core\rendersys\material">
-      <UniqueIdentifier>{9ffd0cd2-2f97-41ba-8427-ac868b8ac017}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\core\renderable\assimp">
-      <UniqueIdentifier>{90719977-f5fd-4594-810d-5d56035572d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\renderable\label">
       <UniqueIdentifier>{4f2df5f0-039c-4b83-928b-29bddbdb363f}</UniqueIdentifier>
@@ -260,8 +254,17 @@
     <Filter Include="src\core\rendersys\scene">
       <UniqueIdentifier>{7ebe8e76-3d1f-4395-86f8-a69cfe8b1719}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\rendersys\resource">
-      <UniqueIdentifier>{74518239-6bce-4478-a63b-64f8e36d17d7}</UniqueIdentifier>
+    <Filter Include="src\core\resource">
+      <UniqueIdentifier>{592d5934-05b7-456b-80e9-a9d5d35573f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\resource\material">
+      <UniqueIdentifier>{518bf122-88c9-450c-bc87-3621c93028ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\resource\assimp">
+      <UniqueIdentifier>{cd9a7dcb-0b69-4170-910e-7b191190cf53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\d3d9">
+      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

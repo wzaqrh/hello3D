@@ -102,8 +102,8 @@ Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr 
 	for (auto& pass : curTech->mPasses) {
 		if (pass->mRenderTarget) {
 			mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, -1), GetVertBufByRT(launchMode, mResourceMng, pass->mRenderTarget)));
-			for (int i = 0; i < pass->mIterTargets.size(); ++i) {
-				mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, i), GetVertBufByRT(launchMode, mResourceMng, pass->mIterTargets[i])));
+			for (int i = 0; i < pass->mRTIterators.size(); ++i) {
+				mVertBufferByPass.insert(std::make_pair(std::make_pair(pass, i), GetVertBufByRT(launchMode, mResourceMng, pass->mRTIterators[i])));
 			}
 		}
 	}

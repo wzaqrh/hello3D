@@ -15,7 +15,7 @@ namespace mir {
 class AiSceneLoader {
 public:
 	AiSceneLoader(Launch launchMode, ResourceManager& resourceMng, 
-		const Material& material, AiScenePtr asset)
+		MaterialPtr material, AiScenePtr asset)
 		: mLaunchMode(launchMode), mResourceMng(resourceMng), mMaterial(material)
 		, mAsset(*asset), mResult(asset)
 	{}
@@ -51,7 +51,8 @@ public:
 				aiProcess_ValidateDataStructure;*/
 			TIME_PROFILE(Assimp_Importer);
 			mAsset.mImporter = new Assimp::Importer;
-			mAsset.mScene = mAsset.mImporter->ReadFile(imgFullpath.string(), ImportFlags);
+			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(
+				imgFullpath.string(), ImportFlags);
 		}
 
 		BOOST_ASSERT(mAsset.mScene != nullptr);
@@ -67,6 +68,8 @@ public:
 
 		mAsset.mRootNode = mAsset.mScene->mRootNode;
 		processNode(mAsset.mScene->mRootNode, mAsset.mScene);
+
+		mResult->SetLoaded();
 		return mResult;
 	}
 	TemplateArgs AiScenePtr operator()(T &&...args) {
@@ -78,7 +81,7 @@ private:
 		mAsset.mNodeInfos[node].mGlobalTransform = mAsset.mNodeInfos[node].mLocalTransform;
 		for (int i = 0; i < node->mNumMeshes; i++) {
 			aiMesh* meshData = scene->mMeshes[node->mMeshes[i]];
-			auto mesh = processMesh(meshData, scene);
+			AssimpMeshPtr mesh = processMesh(meshData, scene);
 			mAsset.mMeshes.push_back(mesh);
 			mAsset.mNodeInfos[node].AddMesh(mesh);
 		}
@@ -150,7 +153,7 @@ private:
 		}
 		return textures;
 	}
-	AssimpMeshPtr processMesh(const aiMesh * mesh, const aiScene * scene) {
+	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
 		// Data to fill
 		std::vector<AssimpMeshVertex> vertices;
 		std::vector<uint32_t> indices;
@@ -229,28 +232,23 @@ private:
 				textures[kTextureNormal] = normalMaps[0];
 		}
 
-		auto material = mResourceMng.CloneMaterial(mLaunchMode, mMaterial);
-		//if (mMatCb) mMatCb(material);
-		return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, vertices, indices, texturesPtr, material);
+		return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, 
+			std::move(vertices), std::move(indices), texturesPtr);
 	}
 private:
 	const Launch mLaunchMode;
 	ResourceManager& mResourceMng;
-	const Material& mMaterial;
+	MaterialPtr mMaterial;
 	AiScene& mAsset;
 	AiScenePtr mResult;
 private:
 	std::string mRedirectResourceDir, mRedirectResourceExt;
 };
 
-class AiAssetManager {
-
-};
-
 /********** AiAssetManager **********/
 
 AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng, 
-	const Material& material, const std::string& assetPath, const std::string& redirectRes)
+	MaterialPtr material, const std::string& assetPath, const std::string& redirectRes)
 {
 	TIME_PROFILE(AiResourceFactory_CreateAiScene);
 	AiSceneLoader loader(launchMode, resourceMng, material, std::make_shared<AiScene>());

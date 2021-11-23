@@ -55,7 +55,7 @@ void Pass::ClearSamplers()
 
 IRenderTexturePtr Pass::AddIterTarget(IRenderTexturePtr target)
 {
-	mIterTargets.push_back(target);
+	mRTIterators.push_back(target);
 	return target;
 }
 
@@ -87,53 +87,12 @@ IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
 	return ret;
 }
 
-void Pass::UpdateConstBufferByName(ResourceManager& resourceMng, const std::string& name, const Data& data)
+void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data)
 {
 	IContantBufferPtr buffer = GetConstBufferByName(name);
-	if (buffer) resourceMng.UpdateBuffer(buffer, data.Bytes, data.Size);
+	if (buffer) renderSys.UpdateBuffer(buffer, data.Bytes, data.Size);
 }
 
-#if 0
-std::shared_ptr<Pass> Pass::Clone(ResourceManager& resourceMng)
-{
-	PassPtr pass = std::make_shared<Pass>(mLightMode, mName);
-	pass->mTopoLogy = mTopoLogy;
-	
-	pass->mInputLayout = mInputLayout;
-	resourceMng.AddResourceDependency(pass, mInputLayout);
-
-	pass->mProgram = mProgram;
-	resourceMng.AddResourceDependency(pass, mProgram);
-
-	for (auto& sampler : mSamplers) {
-		pass->AddSampler(sampler);
-		resourceMng.AddResourceDependency(pass, sampler);
-	}
-		
-	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
-		auto buffer = mConstantBuffers[i];
-		if (!buffer.IsUnique)
-			buffer.Buffer = resourceMng.CreateConstBuffer(*buffer.Buffer->GetDecl(), nullptr);
-		pass->AddConstBuffer(buffer);
-		resourceMng.AddResourceDependency(pass, buffer.Buffer);
-	}
-
-	pass->mRenderTarget = mRenderTarget;
-	for (auto& target : mIterTargets) {
-		pass->AddIterTarget(target);
-		resourceMng.AddResourceDependency(pass, target);
-	}
-
-	pass->mTextures = mTextures;
-	for (auto& tex : mTextures) {
-		resourceMng.AddResourceDependency(pass, tex);
-	}
-
-	pass->OnBind = OnBind;
-	pass->OnUnbind = OnUnbind;
-	return pass;
-}
-#else
 PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
 {
 	PassPtr pass = std::make_shared<Pass>(proto.mLightMode, proto.mName);
@@ -158,7 +117,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 	}
 
 	pass->mRenderTarget = proto.mRenderTarget;
-	for (auto& target : proto.mIterTargets) {
+	for (auto& target : proto.mRTIterators) {
 		pass->AddIterTarget(target);
 		resourceMng.AddResourceDependency(pass, target);
 	}
@@ -167,11 +126,8 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 	for (auto& tex : proto.mTextures)
 		resourceMng.AddResourceDependency(pass, tex);
 
-	pass->OnBind = proto.OnBind;
-	pass->OnUnbind = proto.OnUnbind;
 	return pass;
 }
-#endif
 
 /********** TTechnique **********/
 Technique::Technique()
@@ -227,25 +183,12 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 	return std::move(passVec);
 }
 
-void Technique::UpdateConstBufferByName(ResourceManager& resourceMng, const std::string& name, const Data& data)
+void Technique::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data)
 {
 	for (int i = 0; i < mPasses.size(); ++i)
-		mPasses[i]->UpdateConstBufferByName(resourceMng, name, data);
+		mPasses[i]->UpdateConstBufferByName(renderSys, name, data);
 }
 
-#if 0
-TechniquePtr Technique::Clone(ResourceManager& resourceMng)
-{
-	TechniquePtr technique = std::make_shared<Technique>();
-	for (int i = 0; i < mPasses.size(); ++i) {
-		PassPtr pass = mPasses[i]->Clone(resourceMng);
-		technique->AddPass(pass);
-		resourceMng.AddResourceDependency(technique, pass);
-	}
-	technique->mName = mName;
-	return technique;
-}
-#else
 TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
 {
 	TechniquePtr technique = std::make_shared<Technique>();
@@ -257,7 +200,6 @@ TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager&
 	technique->mName = proto.mName;
 	return technique;
 }
-#endif
 
 /********** TMaterial **********/
 void Material::AddTechnique(TechniquePtr technique)
@@ -299,20 +241,6 @@ ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
 	return sampler;
 }
 
-#if 0
-MaterialPtr Material::Clone(ResourceManager& resourceMng)
-{
-	MaterialPtr material = std::make_shared<Material>();
-	material->Assign(*this);
-	for (int i = 0; i < mTechniques.size(); ++i) {
-		TechniquePtr tech = mTechniques[i]->Clone(resourceMng);
-		material->AddTechnique(tech);
-		resourceMng.AddResourceDependency(material, tech);
-	}
-	material->mCurTechIdx = mCurTechIdx;
-	return material;
-}
-#else
 MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
 {
 	MaterialPtr material = std::make_shared<Material>();
@@ -325,6 +253,5 @@ MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& r
 	material->mCurTechIdx = proto.mCurTechIdx;
 	return material;
 }
-#endif
 
 }

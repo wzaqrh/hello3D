@@ -428,7 +428,7 @@ MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& ma
 	return mMaterialFac.CloneMaterial(launchMode, *this, material);
 }
 
-AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const Material& material, 
+AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, MaterialPtr material, 
 	const std::string& assetPath, const std::string& redirectRes)
 {
 	AiScenePtr aiRes = nullptr;

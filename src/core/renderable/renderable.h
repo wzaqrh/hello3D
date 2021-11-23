@@ -11,6 +11,11 @@ namespace mir {
 
 /********** RenderOperation **********/
 struct RenderOperation {
+	RenderOperation() : mIndexPos(0), mIndexCount(0), mIndexBase(0), mWorldTransform(Eigen::Matrix4f::Identity()) {}
+	template<class T> void SetConstantBufferBytes(const std::string& cbName, const T& value) {
+		mCBDataByName[cbName].assign((char*)&value, (char*)&value + sizeof(value));
+	}
+public:
 	MaterialPtr mMaterial;
 	IVertexBufferPtr mVertexBuffer;
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
@@ -18,8 +23,9 @@ struct RenderOperation {
 	short mIndexPos, mIndexCount, mIndexBase;
 	TextureBySlot mTextures;
 	Eigen::Matrix4f mWorldTransform;
-public:
-	RenderOperation(): mIndexPos(0), mIndexCount(0), mIndexBase(0), mWorldTransform(Eigen::Matrix4f::Identity()) {}
+	typedef std::function<void(RenderSystem& renderSys, const Pass& pass, const RenderOperation& op)> PassCallback;
+	PassCallback OnBind, OnUnbind;
+	std::map<std::string, std::vector<char>> mCBDataByName;
 };
 
 struct RenderOperationQueue {

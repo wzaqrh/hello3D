@@ -7,6 +7,7 @@ namespace mir {
 struct Data {
 	static Data MakeEmpty() { return Data{ nullptr, 0 }; }
 	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
+	template<class T> static Data Make(const std::vector<T>& v) { return Data{ (void*)&v[0], sizeof(T) * v.size() }; }
 	static Data Make(void* data, unsigned size) { return Data{ data, size }; }
 public:
 	void* Bytes;

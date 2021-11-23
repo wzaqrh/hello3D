@@ -61,7 +61,6 @@ class Pass : public ImplementResource<IResource>, std::enable_shared_from_this<P
 	friend class MaterialFactory;
 public:
 	Pass(const std::string& lightMode, const std::string& name);
-	//PassPtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -70,25 +69,19 @@ public:
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
-	void UpdateConstBufferByName(ResourceManager& resourceMng, 
-		const std::string& name, 
-		const Data& data);
+	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 public:
 	std::string mLightMode, mName;
-	IInputLayoutPtr mInputLayout;
+
 	PrimitiveTopology mTopoLogy;
-
+	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;
+	TextureBySlot mTextures;
 	std::vector<ISamplerStatePtr> mSamplers;
-
 	std::vector<CBufferEntry> mConstantBuffers;
 
 	IRenderTexturePtr mRenderTarget;
-	std::vector<IRenderTexturePtr> mIterTargets;
-	TextureBySlot mTextures;
-
-	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnBind;
-	std::function<void(Pass&, IRenderSystem&, TextureBySlot&)> OnUnbind;
+	std::vector<IRenderTexturePtr> mRTIterators;
 };
 
 class Technique : public ImplementResource<IResource>
@@ -97,7 +90,6 @@ class Technique : public ImplementResource<IResource>
 public:
 	Technique();
 	void AddPass(PassPtr pass);
-	//TechniquePtr Clone(ResourceManager& resourceMng);
 	IContantBufferPtr AddConstBuffer(const CBufferEntry& cbuffer);
 	ISamplerStatePtr AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
@@ -105,9 +97,7 @@ public:
 	PassPtr GetPassByLightMode(const std::string& lightMode);
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 
-	void UpdateConstBufferByName(ResourceManager& resourceMng, 
-		const std::string& name, 
-		const Data& data);
+	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 public:
 	std::string mName;
 	std::vector<PassPtr> mPasses;
@@ -117,7 +107,6 @@ class MIR_CORE_API Material : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
 public:
-	//MaterialPtr Clone(ResourceManager& resourceMng);
 	void AddTechnique(TechniquePtr technique);
 
 	TechniquePtr CurTech();

@@ -47,6 +47,7 @@ public:
 	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr);
 	DECLARE_LAUNCH_FUNCTIONS(void, AddLoadResourceJob);
 public:
+	RenderSystem& RenderSys() { return mRenderSys; }
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
 
 	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) {
@@ -121,7 +122,7 @@ public:
 	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial);
 	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
 
-	AiScenePtr CreateAiScene(Launch launchMode, const Material& material, 
+	AiScenePtr CreateAiScene(Launch launchMode, MaterialPtr material, 
 		const std::string& assetPath, const std::string& redirectRes);
 private:
 	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 

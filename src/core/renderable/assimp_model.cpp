@@ -140,7 +140,7 @@ AssimpModel::~AssimpModel()
 
 void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
 {
-	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, *mMaterial, assetPath, redirectResource);
+	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, mMaterial, assetPath, redirectResource);
 	mNodeInfos = mAiScene->mNodeInfos;
 	Update(0);
 }
@@ -246,21 +246,19 @@ void AssimpModel::PlayAnim(int Index)
 
 void AssimpModel::DoDraw(const aiNode* node, RenderOperationQueue& opList)
 {
-	auto& meshes = mNodeInfos[node];
-	if (meshes.MeshCount() > 0) {
+	const auto& meshArr = mNodeInfos[node];
+	if (meshArr.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, mNodeInfos[node].mGlobalTransform);
-		//mRenderSys.mDeviceContext->UpdateSubresource(
-		//	mMaterial->CurTech()->mPasses[0]->mConstBuffers[1], 0, NULL, &weightedSkin, 0, 0);
 
-		for (int i = 0; i < meshes.MeshCount(); i++) {
-			auto mesh = meshes[i];
+		for (int i = 0; i < meshArr.MeshCount(); i++) {
+			AssimpMeshPtr mesh = meshArr[i];
 			if (mesh->GetAiMesh()->HasBones()) {
-				const auto& boneMats = GetBoneMatrices(node, i);
-				size_t boneSize = boneMats.size(); 
-				//assert(boneSize <= MAX_MATRICES);
-				for (int j = 0; j < min(MAX_MATRICES, boneSize); ++j)
-					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMats[j]);
+				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
+				size_t boneSize = boneMatArr.size(); 
+				//BOOST_ASSERT(boneSize <= MAX_MATRICES);
+				for (int j = 0; j < std::min<int>(MAX_MATRICES, boneSize); ++j)
+					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
 			}
 			else {
 				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();
@@ -270,10 +268,16 @@ void AssimpModel::DoDraw(const aiNode* node, RenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
 			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
-			mesh->GetMaterial()->CurTech()->UpdateConstBufferByName(
-				mResourceMng, MAKE_CBNAME(cbWeightedSkin), Data::Make(weightedSkin));
 
-			mesh->GenRenderOperation(opList);
+			if (mesh->IsLoaded()) {
+				RenderOperation op = {};
+				op.mMaterial = mMaterial;
+				op.mIndexBuffer = mesh->GetIndexBuffer();
+				op.mVertexBuffer = mesh->GetVertexBuffer();
+				op.mTextures = *mesh->GetTextures();
+				op.SetConstantBufferBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
+				opList.AddOP(op);
+			}
 		}
 	}
 
@@ -283,8 +287,7 @@ void AssimpModel::DoDraw(const aiNode* node, RenderOperationQueue& opList)
 
 int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded()
-		|| mAiScene->IsLoaded())
+	if (!mMaterial->IsLoaded() || !mAiScene->IsLoaded())
 		return 0;
 
 	int count = opList.Count();

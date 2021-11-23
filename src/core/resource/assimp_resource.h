@@ -25,7 +25,7 @@ public:
 	AiNodeInfo() {
 		channelIndex = -1;
 	}
-	AssimpMeshPtr operator[](int pos) {
+	const AssimpMeshPtr& operator[](int pos) const {
 		return meshes[pos];
 	}
 	size_t MeshCount() const {
@@ -39,7 +39,7 @@ public:
 class AiScene : public ImplementResource<IResource> 
 {
 public:
-	Assimp::Importer* mImporter = nullptr;
+	const Assimp::Importer* mImporter = nullptr;
 	const aiNode* mRootNode = nullptr;
 	const aiScene* mScene = nullptr;
 	std::vector<AssimpMeshPtr> mMeshes;
@@ -51,7 +51,7 @@ public:
 class AiResourceFactory {
 public:
 	AiScenePtr CreateAiScene(Launch launchMode, ResourceManager& resourceMng,
-		const Material& material, const std::string& assetPath, const std::string& redirectRes);
+		MaterialPtr material, const std::string& assetPath, const std::string& redirectRes);
 };
 
 }

@@ -32,32 +32,35 @@ void RenderPipeline::_PopRenderTarget()
 
 void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam)
 {
-	if (iterCnt >= 0) _PushRenderTarget(pass->mIterTargets[iterCnt]);
+	if (iterCnt >= 0) _PushRenderTarget(pass->mRTIterators[iterCnt]);
 	else if (pass->mRenderTarget) _PushRenderTarget(pass->mRenderTarget);
 
 	if (iterCnt >= 0) {
-		if (iterCnt + 1 < pass->mIterTargets.size())
-			textures[0] = pass->mIterTargets[iterCnt + 1]->GetColorTexture();
+		if (iterCnt + 1 < pass->mRTIterators.size())
+			textures[0] = pass->mRTIterators[iterCnt + 1]->GetColorTexture();
 	}
 	else {
-		if (!pass->mIterTargets.empty())
-			textures[0] = pass->mIterTargets[0]->GetColorTexture();
+		if (!pass->mRTIterators.empty())
+			textures[0] = pass->mRTIterators[0]->GetColorTexture();
 	}
 
 	{
 		if (textures.Count() > 0)
 			mRenderSys.SetTextures(E_TEXTURE_MAIN, &textures.Textures[0], textures.Textures.size());
 
-		if (pass->OnBind)
-			pass->OnBind(*pass, mRenderSys, textures);
+		if (op.OnBind) 
+			op.OnBind(mRenderSys, *pass, op);
+
+		for (auto& cbBytes : op.mCBDataByName)
+			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
 
 		BindPass(pass, globalParam);
 
 		if (op.mIndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
 		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
 
-		if (pass->OnUnbind)
-			pass->OnUnbind(*pass, mRenderSys, textures);
+		if (op.OnUnbind) 
+			op.OnUnbind(mRenderSys, *pass, op);
 	}
 
 	if (iterCnt >= 0) {
@@ -97,7 +100,7 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 		TextureBySlot textures = op.mTextures;
 		textures.Merge(pass->mTextures);
 
-		for (int i = pass->mIterTargets.size() - 1; i >= 0; --i) {
+		for (int i = pass->mRTIterators.size() - 1; i >= 0; --i) {
 			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
 			if (iter != op.mVertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
 			else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
