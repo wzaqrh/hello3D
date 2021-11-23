@@ -39,6 +39,9 @@ struct AiAnimeTree {
 	size_t GetChildCount(AiAnimeNode& node) const {
 		return mNodeBySerializeIndex[node.SerilizeIndex]->ChildCount();
 	}
+	bool IsInited() const {
+		return ! mNodeBySerializeIndex.empty();
+	}
 public:
 	mutable std::vector<AiAnimeNode> mAnimeNodes;
 	std::vector<AiNodePtr> mNodeBySerializeIndex;

@@ -20,7 +20,8 @@ public:
 		, mAsset(*asset), mResult(asset)
 	{}
 	~AiSceneLoader() {}
-	AiScenePtr Execute(const std::string& imgPath, const std::string& redirectResource) {
+	void ExecuteAsyncPart(const std::string& imgPath, const std::string& redirectResource) 
+	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
 		namespace boost_property_tree = boost::property_tree;
@@ -54,7 +55,9 @@ public:
 			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(
 				imgFullpath.string(), ImportFlags);
 		}
-
+	}
+	AiScenePtr ExecuteSyncPart() 
+	{
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
 		processNode(mAsset.mRootNode, mAsset.mScene);
 
@@ -76,9 +79,13 @@ public:
 					mAsset.mBoneNodesByName[bone->mName.data] = nullptr;
 			}
 		}
-
-		mResult->SetLoaded();
 		return mResult;
+	}
+	TemplateArgs AiScenePtr Execute(T &&...args) {
+		ExecuteAsyncPart(std::forward<T>(args)...);
+		AiScenePtr result = ExecuteSyncPart();
+		if (result) result->SetLoaded();
+		return result;
 	}
 	TemplateArgs AiScenePtr operator()(T &&...args) {
 		return Execute(std::forward<T>(args)...);
@@ -251,15 +258,31 @@ private:
 private:
 	std::string mRedirectResourceDir, mRedirectResourceExt;
 };
-
+typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** AiAssetManager **********/
 
 AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng, 
 	MaterialPtr material, const std::string& assetPath, const std::string& redirectRes)
 {
 	TIME_PROFILE(AiResourceFactory_CreateAiScene);
-	AiSceneLoader loader(launchMode, resourceMng, material, std::make_shared<AiScene>());
-	return loader(assetPath, redirectRes);
+	AiScenePtr res = std::make_shared<AiScene>();
+
+	AiSceneLoaderPtr loader = std::make_shared<AiSceneLoader>(launchMode, resourceMng, material, res);
+	if (launchMode == Launch::Async) {
+		res->SetPrepared();
+		resourceMng.AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			loader->ExecuteAsyncPart(assetPath, redirectRes);
+			nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob) {
+				loader->ExecuteSyncPart();
+				return true;
+			});
+			return true;
+		}, res);
+		return res;
+	}
+	else {
+		return loader->Execute(assetPath, redirectRes);
+	}
 }
 
 }

@@ -11,7 +11,7 @@ struct Data {
 	static Data Make(void* data, unsigned size) { return Data{ data, size }; }
 public:
 	void* Bytes;
-	unsigned int Size;
+	size_t Size;
 };
 
 struct ShaderCompileMacro {
@@ -66,11 +66,11 @@ enum DepthWriteMask {
 	kDepthWriteMaskAll = 1
 };
 struct DepthState {
-	static DepthState MakeFor2D(bool depthEnable) { 
-		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskZero }; 
+	static DepthState MakeFor2D(bool depthEnable) {
+		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskZero };
 	}
 	static DepthState MakeFor3D() {
-		return DepthState{ true, kCompareLess, kDepthWriteMaskAll }; 
+		return DepthState{ true, kCompareLess, kDepthWriteMaskAll };
 	}
 public:
 	bool DepthEnable;

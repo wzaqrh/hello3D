@@ -141,8 +141,10 @@ AssimpModel::~AssimpModel()
 void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
 {
 	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, mMaterial, assetPath, redirectResource);
-	mAnimeTree.Init(mAiScene->GetSerializeNodes());
-	Update(0);
+	if (mAiScene->IsLoaded()) {
+		mAnimeTree.Init(mAiScene->GetSerializeNodes());
+		Update(0);
+	}
 }
 
 const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const AiNodePtr& node, size_t meshIndexIndex)
@@ -194,6 +196,11 @@ void VisitNode(const AiNodePtr& curNode, const AiAnimeTree& animeTree,
 
 void AssimpModel::Update(float dt)
 {
+	if (!mAiScene->IsLoaded())
+		return;
+	if (!mAnimeTree.IsInited())
+		mAnimeTree.Init(mAiScene->GetSerializeNodes());
+
 	std::vector<AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
 		std::queue<AiNodePtr> nodeQue;
@@ -292,7 +299,9 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 
 int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded() || !mAiScene->IsLoaded())
+	if (!mMaterial->IsLoaded() 
+		|| !mAiScene->IsLoaded() 
+		|| !mAnimeTree.IsInited())
 		return 0;
 
 	int count = opList.Count();
