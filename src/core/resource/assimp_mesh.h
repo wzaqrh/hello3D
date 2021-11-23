@@ -22,16 +22,16 @@ class MIR_CORE_API AssimpMesh : public IRenderable
 {
 	friend class AssimpModel;
 	friend class RenderableFactory;
+public:
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpMesh);
 	AssimpMesh(Launch launchMode, ResourceManager& resourceMng,
-		const aiMesh* data, 
-		std::vector<AssimpMeshVertex>& vertices, 
+		const aiMesh* data,
+		std::vector<AssimpMeshVertex>& vertices,
 		std::vector<UINT>& indices,
 		TextureBySlotPtr textures,
 		MaterialPtr material);
-public:
 	int GenRenderOperation(RenderOperationQueue& opList) override;
-	bool HasTexture(int slot);
+	bool HasTexture(int slot) const;
 	const aiMesh* GetAiMesh() const { return mData; }
 	const MaterialPtr& GetMaterial() const { return mMaterial; }
 private:

@@ -11,13 +11,14 @@ DECLARE_STRUCT(cbPointLight);
 DECLARE_STRUCT(cbSpotLight);
 DECLARE_STRUCT(cbGlobalParam);
 
-DECLARE_STRUCT(IObject);
 DECLARE_STRUCT(IResource);
-
 DECLARE_STRUCT(Pass);
 DECLARE_STRUCT(Technique);
 DECLARE_STRUCT(Material);
 DECLARE_STRUCT(MaterialFactory);
+DECLARE_CLASS(AiScene);
+DECLARE_CLASS(AiResourceFactory);
+DECLARE_CLASS(ResourceManager);
 
 DECLARE_STRUCT(Camera);
 DECLARE_STRUCT(SceneManager);
@@ -35,13 +36,11 @@ DECLARE_STRUCT(IContantBuffer);
 DECLARE_STRUCT(ITexture);
 DECLARE_STRUCT(IRenderTexture);
 DECLARE_STRUCT(ISamplerState);
-DECLARE_CLASS(ThreadPump);
 DECLARE_STRUCT(ConstBufferDeclElement);
 DECLARE_STRUCT(ConstBufferDecl);
 
 DECLARE_STRUCT(IRenderSystem);
 DECLARE_STRUCT(RenderSystem);
 DECLARE_STRUCT(RenderPipeline);
-DECLARE_CLASS(ResourceManager);
 
 }

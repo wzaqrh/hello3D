@@ -12,9 +12,10 @@ namespace mir {
 
 class MIR_CORE_API Mir {
 	RenderSystemPtr mRenderSys;
+	MaterialFactoryPtr mMaterialFac;
+	AiResourceFactoryPtr mAiResourceFac;
 	ResourceManagerPtr mResourceMng;
 	RenderPipelinePtr mRenderPipe;
-	MaterialFactoryPtr mMaterialFac;
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
 public:
@@ -27,7 +28,6 @@ public:
 	inline const RenderSystemPtr& RenderSys() { return mRenderSys; }
 	inline const ResourceManagerPtr& ResourceMng() { return mResourceMng; }
 	inline const RenderPipelinePtr& RenderPipe() { return mRenderPipe; }
-	//inline const MaterialFactoryPtr& MaterialFac() { return mMaterialFac; }
 	inline const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }
 	inline const SceneManagerPtr& SceneMng() { return mSceneMng; }
 };

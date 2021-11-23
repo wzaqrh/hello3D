@@ -40,7 +40,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable {
 		LoadResourceJobPtr WorkThreadJob, MainThreadJob;
 	};
 public:
-	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac);
+	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac, AiResourceFactory& aiResFac);
 	~ResourceManager();
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from);//parent rely-on node
@@ -102,7 +102,8 @@ public:
 		res->SetLoaded(nullptr != mRenderSys.LoadTexture(res, format, std::forward<T>(args)...));
 		return std::static_pointer_cast<ITexture>(res);
 	}
-	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
+	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, 
+		ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
 	DECLARE_LAUNCH_FUNCTIONS(ITexturePtr, CreateTextureByFile);
 
 	TemplateArgs bool LoadRawTextureData(T &&...args) {
@@ -118,8 +119,10 @@ public:
 
 	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName, bool sharedUse = false);
 	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial);
-
 	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
+
+	AiScenePtr CreateAiScene(Launch launchMode, const Material& material, 
+		const std::string& assetPath, const std::string& redirectRes);
 private:
 	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
 		const std::string& name, const std::string& vsEntry, const std::string& psEntry);
@@ -128,6 +131,7 @@ private:
 private:
 	RenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
+	AiResourceFactory& mAiResourceFac;
 	class ResourceDependencyGraph {
 		typedef IResourcePtr ValueType;
 		typedef const ValueType& ConstReference;
@@ -238,9 +242,17 @@ private:
 		}
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
-	std::map<std::string, ITexturePtr> mTexByPath;
+	std::map<std::string, ITexturePtr> mTextureByPath;
 	std::mutex mTexLock;
-	std::map<std::string, MaterialPtr> mMaterials;
+	std::map<std::string, MaterialPtr> mMaterialByName;
+	struct AiResourceKey {
+		std::string Path, RedirectResource;
+		bool operator<(const AiResourceKey& other) const {
+			if (Path != other.Path) return Path < other.Path;
+			return RedirectResource < other.RedirectResource;
+		}
+	};
+	std::map<AiResourceKey, AiScenePtr> mAiSceneByKey;
 };
 
 }

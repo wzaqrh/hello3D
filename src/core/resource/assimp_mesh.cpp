@@ -1,4 +1,4 @@
-#include "core/renderable/assimp_mesh.h"
+#include "core/resource/assimp_mesh.h"
 #include "core/resource/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 
@@ -22,7 +22,7 @@ AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng,
 	mIndexBuffer = resourceMng.CreateIndexBuffer(launchMode, sizeof(UINT) * mIndices.size(), kFormatR32UInt, &mIndices[0]);
 }
 
-bool AssimpMesh::HasTexture(int slot)
+bool AssimpMesh::HasTexture(int slot) const
 {
 	return (slot < mTextures->Count()) 
 		&& mTextures->At(slot)

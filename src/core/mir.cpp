@@ -2,6 +2,7 @@
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/resource/material_factory.h"
+#include "core/resource/assimp_resource.h"
 
 namespace mir {
 
@@ -22,7 +23,8 @@ bool Mir::Initialize(HWND hWnd) {
 	}
 
 	mMaterialFac = std::make_shared<MaterialFactory>();
-	mResourceMng = std::make_shared<ResourceManager>(*mRenderSys, *mMaterialFac);
+	mAiResourceFac = std::make_shared<AiResourceFactory>();
+	mResourceMng = std::make_shared<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
 	
 	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, *mResourceMng, mRenderSys->WinSize());
 	mSceneMng = std::make_shared<SceneManager>(*mRenderSys, *mMaterialFac, mRenderSys->WinSize(), 
