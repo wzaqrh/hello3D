@@ -29,7 +29,7 @@ public:
 		TextureBySlotPtr textures);
 	bool IsLoaded() const;
 	bool HasTexture(int slot) const;
-	const aiMesh* GetAiMesh() const { return mAiMesh; }
+	const aiMesh* GetRawMesh() const { return mAiMesh; }
 	const TextureBySlotPtr& GetTextures() const { return mTextures; }
 	const IVertexBufferPtr& GetVertexBuffer() const { return mVertexBuffer; }
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }

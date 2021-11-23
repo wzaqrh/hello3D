@@ -16,6 +16,7 @@ DECLARE_STRUCT(Pass);
 DECLARE_STRUCT(Technique);
 DECLARE_STRUCT(Material);
 DECLARE_STRUCT(MaterialFactory);
+DECLARE_CLASS(AiNode);
 DECLARE_CLASS(AiScene);
 DECLARE_CLASS(AiResourceFactory);
 DECLARE_CLASS(ResourceManager);

@@ -141,65 +141,69 @@ AssimpModel::~AssimpModel()
 void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
 {
 	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, mMaterial, assetPath, redirectResource);
-	mNodeInfos = mAiScene->mNodeInfos;
+	mAnimeTree.Init(mAiScene->GetSerializeNodes());
 	Update(0);
 }
 
-const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const aiNode* pNode, size_t pMeshIndex)
+const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const AiNodePtr& node, size_t meshIndexIndex)
 {
-	BOOST_ASSERT(pMeshIndex < pNode->mNumMeshes);
-	size_t meshIndex = pNode->mMeshes[pMeshIndex];
+	BOOST_ASSERT(meshIndexIndex < node->MeshCount());
+	size_t meshIndex = node->RawNode->mMeshes[meshIndexIndex];
 
 	BOOST_ASSERT(meshIndex < mAiScene->mScene->mNumMeshes);
-	const aiMesh* mesh = mAiScene->mScene->mMeshes[meshIndex];
+	const aiMesh* rawMesh = mAiScene->mScene->mMeshes[meshIndex];
 
-	mTransforms.resize(mesh->mNumBones, aiMatrix4x4());
+	mTempBoneMatrices.resize(rawMesh->mNumBones, aiMatrix4x4());
 
-	aiMatrix4x4 globalInverseMeshTransform = mNodeInfos[pNode].mGlobalTransform;
+	auto& anode = mAnimeTree.GetNode(node);
+	aiMatrix4x4 globalInverseMeshTransform = anode.GlobalTransform;
 	globalInverseMeshTransform.Inverse();
 
-	for (size_t a = 0; a < mesh->mNumBones; ++a) {
-		const aiBone* bone = mesh->mBones[a];
-		const aiNode* boneNode = mAiScene->mBoneNodesByName[bone->mName.data];
-		auto& boneInfo = mNodeInfos[boneNode];
-		aiMatrix4x4 currentGlobalTransform = boneInfo.mGlobalTransform;
-		mTransforms[a] = globalInverseMeshTransform * currentGlobalTransform * bone->mOffsetMatrix;
+	for (size_t a = 0; a < rawMesh->mNumBones; ++a) {
+		const aiBone* rawBone = rawMesh->mBones[a];
+		AiNodePtr boneNode = mAiScene->mBoneNodesByName[rawBone->mName.data];
+		if (boneNode) {
+			auto& boneInfo = mAnimeTree.GetNode(boneNode);// mNodeInfos[boneNode];
+			aiMatrix4x4 currentGlobalTransform = boneInfo.GlobalTransform;
+			mTempBoneMatrices[a] = globalInverseMeshTransform * currentGlobalTransform * rawBone->mOffsetMatrix;
+		}
+		else {
+			mTempBoneMatrices[a] = globalInverseMeshTransform * rawBone->mOffsetMatrix;
+		}
 	}
-	return mTransforms;
+	return mTempBoneMatrices;
 }
 
-void VisitNode(const aiNode* cur, 
-	std::map<const aiNode*, AiNodeInfo>& mNodeInfos, 
-	std::vector<const aiNode*>& vec, 
-	EvaluateTransforms& eval) 
+void VisitNode(const AiNodePtr& curNode, const AiAnimeTree& animeTree, 
+	std::vector<AiNodePtr>& nodeVec, EvaluateTransforms& eval) 
 {
-	vec.push_back(cur);
+	nodeVec.push_back(curNode);
 
-	auto& nodeInfo = mNodeInfos[cur];
-	if (nodeInfo.channelIndex >= 0 && nodeInfo.channelIndex < eval.mTransforms.size()) {
-		nodeInfo.mLocalTransform = (eval.mTransforms[nodeInfo.channelIndex]);
+	auto& nodeInfo = animeTree.GetNode(curNode);
+	if (nodeInfo.ChannelIndex >= 0 && nodeInfo.ChannelIndex < eval.mTransforms.size()) {
+		nodeInfo.LocalTransform = (eval.mTransforms[nodeInfo.ChannelIndex]);
 	}
 	else {
-		nodeInfo.mLocalTransform = (cur->mTransformation);
+		nodeInfo.LocalTransform = (curNode->RawNode->mTransformation);
 	}
 
-	for (int i = 0; i < cur->mNumChildren; ++i) {
-		VisitNode(cur->mChildren[i], mNodeInfos, vec, eval);
+	for (int i = 0; i < curNode->ChildCount(); ++i) {
+		VisitNode(curNode->Children[i], animeTree, nodeVec, eval);
 	}
 }
 
 void AssimpModel::Update(float dt)
 {
-	std::vector<const aiNode*> vec;
+	std::vector<AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
-		std::queue<const aiNode*> que;
-		que.push(mAiScene->mRootNode);
-		while (!que.empty()) {
-			const aiNode* cur = que.front();
-			que.pop();
-			vec.push_back(cur);
-			for (int i = 0; i < cur->mNumChildren; ++i)
-				que.push(cur->mChildren[i]);
+		std::queue<AiNodePtr> nodeQue;
+		nodeQue.push(mAiScene->mRootNode);
+		while (!nodeQue.empty()) {
+			AiNodePtr curNode = nodeQue.front();
+			nodeQue.pop();
+			nodeVec.push_back(curNode);
+			for (int i = 0; i < curNode->ChildCount(); ++i)
+				nodeQue.push(curNode->Children[i]);
 		}
 	}
 	else {
@@ -209,18 +213,19 @@ void AssimpModel::Update(float dt)
 		mElapse += dt;
 		eval.Update(mElapse);
 
-		VisitNode(mAiScene->mRootNode, mNodeInfos, vec, eval);
+		VisitNode(mAiScene->mRootNode, mAnimeTree, nodeVec, eval);
 	}
 
-	for (int i = 0; i < vec.size(); ++i) {
-		const aiNode* cur = vec[i];
-		auto& nodeInfo = mNodeInfos[cur];
+	for (int i = 0; i < nodeVec.size(); ++i) {
+		AiNodePtr curNode = nodeVec[i];
+		auto& curANode = mAnimeTree.GetNode(curNode);
 
-		nodeInfo.mGlobalTransform = (nodeInfo.mLocalTransform);
-		const aiNode* iter = cur->mParent;
-		while (iter) {
-			nodeInfo.mGlobalTransform = mNodeInfos[iter].mLocalTransform * nodeInfo.mGlobalTransform;
-			iter = iter->mParent;
+		curANode.GlobalTransform = curANode.LocalTransform;
+		AiNodePtr iterNode = curNode->Parent.lock();
+		while (iterNode) {
+			auto& iterANode = mAnimeTree.GetNode(iterNode);
+			curANode.GlobalTransform = iterANode.LocalTransform * curANode.GlobalTransform;
+			iterNode = iterNode->Parent.lock();
 		}
 	}
 }
@@ -233,30 +238,30 @@ void AssimpModel::PlayAnim(int Index)
 
 	const aiAnimation* currentAnim = mAiScene->mScene->mAnimations[mCurrentAnimIndex];
 
-	for (auto& iter : mNodeInfos) {
-		std::string iterName = iter.first->mName.C_Str();
+	for (auto& iter : *mAiScene) {
+		std::string iterName = iter->RawNode->mName.C_Str();
 		for (unsigned int a = 0; a < currentAnim->mNumChannels; a++) {
 			if (iterName == currentAnim->mChannels[a]->mNodeName.C_Str()) {
-				iter.second.channelIndex = a;
+				mAnimeTree.GetNode(iter).ChannelIndex = a;
 				break;
 			}
 		}
 	}
 }
 
-void AssimpModel::DoDraw(const aiNode* node, RenderOperationQueue& opList)
+void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 {
-	const auto& meshArr = mNodeInfos[node];
+	const auto& meshArr = *node;// mNodeInfos[node];
 	if (meshArr.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
-		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, mNodeInfos[node].mGlobalTransform);
+		auto& anode = mAnimeTree.GetNode(node);
+		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, anode.GlobalTransform);
 
 		for (int i = 0; i < meshArr.MeshCount(); i++) {
 			AssimpMeshPtr mesh = meshArr[i];
-			if (mesh->GetAiMesh()->HasBones()) {
+			if (mesh->GetRawMesh()->HasBones()) {
 				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
 				size_t boneSize = boneMatArr.size(); 
-				//BOOST_ASSERT(boneSize <= MAX_MATRICES);
 				for (int j = 0; j < std::min<int>(MAX_MATRICES, boneSize); ++j)
 					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
 			}
@@ -281,8 +286,8 @@ void AssimpModel::DoDraw(const aiNode* node, RenderOperationQueue& opList)
 		}
 	}
 
-	for (int i = 0; i < node->mNumChildren; i++)
-		DoDraw(node->mChildren[i], opList);
+	for (int i = 0; i < node->Children.size(); i++)
+		DoDraw(node->Children[i], opList);
 }
 
 int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)

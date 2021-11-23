@@ -16,36 +16,54 @@
 
 namespace mir {
 
-struct AiNodeInfo {
-	aiMatrix4x4 mLocalTransform;
-	aiMatrix4x4 mGlobalTransform;
-	std::vector<AssimpMeshPtr> meshes;
-	int channelIndex;
-public:
-	AiNodeInfo() {
-		channelIndex = -1;
+struct AiNode : public std::enable_shared_from_this<AiNode>
+{
+	AiNode(const aiNode* rawNode, const size_t serializeIndex) 
+		: RawNode(rawNode), SerilizeIndex(serializeIndex) {}
+	void AddChild(const AiNodePtr& child) {
+		Children.push_back(child);
+		child->Parent = this->shared_from_this();
 	}
-	const AssimpMeshPtr& operator[](int pos) const {
-		return meshes[pos];
+	void AddMesh(const AssimpMeshPtr& mesh) {
+		Meshes.push_back(mesh);
+	}
+	size_t ChildCount() const {
+		return Children.size();
+	}
+	const AssimpMeshPtr& operator[](size_t index) const {
+		return Meshes[index];
 	}
 	size_t MeshCount() const {
-		return meshes.size();
+		return Meshes.size();
 	}
-	void AddMesh(AssimpMeshPtr mesh) {
-		meshes.push_back(mesh);
-	}
+public:
+	const size_t SerilizeIndex;
+	const aiNode* RawNode;
+	std::weak_ptr<AiNode> Parent;
+	std::vector<AiNodePtr> Children;
+	std::vector<AssimpMeshPtr> Meshes;
 };
 
-class AiScene : public ImplementResource<IResource> 
+struct AiScene : public ImplementResource<IResource> 
 {
+	friend class AiSceneLoader;
 public:
-	const Assimp::Importer* mImporter = nullptr;
-	const aiNode* mRootNode = nullptr;
+	AiNodePtr AddNode(const aiNode* rawNode) {
+		AiNodePtr newNode = std::make_shared<AiNode>(rawNode, mNodeBySerializeIndex.size());
+		mNodeBySerializeIndex.push_back(newNode);
+		return newNode;
+	}
+	const std::vector<AiNodePtr>& GetSerializeNodes() const { return mNodeBySerializeIndex; }
+	std::vector<AiNodePtr>::const_iterator begin() const { return mNodeBySerializeIndex.begin(); }
+	std::vector<AiNodePtr>::const_iterator end() const { return mNodeBySerializeIndex.end(); }
+public:
 	const aiScene* mScene = nullptr;
-	std::vector<AssimpMeshPtr> mMeshes;
-	std::map<std::string, const aiNode*> mBoneNodesByName;
+	AiNodePtr mRootNode;
+	std::vector<AiNodePtr> mNodeBySerializeIndex;
+	std::map<std::string, AiNodePtr> mBoneNodesByName;
 	std::map<std::string, ITexturePtr> mLoadedTexture;
-	std::map<const aiNode*, AiNodeInfo> mNodeInfos;
+private:
+	const Assimp::Importer* mImporter = nullptr;
 };
 
 class AiResourceFactory {

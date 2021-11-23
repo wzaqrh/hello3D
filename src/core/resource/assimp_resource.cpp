@@ -55,19 +55,27 @@ public:
 				imgFullpath.string(), ImportFlags);
 		}
 
+		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
+		processNode(mAsset.mRootNode, mAsset.mScene);
+
 		BOOST_ASSERT(mAsset.mScene != nullptr);
 		for (unsigned int i = 0; i < mAsset.mScene->mNumMeshes; ++i) {
 			const aiMesh* mesh = mAsset.mScene->mMeshes[i];
 			for (unsigned int n = 0; n < mesh->mNumBones; ++n) {
 				const aiBone* bone = mesh->mBones[n];
-				BOOST_ASSERT(mAsset.mBoneNodesByName[bone->mName.data] == nullptr 
-					|| mAsset.mBoneNodesByName[bone->mName.data] == mAsset.mScene->mRootNode->FindNode(bone->mName));
-				mAsset.mBoneNodesByName[bone->mName.data] = mAsset.mScene->mRootNode->FindNode(bone->mName);
+				BOOST_ASSERT(mAsset.mBoneNodesByName[bone->mName.data] == nullptr
+					|| mAsset.mBoneNodesByName[bone->mName.data]->RawNode == mAsset.mScene->mRootNode->FindNode(bone->mName));
+				//mAsset.mBoneNodesByName[bone->mName.data] = mAsset.mScene->mRootNode->FindNode(bone->mName);
+				auto findRawNode = mAsset.mScene->mRootNode->FindNode(bone->mName);
+				auto findIter = std::find_if(mAsset.mNodeBySerializeIndex.begin(), mAsset.mNodeBySerializeIndex.end(), [&findRawNode](const AiNodePtr& nnode) {
+					return nnode->RawNode == findRawNode;
+				});
+				if (findIter != mAsset.mNodeBySerializeIndex.end())
+					mAsset.mBoneNodesByName[bone->mName.data] = *findIter;
+				else
+					mAsset.mBoneNodesByName[bone->mName.data] = nullptr;
 			}
 		}
-
-		mAsset.mRootNode = mAsset.mScene->mRootNode;
-		processNode(mAsset.mScene->mRootNode, mAsset.mScene);
 
 		mResult->SetLoaded();
 		return mResult;
@@ -76,18 +84,17 @@ public:
 		return Execute(std::forward<T>(args)...);
 	}
 private:
-	void processNode(const aiNode* node, const aiScene* scene) {
-		mAsset.mNodeInfos[node].mLocalTransform = node->mTransformation;
-		mAsset.mNodeInfos[node].mGlobalTransform = mAsset.mNodeInfos[node].mLocalTransform;
-		for (int i = 0; i < node->mNumMeshes; i++) {
-			aiMesh* meshData = scene->mMeshes[node->mMeshes[i]];
-			AssimpMeshPtr mesh = processMesh(meshData, scene);
-			mAsset.mMeshes.push_back(mesh);
-			mAsset.mNodeInfos[node].AddMesh(mesh);
+	void processNode(const AiNodePtr& node, const aiScene* rawScene) {
+		const aiNode* rawNode = node->RawNode;
+		for (int i = 0; i < rawNode->mNumMeshes; i++) {
+			aiMesh* rawMesh = rawScene->mMeshes[rawNode->mMeshes[i]];
+			node->AddMesh(processMesh(rawMesh, rawScene));
 		}
 
-		for (int i = 0; i < node->mNumChildren; i++) {
-			processNode(node->mChildren[i], scene);
+		for (int i = 0; i < rawNode->mNumChildren; i++) {
+			AiNodePtr child = mAsset.AddNode(rawNode->mChildren[i]);
+			node->AddChild(child);
+			processNode(child, rawScene);
 		}
 	}
 	static void ReCalculateTangents(std::vector<AssimpMeshVertex>& vertices, const std::vector<uint32_t>& indices) {
