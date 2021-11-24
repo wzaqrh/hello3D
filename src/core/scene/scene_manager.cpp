@@ -36,25 +36,25 @@ CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, doub
 	return camera;
 }
 
-cbSpotLightPtr SceneManager::AddSpotLight()
+SpotLightPtr SceneManager::AddSpotLight()
 {
-	cbSpotLightPtr light = std::make_shared<cbSpotLight>();
+	SpotLightPtr light = std::make_shared<SpotLight>();
 	mSpotLights.push_back(light);
-	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightSpot));
+	mLightsByOrder.push_back(light);
 	return light;
 }
-cbPointLightPtr SceneManager::AddPointLight()
+PointLightPtr SceneManager::AddPointLight()
 {
-	cbPointLightPtr light = std::make_shared<cbPointLight>();
+	PointLightPtr light = std::make_shared<PointLight>();
 	mPointLights.push_back(light);
-	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightPoint));
+	mLightsByOrder.push_back(light);
 	return light;
 }
-cbDirectLightPtr SceneManager::AddDirectLight()
+DirectLightPtr SceneManager::AddDirectLight()
 {
-	cbDirectLightPtr light = std::make_shared<cbDirectLight>();
+	DirectLightPtr light = std::make_shared<DirectLight>();
 	mDirectLights.push_back(light);
-	mLightsByOrder.push_back(std::pair<cbDirectLight*, LightType>(light.get(), kLightDirectional));
+	mLightsByOrder.push_back(light);
 	return light;
 }
 

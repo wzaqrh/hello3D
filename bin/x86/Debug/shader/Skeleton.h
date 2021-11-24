@@ -1,5 +1,5 @@
 static const int MAX_MATRICES = 56;
-cbuffer cbWeightedSkin : register(b1)
+cbuffer cbWeightedSkin : register(b2)
 {
 	matrix Model;
 	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	

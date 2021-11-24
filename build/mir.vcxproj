@@ -104,7 +104,6 @@
     <ClCompile Include="..\src\core\resource\assimp_mesh.cpp" />
     <ClCompile Include="..\src\core\resource\assimp_resource.cpp" />
     <ClCompile Include="..\src\core\resource\material.cpp" />
-    <ClCompile Include="..\src\core\resource\material_cb.cpp" />
     <ClCompile Include="..\src\core\resource\material_factory.cpp" />
     <ClCompile Include="..\src\core\resource\resource_manager.cpp" />
     <ClCompile Include="..\src\core\scene\camera.cpp" />

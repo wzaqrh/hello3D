@@ -26,10 +26,10 @@
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\interface_type9.h">
-      <Filter>src\core\d3d9</Filter>
+      <Filter>src\core\rendersys\d3d9</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h">
-      <Filter>src\core\d3d9</Filter>
+      <Filter>src\core\rendersys\d3d9</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\interface_type11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
@@ -157,10 +157,10 @@
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp">
-      <Filter>src\core\d3d9</Filter>
+      <Filter>src\core\rendersys\d3d9</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\render_system9.cpp">
-      <Filter>src\core\d3d9</Filter>
+      <Filter>src\core\rendersys\d3d9</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\interface_type11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
@@ -202,9 +202,6 @@
       <Filter>src\core\resource</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\resource\material.cpp">
-      <Filter>src\core\resource\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\resource\material_cb.cpp">
       <Filter>src\core\resource\material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\resource\material_factory.cpp">
@@ -263,11 +260,11 @@
     <Filter Include="src\core\resource\assimp">
       <UniqueIdentifier>{cd9a7dcb-0b69-4170-910e-7b191190cf53}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\d3d9">
-      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\scene">
       <UniqueIdentifier>{095f3967-7dbc-4ef5-9595-cf51fe1e8384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\d3d9">
+      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

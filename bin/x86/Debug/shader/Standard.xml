@@ -13,7 +13,8 @@
 			<Element Name="WorldInv" 	 Type="matrix"></Element>
 			<Element Name="ViewInv" 	 Type="matrix"></Element>
 			<Element Name="ProjectionInv"	Type="matrix"></Element>
-			
+		</Uniform>
+		<Uniform Name="cbPerLight">
 			<Element Name="LightView" 	 	Type="matrix"></Element>
 			<Element Name="LightProjection" Type="matrix"></Element>
 			<Element Name="Light"			Type="struct" Size="80"></Element>

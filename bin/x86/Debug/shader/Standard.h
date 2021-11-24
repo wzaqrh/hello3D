@@ -17,7 +17,16 @@ struct LIGHT_SPOT
 	float4 DirectionCutOff;
 };
 
-static const int MAX_LIGHTS = 4;
+cbuffer cbPerLight : register(b1)
+{
+	matrix LightView;
+	matrix LightProjection;	
+	LIGHT_SPOT Light;
+
+	int LightType;
+	int HasDepthMap;
+}
+
 cbuffer cbGlobalParam : register(b0)
 {
 	matrix World;
@@ -27,13 +36,6 @@ cbuffer cbGlobalParam : register(b0)
 	matrix WorldInv;
 	matrix ViewInv;
 	matrix ProjectionInv;
-
-	matrix LightView;
-	matrix LightProjection;	
-	LIGHT_SPOT Light;
-
-	int LightType;
-	int HasDepthMap;
 }
 
 #if SHADER_MODEL > 30000

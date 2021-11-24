@@ -22,7 +22,7 @@ protected:
 	virtual void OnInitLight() override;
 private:
 	AssimpModelPtr mModel1, mModel2 = nullptr;
-	cbPointLightPtr mLight;
+	PointLightPtr mLight;
 };
 
 void TestShadowMap::OnInitLight()

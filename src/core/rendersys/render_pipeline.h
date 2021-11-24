@@ -21,13 +21,6 @@ public:
 	Eigen::Matrix4f WorldInv;
 	Eigen::Matrix4f ViewInv;
 	Eigen::Matrix4f ProjectionInv;
-
-	Eigen::Matrix4f LightView;
-	Eigen::Matrix4f LightProjection;
-	cbSpotLight Light;
-
-	unsigned int LightType;//directional=1,point=2,spot=3
-	unsigned int HasDepthMap;
 };
 
 class MIR_CORE_API RenderPipeline
@@ -48,14 +41,15 @@ private:
 	void _DoPostProcess();
 	void _PushRenderTarget(IRenderTexturePtr rendTarget);
 	void _PopRenderTarget();
-	void BindPass(const PassPtr& pass, const cbGlobalParam& globalParam);
-	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam);
-	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
-	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, cbGlobalParam& globalParam);
+	void BindPass(const PassPtr& pass);
+	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op);
+	void RenderOp(const RenderOperation& op, const std::string& lightMode);
+	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, 
+		const cbPerLight& lightParam, cbGlobalParam& globalParam);
 	void RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
-		const std::vector<std::pair<cbDirectLight*, int>>& lights, const std::string& lightMode);
+		const std::vector<ILightPtr>& lights, const std::string& lightMode);
 	void RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera,
-		const std::vector<std::pair<cbDirectLight*, int>>& lights);
+		const std::vector<ILightPtr>& lights);
 };
 
 }

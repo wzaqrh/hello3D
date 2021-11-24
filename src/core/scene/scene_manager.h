@@ -17,10 +17,10 @@ public:
 	
 	std::vector<CameraPtr> mCameras;
 
-	std::vector<cbDirectLightPtr> mDirectLights;
-	std::vector<cbPointLightPtr> mPointLights;
-	std::vector<cbSpotLightPtr> mSpotLights;
-	typedef std::vector<std::pair<cbDirectLight*, int>> LightsByOrder;
+	std::vector<DirectLightPtr> mDirectLights;
+	std::vector<PointLightPtr> mPointLights;
+	std::vector<SpotLightPtr> mSpotLights;
+	typedef std::vector<ILightPtr> LightsByOrder;
 	LightsByOrder mLightsByOrder;
 public:
 	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, const Eigen::Vector2i& screenSize, CameraPtr defCamera);
@@ -30,9 +30,9 @@ public:
 	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov);
 	CameraPtr GetDefCamera() const;
 
-	cbSpotLightPtr AddSpotLight();
-	cbPointLightPtr AddPointLight();
-	cbDirectLightPtr AddDirectLight();
+	SpotLightPtr AddSpotLight();
+	PointLightPtr AddPointLight();
+	DirectLightPtr AddDirectLight();
 };
 
 };

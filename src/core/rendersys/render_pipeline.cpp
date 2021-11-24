@@ -31,7 +31,23 @@ void RenderPipeline::_PopRenderTarget()
 	mRenderSys.SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
-void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op, const cbGlobalParam& globalParam)
+void RenderPipeline::BindPass(const PassPtr& pass)
+{
+	mRenderSys.SetProgram(pass->mProgram);
+
+	//if (pass->mConstantBuffers.size() > 0)
+	//	mRenderSys.UpdateBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
+
+	auto cbuffers = pass->GetConstBuffers();
+	mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
+
+	mRenderSys.SetVertexLayout(pass->mInputLayout);
+
+	if (!pass->mSamplers.empty())
+		mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
+}
+
+void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op)
 {
 	if (iterCnt >= 0) _PushRenderTarget(pass->mRTIterators[iterCnt]);
 	else if (pass->mRenderTarget) _PushRenderTarget(pass->mRenderTarget);
@@ -55,7 +71,7 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 		for (auto& cbBytes : op.mCBDataByName)
 			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
 
-		BindPass(pass, globalParam);
+		BindPass(pass);
 
 		if (op.mIndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
 		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
@@ -73,23 +89,7 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 	}
 }
 
-void RenderPipeline::BindPass(const PassPtr& pass, const cbGlobalParam& globalParam)
-{
-	mRenderSys.SetProgram(pass->mProgram);
-
-	if (pass->mConstantBuffers.size() > 0)
-		mRenderSys.UpdateBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
-
-	auto cbuffers = pass->GetConstBuffers();
-	mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
-
-	mRenderSys.SetVertexLayout(pass->mInputLayout);
-
-	if (!pass->mSamplers.empty())
-		mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
-}
-
-void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam)
+void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode)
 {
 	TechniquePtr tech = op.mMaterial->CurTech();
 	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
@@ -107,67 +107,61 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 			else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
 			
 			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
-			RenderPass(pass, textures, i, op, globalParam);
+			RenderPass(pass, textures, i, op);
 			textures[0] = first;
 		}
 		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
 		if (iter != op.mVertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
 		else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
 		
-		RenderPass(pass, textures, -1, op, globalParam);
+		RenderPass(pass, textures, -1, op);
 	}
 }
 
-void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, cbGlobalParam& globalParam)
+void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, 
+	const cbPerLight& lightParam, cbGlobalParam& globalParam)
 {
 	for (int i = 0; i < opQueue.Count(); ++i) {
-		if (opQueue[i].mMaterial->IsLoaded()) {
-			globalParam.World = opQueue[i].mWorldTransform;
+		auto& op = opQueue[i];
+		if (op.mMaterial->IsLoaded()) {
+			globalParam.World = op.mWorldTransform;
 			globalParam.WorldInv = globalParam.World.inverse();
-			RenderOp(opQueue[i], lightMode, globalParam);
+			op.mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys, 
+				MAKE_CBNAME(cbGlobalParam), Data::Make(globalParam));
+			
+			op.mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys,
+				MAKE_CBNAME(cbPerLight), Data::Make(lightParam));
+
+			RenderOp(op, lightMode);
 		}
 	}
 }
 
-cbGlobalParam MakeAutoParam(const Camera& camera, bool castShadow, 
-	cbDirectLight* light, LightType lightType)
+std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool castShadow, const ILight& light)
 {
-	cbGlobalParam globalParam;
-	memset(&globalParam, 0, sizeof(globalParam));
+	cbGlobalParam globalParam = {};
+	cbPerLight lightParam = {};
 
 	if (castShadow) {
-		light->CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
+		light.CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
-		light->CalculateLightingViewProjection(camera, globalParam.LightView, globalParam.LightProjection);
+		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
 	}
-	globalParam.HasDepthMap = castShadow ? TRUE : FALSE;
-
 	globalParam.WorldInv = globalParam.World.inverse();
 	globalParam.ViewInv = globalParam.View.inverse();
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
 
-	globalParam.LightType = lightType + 1;
-	switch (lightType) {
-	case kLightDirectional:
-		static_cast<cbDirectLight&>(globalParam.Light) = *light;
-		break;
-	case kLightPoint:
-		static_cast<cbPointLight&>(globalParam.Light) = *(cbPointLight*)light;
-		break;
-	case kLightSpot:
-		globalParam.Light = *(cbSpotLight*)light;
-		break;
-	default:
-		break;
-	}
-	return globalParam;
+	lightParam.HasDepthMap = castShadow ? TRUE : FALSE;
+	lightParam.LightType = light.GetType() + 1;
+	lightParam.Light = light.MakeCbLight();
+	return std::tie(globalParam, lightParam);
 }
 
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
-	const std::vector<std::pair<cbDirectLight*, int>>& lightsOrder, const std::string& lightMode)
+	const std::vector<ILightPtr>& lightsOrder, const std::string& lightMode)
 {
 	if (opQueue.IsEmpty()) return;
 
@@ -196,16 +190,16 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		BlendState orgBlend = mRenderSys.GetBlendFunc();
 		mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 		
-		cbGlobalParam globalParam = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, 
-			lightsOrder[0].first, static_cast<LightType>(lightsOrder[0].second));
-		RenderLight(opQueue, lightMode, globalParam);
+		cbGlobalParam globalParam;
+		cbPerLight lightParam;
+		std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, *lightsOrder[0]);
+		RenderLight(opQueue, lightMode, lightParam, globalParam);
 
 		for (int i = 1; i < lightsOrder.size(); ++i) {
 			mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 			auto lightModeEx = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
-			globalParam = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, 
-				lightsOrder[i].first, static_cast<LightType>(lightsOrder[i].second));
-			RenderLight(opQueue, lightModeEx, globalParam);
+			std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, *lightsOrder[i]);
+			RenderLight(opQueue, lightModeEx, lightParam, globalParam);
 		}
 		mRenderSys.SetBlendFunc(orgBlend);
 	}
@@ -224,7 +218,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 }
 
 void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera, 
-	const std::vector<std::pair<cbDirectLight*, int>>& lights)
+	const std::vector<ILightPtr>& lights)
 {
 	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
 	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);

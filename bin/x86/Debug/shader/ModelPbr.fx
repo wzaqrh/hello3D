@@ -36,7 +36,7 @@ sampler2D txAmbientOcclusion : register(s4) = sampler_state {
 #endif
 
 
-cbuffer cbUnityMaterial : register(b2)
+cbuffer cbUnityMaterial : register(b3)
 {
 	float4 _SpecColor;
 	float4 _Color;
@@ -45,7 +45,7 @@ cbuffer cbUnityMaterial : register(b2)
 	int _SpecLightOff;
 }
 
-cbuffer cbUnityGlobal : register(b3)
+cbuffer cbUnityGlobal : register(b4)
 {
 	float4 _Unity_IndirectSpecColor;
 	float4 _AmbientOrLightmapUV;
