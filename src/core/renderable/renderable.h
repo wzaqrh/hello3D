@@ -47,7 +47,9 @@ public:
 	const RenderOperation& operator[](size_t pos) const { return At(pos); }
 };
 
-interface MIR_CORE_API IRenderable : boost::noncopyable {
+interface MIR_CORE_API IRenderable : boost::noncopyable 
+{
+	virtual ~IRenderable() {}
 	virtual int GenRenderOperation(RenderOperationQueue& opList) = 0;
 };
 

@@ -3,12 +3,4 @@
 
 namespace mir {
 
-RenderSystem::RenderSystem()
-{
-}
-
-RenderSystem::~RenderSystem()
-{
-}
-
 }

@@ -9,6 +9,7 @@ namespace mir {
 
 interface MIR_CORE_API ILight : boost::noncopyable 
 {
+	virtual ~ILight() {}
 	virtual LightType GetType() const = 0;
 	virtual cbSpotLight MakeCbLight() const = 0;
 	virtual void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const = 0;

@@ -42,7 +42,6 @@ class VertexShader11 : public ImplementResource<IVertexShader>
 {
 public:
 	VertexShader11(IBlobDataPtr pBlob);
-	ShaderType GetType() const override { return kShaderVertex; }
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 	ID3D11VertexShader*& GetShader11() { return mShader; }
 public:
@@ -55,7 +54,6 @@ class PixelShader11 : public ImplementResource<IPixelShader>
 {
 public:
 	PixelShader11(IBlobDataPtr pBlob);
-	ShaderType GetType() const override { return kShaderPixel; }
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 	ID3D11PixelShader*& GetShader11() { return mShader; }
 public:

@@ -64,7 +64,6 @@ class VertexShader9 : public ImplementResource<IVertexShader>
 {
 public:
 	VertexShader9();
-	ShaderType GetType() const override { return kShaderVertex; }
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 	IDirect3DVertexShader9*& GetShader9() { return mShader; }
 	void SetConstTable(ID3DXConstantTable* constTable);
@@ -78,7 +77,6 @@ class PixelShader9 : public ImplementResource<IPixelShader>
 {
 public:
 	PixelShader9();
-	ShaderType GetType() const override { return kShaderPixel; }
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 	IDirect3DPixelShader9*& GetShader9() { return mShader; }
 	void SetConstTable(ID3DXConstantTable* constTable);

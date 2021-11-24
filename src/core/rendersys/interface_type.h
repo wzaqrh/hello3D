@@ -10,6 +10,7 @@ namespace mir {
 /********** Program **********/
 interface IBlobData : boost::noncopyable  
 {
+	virtual ~IBlobData() {}
 	virtual const char* GetBufferPointer() const = 0;
 	virtual size_t GetBufferSize() const = 0;
 };
@@ -42,10 +43,12 @@ interface IShader : public IResource
 
 interface IVertexShader : public IShader 
 {	
+	ShaderType GetType() const override final { return kShaderVertex; }
 };
 
 interface IPixelShader : public IShader 
 {
+	ShaderType GetType() const override final { return kShaderPixel; }
 };
 
 interface IProgram : public IResource 

@@ -153,9 +153,6 @@
     <ClCompile Include="..\src\core\renderable\sprite.cpp">
       <Filter>src\core\renderable</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\render_system.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp">
       <Filter>src\core\rendersys\d3d9</Filter>
     </ClCompile>

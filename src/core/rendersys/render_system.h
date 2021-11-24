@@ -21,6 +21,7 @@ enum DeviceResourceType {
 
 interface MIR_CORE_API IRenderSystem : boost::noncopyable 
 {
+	virtual ~IRenderSystem() {}
 	virtual bool Initialize(HWND hWnd, RECT vp = { 0,0,0,0 }) = 0;
 	virtual void Update(float dt) = 0;
 	virtual void CleanUp() = 0;
@@ -76,9 +77,6 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 
 struct MIR_CORE_API RenderSystem : public IRenderSystem
 {
-public:
-	RenderSystem();
-	virtual ~RenderSystem();
 public:
 	Eigen::Vector2i WinSize() const override { return mScreenSize; }
 	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
