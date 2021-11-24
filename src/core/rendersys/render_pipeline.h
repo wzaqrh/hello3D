@@ -2,9 +2,11 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/stl.h"
-#include "core/resource/material_cb.h"
+#include "core/base/math.h"
 
 namespace mir {
+
+struct cbPerLight;
 
 struct cbGlobalParam
 {

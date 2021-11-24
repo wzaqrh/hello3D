@@ -103,9 +103,6 @@
     <ClInclude Include="..\src\core\resource\material.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\resource\material_cb.h">
-      <Filter>src\core\resource\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\resource\material_factory.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>

@@ -2,7 +2,6 @@
 #include "core/resource/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/resource/material.h"
-#include "core/resource/material_cb.h"
 #include "core/resource/material_factory.h"
 
 namespace mir {
