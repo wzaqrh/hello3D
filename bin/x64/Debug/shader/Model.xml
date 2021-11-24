@@ -4,6 +4,7 @@
 	
 	<PROGRAM>
 		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		<Attribute Name="attrPos3NormalTangentTexBlendWeightBlendIndicesBitangent">

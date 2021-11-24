@@ -30,7 +30,7 @@ static const float  MIDDLE_GRAY = 0.72f;
 static const float  LUM_WHITE = 1.5f;
 static const float  BRIGHT_THRESHOLD = 0.5f;
 
-cbuffer cbBloom : register(b1)
+cbuffer cbBloom : register(b3)
 {
 	float4 SampleOffsets[16];
 	float4 SampleWeights[16];
