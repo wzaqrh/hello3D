@@ -12,8 +12,8 @@
 #include "core/base/input.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d11/interface_type11.h"
-#include "core/rendersys/d3d11/thread_pump.h"
 #include "core/resource/material_factory.h"
+#include "core/renderable/renderable.h"
 
 using Microsoft::WRL::ComPtr;
 

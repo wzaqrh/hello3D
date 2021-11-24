@@ -1,10 +1,10 @@
 #pragma once
+#include <Windows.h>
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
-#include "core/rendersys/predeclare.h"
+#include "core/predeclare.h"
 #include "core/rendersys/base_type.h"
 #include "core/rendersys/interface_type.h"
-#include "core/renderable/renderable.h"
 
 namespace mir {
 

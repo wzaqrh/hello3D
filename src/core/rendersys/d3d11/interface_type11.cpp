@@ -14,12 +14,12 @@ BlobData11::BlobData11(ID3DBlob* pBlob)
 {
 }
 
-char* BlobData11::GetBufferPointer()
+const char* BlobData11::GetBufferPointer() const
 {
 	return (char*)mBlob->GetBufferPointer();
 }
 
-size_t BlobData11::GetBufferSize()
+size_t BlobData11::GetBufferSize() const
 {
 	return mBlob->GetBufferSize();
 }
@@ -92,7 +92,7 @@ int VertexBuffer11::GetCount()
 }
 
 /********** IndexBuffer11 **********/
-int IndexBuffer11::GetWidth()
+int IndexBuffer11::GetWidth() const
 {
 	return d3d::BytePerPixel(static_cast<DXGI_FORMAT>(Format));
 }

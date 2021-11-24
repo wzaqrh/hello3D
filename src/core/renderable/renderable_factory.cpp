@@ -6,7 +6,7 @@
 #include "core/renderable/label.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/post_process.h"
-#include "core/rendersys/camera.h"
+#include "core/scene/camera.h"
 #include "core/resource/material_factory.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/resource_manager.h"

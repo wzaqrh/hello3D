@@ -22,8 +22,8 @@ typedef std::shared_ptr< struct SamplerState11> SamplerState11Ptr;
 class BlobData11 : public IBlobData {
 public:
 	BlobData11(ID3DBlob* pBlob);
-	char* GetBufferPointer() override;
-	size_t GetBufferSize() override;
+	const char* GetBufferPointer() const override;
+	size_t GetBufferSize() const override;
 public:
 	ID3DBlob* mBlob = nullptr;
 };
@@ -42,8 +42,8 @@ class VertexShader11 : public ImplementResource<IVertexShader>
 {
 public:
 	VertexShader11(IBlobDataPtr pBlob);
-	ShaderType GetType() override { return kShaderVertex; }
-	IBlobDataPtr GetBlob() override { return mBlob; }
+	ShaderType GetType() const override { return kShaderVertex; }
+	IBlobDataPtr GetBlob() const override { return mBlob; }
 	ID3D11VertexShader*& GetShader11() { return mShader; }
 public:
 	ID3D11VertexShader* mShader = nullptr;
@@ -55,8 +55,8 @@ class PixelShader11 : public ImplementResource<IPixelShader>
 {
 public:
 	PixelShader11(IBlobDataPtr pBlob);
-	ShaderType GetType() override { return kShaderPixel; }
-	IBlobDataPtr GetBlob() override { return mBlob; }
+	ShaderType GetType() const override { return kShaderPixel; }
+	IBlobDataPtr GetBlob() const override { return mBlob; }
 	ID3D11PixelShader*& GetShader11() { return mShader; }
 public:
 	ID3D11PixelShader* mShader = nullptr;
@@ -70,8 +70,8 @@ public:
 	Program11();
 	void SetVertex(VertexShader11Ptr pVertex);
 	void SetPixel(PixelShader11Ptr pPixel);
-	IVertexShaderPtr GetVertex() override { return mVertex; }
-	IPixelShaderPtr GetPixel() override { return mPixel; }
+	IVertexShaderPtr GetVertex() const override { return mVertex; }
+	IPixelShaderPtr GetPixel() const override { return mPixel; }
 public:
 	VertexShader11Ptr mVertex;
 	PixelShader11Ptr mPixel;
@@ -97,10 +97,10 @@ public:
 	int GetCount();
 public:
 	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
-	unsigned int GetBufferSize() override { return hd.BufferSize; }
-	HardwareBufferType GetType() override { return kHWBufferVertex; }
-	unsigned int GetStride() override { return Stride; }
-	unsigned int GetOffset() override { return Offset; }
+	unsigned int GetBufferSize() const override { return hd.BufferSize; }
+	HardwareBufferType GetType() const override { return kHWBufferVertex; }
+	unsigned int GetStride() const override { return Stride; }
+	unsigned int GetOffset() const override { return Offset; }
 public:
 	unsigned int Stride, Offset;
 	HardwareBuffer hd;
@@ -116,11 +116,11 @@ public:
 	}
 public:
 	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
-	unsigned int GetBufferSize() override { return hd.BufferSize; }
-	HardwareBufferType GetType() override { return kHWBufferIndex; }
+	unsigned int GetBufferSize() const override { return hd.BufferSize; }
+	HardwareBufferType GetType() const override { return kHWBufferIndex; }
 
-	int GetWidth() override;
-	ResourceFormat GetFormat() override { return Format; }
+	int GetWidth() const override;
+	ResourceFormat GetFormat() const override { return Format; }
 public:
 	ResourceFormat Format;
 	HardwareBuffer hd;
@@ -132,11 +132,11 @@ public:
 	ContantBuffer11() {}
 	void Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl);
 public:
-	ConstBufferDeclPtr GetDecl() override { return mDecl; }
-	HardwareBufferType GetType() override { return kHWBufferConstant; }
+	ConstBufferDeclPtr GetDecl() const override { return mDecl; }
+	HardwareBufferType GetType() const override { return kHWBufferConstant; }
 
 	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
-	unsigned int GetBufferSize() override { return hd.BufferSize; }
+	unsigned int GetBufferSize() const override { return hd.BufferSize; }
 public:
 	ConstBufferDeclPtr mDecl;
 	HardwareBuffer hd;
@@ -148,16 +148,16 @@ class Texture11 : public ImplementResource<ITexture>
 public:
 	void Init(ResourceFormat format, int width, int height, int faceCount, int mipmap);
 
-	bool HasSRV() override { return mTexture != nullptr; }
+	bool HasSRV() const override { return mTexture != nullptr; }
 	void SetSRV11(ID3D11ShaderResourceView* texture);
 	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
 
-	ResourceFormat GetFormat() override { return mFormat; }
-	int GetWidth() override { return mWidth; }
-	int GetHeight() override { return mHeight; }
-	int GetFaceCount() { return mFaceCount; }
-	int GetMipmapCount() override { return mMipCount; }
-	bool IsAutoGenMipmap() const { return mAutoGenMipmap; }
+	ResourceFormat GetFormat() const override { return mFormat; }
+	int GetWidth() const override { return mWidth; }
+	int GetHeight() const override { return mHeight; }
+	int GetMipmapCount() const override { return mMipCount; }
+	int GetFaceCount() const override { return mFaceCount; }
+	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 private:
@@ -172,7 +172,7 @@ class RenderTexture11 : public ImplementResource<IRenderTexture>
 public:
 	RenderTexture11();
 	void Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format = kFormatR32G32B32A32Float);
-	ITexturePtr GetColorTexture() override { return mRenderTargetPtr; }
+	ITexturePtr GetColorTexture() const override { return mRenderTargetPtr; }
 
 	ID3D11RenderTargetView*& GetColorBuffer11() { 	return mRenderTargetView; }
 	ID3D11DepthStencilView*& GetDepthStencilBuffer11() { return mDepthStencilView; }

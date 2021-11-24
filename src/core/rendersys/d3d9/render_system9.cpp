@@ -3,6 +3,7 @@
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/d3d9/interface_type9.h"
 #include "core/resource/material_factory.h"
+#include "core/renderable/renderable.h"
 #include "core/base/debug.h"
 #include "core/base/input.h"
 #include "core/base/d3d.h"
@@ -13,14 +14,10 @@ namespace mir {
 #define PtrRaw(T) T.get()
 
 RenderSystem9::RenderSystem9()
-{
-	//mFXCDir = "d3d9\\";
-}
+{}
 
 RenderSystem9::~RenderSystem9()
-{
-
-}
+{}
 
 bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 {

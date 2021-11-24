@@ -16,6 +16,19 @@
 
 namespace mir {
 
+enum TextureType {
+	kTextureDiffuse,
+	kTextureSpecular,
+	kTextureNormal
+};
+enum TexturePbrType {
+	kTexturePbrAlbedo,
+	kTexturePbrNormal,
+	kTexturePbrMetalness,
+	kTexturePbrRoughness,
+	kTexturePbrAo
+};
+
 struct AiNode : public std::enable_shared_from_this<AiNode>
 {
 	AiNode(const aiNode* rawNode, const size_t serializeIndex) 

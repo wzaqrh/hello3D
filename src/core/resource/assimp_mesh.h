@@ -1,9 +1,10 @@
 #pragma once
 #include <assimp/mesh.h>
 #include "core/mir_export.h"
+#include "core/predeclare.h"
+#include "core/base/math.h"
 #include "core/base/declare_macros.h"
 #include "core/base/launch.h"
-#include "core/renderable/renderable.h"
 
 namespace mir {
 

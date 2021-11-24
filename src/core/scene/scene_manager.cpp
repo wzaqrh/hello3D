@@ -1,4 +1,5 @@
-#include "core/rendersys/scene_manager.h"
+#include "core/scene/scene_manager.h"
+#include "core/scene/camera.h"
 #include "core/base/transform.h"
 #include "core/resource/material_factory.h"
 #include "core/renderable/skybox.h"

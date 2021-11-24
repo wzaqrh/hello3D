@@ -3,9 +3,9 @@
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
-#include "core/resource/resource_manager.h"
 #include "core/rendersys/interface_type.h"
 #include "core/rendersys/render_system.h"
+#include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/assimp_resource.h"
 

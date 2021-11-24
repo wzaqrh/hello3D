@@ -1,8 +1,9 @@
 #pragma once
-#include "core/rendersys/interface_type.h"
-#include "ft2build.h"
-#include "freetype.h"
-#include "freetype2/freetype/ftglyph.h"
+#include <ft2build.h>
+#include <freetype.h>
+#include <freetype2/freetype/ftglyph.h>
+#include "core/predeclare.h"
+#include "core/base/math.h"
 
 namespace mir {
 

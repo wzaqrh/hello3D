@@ -1,11 +1,12 @@
 #include "core/rendersys/render_pipeline.h"
-#include "core/base/debug.h"
 #include "core/rendersys/interface_type.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
-#include "core/rendersys/scene_manager.h"
+#include "core/scene/scene_manager.h"
+#include "core/scene/camera.h"
 #include "core/renderable/post_process.h"
 #include "core/renderable/skybox.h"
+#include "core/base/debug.h"
 
 namespace mir {
 
@@ -166,7 +167,7 @@ cbGlobalParam MakeAutoParam(const Camera& camera, bool castShadow,
 }
 
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
-	const std::vector<std::pair<cbDirectLight*, LightType>>& lightsOrder, const std::string& lightMode)
+	const std::vector<std::pair<cbDirectLight*, int>>& lightsOrder, const std::string& lightMode)
 {
 	if (opQueue.IsEmpty()) return;
 
@@ -196,13 +197,14 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 		
 		cbGlobalParam globalParam = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, 
-			lightsOrder[0].first, lightsOrder[0].second);
+			lightsOrder[0].first, static_cast<LightType>(lightsOrder[0].second));
 		RenderLight(opQueue, lightMode, globalParam);
 
 		for (int i = 1; i < lightsOrder.size(); ++i) {
 			mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 			auto lightModeEx = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
-			globalParam = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, lightsOrder[i].first, lightsOrder[i].second);
+			globalParam = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, 
+				lightsOrder[i].first, static_cast<LightType>(lightsOrder[i].second));
 			RenderLight(opQueue, lightModeEx, globalParam);
 		}
 		mRenderSys.SetBlendFunc(orgBlend);
@@ -222,7 +224,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 }
 
 void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera, 
-	const std::vector<std::pair<cbDirectLight*, LightType>>& lights)
+	const std::vector<std::pair<cbDirectLight*, int>>& lights)
 {
 	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
 	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);

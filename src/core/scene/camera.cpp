@@ -1,10 +1,9 @@
 #include <boost/math/constants/constants.hpp>
-#include "core/rendersys/camera.h"
+#include "core/scene/camera.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/base/debug.h"
 #include "core/base/math.h"
-
 
 namespace mir {
 

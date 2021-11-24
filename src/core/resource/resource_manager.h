@@ -5,9 +5,8 @@
 #include "core/mir_export.h"
 #include "core/base/stl.h"
 #include "core/base/declare_macros.h"
-#include "core/rendersys/predeclare.h"
-#include "core/rendersys/base_type.h"
 #include "core/base/launch.h"
+#include "core/predeclare.h"
 #include "core/resource/resource.h"
 #include "core/rendersys/render_system.h"
 

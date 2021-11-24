@@ -82,12 +82,6 @@
     <ClInclude Include="..\src\core\rendersys\base_type.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\scene_manager.h">
-      <Filter>src\core\rendersys\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\camera.h">
-      <Filter>src\core\rendersys\scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\declare_macros.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
@@ -123,6 +117,21 @@
     </ClInclude>
     <ClInclude Include="..\src\core\renderable\assimp_model.h">
       <Filter>src\core\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\scene\camera.h">
+      <Filter>src\core\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\scene\scene_manager.h">
+      <Filter>src\core\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\scene\light.h">
+      <Filter>src\core\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\predeclare.h">
+      <Filter>src\core\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\scene\predeclare.h">
+      <Filter>src\core\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -189,21 +198,6 @@
     <ClCompile Include="..\src\core\base\d3d.cpp">
       <Filter>src\core\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\interface_type.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\base_type.cpp">
-      <Filter>src\core\rendersys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\scene_manager.cpp">
-      <Filter>src\core\rendersys\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\camera.cpp">
-      <Filter>src\core\rendersys\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\resource\resource.cpp">
-      <Filter>src\core\resource</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\resource\resource_manager.cpp">
       <Filter>src\core\resource</Filter>
     </ClCompile>
@@ -224,6 +218,15 @@
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp">
       <Filter>src\core\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\scene\camera.cpp">
+      <Filter>src\core\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\scene\scene_manager.cpp">
+      <Filter>src\core\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\scene\light.cpp">
+      <Filter>src\core\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -251,9 +254,6 @@
     <Filter Include="src\unit_test">
       <UniqueIdentifier>{cdd69705-991f-47e3-93a0-c38a5203813a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\rendersys\scene">
-      <UniqueIdentifier>{7ebe8e76-3d1f-4395-86f8-a69cfe8b1719}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\resource">
       <UniqueIdentifier>{592d5934-05b7-456b-80e9-a9d5d35573f6}</UniqueIdentifier>
     </Filter>
@@ -265,6 +265,9 @@
     </Filter>
     <Filter Include="src\core\d3d9">
       <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\scene">
+      <UniqueIdentifier>{095f3967-7dbc-4ef5-9595-cf51fe1e8384}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

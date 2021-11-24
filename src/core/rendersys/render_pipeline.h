@@ -1,11 +1,34 @@
 #pragma once
 #include "core/mir_export.h"
+#include "core/predeclare.h"
 #include "core/base/stl.h"
-#include "core/rendersys/predeclare.h"
-#include "core/renderable/predeclare.h"
 #include "core/resource/material_cb.h"
 
 namespace mir {
+
+struct cbGlobalParam
+{
+	cbGlobalParam() {
+		World = Eigen::Matrix4f::Identity();
+		View = Eigen::Matrix4f::Identity();
+		Projection = Eigen::Matrix4f::Identity();
+	}
+public:
+	Eigen::Matrix4f World;
+	Eigen::Matrix4f View;
+	Eigen::Matrix4f Projection;
+
+	Eigen::Matrix4f WorldInv;
+	Eigen::Matrix4f ViewInv;
+	Eigen::Matrix4f ProjectionInv;
+
+	Eigen::Matrix4f LightView;
+	Eigen::Matrix4f LightProjection;
+	cbSpotLight Light;
+
+	unsigned int LightType;//directional=1,point=2,spot=3
+	unsigned int HasDepthMap;
+};
 
 class MIR_CORE_API RenderPipeline
 {
@@ -30,9 +53,9 @@ private:
 	void RenderOp(const RenderOperation& op, const std::string& lightMode, const cbGlobalParam& globalParam);
 	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, cbGlobalParam& globalParam);
 	void RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
-		const std::vector<std::pair<cbDirectLight*, LightType>>& lights, const std::string& lightMode);
+		const std::vector<std::pair<cbDirectLight*, int>>& lights, const std::string& lightMode);
 	void RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera,
-		const std::vector<std::pair<cbDirectLight*, LightType>>& lights);
+		const std::vector<std::pair<cbDirectLight*, int>>& lights);
 };
 
 }

@@ -52,7 +52,7 @@ D3DSURFACE_DESC Texture9::GetDesc()
 }
 
 /********** TIndexBuffer9 **********/
-int IndexBuffer9::GetWidth()
+int IndexBuffer9::GetWidth() const
 {
 	return d3d::BytePerPixel(static_cast<DXGI_FORMAT>(Format));
 }
@@ -227,15 +227,14 @@ void VertexShader9::SetConstTable(ID3DXConstantTable* constTable)
 /********** TBlobDataD3d9 **********/
 BlobData9::BlobData9(ID3DXBuffer* pBlob)
 	:mBlob(pBlob)
-{
-}
+{}
 
-char* BlobData9::GetBufferPointer()
+const char* BlobData9::GetBufferPointer() const
 {
 	return (char*)mBlob->GetBufferPointer();
 }
 
-size_t BlobData9::GetBufferSize()
+size_t BlobData9::GetBufferSize() const
 {
 	return mBlob->GetBufferSize();
 }
@@ -254,7 +253,7 @@ ContantBuffer9::ContantBuffer9(ConstBufferDeclPtr decl)
 	mBuffer9.resize(mDecl->BufferSize);
 }
 
-unsigned int ContantBuffer9::GetBufferSize()
+unsigned int ContantBuffer9::GetBufferSize() const
 {
 	return mDecl->BufferSize;
 }

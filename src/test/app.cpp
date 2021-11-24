@@ -3,7 +3,7 @@
 #include "core/base/transform.h"
 #include "core/base/input.h"
 #include "core/rendersys/render_system.h"
-#include "core/rendersys/scene_manager.h"
+#include "core/scene/scene_manager.h"
 #include "test/app.h"
 
 using namespace mir;

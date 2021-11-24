@@ -23,8 +23,8 @@ class BlobData9 : public IBlobData
 {
 public:
 	BlobData9(ID3DXBuffer* pBlob);
-	char* GetBufferPointer() override;
-	size_t GetBufferSize() override;
+	const char* GetBufferPointer() const override;
+	size_t GetBufferSize() const override;
 public:
 	ID3DXBuffer* mBlob;
 };
@@ -64,8 +64,8 @@ class VertexShader9 : public ImplementResource<IVertexShader>
 {
 public:
 	VertexShader9();
-	ShaderType GetType() override { return kShaderVertex; }
-	IBlobDataPtr GetBlob() override { return mBlob; }
+	ShaderType GetType() const override { return kShaderVertex; }
+	IBlobDataPtr GetBlob() const override { return mBlob; }
 	IDirect3DVertexShader9*& GetShader9() { return mShader; }
 	void SetConstTable(ID3DXConstantTable* constTable);
 public:
@@ -78,8 +78,8 @@ class PixelShader9 : public ImplementResource<IPixelShader>
 {
 public:
 	PixelShader9();
-	ShaderType GetType() override { return kShaderPixel; }
-	IBlobDataPtr GetBlob() override { return mBlob; }
+	ShaderType GetType() const override { return kShaderPixel; }
+	IBlobDataPtr GetBlob() const override { return mBlob; }
 	IDirect3DPixelShader9*& GetShader9() { return mShader; }
 	void SetConstTable(ID3DXConstantTable* constTable);
 public:
@@ -94,8 +94,8 @@ public:
 	Program9();
 	void SetVertex(VertexShader9Ptr pVertex);
 	void SetPixel(PixelShader9Ptr pPixel);
-	IVertexShaderPtr GetVertex() override { return mVertex; }
-	IPixelShaderPtr GetPixel() override { return mPixel; }
+	IVertexShaderPtr GetVertex() const override { return mVertex; }
+	IPixelShaderPtr GetPixel() const override { return mPixel; }
 public:
 	VertexShader9Ptr mVertex;
 	PixelShader9Ptr mPixel;
@@ -113,11 +113,11 @@ public:
 	}
 
 	IDirect3DIndexBuffer9*& GetBuffer9() { return Buffer; }
-	HardwareBufferType GetType() override { return kHWBufferIndex; }
-	unsigned int GetBufferSize() override { return BufferSize; }
+	HardwareBufferType GetType() const override { return kHWBufferIndex; }
+	unsigned int GetBufferSize() const override { return BufferSize; }
 
-	int GetWidth() override;
-	ResourceFormat GetFormat() override { return Format; }
+	int GetWidth() const override;
+	ResourceFormat GetFormat() const override { return Format; }
 public:
 	IDirect3DIndexBuffer9* Buffer;
 	unsigned int BufferSize;
@@ -132,11 +132,11 @@ public:
 	VertexBuffer9() :VertexBuffer9(nullptr, 0, 0, 0) {}
 
 	IDirect3DVertexBuffer9*& GetBuffer9() {	return Buffer; }
-	HardwareBufferType GetType() override { return kHWBufferVertex; }
-	unsigned int GetBufferSize() override {	return BufferSize; }
+	HardwareBufferType GetType() const override { return kHWBufferVertex; }
+	unsigned int GetBufferSize() const override {	return BufferSize; }
 
-	unsigned int GetStride() override { return Stride; }
-	unsigned int GetOffset() override { return Offset; }
+	unsigned int GetStride() const override { return Stride; }
+	unsigned int GetOffset() const override { return Offset; }
 public:
 	IDirect3DVertexBuffer9* Buffer;
 	unsigned int BufferSize;
@@ -149,10 +149,10 @@ public:
 	ContantBuffer9(ConstBufferDeclPtr decl);
 	ContantBuffer9() :ContantBuffer9(nullptr) {}
 
-	HardwareBufferType GetType() override { return kHWBufferConstant; }
-	unsigned int GetBufferSize() override;
+	HardwareBufferType GetType() const override { return kHWBufferConstant; }
+	unsigned int GetBufferSize() const override;
 
-	ConstBufferDeclPtr GetDecl() override { return mDecl; }
+	ConstBufferDeclPtr GetDecl() const override { return mDecl; }
 	char* GetBuffer9();
 	void SetBuffer9(char* data, int dataSize);
 public:
@@ -168,15 +168,17 @@ public:
 	Texture9(IDirect3DTexture9* texture);
 
 	bool IsCube() const { return mTextureCube != nullptr; }
-	bool HasSRV() override { return mTexture != nullptr || mTextureCube != nullptr; }
+	bool HasSRV() const override { return mTexture != nullptr || mTextureCube != nullptr; }
 	void SetSRV9(IDirect3DTexture9* texture);
 	IDirect3DTexture9*& GetSRV9() { return mTexture; }
 	IDirect3DCubeTexture9*& GetSRVCube9() { return mTextureCube; }
 
-	int GetWidth() override { return mWidth; }
-	int GetHeight() override { return mHeight; }
-	ResourceFormat GetFormat() override { return mFormat; }
-	int GetMipmapCount() override { return mMipCount; }
+	int GetWidth() const override { return mWidth; }
+	int GetHeight() const override { return mHeight; }
+	ResourceFormat GetFormat() const override { return mFormat; }
+	int GetMipmapCount() const override { return mMipCount; }
+	int GetFaceCount() const override { return 1; }
+	bool IsAutoGenMipmap() const override { return false; }
 private:
 	D3DSURFACE_DESC GetDesc();
 private:
@@ -191,7 +193,7 @@ class RenderTexture9 : public ImplementResource<IRenderTexture>
 public:
 	RenderTexture9();
 	RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
-	ITexturePtr GetColorTexture() override { return mColorTexture; }
+	ITexturePtr GetColorTexture() const override { return mColorTexture; }
 	IDirect3DSurface9*& GetColorBuffer9();
 	IDirect3DSurface9*& GetDepthStencilBuffer9() { return mDepthStencilBuffer; }
 public:

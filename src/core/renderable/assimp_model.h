@@ -6,6 +6,45 @@
 
 namespace mir {
 
+constexpr int MAX_MATRICES = 56;
+struct cbWeightedSkin
+{
+	Eigen::Matrix4f Model;
+	Eigen::Matrix4f Models[MAX_MATRICES];
+	unsigned int hasNormal;
+	unsigned int hasMetalness;
+	unsigned int hasRoughness;
+	unsigned int hasAO;
+};
+
+struct cbUnityMaterial
+{
+	cbUnityMaterial() {
+		_SpecColor = Eigen::Vector4f(1, 1, 1, 1);
+		_Color = Eigen::Vector4f(1, 1, 1, 1);
+		_GlossMapScale = 1;
+		_OcclusionStrength = 1;
+		_SpecLightOff = 0;
+	}
+	Eigen::Vector4f _SpecColor;
+	Eigen::Vector4f _Color;
+	float _GlossMapScale;
+	float _OcclusionStrength;
+	unsigned int _SpecLightOff;
+};
+
+struct cbUnityGlobal
+{
+	cbUnityGlobal() {
+		_Unity_IndirectSpecColor = Eigen::Vector4f(0, 0, 0, 0);
+		_AmbientOrLightmapUV = Eigen::Vector4f(0.01, 0.01, 0.01, 1);
+		_Unity_SpecCube0_HDR = Eigen::Vector4f(0.5, 1, 0, 0);
+	}
+	Eigen::Vector4f _Unity_IndirectSpecColor;
+	Eigen::Vector4f _AmbientOrLightmapUV;
+	Eigen::Vector4f _Unity_SpecCube0_HDR;
+};
+
 struct AiAnimeNode {
 	void Init(size_t serializeIndex, const AiNodePtr& node) {
 		SerilizeIndex = serializeIndex;

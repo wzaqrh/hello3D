@@ -4,26 +4,4 @@
 
 namespace mir {
 
-/********** TBlobDataStd **********/
-BlobDataStandard::BlobDataStandard(const std::vector<char>& buffer)
-	:mBuffer(buffer)
-{
-}
-
-char* BlobDataStandard::GetBufferPointer()
-{
-	return mBuffer.empty() ? nullptr : &mBuffer[0];
-}
-
-size_t BlobDataStandard::GetBufferSize()
-{
-	return mBuffer.size();
-}
-
-/********** IIndexBuffer **********/
-int IIndexBuffer::GetCount()
-{
-	return GetBufferSize() / GetWidth();
-}
-
 }
