@@ -16,6 +16,9 @@ enum ResourceState {
 };
 interface MIR_CORE_API IResource : boost::noncopyable 
 {
+#if defined MIR_RESOURCE_DEBUG
+	std::string _ResourcePath;
+#endif
 	virtual ~IResource() {}
 	virtual ResourceState GetCurState() const = 0;
 	virtual void SetCurState(ResourceState state) = 0;

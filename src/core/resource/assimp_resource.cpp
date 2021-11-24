@@ -15,10 +15,8 @@ namespace mir {
 /********** AiSceneLoader **********/
 class AiSceneLoader {
 public:
-	AiSceneLoader(Launch launchMode, ResourceManager& resourceMng, 
-		MaterialPtr material, AiScenePtr asset)
-		: mLaunchMode(launchMode), mResourceMng(resourceMng), mMaterial(material)
-		, mAsset(*asset), mResult(asset)
+	AiSceneLoader(Launch launchMode, ResourceManager& resourceMng, AiScenePtr asset)
+		: mLaunchMode(launchMode), mResourceMng(resourceMng), mAsset(*asset), mResult(asset)
 	{}
 	~AiSceneLoader() {}
 	void ExecuteAsyncPart(const std::string& imgPath, const std::string& redirectResource) 
@@ -253,7 +251,6 @@ private:
 private:
 	const Launch mLaunchMode;
 	ResourceManager& mResourceMng;
-	MaterialPtr mMaterial;
 	AiScene& mAsset;
 	AiScenePtr mResult;
 private:
@@ -263,12 +260,12 @@ typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** AiAssetManager **********/
 
 AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng, 
-	MaterialPtr material, const std::string& assetPath, const std::string& redirectRes)
+	const std::string& assetPath, const std::string& redirectRes)
 {
 	TIME_PROFILE(AiResourceFactory_CreateAiScene);
 	AiScenePtr res = std::make_shared<AiScene>();
 
-	AiSceneLoaderPtr loader = std::make_shared<AiSceneLoader>(launchMode, resourceMng, material, res);
+	AiSceneLoaderPtr loader = std::make_shared<AiSceneLoader>(launchMode, resourceMng, res);
 	if (launchMode == Launch::Async) {
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {

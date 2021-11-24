@@ -117,12 +117,11 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IRenderTexturePtr, CreateRenderTexture);
 
-	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName, bool sharedUse = false);
+	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName);
 	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial);
 	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
 
-	AiScenePtr CreateAiScene(Launch launchMode, MaterialPtr material, 
-		const std::string& assetPath, const std::string& redirectRes);
+	AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes);
 private:
 	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
 		const std::string& name, const std::string& vsEntry, const std::string& psEntry);

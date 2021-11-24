@@ -1,5 +1,6 @@
 #include <boost/assert.hpp>
 #include <boost/asio.hpp>
+#include <boost/format.hpp>
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
@@ -214,6 +215,9 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 	else {
 		program = findProg->second;
 	}
+#if defined MIR_RESOURCE_DEBUG
+	program->_ResourcePath = (boost::format("name:%1%, vs:%2%, ps:%3%") %name %vsEntry %psEntry).str();
+#endif
 	return program;
 }
 
@@ -395,10 +399,13 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 	std::string imgFullpath = fullpath.string();
 
 	ITexturePtr texture = nullptr;
-	auto findTex = mTextureByPath.find(imgFullpath);
-	if (findTex == mTextureByPath.end()) {
+	auto findIter = mTextureByPath.find(imgFullpath);
+	if (findIter == mTextureByPath.end()) {
 		texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
 		mTextureByPath.insert(std::make_pair(imgFullpath, texture));
+	#if defined MIR_RESOURCE_DEBUG
+		texture->_ResourcePath = (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str();
+	#endif
 
 		if (launchMode == Launch::Async) {
 			AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
@@ -409,17 +416,25 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 		else texture->SetLoaded(nullptr != _LoadTextureByFile(texture, nullptr, imgFullpath, format, autoGenMipmap));
 	}
 	else {
-		texture = findTex->second;
+		texture = findIter->second;
 	}
 	return texture;
 }
 
-MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName, bool sharedUse/*readonly*/)
+MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName)
 {
-	if (mMaterialByName.find(matName) == mMaterialByName.end())
-		mMaterialByName.insert(std::make_pair(matName, mMaterialFac.CreateMaterial(launchMode, *this, matName)));
-
-	MaterialPtr material = sharedUse ? mMaterialByName[matName] : CloneMaterial(launchMode, *mMaterialByName[matName]);
+	MaterialPtr material = nullptr;
+	auto findIter = mMaterialByName.find(matName);
+	if (findIter == mMaterialByName.end()) {
+		material = mMaterialFac.CreateMaterial(launchMode, *this, matName);
+		mMaterialByName.insert(std::make_pair(matName, material));
+	#if defined MIR_RESOURCE_DEBUG
+		material->_ResourcePath = (boost::format("name:%1%") %matName).str();
+	#endif
+	}
+	else {
+		material = findIter->second;
+	}
 	return material;
 }
 
@@ -428,18 +443,20 @@ MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& ma
 	return mMaterialFac.CloneMaterial(launchMode, *this, material);
 }
 
-AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, MaterialPtr material, 
-	const std::string& assetPath, const std::string& redirectRes)
+AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes)
 {
 	AiScenePtr aiRes = nullptr;
 	AiResourceKey key{ assetPath, redirectRes };
-	auto findAiRes = mAiSceneByKey.find(key);
-	if (findAiRes == mAiSceneByKey.end()) {
-		aiRes = mAiResourceFac.CreateAiScene(launchMode, *this, material, assetPath, redirectRes);
+	auto findIter = mAiSceneByKey.find(key);
+	if (findIter == mAiSceneByKey.end()) {
+		aiRes = mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
 		mAiSceneByKey.insert(std::make_pair(key, aiRes));
+	#if defined MIR_RESOURCE_DEBUG
+		aiRes->_ResourcePath = (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str();
+	#endif
 	}
 	else {
-		aiRes = findAiRes->second;
+		aiRes = findIter->second;
 	}
 	return aiRes;
 }

@@ -82,7 +82,7 @@ private:
 class AiResourceFactory {
 public:
 	AiScenePtr CreateAiScene(Launch launchMode, ResourceManager& resourceMng,
-		MaterialPtr material, const std::string& assetPath, const std::string& redirectRes);
+		const std::string& assetPath, const std::string& redirectRes);
 };
 
 }

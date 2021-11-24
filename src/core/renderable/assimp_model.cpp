@@ -140,7 +140,7 @@ AssimpModel::~AssimpModel()
 
 void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
 {
-	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, mMaterial, assetPath, redirectResource);
+	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
 	if (mAiScene->IsLoaded()) {
 		mAnimeTree.Init(mAiScene->GetSerializeNodes());
 		Update(0);
