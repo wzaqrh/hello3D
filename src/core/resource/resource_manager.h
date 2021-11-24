@@ -12,7 +12,9 @@
 
 namespace mir {
 
+DECLARE_STRUCT(ThreadPool);
 DECLARE_STRUCT(LoadResourceJob);
+
 typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
 struct LoadResourceJob {
 	void Init(Launch launchMode, LoadResourceCallback loadResCb);
@@ -20,18 +22,19 @@ struct LoadResourceJob {
 public:
 	std::function<void(IResourcePtr res, LoadResourceJobPtr nextJob)> Execute;
 	std::future<bool> Result;
-	std::vector<unsigned char> bytes;
+	std::vector<unsigned char> Bytes;
+	std::weak_ptr<ThreadPool> Pool;
 };
 
-struct ThreadPoolImp;
 class MIR_CORE_API ResourceManager : boost::noncopyable {
 	struct ResourceLoadTaskContext {
 		ResourceLoadTaskContext() {
 			WorkThreadJob = std::make_shared<LoadResourceJob>();
 			MainThreadJob = std::make_shared<LoadResourceJob>();
 		}
-		void Init(Launch launchMode, IResourcePtr res, LoadResourceCallback loadResCb) {
+		void Init(Launch launchMode, IResourcePtr res, LoadResourceCallback loadResCb, ThreadPoolPtr pool) {
 			Res = res;
+			WorkThreadJob->Pool = MainThreadJob->Pool = pool;
 			WorkThreadJob->Init(launchMode, loadResCb);
 		}
 	public:
@@ -41,6 +44,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable {
 public:
 	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac, AiResourceFactory& aiResFac);
 	~ResourceManager();
+	void Dispose();
 	void UpdateForLoading();
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from);//parent rely-on node
 	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr);
@@ -229,7 +233,7 @@ private:
 	};
 	ResourceDependencyGraph mResDependencyGraph;
 	std::map<IResourcePtr, ResourceLoadTaskContext> mLoadTaskCtxByRes;
-	std::shared_ptr<ThreadPoolImp> mThreadPoolImp;
+	std::shared_ptr<ThreadPool> mThreadPool;
 private:
 	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {

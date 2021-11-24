@@ -12,10 +12,22 @@
 
 namespace mir {
 
-struct ThreadPoolImp {
-	ThreadPoolImp() :Pool(4) {}
-
-	boost::asio::thread_pool Pool;
+constexpr int CThreadPoolNumber = 8;
+class ThreadPool 
+{
+public:
+	ThreadPool(int threadNum) {
+		Pool = std::make_unique<boost::asio::thread_pool>(threadNum);
+	}
+	~ThreadPool() {
+		Pool->stop();
+		Pool = nullptr;
+	}
+	TemplateArgs void Post(T &&...args) {
+		boost::asio::post(*Pool, std::forward<T>(args)...);
+	}
+private:
+	std::unique_ptr<boost::asio::thread_pool> Pool;
 };
 
 /********** LoadResourceJob **********/
@@ -23,7 +35,11 @@ void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
 {
 	if (launchMode == LaunchAsync) {
 		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			this->Result = std::move(std::async(loadResCb, res, nextJob));
+			typedef std::packaged_task<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourcePkgTask;
+			std::shared_ptr<LoadResourcePkgTask> pkg_task = std::make_shared<LoadResourcePkgTask>(loadResCb);
+			this->Result = std::move(pkg_task->get_future());
+			auto pool = Pool.lock();
+			if (pool) pool->Post([=]() { (*pkg_task)(res, nextJob); });
 		};
 	}
 	else {
@@ -42,11 +58,18 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& mater
 	, mAiResourceFac(aiResFac)
 {
 	ilInit();
-	mThreadPoolImp = std::make_shared<ThreadPoolImp>();
+	mThreadPool = std::make_shared<ThreadPool>(CThreadPoolNumber);
 }
 ResourceManager::~ResourceManager()
 {
-	ilShutDown();
+	Dispose();
+}
+void ResourceManager::Dispose()
+{
+	if (mThreadPool) {
+		mThreadPool = nullptr;
+		ilShutDown();
+	}
 }
 
 void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
@@ -59,7 +82,7 @@ void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCa
 {
 	AddResourceDependency(res, dependRes);
 	res->SetPrepared();
-	mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb);
+	mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb, mThreadPool);
 #if defined MIR_RESOURCE_DEBUG
 	res->_CallStack = launchMode;
 #endif
@@ -295,7 +318,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));
 				int faceSize = width * height * bpp;
 				 
-				auto& bytes = nextJob ? nextJob->bytes : mTempBytes; 
+				auto& bytes = nextJob ? nextJob->Bytes : mTempBytes; 
 				bytes.resize(faceSize * mipCount * faceCount);
 				size_t bytes_position = 0;
 

@@ -35,6 +35,8 @@ bool Mir::Initialize(HWND hWnd) {
 }
 
 void Mir::Dispose() {
+	mResourceMng->Dispose();
+
 	mRenderableFac = nullptr;
 	mMaterialFac = nullptr;
 	mSceneMng = nullptr;
