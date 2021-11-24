@@ -7,6 +7,7 @@
 #include <d3dcompiler.h>
 #include <wrl/client.h>
 #include <IL/il.h>
+#include "core/mir_config.h"
 #include "core/base/d3d.h"
 #include "core/base/debug.h"
 #include "core/base/input.h"
@@ -371,7 +372,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 	}
 
 	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined(_DEBUG) && defined(D3D11_DEBUG)
+#if defined(_DEBUG) && defined(MIR_D3D11_DEBUG)
 	shaderFlags |= D3DCOMPILE_DEBUG;
 #endif
 

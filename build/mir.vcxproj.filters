@@ -133,6 +133,9 @@
     <ClInclude Include="..\src\core\scene\predeclare.h">
       <Filter>src\core\scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\mir_config.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">

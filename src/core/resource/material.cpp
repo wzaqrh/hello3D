@@ -111,7 +111,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 
 	for (size_t i = 0; i < proto.mConstantBuffers.size(); ++i) {
 		auto buffer = proto.mConstantBuffers[i];
-		if (!buffer.IsUnique) buffer.Buffer = resourceMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), nullptr);
+		if (!buffer.IsUnique) buffer.Buffer = resourceMng.CreateConstBuffer(__launchMode__, *buffer.Buffer->GetDecl(), nullptr);
 		pass->AddConstBuffer(buffer);
 		resourceMng.AddResourceDependency(pass, buffer.Buffer);
 	}

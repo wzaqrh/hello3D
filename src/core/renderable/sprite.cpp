@@ -82,9 +82,9 @@ Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::strin
 	, mPosition(0, 0)
 {
 	mTransform = std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(launchMode, matName != "" ? matName : E_MAT_SPRITE);
-	mIndexBuffer = resourceMng.CreateIndexBuffer(launchMode, sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
-	mVertexBuffer = resourceMng.CreateVertexBuffer(launchMode, sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
+	mMaterial = resourceMng.CreateMaterial(__launchMode__, matName != "" ? matName : E_MAT_SPRITE);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
+	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
 
 	if (mFlipY) mQuad.FlipY();
 }

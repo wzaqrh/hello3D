@@ -8,7 +8,7 @@
 #define MIR_SYMBOL_EXPORT __declspec(dllexport)
 #define MIR_SYMBOL_IMPORT __declspec(dllimport)
 
-#ifdef MIR_CORE_SOURCE		// Build dll
+#if defined MIR_CORE_SOURCE		// Build dll
 #define MIR_CORE_API MIR_SYMBOL_EXPORT
 #else							// Use dll
 #define MIR_CORE_API MIR_SYMBOL_IMPORT

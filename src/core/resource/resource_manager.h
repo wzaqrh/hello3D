@@ -50,7 +50,7 @@ public:
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
 
 	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer);
+		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer); ResSetLaunch;
 		mRenderSys.LoadIndexBuffer(res, std::forward<T>(args)...);
 		res->SetLoaded();
 		return std::static_pointer_cast<IIndexBuffer>(res);
@@ -58,14 +58,14 @@ public:
 	DECLARE_LAUNCH_FUNCTIONS(IIndexBufferPtr, CreateIndexBuffer);
 
 	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer);
+		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IVertexBuffer>(res);
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IVertexBufferPtr, CreateVertexBuffer);
 
 	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer);
+		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IContantBuffer>(res);
 	}
@@ -76,9 +76,9 @@ public:
 	}
 
 	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout);
-		if (launchMode == Launch::Async) {
-			AddLoadResourceJob(Launch::Sync, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout); ResSetLaunch;
+		if (launchMode == LaunchAsync) {
+			AddLoadResourceJobSync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 				return nullptr != mRenderSys.LoadLayout(res, program, args...);
 			}, res, program);
 		}
@@ -88,7 +88,7 @@ public:
 	DECLARE_LAUNCH_FUNCTIONS(IInputLayoutPtr, CreateLayout);
 
 	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState);
+		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadSampler(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<ISamplerState>(res);
 	}
@@ -111,7 +111,7 @@ public:
 	}
 
 	TemplateArgs IRenderTexturePtr CreateRenderTexture(Launch launchMode, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceRenderTexture);
+		auto res = mRenderSys.CreateResource(kDeviceResourceRenderTexture); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadRenderTexture(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IRenderTexture>(res);
 	}

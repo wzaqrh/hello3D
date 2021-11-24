@@ -21,7 +21,7 @@ void TestSprite::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 
-	Launch sync = Launch::Sync;
+	Launch sync = __LaunchSync__;
 	switch (mCaseIndex) {
 	case 0: {
 		mSprite = mContext->RenderableFac()->CreateSprite();

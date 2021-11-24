@@ -9,11 +9,11 @@
 #define DECLARE_LAUNCH_FUNCTIONS(RETURN_TYPE, CREATE_FUNC) \
 	template <typename... T>\
 	RETURN_TYPE CREATE_FUNC##Sync(T &&...args) {\
-		return CREATE_FUNC(Launch::Sync, std::forward<T>(args)...);\
+		return CREATE_FUNC(__LaunchSync__, std::forward<T>(args)...);\
 	}\
 	template <typename... T>\
 	RETURN_TYPE CREATE_FUNC##Async(T &&...args) {\
-		return CREATE_FUNC(Launch::Async, std::forward<T>(args)...);\
+		return CREATE_FUNC(__LaunchAsync__, std::forward<T>(args)...);\
 	}
 
 #define TemplateArgs template <typename... T>

@@ -266,9 +266,9 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 	AiScenePtr res = std::make_shared<AiScene>();
 
 	AiSceneLoaderPtr loader = std::make_shared<AiSceneLoader>(launchMode, resourceMng, res);
-	if (launchMode == Launch::Async) {
+	if (launchMode == LaunchAsync) {
 		res->SetPrepared();
-		resourceMng.AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 			loader->ExecuteAsyncPart(assetPath, redirectRes);
 			nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob) {
 				loader->ExecuteSyncPart();

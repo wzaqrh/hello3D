@@ -1,8 +1,12 @@
 #pragma once
 #include <Windows.h>
 #include <boost/noncopyable.hpp>
+#include "core/mir_config.h"
 #include "core/mir_export.h"
 #include "core/base/stl.h"
+#if defined MIR_RESOURCE_DEBUG
+#include "core/base/launch.h"
+#endif
 #include "core/rendersys/predeclare.h"
 
 namespace mir {
@@ -18,6 +22,7 @@ interface MIR_CORE_API IResource : boost::noncopyable
 {
 #if defined MIR_RESOURCE_DEBUG
 	std::string _ResourcePath;
+	Launch _CallStack;
 #endif
 	virtual ~IResource() {}
 	virtual ResourceState GetCurState() const = 0;

@@ -143,7 +143,7 @@ public:
 		return *this;
 	}
 	MaterialPtr Build() {
-		if (mLaunchMode == Launch::Async) mMaterial->SetPrepared();
+		if (mLaunchMode == LaunchAsync) mMaterial->SetPrepared();
 		else mMaterial->SetLoaded();
 		return mMaterial;
 	}
@@ -615,14 +615,14 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			builder.SetTopology(shaderInfo.Program.Topo);
 
 			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
-				launchMode, shaderInfo.Program.FxName, shaderInfo.Program.VsEntry, passInfo.PSEntry));
+				__launchMode__, shaderInfo.Program.FxName, shaderInfo.Program.VsEntry, passInfo.PSEntry));
 			builder.SetInputLayout(resourceMng.CreateLayout(
-				launchMode, program, shaderInfo.Program.Attr.Layout));
+				__launchMode__, program, shaderInfo.Program.Attr.Layout));
 
 			for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 				const auto& elem = shaderInfo.Program.Samplers[k];
 				builder.AddSampler(resourceMng.CreateSampler(
-					launchMode, elem.first, kCompareNever));
+					__launchMode__, elem.first, kCompareNever));
 			}
 		}
 	}
@@ -630,7 +630,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
 		auto& uniformI = shaderInfo.Program.Uniforms[i];
 		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(
-			launchMode, uniformI.Decl, (void*)&uniformI.Data[0]), uniformI.ShortName, uniformI.IsUnique);
+			__launchMode__, uniformI.Decl, (void*)&uniformI.Data[0]), uniformI.ShortName, uniformI.IsUnique);
 	}
 
 	builder.CloneTechnique(*this, "d3d9");

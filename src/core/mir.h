@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_config.h"
 #include "core/mir_export.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"

@@ -21,7 +21,7 @@ struct ThreadPoolImp {
 /********** LoadResourceJob **********/
 void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
 {
-	if (launchMode == Launch::Async) {
+	if (launchMode == LaunchAsync) {
 		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
 			this->Result = std::move(std::async(loadResCb, res, nextJob));
 		};
@@ -60,6 +60,9 @@ void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCa
 	AddResourceDependency(res, dependRes);
 	res->SetPrepared();
 	mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb);
+#if defined MIR_RESOURCE_DEBUG
+	res->_CallStack = launchMode;
+#endif
 }
 
 void ResourceManager::UpdateForLoading()
@@ -201,10 +204,14 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 	if (findProg == mProgramByKey.end()) {
 		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
 		mProgramByKey.insert(std::make_pair(key, program));
+	#if defined MIR_RESOURCE_DEBUG
+		program->_ResourcePath = (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vsEntry %psEntry).str();
+		program->_CallStack = launchMode;
+	#endif
 
-		if (launchMode == Launch::Async) {
-			AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
-				return nullptr != _LoadProgram(program, nextJob, name, vsEntry, psEntry);
+		if (launchMode == LaunchAsync) {
+			AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+				return nullptr != _LoadProgram(std::static_pointer_cast<IProgram>(res), nextJob, name, vsEntry, psEntry);
 			}, program, nullptr);
 		}
 		else {
@@ -215,9 +222,6 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 	else {
 		program = findProg->second;
 	}
-#if defined MIR_RESOURCE_DEBUG
-	program->_ResourcePath = (boost::format("name:%1%, vs:%2%, ps:%3%") %name %vsEntry %psEntry).str();
-#endif
 	return program;
 }
 
@@ -405,10 +409,11 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 		mTextureByPath.insert(std::make_pair(imgFullpath, texture));
 	#if defined MIR_RESOURCE_DEBUG
 		texture->_ResourcePath = (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str();
+		texture->_CallStack = launchMode;
 	#endif
 
-		if (launchMode == Launch::Async) {
-			AddLoadResourceJobAsync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+		if (launchMode == LaunchAsync) {
+			AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 				return nullptr != _LoadTextureByFile(std::static_pointer_cast<ITexture>(res), nextJob,
 					imgFullpath, format, autoGenMipmap);
 			}, texture, nullptr);
@@ -430,6 +435,7 @@ MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string
 		mMaterialByName.insert(std::make_pair(matName, material));
 	#if defined MIR_RESOURCE_DEBUG
 		material->_ResourcePath = (boost::format("name:%1%") %matName).str();
+		material->_CallStack = launchMode;
 	#endif
 	}
 	else {
@@ -453,6 +459,7 @@ AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& 
 		mAiSceneByKey.insert(std::make_pair(key, aiRes));
 	#if defined MIR_RESOURCE_DEBUG
 		aiRes->_ResourcePath = (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str();
+		aiRes->_CallStack = launchMode;
 	#endif
 	}
 	else {
