@@ -326,10 +326,12 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, 
 {
 	BOOST_ASSERT(res);
 
+	HWMemoryUsage usage = data.Bytes ? kHWUsageImmutable : kHWUsageDynamic;
+
 	D3D11_BUFFER_DESC bd = {};
 	bd.ByteWidth = data.Size;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	if (data.Bytes) {
+	if (usage == kHWUsageDefault) {
 		bd.Usage = D3D11_USAGE_DEFAULT;
 		bd.CPUAccessFlags = 0;
 	}
@@ -345,7 +347,7 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, 
 	if (CheckHR(mDevice->CreateBuffer(&bd, data.Bytes ? &InitData : nullptr, &pVertexBuffer))) return nullptr;
 
 	VertexBuffer11Ptr ret = std::static_pointer_cast<VertexBuffer11>(res);
-	ret->Init(pVertexBuffer, data.Size, stride, offset);
+	ret->Init(pVertexBuffer, data.Size, usage, stride, offset);
 	return ret;
 }
 void RenderSystem11::SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count)
@@ -375,20 +377,28 @@ IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, ResourceFormat
 {
 	BOOST_ASSERT(res);
 
+	HWMemoryUsage usage = data.Bytes ? kHWUsageImmutable : kHWUsageDynamic;
+
 	D3D11_BUFFER_DESC bd = {};
-	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = data.Size;// sizeof(WORD) * Indices.size();
+	bd.ByteWidth = data.Size;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	if (usage == kHWUsageDynamic) {
+		bd.Usage = D3D11_USAGE_DYNAMIC;
+		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else {
+		bd.Usage = D3D11_USAGE_IMMUTABLE;
+		bd.CPUAccessFlags = 0;
+	}
 
 	D3D11_SUBRESOURCE_DATA InitData = {};
 	InitData.pSysMem = data.Bytes;
 	
 	ID3D11Buffer* pIndexBuffer = nullptr;
-	if (CheckHR(mDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer))) return nullptr;
+	if (CheckHR(mDevice->CreateBuffer(&bd, data.Bytes ? &InitData : nullptr, &pIndexBuffer))) return nullptr;
 
 	IndexBuffer11Ptr ret = std::static_pointer_cast<IndexBuffer11>(res);
-	ret->Init(pIndexBuffer, data.Size, format);
+	ret->Init(pIndexBuffer, data.Size, format, usage);
 	return ret;
 }
 void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
@@ -400,33 +410,33 @@ void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 	else mDeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
 }
 
-#define CBufferUsage D3D11_USAGE_DEFAULT
-
-IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, const Data& data)
+IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data)
 {
 	BOOST_ASSERT(res);
+	ContantBuffer11Ptr ret = std::static_pointer_cast<ContantBuffer11>(res);
 
 	D3D11_BUFFER_DESC cbDesc = {};
-#if CBufferUsage == D3D11_USAGE_DEFAULT
-	cbDesc.ByteWidth = (cbDecl.BufferSize + 15) / 16 * 16;
-	cbDesc.Usage = D3D11_USAGE_DEFAULT;
 	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = 0;
-#else
 	cbDesc.ByteWidth = (cbDecl.BufferSize + 15) / 16 * 16;
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-#endif
-	ID3D11Buffer* pConstantBuffer = nullptr;
-	if (CheckHR(mDevice->CreateBuffer(&cbDesc, NULL, &pConstantBuffer))) return nullptr;
-	
-	ContantBuffer11Ptr ret = std::static_pointer_cast<ContantBuffer11>(res);
-	ret->Init(pConstantBuffer, std::make_shared<ConstBufferDecl>(cbDecl));
-	if (data.NotNull()) {
-		BOOST_ASSERT(data.Size == ret->GetBufferSize());
-		UpdateBuffer(ret, data);
+	cbDesc.Usage = static_cast<D3D11_USAGE>(usage);
+	if (usage == kHWUsageDefault || usage == kHWUsageImmutable) {
+		BOOST_ASSERT(data.Bytes);
+		cbDesc.CPUAccessFlags = 0;
 	}
+	else if (usage == kHWUsageDynamic) {
+		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else {
+		BOOST_ASSERT(false);
+	}
+
+	D3D11_SUBRESOURCE_DATA initData = {};
+	initData.pSysMem = data.Bytes;
+
+	ID3D11Buffer* pConstantBuffer = nullptr;
+	if (CheckHR(mDevice->CreateBuffer(&cbDesc, data.Bytes ? &initData : nullptr, &pConstantBuffer))) return nullptr;
+	
+	ret->Init(pConstantBuffer, std::make_shared<ConstBufferDecl>(cbDecl), usage);
 	return ret;
 }
 void RenderSystem11::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program)
@@ -442,33 +452,30 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 {
 	BOOST_ASSERT(buffer);
 
-	D3D11_MAPPED_SUBRESOURCE MappedResource;
+	D3D11_MAPPED_SUBRESOURCE mapData;
 	switch (buffer->GetType()) {
 	case kHWBufferConstant: {
 		ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(buffer);
-	#if CBufferUsage == D3D11_USAGE_DEFAULT
-		mDeviceContext->UpdateSubresource(cbuffer11->GetBuffer11(), 0,
-			NULL, data.Bytes, 0, 0);
-	#else
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0,
-			D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
-		memcpy(MappedResource.pData, data.Bytes, data.Size);
-		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
-	#endif
+		if (cbuffer11->GetUsage() == kHWUsageDefault) {
+			mDeviceContext->UpdateSubresource(cbuffer11->GetBuffer11(), 0, NULL, data.Bytes, 0, 0);
+		}
+		else {
+			if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
+			memcpy(mapData.pData, data.Bytes, data.Size);
+			mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+		}
 	}break;
 	case kHWBufferVertex: {
 		VertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0,
-			D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
-		memcpy(MappedResource.pData, data.Bytes, data.Size);
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
+		memcpy(mapData.pData, data.Bytes, std::min<int>(buffer->GetBufferSize(), data.Size));
 		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
 	}break;
 	case kHWBufferIndex: {
 		IndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0,
-			D3D11_MAP_WRITE_DISCARD, 0, &MappedResource))) return false;
-		memcpy(MappedResource.pData, data.Bytes, data.Size);
-		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
+		memcpy(mapData.pData, data.Bytes, std::min<int>(buffer->GetBufferSize(), data.Size));
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);										
 	}break;
 	default:
 		break;
@@ -481,12 +488,14 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 {
 	BOOST_ASSERT(res);
 
-	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
-	texture->Init(format, size.x(), size.y(), size.w(), mipCount);
-
 	Data defaultData = Data{};
 	if (datas == nullptr)
 		datas = &defaultData;
+
+	HWMemoryUsage usage = datas[0].Bytes ? kHWUsageDefault : kHWUsageDynamic;
+
+	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
+	texture->Init(format, usage, size.x(), size.y(), size.w(), mipCount);
 
 	mipCount = texture->GetMipmapCount();
 	const bool autoGen = texture->IsAutoGenMipmap();
@@ -503,7 +512,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 	desc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
 	desc.SampleDesc.Count = 1;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	if (datas[0].Bytes) {
+	if (usage == kHWUsageDefault) {
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = 0;
 		if (autoGen) {
@@ -543,12 +552,10 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 	srvDesc.ViewDimension = (faceCount > 1) ? D3D11_SRV_DIMENSION_TEXTURECUBE : D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = autoGen ? -1 : texture->GetMipmapCount();
 
-	if (CheckHR(mDevice->CreateShaderResourceView(pTexture, &srvDesc, 
-		&texture->GetSRV11()))) return nullptr; 
+	if (CheckHR(mDevice->CreateShaderResourceView(pTexture, &srvDesc, &texture->GetSRV11()))) return nullptr; 
 	
 	if (autoGen) {
-		mDeviceContext->UpdateSubresource(pTexture, 0, nullptr, 
-			datas[0].Bytes, datas[0].Size, imageSize);
+		mDeviceContext->UpdateSubresource(pTexture, 0, nullptr, datas[0].Bytes, datas[0].Size, imageSize);
 		mDeviceContext->GenerateMips(texture->GetSRV11());
 	}
 

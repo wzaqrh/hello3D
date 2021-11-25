@@ -253,7 +253,7 @@ ContantBuffer9::ContantBuffer9(ConstBufferDeclPtr decl)
 	mBuffer9.resize(mDecl->BufferSize);
 }
 
-unsigned int ContantBuffer9::GetBufferSize() const
+int ContantBuffer9::GetBufferSize() const
 {
 	return mDecl->BufferSize;
 }

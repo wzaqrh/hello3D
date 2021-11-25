@@ -46,7 +46,7 @@ PixelShader11::PixelShader11(IBlobDataPtr pBlob)
 }
 
 /********** Texture11 **********/
-void Texture11::Init(ResourceFormat format, int width, int height, int faceCount, int mipmap)
+void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap)
 {
 	mWidth = width;
 	mHeight = height;
@@ -54,6 +54,7 @@ void Texture11::Init(ResourceFormat format, int width, int height, int faceCount
 	mMipCount = std::max<int>(mipmap, 1);
 	mAutoGenMipmap = mipmap < 0;
 	mFormat = format;
+	mUsage = usage;
 
 	mTexture = nullptr;
 }
@@ -79,19 +80,6 @@ D3D11_TEXTURE2D_DESC Texture11::GetDesc()
 	}
 }
 
-void VertexBuffer11::Init(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset)
-{
-	hd.Init(buffer, bufferSize);
-	Stride = stride;
-	Offset = offset;
-}
-
-/********** TVertex11Buffer **********/
-int VertexBuffer11::GetCount()
-{
-	return hd.BufferSize / Stride;
-}
-
 /********** IndexBuffer11 **********/
 int IndexBuffer11::GetWidth() const
 {
@@ -99,9 +87,9 @@ int IndexBuffer11::GetWidth() const
 }
 
 /********** ContantBuffer11 **********/
-void ContantBuffer11::Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl)
+void ContantBuffer11::Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl, HWMemoryUsage usage)
 {
-	hd.Init(buffer, decl->BufferSize);
+	hd.Init(buffer, decl->BufferSize, usage);
 	mDecl = decl;
 }
 
@@ -131,8 +119,7 @@ void FrameBuffer11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, Res
 
 bool FrameBuffer11::InitRenderTexture(ID3D11Device* pDevice)
 {
-	D3D11_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = mSize.x();
 	textureDesc.Height = mSize.y();
 	textureDesc.MipLevels = 1;
@@ -151,8 +138,7 @@ bool FrameBuffer11::InitRenderTexture(ID3D11Device* pDevice)
 
 bool FrameBuffer11::InitRenderTargetView(ID3D11Device* pDevice)
 {
-	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc = {};
 	renderTargetViewDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
@@ -164,18 +150,17 @@ bool FrameBuffer11::InitRenderTargetView(ID3D11Device* pDevice)
 
 bool FrameBuffer11::InitRenderTextureView(ID3D11Device* pDevice)
 {
-	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
 	shaderResourceViewDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	if (FAILED(pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mRenderTargetSRV))) 
+	if (CheckHR(pDevice->CreateShaderResourceView(mRenderTargetTexture, &shaderResourceViewDesc, &mRenderTargetSRV))) 
 		return false;
 
 	mRenderTargetPtr = MakePtr<Texture11>();
-	mRenderTargetPtr->Init(mFormat, mSize.x(), mSize.y(), 1, 1);
+	mRenderTargetPtr->Init(mFormat, kHWUsageDefault, mSize.x(), mSize.y(), 1, 1);
 	mRenderTargetPtr->SetSRV11(mRenderTargetSRV);
 	AsRes(mRenderTargetPtr)->SetLoaded();
 	return true;
@@ -183,8 +168,7 @@ bool FrameBuffer11::InitRenderTextureView(ID3D11Device* pDevice)
 
 bool FrameBuffer11::InitDepthStencilTexture(ID3D11Device* pDevice)
 {
-	D3D11_TEXTURE2D_DESC depthBufferDesc;
-	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+	D3D11_TEXTURE2D_DESC depthBufferDesc = {};
 	depthBufferDesc.Width = mSize.x();
 	depthBufferDesc.Height = mSize.y();
 	depthBufferDesc.MipLevels = 1;
@@ -197,23 +181,20 @@ bool FrameBuffer11::InitDepthStencilTexture(ID3D11Device* pDevice)
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	if (FAILED(pDevice->CreateTexture2D(&depthBufferDesc, NULL, &mDepthStencilTexture)))
+	if (CheckHR(pDevice->CreateTexture2D(&depthBufferDesc, NULL, &mDepthStencilTexture)))
 		return false;
 	return true;
 }
 
 bool FrameBuffer11::InitDepthStencilView(ID3D11Device* pDevice)
 {
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	HRESULT result = pDevice->CreateDepthStencilView(mDepthStencilTexture, &depthStencilViewDesc, &mDepthStencilView);
-	if (FAILED(result)) {
+	if (CheckHR(pDevice->CreateDepthStencilView(mDepthStencilTexture, &depthStencilViewDesc, &mDepthStencilView)))
 		return false;
-	}
 	return true;
 }
 

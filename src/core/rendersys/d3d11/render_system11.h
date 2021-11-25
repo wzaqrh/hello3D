@@ -27,7 +27,7 @@ public:
 	IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data) override;
 	void SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count) override;
 
-	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, const Data& data) override;
+	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data) override;
 	bool UpdateBuffer(IHardwareBufferPtr buffer, const Data& data) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 

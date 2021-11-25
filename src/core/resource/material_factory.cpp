@@ -630,7 +630,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	for (size_t slot = 0; slot < shaderInfo.Program.Uniforms.size(); ++slot) {
 		auto& uniformSlot = shaderInfo.Program.Uniforms[slot];
 		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(
-			__launchMode__, uniformSlot.Decl, Data::Make(uniformSlot.Data)), 
+			__launchMode__, uniformSlot.Decl, kHWUsageDynamic, Data::Make(uniformSlot.Data)), 
 			uniformSlot.ShortName, uniformSlot.IsUnique, slot);
 	}
 

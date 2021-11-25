@@ -79,26 +79,39 @@ public:
 class HardwareBuffer 
 {
 public:
-	HardwareBuffer(ID3D11Buffer* buffer, unsigned int bufferSize) :Buffer(buffer), BufferSize(bufferSize) {}
-	HardwareBuffer() :HardwareBuffer(nullptr, 0) {}
-	void Init(ID3D11Buffer* buffer, unsigned int bufferSize) { Buffer = buffer; BufferSize = bufferSize; }
+	HardwareBuffer(ID3D11Buffer* buffer, size_t bufferSize, HWMemoryUsage usage) 
+		:Buffer(buffer), BufferSize(bufferSize), Usage(usage) {}
+	HardwareBuffer() :HardwareBuffer(nullptr, 0, kHWUsageDefault) {}
+	void Init(ID3D11Buffer* buffer, size_t bufferSize, HWMemoryUsage usage) {
+		Buffer = buffer, BufferSize = bufferSize, Usage = usage;
+	}
 public:
 	ID3D11Buffer* Buffer;
-	unsigned int BufferSize;
+	size_t BufferSize;
+	HWMemoryUsage Usage;
 };
 
 class VertexBuffer11 : public ImplementResource<IVertexBuffer> 
 {
 public:
-	void Init(ID3D11Buffer* buffer, unsigned int bufferSize, unsigned int stride, unsigned int offset);
 	VertexBuffer11() :Stride(0), Offset(0) {}
-	int GetCount();
+	void Init(ID3D11Buffer* buffer, int bufferSize, HWMemoryUsage usage, int stride, int offset) {
+		hd.Init(buffer, bufferSize, usage);
+		Stride = stride;
+		Offset = offset;
+	}
+	int GetCount() const {
+		return hd.BufferSize / Stride;
+	}
 public:
-	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
-	unsigned int GetBufferSize() const override { return hd.BufferSize; }
+	HWMemoryUsage GetUsage() const override { return hd.Usage; }
+	int GetBufferSize() const override { return hd.BufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferVertex; }
-	unsigned int GetStride() const override { return Stride; }
-	unsigned int GetOffset() const override { return Offset; }
+	
+	int GetStride() const override { return Stride; }
+	int GetOffset() const override { return Offset; }
+
+	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
 public:
 	unsigned int Stride, Offset;
 	HardwareBuffer hd;
@@ -108,17 +121,19 @@ class IndexBuffer11 : public ImplementResource<IIndexBuffer>
 {
 public:
 	IndexBuffer11() :Format(kFormatUnknown) {}
-	void Init(ID3D11Buffer* buffer, unsigned int bufferSize, ResourceFormat format) {
-		hd.Init(buffer, bufferSize); 
+	void Init(ID3D11Buffer* buffer, int bufferSize, ResourceFormat format, HWMemoryUsage usage) {
+		hd.Init(buffer, bufferSize, usage); 
 		Format = format; 
 	}
 public:
-	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
-	unsigned int GetBufferSize() const override { return hd.BufferSize; }
+	HWMemoryUsage GetUsage() const override { return hd.Usage; }
+	int GetBufferSize() const override { return hd.BufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferIndex; }
 
 	int GetWidth() const override;
 	ResourceFormat GetFormat() const override { return Format; }
+
+	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
 public:
 	ResourceFormat Format;
 	HardwareBuffer hd;
@@ -128,13 +143,15 @@ class ContantBuffer11 : public ImplementResource<IContantBuffer>
 {
 public:
 	ContantBuffer11() {}
-	void Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl);
+	void Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl, HWMemoryUsage usage);
 public:
-	ConstBufferDeclPtr GetDecl() const override { return mDecl; }
+	HWMemoryUsage GetUsage() const override { return hd.Usage; }	
+	int GetBufferSize() const override { return hd.BufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferConstant; }
 
+	ConstBufferDeclPtr GetDecl() const override { return mDecl; }
+
 	ID3D11Buffer*& GetBuffer11() { return hd.Buffer; }
-	unsigned int GetBufferSize() const override { return hd.BufferSize; }
 public:
 	ConstBufferDeclPtr mDecl;
 	HardwareBuffer hd;
@@ -144,24 +161,26 @@ public:
 class Texture11 : public ImplementResource<ITexture> 
 {
 public:
-	void Init(ResourceFormat format, int width, int height, int faceCount, int mipmap);
+	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
 
 	bool HasSRV() const override { return mTexture != nullptr; }
-	void SetSRV11(ID3D11ShaderResourceView* texture);
-	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
-
 	ResourceFormat GetFormat() const override { return mFormat; }
+	HWMemoryUsage GetUsage() const override { return mUsage; }
 	int GetWidth() const override { return mWidth; }
 	int GetHeight() const override { return mHeight; }
 	int GetMipmapCount() const override { return mMipCount; }
 	int GetFaceCount() const override { return mFaceCount; }
 	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
+
+	void SetSRV11(ID3D11ShaderResourceView* texture);
+	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 private:
 	bool mAutoGenMipmap;
 	int mWidth, mHeight, mFaceCount, mMipCount;
 	ResourceFormat mFormat;
+	HWMemoryUsage mUsage;
 	ID3D11ShaderResourceView* mTexture;
 };
 

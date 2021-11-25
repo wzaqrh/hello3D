@@ -110,12 +110,14 @@ public:
 		Format = format;
 	}
 
-	IDirect3DIndexBuffer9*& GetBuffer9() { return Buffer; }
+	HWMemoryUsage GetUsage() const override { return kHWUsageDefault; }
 	HardwareBufferType GetType() const override { return kHWBufferIndex; }
-	unsigned int GetBufferSize() const override { return BufferSize; }
+	int GetBufferSize() const override { return BufferSize; }
 
 	int GetWidth() const override;
 	ResourceFormat GetFormat() const override { return Format; }
+
+	IDirect3DIndexBuffer9*& GetBuffer9() { return Buffer; }
 public:
 	IDirect3DIndexBuffer9* Buffer;
 	unsigned int BufferSize;
@@ -129,12 +131,14 @@ public:
 		: Buffer(buffer), BufferSize(bufferSize), Stride(stride), Offset(offset) {}
 	VertexBuffer9() :VertexBuffer9(nullptr, 0, 0, 0) {}
 
-	IDirect3DVertexBuffer9*& GetBuffer9() {	return Buffer; }
+	HWMemoryUsage GetUsage() const override { return kHWUsageDefault; }
 	HardwareBufferType GetType() const override { return kHWBufferVertex; }
-	unsigned int GetBufferSize() const override {	return BufferSize; }
+	int GetBufferSize() const override {	return BufferSize; }
 
-	unsigned int GetStride() const override { return Stride; }
-	unsigned int GetOffset() const override { return Offset; }
+	int GetStride() const override { return Stride; }
+	int GetOffset() const override { return Offset; }
+
+	IDirect3DVertexBuffer9*& GetBuffer9() {	return Buffer; }
 public:
 	IDirect3DVertexBuffer9* Buffer;
 	unsigned int BufferSize;
@@ -147,8 +151,9 @@ public:
 	ContantBuffer9(ConstBufferDeclPtr decl);
 	ContantBuffer9() :ContantBuffer9(nullptr) {}
 
+	HWMemoryUsage GetUsage() const override { return kHWUsageDefault; }
 	HardwareBufferType GetType() const override { return kHWBufferConstant; }
-	unsigned int GetBufferSize() const override;
+	int GetBufferSize() const override;
 
 	ConstBufferDeclPtr GetDecl() const override { return mDecl; }
 	char* GetBuffer9();
@@ -174,6 +179,7 @@ public:
 	int GetWidth() const override { return mWidth; }
 	int GetHeight() const override { return mHeight; }
 	ResourceFormat GetFormat() const override { return mFormat; }
+	HWMemoryUsage GetUsage() const override { return kHWUsageDefault; }
 	int GetMipmapCount() const override { return mMipCount; }
 	int GetFaceCount() const override { return 1; }
 	bool IsAutoGenMipmap() const override { return false; }

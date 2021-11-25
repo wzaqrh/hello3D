@@ -66,13 +66,14 @@ enum HardwareBufferType {
 interface IHardwareBuffer : public IResource  
 {
 	virtual HardwareBufferType GetType() const = 0;
-	virtual unsigned int GetBufferSize() const = 0;
+	virtual int GetBufferSize() const = 0;
+	virtual HWMemoryUsage GetUsage() const = 0;
 };
 
 interface IVertexBuffer : public IHardwareBuffer 
 {
-	virtual unsigned int GetStride() const = 0;
-	virtual unsigned int GetOffset() const = 0;
+	virtual int GetStride() const = 0;
+	virtual int GetOffset() const = 0;
 };
 
 interface IIndexBuffer : public IHardwareBuffer 
@@ -98,8 +99,9 @@ interface ITexture : public IResource
 	virtual int GetWidth() const = 0;
 	virtual int GetHeight() const = 0;
 	virtual ResourceFormat GetFormat() const = 0;
-	virtual int GetMipmapCount() const = 0;
+	virtual HWMemoryUsage GetUsage() const = 0;
 	virtual int GetFaceCount() const = 0;
+	virtual int GetMipmapCount() const = 0;
 	virtual bool IsAutoGenMipmap() const = 0;
 };
 

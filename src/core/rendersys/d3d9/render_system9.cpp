@@ -179,7 +179,7 @@ void RenderSystem9::SetFrameBuffer(IFrameBufferPtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-IContantBufferPtr RenderSystem9::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, const Data& data)
+IContantBufferPtr RenderSystem9::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceContantBuffer);
 
