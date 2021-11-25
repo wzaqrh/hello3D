@@ -58,13 +58,13 @@ int IndexBuffer9::GetWidth() const
 }
 
 /********** TRenderTexture9 **********/
-RenderTexture9::RenderTexture9()
+RenderTarget9::RenderTarget9()
 {
 	mColorTexture = nullptr;
 	mColorBuffer = nullptr;
 	mDepthStencilBuffer = nullptr;
 }
-RenderTexture9::RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
+RenderTarget9::RenderTarget9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer)
 {
 	mColorTexture = colorTexture;
 	AsRes(mColorTexture)->SetLoaded();
@@ -72,7 +72,7 @@ RenderTexture9::RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* dept
 	mDepthStencilBuffer = depthStencilBuffer;
 }
 
-IDirect3DSurface9*& RenderTexture9::GetColorBuffer9()
+IDirect3DSurface9*& RenderTarget9::GetColorBuffer9()
 {
 	mColorBuffer = nullptr;
 	if (CheckHR(mColorTexture->GetSRV9()->GetSurfaceLevel(0, &mColorBuffer))) return mColorBuffer;
@@ -229,12 +229,12 @@ BlobData9::BlobData9(ID3DXBuffer* pBlob)
 	:mBlob(pBlob)
 {}
 
-const char* BlobData9::GetBufferPointer() const
+const char* BlobData9::GetBytes() const
 {
 	return (char*)mBlob->GetBufferPointer();
 }
 
-size_t BlobData9::GetBufferSize() const
+size_t BlobData9::GetSize() const
 {
 	return mBlob->GetBufferSize();
 }
@@ -263,9 +263,9 @@ char* ContantBuffer9::GetBuffer9()
 	return mBuffer9.empty() ? nullptr : &mBuffer9[0];
 }
 
-void ContantBuffer9::SetBuffer9(char* data, int dataSize)
+void ContantBuffer9::SetBuffer9(const void* data, int dataSize)
 {
-	mBuffer9.assign((char*)data, (char*)data + dataSize);
+	mBuffer9.assign((const char*)data, (const char*)data + dataSize);
 }
 
 /********** TProgram9 **********/

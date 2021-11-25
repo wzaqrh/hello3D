@@ -57,7 +57,7 @@ void App::Render()
 	auto renderSys = mContext->RenderSys();
 	auto sceneMng = mContext->SceneMng();
 
-	renderSys->ClearColorDepthStencil(mBackgndColor, 1.0f, 0);
+	renderSys->ClearRenderTarget(nullptr, mBackgndColor, 1.0f, 0);
 
 	mTimer->Update();
 	mInput->Frame();

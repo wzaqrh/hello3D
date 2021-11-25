@@ -17,7 +17,7 @@ protected:
 	virtual void OnInitLight() override;
 private:
 	AssimpModelPtr mModel = nullptr;
-	IRenderTexturePtr mRendTexture = nullptr;
+	IRenderTargetPtr mRendTexture = nullptr;
 	SpritePtr mSprite, mLayerColor;
 };
 
@@ -38,7 +38,7 @@ void TestRT::OnPostInitDevice()
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
 	
-	mRendTexture = mContext->ResourceMng()->CreateRenderTextureSync(
+	mRendTexture = mContext->ResourceMng()->CreateRenderTargetSync(
 		mContext->ResourceMng()->WinSize(), 
 		kFormatR32G32B32A32Float);
 

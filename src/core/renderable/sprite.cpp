@@ -70,7 +70,7 @@ void SpriteVertexQuad::SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vect
 }
 
 /********** TSprite **********/
-const unsigned int indices[] = {
+constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3 
 };
 Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName)
@@ -83,8 +83,8 @@ Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::strin
 {
 	mTransform = std::make_shared<Transform>();
 	mMaterial = resourceMng.CreateMaterial(__launchMode__, matName != "" ? matName : E_MAT_SPRITE);
-	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, sizeof(indices), kFormatR32UInt, (void*)&indices[0]);
-	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(SpriteVertexQuad), sizeof(SpriteVertex), 0, nullptr);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(CIndices));
+	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(SpriteVertex), 0, Data::MakeSize(sizeof(SpriteVertexQuad)));
 
 	if (mFlipY) mQuad.FlipY();
 }
@@ -146,7 +146,7 @@ int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 
 	if (mQuadDirty) {
 		mQuadDirty = false;
-		mResourceMng.UpdateBuffer(mVertexBuffer, &mQuad, sizeof(mQuad));
+		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
 	}
 
 	RenderOperation op = {};

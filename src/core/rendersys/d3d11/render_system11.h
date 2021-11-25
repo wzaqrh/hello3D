@@ -30,22 +30,20 @@ public:
 	void CleanUp() override;
 	void SetViewPort(int x, int y, int w, int h) override;
 public:
-	void ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil) override;
-
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IRenderTexturePtr LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
-	void _ClearRenderTexture(IRenderTexturePtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil);
-	void SetRenderTarget(IRenderTexturePtr rendTarget) override;
+	IRenderTargetPtr LoadRenderTarget(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
+	void SetRenderTarget(IRenderTargetPtr rendTarget) override;
+	void ClearRenderTarget(IRenderTargetPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
 
-	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, int bufSize, ResourceFormat format, void* buffer) override;
+	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
 
-	IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int bufSize, int stride, int offset, void* buffer) override;
-	void SetVertexBuffer(IVertexBufferPtr vertexBuffer) override;
+	IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data) override;
+	void SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count) override;
 
-	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data) override;
-	bool UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize) override;
+	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, const Data& data) override;
+	bool UpdateBuffer(IHardwareBufferPtr buffer, const Data& data) override;
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
 	IBlobDataPtr CompileShader(const ShaderCompileDesc& compileDesc, const Data& data) override;
@@ -65,7 +63,6 @@ public:
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
-	void SetTexture(size_t slot, ITexturePtr texture) override;
 	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
 
 	void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
@@ -77,12 +74,7 @@ private:
 	HRESULT _CreateDeviceAndSwapChain(int width, int height);
 	HRESULT _CreateBackRenderTargetView();
 	HRESULT _CreateBackDepthStencilView(int width, int height);
-	void _SetViewports(int width, int height, int x = 0, int y = 0);
 	HRESULT _SetRasterizerState(); 
-private:
-	ID3D11Buffer* _CreateVertexBuffer(int bufferSize, void* buffer);
-	ID3D11Buffer* _CreateVertexBuffer(int bufferSize);
-	ID3D11InputLayout* _CreateInputLayout(Program11* pProgram, const std::vector<D3D11_INPUT_ELEMENT_DESC>& descArr);
 };
 
 }

@@ -35,8 +35,8 @@ Label::Label(Launch launchMode, ResourceManager& resourceMng, FontPtr font)
 	mTransform = std::make_shared<Transform>();
 	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_LABEL);
 
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, sizeof(unsigned int) * 6 * CMaxStringLength, kFormatR32UInt, (void*)&sIndiceData.Indices[0]);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SpriteVertexQuad) * CMaxStringLength, sizeof(SpriteVertex), 0, nullptr);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SpriteVertex), 0, Data::MakeSize(sizeof(SpriteVertexQuad) * CMaxStringLength));
 }
 
 int Label::GenRenderOperation(RenderOperationQueue& opList)
@@ -206,7 +206,7 @@ void Label::ForceLayout()
 			quadArray.push_back(quad);
 		}
 
-		mResourceMng.UpdateBuffer(mVertexBuffer, &quadArray[0], quadArray.size() * sizeof(SpriteVertexQuad));
+		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(quadArray));
 	}
 }
 

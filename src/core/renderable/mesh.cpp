@@ -11,11 +11,11 @@ Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& m
 {
 	mMaterial = resourceMng.CreateMaterial(__launchMode__, matName != "" ? matName : E_MAT_SPRITE);
 
-	mVertices.resize(vertCount);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(__launchMode__, sizeof(MeshVertex) * vertCount, sizeof(MeshVertex), 0, nullptr);
-	
 	mIndices.resize(indexCount);
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(__launchMode__, sizeof(UINT) * indexCount, kFormatR32UInt, &mIndices[0]);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(mIndices));
+
+	mVertices.resize(vertCount);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(__launchMode__, sizeof(MeshVertex), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
 }
@@ -30,13 +30,13 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	if (mVertDirty)
 	{
 		mVertDirty = false;
-		mResourceMng.UpdateBuffer(mVertexBuffer, &mVertices[0], mVertices.size() * sizeof(MeshVertex));
+		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mVertices));
 	}
 
 	if (mIndiceDirty)
 	{
 		mIndiceDirty = false;
-		mResourceMng.UpdateBuffer(mIndexBuffer, &mIndices[0], mIndices.size() * sizeof(UINT));
+		mResourceMng.UpdateBuffer(mIndexBuffer, Data::Make(mIndices));
 	}
 
 	int opCount = 0;

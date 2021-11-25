@@ -5,12 +5,19 @@
 namespace mir {
 
 struct Data {
-	static Data MakeEmpty() { return Data{ nullptr, 0 }; }
+	static Data MakeNull() { return Data{ nullptr, 0 }; }
+	
+	template<class T> static Data MakeSize(const T& v) { return Data{ nullptr, sizeof(v) }; }
+	template<class T> static Data MakeSize(const std::vector<T>& v) { return Data{ nullptr, sizeof(T) * v.size() }; }
+	static Data MakeSize(size_t size) { return Data{ nullptr, size }; } 
+
 	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
 	template<class T> static Data Make(const std::vector<T>& v) { return Data{ (void*)&v[0], sizeof(T) * v.size() }; }
-	static Data Make(void* data, unsigned size) { return Data{ data, size }; }
+	static Data Make(const void* data, size_t size) { return Data{ data, size }; }
+
+	bool NotNull() const { return Bytes != nullptr; }
 public:
-	void* Bytes;
+	const void* Bytes;
 	size_t Size;
 };
 

@@ -118,7 +118,7 @@ static inline D3DCOLOR XMFLOAT2D3DCOLOR(Eigen::Vector4f color) {
 	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x() * 255), int(color.y() * 255), int(color.z() * 255), int(color.w() * 255));
 	return dc;
 }
-void RenderSystem9::ClearColorDepthStencil(const Eigen::Vector4f& color, float depth, unsigned char stencil)
+void RenderSystem9::ClearRenderTarget(IRenderTargetPtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil)
 {
 	if (mCurColorBuffer != mBackColorBuffer) {
 		//mDevice9->ColorFill(mCurColorBuffer, NULL, XMFLOAT2D3DCOLOR(color));
@@ -141,8 +141,8 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 		return MakePtr<ContantBuffer9>();
 	case mir::kDeviceResourceTexture:
 		return MakePtr<Texture9>(nullptr);
-	case mir::kDeviceResourceRenderTexture:
-		return MakePtr<RenderTexture9>();
+	case mir::kDeviceResourceRenderTarget:
+		return MakePtr<RenderTarget9>();
 	case mir::kDeviceResourceSamplerState:
 		return MakePtr<SamplerState9>();
 	default:
@@ -151,7 +151,7 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IRenderTexturePtr RenderSystem9::LoadRenderTexture(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
+IRenderTargetPtr RenderSystem9::LoadRenderTarget(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr);
 	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
@@ -161,15 +161,15 @@ IRenderTexturePtr RenderSystem9::LoadRenderTexture(IResourcePtr res, const Eigen
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
 	if (CheckHR(mDevice9->CreateDepthStencilSurface(size.x(), size.y(), D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
-	RenderTexture9Ptr ret = MakePtr<RenderTexture9>(pTextureRV, pSurfaceDepthStencil);
+	RenderTexture9Ptr ret = MakePtr<RenderTarget9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;
 }
 
-void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
+void RenderSystem9::SetRenderTarget(IRenderTargetPtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = std::static_pointer_cast<RenderTexture9>(rendTarget)->GetColorBuffer9();
-		mCurDepthStencilBuffer = std::static_pointer_cast<RenderTexture9>(rendTarget)->GetDepthStencilBuffer9();
+		mCurColorBuffer = std::static_pointer_cast<RenderTarget9>(rendTarget)->GetColorBuffer9();
+		mCurDepthStencilBuffer = std::static_pointer_cast<RenderTarget9>(rendTarget)->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;
@@ -179,27 +179,28 @@ void RenderSystem9::SetRenderTarget(IRenderTexturePtr rendTarget)
 	if (CheckHR(mDevice9->SetDepthStencilSurface(mCurDepthStencilBuffer))) return;
 }
 
-IContantBufferPtr RenderSystem9::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, void* data /*= nullptr*/)
+IContantBufferPtr RenderSystem9::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, const Data& data)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceContantBuffer);
 
 	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));
-	if (data) UpdateBuffer((ret), data, ret->GetBufferSize());
+	if (data.NotNull()) {
+		BOOST_ASSERT(data.Size == ret->GetBufferSize());
+		UpdateBuffer(ret, data);
+	}
 	return ret;
 }
 
-IIndexBufferPtr RenderSystem9::LoadIndexBuffer(IResourcePtr res, int bufferSize, ResourceFormat format, void* buffer)
+IIndexBufferPtr RenderSystem9::LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data)
 {
-	if (res == nullptr) res = CreateResource(kDeviceResourceIndexBuffer);
-
+	BOOST_ASSERT(res);
 	IndexBuffer9Ptr ret;
 	IDirect3DIndexBuffer9* pIndexBuffer = nullptr;
 	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
-	if (! CheckHR(mDevice9->CreateIndexBuffer(bufferSize, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
+	if (! CheckHR(mDevice9->CreateIndexBuffer(data.Size, D3DUSAGE_WRITEONLY, Format, D3DPOOL_MANAGED, &pIndexBuffer, NULL))) {
 		ret = std::static_pointer_cast<IndexBuffer9>(res);
-		ret->Init(pIndexBuffer, bufferSize, format);
-		if (buffer) 
-			UpdateBuffer(ret, buffer, bufferSize);
+		ret->Init(pIndexBuffer, data.Size, format);
+		if (data.NotNull()) UpdateBuffer(ret, data);
 	}
 	return ret;
 }
@@ -209,51 +210,55 @@ void RenderSystem9::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 	mDevice9->SetIndices(indexBuffer ? std::static_pointer_cast<IndexBuffer9>(indexBuffer)->GetBuffer9() : nullptr);
 }
 
-IVertexBufferPtr RenderSystem9::LoadVertexBuffer(IResourcePtr res, int bufferSize, int stride, int offset, void* buffer/*=nullptr*/)
+IVertexBufferPtr RenderSystem9::LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data)
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceVertexBuffer);
 
 	VertexBuffer9Ptr ret;
 	IDirect3DVertexBuffer9* pVertexBuffer = nullptr;
-	if (! CheckHR(mDevice9->CreateVertexBuffer(bufferSize, D3DUSAGE_WRITEONLY, 0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
-		ret = MakePtr<VertexBuffer9>(pVertexBuffer, bufferSize, stride, offset);
+	if (! CheckHR(mDevice9->CreateVertexBuffer(data.Size, D3DUSAGE_WRITEONLY, 
+		0/*non-FVF*/, D3DPOOL_MANAGED, &pVertexBuffer, NULL))) {
+		ret = MakePtr<VertexBuffer9>(pVertexBuffer, data.Size, stride, offset);
 	}
-	if (buffer) UpdateBuffer(ret, buffer, bufferSize);
+	if (data.NotNull()) UpdateBuffer(ret, data);
 	return ret;
 }
 
-void RenderSystem9::SetVertexBuffer(IVertexBufferPtr vertexBuffer)
+void RenderSystem9::SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count)
 {
-	UINT offset = vertexBuffer->GetOffset();
-	UINT stride = vertexBuffer->GetStride();
-	IDirect3DVertexBuffer9* buffer = std::static_pointer_cast<VertexBuffer9>(vertexBuffer)->GetBuffer9();
-	mDevice9->SetStreamSource(0, buffer, offset, stride);
+	for (size_t i = 0; i < count; ++i) {
+		auto vertexBuffer = vertexBuffers[i];
+		uint32_t offset = vertexBuffer->GetOffset();
+		uint32_t stride = vertexBuffer->GetStride();
+		IDirect3DVertexBuffer9* buffer = std::static_pointer_cast<VertexBuffer9>(vertexBuffer)->GetBuffer9();
+		mDevice9->SetStreamSource(slot + i, buffer, offset, stride);
+	}
 }
 
-bool RenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, void* data, int dataSize)
+bool RenderSystem9::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 {
-	assert(buffer != nullptr);
+	BOOST_ASSERT(buffer);
 	HardwareBufferType bufferType = buffer->GetType();
 	switch (bufferType)
 	{
 	case kHWBufferConstant: {
 		IContantBufferPtr cbuffer = std::static_pointer_cast<IContantBuffer>(buffer);
-		std::static_pointer_cast<ContantBuffer9>(cbuffer)->SetBuffer9((char*)data, dataSize);
+		std::static_pointer_cast<ContantBuffer9>(cbuffer)->SetBuffer9(data.Bytes, data.Size);
 	}break;
 	case kHWBufferVertex: {
 		IVertexBufferPtr vbuffer = std::static_pointer_cast<IVertexBuffer>(buffer);
 		IDirect3DVertexBuffer9* buffer9 = std::static_pointer_cast<VertexBuffer9>(vbuffer)->GetBuffer9();
 		void* pByteDest = nullptr;
-		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
-		memcpy(pByteDest, data, dataSize);
+		if (CheckHR(buffer9->Lock(0, data.Size, &pByteDest, 0))) return false;
+		memcpy(pByteDest, data.Bytes, data.Size);
 		if (CheckHR(buffer9->Unlock())) return false;
 	}break;
 	case kHWBufferIndex: {
 		IIndexBufferPtr ibuffer = std::static_pointer_cast<IIndexBuffer>(buffer);
 		IDirect3DIndexBuffer9* buffer9 = std::static_pointer_cast<IndexBuffer9>(ibuffer)->GetBuffer9();
 		void* pByteDest = nullptr;
-		if (CheckHR(buffer9->Lock(0, dataSize, &pByteDest, 0))) return false;
-		memcpy(pByteDest, data, dataSize);
+		if (CheckHR(buffer9->Lock(0, data.Size, &pByteDest, 0))) return false;
+		memcpy(pByteDest, data.Bytes, data.Size);
 		if (CheckHR(buffer9->Unlock())) return false;
 	}break;
 	default:
@@ -311,10 +316,10 @@ static PixelShader9Ptr _CreatePSByBlob(IDirect3DDevice9* pDevice9, IBlobDataPtr 
 	PixelShader9Ptr ret = MakePtr<PixelShader9>();
 	ret->mBlob = pBlob;
 	
-	if (CheckHR(pDevice9->CreatePixelShader((DWORD*)pBlob->GetBufferPointer(), &ret->mShader))) return nullptr;
+	if (CheckHR(pDevice9->CreatePixelShader((DWORD*)pBlob->GetBytes(), &ret->mShader))) return nullptr;
 
 	ID3DXConstantTable* constTable = nullptr;
-	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)pBlob->GetBufferPointer(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
+	if (CheckHR(D3DXGetShaderConstantTableEx((DWORD*)pBlob->GetBytes(), D3DXCONSTTABLE_LARGEADDRESSAWARE, &constTable))) return nullptr;
 	ret->SetConstTable(constTable);
 
 	AsRes(ret)->SetLoaded();
@@ -568,18 +573,6 @@ void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTop
 	mDevice9->DrawIndexedPrimitive(topo9, 
 		0, 0, op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0, 
 		CalPrimCount(op.mIndexBuffer->GetCount(), topo9));
-}
-
-void RenderSystem9::SetTexture(size_t slot, ITexturePtr texture) 
-{
-	if (texture) {
-		auto texture9 = std::static_pointer_cast<Texture9>(texture);
-		if (texture9->IsCube()) mDevice9->SetTexture(slot, texture9->GetSRVCube9());
-		else mDevice9->SetTexture(slot, texture9->GetSRV9()); 
-	}
-	else {
-		mDevice9->SetTexture(slot, nullptr);
-	}
 }
 
 void RenderSystem9::SetTextures(size_t slot, ITexturePtr textures[], size_t count) {

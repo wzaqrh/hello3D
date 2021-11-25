@@ -72,7 +72,7 @@ bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data)
 	if (FAILED(hr)) 
 	{
 		ID3DBlob* pErrorBlob = nullptr;
-		D3DGetDebugInfo(data->GetBufferPointer(), data->GetBufferSize(), &pErrorBlob);
+		D3DGetDebugInfo(data->GetBytes(), data->GetSize(), &pErrorBlob);
 		if (pErrorBlob != NULL) 
 		{
 			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());

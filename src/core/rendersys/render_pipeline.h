@@ -30,8 +30,8 @@ class MIR_CORE_API RenderPipeline
 	RenderSystem& mRenderSys;
 	const Eigen::Vector2i mScreenSize;
 
-	std::vector<IRenderTexturePtr> mRenderTargetStk;
-	IRenderTexturePtr mShadowCasterOutput;
+	std::vector<IRenderTargetPtr> mRenderTargetStk;
+	IRenderTargetPtr mShadowCasterOutput;
 public:
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size);
 	bool BeginFrame();
@@ -41,7 +41,7 @@ public:
 private:
 	void _RenderSkyBox();
 	void _DoPostProcess();
-	void _PushRenderTarget(IRenderTexturePtr rendTarget);
+	void _PushRenderTarget(IRenderTargetPtr rendTarget);
 	void _PopRenderTarget();
 	void BindPass(const PassPtr& pass);
 	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op);

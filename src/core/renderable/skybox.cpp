@@ -20,7 +20,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const std::strin
 	Vertexs[1].pos = Eigen::Vector4f(fLowW, fHighH, 1.0f, 1.0f);
 	Vertexs[2].pos = Eigen::Vector4f(fHighW, fLowH, 1.0f, 1.0f);
 	Vertexs[3].pos = Eigen::Vector4f(fHighW, fHighH, 1.0f, 1.0f);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex) * 4, sizeof(SkyboxVertex), 0, Vertexs);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
 
 	mMainTex = mResourceMng.CreateTextureByFile(launchMode, imgName);
 #if 0

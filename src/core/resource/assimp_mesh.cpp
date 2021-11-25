@@ -13,8 +13,8 @@ AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng, const ai
 	, mIndices(std::move(indices))
 	, mTextures(textures)
 {
-	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(AssimpMeshVertex) * mVertices.size(), sizeof(AssimpMeshVertex), 0, &mVertices[0]);
-	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, sizeof(UINT) * mIndices.size(), kFormatR32UInt, &mIndices[0]);
+	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt,  Data::Make(mIndices));
+	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(AssimpMeshVertex), 0, Data::Make(mVertices));
 }
 
 bool AssimpMesh::HasTexture(int slot) const

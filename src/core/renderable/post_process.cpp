@@ -45,17 +45,17 @@ void PostProcessVertexQuad::SetZ(float z)
 }
 
 /********** PostProcess **********/
-constexpr unsigned int CIndices[] = {
+constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr mainTex)
+PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr mainTex)
 	:mResourceMng(resourceMng)
 {
 	mMainTex = mainTex;
 
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, sizeof(CIndices), kFormatR32UInt, (void*)&CIndices[0]);
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(CIndices));
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
 PostProcess::~PostProcess()
@@ -150,17 +150,16 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 }
 
 /********** Bloom **********/
-IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr target) {
+IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr target) {
 	auto srv = target->GetColorTexture();
 	float sx = srv->GetWidth() * 1.0 / resourceMng.WinSize().x();
 	float sy = srv->GetHeight() * 1.0 / resourceMng.WinSize().y();
 	assert(sx <= 1 && sy <= 1);
 	PostProcessVertexQuad quad(-1, 1.0 - 2 * sy, 2 * sx, 2 * sy);
-	IVertexBufferPtr vertBuf = resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertexQuad), sizeof(PostProcessVertex), 0, &quad);
-	return vertBuf;
+	return resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
-Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTexturePtr mainTex)
+Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr mainTex)
 	:PostProcess(launchMode, resourceMng, mainTex)
 {
 	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_POSTPROC_BLOOM);

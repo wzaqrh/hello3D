@@ -22,6 +22,9 @@ struct Launch
 	bool operator==(LaunchMode mode) const {
 		return Mode == mode;
 	}
+	bool operator!=(LaunchMode mode) const {
+		return Mode != mode;
+	}
 	LaunchMode Mode;
 	std::string CallStack;
 };

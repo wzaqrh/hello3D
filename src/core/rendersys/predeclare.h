@@ -24,7 +24,7 @@ DECLARE_STRUCT(IVertexBuffer);
 DECLARE_STRUCT(IIndexBuffer);
 DECLARE_STRUCT(IContantBuffer);
 DECLARE_STRUCT(ITexture);
-DECLARE_STRUCT(IRenderTexture);
+DECLARE_STRUCT(IRenderTarget);
 DECLARE_STRUCT(ISamplerState);
 DECLARE_STRUCT(ConstBufferDeclElement);
 DECLARE_STRUCT(ConstBufferDecl);

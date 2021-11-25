@@ -24,7 +24,7 @@ public:
 	void SetFlipY(bool flip);
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
-	IRenderTexturePtr FetchPostProcessInput();
+	IRenderTargetPtr FetchPostProcessInput();
 public:
 	const TransformPtr& GetTransform() const;
 	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
@@ -50,7 +50,7 @@ private:
 	bool mFlipY;
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 public:
-	IRenderTexturePtr mPostProcessInput;
+	IRenderTargetPtr mPostProcessInput;
 
 	Eigen::Vector2i mSize;
 	Eigen::Vector3f mEyePos, mLookAtPos, mUpVector;

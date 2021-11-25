@@ -16,15 +16,15 @@ typedef std::shared_ptr<struct IndexBuffer9> IndexBuffer9Ptr;
 typedef std::shared_ptr<struct VertexBuffer9> VertexBuffer9Ptr;
 typedef std::shared_ptr<struct ContantBuffer9> ContantBuffer9Ptr;
 typedef std::shared_ptr<struct Texture9> Texture9Ptr;
-typedef std::shared_ptr<struct RenderTexture9> RenderTexture9Ptr;
+typedef std::shared_ptr<struct RenderTarget9> RenderTexture9Ptr;
 typedef std::shared_ptr<struct SamplerState9> SamplerState9Ptr;
 
 class BlobData9 : public IBlobData 
 {
 public:
 	BlobData9(ID3DXBuffer* pBlob);
-	const char* GetBufferPointer() const override;
-	size_t GetBufferSize() const override;
+	const char* GetBytes() const override;
+	size_t GetSize() const override;
 public:
 	ID3DXBuffer* mBlob;
 };
@@ -152,7 +152,7 @@ public:
 
 	ConstBufferDeclPtr GetDecl() const override { return mDecl; }
 	char* GetBuffer9();
-	void SetBuffer9(char* data, int dataSize);
+	void SetBuffer9(const void* data, int dataSize);
 public:
 	ConstBufferDeclPtr mDecl;
 	std::vector<char> mBuffer9;
@@ -186,11 +186,11 @@ private:
 	IDirect3DCubeTexture9* mTextureCube;
 };
 
-class RenderTexture9 : public ImplementResource<IRenderTexture>
+class RenderTarget9 : public ImplementResource<IRenderTarget>
 {
 public:
-	RenderTexture9();
-	RenderTexture9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
+	RenderTarget9();
+	RenderTarget9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
 	ITexturePtr GetColorTexture() const override { return mColorTexture; }
 	IDirect3DSurface9*& GetColorBuffer9();
 	IDirect3DSurface9*& GetDepthStencilBuffer9() { return mDepthStencilBuffer; }

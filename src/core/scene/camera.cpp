@@ -141,10 +141,10 @@ void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
 	mPostProcessEffects.push_back(postEffect);
 }
 
-IRenderTexturePtr Camera::FetchPostProcessInput()
+IRenderTargetPtr Camera::FetchPostProcessInput()
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mRenderSys.LoadRenderTexture(nullptr, mSize, kFormatR16G16B16A16UNorm);
+		mPostProcessInput = mRenderSys.LoadRenderTarget(nullptr, mSize, kFormatR16G16B16A16UNorm);
 		//SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
 	}
 	return mPostProcessInput;

@@ -11,16 +11,16 @@ namespace mir {
 interface IBlobData : boost::noncopyable  
 {
 	virtual ~IBlobData() {}
-	virtual const char* GetBufferPointer() const = 0;
-	virtual size_t GetBufferSize() const = 0;
+	virtual const char* GetBytes() const = 0;
+	virtual size_t GetSize() const = 0;
 };
 
 interface BlobDataStandard : public IBlobData 
 {
 public:
 	BlobDataStandard(const std::vector<char>& buffer) :mBuffer(buffer) {}
-	const char* GetBufferPointer() const override { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-	size_t GetBufferSize() const override { return mBuffer.size(); }
+	const char* GetBytes() const override { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
+	size_t GetSize() const override { return mBuffer.size(); }
 public:
 	std::vector<char> mBuffer;
 };
@@ -103,7 +103,7 @@ interface ITexture : public IResource
 	virtual bool IsAutoGenMipmap() const = 0;
 };
 
-interface IRenderTexture : public IResource   
+interface IRenderTarget : public IResource   
 {
 	virtual ITexturePtr GetColorTexture() const = 0;
 };

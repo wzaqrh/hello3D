@@ -15,15 +15,15 @@ typedef std::shared_ptr< struct VertexBuffer11> VertexBuffer11Ptr;
 typedef std::shared_ptr< struct IndexBuffer11> IndexBuffer11Ptr;
 typedef std::shared_ptr< struct ContantBuffer11> ContantBuffer11Ptr;
 typedef std::shared_ptr< struct Texture11> Texture11Ptr;
-typedef std::shared_ptr< struct RenderTexture11> RenderTexture11Ptr;
+typedef std::shared_ptr< struct RenderTarget11> RenderTexture11Ptr;
 typedef std::shared_ptr< struct SamplerState11> SamplerState11Ptr;
 
 /********** Program **********/
 class BlobData11 : public IBlobData {
 public:
 	BlobData11(ID3DBlob* pBlob);
-	const char* GetBufferPointer() const override;
-	size_t GetBufferSize() const override;
+	const char* GetBytes() const override;
+	size_t GetSize() const override;
 public:
 	ID3DBlob* mBlob = nullptr;
 };
@@ -165,10 +165,10 @@ private:
 	ID3D11ShaderResourceView* mTexture;
 };
 
-class RenderTexture11 : public ImplementResource<IRenderTexture>
+class RenderTarget11 : public ImplementResource<IRenderTarget>
 {
 public:
-	RenderTexture11();
+	RenderTarget11();
 	void Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format = kFormatR32G32B32A32Float);
 	ITexturePtr GetColorTexture() const override { return mRenderTargetPtr; }
 

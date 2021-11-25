@@ -14,11 +14,11 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	:mRenderSys(renderSys)
 	,mScreenSize(size)
 {
-	mShadowCasterOutput = resMng.CreateRenderTexture(__LaunchSync__, mScreenSize, kFormatR32Float);
+	mShadowCasterOutput = resMng.CreateRenderTarget(__LaunchSync__, mScreenSize, kFormatR32Float);
 	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
-void RenderPipeline::_PushRenderTarget(IRenderTexturePtr rendTarget)
+void RenderPipeline::_PushRenderTarget(IRenderTargetPtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
 	mRenderSys.SetRenderTarget(rendTarget);
@@ -34,9 +34,6 @@ void RenderPipeline::_PopRenderTarget()
 void RenderPipeline::BindPass(const PassPtr& pass)
 {
 	mRenderSys.SetProgram(pass->mProgram);
-
-	//if (pass->mConstantBuffers.size() > 0)
-	//	mRenderSys.UpdateBuffer(pass->mConstantBuffers[0].Buffer, (void*)&globalParam, sizeof(globalParam));
 
 	auto cbuffers = pass->GetConstBuffers();
 	mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
@@ -170,7 +167,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowCasterOutput);
-		mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
+		mRenderSys.ClearRenderTarget(nullptr, Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
 		mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
@@ -232,7 +229,7 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 		//setup framebuffer as camera's post_process_input 
 		if (!camera->PostProcessEffects().empty() && camera->mPostProcessInput) {
 			mRenderSys.SetRenderTarget(camera->mPostProcessInput);
-			mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
+			mRenderSys.ClearRenderTarget(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
 		}
 
 		//camera's skybox
@@ -293,7 +290,7 @@ bool RenderPipeline::BeginFrame()
 #if REFACTOR
 	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mSceneManager->GetDefCamera()->mPostProcessInput) {
 		mRenderSys.SetRenderTarget(mSceneManager->GetDefCamera()->mPostProcessInput);
-		mRenderSys.ClearColorDepthStencil(Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
+		mRenderSys.ClearRenderTarget(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
 	}
 	_RenderSkyBox();
 #endif

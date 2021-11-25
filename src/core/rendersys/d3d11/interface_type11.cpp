@@ -14,12 +14,12 @@ BlobData11::BlobData11(ID3DBlob* pBlob)
 {
 }
 
-const char* BlobData11::GetBufferPointer() const
+const char* BlobData11::GetBytes() const
 {
 	return (char*)mBlob->GetBufferPointer();
 }
 
-size_t BlobData11::GetBufferSize() const
+size_t BlobData11::GetSize() const
 {
 	return mBlob->GetBufferSize();
 }
@@ -104,8 +104,8 @@ void ContantBuffer11::Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl)
 	mDecl = decl;
 }
 
-/********** RenderTexture11 **********/
-RenderTexture11::RenderTexture11()
+/********** RenderTarget11 **********/
+RenderTarget11::RenderTarget11()
 {
 	mRenderTargetTexture = nullptr;
 	mRenderTargetSRV = nullptr;
@@ -115,7 +115,7 @@ RenderTexture11::RenderTexture11()
 	mDepthStencilView = nullptr;
 }
 
-void RenderTexture11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+void RenderTarget11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	mFormat = format;
 	mSize = size;
@@ -128,7 +128,7 @@ void RenderTexture11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, R
 	InitDepthStencilView(pDevice);
 }
 
-bool RenderTexture11::InitRenderTexture(ID3D11Device* pDevice)
+bool RenderTarget11::InitRenderTexture(ID3D11Device* pDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -148,7 +148,7 @@ bool RenderTexture11::InitRenderTexture(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTexture11::InitRenderTargetView(ID3D11Device* pDevice)
+bool RenderTarget11::InitRenderTargetView(ID3D11Device* pDevice)
 {
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
@@ -161,7 +161,7 @@ bool RenderTexture11::InitRenderTargetView(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
+bool RenderTarget11::InitRenderTextureView(ID3D11Device* pDevice)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
@@ -180,7 +180,7 @@ bool RenderTexture11::InitRenderTextureView(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice)
+bool RenderTarget11::InitDepthStencilTexture(ID3D11Device* pDevice)
 {
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
@@ -201,7 +201,7 @@ bool RenderTexture11::InitDepthStencilTexture(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTexture11::InitDepthStencilView(ID3D11Device* pDevice)
+bool RenderTarget11::InitDepthStencilView(ID3D11Device* pDevice)
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
