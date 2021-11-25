@@ -6,7 +6,7 @@
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		
-		<Uniform Name="cbBloom">
+		<Uniform Name="cbBloom" Slot="3">
 			<Element Name="SampleOffsets"	Type="float4" Count="16"></Element>
 			<Element Name="SampleWeights"	Type="float4" Count="16"></Element>
 		</Uniform>

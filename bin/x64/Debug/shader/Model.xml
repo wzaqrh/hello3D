@@ -3,9 +3,9 @@
 	<Include>Skeleton</Include>
 	
 	<PROGRAM>
-		<UseUniform>cbGlobalParam</UseUniform>
-		<UseUniform>cbPerLight</UseUniform>
-		<UseUniform>cbWeightedSkin</UseUniform>
+		<UseUniform Slot="0">cbGlobalParam</UseUniform>
+		<UseUniform Slot="1">cbPerLight</UseUniform>
+		<UseUniform Slot="2">cbWeightedSkin</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		<Attribute Name="attrPos3NormalTangentTexBlendWeightBlendIndicesBitangent">
 			<Element Format="6"  SemanticName="POSITION"></Element>

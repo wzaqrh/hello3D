@@ -19,10 +19,11 @@ namespace boost_property_tree = boost::property_tree;
 
 namespace mir {
 
+#define TemplateT template <typename T>
+
 /********** ConstBufferDeclBuilder **********/
 struct ConstBufferDeclBuilder
 {
-	ConstBufferDecl& mDecl;
 public:
 	ConstBufferDeclBuilder(ConstBufferDecl& decl) :mDecl(decl) {}
 	ConstBufferDeclBuilder& Add(const ConstBufferDeclElement& elem) {
@@ -38,17 +39,14 @@ public:
 	ConstBufferDecl& Build() {
 		return mDecl;
 	}
+private:
+	ConstBufferDecl& mDecl;
 };
 #define MAKE_CBDESC(CB) (CB::GetDesc())
 
 /********** MaterialBuilder **********/
 struct MaterialBuilder
 {
-	MaterialPtr mMaterial;
-	TechniquePtr mCurTech;
-	PassPtr mCurPass;
-	ResourceManager& mResourceMng;
-	Launch mLaunchMode;
 public:
 	MaterialBuilder(ResourceManager& resMng, Launch launchMode, bool addTechPass = true) 
 		:mResourceMng(resMng), mLaunchMode(launchMode) {
@@ -116,22 +114,24 @@ public:
 		mCurTech->ClearSamplers();
 		return *this;
 	}
-	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
-		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
+	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, 
+		const std::string& name = "", bool isUnique = true, int slot = -1) {
+		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
 		mResourceMng.AddResourceDependency(mMaterial, buffer);
 		return *this;
 	}
-	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, const std::string& name = "", bool isUnique = true) {
-		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique));
+	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, 
+		const std::string& name = "", bool isUnique = true, int slot = -1) {
+		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
 		mResourceMng.AddResourceDependency(mMaterial, buffer);
 		return *this;
 	}
-	MaterialBuilder& SetRenderTarget(IRenderTexturePtr target) {
+	MaterialBuilder& SetRenderTarget(IRenderTargetPtr target) {
 		mCurPass->mRenderTarget = target;
 		mResourceMng.AddResourceDependency(mMaterial, target);
 		return *this;
 	}
-	MaterialBuilder& AddIterTarget(IRenderTexturePtr target) {
+	MaterialBuilder& AddIterTarget(IRenderTargetPtr target) {
 		mCurPass->AddIterTarget(target);
 		mResourceMng.AddResourceDependency(mMaterial, target);
 		return *this;
@@ -142,82 +142,81 @@ public:
 		return *this;
 	}
 	MaterialPtr Build() {
-		if (mLaunchMode == LaunchAsync) mMaterial->SetPrepared();
-		else mMaterial->SetLoaded();
+		if (mLaunchMode == LaunchSync)
+			mMaterial->SetLoaded();
 		return mMaterial;
 	}
+private:
+	MaterialPtr mMaterial;
+	TechniquePtr mCurTech;
+	PassPtr mCurPass;
+	ResourceManager& mResourceMng;
+	Launch mLaunchMode;
 };
 
 /********** MaterialAssetManager **********/
 struct XmlAttributeInfo {
 	std::vector<LayoutInputElement> Layout;
-	std::vector<std::string> LayoutStr;
-public:
-	XmlAttributeInfo() {}
-	XmlAttributeInfo(const XmlAttributeInfo& other) {
-		LayoutStr = other.LayoutStr;
-		Layout = other.Layout;
-		for (size_t i = 0; i < Layout.size(); ++i)
-			Layout[i].SemanticName = LayoutStr[i].c_str();
-	}
-	XmlAttributeInfo& operator=(const XmlAttributeInfo& other) {
-		LayoutStr = other.LayoutStr;
-		Layout = other.Layout;
-		for (size_t i = 0; i < Layout.size(); ++i)
-			Layout[i].SemanticName = LayoutStr[i].c_str();
-		return *this;
-	}
 };
 struct XmlUniformInfo {
+	bool IsValid() const { return !Data.empty(); }
+public:
 	ConstBufferDecl Decl;
 	std::string ShortName;
 	std::vector<float> Data;
 	bool IsUnique;
+	int Slot;
 };
 struct XmlSamplersInfo {
-	std::vector<std::pair<SamplerFilterMode, int>> Samplers;
 	void Add(const XmlSamplersInfo& other) {
 		Samplers.insert(Samplers.end(), other.Samplers.begin(), other.Samplers.end());
 	}
 	size_t size() const { return Samplers.size(); }
 	const std::pair<SamplerFilterMode, int>& operator[](size_t pos) const { return Samplers[pos]; }
+public:
+	std::vector<std::pair<SamplerFilterMode, int>> Samplers;
 };
 struct XmlProgramInfo {
+	TemplateT void AddUniform(T&& uniform, int slot = -1) {
+		if (slot >= 0) {
+			if (Uniforms.size() < slot + 1) 
+				Uniforms.resize(slot + 1);
+			Uniforms[slot] = std::forward<T>(uniform);
+		}
+		else {
+			Uniforms.push_back(std::forward<T>(uniform));
+		}
+	}
+	TemplateT void AddAttribute(T&& attr) {
+		Attr = std::forward<T>(attr);
+	}
+	TemplateT void AddSamplers(T&& samplers) {
+		Samplers.Add(std::forward<T>(samplers));
+	}
+public:
 	PrimitiveTopology Topo;
 	XmlAttributeInfo Attr;
 	std::vector<XmlUniformInfo> Uniforms;
 	XmlSamplersInfo Samplers;
 	std::string FxName, VsEntry;
-public:
-	void AddUniform(const XmlUniformInfo& uniform) {
-		Uniforms.push_back(uniform);
-	}
-	void AddAttribute(const XmlAttributeInfo& attr) {
-		Attr = attr;
-	}
-	void AddSamplers(const XmlSamplersInfo& samplers) {
-		Samplers.Add(samplers);
-	}
 };
 struct XmlPassInfo {
 	std::string LightMode, Name, ShortName, PSEntry;
-public:
-	XmlPassInfo() {}
 };
 struct XmlSubShaderInfo {
-	std::vector<XmlPassInfo> Passes;
-public:
-	void AddPass(XmlPassInfo&& pass) {
-		Passes.push_back((pass));
+	TemplateT void AddPass(T&& pass) {
+		Passes.push_back(std::forward<T>(pass));
 	}
+public:
+	std::vector<XmlPassInfo> Passes;
 };
 struct XmlShaderInfo {
+	TemplateT void AddSubShader(T&& subShader) {
+		SubShaders.push_back(std::forward<T>(subShader));
+	}
+public:
 	XmlProgramInfo Program;
 	std::vector<XmlSubShaderInfo> SubShaders;
-public:
-	void AddSubShader(XmlSubShaderInfo&& subShader) {
-		SubShaders.push_back((subShader));
-	}
 };
 
 struct MaterialAssetEntry {
@@ -225,7 +224,6 @@ struct MaterialAssetEntry {
 	std::string VariantName;
 };
 class MaterialNameToAssetMapping : boost::noncopyable {
-	std::unordered_map<std::string, MaterialAssetEntry> mMatEntryByMatName;
 public:
 	bool InitFromXmlFile(const std::string& xmlFilePath) {
 		bool result = false;
@@ -268,6 +266,8 @@ private:
 			VisitMaterial(it.second);
 		}
 	}
+private:
+	std::unordered_map<std::string, MaterialAssetEntry> mMatEntryByMatName;
 };
 
 struct MaterialAsset {
@@ -353,13 +353,11 @@ private:
 
 			int elementCount = it.second.count("Element");
 			attribute.Layout.resize(elementCount);
-			attribute.LayoutStr.resize(elementCount);
 			int byteOffset = 0, j = 0;
 			for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
-				attribute.LayoutStr[j] = element.second.get<std::string>("<xmlattr>.SemanticName");
 				auto& layoutJ = attribute.Layout[j];
 				layoutJ = LayoutInputElement{
-					attribute.LayoutStr[j],
+					element.second.get<std::string>("<xmlattr>.SemanticName"),
 					element.second.get<UINT>("<xmlattr>.SemanticIndex", 0),
 					static_cast<ResourceFormat>(element.second.get<UINT>("<xmlattr>.Format")),
 					element.second.get<UINT>("<xmlattr>.InputSlot", 0),
@@ -386,7 +384,8 @@ private:
 			std::string refName = it.second.data();
 			auto find_iter = mUniformByName.find(refName);
 			if (find_iter != mUniformByName.end()) {
-				vis.shaderInfo.Program.AddUniform(find_iter->second);
+				int refSlot = it.second.get<int>("<xmlattr>.Slot", find_iter->second.Slot);
+				vis.shaderInfo.Program.AddUniform(find_iter->second, refSlot);
 			}
 		}
 
@@ -435,6 +434,8 @@ private:
 					}
 				}
 			}
+
+			uniform.Slot = it.second.get<int>("<xmlattr>.Slot", -1);
 
 			std::string Name = it.second.get<std::string>("<xmlattr>.Name");
 			uniform.ShortName = it.second.get<std::string>("<xmlattr>.ShortName", Name);
@@ -626,10 +627,11 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 		}
 	}
 
-	for (size_t i = 0; i < shaderInfo.Program.Uniforms.size(); ++i) {
-		auto& uniformI = shaderInfo.Program.Uniforms[i];
+	for (size_t slot = 0; slot < shaderInfo.Program.Uniforms.size(); ++slot) {
+		auto& uniformSlot = shaderInfo.Program.Uniforms[slot];
 		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(
-			__launchMode__, uniformI.Decl, (void*)&uniformI.Data[0]), uniformI.ShortName, uniformI.IsUnique);
+			__launchMode__, uniformSlot.Decl, Data::Make(uniformSlot.Data)), 
+			uniformSlot.ShortName, uniformSlot.IsUnique, slot);
 	}
 
 	builder.CloneTechnique(*this, "d3d9");

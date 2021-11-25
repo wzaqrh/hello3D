@@ -1,6 +1,6 @@
 <Shader Name="Skeleton">
 	<PROGRAM>
-		<Uniform Name="cbWeightedSkin" IsUnique="false">
+		<Uniform Name="cbWeightedSkin" IsUnique="false" Slot="2">
 			<Element Name="Model" 	Type="matrix"></Element>
 			<Element Name="Models" 	Type="matrix" Count="56"></Element>
 			<Element Name="hasNormal" 	 Type="int"></Element>

@@ -5,7 +5,7 @@
 			<Element SemanticName="COLOR" 	 Format="28"></Element>
 			<Element SemanticName="TEXCOORD" Format="16"></Element>
 		</Attribute>
-		<Uniform Name="cbGlobalParam">
+		<Uniform Name="cbGlobalParam" Slot="0">
 			<Element Name="World" 		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 			<Element Name="View" 	 	Type="matrix"></Element>
 			<Element Name="Projection" 	Type="matrix"></Element>
@@ -14,7 +14,7 @@
 			<Element Name="ViewInv" 	 Type="matrix"></Element>
 			<Element Name="ProjectionInv"	Type="matrix"></Element>
 		</Uniform>
-		<Uniform Name="cbPerLight">
+		<Uniform Name="cbPerLight" Slot="1">
 			<Element Name="LightView" 	 	Type="matrix"></Element>
 			<Element Name="LightProjection" Type="matrix"></Element>
 			<Element Name="Light"			Type="struct" Size="80"></Element>

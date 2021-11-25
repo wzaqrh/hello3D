@@ -8,14 +8,14 @@
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		
-		<Uniform Name="cbUnityMaterial">
+		<Uniform Name="cbUnityMaterial" Slot="3">
 			<Element Name="_SpecColor"			Type="float4" Default="1,1,1,1"></Element>
 			<Element Name="_Color"				Type="float4" Default="1,1,1,1"></Element>
 			<Element Name="_GlossMapScale"		Type="float"  Default="1"></Element>
 			<Element Name="_OcclusionStrength"	Type="float"  Default="1"></Element>
 			<Element Name="_SpecLightOff"		Type="int"    Default="0"></Element>
 		</Uniform>
-		<Uniform Name="cbUnityGlobal">
+		<Uniform Name="cbUnityGlobal" Slot="4">
 			<Element Name="_Unity_IndirectSpecColor" Type="float4" Default="0,0,0,0"></Element>
 			<Element Name="_AmbientOrLightmapUV"	 Type="float4" Default="0.01,0.01,0.01,1"></Element>
 			<Element Name="_Unity_SpecCube0_HDR"	 Type="float"  Default="0.5,1,0,0"></Element>

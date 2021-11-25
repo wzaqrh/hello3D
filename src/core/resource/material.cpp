@@ -29,33 +29,34 @@ bool TextureBySlot::IsLoaded() const {
 
 /********** TPass **********/
 Pass::Pass(const std::string& lightMode, const std::string& name)
-	:mLightMode(lightMode)
-	,mName(name)
+	: mLightMode(lightMode)
+	, mName(name)
 {
 	SetPrepared();
 }
 
-IContantBufferPtr Pass::AddConstBuffer(const CBufferEntry& cbuffer)
+void Pass::AddConstBuffer(const CBufferEntry& cbuffer, int slot)
 {
-	mConstantBuffers.push_back(cbuffer);
-	return cbuffer.Buffer;
+	if (slot >= 0) {
+		if (mConstantBuffers.size() <= slot + 1)
+			mConstantBuffers.resize(slot + 1);
+		mConstantBuffers[slot] = cbuffer;
+	}
+	else {
+		mConstantBuffers.push_back(cbuffer);
+	}
 }
-
-ISamplerStatePtr Pass::AddSampler(ISamplerStatePtr sampler)
+void Pass::AddSampler(ISamplerStatePtr sampler)
 {
 	mSamplers.push_back(sampler);
-	return sampler;
 }
-
 void Pass::ClearSamplers()
 {
 	mSamplers.clear();
 }
-
-IRenderTexturePtr Pass::AddIterTarget(IRenderTexturePtr target)
+void Pass::AddIterTarget(IRenderTargetPtr target)
 {
 	mRTIterators.push_back(target);
-	return target;
 }
 
 std::vector<IContantBufferPtr> Pass::GetConstBuffers() const
@@ -89,7 +90,7 @@ IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
 void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data)
 {
 	IContantBufferPtr buffer = GetConstBufferByName(name);
-	if (buffer) renderSys.UpdateBuffer(buffer, data.Bytes, data.Size);
+	if (buffer) renderSys.UpdateBuffer(buffer, data);
 }
 
 PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
@@ -108,10 +109,10 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 		resourceMng.AddResourceDependency(pass, sampler);
 	}
 
-	for (size_t i = 0; i < proto.mConstantBuffers.size(); ++i) {
-		auto buffer = proto.mConstantBuffers[i];
-		if (!buffer.IsUnique) buffer.Buffer = resourceMng.CreateConstBuffer(__launchMode__, *buffer.Buffer->GetDecl(), nullptr);
-		pass->AddConstBuffer(buffer);
+	for (size_t slot = 0; slot < proto.mConstantBuffers.size(); ++slot) {
+		auto buffer = proto.mConstantBuffers[slot];
+		if (!buffer.IsUnique) buffer.Buffer = resourceMng.CreateConstBuffer(__launchMode__, *buffer.Buffer->GetDecl(), Data::MakeNull());
+		pass->AddConstBuffer(buffer, slot);
 		resourceMng.AddResourceDependency(pass, buffer.Buffer);
 	}
 
@@ -129,36 +130,6 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 }
 
 /********** TTechnique **********/
-Technique::Technique()
-{
-	SetPrepared();
-}
-
-void Technique::AddPass(PassPtr pass)
-{
-	mPasses.push_back(pass);
-}
-
-IContantBufferPtr Technique::AddConstBuffer(const CBufferEntry& cbuffer)
-{
-	for (auto& pass : mPasses)
-		pass->AddConstBuffer(cbuffer);
-	return cbuffer.Buffer;
-}
-
-ISamplerStatePtr Technique::AddSampler(ISamplerStatePtr sampler)
-{
-	for (auto& pass : mPasses)
-		pass->AddSampler(sampler);
-	return sampler;
-}
-
-void Technique::ClearSamplers()
-{
-	for (auto& pass : mPasses)
-		pass->ClearSamplers();
-}
-
 PassPtr Technique::GetPassByLightMode(const std::string& lightMode)
 {
 	PassPtr pass;
@@ -182,12 +153,6 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 	return std::move(passVec);
 }
 
-void Technique::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data)
-{
-	for (int i = 0; i < mPasses.size(); ++i)
-		mPasses[i]->UpdateConstBufferByName(renderSys, name, data);
-}
-
 TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
 {
 	TechniquePtr technique = std::make_shared<Technique>();
@@ -200,17 +165,7 @@ TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager&
 	return technique;
 }
 
-/********** TMaterial **********/
-void Material::AddTechnique(TechniquePtr technique)
-{
-	mTechniques.push_back(technique);
-}
-
-TechniquePtr Material::CurTech()
-{
-	return mTechniques[mCurTechIdx];
-}
-
+/********** Material **********/
 TechniquePtr Material::SetCurTechByIdx(int idx)
 {
 	mCurTechIdx = idx;
@@ -224,20 +179,6 @@ void Material::SetCurTechByName(const std::string& name)
 			mCurTechIdx = idx;
 			break;
 		}
-}
-
-IContantBufferPtr Material::AddConstBuffer(const CBufferEntry& cbuffer)
-{
-	for (auto& tech : mTechniques)
-		tech->AddConstBuffer(cbuffer);
-	return cbuffer.Buffer;
-}
-
-ISamplerStatePtr Material::AddSampler(ISamplerStatePtr sampler)
-{
-	for (auto& tech : mTechniques)
-		tech->AddSampler(sampler);
-	return sampler;
 }
 
 MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
