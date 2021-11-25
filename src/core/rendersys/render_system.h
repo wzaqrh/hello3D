@@ -32,9 +32,9 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 
 	virtual IResourcePtr CreateResource(DeviceResourceType deviceResType) = 0;
 
-	virtual IRenderTargetPtr LoadRenderTarget(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) = 0;
-	virtual void SetRenderTarget(IRenderTargetPtr rendTarget) = 0;
-	virtual void ClearRenderTarget(IRenderTargetPtr rendTarget, const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
+	virtual IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) = 0;
+	virtual void SetFrameBuffer(IFrameBufferPtr rendTarget) = 0;
+	virtual void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
 
 	virtual IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;

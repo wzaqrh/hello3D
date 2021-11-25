@@ -57,7 +57,7 @@ void App::Render()
 	auto renderSys = mContext->RenderSys();
 	auto sceneMng = mContext->SceneMng();
 
-	renderSys->ClearRenderTarget(nullptr, mBackgndColor, 1.0f, 0);
+	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
 
 	mTimer->Update();
 	mInput->Frame();

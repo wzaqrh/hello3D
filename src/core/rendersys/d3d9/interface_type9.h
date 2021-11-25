@@ -16,7 +16,7 @@ typedef std::shared_ptr<struct IndexBuffer9> IndexBuffer9Ptr;
 typedef std::shared_ptr<struct VertexBuffer9> VertexBuffer9Ptr;
 typedef std::shared_ptr<struct ContantBuffer9> ContantBuffer9Ptr;
 typedef std::shared_ptr<struct Texture9> Texture9Ptr;
-typedef std::shared_ptr<struct RenderTarget9> RenderTexture9Ptr;
+typedef std::shared_ptr<struct FrameBuffer9> FrameBuffer9Ptr;
 typedef std::shared_ptr<struct SamplerState9> SamplerState9Ptr;
 
 class BlobData9 : public IBlobData 
@@ -186,11 +186,11 @@ private:
 	IDirect3DCubeTexture9* mTextureCube;
 };
 
-class RenderTarget9 : public ImplementResource<IRenderTarget>
+class FrameBuffer9 : public ImplementResource<IFrameBuffer>
 {
 public:
-	RenderTarget9();
-	RenderTarget9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
+	FrameBuffer9();
+	FrameBuffer9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
 	ITexturePtr GetColorTexture() const override { return mColorTexture; }
 	IDirect3DSurface9*& GetColorBuffer9();
 	IDirect3DSurface9*& GetDepthStencilBuffer9() { return mDepthStencilBuffer; }

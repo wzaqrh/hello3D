@@ -126,12 +126,12 @@ public:
 		mResourceMng.AddResourceDependency(mMaterial, buffer);
 		return *this;
 	}
-	MaterialBuilder& SetRenderTarget(IRenderTargetPtr target) {
+	MaterialBuilder& SetFrameBuffer(IFrameBufferPtr target) {
 		mCurPass->mRenderTarget = target;
 		mResourceMng.AddResourceDependency(mMaterial, target);
 		return *this;
 	}
-	MaterialBuilder& AddIterTarget(IRenderTargetPtr target) {
+	MaterialBuilder& AddIterTarget(IFrameBufferPtr target) {
 		mCurPass->AddIterTarget(target);
 		mResourceMng.AddResourceDependency(mMaterial, target);
 		return *this;

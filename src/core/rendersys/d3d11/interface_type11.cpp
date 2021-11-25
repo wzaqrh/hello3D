@@ -2,6 +2,7 @@
 #include "core/rendersys/render_system.h"
 #include "core/resource/resource.h"
 #include "core/base/d3d.h"
+#include "core/base/debug.h"
 
 namespace mir {
 
@@ -104,8 +105,8 @@ void ContantBuffer11::Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl)
 	mDecl = decl;
 }
 
-/********** RenderTarget11 **********/
-RenderTarget11::RenderTarget11()
+/********** FrameBuffer11 **********/
+FrameBuffer11::FrameBuffer11()
 {
 	mRenderTargetTexture = nullptr;
 	mRenderTargetSRV = nullptr;
@@ -115,7 +116,7 @@ RenderTarget11::RenderTarget11()
 	mDepthStencilView = nullptr;
 }
 
-void RenderTarget11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+void FrameBuffer11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	mFormat = format;
 	mSize = size;
@@ -128,7 +129,7 @@ void RenderTarget11::Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, Re
 	InitDepthStencilView(pDevice);
 }
 
-bool RenderTarget11::InitRenderTexture(ID3D11Device* pDevice)
+bool FrameBuffer11::InitRenderTexture(ID3D11Device* pDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -148,7 +149,7 @@ bool RenderTarget11::InitRenderTexture(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTarget11::InitRenderTargetView(ID3D11Device* pDevice)
+bool FrameBuffer11::InitRenderTargetView(ID3D11Device* pDevice)
 {
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
@@ -156,12 +157,12 @@ bool RenderTarget11::InitRenderTargetView(ID3D11Device* pDevice)
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	if (FAILED(pDevice->CreateRenderTargetView(mRenderTargetTexture, &renderTargetViewDesc, &mRenderTargetView)))
+	if (CheckHR(pDevice->CreateRenderTargetView(mRenderTargetTexture, &renderTargetViewDesc, &mRenderTargetView)))
 		return false;
 	return true;
 }
 
-bool RenderTarget11::InitRenderTextureView(ID3D11Device* pDevice)
+bool FrameBuffer11::InitRenderTextureView(ID3D11Device* pDevice)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
@@ -180,7 +181,7 @@ bool RenderTarget11::InitRenderTextureView(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTarget11::InitDepthStencilTexture(ID3D11Device* pDevice)
+bool FrameBuffer11::InitDepthStencilTexture(ID3D11Device* pDevice)
 {
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
@@ -201,7 +202,7 @@ bool RenderTarget11::InitDepthStencilTexture(ID3D11Device* pDevice)
 	return true;
 }
 
-bool RenderTarget11::InitDepthStencilView(ID3D11Device* pDevice)
+bool FrameBuffer11::InitDepthStencilView(ID3D11Device* pDevice)
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));

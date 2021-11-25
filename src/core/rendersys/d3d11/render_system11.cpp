@@ -30,33 +30,26 @@ RenderSystem11::~RenderSystem11()
 {
 }
 
-HRESULT RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
+bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 {
-	HRESULT hr = S_OK;
-
-	UINT createDeviceFlags = 0;
+	uint32_t createDeviceFlags = 0;
 #ifdef _DEBUG
 	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-	D3D_DRIVER_TYPE driverTypes[] =
-	{
+	std::array<D3D_DRIVER_TYPE, 3> driverTypes = {
 		D3D_DRIVER_TYPE_HARDWARE,
 		D3D_DRIVER_TYPE_WARP,
 		D3D_DRIVER_TYPE_REFERENCE,
 	};
-	UINT numDriverTypes = ARRAYSIZE(driverTypes);
 
-	D3D_FEATURE_LEVEL featureLevels[] =
-	{
+	std::array<D3D_FEATURE_LEVEL,3> featureLevels = {
 		D3D_FEATURE_LEVEL_11_0,
 		D3D_FEATURE_LEVEL_10_1,
 		D3D_FEATURE_LEVEL_10_0,
 	};
-	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
-	DXGI_SWAP_CHAIN_DESC sd;
-	ZeroMemory(&sd, sizeof(sd));
+	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferCount = 1;
 	sd.BufferDesc.Width = width;
 	sd.BufferDesc.Height = height;
@@ -69,36 +62,27 @@ HRESULT RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
 
-	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
-	{
-		mDriverType = driverTypes[driverTypeIndex];
-		mDriverType = D3D_DRIVER_TYPE_HARDWARE;
-		hr = D3D11CreateDeviceAndSwapChain(NULL, mDriverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-			D3D11_SDK_VERSION, &sd, &mSwapChain, &mDevice, &mFeatureLevel, &mDeviceContext);
-		if (SUCCEEDED(hr))
-			break;
+	for (size_t i = 0; i < driverTypes.size(); i++) {
+		if (SUCCEEDED(D3D11CreateDeviceAndSwapChain(NULL, driverTypes[i], NULL, createDeviceFlags,
+			featureLevels.data(), featureLevels.size(), D3D11_SDK_VERSION, &sd,
+			&mSwapChain, &mDevice, &mFeatureLevel, &mDeviceContext)))
+			return true;
 	}
-	return hr;
+	return false;
 }
-HRESULT RenderSystem11::_CreateBackRenderTargetView()
+bool RenderSystem11::_FetchBackFrameBufferColor()
 {
-	// Create a render target view
 	ID3D11Texture2D* pBackBuffer = NULL;
-	HRESULT hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	if (CheckHR(hr))
-		return hr;
-
-	hr = mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mBackRenderTargetView); 
-	mCurRenderTargetView = mBackRenderTargetView;
+	if (CheckHR(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer))) return false;
+	if (CheckHR(mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mBackFrameBuffer.first))) return false;
 	pBackBuffer->Release();
-	return hr;
+
+	mCurFrameBuffer.first = mBackFrameBuffer.first;
+	return true;
 }
-HRESULT RenderSystem11::_CreateBackDepthStencilView(int width, int height)
+bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 {
-	HRESULT hr = S_OK;
-	// Create depth stencil texture
-	D3D11_TEXTURE2D_DESC descDepth;
-	ZeroMemory(&descDepth, sizeof(descDepth));
+	D3D11_TEXTURE2D_DESC descDepth = {};
 	descDepth.Width = width;
 	descDepth.Height = height;
 	descDepth.MipLevels = 1;
@@ -110,57 +94,52 @@ HRESULT RenderSystem11::_CreateBackDepthStencilView(int width, int height)
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	descDepth.CPUAccessFlags = 0;
 	descDepth.MiscFlags = 0;
-	if (CheckHR(hr = mDevice->CreateTexture2D(&descDepth, NULL, &mDepthStencil))) return hr;
+	if (CheckHR(mDevice->CreateTexture2D(&descDepth, NULL, &mDepthStencil))) return false;
 
-	// Create the depth stencil view
-	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-	ZeroMemory(&descDSV, sizeof(descDSV));
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
-	hr = mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mBackDepthStencilView); mCurDepthStencilView = mBackDepthStencilView;
-	return hr;
+	if (CheckHR(mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mBackFrameBuffer.second))) return false;
+
+	mCurFrameBuffer.second = mBackFrameBuffer.second;
+	return true;
 }
-HRESULT RenderSystem11::_SetRasterizerState()
+bool RenderSystem11::_SetRasterizerState()
 {
-	D3D11_RASTERIZER_DESC wfdesc;
-	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
+	D3D11_RASTERIZER_DESC wfdesc = {};
 	wfdesc.FillMode = D3D11_FILL_SOLID;
-	wfdesc.CullMode = D3D11_CULL_NONE;// D3D11_CULL_BACK;
+	wfdesc.CullMode = D3D11_CULL_BACK;
 	ID3D11RasterizerState* pRasterizerState = nullptr;
-	HRESULT hr = mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState);
+	if (CheckHR(mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState))) return false;
+
 	mDeviceContext->RSSetState(pRasterizerState);
-	return hr;
+	return true;
 }
 bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 {
 	mHWnd = hWnd;
-
-	if (vp.right == 0 || vp.bottom == 0)
-		GetClientRect(mHWnd, &vp);
-	UINT vpWidth = vp.right - vp.left;
-	UINT vpHeight = vp.bottom - vp.top;
 
 	RECT rc;
 	GetClientRect(mHWnd, &rc);
 	UINT rcWidth = rc.right - rc.left;
 	UINT rcHeight = rc.bottom - rc.top;
 
-	if (CheckHR(_CreateDeviceAndSwapChain(rcWidth, rcHeight))) return false;
+	if (!_CreateDeviceAndSwapChain(rcWidth, rcHeight)) return false;
 
-	if (CheckHR(_CreateBackRenderTargetView())) return false;
-	if (CheckHR(_CreateBackDepthStencilView(rcWidth, rcHeight))) return false;
-	mDeviceContext->OMSetRenderTargets(1, &mBackRenderTargetView, mBackDepthStencilView);
+	if (!_FetchBackFrameBufferColor() || !_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
+	mDeviceContext->OMSetRenderTargets(1, &mBackFrameBuffer.first, mBackFrameBuffer.second);
 
-	SetViewPort(vp.left, vp.top, vpWidth, vpHeight);
-
-	if (CheckHR(_SetRasterizerState())) return false;
-
+	if (!_SetRasterizerState()) return false;
+	
 	SetDepthState(DepthState{ true, kCompareLessEqual, kDepthWriteMaskAll });
 	SetBlendFunc(BlendState::MakeAlphaPremultiplied());
 
-	mScreenSize.x() = vpWidth;
-	mScreenSize.y() = vpHeight;
+	if (vp.right == 0 || vp.bottom == 0) 
+		GetClientRect(mHWnd, &vp);
+	mScreenSize.x() = vp.right - vp.left;
+	mScreenSize.y() = vp.bottom - vp.top;
+	SetViewPort(vp.left, vp.top, mScreenSize.x(), mScreenSize.y());
 	return true;
 }
 
@@ -197,7 +176,7 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 	case mir::kDeviceResourceTexture:
 		return MakePtr<Texture11>();
 	case mir::kDeviceResourceRenderTarget:
-		return MakePtr<RenderTarget11>();
+		return MakePtr<FrameBuffer11>();
 	case mir::kDeviceResourceSamplerState:
 		return MakePtr<SamplerState11>();
 	default:
@@ -206,35 +185,36 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IRenderTargetPtr RenderSystem11::LoadRenderTarget(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
+IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	BOOST_ASSERT(res);
 
-	RenderTexture11Ptr ret = std::static_pointer_cast<RenderTarget11>(res);
+	FrameBuffer11Ptr ret = std::static_pointer_cast<FrameBuffer11>(res);
 	ret->Init(mDevice, size, format);
 	return ret;
 }
-void RenderSystem11::ClearRenderTarget(IRenderTargetPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil)
+void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil)
 {
 	if (rendTarget) {
-		auto target11 = std::static_pointer_cast<RenderTarget11>(rendTarget);
+		auto target11 = std::static_pointer_cast<FrameBuffer11>(rendTarget);
 		mDeviceContext->ClearRenderTargetView(target11->GetColorBuffer11(), (const float*)&color);
 		mDeviceContext->ClearDepthStencilView(target11->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, depth, stencil);
 	}
 	else {
-		mDeviceContext->ClearRenderTargetView(mCurRenderTargetView, (const float*)&color);
-		mDeviceContext->ClearDepthStencilView(mCurDepthStencilView, D3D11_CLEAR_DEPTH, depth, stencil);
+		mDeviceContext->ClearRenderTargetView(mCurFrameBuffer.first, (const float*)&color);
+		mDeviceContext->ClearDepthStencilView(mCurFrameBuffer.second, D3D11_CLEAR_DEPTH, depth, stencil);
 	}
 }
-void RenderSystem11::SetRenderTarget(IRenderTargetPtr rendTarget)
+void RenderSystem11::SetFrameBuffer(IFrameBufferPtr rendTarget)
 {
 	ID3D11ShaderResourceView* TextureNull = nullptr;
 	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
 
-	auto target11 = std::static_pointer_cast<RenderTarget11>(rendTarget);
-	mCurRenderTargetView = target11 != nullptr ? target11->GetColorBuffer11() : mBackRenderTargetView;
-	mCurDepthStencilView = target11 != nullptr ? target11->GetDepthStencilBuffer11() : mBackDepthStencilView;
-	mDeviceContext->OMSetRenderTargets(1, &mCurRenderTargetView, mCurDepthStencilView);
+	auto target11 = std::static_pointer_cast<FrameBuffer11>(rendTarget);
+	mCurFrameBuffer = target11 
+		? std::make_pair(target11->GetColorBuffer11(), target11->GetDepthStencilBuffer11()) 
+		: mBackFrameBuffer;
+	mDeviceContext->OMSetRenderTargets(1, &mCurFrameBuffer.first, mCurFrameBuffer.second);
 }
 
 IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr)

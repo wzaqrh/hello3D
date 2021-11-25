@@ -54,7 +54,7 @@ void Pass::ClearSamplers()
 {
 	mSamplers.clear();
 }
-void Pass::AddIterTarget(IRenderTargetPtr target)
+void Pass::AddIterTarget(IFrameBufferPtr target)
 {
 	mRTIterators.push_back(target);
 }

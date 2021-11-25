@@ -48,7 +48,7 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr mainTex)
+PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex)
 	:mResourceMng(resourceMng)
 {
 	mMainTex = mainTex;
@@ -150,7 +150,7 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 }
 
 /********** Bloom **********/
-IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr target) {
+IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr target) {
 	auto srv = target->GetColorTexture();
 	float sx = srv->GetWidth() * 1.0 / resourceMng.WinSize().x();
 	float sy = srv->GetHeight() * 1.0 / resourceMng.WinSize().y();
@@ -159,7 +159,7 @@ IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng,
 	return resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
-Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr mainTex)
+Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex)
 	:PostProcess(launchMode, resourceMng, mainTex)
 {
 	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_POSTPROC_BLOOM);

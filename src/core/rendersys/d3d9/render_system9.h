@@ -27,9 +27,9 @@ public:
 public:
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IRenderTargetPtr LoadRenderTarget(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
-	void SetRenderTarget(IRenderTargetPtr rendTarget) override;
-	void ClearRenderTarget(IRenderTargetPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
+	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
+	void SetFrameBuffer(IFrameBufferPtr rendTarget) override;
+	void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
 
 	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;

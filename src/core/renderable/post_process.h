@@ -22,13 +22,13 @@ class MIR_CORE_API PostProcess : public IRenderable
 {
 	friend class RenderableFactory;
 protected:
-	PostProcess(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr mainTex);
+	PostProcess(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex);
 public:
 	~PostProcess();
 	int GenRenderOperation(RenderOperationQueue& opList) override;
 protected:
 	ResourceManager& mResourceMng;
-	IRenderTargetPtr mMainTex;
+	IFrameBufferPtr mMainTex;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 	MaterialPtr mMaterial;
@@ -47,7 +47,7 @@ class MIR_CORE_API Bloom : public PostProcess
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Bloom);
-	Bloom(Launch launchMode, ResourceManager& resourceMng, IRenderTargetPtr mainTex);
+	Bloom(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex);
 public:
 };
 

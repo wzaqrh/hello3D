@@ -14,21 +14,21 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	:mRenderSys(renderSys)
 	,mScreenSize(size)
 {
-	mShadowCasterOutput = resMng.CreateRenderTarget(__LaunchSync__, mScreenSize, kFormatR32Float);
+	mShadowCasterOutput = resMng.CreateFrameBuffer(__LaunchSync__, mScreenSize, kFormatR32Float);
 	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
-void RenderPipeline::_PushRenderTarget(IRenderTargetPtr rendTarget)
+void RenderPipeline::_PushRenderTarget(IFrameBufferPtr rendTarget)
 {
 	mRenderTargetStk.push_back(rendTarget);
-	mRenderSys.SetRenderTarget(rendTarget);
+	mRenderSys.SetFrameBuffer(rendTarget);
 }
 void RenderPipeline::_PopRenderTarget()
 {
 	if (!mRenderTargetStk.empty())
 		mRenderTargetStk.pop_back();
 
-	mRenderSys.SetRenderTarget(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
+	mRenderSys.SetFrameBuffer(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
 }
 
 void RenderPipeline::BindPass(const PassPtr& pass)
@@ -167,7 +167,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
 		_PushRenderTarget(mShadowCasterOutput);
-		mRenderSys.ClearRenderTarget(nullptr, Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
+		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
 		mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
@@ -228,8 +228,8 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 	{
 		//setup framebuffer as camera's post_process_input 
 		if (!camera->PostProcessEffects().empty() && camera->mPostProcessInput) {
-			mRenderSys.SetRenderTarget(camera->mPostProcessInput);
-			mRenderSys.ClearRenderTarget(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
+			mRenderSys.SetFrameBuffer(camera->mPostProcessInput);
+			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
 		}
 
 		//camera's skybox
@@ -257,53 +257,12 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 	}
 }
 
-void RenderPipeline::_RenderSkyBox()
-{
-#if REFACTOR
-	if (mSceneManager->GetDefCamera()->SkyBox()) {
-		RenderOperationQueue opQue;
-		mSceneManager->GetDefCamera()->SkyBox()->GenRenderOperation(opQue);
-		RenderOpQueue(opQue, E_PASS_FORWARDBASE);
-	}
-#endif
-}
-void RenderPipeline::_DoPostProcess()
-{
-#if REFACTOR
-	DepthState orgState = mRenderSys.GetDepthState();
-	mRenderSys.SetDepthState(DepthState(false));
-
-	RenderOperationQueue opQue;
-	auto& postProcessEffects = mSceneManager->GetDefCamera()->PostProcessEffects();
-	for (size_t i = 0; i < postProcessEffects.size(); ++i)
-		postProcessEffects[i]->GenRenderOperation(opQue);
-	RenderOpQueue(opQue, E_PASS_POSTPROCESS);
-
-	mRenderSys.SetDepthState(orgState);
-#endif
-}
-
 bool RenderPipeline::BeginFrame()
 {
-	if (!mRenderSys.BeginScene()) return false;
-
-#if REFACTOR
-	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty() && mSceneManager->GetDefCamera()->mPostProcessInput) {
-		mRenderSys.SetRenderTarget(mSceneManager->GetDefCamera()->mPostProcessInput);
-		mRenderSys.ClearRenderTarget(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
-	}
-	_RenderSkyBox();
-#endif
-	return true;
+	return mRenderSys.BeginScene();
 }
 void RenderPipeline::EndFrame()
 {
-#if REFACTOR
-	if (!mSceneManager->GetDefCamera()->PostProcessEffects().empty()) {
-		mRenderSys.SetRenderTarget(nullptr);
-	}
-	_DoPostProcess();
-#endif
 	mRenderSys.EndScene();
 }
 

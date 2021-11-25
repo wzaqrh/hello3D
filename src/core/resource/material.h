@@ -68,7 +68,7 @@ public:
 	void AddConstBuffer(const CBufferEntry& cbuffer, int slot);
 	void AddSampler(ISamplerStatePtr sampler);
 	void ClearSamplers();
-	void AddIterTarget(IRenderTargetPtr target);
+	void AddIterTarget(IFrameBufferPtr target);
 	
 	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 
@@ -85,8 +85,8 @@ public:
 	std::vector<ISamplerStatePtr> mSamplers;
 	std::vector<CBufferEntry> mConstantBuffers;
 
-	IRenderTargetPtr mRenderTarget;
-	std::vector<IRenderTargetPtr> mRTIterators;
+	IFrameBufferPtr mRenderTarget;
+	std::vector<IFrameBufferPtr> mRTIterators;
 };
 
 class Technique : public ImplementResource<IResource>

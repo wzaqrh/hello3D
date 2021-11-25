@@ -15,7 +15,7 @@ typedef std::shared_ptr< struct VertexBuffer11> VertexBuffer11Ptr;
 typedef std::shared_ptr< struct IndexBuffer11> IndexBuffer11Ptr;
 typedef std::shared_ptr< struct ContantBuffer11> ContantBuffer11Ptr;
 typedef std::shared_ptr< struct Texture11> Texture11Ptr;
-typedef std::shared_ptr< struct RenderTarget11> RenderTexture11Ptr;
+typedef std::shared_ptr< struct FrameBuffer11> FrameBuffer11Ptr;
 typedef std::shared_ptr< struct SamplerState11> SamplerState11Ptr;
 
 /********** Program **********/
@@ -165,10 +165,10 @@ private:
 	ID3D11ShaderResourceView* mTexture;
 };
 
-class RenderTarget11 : public ImplementResource<IRenderTarget>
+class FrameBuffer11 : public ImplementResource<IFrameBuffer>
 {
 public:
-	RenderTarget11();
+	FrameBuffer11();
 	void Init(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format = kFormatR32G32B32A32Float);
 	ITexturePtr GetColorTexture() const override { return mRenderTargetPtr; }
 

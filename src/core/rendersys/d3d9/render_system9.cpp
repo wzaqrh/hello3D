@@ -118,7 +118,7 @@ static inline D3DCOLOR XMFLOAT2D3DCOLOR(Eigen::Vector4f color) {
 	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x() * 255), int(color.y() * 255), int(color.z() * 255), int(color.w() * 255));
 	return dc;
 }
-void RenderSystem9::ClearRenderTarget(IRenderTargetPtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil)
+void RenderSystem9::ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, unsigned char stencil)
 {
 	if (mCurColorBuffer != mBackColorBuffer) {
 		//mDevice9->ColorFill(mCurColorBuffer, NULL, XMFLOAT2D3DCOLOR(color));
@@ -142,7 +142,7 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 	case mir::kDeviceResourceTexture:
 		return MakePtr<Texture9>(nullptr);
 	case mir::kDeviceResourceRenderTarget:
-		return MakePtr<RenderTarget9>();
+		return MakePtr<FrameBuffer9>();
 	case mir::kDeviceResourceSamplerState:
 		return MakePtr<SamplerState9>();
 	default:
@@ -151,7 +151,7 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IRenderTargetPtr RenderSystem9::LoadRenderTarget(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
+IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr);
 	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
@@ -161,15 +161,15 @@ IRenderTargetPtr RenderSystem9::LoadRenderTarget(IResourcePtr res, const Eigen::
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
 	if (CheckHR(mDevice9->CreateDepthStencilSurface(size.x(), size.y(), D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
-	RenderTexture9Ptr ret = MakePtr<RenderTarget9>(pTextureRV, pSurfaceDepthStencil);
+	FrameBuffer9Ptr ret = MakePtr<FrameBuffer9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;
 }
 
-void RenderSystem9::SetRenderTarget(IRenderTargetPtr rendTarget)
+void RenderSystem9::SetFrameBuffer(IFrameBufferPtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = std::static_pointer_cast<RenderTarget9>(rendTarget)->GetColorBuffer9();
-		mCurDepthStencilBuffer = std::static_pointer_cast<RenderTarget9>(rendTarget)->GetDepthStencilBuffer9();
+		mCurColorBuffer = std::static_pointer_cast<FrameBuffer9>(rendTarget)->GetColorBuffer9();
+		mCurDepthStencilBuffer = std::static_pointer_cast<FrameBuffer9>(rendTarget)->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;

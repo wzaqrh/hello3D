@@ -114,12 +114,12 @@ public:
 		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
 	}
 
-	TemplateArgs IRenderTargetPtr CreateRenderTarget(Launch launchMode, T &&...args) {
+	TemplateArgs IFrameBufferPtr CreateFrameBuffer(Launch launchMode, T &&...args) {
 		auto res = mRenderSys.CreateResource(kDeviceResourceRenderTarget); ResSetLaunch;
-		res->SetLoaded(nullptr != mRenderSys.LoadRenderTarget(res, std::forward<T>(args)...));
-		return std::static_pointer_cast<IRenderTarget>(res);
+		res->SetLoaded(nullptr != mRenderSys.LoadFrameBuffer(res, std::forward<T>(args)...));
+		return std::static_pointer_cast<IFrameBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IRenderTargetPtr, CreateRenderTarget);
+	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer);
 
 	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName);
 	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial);

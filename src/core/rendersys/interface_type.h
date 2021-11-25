@@ -103,7 +103,7 @@ interface ITexture : public IResource
 	virtual bool IsAutoGenMipmap() const = 0;
 };
 
-interface IRenderTarget : public IResource   
+interface IFrameBuffer : public IResource   
 {
 	virtual ITexturePtr GetColorTexture() const = 0;
 };
