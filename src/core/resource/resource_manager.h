@@ -7,8 +7,14 @@
 #include "core/base/declare_macros.h"
 #include "core/base/launch.h"
 #include "core/predeclare.h"
-#include "core/resource/resource.h"
+#include "core/rendersys/blob.h"
+#include "core/rendersys/program.h"
+#include "core/rendersys/input_layout.h"
+#include "core/rendersys/hardware_buffer.h"
+#include "core/rendersys/texture.h"
+#include "core/rendersys/framebuffer.h"
 #include "core/rendersys/render_system.h"
+#include "core/resource/material_name.h"
 
 namespace mir {
 
@@ -115,7 +121,7 @@ public:
 	}
 
 	TemplateArgs IFrameBufferPtr CreateFrameBuffer(Launch launchMode, T &&...args) {
-		auto res = mRenderSys.CreateResource(kDeviceResourceRenderTarget); ResSetLaunch;
+		auto res = mRenderSys.CreateResource(kDeviceResourceFrameBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadFrameBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IFrameBuffer>(res);
 	}

@@ -2,7 +2,6 @@
 #include "test/app.h"
 #include "core/resource/material_factory.h"
 #include "core/scene/scene_manager.h"
-#include "core/rendersys/interface_type.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"

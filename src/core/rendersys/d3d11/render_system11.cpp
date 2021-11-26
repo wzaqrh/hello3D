@@ -12,7 +12,12 @@
 #include "core/base/debug.h"
 #include "core/base/input.h"
 #include "core/rendersys/d3d11/render_system11.h"
-#include "core/rendersys/d3d11/interface_type11.h"
+#include "core/rendersys/d3d11/blob11.h"
+#include "core/rendersys/d3d11/program11.h"
+#include "core/rendersys/d3d11/input_layout11.h"
+#include "core/rendersys/d3d11/hardware_buffer11.h"
+#include "core/rendersys/d3d11/texture11.h"
+#include "core/rendersys/d3d11/framebuffer11.h"
 #include "core/resource/material_factory.h"
 #include "core/renderable/renderable.h"
 
@@ -175,7 +180,7 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 		return MakePtr<ContantBuffer11>();
 	case mir::kDeviceResourceTexture:
 		return MakePtr<Texture11>();
-	case mir::kDeviceResourceRenderTarget:
+	case mir::kDeviceResourceFrameBuffer:
 		return MakePtr<FrameBuffer11>();
 	case mir::kDeviceResourceSamplerState:
 		return MakePtr<SamplerState11>();
@@ -277,7 +282,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 
 	return blob;
 }
-IShaderPtr RenderSystem11::CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data)
+IShaderPtr RenderSystem11::CreateShader(int type, const ShaderCompileDesc& desc, IBlobDataPtr data)
 {
 	switch (type) {
 	case kShaderVertex: {

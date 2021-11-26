@@ -4,7 +4,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/rendersys/base_type.h"
-#include "core/rendersys/interface_type.h"
+//#include "core/rendersys/hardware_buffer.h"
 
 namespace mir {
 
@@ -15,7 +15,7 @@ enum DeviceResourceType {
 	kDeviceResourceIndexBuffer,
 	kDeviceResourceContantBuffer,
 	kDeviceResourceTexture,
-	kDeviceResourceRenderTarget,
+	kDeviceResourceFrameBuffer,
 	kDeviceResourceSamplerState
 };
 
@@ -48,7 +48,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, const Data& data) = 0;
 
 	virtual IBlobDataPtr CompileShader(const ShaderCompileDesc& desc, const Data& data) = 0;
-	virtual IShaderPtr CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data) = 0;
+	virtual IShaderPtr CreateShader(int shaderType, const ShaderCompileDesc& desc, IBlobDataPtr data) = 0;
 	virtual IProgramPtr LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders) = 0;
 	virtual void SetProgram(IProgramPtr program) = 0;
 	

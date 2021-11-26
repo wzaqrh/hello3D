@@ -4,8 +4,6 @@
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
-#include "core/rendersys/interface_type.h"
-#include "core/rendersys/render_system.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/assimp_resource.h"
@@ -149,7 +147,7 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 			{{"SHADER_MODEL", "40000"}},
 			vsEntry, "vs_4_0", vsAsmPath.string()
 		};
-		auto blobVS = std::make_shared<BlobDataStandard>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
+		auto blobVS = std::make_shared<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
 
 		std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
 		boost::filesystem::path psAsmPath = "shader/d3d11/" + name + "_" + psEntryOrPS + ".cso";
@@ -158,7 +156,7 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 			{{"SHADER_MODEL", "40000"}},
 			psEntry, "ps_4_0", psAsmPath.string()
 		};
-		auto blobPS = std::make_shared<BlobDataStandard>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
+		auto blobPS = std::make_shared<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
 
 		if (nextJob == nullptr) {
 			std::vector<IShaderPtr> shaders;

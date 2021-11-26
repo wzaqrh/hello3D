@@ -1,8 +1,6 @@
 #include "core/resource/material.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/resource_manager.h"
-#include "core/rendersys/interface_type.h"
-#include "core/renderable/post_process.h"
 
 namespace mir {
 

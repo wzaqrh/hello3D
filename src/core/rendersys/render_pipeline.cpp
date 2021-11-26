@@ -1,14 +1,16 @@
 #include "core/rendersys/render_pipeline.h"
-#include "core/rendersys/interface_type.h"
 #include "core/resource/resource_manager.h"
-#include "core/resource/material_factory.h"
+#include "core/renderable/skybox.h"
+#include "core/renderable/post_process.h"
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
-#include "core/renderable/post_process.h"
-#include "core/renderable/skybox.h"
 #include "core/base/debug.h"
 
 namespace mir {
+
+#define E_TEXTURE_MAIN 0
+#define E_TEXTURE_DEPTH_MAP 8
+#define E_TEXTURE_ENV 9
 
 RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size)
 	:mRenderSys(renderSys)

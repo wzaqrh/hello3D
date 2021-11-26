@@ -6,7 +6,7 @@
 
 namespace mir {
 
-struct cbPerLight;
+
 
 struct cbGlobalParam
 {
@@ -25,6 +25,7 @@ public:
 	Eigen::Matrix4f ProjectionInv;
 };
 
+struct cbPerLight;
 class MIR_CORE_API RenderPipeline
 {
 	RenderSystem& mRenderSys;

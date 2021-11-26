@@ -1,6 +1,7 @@
 #pragma once
+#include <windows.h>
+#include <d3d11.h>
 #include "core/rendersys/render_system.h"
-#include "interface_type11.h"
 
 namespace mir {
 
@@ -32,7 +33,7 @@ public:
 	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
 	IBlobDataPtr CompileShader(const ShaderCompileDesc& compileDesc, const Data& data) override;
-	IShaderPtr CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data) override;
+	IShaderPtr CreateShader(int type, const ShaderCompileDesc& desc, IBlobDataPtr data) override;
 	IProgramPtr LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders) override;
 	void SetProgram(IProgramPtr program) override;
 
