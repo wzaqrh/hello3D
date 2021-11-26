@@ -20,7 +20,6 @@ public:
 	Texture9(IDirect3DTexture9* texture);
 
 	bool IsCube() const { return mTextureCube != nullptr; }
-	bool HasSRV() const override { return mTexture != nullptr || mTextureCube != nullptr; }
 	void SetSRV9(IDirect3DTexture9* texture);
 	IDirect3DTexture9*& GetSRV9() { return mTexture; }
 	IDirect3DCubeTexture9*& GetSRVCube9() { return mTextureCube; }

@@ -11,7 +11,6 @@ interface ISamplerState : public IResource
 
 interface ITexture : public IResource
 {
-	virtual bool HasSRV() const = 0;
 	virtual int GetWidth() const = 0;
 	virtual int GetHeight() const = 0;
 	virtual ResourceFormat GetFormat() const = 0;

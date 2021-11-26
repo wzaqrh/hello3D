@@ -202,8 +202,12 @@ void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::V
 {
 	if (rendTarget) {
 		auto target11 = std::static_pointer_cast<FrameBuffer11>(rendTarget);
-		mDeviceContext->ClearRenderTargetView(target11->GetColorBuffer11(), (const float*)&color);
-		mDeviceContext->ClearDepthStencilView(target11->GetDepthStencilBuffer11(), D3D11_CLEAR_DEPTH, depth, stencil);
+		mDeviceContext->ClearRenderTargetView(
+			std::static_pointer_cast<FrameBufferAttachColor11>(target11->GetAttachColor(0))->AsRTV(), 
+			(const float*)&color);
+		mDeviceContext->ClearDepthStencilView(
+			std::static_pointer_cast<FrameBufferAttachZStencil11>(target11->GetAttachZStencil())->AsDSV(), 
+			D3D11_CLEAR_DEPTH, depth, stencil);
 	}
 	else {
 		mDeviceContext->ClearRenderTargetView(mCurFrameBuffer.first, (const float*)&color);
@@ -217,7 +221,8 @@ void RenderSystem11::SetFrameBuffer(IFrameBufferPtr rendTarget)
 
 	auto target11 = std::static_pointer_cast<FrameBuffer11>(rendTarget);
 	mCurFrameBuffer = target11 
-		? std::make_pair(target11->GetColorBuffer11(), target11->GetDepthStencilBuffer11()) 
+		? std::make_pair(std::static_pointer_cast<FrameBufferAttachColor11>(target11->GetAttachColor(0))->AsRTV(), 
+						 std::static_pointer_cast<FrameBufferAttachZStencil11>(target11->GetAttachZStencil())->AsDSV()) 
 		: mBackFrameBuffer;
 	mDeviceContext->OMSetRenderTargets(1, &mCurFrameBuffer.first, mCurFrameBuffer.second);
 }
@@ -594,25 +599,17 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	
 	ComPtr<ID3D11Texture2D> tex;
-	HRESULT hr = mDevice->CreateTexture2D(&desc, &initData, tex.GetAddressOf());
+	if (CheckHR(mDevice->CreateTexture2D(&desc, &initData, tex.GetAddressOf()))) return false;
+	
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	SRVDesc.Texture2D.MipLevels = texture->GetMipmapCount();
 
-	if (SUCCEEDED(hr))
-	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = static_cast<DXGI_FORMAT>(texture->GetFormat());
-		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		SRVDesc.Texture2D.MipLevels = texture->GetMipmapCount();
+	Texture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
+	if (CheckHR(mDevice->CreateShaderResourceView(tex.Get(), &SRVDesc, &tex11->GetSRV11()))) return false;
 
-		ID3D11ShaderResourceView* texSRV;
-		hr = mDevice->CreateShaderResourceView(tex.Get(), &SRVDesc, &texSRV);
-		if (SUCCEEDED(hr)) 
-		{
-			Texture11Ptr tex11 = std::static_pointer_cast<Texture11>(texture);
-			tex11->SetSRV11(texSRV);
-		}
-	}
-
-	return SUCCEEDED(hr);
+	return true;
 }
 
 ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc cmpFunc)

@@ -11,7 +11,7 @@ void TextureBySlot::Merge(const TextureBySlot& other)
 		Textures.resize(other.Textures.size());
 
 	for (size_t i = 0; i < other.Textures.size(); ++i) {
-		if (other.Textures[i] && other.Textures[i]->HasSRV()) {
+		if (other.Textures[i] && other.Textures[i]->IsLoaded()) {
 			Textures[i] = other.Textures[i];
 		}
 	}

@@ -53,11 +53,11 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 
 	if (iterCnt >= 0) {
 		if (iterCnt + 1 < pass->mRTIterators.size())
-			textures[0] = pass->mRTIterators[iterCnt + 1]->GetColorTexture();
+			textures[0] = pass->mRTIterators[iterCnt + 1]->GetAttachColorTexture(0);
 	}
 	else {
 		if (!pass->mRTIterators.empty())
-			textures[0] = pass->mRTIterators[0]->GetColorTexture();
+			textures[0] = pass->mRTIterators[0]->GetAttachColorTexture(0);
 	}
 
 	{
@@ -174,7 +174,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetAttachColorTexture(0));
 
 		auto& skyBox = camera.SkyBox();
 		if (skyBox && skyBox->GetTexture())
@@ -182,7 +182,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
 		if (camera.mPostProcessInput) 
-			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.mPostProcessInput->GetColorTexture());
+			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.mPostProcessInput->GetAttachColorTexture(0));
 	}
 
 	if (!lightsOrder.empty()) {

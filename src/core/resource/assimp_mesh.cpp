@@ -20,7 +20,7 @@ bool AssimpMesh::HasTexture(int slot) const
 {
 	return (slot < mTextures->Count()) 
 		&& mTextures->At(slot)
-		&& mTextures->At(slot)->HasSRV();
+		&& mTextures->At(slot)->IsLoaded();
 }
 
 bool AssimpMesh::IsLoaded() const

@@ -32,7 +32,8 @@ void DirectLight::SetSpecularPower(float power)
 	mCbLight.SpecularColorPower.w() = power;
 }
 
-void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const {
+void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
+{
 	view = math::MakeLookAtLH(mCbLight.LightPos.head<3>(), camera.mLookAtPos, Eigen::Vector3f(0, 1, 0));
 	proj = math::MakeOrthographicOffCenterLH(0, camera.mSize.x(), 0, camera.mSize.y(), 0.01, camera.mZFar);
 }

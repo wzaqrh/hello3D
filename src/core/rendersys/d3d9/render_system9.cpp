@@ -176,8 +176,11 @@ IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Ve
 void RenderSystem9::SetFrameBuffer(IFrameBufferPtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = std::static_pointer_cast<FrameBuffer9>(rendTarget)->GetColorBuffer9();
-		mCurDepthStencilBuffer = std::static_pointer_cast<FrameBuffer9>(rendTarget)->GetDepthStencilBuffer9();
+		auto target9 = std::static_pointer_cast<FrameBuffer9>(rendTarget);
+		mCurColorBuffer = std::static_pointer_cast<FrameBufferAttachColor9>(target9->GetAttachColor(0))
+			->GetColorBuffer9();
+		mCurDepthStencilBuffer = std::static_pointer_cast<FrameBufferAttachZStencil9>(target9->GetAttachZStencil())
+			->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;

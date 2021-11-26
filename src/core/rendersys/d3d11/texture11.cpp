@@ -16,11 +16,6 @@ void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int 
 	mTexture = nullptr;
 }
 
-void Texture11::SetSRV11(ID3D11ShaderResourceView* texture)
-{
-	mTexture = texture;
-}
-
 D3D11_TEXTURE2D_DESC Texture11::GetDesc()
 {
 	if (mTexture != nullptr) {
