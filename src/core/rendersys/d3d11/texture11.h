@@ -27,7 +27,9 @@ public:
 	int GetFaceCount() const override { return mFaceCount; }
 	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
 
-	ID3D11ShaderResourceView*& GetSRV11() { return mTexture; }
+	ID3D11ShaderResourceView*& AsSRV() { return mSRV; }
+	ID3D11RenderTargetView*& AsRTV() { return mRTV; }
+	ID3D11DepthStencilView*& AsDSV() { return mDSV; }
 private:
 	D3D11_TEXTURE2D_DESC GetDesc();
 private:
@@ -35,7 +37,9 @@ private:
 	int mWidth, mHeight, mFaceCount, mMipCount;
 	ResourceFormat mFormat;
 	HWMemoryUsage mUsage;
-	ID3D11ShaderResourceView* mTexture;
+	ID3D11ShaderResourceView* mSRV;
+	ID3D11RenderTargetView* mRTV;
+	ID3D11DepthStencilView* mDSV;
 };
 
 }

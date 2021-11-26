@@ -13,14 +13,14 @@ void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int 
 	mFormat = format;
 	mUsage = usage;
 
-	mTexture = nullptr;
+	mSRV = nullptr;
 }
 
 D3D11_TEXTURE2D_DESC Texture11::GetDesc()
 {
-	if (mTexture != nullptr) {
+	if (mSRV != nullptr) {
 		ID3D11Texture2D* pTexture;
-		mTexture->GetResource((ID3D11Resource **)&pTexture);
+		mSRV->GetResource((ID3D11Resource **)&pTexture);
 
 		D3D11_TEXTURE2D_DESC desc;
 		pTexture->GetDesc(&desc);
