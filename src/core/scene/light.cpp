@@ -41,7 +41,7 @@ void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::M
 PointLight::PointLight()
 {
 	SetPosition(0, 0, -10);
-	SetAttenuation(1.0, 0.01, 0.0);
+	SetAttenuation(0.01);
 }
 
 void PointLight::SetPosition(float x, float y, float z)
@@ -49,9 +49,9 @@ void PointLight::SetPosition(float x, float y, float z)
 	mCbLight.LightPos = Eigen::Vector4f(x, y, z, 1);
 }
 
-void PointLight::SetAttenuation(float a, float b, float c)
+void PointLight::SetAttenuation(float c)
 {
-	mCbLight.Attenuation = Eigen::Vector4f(a, b, c, 0);
+	mCbLight.Attenuation = Eigen::Vector4f(1, 0, c, mCbLight.Attenuation.w());
 }
 
 /********** SpotLight **********/

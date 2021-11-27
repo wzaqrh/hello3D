@@ -137,8 +137,9 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool castShadow, const ILight& light)
 {
 	cbGlobalParam globalParam = {};
-	cbPerLight lightParam = {};
-
+	cbPerLight lightParam = light.MakeCbLight();
+	lightParam.HasDepthMap = castShadow ? TRUE : FALSE;
+	lightParam.LightType = light.GetType() + 1;
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
 	}
@@ -150,10 +151,6 @@ std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool c
 	globalParam.WorldInv = globalParam.World.inverse();
 	globalParam.ViewInv = globalParam.View.inverse();
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
-
-	lightParam.HasDepthMap = castShadow ? TRUE : FALSE;
-	lightParam.LightType = light.GetType() + 1;
-	lightParam.Light = light.MakeCbLight();
 	return std::tie(globalParam, lightParam);
 }
 

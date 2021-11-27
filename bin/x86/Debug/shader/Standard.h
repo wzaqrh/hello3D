@@ -1,27 +1,13 @@
-struct LIGHT_DIRECT
-{
-	float4 LightPos;//world space
-	float4 DiffuseColor;
-	float4 SpecularColorPower;
-};
-
-struct LIGHT_POINT
-{
-	LIGHT_DIRECT Base;
-	float4 Attenuation;
-};
-
-struct LIGHT_SPOT
-{
-	LIGHT_POINT Base;
-	float4 DirectionCutOff;
-};
-
 cbuffer cbPerLight : register(b1)
 {
 	matrix LightView;
 	matrix LightProjection;	
-	LIGHT_SPOT Light;
+
+	float4 LightPos;//world space
+	float4 DiffuseColor;
+	float4 SpecularColorPower;
+	float4 Attenuation;
+	float4 DirectionCutOff;
 
 	int LightType;
 	int HasDepthMap;
@@ -36,6 +22,8 @@ cbuffer cbGlobalParam : register(b0)
 	matrix WorldInv;
 	matrix ViewInv;
 	matrix ProjectionInv;
+
+	//float4 glstate_lightmodel_ambient;
 }
 
 #if SHADER_MODEL > 30000

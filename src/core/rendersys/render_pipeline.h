@@ -23,6 +23,8 @@ public:
 	Eigen::Matrix4f WorldInv;
 	Eigen::Matrix4f ViewInv;
 	Eigen::Matrix4f ProjectionInv;
+
+	//Eigen::Vector4f glstate_lightmodel_ambient;
 };
 
 class MIR_CORE_API RenderPipeline

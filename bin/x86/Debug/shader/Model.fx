@@ -75,10 +75,10 @@ PS_INPUT VS(VS_INPUT i)
 	output.Pos = mul(MWV, skinPos);
 	
 	if (LightType == 1) {
-		output.ToLight = normalize(mul(View, float4(-Light.Base.Base.LightPos.xyz,0.0)));	
+		output.ToLight = normalize(mul(View, float4(-LightPos.xyz,0.0)));
 	}
 	else if (LightType == 2 || LightType == 3) {
-		output.ToLight = mul(View,float4(Light.Base.Base.LightPos.xyz,1.0)).xyz - output.Pos.xyz;
+		output.ToLight = mul(View,float4(LightPos.xyz,1.0)).xyz - output.Pos.xyz;
 	}
 	
 	matrix LightMWVP = mul(LightProjection,mul(LightView, MW));
@@ -106,32 +106,63 @@ float3 GetSpecularBySampler(float3 normal, float3 light, float3 eye, float4 Spec
 	return GetSpecularByDef(normal, light, eye, SpecColorPower) * specularMat;
 }
 
-float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 light, float3 eye, float2 texcoord) {
+float3 CalDirectLight(float3 normal, float3 light, float3 eye, float2 texcoord) {
 	float3 color = 0.0;
 	if (dot(normal, light) > 0.0) 
 	{
-		float3 diffuse = GetDiffuseBySampler(normal, light, directLight.DiffuseColor.xyz, texcoord);
-		float3 specular = GetSpecularBySampler(normal, light, eye, directLight.SpecularColorPower, texcoord);
+		float3 diffuse = GetDiffuseBySampler(normal, light, DiffuseColor.xyz, texcoord);
+		float3 specular = GetSpecularBySampler(normal, light, eye, SpecularColorPower, texcoord);
 		color = diffuse + specular;	
 	}
 	return color;
 }
-float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance) {
-	float3 color = CalDirectLight(pointLight.Base, normal, light, eye, texcoord);
-	float Attenuation = pointLight.Attenuation.x 
-	+ pointLight.Attenuation.y * Distance 
-	+ pointLight.Attenuation.z * Distance * Distance;
-	return color / Attenuation;
+float3 CalPointLight(float3 normal, float3 light, float3 eye, float2 texcoord, float Distance) {
+	float3 color = CalDirectLight(normal, light, eye, texcoord);
+	float attenuation = Attenuation.x
+	+ Attenuation.y * Distance
+	+ Attenuation.z * Distance * Distance;
+	return color / attenuation;
 }
-float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance, float3 spotDirection) {
+float3 CalSpotLight(float3 normal, float3 light, float3 eye, float2 texcoord, float Distance, float3 spotDirection) {
 	float3 color = 0.0;
 	float spotFactor = dot(light, spotDirection);
-	if (spotFactor > spotLight.DirectionCutOff.w) {
-		color = CalPointLight(spotLight.Base, normal, light, eye, texcoord, Distance);
-        color = color * ((spotFactor - spotLight.DirectionCutOff.w) / (1.0 - spotLight.DirectionCutOff.w));
+	if (spotFactor > DirectionCutOff.w) {
+		color = CalPointLight(normal, light, eye, texcoord, Distance);
+        color = color * ((spotFactor - DirectionCutOff.w) / (1.0 - DirectionCutOff.w));
 	}
 	return color;
 }
+
+#ifdef CPPPP
+float3 ShadeVertexLightsFull (float4 vertex, float3 normal, bool spotLight)
+{
+    float3 viewpos = vertex.xyz;
+    float3 viewN = normal;
+
+    float3 lightColor = glstate_lightmodel_ambient.xyz;
+    {
+        float3 toLight = unity_LightPosition.xyz - viewpos.xyz * unity_LightPosition.w;
+        float lengthSq = dot(toLight, toLight);
+
+        // don't produce NaNs if some vertex position overlaps with the light
+        lengthSq = max(lengthSq, 0.000001);
+
+        toLight *= rsqrt(lengthSq);
+
+        float atten = 1.0 / (1.0 + lengthSq * unity_LightAtten.z);
+        if (spotLight)
+        {
+            float rho = max (0, dot(toLight, unity_SpotDirection.xyz));
+            float spotAtt = (rho - unity_LightAtten.x) * unity_LightAtten.y;
+            atten *= saturate(spotAtt);
+        }
+
+        float diff = max (0, dot (viewN, toLight));
+        lightColor += unity_LightColor.rgb * (diff * atten);
+    }
+    return lightColor;
+}
+#endif
 
 float4 PS(PS_INPUT input) : SV_Target
 {	
@@ -142,18 +173,18 @@ float4 PS(PS_INPUT input) : SV_Target
 	
 	if (LightType == 1) {
 		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);
+		finalColor.xyz += CalDirectLight(normal, light, eye, input.Tex);
 	}
 	else if (LightType == 2) {
 		float Distance = length(input.ToLight);
 		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, light, eye, input.Tex, Distance);
+		finalColor.xyz += CalPointLight(normal, light, eye, input.Tex, Distance);
 	}
 	else if (LightType == 3) {
 		float Distance = length(input.ToLight);
 		float3 light = normalize(input.ToLight);
-		float3 spotDirection = normalize(-Light.DirectionCutOff.xyz.xyz);
-		finalColor.xyz += CalSpotLight(Light, normal, light, eye, input.Tex, Distance, spotDirection);
+		float3 spotDirection = normalize(-DirectionCutOff.xyz);
+		finalColor.xyz += CalSpotLight(normal, light, eye, input.Tex, Distance, spotDirection);
 	}
 	
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
@@ -170,18 +201,18 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 	
 	if (LightType == 1) {
 		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);
+		finalColor.xyz += CalDirectLight(normal, light, eye, input.Tex);
 	}
 	else if (LightType == 2) {
 		float Distance = length(input.ToLight);
 		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, light, eye, input.Tex, Distance);
+		finalColor.xyz += CalPointLight(normal, light, eye, input.Tex, Distance);
 	}
 	else if (LightType == 3) {
 		float Distance = length(input.ToLight);
 		float3 light = normalize(input.ToLight);
-		float3 spotDirection = normalize(-Light.DirectionCutOff.xyz.xyz);
-		finalColor.xyz += CalSpotLight(Light, normal, light, eye, input.Tex, Distance, spotDirection);
+		float3 spotDirection = normalize(-DirectionCutOff.xyz.xyz);
+		finalColor.xyz += CalSpotLight(normal, light, eye, input.Tex, Distance, spotDirection);
 	}
 	
 	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
