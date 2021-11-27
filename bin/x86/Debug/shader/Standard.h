@@ -3,11 +3,11 @@ cbuffer cbPerLight : register(b1)
 	matrix LightView;
 	matrix LightProjection;	
 
-	float4 LightPos;//world space
-	float4 DiffuseColor;
+	float4 unity_LightPosition;//world space
+	float4 unity_LightColor;
 	float4 SpecularColorPower;
-	float4 Attenuation;
-	float4 DirectionCutOff;
+	float4 unity_LightAtten;
+	float4 unity_SpotDirection;
 
 	int LightType;
 	int HasDepthMap;
@@ -23,7 +23,7 @@ cbuffer cbGlobalParam : register(b0)
 	matrix ViewInv;
 	matrix ProjectionInv;
 
-	//float4 glstate_lightmodel_ambient;
+	float4 glstate_lightmodel_ambient;
 }
 
 #if SHADER_MODEL > 30000

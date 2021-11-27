@@ -1,10 +1,12 @@
 <Shader Name="ModelPbr">
 	<Include>Standard</Include>
 	<Include>Skeleton</Include>
+	<Include>Model</Include>
 	
 	<PROGRAM>
 		<UseAttribute>attrPos3NormalTangentTexBlendWeightBlendIndicesBitangent</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		

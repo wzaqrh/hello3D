@@ -14,6 +14,7 @@ struct cbGlobalParam
 		World = Eigen::Matrix4f::Identity();
 		View = Eigen::Matrix4f::Identity();
 		Projection = Eigen::Matrix4f::Identity();
+		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
 	}
 public:
 	Eigen::Matrix4f World;
@@ -24,7 +25,7 @@ public:
 	Eigen::Matrix4f ViewInv;
 	Eigen::Matrix4f ProjectionInv;
 
-	//Eigen::Vector4f glstate_lightmodel_ambient;
+	Eigen::Vector4f glstate_lightmodel_ambient;
 };
 
 class MIR_CORE_API RenderPipeline

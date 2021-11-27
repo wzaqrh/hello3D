@@ -18,11 +18,11 @@ struct cbPerLight {
 	Eigen::Matrix4f LightView;
 	Eigen::Matrix4f LightProjection;
 
-	Eigen::Vector4f LightPos;//world space
-	Eigen::Vector4f DiffuseColor;
+	Eigen::Vector4f unity_LightPosition;//world space
+	Eigen::Vector4f unity_LightColor;
 	Eigen::Vector4f SpecularColorPower;
-	Eigen::Vector4f Attenuation;
-	Eigen::Vector4f DirectionCutOff;
+	Eigen::Vector4f unity_LightAtten;
+	Eigen::Vector4f unity_SpotDirection;
 
 	unsigned int LightType;//directional=1,point=2,spot=3
 	unsigned int HasDepthMap;
@@ -66,7 +66,8 @@ class MIR_CORE_API SpotLight : public PointLight
 {
 public:
 	SpotLight();
-	void SetDirection(float x, float y, float z);
+	void SetDirection(float x, float y, float z) override;
+	void SetSpotDirection(float x, float y, float z);
 	void SetCutOff(float cutoff);
 	void SetAngle(float radian);
 

@@ -21,7 +21,7 @@ void TestModel::OnPostInitDevice()
 	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
 
-	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL);
+	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL_PBR);
 	mModel->LoadModel("model/Male03/Male02.FBX", R"({"ext":"png","dir":"model/Male03/"})"); 
 	mMoveDefScale = 0.07; 
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
