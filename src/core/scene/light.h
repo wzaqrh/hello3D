@@ -14,7 +14,7 @@ enum LightType {
 	kLightSpot
 };
 
-struct cbPerLight {
+struct _declspec(align(16)) cbPerLight {
 	Eigen::Matrix4f LightView;
 	Eigen::Matrix4f LightProjection;
 

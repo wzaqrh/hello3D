@@ -6,9 +6,7 @@
 
 namespace mir {
 
-
-
-struct cbGlobalParam
+struct _declspec(align(16)) cbGlobalParam
 {
 	cbGlobalParam() {
 		World = Eigen::Matrix4f::Identity();

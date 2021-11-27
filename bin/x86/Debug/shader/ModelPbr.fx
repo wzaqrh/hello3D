@@ -607,32 +607,10 @@ float4 PS(PS_INPUT input) : SV_Target
 		normal = normalize(input.Normal);
 	}
 	
-#if 1
 	float4 finalColor;
 	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
 	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, false);
 	finalColor.w = 1.0;
-	finalColor *= GetTexture2D(txMain, samLinear, input.Tex);
-#else
-	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	if (LightType == 1) {
-		float3 toLight = normalize(-Light.Base.Base.LightPos.xyz);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, toLight, toEye, input.Tex, false);
-	}
-	else if (LightType == 2) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, toLight, toEye, input.Tex, Distance, false);
-	}
-	else if (LightType == 3) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		float3 spotDirection = -Light.DirectionCutOff.xyz;
-		finalColor.xyz += CalSpotLight(Light, normal, toLight, toEye, input.Tex, Distance, spotDirection, false);
-	}
-#endif
 	
 	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 
@@ -681,32 +659,10 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 		normal = normalize(input.Normal);
 	}
 	
-#if 1
 	float4 finalColor;
 	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
-	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, false);
+	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, true);
 	finalColor.w = 1.0;
-	finalColor *= GetTexture2D(txMain, samLinear, input.Tex);
-#else
-	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	if (LightType == 1) {
-		float3 toLight = normalize(-Light.Base.Base.LightPos.xyz);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, toLight, toEye, input.Tex, true);
-	}
-	else if (LightType == 2) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, toLight, toEye, input.Tex, Distance, true);
-	}
-	else if (LightType == 3) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		float3 spotDirection = -Light.DirectionCutOff.xyz;
-		finalColor.xyz += CalSpotLight(Light, normal, toLight, toEye, input.Tex, Distance, spotDirection, true);
-	}
-#endif
 	
 	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);	
 	return finalColor;

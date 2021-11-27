@@ -105,9 +105,10 @@ private:
 	ResourceManager& mResourceMng;
 	MaterialPtr mMaterial;
 	TransformPtr mTransform;
-	std::shared_ptr<AiScene> mAiScene;
+	AiScenePtr mAiScene;
 	AiAnimeTree mAnimeTree;
-	
+	std::function<void()> mInitAnimeTreeTask, mPlayAnimTask;
+
 	int mCurrentAnimIndex = -1;
 	float mElapse = 0.0f;
 	std::vector<aiMatrix4x4> mTempBoneMatrices;

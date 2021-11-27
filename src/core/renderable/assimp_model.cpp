@@ -136,9 +136,15 @@ AssimpModel::~AssimpModel()
 void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
 {
 	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
+	
 	if (mAiScene->IsLoaded()) {
 		mAnimeTree.Init(mAiScene->GetSerializeNodes());
 		Update(0);
+	}
+	else {
+		mInitAnimeTreeTask = [this]() {
+			mAnimeTree.Init(mAiScene->GetSerializeNodes());
+		};
 	}
 }
 
@@ -193,8 +199,10 @@ void AssimpModel::Update(float dt)
 {
 	if (!mAiScene->IsLoaded())
 		return;
-	if (!mAnimeTree.IsInited())
-		mAnimeTree.Init(mAiScene->GetSerializeNodes());
+	if (auto task = std::move(mInitAnimeTreeTask))
+		task();
+	if (auto task = std::move(mPlayAnimTask))
+		task();
 
 	std::vector<AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
@@ -236,19 +244,24 @@ void AssimpModel::PlayAnim(int Index)
 {
 	mCurrentAnimIndex = Index;
 	mElapse = 0;
-	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) return;
 
-	const aiAnimation* currentAnim = mAiScene->mScene->mAnimations[mCurrentAnimIndex];
+	auto playAnimTask = [this]() {
+		if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) return;
 
-	for (auto& iter : *mAiScene) {
-		std::string iterName = iter->RawNode->mName.C_Str();
-		for (unsigned int a = 0; a < currentAnim->mNumChannels; a++) {
-			if (iterName == currentAnim->mChannels[a]->mNodeName.C_Str()) {
-				mAnimeTree.GetNode(iter).ChannelIndex = a;
-				break;
+		const aiAnimation* currentAnim = mAiScene->mScene->mAnimations[mCurrentAnimIndex];
+
+		for (auto& iter : *mAiScene) {
+			std::string iterName = iter->RawNode->mName.C_Str();
+			for (unsigned int a = 0; a < currentAnim->mNumChannels; a++) {
+				if (iterName == currentAnim->mChannels[a]->mNodeName.C_Str()) {
+					mAnimeTree.GetNode(iter).ChannelIndex = a;
+					break;
+				}
 			}
 		}
-	}
+	};
+	if (mAiScene->IsLoaded()) playAnimTask();
+	else mPlayAnimTask = playAnimTask;
 }
 
 void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)

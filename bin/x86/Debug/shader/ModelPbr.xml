@@ -20,7 +20,7 @@
 		<Uniform Name="cbUnityGlobal" Slot="4">
 			<Element Name="_Unity_IndirectSpecColor" Type="float4" Default="0,0,0,0"></Element>
 			<Element Name="_AmbientOrLightmapUV"	 Type="float4" Default="0.01,0.01,0.01,1"></Element>
-			<Element Name="_Unity_SpecCube0_HDR"	 Type="float"  Default="0.5,1,0,0"></Element>
+			<Element Name="_Unity_SpecCube0_HDR"	 Type="float4" Default="0.5,1,0,0"></Element>
 		</Uniform>
 		
 		<FileName>ModelPbr</FileName>

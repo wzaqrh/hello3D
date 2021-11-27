@@ -22,11 +22,17 @@ public:
 	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
-		namespace boost_property_tree = boost::property_tree;
-		boost_property_tree::ptree pt;
-		boost_property_tree::read_json(std::stringstream(redirectResource), pt);
-		mRedirectResourceDir = pt.get<std::string>("dir", "");
-		mRedirectResourceExt = pt.get<std::string>("ext", "");
+		if (!redirectResource.empty()) {
+			namespace boost_property_tree = boost::property_tree;
+			boost_property_tree::ptree pt;
+			boost_property_tree::read_json(std::stringstream(redirectResource), pt);
+			mRedirectResourceDir = pt.get<std::string>("dir", "");
+			mRedirectResourceExt = pt.get<std::string>("ext", "");
+		}
+		else {
+			mRedirectResourceDir.clear();
+			mRedirectResourceExt.clear();
+		}
 
 		if (!mRedirectResourceDir.empty()) {
 			mRedirectResourceDir = boost::filesystem::system_complete(mRedirectResourceDir).string();
@@ -136,22 +142,34 @@ private:
 		}
 	}
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene) {
-		boost::filesystem::path redirectPath(mRedirectResourceDir);
+		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;
 		for (UINT i = 0; i < mat->GetTextureCount(type); i++) {
 			aiString str; mat->GetTexture(type, i, &str);
 			std::string key = str.C_Str();
 
 			if (!mRedirectResourceDir.empty()) {
+				boost::filesystem::path redirectPath(redirectPathProto);
 				boost::filesystem::path texturePath(key);
 				if (texturePath.is_relative()) texturePath = redirectPath.append(texturePath.string());
 				else texturePath = redirectPath.append(texturePath.filename().string());
-
+				
 				if (!mRedirectResourceExt.empty())
 					texturePath = texturePath.replace_extension(mRedirectResourceExt);
 
 				if (!boost::filesystem::exists(texturePath))
 					texturePath = texturePath.replace_extension("png");
+
+				if (!boost::filesystem::exists(texturePath)) {
+					redirectPath = redirectPathProto;
+					texturePath = redirectPath.append(boost::filesystem::path(key).filename().string());
+
+					if (!mRedirectResourceExt.empty())
+						texturePath = texturePath.replace_extension(mRedirectResourceExt);
+
+					if (!boost::filesystem::exists(texturePath))
+						texturePath = texturePath.replace_extension("png");
+				}
 
 				if (!boost::filesystem::exists(texturePath))
 					continue;

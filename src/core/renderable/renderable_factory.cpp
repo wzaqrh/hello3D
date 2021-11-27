@@ -19,6 +19,7 @@ RenderableFactory::RenderableFactory(ResourceManager& resMng)
 	: mResourceMng(resMng)
 {
 	mFontCache = std::make_shared<FontCache>(mResourceMng);
+	//mLaunchMode = LaunchAsync;
 	mLaunchMode = LaunchSync;
 }
 

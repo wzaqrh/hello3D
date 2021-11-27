@@ -6,6 +6,7 @@ namespace mir {
 /********** DirectLight **********/
 DirectLight::DirectLight()
 {
+	memset(&mCbLight, 0, sizeof(mCbLight));
 	mCbLight.unity_LightPosition = Eigen::Vector4f(0, 0, 1, 0);
 	SetDiffuseColor(1, 1, 1, 1);
 	SetSpecularColor(1, 1, 1, 1);
@@ -14,7 +15,7 @@ DirectLight::DirectLight()
 
 void DirectLight::SetDirection(float x, float y, float z)
 {
-	mCbLight.unity_LightPosition = Eigen::Vector4f(x, y, z, 0);
+	mCbLight.unity_LightPosition = -Eigen::Vector4f(x, y, z, 0).normalized();
 }
 
 void DirectLight::SetDiffuseColor(float r, float g, float b, float a)
@@ -63,8 +64,8 @@ SpotLight::SpotLight()
 
 void SpotLight::SetDirection(float x, float y, float z)
 {
-	mCbLight.unity_LightPosition = Eigen::Vector4f(x, y, z, 0);
-	mCbLight.unity_SpotDirection = Eigen::Vector4f(x, y, z, mCbLight.unity_SpotDirection.w());
+	mCbLight.unity_LightPosition = -Eigen::Vector4f(x, y, z, 0);
+	mCbLight.unity_SpotDirection.leftCols<3>() = mCbLight.unity_LightPosition.leftCols<3>();
 }
 
 void SpotLight::SetSpotDirection(float x, float y, float z)

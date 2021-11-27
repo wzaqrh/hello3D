@@ -410,8 +410,8 @@ private:
 				uniform.Data.resize(dataSize + size / 4);
 				void* pData = &uniform.Data[dataSize];
 
-				if (element.second.find("<xmlattr>.Default") != element.second.not_found()) {
-					std::string strDefault = element.second.get<std::string>("<xmlattr>.Default");
+				std::string strDefault = element.second.get<std::string>("<xmlattr>.Default", "");
+				if (!strDefault.empty()) {
 					switch (uniformElementType) {
 					case kCBElementInt: {
 						*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
@@ -431,6 +431,8 @@ private:
 					}
 				}
 			}
+			int dataSize = uniform.Data.size();
+			if (dataSize & 15) uniform.Data.resize((dataSize + 15)/16*16);
 
 			uniform.Slot = it.second.get<int>("<xmlattr>.Slot", -1);
 
@@ -627,7 +629,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	for (size_t slot = 0; slot < shaderInfo.Program.Uniforms.size(); ++slot) {
 		auto& uniformSlot = shaderInfo.Program.Uniforms[slot];
 		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(
-			__launchMode__, uniformSlot.Decl, kHWUsageDynamic, Data::Make(uniformSlot.Data)), 
+			__launchMode__, uniformSlot.Decl, kHWUsageDefault, Data::Make(uniformSlot.Data)), 
 			uniformSlot.ShortName, uniformSlot.IsUnique, slot);
 	}
 
