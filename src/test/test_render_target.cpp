@@ -2,7 +2,6 @@
 #include "test/app.h"
 #include "core/resource/material_factory.h"
 #include "core/scene/scene_manager.h"
-#include "core/rendersys/interface_type.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/base/transform.h"
@@ -43,7 +42,7 @@ void TestRT::OnPostInitDevice()
 		kFormatR32G32B32A32Float);
 
 	mSprite = mContext->RenderableFac()->CreateSprite();
-	mSprite->SetTexture(mRendTexture->GetColorTexture());
+	mSprite->SetTexture(mRendTexture->GetAttachColorTexture(0));
 	mSprite->SetPosition(Eigen::Vector3f(0, 0, 0));
 	mSprite->SetSize(Eigen::Vector2f(5, 5));
 

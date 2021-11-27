@@ -3,7 +3,7 @@
 #include <dxerr.h>
 #include <boost/assert.hpp>
 #include "core/base/debug.h"
-#include "core/rendersys/interface_type.h"
+#include "core/rendersys/blob.h"
 
 namespace mir {
 namespace debug {

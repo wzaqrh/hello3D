@@ -3,8 +3,6 @@
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
 #include "core/resource/resource_manager.h"
-#include "core/resource/material_factory.h"
-#include "core/rendersys/interface_type.h"
 
 namespace mir {
 

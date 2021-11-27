@@ -1,8 +1,6 @@
 #include "core/resource/material.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/resource_manager.h"
-#include "core/rendersys/interface_type.h"
-#include "core/renderable/post_process.h"
 
 namespace mir {
 
@@ -13,7 +11,7 @@ void TextureBySlot::Merge(const TextureBySlot& other)
 		Textures.resize(other.Textures.size());
 
 	for (size_t i = 0; i < other.Textures.size(); ++i) {
-		if (other.Textures[i] && other.Textures[i]->HasSRV()) {
+		if (other.Textures[i] && other.Textures[i]->IsLoaded()) {
 			Textures[i] = other.Textures[i];
 		}
 	}

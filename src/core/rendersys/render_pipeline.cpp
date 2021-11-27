@@ -1,14 +1,16 @@
 #include "core/rendersys/render_pipeline.h"
-#include "core/rendersys/interface_type.h"
 #include "core/resource/resource_manager.h"
-#include "core/resource/material_factory.h"
+#include "core/renderable/skybox.h"
+#include "core/renderable/post_process.h"
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
-#include "core/renderable/post_process.h"
-#include "core/renderable/skybox.h"
 #include "core/base/debug.h"
 
 namespace mir {
+
+#define E_TEXTURE_MAIN 0
+#define E_TEXTURE_DEPTH_MAP 8
+#define E_TEXTURE_ENV 9
 
 RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size)
 	:mRenderSys(renderSys)
@@ -51,11 +53,11 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 
 	if (iterCnt >= 0) {
 		if (iterCnt + 1 < pass->mRTIterators.size())
-			textures[0] = pass->mRTIterators[iterCnt + 1]->GetColorTexture();
+			textures[0] = pass->mRTIterators[iterCnt + 1]->GetAttachColorTexture(0);
 	}
 	else {
 		if (!pass->mRTIterators.empty())
-			textures[0] = pass->mRTIterators[0]->GetColorTexture();
+			textures[0] = pass->mRTIterators[0]->GetAttachColorTexture(0);
 	}
 
 	{
@@ -173,7 +175,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetColorTexture());
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetAttachColorTexture(0));
 
 		auto& skyBox = camera.SkyBox();
 		if (skyBox && skyBox->GetTexture())
@@ -181,7 +183,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
 		if (camera.mPostProcessInput) 
-			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.mPostProcessInput->GetColorTexture());
+			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.mPostProcessInput->GetAttachColorTexture(0));
 	}
 
 	if (!lightsOrder.empty()) {

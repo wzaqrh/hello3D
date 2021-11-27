@@ -1,8 +1,6 @@
 #include "core/renderable/post_process.h"
 #include "core/resource/resource_manager.h"
-#include "core/rendersys/interface_type.h"
 #include "core/resource/material.h"
-#include "core/resource/material_factory.h"
 
 namespace mir {
 
@@ -74,7 +72,7 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	op.mMaterial = mMaterial;
 	op.mIndexBuffer = mIndexBuffer;
 	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.Add(mMainTex->GetColorTexture());
+	op.mTextures.Add(mMainTex->GetAttachColorTexture(0));
 	op.mWorldTransform = Eigen::Matrix4f::Identity();
 	op.mVertBufferByPass = mVertBufferByPass;
 	opList.AddOP(op);
@@ -151,7 +149,7 @@ cbBloom cbBloom::CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fM
 
 /********** Bloom **********/
 IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr target) {
-	auto srv = target->GetColorTexture();
+	auto srv = target->GetAttachColorTexture(0);
 	float sx = srv->GetWidth() * 1.0 / resourceMng.WinSize().x();
 	float sy = srv->GetHeight() * 1.0 / resourceMng.WinSize().y();
 	assert(sx <= 1 && sy <= 1);

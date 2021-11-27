@@ -1,7 +1,12 @@
 #include <boost/assert.hpp>
 #include <boost/filesystem.hpp>
 #include "core/rendersys/d3d9/render_system9.h"
-#include "core/rendersys/d3d9/interface_type9.h"
+#include "core/rendersys/d3d9/blob9.h"
+#include "core/rendersys/d3d9/program9.h"
+#include "core/rendersys/d3d9/input_layout9.h"
+#include "core/rendersys/d3d9/hardware_buffer9.h"
+#include "core/rendersys/d3d9/texture9.h"
+#include "core/rendersys/d3d9/framebuffer9.h"
 #include "core/resource/material_factory.h"
 #include "core/renderable/renderable.h"
 #include "core/base/debug.h"
@@ -12,6 +17,9 @@ namespace mir {
 
 #define MakePtr std::make_shared
 #define PtrRaw(T) T.get()
+
+#define FILE_EXT_CSO ".cso"
+#define FILE_EXT_FX ".fx"
 
 RenderSystem9::RenderSystem9()
 {}
@@ -141,7 +149,7 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 		return MakePtr<ContantBuffer9>();
 	case mir::kDeviceResourceTexture:
 		return MakePtr<Texture9>(nullptr);
-	case mir::kDeviceResourceRenderTarget:
+	case mir::kDeviceResourceFrameBuffer:
 		return MakePtr<FrameBuffer9>();
 	case mir::kDeviceResourceSamplerState:
 		return MakePtr<SamplerState9>();
@@ -168,8 +176,11 @@ IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Ve
 void RenderSystem9::SetFrameBuffer(IFrameBufferPtr rendTarget)
 {
 	if (rendTarget) {
-		mCurColorBuffer = std::static_pointer_cast<FrameBuffer9>(rendTarget)->GetColorBuffer9();
-		mCurDepthStencilBuffer = std::static_pointer_cast<FrameBuffer9>(rendTarget)->GetDepthStencilBuffer9();
+		auto target9 = std::static_pointer_cast<FrameBuffer9>(rendTarget);
+		mCurColorBuffer = std::static_pointer_cast<FrameBufferAttachColor9>(target9->GetAttachColor(0))
+			->GetColorBuffer9();
+		mCurDepthStencilBuffer = std::static_pointer_cast<FrameBufferAttachZStencil9>(target9->GetAttachZStencil())
+			->GetDepthStencilBuffer9();
 	}
 	else {
 		mCurColorBuffer = mBackColorBuffer;
@@ -308,7 +319,7 @@ VertexShader9Ptr RenderSystem9::_CreateVSByFXC(const std::string& filename)
 	VertexShader9Ptr ret;
 	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty()) 
-		ret = _CreateVSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
+		ret = _CreateVSByBlob(mDevice9, MakePtr<BlobDataBytes>(buffer));
 	return ret;
 }
 
@@ -352,7 +363,7 @@ PixelShader9Ptr RenderSystem9::_CreatePSByFXC(const std::string& filename)
 	PixelShader9Ptr ret;
 	std::vector<char> buffer = input::ReadFile(filename.c_str(), "rb");
 	if (!buffer.empty())
-		ret = _CreatePSByBlob(mDevice9, MakePtr<BlobDataStandard>(buffer));
+		ret = _CreatePSByBlob(mDevice9, MakePtr<BlobDataBytes>(buffer));
 	return ret;
 }
 
@@ -394,7 +405,7 @@ IBlobDataPtr RenderSystem9::CompileShader(const ShaderCompileDesc& compileDesc, 
 	return nullptr;
 }
 
-IShaderPtr RenderSystem9::CreateShader(ShaderType type, const ShaderCompileDesc& desc, IBlobDataPtr data)
+IShaderPtr RenderSystem9::CreateShader(int type, const ShaderCompileDesc& desc, IBlobDataPtr data)
 {
 	return nullptr;
 }

@@ -25,17 +25,8 @@
     <ClInclude Include="..\src\core\rendersys\render_system.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\interface_type9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h">
       <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d11\interface_type11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\mir.h">
       <Filter>src\core</Filter>
@@ -75,9 +66,6 @@
     </ClInclude>
     <ClInclude Include="..\src\core\base\d3d.h">
       <Filter>src\core\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\interface_type.h">
-      <Filter>src\core\rendersys</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\base_type.h">
       <Filter>src\core\rendersys</Filter>
@@ -133,6 +121,72 @@
     <ClInclude Include="..\src\core\mir_config.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\program.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\hardware_buffer.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\texture.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\framebuffer.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\input_layout.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\blob.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\program11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\texture11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\blob11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\framebuffer11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\hardware_buffer11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\input_layout11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\predeclare.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\framebuffer9.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\hardware_buffer9.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\input_layout9.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\predeclare.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\program9.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\texture9.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d9\blob9.h">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\material_name.h">
+      <Filter>src\core\resource\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -153,17 +207,8 @@
     <ClCompile Include="..\src\core\renderable\sprite.cpp">
       <Filter>src\core\renderable</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\interface_type9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d9\render_system9.cpp">
       <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d11\interface_type11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\mir.cpp">
       <Filter>src\core</Filter>
@@ -222,6 +267,45 @@
     <ClCompile Include="..\src\core\scene\light.cpp">
       <Filter>src\core\scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\blob11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\input_layout11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\program11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\hardware_buffer11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\texture11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\framebuffer11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d9\hardware_buffer9.cpp">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d9\input_layout9.cpp">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d9\program9.cpp">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d9\texture9.cpp">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d9\blob9.cpp">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d9\framebuffer9.cpp">
+      <Filter>src\core\rendersys\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
+      <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -262,6 +346,9 @@
     </Filter>
     <Filter Include="src\core\rendersys\d3d9">
       <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\interface">
+      <UniqueIdentifier>{9bdcc5a6-7e83-4a77-840a-cc086231b1e3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

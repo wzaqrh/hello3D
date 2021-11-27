@@ -6,7 +6,7 @@
 
 namespace mir {
 
-struct cbPerLight;
+
 
 struct cbGlobalParam
 {
@@ -28,6 +28,7 @@ public:
 	Eigen::Vector4f glstate_lightmodel_ambient;
 };
 
+struct cbPerLight;
 class MIR_CORE_API RenderPipeline
 {
 	RenderSystem& mRenderSys;

@@ -2,11 +2,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
-#include "core/base/debug.h"
-#include "core/rendersys/interface_type.h"
-#include "core/resource/material.h"
 #include "core/resource/assimp_resource.h"
+#include "core/resource/material.h"
 #include "core/resource/resource_manager.h"
+#include "core/base/debug.h"
 
 namespace mir {
 
