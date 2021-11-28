@@ -4,29 +4,12 @@
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
+#include "core/base/thread.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/assimp_resource.h"
 
 namespace mir {
-
-constexpr int CThreadPoolNumber = 8;
-class ThreadPool 
-{
-public:
-	ThreadPool(int threadNum) {
-		Pool = std::make_unique<boost::asio::thread_pool>(threadNum);
-	}
-	~ThreadPool() {
-		Pool->stop();
-		Pool = nullptr;
-	}
-	TemplateArgs void Post(T &&...args) {
-		boost::asio::post(*Pool, std::forward<T>(args)...);
-	}
-private:
-	std::unique_ptr<boost::asio::thread_pool> Pool;
-};
 
 /********** LoadResourceJob **********/
 void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
@@ -55,7 +38,12 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& mater
 	, mMaterialFac(materialFac)
 	, mAiResourceFac(aiResFac)
 {
+	mProgramMapLock = mTextureMapLock = mMaterialMapLock = mAiSceneMapLock = false;
+	mLoadTaskCtxMapLock = mResDependGraphLock = false;
+
 	ilInit();
+	
+	constexpr int CThreadPoolNumber = 8;
 	mThreadPool = std::make_shared<ThreadPool>(CThreadPoolNumber);
 }
 ResourceManager::~ResourceManager()
@@ -70,20 +58,21 @@ void ResourceManager::Dispose()
 	}
 }
 
-void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from)
+void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe
 {
-	if (to && !to->IsLoaded()) 
-		mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr);
+	if (to && !to->IsLoaded()) {
+		ATOMIC_STATEMENT(mResDependGraphLock, mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr));
+	}
 }
 
-void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes)
+void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes) ThreadSafe
 {
 	AddResourceDependency(res, dependRes);
 	res->SetPrepared();
-	mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb, mThreadPool);
 #if defined MIR_RESOURCE_DEBUG
 	res->_CallStack = launchMode;
 #endif
+	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb, mThreadPool));
 }
 
 void ResourceManager::UpdateForLoading()
@@ -135,7 +124,7 @@ void ResourceManager::UpdateForLoading()
 }
 
 IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
-	const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+	const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe
 {
 	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
 	boost::filesystem::path vsAsmPath = "shader/d3d11/" + name + "_" + vsEntryOrVS + ".cso";
@@ -160,20 +149,20 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 
 		if (nextJob == nullptr) {
 			std::vector<IShaderPtr> shaders;
-			shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-			shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+			shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+			shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
 			for (auto& it : shaders)
 				it->SetLoaded();
-			return mRenderSys.LoadProgram(program, shaders);
+			return this->mRenderSys.LoadProgram(program, shaders);
 		}
 		else {
 			nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
 				std::vector<IShaderPtr> shaders;
-				shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+				shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+				shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
 				for (auto& it : shaders)
 					it->SetLoaded();
-				return nullptr != mRenderSys.LoadProgram(program, shaders);
+				return nullptr != this->mRenderSys.LoadProgram(program, shaders);
 			});
 			return program;
 		}
@@ -186,30 +175,30 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 				{{"SHADER_MODEL", "40000"}},
 				vsEntry, "vs_4_0", vsPsPath
 			};
-			IBlobDataPtr blobVS = mRenderSys.CompileShader(descVS, Data::Make(&bytes[0], bytes.size()));
+			IBlobDataPtr blobVS = this->mRenderSys.CompileShader(descVS, Data::Make(&bytes[0], bytes.size()));
 
 			ShaderCompileDesc descPS = {
 				{{"SHADER_MODEL", "40000"}},
 				psEntry, "ps_4_0", vsPsPath
 			};
-			IBlobDataPtr blobPS = mRenderSys.CompileShader(descPS, Data::Make(&bytes[0], bytes.size()));
+			IBlobDataPtr blobPS = this->mRenderSys.CompileShader(descPS, Data::Make(&bytes[0], bytes.size()));
 
 			if (nextJob == nullptr) {
 				std::vector<IShaderPtr> shaders;
-				shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-				shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+				shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+				shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
 				for (auto& it : shaders)
 					it->SetLoaded();
-				return mRenderSys.LoadProgram(program, shaders);
+				return this->mRenderSys.LoadProgram(program, shaders);
 			}
 			else {
 				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
 					std::vector<IShaderPtr> shaders;
-					shaders.push_back(mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-					shaders.push_back(mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+					shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
+					shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
 					for (auto& it : shaders)
 						it->SetLoaded();
-					return nullptr != mRenderSys.LoadProgram(program, shaders);
+					return nullptr != this->mRenderSys.LoadProgram(program, shaders);
 				});
 				return program;
 			}
@@ -217,14 +206,15 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 	}
 	return nullptr;
 }
-IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry)
+IProgramPtr ResourceManager::CreateProgram(Launch launchMode, 
+	const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe
 {
 	IProgramPtr program = nullptr;
 	ProgramKey key{ name, vsEntry, psEntry };
-	auto findProg = mProgramByKey.find(key);
-	if (findProg == mProgramByKey.end()) {
+	ATOMIC_STATEMENT(this->mProgramMapLock, auto findProg = this->mProgramByKey.find(key));
+	if (findProg == this->mProgramByKey.end()) {
 		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
-		mProgramByKey.insert(std::make_pair(key, program));
+		ATOMIC_STATEMENT(this->mProgramMapLock, this->mProgramByKey.insert(std::make_pair(key, program)));
 	#if defined MIR_RESOURCE_DEBUG
 		program->_ResourcePath = (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vsEntry %psEntry).str();
 		program->_CallStack = launchMode;
@@ -247,13 +237,13 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode, const std::string&
 }
 
 ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
-	const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap)
+	const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	ITexturePtr ret = nullptr;
 
 	FILE* fd = fopen(imgFullpath.c_str(), "rb"); BOOST_ASSERT(fd);
 	if (fd) {
-		if (nextJob) mTexLock.lock();
+		if (nextJob) this->mTexLock.lock();
 
 		ILuint imageId = ilGenImage();
 		ilBindImage(imageId);
@@ -316,7 +306,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));
 				int faceSize = width * height * bpp;
 				 
-				auto& bytes = nextJob ? nextJob->Bytes : mTempBytes; 
+				auto& bytes = nextJob ? nextJob->Bytes : this->mTempBytes; 
 				bytes.resize(faceSize * mipCount * faceCount);
 				size_t bytes_position = 0;
 
@@ -413,21 +403,24 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 		}
 
 		ilDeleteImage(imageId);
-		if (nextJob) mTexLock.unlock();
+		if (nextJob) this->mTexLock.unlock();
 		fclose(fd);
 	}//if fd
 	return ret;
 }
-ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap)
+ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, 
+	const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string imgFullpath = fullpath.string();
 
 	ITexturePtr texture = nullptr;
-	auto findIter = mTextureByPath.find(imgFullpath);
-	if (findIter == mTextureByPath.end()) {
-		texture = std::static_pointer_cast<ITexture>(mRenderSys.CreateResource(kDeviceResourceTexture));
-		mTextureByPath.insert(std::make_pair(imgFullpath, texture));
+
+	ATOMIC_STATEMENT(this->mTextureMapLock, auto findIter = this->mTextureByPath.find(imgFullpath));
+	if (findIter == this->mTextureByPath.end()) {
+		texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
+		ATOMIC_STATEMENT(this->mTextureMapLock, this->mTextureByPath.insert(std::make_pair(imgFullpath, texture)));
+	
 	#if defined MIR_RESOURCE_DEBUG
 		texture->_ResourcePath = (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str();
 		texture->_CallStack = launchMode;
@@ -447,13 +440,13 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode, const std::s
 	return texture;
 }
 
-MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName)
+MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName) ThreadSafe ThreadSafe
 {
 	MaterialPtr material = nullptr;
-	auto findIter = mMaterialByName.find(matName);
-	if (findIter == mMaterialByName.end()) {
-		material = mMaterialFac.CreateMaterial(launchMode, *this, matName);
-		mMaterialByName.insert(std::make_pair(matName, material));
+	ATOMIC_STATEMENT(this->mMaterialMapLock, auto findIter = this->mMaterialByName.find(matName));
+	if (findIter == this->mMaterialByName.end()) {
+		material = this->mMaterialFac.CreateMaterial(launchMode, *this, matName);
+		ATOMIC_STATEMENT(this->mMaterialMapLock, this->mMaterialByName.insert(std::make_pair(matName, material)));
 	#if defined MIR_RESOURCE_DEBUG
 		material->_ResourcePath = (boost::format("name:%1%") %matName).str();
 		material->_CallStack = launchMode;
@@ -464,20 +457,19 @@ MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string
 	}
 	return material;
 }
-
-MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& material)
+MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& material) ThreadSafe
 {
-	return mMaterialFac.CloneMaterial(launchMode, *this, material);
+	return this->mMaterialFac.CloneMaterial(launchMode, *this, material);
 }
 
-AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes)
+AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe 
 {
 	AiScenePtr aiRes = nullptr;
 	AiResourceKey key{ assetPath, redirectRes };
-	auto findIter = mAiSceneByKey.find(key);
-	if (findIter == mAiSceneByKey.end()) {
-		aiRes = mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
-		mAiSceneByKey.insert(std::make_pair(key, aiRes));
+	ATOMIC_STATEMENT(this->mAiSceneMapLock, auto findIter = this->mAiSceneByKey.find(key));
+	if (findIter == this->mAiSceneByKey.end()) {
+		aiRes = this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
+		ATOMIC_STATEMENT(this->mAiSceneMapLock, this->mAiSceneByKey.insert(std::make_pair(key, aiRes)));
 	#if defined MIR_RESOURCE_DEBUG
 		aiRes->_ResourcePath = (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str();
 		aiRes->_CallStack = launchMode;

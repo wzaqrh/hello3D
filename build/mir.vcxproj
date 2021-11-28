@@ -44,6 +44,7 @@
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
+    <ClInclude Include="..\src\core\base\thread.h" />
     <ClInclude Include="..\src\core\base\transform.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="..\src\core\scene\light.cpp" />
     <ClCompile Include="..\src\core\scene\scene_manager.cpp" />
     <ClCompile Include="..\src\test\unit_test\main.cpp" />
+    <ClCompile Include="..\src\test\unit_test\test_atomic.cpp" />
     <ClCompile Include="..\src\test\unit_test\test_eigen.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

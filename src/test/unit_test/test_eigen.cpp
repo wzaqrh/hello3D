@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <xnamath.h>
+#include <catch.hpp>
 #include "core/base/math.h"
-#include "catch.hpp"
 
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
 

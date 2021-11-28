@@ -1,6 +1,7 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.h"
 #include "Skeleton.h"
+#include "Lighting.h"
 
 #if SHADER_MODEL > 30000
 Texture2D txSpecular : register(t1);
@@ -86,33 +87,11 @@ PS_INPUT VS(VS_INPUT i)
     return output;
 }
 
-float3 ShadeVertexLightsFull (float3 toLight, float3 viewN, bool spotLight)
-{
-    float3 lightColor = glstate_lightmodel_ambient.xyz;
-    {
-        float lengthSq = max(dot(toLight, toLight), 0.000001);
-        toLight *= rsqrt(lengthSq);
-
-        float atten = 1.0 / (1.0 + lengthSq * unity_LightAtten.z);
-        if (spotLight)
-        {
-            float rho = max (0, dot(toLight, unity_SpotDirection.xyz));
-            float spotAtt = (rho - unity_LightAtten.x) * unity_LightAtten.y;
-            atten *= saturate(spotAtt);
-        }
-
-        float diff = max (0, dot (viewN, toLight));
-        lightColor += unity_LightColor.rgb * (diff * atten);
-    }
-    return lightColor;
-}
-
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.xyz = ShadeVertexLightsFull(input.ToLight, normalize(input.Normal), LightType == 3);
+	finalColor.xyz = MirLambertLight(input.ToLight, normalize(input.Normal), GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
 	finalColor.w = 1.0;
-	finalColor *= GetTexture2D(txMain, samLinear, input.Tex);
 
 	finalColor.xyz *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
@@ -122,9 +101,8 @@ float4 PS(PS_INPUT input) : SV_Target
 float4 PSAdd(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.xyz = ShadeVertexLightsFull(input.ToLight, normalize(input.Normal), LightType == 3);
+	finalColor.xyz = MirLambertLight(input.ToLight, normalize(input.Normal), GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
 	finalColor.w = 1.0;
-	finalColor *= GetTexture2D(txMain, samLinear, input.Tex);
 	
 	finalColor.xyz *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;

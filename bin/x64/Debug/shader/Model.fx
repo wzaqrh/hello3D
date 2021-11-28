@@ -1,6 +1,7 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.h"
 #include "Skeleton.h"
+#include "Lighting.h"
 
 #if SHADER_MODEL > 30000
 Texture2D txSpecular : register(t1);
@@ -74,12 +75,8 @@ PS_INPUT VS(VS_INPUT i)
 	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
 	output.Pos = mul(MWV, skinPos);
 	
-	if (LightType == 1) {
-		output.ToLight = normalize(mul(View, float4(-Light.Base.Base.LightPos.xyz,0.0)));	
-	}
-	else if (LightType == 2 || LightType == 3) {
-		output.ToLight = mul(View,float4(Light.Base.Base.LightPos.xyz,1.0)).xyz - output.Pos.xyz;
-	}
+	float3 worldpos = mul(MW, skinPos);
+	output.ToLight = unity_LightPosition.xyz - worldpos.xyz * unity_LightPosition.w;
 	
 	matrix LightMWVP = mul(LightProjection,mul(LightView, MW));
 	output.PosInLight = mul(LightMWVP, skinPos);
@@ -90,100 +87,23 @@ PS_INPUT VS(VS_INPUT i)
     return output;
 }
 
-float3 GetDiffuseBySampler(float3 normal, float3 light, float3 lightDiffuseColor, float2 texcoord) {
-	float diffuseFactor = saturate(dot(normal, light));
-	float3 diffuseMat = GetTexture2D(txMain, samLinear, texcoord).xyz;
-	return diffuseMat * diffuseFactor * lightDiffuseColor;
-}
-float3 GetSpecularByDef(float3 normal, float3 light, float3 eye, float4 SpecColorPower) {
-	float3 reflection = reflect(-light, normal);
-	float specularFactor = saturate(dot(reflection, eye));
-	specularFactor = pow(specularFactor, SpecColorPower.w);
-	return specularFactor * SpecColorPower.xyz;
-}
-float3 GetSpecularBySampler(float3 normal, float3 light, float3 eye, float4 SpecColorPower, float2 texcoord) {
-	float3 specularMat = GetTexture2D(txSpecular, samLinear, texcoord).xyz;
-	return GetSpecularByDef(normal, light, eye, SpecColorPower) * specularMat;
-}
-
-float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 light, float3 eye, float2 texcoord) {
-	float3 color = 0.0;
-	if (dot(normal, light) > 0.0) 
-	{
-		float3 diffuse = GetDiffuseBySampler(normal, light, directLight.DiffuseColor.xyz, texcoord);
-		float3 specular = GetSpecularBySampler(normal, light, eye, directLight.SpecularColorPower, texcoord);
-		color = diffuse + specular;	
-	}
-	return color;
-}
-float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance) {
-	float3 color = CalDirectLight(pointLight.Base, normal, light, eye, texcoord);
-	float Attenuation = pointLight.Attenuation.x 
-	+ pointLight.Attenuation.y * Distance 
-	+ pointLight.Attenuation.z * Distance * Distance;
-	return color / Attenuation;
-}
-float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 light, float3 eye, float2 texcoord, float Distance, float3 spotDirection) {
-	float3 color = 0.0;
-	float spotFactor = dot(light, spotDirection);
-	if (spotFactor > spotLight.DirectionCutOff.w) {
-		color = CalPointLight(spotLight.Base, normal, light, eye, texcoord, Distance);
-        color = color * ((spotFactor - spotLight.DirectionCutOff.w) / (1.0 - spotLight.DirectionCutOff.w));
-	}
-	return color;
-}
-
 float4 PS(PS_INPUT input) : SV_Target
 {	
-	float3 normal = normalize(input.Normal);
-	float3 eye = normalize(input.Eye);
-	
-	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	
-	if (LightType == 1) {
-		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);
-	}
-	else if (LightType == 2) {
-		float Distance = length(input.ToLight);
-		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, light, eye, input.Tex, Distance);
-	}
-	else if (LightType == 3) {
-		float Distance = length(input.ToLight);
-		float3 light = normalize(input.ToLight);
-		float3 spotDirection = normalize(-Light.DirectionCutOff.xyz.xyz);
-		finalColor.xyz += CalSpotLight(Light, normal, light, eye, input.Tex, Distance, spotDirection);
-	}
-	
-	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
+	float4 finalColor;
+	finalColor.xyz = MirLambertLight(input.ToLight, normalize(input.Normal), GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.w = 1.0;
+
+	finalColor.xyz *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }
 
 /************ ForwardAdd ************/
 float4 PSAdd(PS_INPUT input) : SV_Target
 {	
-	float3 normal = normalize(input.Normal);
-	float3 eye = normalize(input.Eye);
+	float4 finalColor;
+	finalColor.xyz = MirLambertLight(input.ToLight, normalize(input.Normal), GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.w = 1.0;
 	
-	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	
-	if (LightType == 1) {
-		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, light, eye, input.Tex);
-	}
-	else if (LightType == 2) {
-		float Distance = length(input.ToLight);
-		float3 light = normalize(input.ToLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, light, eye, input.Tex, Distance);
-	}
-	else if (LightType == 3) {
-		float Distance = length(input.ToLight);
-		float3 light = normalize(input.ToLight);
-		float3 spotDirection = normalize(-Light.DirectionCutOff.xyz.xyz);
-		finalColor.xyz += CalSpotLight(Light, normal, light, eye, input.Tex, Distance, spotDirection);
-	}
-	
-	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
+	finalColor.xyz *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }

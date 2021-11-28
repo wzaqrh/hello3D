@@ -187,6 +187,9 @@
     <ClInclude Include="..\src\core\resource\material_name.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\thread.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -305,6 +308,9 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\unit_test\test_atomic.cpp">
+      <Filter>src\unit_test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

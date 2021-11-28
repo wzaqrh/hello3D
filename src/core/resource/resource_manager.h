@@ -52,40 +52,40 @@ public:
 	~ResourceManager();
 	void Dispose();
 	void UpdateForLoading();
-	void AddResourceDependency(IResourcePtr to, IResourcePtr from);//parent rely-on node
-	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr);
-	DECLARE_LAUNCH_FUNCTIONS(void, AddLoadResourceJob);
+	void AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe;//to rely-on from
+	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(void, AddLoadResourceJob, ThreadSafe);
 public:
 	RenderSystem& RenderSys() { return mRenderSys; }
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
 
-	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) {
+	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer); ResSetLaunch;
 		mRenderSys.LoadIndexBuffer(res, std::forward<T>(args)...);
 		res->SetLoaded();
 		return std::static_pointer_cast<IIndexBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IIndexBufferPtr, CreateIndexBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IIndexBufferPtr, CreateIndexBuffer, ThreadSafe);
 
-	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) {
+	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IVertexBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IVertexBufferPtr, CreateVertexBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IVertexBufferPtr, CreateVertexBuffer, ThreadSafe);
 
-	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) {
+	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IContantBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IContantBufferPtr, CreateConstBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IContantBufferPtr, CreateConstBuffer, ThreadSafe);
 
-	TemplateArgs bool UpdateBuffer(T &&...args) {
+	TemplateArgs bool UpdateBuffer(T &&...args) ThreadSafe {
 		return mRenderSys.UpdateBuffer(std::forward<T>(args)...);
 	}
 
-	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) {
+	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout); ResSetLaunch;
 		if (launchMode == LaunchAsync) {
 			AddLoadResourceJobSync([=](IResourcePtr res, LoadResourceJobPtr nextJob) {
@@ -95,48 +95,48 @@ public:
 		else res->SetLoaded(nullptr != mRenderSys.LoadLayout(res, program, std::forward<T>(args)...));
 		return std::static_pointer_cast<IInputLayout>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IInputLayoutPtr, CreateLayout);
+	DECLARE_LAUNCH_FUNCTIONS(IInputLayoutPtr, CreateLayout, ThreadSafe);
 
-	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) {
+	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadSampler(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<ISamplerState>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler);
+	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler, ThreadSafe);
 
-	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry);
-	DECLARE_LAUNCH_FUNCTIONS(IProgramPtr, CreateProgram);
+	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe);
 
-	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) {
+	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		res->SetLoaded(nullptr != mRenderSys.LoadTexture(res, format, std::forward<T>(args)...));
 		return std::static_pointer_cast<ITexture>(res);
 	}
 	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, 
-		ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false);
-	DECLARE_LAUNCH_FUNCTIONS(ITexturePtr, CreateTextureByFile);
+		ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(ITexturePtr, CreateTextureByFile, ThreadSafe);
 
-	TemplateArgs bool LoadRawTextureData(T &&...args) {
+	TemplateArgs bool LoadRawTextureData(T &&...args) ThreadSafe {
 		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
 	}
 
-	TemplateArgs IFrameBufferPtr CreateFrameBuffer(Launch launchMode, T &&...args) {
+	TemplateArgs IFrameBufferPtr CreateFrameBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceFrameBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadFrameBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IFrameBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer);
+	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName);
-	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial);
-	MaterialPtr CloneMaterial(Launch launchMode, const Material& material);
+	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial, ThreadSafe);
+	MaterialPtr CloneMaterial(Launch launchMode, const Material& material) ThreadSafe;
 
-	AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes);
+	AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 private:
 	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
-		const std::string& name, const std::string& vsEntry, const std::string& psEntry);
+		const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe;
 	ITexturePtr _LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
-		const std::string& filepath, ResourceFormat format, bool autoGenMipmap);
+		const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
 private:
 	RenderSystem& mRenderSys;
 	MaterialFactory& mMaterialFac;
@@ -262,6 +262,8 @@ private:
 		}
 	};
 	std::map<AiResourceKey, AiScenePtr> mAiSceneByKey;
+	std::atomic<bool> mProgramMapLock, mTextureMapLock, mMaterialMapLock, mAiSceneMapLock;
+	std::atomic<bool> mLoadTaskCtxMapLock, mResDependGraphLock;
 };
 
 }

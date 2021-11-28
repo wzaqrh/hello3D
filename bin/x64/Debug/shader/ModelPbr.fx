@@ -1,9 +1,11 @@
 /********** PBR **********/
 #include "Standard.h"
 #include "Skeleton.h"
+#include "Lighting.h"
 
 #if SHADER_MODEL > 30000
-Texture2D txAlbedo : register(t0);//rgb
+//Texture2D txAlbedo : register(t0);//rgb
+#define txAlbedo txMain
 Texture2D txNormal : register(t1);//rgb
 Texture2D txMetalness : register(t2);//r
 Texture2D txSmoothness : register(t3);//r
@@ -282,10 +284,10 @@ struct UnityLight
 {
     float3 color;
 };
-UnityLight MainLight(LIGHT_DIRECT directLight)//{color=_LightColor0.rgb,dir=_WorldSpaceLightPos0.xyz}
+UnityLight MainLight()//{color=_LightColor0.rgb,dir=_WorldSpaceLightPos0.xyz}
 {
     UnityLight l;
-    l.color = directLight.DiffuseColor.rgb;
+    l.color = unity_LightColor.rgb;
     return l;
 }
 
@@ -548,10 +550,13 @@ float3 UNITY_BRDF_PBS(FragmentCommonData s, UnityGI gi, float3 normal, float3 to
     return color;
 }
 
-float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, bool forwardAdd) 
+float3 CalLight(float3 toLight, float3 normal, float3 toEye, float2 texcoord, bool spotLight, bool forwardAdd) 
 {
+	float lengthSq = max(dot(toLight, toLight), 0.000001);
+	toLight *= rsqrt(lengthSq);
+	
 	FragmentCommonData s = FragmentSetup(texcoord);
-	UnityLight mainLight = MainLight(directLight);
+	UnityLight mainLight = MainLight();
 	float occlusion = Occlusion(texcoord);
 	UnityGI gi = FragmentGI(s, occlusion, mainLight, normal, toEye);
 	if (forwardAdd) {
@@ -560,23 +565,16 @@ float3 CalDirectLight(LIGHT_DIRECT directLight, float3 normal, float3 toLight, f
 	}
 	float3 c = UNITY_BRDF_PBS(s, gi, normal, toLight, toEye, texcoord);
 	//OutputForward
-	return c;
-}
-float3 CalPointLight(LIGHT_POINT pointLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, bool forwardAdd) {
-	float3 color = CalDirectLight(pointLight.Base, normal, toLight, toEye, texcoord, forwardAdd);
-	float Attenuation = pointLight.Attenuation.x 
-	+ pointLight.Attenuation.y * Distance 
-	+ pointLight.Attenuation.z * Distance * Distance;
-	return color / Attenuation;
-}
-float3 CalSpotLight(LIGHT_SPOT spotLight, float3 normal, float3 toLight, float3 toEye, float2 texcoord, float Distance, float3 spotDirection, bool forwardAdd) {
-	float3 color = 0.0;
-	float spotFactor = dot(toLight, spotDirection);
-	if (spotFactor > spotLight.DirectionCutOff.w) {
-		color = CalPointLight(spotLight.Base, normal, toLight, toEye, texcoord, Distance, forwardAdd);
-        color = color * ((spotFactor - spotLight.DirectionCutOff.w) / (1.0 - spotLight.DirectionCutOff.w));
-	}
-	return color;
+	
+
+	float atten = 1.0 / (1.0 + lengthSq * unity_LightAtten.z);
+    if (spotLight) {
+        float rho = max (0, dot(toLight, unity_SpotDirection.xyz));
+        float spotAtt = (rho - unity_LightAtten.x) * unity_LightAtten.y;
+        atten *= saturate(spotAtt);
+    }
+	
+	return c * atten;
 }
 
 float3x3 CalTBN(float3 normal, float3 tangent, float3 bitangent) {
@@ -610,26 +608,12 @@ float4 PS(PS_INPUT input) : SV_Target
 		normal = normalize(input.Normal);
 	}
 	
-	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	if (LightType == 1) {
-		float3 toLight = normalize(-Light.Base.Base.LightPos.xyz);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, toLight, toEye, input.Tex, false);
-	}
-	else if (LightType == 2) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, toLight, toEye, input.Tex, Distance, false);
-	}
-	else if (LightType == 3) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		float3 spotDirection = -Light.DirectionCutOff.xyz;
-		finalColor.xyz += CalSpotLight(Light, normal, toLight, toEye, input.Tex, Distance, spotDirection, false);
-	}
-
-	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);
+	float4 finalColor;
+	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
+	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, false);
+	finalColor.w = 1.0;
+	
+	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 
     //float2 projPosInLight = 0.5 * input.PosInLight.xy / input.PosInLight.w + float2(0.5, 0.5);
     //projPosInLight.y = 1.0f - input.PosInLight.y;
@@ -654,6 +638,7 @@ float4 PS(PS_INPUT input) : SV_Target
 	
     //finalColor.xyz = finalColor.xyz / (finalColor.xyz + 1.0); // HDR tonemapping
     //finalColor.xyz = pow(finalColor.xyz, 1.0/2.2); // gamma correct
+	//finalColor = float4(1.0, 0.0, 0.0, 1.0);
 	return finalColor;
 }
 
@@ -675,25 +660,11 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 		normal = normalize(input.Normal);
 	}
 	
-	float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
-	if (LightType == 1) {
-		float3 toLight = normalize(-Light.Base.Base.LightPos.xyz);
-		finalColor.xyz += CalDirectLight(Light.Base.Base, normal, toLight, toEye, input.Tex, true);
-	}
-	else if (LightType == 2) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		finalColor.xyz += CalPointLight(Light.Base, normal, toLight, toEye, input.Tex, Distance, true);
-	}
-	else if (LightType == 3) {
-		float3 toLight = Light.Base.Base.LightPos.xyz - input.SurfacePosition.xyz;
-		float Distance = length(toLight);
-		toLight = normalize(toLight);
-		float3 spotDirection = -Light.DirectionCutOff.xyz;
-		finalColor.xyz += CalSpotLight(Light, normal, toLight, toEye, input.Tex, Distance, spotDirection, true);
-	}
+	float4 finalColor;
+	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
+	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, true);
+	finalColor.w = 1.0;
 	
-	finalColor.rgb = finalColor.rgb * CalLightStrengthWithShadow(input.PosInLight);	
+	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);	
 	return finalColor;
 }

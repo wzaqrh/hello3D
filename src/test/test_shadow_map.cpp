@@ -57,10 +57,10 @@ void TestShadowMap::OnPostInitDevice()
 	mModel1 = mContext->RenderableFac()->CreateAssimpModel(move1, matName);
 	mModel1->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
 
-	mModel1->PlayAnim(0);
-
 	mModel2 = mContext->RenderableFac()->CreateAssimpModel(mTransform, matName);
 	mModel2->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
+
+	mModel1->PlayAnim(0);
 }
 
 void TestShadowMap::OnRender()

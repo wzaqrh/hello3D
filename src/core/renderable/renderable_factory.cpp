@@ -19,8 +19,8 @@ RenderableFactory::RenderableFactory(ResourceManager& resMng)
 	: mResourceMng(resMng)
 {
 	mFontCache = std::make_shared<FontCache>(mResourceMng);
-	//mLaunchMode = LaunchAsync;
-	mLaunchMode = LaunchSync;
+	mLaunchMode = LaunchAsync;
+	//mLaunchMode = LaunchSync;
 }
 
 SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matName)

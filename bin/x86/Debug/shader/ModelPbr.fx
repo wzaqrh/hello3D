@@ -1,6 +1,7 @@
 /********** PBR **********/
 #include "Standard.h"
 #include "Skeleton.h"
+#include "Lighting.h"
 
 #if SHADER_MODEL > 30000
 //Texture2D txAlbedo : register(t0);//rgb
