@@ -3,10 +3,10 @@ cbuffer cbPerLight : register(b1)
 	matrix LightView;
 	matrix LightProjection;	
 
-	float4 unity_LightPosition;//world space
-	float4 unity_LightColor;
-	float4 SpecularColorPower;
-	float4 unity_LightAtten;
+	float4 unity_LightPosition;	//world space
+	float4 unity_LightColor;	//w(gross or luminance), 
+	float4 unity_SpecColor;		//w(shiness)
+	float4 unity_LightAtten;	//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	float4 unity_SpotDirection;
 
 	int LightType;

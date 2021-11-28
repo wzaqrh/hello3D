@@ -20,10 +20,10 @@ private:
 void TestModel::OnInitLight()
 {
 	auto pt_light =mContext->SceneMng()->AddPointLight();
-	pt_light->SetPosition(0, 5, -5);
+	pt_light->SetPosition(Eigen::Vector3f(0, 5, -5));
 
 	auto dir_light = mContext->SceneMng()->AddDirectLight();
-	dir_light->SetDirection(25, 0, 5);
+	dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
 }
 
 void TestModel::OnPostInitDevice()

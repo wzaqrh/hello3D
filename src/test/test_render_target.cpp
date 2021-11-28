@@ -24,9 +24,9 @@ private:
 void TestRT::OnInitLight()
 {
 	auto light1 = mContext->SceneMng()->AddPointLight();
-	light1->SetPosition(20, 0, -20);
+	light1->SetPosition(Eigen::Vector3f(20, 0, -20));
 	light1->SetAttenuation(0.01);
-	light1->SetSpecularPower(60);
+	//light1->SetSpecular(60);
 }
 
 void TestRT::OnPostInitDevice()

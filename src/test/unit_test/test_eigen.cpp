@@ -80,6 +80,13 @@ TEST_CASE("eigen matrix translate", "eigen_matrix_translate")
 	CHECK(m1._41 == 100);
 }
 
+TEST_CASE("eigen vector block", "eigen_vector_block")
+{
+	Eigen::Vector4f vec;
+
+	vec.head<3>() = Eigen::Vector3f(0, 0, 0);
+}
+
 TEST_CASE("eigen matrix block", "eigen_matrix_block")
 {
 	Eigen::Matrix4f m0 = Eigen::Matrix4f::Identity();

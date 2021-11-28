@@ -104,8 +104,8 @@ inline float3 MirBlinnPhongLight(float3 toLight, float3 toEye, float3 normal, fl
 	//blinn-phong
 	float3 h = normalize(toLight + toEye);
 	float ndoth = max(0, dot(normal, h));
-	float spec = pow(ndoth, s.Specular*128.0) * s.Gloss;
-	lightColor += spec * _SpecColor.rgb;
+	float spec = pow(ndoth, unity_SpecColor.w*128.0) * unity_LightColor.w;
+	lightColor += spec * unity_SpecColor.rgb;
 
 	//point lighting, spot lighting
 	float atten = 1.0 / (1.0 + lengthSq * unity_LightAtten.z);

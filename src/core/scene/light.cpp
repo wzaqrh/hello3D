@@ -8,29 +8,27 @@ DirectLight::DirectLight()
 {
 	memset(&mCbLight, 0, sizeof(mCbLight));
 	mCbLight.unity_LightPosition = Eigen::Vector4f(0, 0, 1, 0);
-	SetDiffuseColor(1, 1, 1, 1);
-	SetSpecularColor(1, 1, 1, 1);
-	SetSpecularPower(32);
+	mCbLight.unity_LightColor = Eigen::Vector4f(1, 1, 1, 1/*gloss*/);
+	mCbLight.unity_SpecColor = Eigen::Vector4f(1, 1, 1, 1/*shiness*/);
+	mCbLight.unity_LightAtten = Eigen::Vector4f(0, 0, 0, 0);
+	mCbLight.unity_SpotDirection = Eigen::Vector4f(0, 0, 0, 0);
 }
 
-void DirectLight::SetDirection(float x, float y, float z)
+void DirectLight::SetDirection(const Eigen::Vector3f& dir)
 {
-	mCbLight.unity_LightPosition = -Eigen::Vector4f(x, y, z, 0).normalized();
+	mCbLight.unity_LightPosition = -Eigen::Vector4f(dir.x(), dir.y(), dir.z(), 0).normalized();
 }
 
-void DirectLight::SetDiffuseColor(float r, float g, float b, float a)
+void DirectLight::SetDiffuse(const Eigen::Vector3f& color)
 {
-	mCbLight.unity_LightColor = Eigen::Vector4f(r, g, b, a);
+	mCbLight.unity_LightColor.head<3>() = color;
 }
 
-void DirectLight::SetSpecularColor(float r, float g, float b, float a)
+void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float luminance)
 {
-	mCbLight.SpecularColorPower = Eigen::Vector4f(r, g, b, mCbLight.SpecularColorPower.w());
-}
-
-void DirectLight::SetSpecularPower(float power)
-{
-	mCbLight.SpecularColorPower.w() = power;
+	mCbLight.unity_SpecColor.head<3>() = color;
+	mCbLight.unity_SpecColor.w() = shiness;
+	mCbLight.unity_LightColor.w() = luminance;
 }
 
 void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const {
@@ -41,13 +39,13 @@ void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::M
 /********** PointLight **********/
 PointLight::PointLight()
 {
-	mCbLight.unity_LightPosition = Eigen::Vector4f(0, 0, -10, 1);
-	mCbLight.unity_LightAtten = Eigen::Vector4f(0, 0, 0, 0);
+	SetPosition(Eigen::Vector3f(0, 0, -10));
+	SetAttenuation(0);
 }
 
-void PointLight::SetPosition(float x, float y, float z)
+void PointLight::SetPosition(const Eigen::Vector3f& pos)
 {
-	mCbLight.unity_LightPosition = Eigen::Vector4f(x, y, z, 1);
+	mCbLight.unity_LightPosition.head<3>() = pos;
 }
 
 void PointLight::SetAttenuation(float c)
@@ -58,19 +56,13 @@ void PointLight::SetAttenuation(float c)
 /********** SpotLight **********/
 SpotLight::SpotLight()
 {
-	SetSpotDirection(0, 0, 1);
-	SetAngle(3.14 * 30 / 180);
+	SetSpotDirection(Eigen::Vector3f(0, 0, 1));
+	SetAngle(30.0f / 180 * 3.14);
 }
 
-void SpotLight::SetDirection(float x, float y, float z)
+void SpotLight::SetSpotDirection(const Eigen::Vector3f& dir)
 {
-	mCbLight.unity_LightPosition = -Eigen::Vector4f(x, y, z, 0);
-	mCbLight.unity_SpotDirection.leftCols<3>() = mCbLight.unity_LightPosition.leftCols<3>();
-}
-
-void SpotLight::SetSpotDirection(float x, float y, float z)
-{
-	mCbLight.unity_SpotDirection = Eigen::Vector4f(x, y, z, mCbLight.unity_SpotDirection.w());
+	mCbLight.unity_SpotDirection.head<3>() = dir;
 }
 
 void SpotLight::SetCutOff(float cutoff)

@@ -19,9 +19,9 @@ struct _declspec(align(16)) cbPerLight {
 	Eigen::Matrix4f LightProjection;
 
 	Eigen::Vector4f unity_LightPosition;//world space
-	Eigen::Vector4f unity_LightColor;
-	Eigen::Vector4f SpecularColorPower;
-	Eigen::Vector4f unity_LightAtten;
+	Eigen::Vector4f unity_LightColor;//w(gloss)
+	Eigen::Vector4f unity_SpecColor;//w(shiness)
+	Eigen::Vector4f unity_LightAtten;//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	Eigen::Vector4f unity_SpotDirection;
 
 	unsigned int LightType;//directional=1,point=2,spot=3
@@ -40,10 +40,9 @@ class MIR_CORE_API DirectLight : public ILight
 {
 public:
 	DirectLight();
-	virtual void SetDirection(float x, float y, float z);
-	void SetDiffuseColor(float r, float g, float b, float a);
-	void SetSpecularColor(float r, float g, float b, float a);
-	void SetSpecularPower(float power);
+	void SetDirection(const Eigen::Vector3f& dir);
+	void SetDiffuse(const Eigen::Vector3f& color);
+	void SetSpecular(const Eigen::Vector3f& color, float shiness, float luminance);
 
 	void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const override;
 	LightType GetType() const override { return kLightDirectional; }
@@ -56,7 +55,7 @@ class MIR_CORE_API PointLight : public DirectLight
 {
 public:
 	PointLight();
-	void SetPosition(float x, float y, float z);
+	void SetPosition(const Eigen::Vector3f& pos);
 	void SetAttenuation(float c);
 
 	LightType GetType() const override { return kLightPoint; }
@@ -66,8 +65,7 @@ class MIR_CORE_API SpotLight : public PointLight
 {
 public:
 	SpotLight();
-	void SetDirection(float x, float y, float z) override;
-	void SetSpotDirection(float x, float y, float z);
+	void SetSpotDirection(const Eigen::Vector3f& dir);
 	void SetCutOff(float cutoff);
 	void SetAngle(float radian);
 

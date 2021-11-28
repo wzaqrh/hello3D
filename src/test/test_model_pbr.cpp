@@ -42,15 +42,15 @@ void TestPBR::OnInitLight()
 #if 1
 	{
 		auto light = mContext->SceneMng()->AddDirectLight();
-		light->SetDirection(1, -1, 1);
+		light->SetDirection(Eigen::Vector3f(1, -1, 1));
 		float i = 0.7;
-		light->SetDiffuseColor(i, i, i, 1.0);
+		light->SetDiffuse(Eigen::Vector3f(i, i, i));
 	}
 	{
 		auto light = mContext->SceneMng()->AddDirectLight();
-		light->SetDirection(-1, -1, 0);
+		light->SetDirection(Eigen::Vector3f(-1, -1, 0));
 		float i = 1.0;
-		light->SetDiffuseColor(i, i, i, 1.0);
+		light->SetDiffuse(Eigen::Vector3f(i, i, i));
 	}
 #endif
 

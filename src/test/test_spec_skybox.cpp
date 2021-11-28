@@ -18,7 +18,7 @@ protected:
 void TestSpecSkybox::OnInitLight()
 {
 	auto light2 = mContext->SceneMng()->AddDirectLight();
-	light2->SetDirection(0, 0, 1);
+	light2->SetDirection(Eigen::Vector3f(0, 0, 1));
 }
 
 void TestSpecSkybox::OnPostInitDevice()

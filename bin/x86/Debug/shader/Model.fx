@@ -57,7 +57,7 @@ struct PS_INPUT
 	float2 Tex : TEXCOORD0;
 	
 	float3 Normal : NORMAL0;//eye space
-	float3 Eye : TEXCOORD1;//eye space
+	float3 ToEye  : TEXCOORD1;//eye space
 	float3 ToLight : TEXCOORD2;//eye space
 	float4 PosInLight : TEXCOORD3;//world space
 };
@@ -81,7 +81,7 @@ PS_INPUT VS(VS_INPUT i)
 	matrix LightMWVP = mul(LightProjection,mul(LightView, MW));
 	output.PosInLight = mul(LightMWVP, skinPos);
 	
-	output.Eye = -output.Pos;
+	output.ToEye = -output.Pos;
     output.Pos = mul(Projection, output.Pos);
 	output.Tex = i.Tex;
     return output;
@@ -90,10 +90,11 @@ PS_INPUT VS(VS_INPUT i)
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.xyz = MirLambertLight(input.ToLight, normalize(input.Normal), GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
-	finalColor.w = 1.0;
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
+		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.a = 1.0;
 
-	finalColor.xyz *= CalLightStrengthWithShadow(input.PosInLight);
+	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }
 
@@ -101,9 +102,10 @@ float4 PS(PS_INPUT input) : SV_Target
 float4 PSAdd(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.xyz = MirLambertLight(input.ToLight, normalize(input.Normal), GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
-	finalColor.w = 1.0;
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
+		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.a = 1.0;
 	
-	finalColor.xyz *= CalLightStrengthWithShadow(input.PosInLight);
+	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }

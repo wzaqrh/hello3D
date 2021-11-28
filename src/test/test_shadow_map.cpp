@@ -29,7 +29,7 @@ void TestShadowMap::OnInitLight()
 {
 	mLight = mContext->SceneMng()->AddPointLight();//1, -1, 1
 	float ddd = 10;
-	mLight->SetPosition(ddd, ddd, -ddd);
+	mLight->SetPosition(Eigen::Vector3f(ddd, ddd, -ddd));
 	mLight->SetAttenuation(0.001);
 	//mLight->SetPosition(0, 0, -150);
 }
