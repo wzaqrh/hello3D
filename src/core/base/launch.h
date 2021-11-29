@@ -31,7 +31,7 @@ struct Launch
 #define __LaunchSync__  Launch(LaunchSync, __FUNCTION__)
 #define __LaunchAsync__ Launch(LaunchAsync, __FUNCTION__)
 #define __launchMode__  Launch(launchMode, __FUNCTION__)
-#define ResSetLaunch res->_CallStack = launchMode
+#define ResSetLaunch res->SetCallStack(launchMode)
 #else
 #define LaunchMode Launch
 enum Launch {

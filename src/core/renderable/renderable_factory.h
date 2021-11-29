@@ -9,7 +9,7 @@ class MIR_CORE_API RenderableFactory
 {
 public:
 	typedef const std::string& string_cref;
-	RenderableFactory(ResourceManager& resMng);
+	RenderableFactory(ResourceManager& resMng, Launch launchMode);
 	SkyBoxPtr CreateSkybox(string_cref imgpath);
 	SpritePtr CreateColorLayer(string_cref matName = "");
 	SpritePtr CreateSprite(string_cref imgpath = "", string_cref matName = "");

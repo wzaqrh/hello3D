@@ -11,5 +11,6 @@
 	template <typename... T> RETURN_TYPE CREATE_FUNC##Async(T &&...args) ##__VA_ARGS__ { return CREATE_FUNC(__LaunchAsync__, std::forward<T>(args)...); }
 
 #define TemplateArgs template <typename... T>
+#define TemplateT template <typename T>
 
 #define ThreadSafe

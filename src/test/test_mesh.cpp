@@ -1,6 +1,5 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/resource/material_factory.h"
 #include "core/scene/scene_manager.h"
 #include "core/renderable/renderable_factory.h"
 #include "core/renderable/mesh.h"

@@ -50,7 +50,7 @@ ResourceManager::~ResourceManager()
 {
 	Dispose();
 }
-void ResourceManager::Dispose()
+void ResourceManager::Dispose() ThreadSafe
 {
 	if (mThreadPool) {
 		mThreadPool = nullptr;
@@ -61,7 +61,8 @@ void ResourceManager::Dispose()
 void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe
 {
 	if (to && !to->IsLoaded()) {
-		ATOMIC_STATEMENT(mResDependGraphLock, mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr));
+		ATOMIC_STATEMENT(mResDependGraphLock, 
+			this->mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr));
 	}
 }
 
@@ -70,17 +71,24 @@ void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCa
 	AddResourceDependency(res, dependRes);
 	res->SetPrepared();
 #if defined MIR_RESOURCE_DEBUG
-	res->_CallStack = launchMode;
+	res->SetCallStack(launchMode);
 #endif
-	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, mLoadTaskCtxByRes[res].Init(launchMode, res, loadResCb, mThreadPool));
+	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, 
+		this->mLoadTaskCtxByRes[res.get()].Init(launchMode, res, loadResCb, mThreadPool));
 }
 
-void ResourceManager::UpdateForLoading()
+void ResourceManager::AddResourceLoadedObserver(IResourcePtr res, const ResourceLoadedCallback& resLoadedCB)
 {
-	const std::vector<IResourcePtr>& topNodes = mResDependencyGraph.GetTopNodes();
+	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, 
+		this->mLoadTaskCtxByRes[res.get()].AddResourceLoadedCallback(resLoadedCB));
+}
+
+void ResourceManager::UpdateForLoading() ThreadSafe
+{
+	ATOMIC_STATEMENT(mResDependGraphLock, const auto& topNodes = this->mResDependencyGraph.GetTopNodes(mRDGTopNodes));
 	for (auto& res : topNodes) {
 		if (res->IsPreparedNeedLoading()) {
-			ResourceLoadTaskContext& ctx = mLoadTaskCtxByRes[res];
+			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, ResourceLoadTaskContext ctx = this->mLoadTaskCtxByRes[res.get()]);
 			if (ctx.Res) {
 				auto workExecute = std::move(ctx.WorkThreadJob->Execute);
 				if (workExecute) workExecute(ctx.Res, ctx.MainThreadJob);
@@ -94,9 +102,11 @@ void ResourceManager::UpdateForLoading()
 						if (mainExecute) {
 							mainExecute(ctx.Res, nullptr);
 							res->SetLoaded(ctx.MainThreadJob->Result.get());
+							if (res->IsLoaded()) ctx.FireResourceLoaded();
 						}
 						else {
 							res->SetLoaded(true);
+							ctx.FireResourceLoaded();
 						}
 					}
 					else {
@@ -106,19 +116,21 @@ void ResourceManager::UpdateForLoading()
 			}
 			else {
 				res->SetLoaded(true);
+				ctx.FireResourceLoaded();
 			}
 		}
 	}
 	for (auto res : topNodes) {
 		if (res->IsLoaded()) {
-			mResDependencyGraph.RemoveTopNode(res);
-			mLoadTaskCtxByRes.erase(res);
+			ATOMIC_STATEMENT(mResDependGraphLock, this->mResDependencyGraph.RemoveTopNode(res));
+			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, this->mLoadTaskCtxByRes.erase(res.get()));
 		}
 		else if (res->IsLoadedFailed()) {
-			mResDependencyGraph.RemoveConnectedGraphByTopNode(res, [](IResourcePtr node) {
+			ATOMIC_STATEMENT(mResDependGraphLock, 
+				this->mResDependencyGraph.RemoveConnectedGraphByTopNode(res, [](IResourcePtr node) {
 				node->SetLoaded(false);
-			});
-			mLoadTaskCtxByRes.erase(res);
+			}));
+			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, this->mLoadTaskCtxByRes.erase(res.get()));
 		}
 	}
 }
@@ -211,13 +223,13 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode,
 {
 	IProgramPtr program = nullptr;
 	ProgramKey key{ name, vsEntry, psEntry };
-	ATOMIC_STATEMENT(this->mProgramMapLock, auto findProg = this->mProgramByKey.find(key));
+	ATOMIC_STATEMENT(mProgramMapLock, auto findProg = this->mProgramByKey.find(key));
 	if (findProg == this->mProgramByKey.end()) {
 		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
-		ATOMIC_STATEMENT(this->mProgramMapLock, this->mProgramByKey.insert(std::make_pair(key, program)));
+		ATOMIC_STATEMENT(mProgramMapLock, this->mProgramByKey.insert(std::make_pair(key, program)));
 	#if defined MIR_RESOURCE_DEBUG
-		program->_ResourcePath = (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vsEntry %psEntry).str();
-		program->_CallStack = launchMode;
+		program->SetResPath((boost::format("name:%1%, vs:%2%, ps:%3%") % name %vsEntry %psEntry).str());
+		program->SetCallStack(launchMode);
 	#endif
 
 		if (launchMode == LaunchAsync) {
@@ -415,15 +427,14 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 	std::string imgFullpath = fullpath.string();
 
 	ITexturePtr texture = nullptr;
-
-	ATOMIC_STATEMENT(this->mTextureMapLock, auto findIter = this->mTextureByPath.find(imgFullpath));
+	ATOMIC_STATEMENT(mTextureMapLock, auto findIter = this->mTextureByPath.find(imgFullpath));
 	if (findIter == this->mTextureByPath.end()) {
 		texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
-		ATOMIC_STATEMENT(this->mTextureMapLock, this->mTextureByPath.insert(std::make_pair(imgFullpath, texture)));
+		ATOMIC_STATEMENT(mTextureMapLock, this->mTextureByPath.insert(std::make_pair(imgFullpath, texture)));
 	
 	#if defined MIR_RESOURCE_DEBUG
-		texture->_ResourcePath = (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str();
-		texture->_CallStack = launchMode;
+		texture->SetResPath((boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str());
+		texture->SetCallStack(launchMode);
 	#endif
 
 		if (launchMode == LaunchAsync) {
@@ -443,13 +454,13 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName) ThreadSafe ThreadSafe
 {
 	MaterialPtr material = nullptr;
-	ATOMIC_STATEMENT(this->mMaterialMapLock, auto findIter = this->mMaterialByName.find(matName));
+	ATOMIC_STATEMENT(mMaterialMapLock, auto findIter = this->mMaterialByName.find(matName));
 	if (findIter == this->mMaterialByName.end()) {
 		material = this->mMaterialFac.CreateMaterial(launchMode, *this, matName);
-		ATOMIC_STATEMENT(this->mMaterialMapLock, this->mMaterialByName.insert(std::make_pair(matName, material)));
+		ATOMIC_STATEMENT(mMaterialMapLock, this->mMaterialByName.insert(std::make_pair(matName, material)));
 	#if defined MIR_RESOURCE_DEBUG
-		material->_ResourcePath = (boost::format("name:%1%") %matName).str();
-		material->_CallStack = launchMode;
+		material->SetResPath((boost::format("name:%1%") %matName).str());
+		material->SetCallStack(launchMode);
 	#endif
 	}
 	else {
@@ -466,13 +477,13 @@ AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& 
 {
 	AiScenePtr aiRes = nullptr;
 	AiResourceKey key{ assetPath, redirectRes };
-	ATOMIC_STATEMENT(this->mAiSceneMapLock, auto findIter = this->mAiSceneByKey.find(key));
+	ATOMIC_STATEMENT(mAiSceneMapLock, auto findIter = this->mAiSceneByKey.find(key));
 	if (findIter == this->mAiSceneByKey.end()) {
 		aiRes = this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
-		ATOMIC_STATEMENT(this->mAiSceneMapLock, this->mAiSceneByKey.insert(std::make_pair(key, aiRes)));
+		ATOMIC_STATEMENT(mAiSceneMapLock, this->mAiSceneByKey.insert(std::make_pair(key, aiRes)));
 	#if defined MIR_RESOURCE_DEBUG
-		aiRes->_ResourcePath = (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str();
-		aiRes->_CallStack = launchMode;
+		aiRes->SetResPath((boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
+		aiRes->SetCallStack(launchMode);
 	#endif
 	}
 	else {

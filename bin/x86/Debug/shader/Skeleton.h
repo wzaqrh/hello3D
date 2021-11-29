@@ -9,7 +9,7 @@ cbuffer cbWeightedSkin : register(b2)
 	int hasAO;
 }
 
-float4 Skinning(float4 iBlendWeights, int4 iBlendIndices, float4 iPos)
+float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
 {
     float4 Pos = float4(0.0,0.0,0.0,iPos.w); 	
 	Pos.xyz += mul(iPos, Models[iBlendIndices.x]).xyz * iBlendWeights.x;

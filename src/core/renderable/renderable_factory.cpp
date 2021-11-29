@@ -15,12 +15,11 @@ namespace mir {
 
 #define NotEmptyOr(Str, DefStr) (!Str.empty() ? Str : DefStr)
 
-RenderableFactory::RenderableFactory(ResourceManager& resMng)
+RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 	: mResourceMng(resMng)
 {
 	mFontCache = std::make_shared<FontCache>(mResourceMng);
-	mLaunchMode = LaunchAsync;
-	//mLaunchMode = LaunchSync;
+	mLaunchMode = launchMode;
 }
 
 SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, string_cref matName)
@@ -62,6 +61,7 @@ PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName
 	PostProcessPtr process;
 	if (effectName == E_MAT_POSTPROC_BLOOM) {
 		process = Bloom::Create(mLaunchMode, mResourceMng, camera.FetchPostProcessInput());
+		camera.AddPostProcessEffect(process);
 	}
 	return process;
 }

@@ -22,7 +22,9 @@ DECLARE_STRUCT(ThreadPool);
 DECLARE_STRUCT(LoadResourceJob);
 
 typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
-struct LoadResourceJob {
+typedef std::function<void(IResourcePtr res)> ResourceLoadedCallback;
+struct LoadResourceJob 
+{
 	void Init(Launch launchMode, LoadResourceCallback loadResCb);
 	DECLARE_LAUNCH_FUNCTIONS(void, Init);
 public:
@@ -32,7 +34,8 @@ public:
 	std::weak_ptr<ThreadPool> Pool;
 };
 
-class MIR_CORE_API ResourceManager : boost::noncopyable {
+class MIR_CORE_API ResourceManager : boost::noncopyable 
+{
 	struct ResourceLoadTaskContext {
 		ResourceLoadTaskContext() {
 			WorkThreadJob = std::make_shared<LoadResourceJob>();
@@ -43,17 +46,27 @@ class MIR_CORE_API ResourceManager : boost::noncopyable {
 			WorkThreadJob->Pool = MainThreadJob->Pool = pool;
 			WorkThreadJob->Init(launchMode, loadResCb);
 		}
+		TemplateT void AddResourceLoadedCallback(T&& cb) {
+			ResLoadedCb.push_back(std::forward<T>(cb));
+		}
+		void FireResourceLoaded() {
+			auto callbacks = std::move(ResLoadedCb);
+			for (auto& cb : callbacks)
+				cb(Res);
+		}
 	public:
 		IResourcePtr Res;
 		LoadResourceJobPtr WorkThreadJob, MainThreadJob;
+		std::vector<ResourceLoadedCallback> ResLoadedCb;
 	};
 public:
 	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac, AiResourceFactory& aiResFac);
 	~ResourceManager();
-	void Dispose();
-	void UpdateForLoading();
+	void Dispose() ThreadSafe;
+	void UpdateForLoading() ThreadSafe;
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe;//to rely-on from
 	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr) ThreadSafe;
+	void AddResourceLoadedObserver(IResourcePtr res, const ResourceLoadedCallback& resLoadedCB) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(void, AddLoadResourceJob, ThreadSafe);
 public:
 	RenderSystem& RenderSys() { return mRenderSys; }
@@ -225,20 +238,20 @@ private:
 					RemoveConnectedGraphByTopNode(to, cb);
 			}
 		}
-		const std::vector<ValueType>& GetTopNodes() {//入度为0
-			mTopNodes.clear();
+		const std::vector<ValueType>& GetTopNodes(std::vector<ValueType>& topNodes) {//入度为0
+			topNodes.clear();
 			for (auto& iter : mNodeMap) {
 				if (iter.second.Value && iter.second.InDgree() == 0)
-					mTopNodes.push_back(iter.second.Value);
+					topNodes.push_back(iter.second.Value);
 			}
-			return mTopNodes;
+			return topNodes;
 		}
 	private:
 		mutable std::map<IResourceRawPtr, GraphNode> mNodeMap;
-		mutable std::vector<ValueType> mTopNodes;
 	};
+	std::vector<IResourcePtr> mRDGTopNodes;
 	ResourceDependencyGraph mResDependencyGraph;
-	std::map<IResourcePtr, ResourceLoadTaskContext> mLoadTaskCtxByRes;
+	std::map<IResourceRawPtr, ResourceLoadTaskContext> mLoadTaskCtxByRes;
 	std::shared_ptr<ThreadPool> mThreadPool;
 private:
 	std::vector<unsigned char> mTempBytes;

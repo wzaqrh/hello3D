@@ -8,6 +8,9 @@
 
 using namespace mir;
 
+//#define AppLaunchMode __LaunchSync__
+#define AppLaunchMode __LaunchAsync__
+
 App::App()
 {
 	mContext = nullptr;
@@ -17,7 +20,7 @@ App::App()
 
 	mTransform = std::make_shared<mir::Transform>();
 	mBackgndColor = Eigen::Vector4f(0.0f, 0.125f, 0.3f, 1.0f);
-	mContext = new mir::Mir;
+	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()
 {

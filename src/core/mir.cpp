@@ -6,7 +6,8 @@
 
 namespace mir {
 
-Mir::Mir()
+Mir::Mir(Launch launchMode)
+	:mLaunchMode(launchMode)
 {}
 Mir::~Mir()
 {}
@@ -27,10 +28,10 @@ bool Mir::Initialize(HWND hWnd) {
 	mResourceMng = std::make_shared<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
 	
 	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, *mResourceMng, mRenderSys->WinSize());
-	mSceneMng = std::make_shared<SceneManager>(*mRenderSys, *mMaterialFac, mRenderSys->WinSize(), 
-		Camera::CreatePerspective(*mRenderSys, mRenderSys->WinSize()));
+	mSceneMng = std::make_shared<SceneManager>(*mResourceMng, mRenderSys->WinSize(), 
+		Camera::CreatePerspective(*mResourceMng, mRenderSys->WinSize()));
 
-	mRenderableFac = std::make_shared<RenderableFactory>(*mResourceMng);
+	mRenderableFac = std::make_shared<RenderableFactory>(*mResourceMng, mLaunchMode);
 	return true;
 }
 

@@ -1,7 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
 #include "core/scene/scene_manager.h"
-#include "core/resource/material_factory.h"
 #include "core/renderable/sprite.h"
 
 using namespace mir;
@@ -13,7 +12,7 @@ protected:
 	virtual void OnPostInitDevice() override;
 private:
 	SpritePtr mSprite;
-	int mCaseIndex = 6;
+	int mCaseIndex = 4;
 };
 
 void TestSprite::OnPostInitDevice()

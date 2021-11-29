@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_config.h"
 #include "core/mir_export.h"
+#include "core/base/launch.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/render_system.h"
@@ -12,6 +13,7 @@
 namespace mir {
 
 class MIR_CORE_API Mir {
+	Launch mLaunchMode;
 	RenderSystemPtr mRenderSys;
 	MaterialFactoryPtr mMaterialFac;
 	AiResourceFactoryPtr mAiResourceFac;
@@ -20,7 +22,7 @@ class MIR_CORE_API Mir {
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
 public:
-	Mir();
+	Mir(Launch launchMode);
 	~Mir();
 	bool Initialize(HWND hWnd);
 	void Dispose();
