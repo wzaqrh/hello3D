@@ -75,6 +75,7 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	op.Textures.Add(mMainTex->GetAttachColorTexture(0));
 	op.WorldTransform = Eigen::Matrix4f::Identity();
 	op.VertBufferByPass = mVertBufferByPass;
+	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
 	return 1;
 }

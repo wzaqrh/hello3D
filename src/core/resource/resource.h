@@ -20,10 +20,6 @@ enum ResourceState {
 };
 interface MIR_CORE_API IResource : boost::noncopyable 
 {
-#if defined MIR_RESOURCE_DEBUG
-	std::string _ResourcePath;
-	Launch _CallStack;
-#endif
 	virtual ~IResource() {}
 	virtual ResourceState GetCurState() const = 0;
 	virtual void SetCurState(ResourceState state) = 0;
@@ -39,7 +35,35 @@ public:
 	bool IsLoading() const { return GetCurState() == kResourceStateLoading; }
 	bool IsLoadComplete() const { return IsLoaded() || IsLoadedFailed(); }
 	bool IsLoaded() const { return GetCurState() == kResourceStateLoadedSuccess; }
-	bool IsLoadedFailed() const { return GetCurState() == kResourceStateLoadedFailed; } 
+	bool IsLoadedFailed() const { return GetCurState() == kResourceStateLoadedFailed; }
+#if defined MIR_RESOURCE_DEBUG
+public:
+	void SetPrivInfo(const std::string& privInfo) {
+		_PrivInfo = privInfo;
+		UpdateDebugInfo();
+	}
+	void SetResPath(const std::string& resPath) {
+		_ResourcePath = resPath;
+		UpdateDebugInfo();
+	}
+	void SetCallStack(const Launch& launch) {
+		_CallStack = launch;
+		UpdateDebugInfo();
+	}
+	void UpdateDebugInfo() {
+		_DebugInfo.clear();
+		if (!_PrivInfo.empty()) _DebugInfo += "priv:" + _PrivInfo;
+		if (!_ResourcePath.empty()) _DebugInfo += ", path:" + _ResourcePath;
+		if (!_CallStack.CallStack.empty()) _DebugInfo += ", call:" + _CallStack.CallStack;
+	}
+public:
+	std::string _DebugInfo;
+private:
+	std::string _PrivInfo, _ResourcePath;
+	Launch _CallStack;
+#else
+	void SetPrivInfo(const std::string& privInfo) {}
+#endif
 };
 
 template<class _Parent>

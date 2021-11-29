@@ -32,7 +32,7 @@ class MIR_CORE_API RenderPipeline
 	RenderSystem& mRenderSys;
 	const Eigen::Vector2i mScreenSize;
 
-	std::vector<IFrameBufferPtr> mRenderTargetStk;
+	std::vector<IFrameBufferPtr> mFrameBufferStack;
 	IFrameBufferPtr mShadowCasterOutput;
 public:
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size);
@@ -41,12 +41,12 @@ public:
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);
 	void Draw(IRenderable& renderable, SceneManager& scene);
 private:
-	void _PushRenderTarget(IFrameBufferPtr rendTarget);
-	void _PopRenderTarget();
+	void _PushFrameBuffer(IFrameBufferPtr rendTarget);
+	void _PopFrameBuffer();
 	void BindPass(const PassPtr& pass);
 	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode);
-	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, 
+	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
 		const cbPerLight& lightParam, cbGlobalParam& globalParam);
 	void RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
 		const std::vector<ILightPtr>& lights, const std::string& lightMode);

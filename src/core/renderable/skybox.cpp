@@ -47,6 +47,7 @@ int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 	op.VertexBuffer = mVertexBuffer;
 	op.Textures.Add(mMainTex);
 	op.WorldTransform = Eigen::Matrix4f::Identity();
+	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
 	return 1;
 }

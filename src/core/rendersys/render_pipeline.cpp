@@ -20,17 +20,17 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
 }
 
-void RenderPipeline::_PushRenderTarget(IFrameBufferPtr rendTarget)
+void RenderPipeline::_PushFrameBuffer(IFrameBufferPtr rendTarget)
 {
-	mRenderTargetStk.push_back(rendTarget);
+	mFrameBufferStack.push_back(rendTarget);
 	mRenderSys.SetFrameBuffer(rendTarget);
 }
-void RenderPipeline::_PopRenderTarget()
+void RenderPipeline::_PopFrameBuffer()
 {
-	if (!mRenderTargetStk.empty())
-		mRenderTargetStk.pop_back();
+	BOOST_ASSERT(!mFrameBufferStack.empty());
+	mFrameBufferStack.pop_back();
 
-	mRenderSys.SetFrameBuffer(!mRenderTargetStk.empty() ? mRenderTargetStk.back() : nullptr);
+	mRenderSys.SetFrameBuffer(!mFrameBufferStack.empty() ? mFrameBufferStack.back() : nullptr);
 }
 
 void RenderPipeline::BindPass(const PassPtr& pass)
@@ -48,8 +48,8 @@ void RenderPipeline::BindPass(const PassPtr& pass)
 
 void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op)
 {
-	if (iterCnt >= 0) _PushRenderTarget(pass->mRTIterators[iterCnt]);
-	else if (pass->mRenderTarget) _PushRenderTarget(pass->mRenderTarget);
+	if (iterCnt >= 0) _PushFrameBuffer(pass->mRTIterators[iterCnt]);
+	else if (pass->mRenderTarget) _PushFrameBuffer(pass->mRenderTarget);
 
 	if (iterCnt >= 0) {
 		if (iterCnt + 1 < pass->mRTIterators.size())
@@ -80,11 +80,11 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 	}
 
 	if (iterCnt >= 0) {
-		_PopRenderTarget();
+		_PopFrameBuffer();
 	}
 	else {
 		if (pass->mRenderTarget)
-			_PopRenderTarget();
+			_PopFrameBuffer();
 	}
 }
 
@@ -117,12 +117,12 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 	}
 }
 
-void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, 
+void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
 	const cbPerLight& lightParam, cbGlobalParam& globalParam)
 {
 	for (int i = 0; i < opQueue.Count(); ++i) {
 		auto& op = opQueue[i];
-		if (op.Material->IsLoaded()) {
+		if ((op.CameraMask & camMask) && op.Material->IsLoaded()) {
 			globalParam.World = op.WorldTransform;
 			globalParam.WorldInv = globalParam.World.inverse();
 			op.Material->CurTech()->UpdateConstBufferByName(mRenderSys, 
@@ -136,7 +136,7 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 	}
 }
 
-std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool castShadow, const ILight& light)
+static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool castShadow, const ILight& light)
 {
 	cbGlobalParam globalParam = {};
 	cbPerLight lightParam = {};
@@ -169,7 +169,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	BlendState orgBlend = mRenderSys.GetBlendFunc();
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PushRenderTarget(mShadowCasterOutput);
+		_PushFrameBuffer(mShadowCasterOutput);
 		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
 		mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
@@ -177,7 +177,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetAttachColorTexture(0));
 
-		auto& skyBox = camera.SkyBox();
+		auto& skyBox = camera.GetSkyBox();
 		if (skyBox && skyBox->GetTexture())
 			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->GetTexture());
 	}
@@ -187,25 +187,32 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	}
 
 	if (!lightsOrder.empty()) {
-		BlendState orgBlend = mRenderSys.GetBlendFunc();
-		mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
+		BlendState originBlend = mRenderSys.GetBlendFunc();
 		
-		cbGlobalParam globalParam;
-		cbPerLight lightParam;
-		std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, *lightsOrder[0]);
-		RenderLight(opQueue, lightMode, lightParam, globalParam);
+		bool firstLight = true;
+		for (size_t i = 0; i < lightsOrder.size(); ++i) {
+			if (lightsOrder[i]->GetCameraMask() & camera.GetCameraMask()) {
+				cbGlobalParam globalParam;
+				cbPerLight lightParam;
+				std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, *lightsOrder[0]);
 
-		for (int i = 1; i < lightsOrder.size(); ++i) {
-			mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
-			auto lightModeEx = (lightMode == E_PASS_FORWARDBASE) ? E_PASS_FORWARDADD : lightMode;
-			std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightModeEx == E_PASS_SHADOWCASTER, *lightsOrder[i]);
-			RenderLight(opQueue, lightModeEx, lightParam, globalParam);
+				if (firstLight) {
+					firstLight = false;
+					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
+					RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
+				}
+				else {
+					mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
+					auto lightModeEx = (lightMode != E_PASS_FORWARDBASE) ? lightMode : E_PASS_FORWARDADD;
+					RenderLight(opQueue, lightModeEx, camera.GetCameraMask(), lightParam, globalParam);
+				}
+			}
 		}
-		mRenderSys.SetBlendFunc(orgBlend);
+		mRenderSys.SetBlendFunc(originBlend);
 	}
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PopRenderTarget();
+		_PopFrameBuffer();
 		mRenderSys.SetDepthState(orgState);
 		mRenderSys.SetBlendFunc(orgBlend);
 
@@ -227,22 +234,27 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 
 void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& scene)
 {
-	for (auto& camera : scene.mCameras) 
+	for (auto& camera : scene.GetCameras()) 
 	{
+		if (camera->GetOutput()) {
+			_PushFrameBuffer(camera->GetOutput());
+			mRenderSys.ClearFrameBuffer(camera->GetOutput(), Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
+		}
+
 		//setup framebuffer as camera's post_process_input 
-		if (!camera->PostProcessEffects().empty() && camera->mPostProcessInput) {
+		if (!camera->GetPostProcessEffects().empty() && camera->mPostProcessInput) {
 			mRenderSys.SetFrameBuffer(camera->mPostProcessInput);
 			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
 		}
 
 		//camera's skybox
-		if (camera->SkyBox()) {
+		if (camera->GetSkyBox()) {
 			RenderOperationQueue opQue;
-			camera->SkyBox()->GenRenderOperation(opQue);
-			RenderOpQueue(opQue, *camera, scene.mLightsByOrder, E_PASS_FORWARDBASE);
+			camera->GetSkyBox()->GenRenderOperation(opQue);
+			RenderOpQueue(opQue, *camera, scene.GetLights(), E_PASS_FORWARDBASE);
 		}
 
-		RenderCamera(opQueue, *camera, scene.mLightsByOrder);
+		RenderCamera(opQueue, *camera, scene.GetLights());
 
 		//camera's postprocess
 		{
@@ -250,13 +262,15 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 			mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
 
 			RenderOperationQueue opQue;
-			auto& postProcessEffects = camera->PostProcessEffects();
+			auto& postProcessEffects = camera->GetPostProcessEffects();
 			for (size_t i = 0; i < postProcessEffects.size(); ++i)
 				postProcessEffects[i]->GenRenderOperation(opQue);
-			RenderOpQueue(opQue, *camera, scene.mLightsByOrder, E_PASS_POSTPROCESS);
+			RenderOpQueue(opQue, *camera, scene.GetLights(), E_PASS_POSTPROCESS);
 
 			mRenderSys.SetDepthState(orgState);
 		}
+
+		if (camera->GetOutput()) _PopFrameBuffer();
 	}
 }
 

@@ -1,32 +1,32 @@
 #include <boost/math/constants/constants.hpp>
 #include "core/scene/camera.h"
-#include "core/rendersys/render_system.h"
-#include "core/rendersys/render_pipeline.h"
+//#include "core/rendersys/render_pipeline.h"
+#include "core/resource/resource_manager.h"
 #include "core/base/debug.h"
 #include "core/base/math.h"
 
 namespace mir {
 
-CameraPtr Camera::CreatePerspective(RenderSystem& renderSys, const Eigen::Vector2i& size, 
+CameraPtr Camera::CreatePerspective(ResourceManager& resMng, const Eigen::Vector2i& size, 
 	Eigen::Vector3f eyePos, double far1, double fov)
 {
-	CameraPtr camera = std::make_shared<Camera>(renderSys);
+	CameraPtr camera = std::make_shared<Camera>(resMng);
 	camera->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
 	camera->SetPerspectiveProj(size, fov, far1);
 	return camera;
 }
 
-CameraPtr Camera::CreateOthogonal(RenderSystem& renderSys, const Eigen::Vector2i& size, 
+CameraPtr Camera::CreateOthogonal(ResourceManager& resMng, const Eigen::Vector2i& size, 
 	Eigen::Vector3f eyePos, double far1)
 {
-	CameraPtr camera = std::make_shared<Camera>(renderSys);
+	CameraPtr camera = std::make_shared<Camera>(resMng);
 	camera->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
 	camera->SetOthogonalProj(size, far1);
 	return camera;
 }
 
-Camera::Camera(RenderSystem& renderSys)
-	:mRenderSys(renderSys)
+Camera::Camera(ResourceManager& resMng)
+	: mResourceMng(resMng)
 {
 	mFlipY = false;
 	mTransformDirty = true;
@@ -141,13 +141,21 @@ void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
 	mPostProcessEffects.push_back(postEffect);
 }
 
-IFrameBufferPtr Camera::FetchPostProcessInput()
+IFrameBufferPtr Camera::FetchPostProcessInput(ResourceFormat format)
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mRenderSys.LoadFrameBuffer(nullptr, mSize, kFormatR16G16B16A16UNorm);
+		mPostProcessInput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mSize, format);
 		//SET_DEBUG_NAME(mPostProcessInput->mDepthStencilView, "post_process_input");
 	}
 	return mPostProcessInput;
+}
+
+IFrameBufferPtr Camera::FetchOutput(ResourceFormat format)
+{
+	if (mOutput == nullptr) {
+		mOutput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mSize, format);
+	}
+	return mOutput;
 }
 
 }

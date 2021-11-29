@@ -88,8 +88,7 @@ Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::strin
 }
 
 Sprite::~Sprite()
-{
-}
+{}
 
 void Sprite::SetPosition(const Eigen::Vector3f& pos)
 {
@@ -102,13 +101,16 @@ void Sprite::SetPosition(const Eigen::Vector3f& pos)
 void Sprite::SetSize(const Eigen::Vector2f& sz)
 {
 	Eigen::Vector2f size = sz;
-	if (mTexture != nullptr) {
-		if (size.x() == 0) size.x() = mTexture->GetWidth();
-		if (size.y() == 0) size.y() = mTexture->GetHeight();
+	if (mTexture && !size.any()) {
+		size.x() = mTexture->GetWidth();
+		size.y() = mTexture->GetHeight();
 	}
-	mSize = size;
-	mQuad.SetRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y());
-	mQuadDirty = true;
+
+	if (mSize != size) {
+		mSize = size;
+		mQuad.SetRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y());
+		mQuadDirty = true;
+	}
 }
 
 void Sprite::SetFlipY(bool flipY)
@@ -129,8 +131,15 @@ void Sprite::SetColor(const Eigen::Vector4f& color)
 void Sprite::SetTexture(const ITexturePtr& texture)
 {
 	mTexture = texture;
-	if (texture != nullptr && (mSize.x() == 0 || mSize.y() == 0)) {
-		SetSize(Eigen::Vector2f());
+	if (texture && !mSize.any()) {
+		if (texture->IsLoaded()) {
+			SetSize(mSize);
+		}
+		else {
+			mResourceMng.AddResourceLoadedObserver(texture, [this](IResourcePtr res) {
+				SetSize(mSize);	
+			});
+		}
 	}
 }
 
@@ -153,6 +162,7 @@ int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 	op.VertexBuffer = mVertexBuffer;
 	if (mTexture) op.Textures.Add(mTexture);
 	op.WorldTransform = mTransform->GetMatrix();
+	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
 	return 1;
 }

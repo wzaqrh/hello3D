@@ -11,28 +11,36 @@ namespace mir {
 class MIR_CORE_API SceneManager : boost::noncopyable 
 {
 public:
-	RenderSystem& mRenderSys;
-	MaterialFactory& mMaterialFac;
-	Eigen::Vector2i mScreenSize;
+	SceneManager(ResourceManager& resMng, const Eigen::Vector2i& screenSize, CameraPtr defCamera);
 	
-	std::vector<CameraPtr> mCameras;
-
-	std::vector<DirectLightPtr> mDirectLights;
-	std::vector<PointLightPtr> mPointLights;
-	std::vector<SpotLightPtr> mSpotLights;
-	typedef std::vector<ILightPtr> LightsByOrder;
-	LightsByOrder mLightsByOrder;
-public:
-	SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, const Eigen::Vector2i& screenSize, CameraPtr defCamera);
-
 	void RemoveAllCameras();
-	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1);
-	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov);
+	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1, unsigned camMask = -1);
+	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov, unsigned camMask = -1);
+
+	void RemoveAllLights();
+	SpotLightPtr AddSpotLight(unsigned camMask = -1);
+	PointLightPtr AddPointLight(unsigned camMask = -1);
+	DirectLightPtr AddDirectLight(unsigned camMask = -1);
+public:
+	const std::vector<CameraPtr>& GetCameras() const;
+	size_t GetCameraCount() const { return mCameras.size(); }
+	CameraPtr GetCamera(size_t index) const;
 	CameraPtr GetDefCamera() const;
 
-	SpotLightPtr AddSpotLight();
-	PointLightPtr AddPointLight();
-	DirectLightPtr AddDirectLight();
+	const std::vector<ILightPtr>& GetLights() const { return mLightsByOrder; }
+	size_t GetLightCount() const { return mLightsByOrder.size(); }
+	ILightPtr GetLight(size_t index) const { return mLightsByOrder[index]; }
+	ILightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
+private:
+	void ResortCameras() const;
+private:
+	ResourceManager& mResMng;
+	Eigen::Vector2i mScreenSize;
+
+	mutable std::vector<CameraPtr> mCameras;
+	mutable bool mCamerasDirty;
+
+	std::vector<ILightPtr> mLightsByOrder;
 };
 
 };

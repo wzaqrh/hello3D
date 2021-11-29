@@ -3,6 +3,17 @@
 namespace mir {
 
 /********** Texture11 **********/
+Texture11::Texture11()
+{
+	mAutoGenMipmap = false;
+	mWidth = mHeight = mFaceCount = mMipCount = 0;
+	mFormat = kFormatUnknown;
+	mUsage = kHWUsageDefault;
+	mSRV = nullptr;
+	mRTV = nullptr;
+	mDSV = nullptr;
+}
+
 void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap)
 {
 	mWidth = width;

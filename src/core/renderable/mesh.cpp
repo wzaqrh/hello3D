@@ -49,6 +49,7 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 		op.IndexPos = mSubMeshs[i].IndicePos;
 		op.IndexCount = mSubMeshs[i].IndiceCount;
 		op.IndexBase = mSubMeshs[i].IndiceBase;
+		op.CameraMask = mCameraMask;
 		opList.AddOP(op);
 		++opCount;
 	}

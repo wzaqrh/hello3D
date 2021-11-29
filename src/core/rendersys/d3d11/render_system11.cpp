@@ -267,6 +267,11 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
 	framebuffer->SetAttachColor(0, _CreateFrameBufferAttachColor(mDevice, size, format));
 	framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size, kFormatD24UNormS8UInt));
+#if defined MIR_RESOURCE_DEBUG
+	auto textureMain = std::static_pointer_cast<Texture11>(framebuffer->GetAttachColorTexture(0));
+	SET_DEBUG_NAME(textureMain->AsSRV(), framebuffer->_DebugInfo);
+	SET_DEBUG_NAME(textureMain->AsRTV(), framebuffer->_DebugInfo);
+#endif
 	return framebuffer;
 }
 void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil)
@@ -395,6 +400,11 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 			break;
 		}
 	}
+	
+#if defined MIR_RESOURCE_DEBUG
+	SET_DEBUG_NAME(program->mVertex->GetShader11(), program->_DebugInfo);
+	SET_DEBUG_NAME(program->mPixel->GetShader11(), program->_DebugInfo);
+#endif
 	return program;
 }
 void RenderSystem11::SetProgram(IProgramPtr program)
@@ -635,6 +645,9 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		mDeviceContext->GenerateMips(texture->AsSRV());
 	}
 
+#if defined MIR_RESOURCE_DEBUG
+	SET_DEBUG_NAME(texture->AsSRV(), texture->_DebugInfo);
+#endif
 	return texture;
 }
 static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(ITexturePtr textures[], size_t count) {

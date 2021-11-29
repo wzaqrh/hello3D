@@ -10,14 +10,17 @@ namespace mir {
 class MIR_CORE_API Camera : boost::noncopyable
 {
 public:
-	static CameraPtr CreatePerspective(RenderSystem& renderSys, const Eigen::Vector2i& size, 
+	static CameraPtr CreatePerspective(ResourceManager& resMng, const Eigen::Vector2i& size, 
 		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100, double fov = 45.0);
-	static CameraPtr CreateOthogonal(RenderSystem& renderSys, const Eigen::Vector2i& size, 
+	static CameraPtr CreateOthogonal(ResourceManager& resMng, const Eigen::Vector2i& size, 
 		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100);
-	Camera(RenderSystem& renderSys);
+	Camera(ResourceManager& resMng);
 
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
 	unsigned GetCameraMask() const { return mCameraMask; }
+
+	void SetDepth(unsigned depth) { mDepth = depth; }
+	unsigned GetDepth() const { return mDepth; }
 
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
 	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
@@ -26,22 +29,25 @@ public:
 	void SetFlipY(bool flip);
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
-	IFrameBufferPtr FetchPostProcessInput();
+	IFrameBufferPtr FetchPostProcessInput(ResourceFormat format = kFormatR8G8B8A8UNorm);
+	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm);
 public:
 	const TransformPtr& GetTransform() const;
-	const SkyBoxPtr& SkyBox() const { return mSkyBox; }
-	const std::vector<PostProcessPtr>& PostProcessEffects() const { return mPostProcessEffects; }
+	const SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
+	const std::vector<PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
+	const IFrameBufferPtr& GetOutput() const { return mOutput; }
 
 	const Eigen::Matrix4f& GetView() const;
 	const Eigen::Matrix4f& GetProjection() const  { return mProjection; }
 	
+	const Eigen::Vector2i& GetSize() const { return mSize; }
 	int GetWidth() const { return mSize.x(); }
 	int GetHeight() const  { return mSize.y(); }
 	
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 private:
-	RenderSystem& mRenderSys;
+	ResourceManager& mResourceMng;
 
 	SkyBoxPtr mSkyBox;
 	std::vector<PostProcessPtr> mPostProcessEffects;
@@ -53,8 +59,9 @@ private:
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 
 	unsigned mCameraMask = -1;
+	unsigned mDepth = 0;
 public:
-	IFrameBufferPtr mPostProcessInput;
+	IFrameBufferPtr mPostProcessInput, mOutput;
 
 	Eigen::Vector2i mSize;
 	Eigen::Vector3f mEyePos, mLookAtPos, mUpVector;

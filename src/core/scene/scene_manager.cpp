@@ -1,16 +1,16 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
 #include "core/base/transform.h"
-#include "core/resource/material_factory.h"
+#include "core/resource/resource_manager.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
 
 namespace mir {
 
-SceneManager::SceneManager(RenderSystem& renderSys, MaterialFactory& matFac, const Eigen::Vector2i& screenSize, CameraPtr defCamera)
-	:mRenderSys(renderSys)
-	,mMaterialFac(matFac)
-	,mScreenSize(screenSize)
+SceneManager::SceneManager(ResourceManager& resMng, const Eigen::Vector2i& screenSize, CameraPtr defCamera)
+	: mResMng(resMng)
+	, mScreenSize(screenSize)
+	, mCamerasDirty(false)
 {
 	if (defCamera) mCameras.push_back(defCamera);
 }
@@ -19,41 +19,72 @@ void SceneManager::RemoveAllCameras()
 {
 	mCameras.clear();
 }
-CameraPtr SceneManager::GetDefCamera() const 
+CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1, unsigned camMask)
 {
-	return (! mCameras.empty()) ? mCameras[0] : nullptr;
-}
-CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1)
-{
-	CameraPtr camera = Camera::CreateOthogonal(mRenderSys, mScreenSize, eyePos, far1);
+	CameraPtr camera = Camera::CreateOthogonal(mResMng, mScreenSize, eyePos, far1);
+	camera->SetCameraMask(camMask);
 	mCameras.push_back(camera);
+	mCamerasDirty = true;
 	return camera;
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov)
+CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreatePerspective(mRenderSys, mScreenSize, eyePos, far1, fov);
+	CameraPtr camera = Camera::CreatePerspective(mResMng, mScreenSize, eyePos, far1, fov);
+	camera->SetCameraMask(camMask);
 	mCameras.push_back(camera);
+	mCamerasDirty = true;
 	return camera;
 }
 
-SpotLightPtr SceneManager::AddSpotLight()
+void SceneManager::ResortCameras() const {
+	if (mCamerasDirty) {
+		mCamerasDirty = false;
+
+		struct CompCameraByDepth {
+			bool operator()(const CameraPtr& l, const CameraPtr& r) const {
+				return l->GetDepth() < r->GetDepth();
+			}
+		};
+		std::stable_sort(mCameras.begin(), mCameras.end(), CompCameraByDepth());
+	}
+}
+const std::vector<CameraPtr>& SceneManager::GetCameras() const {
+	ResortCameras();
+	return mCameras; 
+}
+CameraPtr SceneManager::GetCamera(size_t index) const { 
+	ResortCameras();
+	mCamerasDirty = true;
+	return mCameras[index]; 
+}
+CameraPtr SceneManager::GetDefCamera() const { 
+	ResortCameras();
+	mCamerasDirty = true;
+	return GetCameraCount() ? GetCamera(0) : nullptr; 
+}
+
+void SceneManager::RemoveAllLights()
+{
+	mLightsByOrder.clear();
+}
+SpotLightPtr SceneManager::AddSpotLight(unsigned camMask)
 {
 	SpotLightPtr light = std::make_shared<SpotLight>();
-	mSpotLights.push_back(light);
+	light->SetCameraMask(camMask);
 	mLightsByOrder.push_back(light);
 	return light;
 }
-PointLightPtr SceneManager::AddPointLight()
+PointLightPtr SceneManager::AddPointLight(unsigned camMask)
 {
 	PointLightPtr light = std::make_shared<PointLight>();
-	mPointLights.push_back(light);
+	light->SetCameraMask(camMask);
 	mLightsByOrder.push_back(light);
 	return light;
 }
-DirectLightPtr SceneManager::AddDirectLight()
+DirectLightPtr SceneManager::AddDirectLight(unsigned camMask)
 {
 	DirectLightPtr light = std::make_shared<DirectLight>();
-	mDirectLights.push_back(light);
+	light->SetCameraMask(camMask);
 	mLightsByOrder.push_back(light);
 	return light;
 }

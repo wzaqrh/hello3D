@@ -244,6 +244,8 @@ void AssimpModel::PlayAnim(int Index)
 {
 	mCurrentAnimIndex = Index;
 	mElapse = 0;
+	if (mAiScene == nullptr) 
+		return;
 
 	auto playAnimTask = [this]() {
 		if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) return;
@@ -296,6 +298,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 				op.VertexBuffer = mesh->GetVertexBuffer();
 				op.Textures = *mesh->GetTextures();
 				op.SetConstantBufferBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
+				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 			}
 		}

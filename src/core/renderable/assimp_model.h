@@ -95,8 +95,11 @@ public:
 	~AssimpModel();
 	void LoadModel(const std::string& assetPath, const std::string& redirectResource = "");
 	void PlayAnim(int Index);
+	
 	void Update(float dt);
 	int GenRenderOperation(RenderOperationQueue& opList) override;
+
+	const TransformPtr& GetTransform() const { return mTransform; }
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const AiNodePtr& node, size_t meshIndexIndex);
 	void DoDraw(const AiNodePtr& node, RenderOperationQueue& opList);

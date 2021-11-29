@@ -17,6 +17,7 @@ public:
 class Texture11 : public ImplementResource<ITexture>
 {
 public:
+	Texture11();
 	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
 
 	ResourceFormat GetFormat() const override { return mFormat; }

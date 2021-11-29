@@ -53,6 +53,11 @@ interface MIR_CORE_API IRenderable : boost::noncopyable
 {
 	virtual ~IRenderable() {}
 	virtual int GenRenderOperation(RenderOperationQueue& opList) = 0;
+
+	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
+	unsigned GetCameraMask() const { return mCameraMask; }
+protected:
+	unsigned mCameraMask;
 };
 
 }
