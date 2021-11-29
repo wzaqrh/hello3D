@@ -267,11 +267,10 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
 	framebuffer->SetAttachColor(0, _CreateFrameBufferAttachColor(mDevice, size, format));
 	framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size, kFormatD24UNormS8UInt));
-#if defined MIR_RESOURCE_DEBUG
+
 	auto textureMain = std::static_pointer_cast<Texture11>(framebuffer->GetAttachColorTexture(0));
-	SET_DEBUG_NAME(textureMain->AsSRV(), framebuffer->_DebugInfo);
-	SET_DEBUG_NAME(textureMain->AsRTV(), framebuffer->_DebugInfo);
-#endif
+	DEBUG_RES_ADD_DEVICE(textureMain, textureMain->AsSRV());
+	DEBUG_RES_ADD_DEVICE(textureMain, textureMain->AsRTV());
 	return framebuffer;
 }
 void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil)
@@ -401,10 +400,8 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 		}
 	}
 	
-#if defined MIR_RESOURCE_DEBUG
-	SET_DEBUG_NAME(program->mVertex->GetShader11(), program->_DebugInfo);
-	SET_DEBUG_NAME(program->mPixel->GetShader11(), program->_DebugInfo);
-#endif
+	DEBUG_RES_ADD_DEVICE(program, program->mVertex->GetShader11());
+	DEBUG_RES_ADD_DEVICE(program, program->mPixel->GetShader11());
 	return program;
 }
 void RenderSystem11::SetProgram(IProgramPtr program)
@@ -578,6 +575,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 	const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data datas[])
 {
 	BOOST_ASSERT(res);
+
 	Data defaultData = Data{};
 	datas = datas ? datas : &defaultData;
 	const HWMemoryUsage usage = datas[0].Bytes ? kHWUsageDefault : kHWUsageDynamic;
@@ -645,9 +643,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		mDeviceContext->GenerateMips(texture->AsSRV());
 	}
 
-#if defined MIR_RESOURCE_DEBUG
-	SET_DEBUG_NAME(texture->AsSRV(), texture->_DebugInfo);
-#endif
+	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV());
 	return texture;
 }
 static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(ITexturePtr textures[], size_t count) {

@@ -4,8 +4,9 @@
 #include <d3d11.h>
 #include <d3d9.h>
 #include "core/mir_export.h"
+#include "core/predeclare.h"
+#include "core/mir_config.h"
 #include "core/base/stl.h"
-#include "core/rendersys/predeclare.h"
 
 namespace mir {
 namespace debug {
@@ -29,7 +30,11 @@ public:
 bool CheckHResultFailed(HRESULT result);
 bool CheckCompileFailed(HRESULT hr, ID3DBlob* pErrorBlob);
 bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data);
-void SetDebugName(ID3D11DeviceChild* child, const std::string& name);
+
+void MIR_CORE_API ResourceAddDebugDevice(IResourcePtr res, void* device);
+void MIR_CORE_API SetDebugPrivData(IResourcePtr res, const std::string& privData);
+void MIR_CORE_API SetDebugResourcePath(IResourcePtr res, const std::string& resPath);
+void MIR_CORE_API SetDebugCallStack(IResourcePtr res, const std::string& callstack);
 
 void Log(const char* msg);
 void Log(const D3DCAPS9& caps);
@@ -37,16 +42,28 @@ void Log(const D3DCAPS9& caps);
 }
 }
 
-#ifdef _DEBUG
+#if defined _DEBUG
 #define CheckHR(HR)					mir::debug::CheckHResultFailed(HR)
-#define SET_DEBUG_NAME(A, NAME)		mir::debug::SetDebugName(A, NAME)
 #define TIME_PROFILE(NAME)			mir::debug::TimeProfile NAME(#NAME)
 #define TIME_PROFILE2(NAME1,NAME2)	mir::debug::TimeProfile NAME(#NAME1+(":"+NAME2))
+#define DEBUG_LOG(MSG1)				mir::debug::Log(MSG1)
 #else
 #define CheckHR(HR)					FAILED(HR)
-#define SET_DEBUG_NAME(A,NAME)
 #define TIME_PROFILE(NAME)
 #define TIME_PROFILE2(NAME1,NAME2)
+#define DEBUG_LOG(MSG1)				
+#endif
+
+#if defined MIR_RESOURCE_DEBUG
+#define DEBUG_RES_ADD_DEVICE(A, DEVICE) mir::debug::ResourceAddDebugDevice(A, DEVICE)
+#define DEBUG_SET_PRIV_DATA(A, NAME)	mir::debug::SetDebugPrivData(A, NAME)
+#define DEBUG_SET_RES_PATH(A, PATH)		mir::debug::SetDebugResourcePath(A, PATH)
+#define DEBUG_SET_CALL(A, CALL)			mir::debug::SetDebugCallStack(A, CALL.CallStack)
+#else
+#define DEBUG_RES_ADD_DEVICE(A, DEVICE)
+#define SET_DEBUG_NAME(A, NAME)		
+#define DEBUG_SET_RES_PATH(A, PATH) 
+#define DEBUG_SET_CALL(A, CALL)		
 #endif
 
 #define BOOST_ASSERT_IF_THEN_ELSE(COND, AND, OR) BOOST_ASSERT((COND) ? (AND) : (OR))

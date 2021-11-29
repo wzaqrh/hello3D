@@ -12,7 +12,6 @@ protected:
 	virtual void OnPostInitDevice() override;
 private:
 	SpritePtr mSprite;
-	int mCaseIndex = 4;
 };
 
 void TestSprite::OnPostInitDevice()

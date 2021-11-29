@@ -4,6 +4,7 @@
 #include <boost/assert.hpp>
 #include "core/base/debug.h"
 #include "core/rendersys/blob.h"
+#include "core/resource/resource.h"
 
 namespace mir {
 namespace debug {
@@ -32,7 +33,7 @@ double Timer::Update()
 	return mDeltaTime;
 }
 
-/********** Functions **********/
+/********** CheckHRXXX **********/
 bool CheckHResultFailed(HRESULT hr)
 {
 	if (FAILED(hr)) {
@@ -85,12 +86,46 @@ bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data)
 	return false;
 }
 
-void SetDebugName(ID3D11DeviceChild* child, const std::string& name)
+/********** SetDebugXXX **********/
+static void SetChildrenPrivateData(const std::vector<void*>& children, const std::string& name)
 {
-	if (child && name != "")
-		child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
+	for (auto& child : children)
+		static_cast<ID3D11DeviceChild*>(child)->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
 }
 
+void ResourceAddDebugDevice(IResourcePtr res, void* device)
+{
+#if defined MIR_RESOURCE_DEBUG
+	res->_Debug._DeviceChilds.push_back(device);
+	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+#endif
+}
+
+void SetDebugPrivData(IResourcePtr res, const std::string& privData)
+{
+#if defined MIR_RESOURCE_DEBUG
+	res->_Debug._PrivData = (privData);
+	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+#endif
+}
+
+void SetDebugResourcePath(IResourcePtr res, const std::string& resPath)
+{
+#if defined MIR_RESOURCE_DEBUG
+	res->_Debug._ResourcePath = (resPath);
+	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+#endif
+}
+
+void SetDebugCallStack(IResourcePtr res, const std::string& callstack)
+{
+#if defined MIR_RESOURCE_DEBUG
+	res->_Debug._CallStack = (callstack);
+	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+#endif
+}
+
+/********** Log **********/
 void Log(const char* msg)
 {
 	OutputDebugStringA(msg);

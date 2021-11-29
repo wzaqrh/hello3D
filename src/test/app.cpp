@@ -110,6 +110,12 @@ std::string App::GetName()
 {
 	return mName;
 }
+
+void App::SetCaseIndex(int caseIndex)
+{
+	mCaseIndex = caseIndex;
+}
+
 Eigen::Matrix4f App::GetWorldTransform()
 {
 	return mTransform->GetMatrix();

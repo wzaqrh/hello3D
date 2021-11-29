@@ -25,20 +25,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
 
 	std::string appName = GetCurrentAppName();
+	int caseIndex = -1;
 	if (argc > 1) {
 		appName = ConvertLPWSTRToLPSTR(argv[1]);
+		if (argc > 2) caseIndex = atoi(ConvertLPWSTRToLPSTR(argv[2]));
 	}
 	else {
 		FILE* fd = fopen("test_cmdline.txt", "r");
 		if (fd) {
 			char szAppName[260];
-			fscanf(fd, "%s", szAppName);
+			fscanf(fd, "%s %d", szAppName, &caseIndex);
 			appName = szAppName;
 			fclose(fd);
 		}
 	}
 
 	auto AppDraw = CreateApp(appName);
+	if (caseIndex != -1)
+		AppDraw->SetCaseIndex(caseIndex);
 
 	HWND handle;
 	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), &handle)))

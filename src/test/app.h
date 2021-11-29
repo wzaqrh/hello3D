@@ -4,17 +4,6 @@
 #include "core/base/debug.h"
 #include "core/predeclare.h"
 
-//namespace mir {
-//namespace debug {
-//class Timer;
-//}
-//namespace input {
-//class D3DInput;
-//}
-////struct aiNode;
-////class AssimpModel;
-//}
-
 struct IApp
 {
 	virtual void Create() = 0;
@@ -22,6 +11,7 @@ struct IApp
 	virtual void Render() = 0;
 	virtual void CleanUp() = 0;
 	virtual std::string GetName() = 0;
+	virtual void SetCaseIndex(int caseIndex) = 0;
 };
 
 class App : public IApp
@@ -30,11 +20,12 @@ public:
 	App();
 	~App();
 public:
-	virtual void Create();
-	virtual bool Initialize(HINSTANCE hInstance, HWND hWnd);
-	virtual void Render();
-	virtual void CleanUp();
-	virtual std::string GetName();
+	void Create() override;
+	bool Initialize(HINSTANCE hInstance, HWND hWnd) override;
+	void Render() override;
+	void CleanUp() override;
+	std::string GetName() override;
+	void SetCaseIndex(int caseIndex) override;
 protected:
 	virtual void OnPreInitDevice() {};
 	virtual void OnPostInitDevice() {};
@@ -49,6 +40,7 @@ protected:
 	mir::TransformPtr mTransform;
 	float mMoveDefScale, mOriginCameraDistance;
 	Eigen::Vector4f mBackgndColor;
+	int mCaseIndex = 0;
 public:
 	std::string mName;
 	HWND mHnd;

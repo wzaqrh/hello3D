@@ -63,7 +63,7 @@ void TestCamera::OnPostInitDevice()
 		mSpriteCam1->SetCameraMask(cameraMask1);
 		//auto fetchTexture = resMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
 		auto fetchTexture = camera2->FetchOutput()->GetAttachColorTexture(0);
-		fetchTexture->SetPrivInfo("camera2 output");
+		DEBUG_SET_PRIV_DATA(fetchTexture, "camera2 output");
 		mSpriteCam1->SetTexture(fetchTexture);
 		mSpriteCam1->SetPosition(Eigen::Vector3f(cam1Size.x(), cam1Size.y(), 0));
 		mSpriteCam1->SetSize(cam1Size.cast<float>());
