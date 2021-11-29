@@ -58,6 +58,4 @@ void TestRT::OnRender()
 	mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
 }
 
-#if defined TEST_RT && TEST_CASE == TEST_RT
-auto reg = AppRegister<TestRT>("TestRT: RenderTarget");
-#endif
+auto reg = AppRegister<TestRT>("test_framebuffer");

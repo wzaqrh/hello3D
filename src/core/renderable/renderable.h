@@ -11,21 +11,23 @@ namespace mir {
 
 /********** RenderOperation **********/
 struct RenderOperation {
-	RenderOperation() : mIndexPos(0), mIndexCount(0), mIndexBase(0), mWorldTransform(Eigen::Matrix4f::Identity()) {}
+	RenderOperation() 
+		: IndexPos(0), IndexCount(0), IndexBase(0), WorldTransform(Eigen::Matrix4f::Identity()), CameraMask(-1) {}
 	template<class T> void SetConstantBufferBytes(const std::string& cbName, const T& value) {
-		mCBDataByName[cbName].assign((char*)&value, (char*)&value + sizeof(value));
+		CBDataByName[cbName].assign((char*)&value, (char*)&value + sizeof(value));
 	}
 public:
-	MaterialPtr mMaterial;
-	IVertexBufferPtr mVertexBuffer;
-	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
-	IIndexBufferPtr mIndexBuffer;
-	short mIndexPos, mIndexCount, mIndexBase;
-	TextureBySlot mTextures;
-	Eigen::Matrix4f mWorldTransform;
+	MaterialPtr Material;
+	IVertexBufferPtr VertexBuffer;
+	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> VertBufferByPass;
+	IIndexBufferPtr IndexBuffer;
+	short IndexPos, IndexCount, IndexBase;
+	TextureBySlot Textures;
+	Eigen::Matrix4f WorldTransform;
 	typedef std::function<void(RenderSystem& renderSys, const Pass& pass, const RenderOperation& op)> PassCallback;
 	PassCallback OnBind, OnUnbind;
-	std::map<std::string, std::vector<char>> mCBDataByName;
+	std::map<std::string, std::vector<char>> CBDataByName;
+	unsigned CameraMask;
 };
 
 struct RenderOperationQueue {

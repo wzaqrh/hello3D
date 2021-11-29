@@ -6,7 +6,7 @@ namespace mir {
 /********** DirectLight **********/
 DirectLight::DirectLight()
 {
-	memset(&mCbLight, 0, sizeof(mCbLight));
+	mCbLight = cbPerLight{};
 	mCbLight.unity_LightPosition = Eigen::Vector4f(0, 0, 1, 0);
 	mCbLight.unity_LightColor = Eigen::Vector4f(1, 1, 1, 1/*gloss*/);
 	mCbLight.unity_SpecColor = Eigen::Vector4f(1, 1, 1, 1/*shiness*/);

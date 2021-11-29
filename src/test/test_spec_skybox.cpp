@@ -36,6 +36,4 @@ void TestSpecSkybox::OnRender()
 	}
 }
 
-#if defined TEST_SPEC_SKYBOX && TEST_CASE == TEST_SPEC_SKYBOX
-auto reg = AppRegister<TestSpecSkybox>("Skybox");
-#endif
+auto reg = AppRegister<TestSpecSkybox>("test_spec_skybox");

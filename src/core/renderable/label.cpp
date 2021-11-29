@@ -55,13 +55,13 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 		if (entry.texture != lastTex) {
 			if (lastTex != nullptr) {
 				RenderOperation op = {};
-				op.mMaterial = mMaterial;
-				op.mVertexBuffer = mVertexBuffer;
-				op.mIndexBuffer = mIndexBuffer;
-				op.mIndexBase = 4 * (i - lastCount);
-				op.mIndexCount = 6 * lastCount;
-				op.mTextures.Add(lastTex);
-				op.mWorldTransform = mTransform->GetMatrix();
+				op.Material = mMaterial;
+				op.VertexBuffer = mVertexBuffer;
+				op.IndexBuffer = mIndexBuffer;
+				op.IndexBase = 4 * (i - lastCount);
+				op.IndexCount = 6 * lastCount;
+				op.Textures.Add(lastTex);
+				op.WorldTransform = mTransform->GetMatrix();
 				opList.AddOP(op);
 				++count;
 			}
@@ -73,13 +73,13 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 
 	if (lastTex) {
 		RenderOperation op = {};
-		op.mMaterial = mMaterial;
-		op.mVertexBuffer = mVertexBuffer;
-		op.mIndexBuffer = mIndexBuffer;
-		op.mIndexBase = 4 * (mCharSeqOrder.size() - lastCount);
-		op.mIndexCount = 6 * lastCount;
-		op.mTextures.Add(lastTex);
-		op.mWorldTransform = mTransform->GetMatrix();
+		op.Material = mMaterial;
+		op.VertexBuffer = mVertexBuffer;
+		op.IndexBuffer = mIndexBuffer;
+		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);
+		op.IndexCount = 6 * lastCount;
+		op.Textures.Add(lastTex);
+		op.WorldTransform = mTransform->GetMatrix();
 		opList.AddOP(op);
 		++count;
 	}

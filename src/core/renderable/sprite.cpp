@@ -148,11 +148,11 @@ int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 	}
 
 	RenderOperation op = {};
-	op.mMaterial = mMaterial;
-	op.mIndexBuffer = mIndexBuffer;
-	op.mVertexBuffer = mVertexBuffer;
-	if (mTexture) op.mTextures.Add(mTexture);
-	op.mWorldTransform = mTransform->GetMatrix();
+	op.Material = mMaterial;
+	op.IndexBuffer = mIndexBuffer;
+	op.VertexBuffer = mVertexBuffer;
+	if (mTexture) op.Textures.Add(mTexture);
+	op.WorldTransform = mTransform->GetMatrix();
 	opList.AddOP(op);
 	return 1;
 }

@@ -76,6 +76,4 @@ void TestLabel::OnRender()
 	}
 }
 
-#if defined TEST_LABEL && TEST_CASE == TEST_LABEL
-auto reg = AppRegister<TestLabel>("Label");
-#endif
+auto reg = AppRegister<TestLabel>("test_label");

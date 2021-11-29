@@ -100,6 +100,4 @@ void TestPBR::OnRender()
 	}
 }
 
-#if defined TEST_PBR && TEST_CASE == TEST_PBR
-auto reg = AppRegister<TestPBR>("TestPBR: PBR");
-#endif
+auto reg = AppRegister<TestPBR>("test_model_pbr");

@@ -16,6 +16,9 @@ public:
 		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100);
 	Camera(RenderSystem& renderSys);
 
+	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
+	unsigned GetCameraMask() const { return mCameraMask; }
+
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
 	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
 	void SetOthogonalProj(const Eigen::Vector2i& size, double zFar);
@@ -48,6 +51,8 @@ private:
 
 	bool mFlipY;
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
+
+	unsigned mCameraMask = -1;
 public:
 	IFrameBufferPtr mPostProcessInput;
 

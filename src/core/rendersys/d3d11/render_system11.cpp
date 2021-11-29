@@ -748,12 +748,12 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 
 void RenderSystem11::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	mDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
-	mDeviceContext->Draw(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0);
+	mDeviceContext->Draw(op.VertexBuffer->GetBufferSize() / op.VertexBuffer->GetStride(), 0);
 }
 void RenderSystem11::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	mDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
-	int indexCount = op.mIndexCount != 0 ? op.mIndexCount : op.mIndexBuffer->GetBufferSize() / op.mIndexBuffer->GetWidth();
-	mDeviceContext->DrawIndexed(indexCount, op.mIndexPos, op.mIndexBase);
+	int indexCount = op.IndexCount != 0 ? op.IndexCount : op.IndexBuffer->GetBufferSize() / op.IndexBuffer->GetWidth();
+	mDeviceContext->DrawIndexed(indexCount, op.IndexPos, op.IndexBase);
 }
 
 bool RenderSystem11::BeginScene()

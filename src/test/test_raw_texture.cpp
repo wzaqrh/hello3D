@@ -93,6 +93,4 @@ void TestRawTexture::OnRender()
 	mContext->RenderPipe()->Draw(*mSprite, *mContext->SceneMng());
 }
 
-#if defined TEST_RAW_TEXTURE && TEST_CASE == TEST_RAW_TEXTURE
-auto reg = AppRegister<TestRawTexture>("Sprite: RawTexture");
-#endif
+auto reg = AppRegister<TestRawTexture>("test_raw_texture");

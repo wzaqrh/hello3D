@@ -63,6 +63,4 @@ void TestSprite::OnRender()
 	mContext->RenderPipe()->Draw(*mSprite, *mContext->SceneMng());
 }
 
-#if defined TEST_SPRITE && TEST_CASE == TEST_SPRITE
-auto reg = AppRegister<TestSprite>("Sprite");
-#endif
+auto reg = AppRegister<TestSprite>("test_sprite");

@@ -34,6 +34,9 @@ interface MIR_CORE_API ILight : boost::noncopyable
 	virtual LightType GetType() const = 0;
 	virtual cbPerLight MakeCbLight() const = 0;
 	virtual void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const = 0;
+	
+	virtual void SetCameraMask(unsigned mask) = 0;
+	virtual unsigned GetCameraMask() const = 0;
 };
 
 class MIR_CORE_API DirectLight : public ILight 
@@ -44,11 +47,15 @@ public:
 	void SetDiffuse(const Eigen::Vector3f& color);
 	void SetSpecular(const Eigen::Vector3f& color, float shiness, float luminance);
 
+	void SetCameraMask(unsigned mask) override final { mCameraMask = mask; }
+	unsigned GetCameraMask() const override final { return mCameraMask; }
+
 	void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const override;
 	LightType GetType() const override { return kLightDirectional; }
 	cbPerLight MakeCbLight() const override { return mCbLight; }
 protected:
 	cbPerLight mCbLight;
+	unsigned mCameraMask = -1;
 };
 
 class MIR_CORE_API PointLight : public DirectLight

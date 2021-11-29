@@ -291,10 +291,10 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
-				op.mMaterial = mMaterial;
-				op.mIndexBuffer = mesh->GetIndexBuffer();
-				op.mVertexBuffer = mesh->GetVertexBuffer();
-				op.mTextures = *mesh->GetTextures();
+				op.Material = mMaterial;
+				op.IndexBuffer = mesh->GetIndexBuffer();
+				op.VertexBuffer = mesh->GetVertexBuffer();
+				op.Textures = *mesh->GetTextures();
 				op.SetConstantBufferBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
 				opList.AddOP(op);
 			}
@@ -317,7 +317,7 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 
 	Eigen::Matrix4f world = mTransform->GetMatrix();
 	for (int i = count; i < opList.Count(); ++i)
-		opList[i].mWorldTransform = world;
+		opList[i].WorldTransform = world;
 
 	return opList.Count() - count;
 }

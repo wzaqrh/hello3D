@@ -576,14 +576,14 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 void RenderSystem9::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	D3DPRIMITIVETYPE topo9 = d3d::convert11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
-	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), topo9));
+	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.VertexBuffer->GetBufferSize() / op.VertexBuffer->GetStride(), topo9));
 }
 void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	D3DPRIMITIVETYPE topo9 = d3d::convert11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
 	mDevice9->DrawIndexedPrimitive(topo9, 
-		0, 0, op.mVertexBuffer->GetBufferSize() / op.mVertexBuffer->GetStride(), 0, 
-		CalPrimCount(op.mIndexBuffer->GetCount(), topo9));
+		0, 0, op.VertexBuffer->GetBufferSize() / op.VertexBuffer->GetStride(), 0, 
+		CalPrimCount(op.IndexBuffer->GetCount(), topo9));
 }
 
 void RenderSystem9::SetTextures(size_t slot, ITexturePtr textures[], size_t count) {

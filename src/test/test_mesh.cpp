@@ -62,6 +62,4 @@ void TestMesh::OnRender()
 	mContext->RenderPipe()->Draw(*mMesh, *mContext->SceneMng());
 }
 
-#if defined TEST_MESH && TEST_CASE == TEST_MESH
-auto reg = AppRegister<TestMesh>("TestMesh");
-#endif
+auto reg = AppRegister<TestMesh>("test_mesh");

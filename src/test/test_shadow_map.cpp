@@ -78,6 +78,4 @@ void TestShadowMap::OnRender()
 	}
 }
 
-#if defined TEST_SHADOW_MAP && TEST_CASE == TEST_SHADOW_MAP
-auto reg = AppRegister<TestShadowMap>("Lesson7: ShadowMap");
-#endif
+auto reg = AppRegister<TestShadowMap>("test_shadow_map");

@@ -42,13 +42,13 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	if (mSubMeshs[i].IndiceCount > 0)
 	{
 		RenderOperation op = {};
-		op.mMaterial = mMaterial;
-		op.mIndexBuffer = mIndexBuffer;
-		op.mVertexBuffer = mVertexBuffer;
-		op.mTextures = mSubMeshs[i].Textures;
-		op.mIndexPos = mSubMeshs[i].IndicePos;
-		op.mIndexCount = mSubMeshs[i].IndiceCount;
-		op.mIndexBase = mSubMeshs[i].IndiceBase;
+		op.Material = mMaterial;
+		op.IndexBuffer = mIndexBuffer;
+		op.VertexBuffer = mVertexBuffer;
+		op.Textures = mSubMeshs[i].Textures;
+		op.IndexPos = mSubMeshs[i].IndicePos;
+		op.IndexCount = mSubMeshs[i].IndiceCount;
+		op.IndexBase = mSubMeshs[i].IndiceBase;
 		opList.AddOP(op);
 		++opCount;
 	}

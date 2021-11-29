@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+﻿//--------------------------------------------------------------------------------------
 // File: Tutorial06.cpp
 //
 // This application demonstrates simple lighting in the vertex shader
@@ -14,13 +14,31 @@
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+char* ConvertLPWSTRToLPSTR(LPWSTR lpwszStrIn);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	auto AppDraw = CreateApp(GetCurrentAppName());
+	int argc = 0; 
+	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
+
+	std::string appName = GetCurrentAppName();
+	if (argc > 1) {
+		appName = ConvertLPWSTRToLPSTR(argv[1]);
+	}
+	else {
+		FILE* fd = fopen("test_cmdline.txt", "r");
+		if (fd) {
+			char szAppName[260];
+			fscanf(fd, "%s", szAppName);
+			appName = szAppName;
+			fclose(fd);
+		}
+	}
+
+	auto AppDraw = CreateApp(appName);
 
 	HWND handle;
 	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), &handle)))
@@ -44,6 +62,28 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	return (int)msg.wParam;
 }
 
+char* ConvertLPWSTRToLPSTR(LPWSTR lpwszStrIn)
+{
+	LPSTR pszOut = NULL;
+	try
+	{
+		if (lpwszStrIn != NULL)
+		{
+			int nInputStrLen = wcslen(lpwszStrIn);
+			int nOutputStrLen = WideCharToMultiByte(CP_ACP, 0, lpwszStrIn, nInputStrLen, NULL, 0, 0, 0) + 2;
+			pszOut = new char[nOutputStrLen];
+			if (pszOut)
+			{
+				memset(pszOut, 0x00, nOutputStrLen);
+				WideCharToMultiByte(CP_ACP, 0, lpwszStrIn, nInputStrLen, pszOut, nOutputStrLen, 0, 0);
+			}
+		}
+	}
+	catch (std::exception e)
+	{}
+
+	return pszOut;
+}
 
 //--------------------------------------------------------------------------------------
 // Register class and create window

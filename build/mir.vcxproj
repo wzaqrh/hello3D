@@ -138,7 +138,6 @@
     <ClCompile Include="..\src\core\scene\light.cpp" />
     <ClCompile Include="..\src\core\scene\scene_manager.cpp" />
     <ClCompile Include="..\src\test\unit_test\main.cpp" />
-    <ClCompile Include="..\src\test\unit_test\test_atomic.cpp" />
     <ClCompile Include="..\src\test\unit_test\test_eigen.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

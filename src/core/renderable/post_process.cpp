@@ -69,12 +69,12 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 		return 0;
 
 	RenderOperation op = {};
-	op.mMaterial = mMaterial;
-	op.mIndexBuffer = mIndexBuffer;
-	op.mVertexBuffer = mVertexBuffer;
-	op.mTextures.Add(mMainTex->GetAttachColorTexture(0));
-	op.mWorldTransform = Eigen::Matrix4f::Identity();
-	op.mVertBufferByPass = mVertBufferByPass;
+	op.Material = mMaterial;
+	op.IndexBuffer = mIndexBuffer;
+	op.VertexBuffer = mVertexBuffer;
+	op.Textures.Add(mMainTex->GetAttachColorTexture(0));
+	op.WorldTransform = Eigen::Matrix4f::Identity();
+	op.VertBufferByPass = mVertBufferByPass;
 	opList.AddOP(op);
 	return 1;
 }

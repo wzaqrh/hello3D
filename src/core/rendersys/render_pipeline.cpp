@@ -67,12 +67,12 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 		if (op.OnBind) 
 			op.OnBind(mRenderSys, *pass, op);
 
-		for (auto& cbBytes : op.mCBDataByName)
+		for (auto& cbBytes : op.CBDataByName)
 			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
 
 		BindPass(pass);
 
-		if (op.mIndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
+		if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
 		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
 
 		if (op.OnUnbind) 
@@ -90,28 +90,28 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 
 void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode)
 {
-	TechniquePtr tech = op.mMaterial->CurTech();
+	TechniquePtr tech = op.Material->CurTech();
 	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes) {
 		//SetVertexLayout(pass->mInputLayout);
-		mRenderSys.SetVertexBuffer(op.mVertexBuffer);
-		mRenderSys.SetIndexBuffer(op.mIndexBuffer);
+		mRenderSys.SetVertexBuffer(op.VertexBuffer);
+		mRenderSys.SetIndexBuffer(op.IndexBuffer);
 
-		TextureBySlot textures = op.mTextures;
+		TextureBySlot textures = op.Textures;
 		textures.Merge(pass->mTextures);
 
 		for (int i = pass->mRTIterators.size() - 1; i >= 0; --i) {
-			auto iter = op.mVertBufferByPass.find(std::make_pair(pass, i));
-			if (iter != op.mVertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
-			else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
+			auto iter = op.VertBufferByPass.find(std::make_pair(pass, i));
+			if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
+			else mRenderSys.SetVertexBuffer(op.VertexBuffer);
 			
 			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
 			RenderPass(pass, textures, i, op);
 			textures[0] = first;
 		}
-		auto iter = op.mVertBufferByPass.find(std::make_pair(pass, -1));
-		if (iter != op.mVertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
-		else mRenderSys.SetVertexBuffer(op.mVertexBuffer);
+		auto iter = op.VertBufferByPass.find(std::make_pair(pass, -1));
+		if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
+		else mRenderSys.SetVertexBuffer(op.VertexBuffer);
 		
 		RenderPass(pass, textures, -1, op);
 	}
@@ -122,13 +122,13 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 {
 	for (int i = 0; i < opQueue.Count(); ++i) {
 		auto& op = opQueue[i];
-		if (op.mMaterial->IsLoaded()) {
-			globalParam.World = op.mWorldTransform;
+		if (op.Material->IsLoaded()) {
+			globalParam.World = op.WorldTransform;
 			globalParam.WorldInv = globalParam.World.inverse();
-			op.mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys, 
+			op.Material->CurTech()->UpdateConstBufferByName(mRenderSys, 
 				MAKE_CBNAME(cbGlobalParam), Data::Make(globalParam));
 			
-			op.mMaterial->CurTech()->UpdateConstBufferByName(mRenderSys,
+			op.Material->CurTech()->UpdateConstBufferByName(mRenderSys,
 				MAKE_CBNAME(cbPerLight), Data::Make(lightParam));
 
 			RenderOp(op, lightMode);

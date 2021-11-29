@@ -40,6 +40,4 @@ void TestBloom::OnRender()
 	}
 }
 
-#if defined TEST_BLOOM && TEST_CASE == TEST_BLOOM
-auto reg = AppRegister<TestBloom>("TestBloom: PostProcess Bloom");
-#endif
+auto reg = AppRegister<TestBloom>("test_bloom");

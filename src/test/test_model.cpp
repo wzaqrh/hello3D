@@ -46,6 +46,4 @@ void TestModel::OnRender()
 	mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
 }
 
-#if defined TEST_MODEL && TEST_CASE == TEST_MODEL
-auto reg = AppRegister<TestModel>("TestModel: Assimp Model");
-#endif
+auto reg = AppRegister<TestModel>("test_model");
