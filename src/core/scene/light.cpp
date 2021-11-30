@@ -1,5 +1,8 @@
+#include <boost/assert.hpp>
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
+
+void testViewProjection(Eigen::Matrix4f view, Eigen::Matrix4f proj);
 
 namespace mir {
 
@@ -31,10 +34,21 @@ void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float
 	mCbLight.unity_LightColor.w() = luminance;
 }
 
-void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const {
-	view = math::MakeLookAtLH(mCbLight.unity_LightPosition.head<3>(), Eigen::Vector3f(0,0,0), Eigen::Vector3f(0,1,0));
-	proj = math::MakeOrthographicOffCenterLH(0, camera.GetSize().x(), 0, camera.GetSize().y(), 0.01, camera.GetZFar());
+void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
+{
+	float width = std::max<int>(camera.GetSize().x(), camera.GetSize().y());
+	//float depth = std::abs<float>(camera.GetZFar());
+	float depth = (camera.GetLookAtPos() - camera.GetEyePos()).norm();
+	float distance = sqrtf(width * width + depth * depth);
+	view = math::MakeLookAtLH(mCbLight.unity_LightPosition.head<3>() * distance, camera.GetLookAtPos(), Eigen::Vector3f(0,1,0));
+
+	auto hs = camera.GetSize() / 2;
+	proj = math::MakeOrthographicOffCenterLH(-hs.x(), hs.x(), -hs.y(), hs.y(), 0.01, distance * 1.5);
+#if 1
+	testViewProjection(view, proj);
+#endif
 }
+
 
 /********** PointLight **********/
 PointLight::PointLight()

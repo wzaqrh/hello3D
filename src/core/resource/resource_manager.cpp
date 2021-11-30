@@ -192,12 +192,13 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 				{{"SHADER_MODEL", "40000"}},
 				psEntry, "ps_4_0", vsPsPath
 			};
-			IBlobDataPtr blobPS = this->mRenderSys.CompileShader(descPS, Data::Make(&bytes[0], bytes.size()));
+			IBlobDataPtr blobPS = (psEntry != "") ? this->mRenderSys.CompileShader(descPS, Data::Make(&bytes[0], bytes.size())) : nullptr;
 
 			if (nextJob == nullptr) {
 				std::vector<IShaderPtr> shaders;
 				shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-				shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+				if (blobPS) 
+					shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
 				for (auto& it : shaders)
 					it->SetLoaded();
 				return this->mRenderSys.LoadProgram(program, shaders);
@@ -206,7 +207,8 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
 					std::vector<IShaderPtr> shaders;
 					shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-					shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
+					if (blobPS) 
+						shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
 					for (auto& it : shaders)
 						it->SetLoaded();
 					return nullptr != this->mRenderSys.LoadProgram(program, shaders);

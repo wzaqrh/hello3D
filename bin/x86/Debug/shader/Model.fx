@@ -30,6 +30,7 @@ struct SHADOW_PS_INPUT
 {
     float4 Pos : SV_POSITION;
 	//float4 Depth : TEXCOORD0;
+	float2 Tex  : TEXCOORD0;
 };
 
 SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
@@ -41,12 +42,15 @@ SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 	matrix MWVP = mul(Projection, MWV);
 	output.Pos = mul(MWVP, skinPos);
 	//output.Depth = output.Pos;	
+	output.Tex = i.Tex;
 	return output;
 }
 
 float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
 {
-	return float4(1.0,1.0,1.0,1.0);
+	float z = i.Pos.z / i.Pos.w;
+	//return float4(z,z,z,z);
+	return GetTexture2D(txMain, samLinear, i.Tex);
 }
 
 /************ ForwardBase ************/
@@ -95,6 +99,12 @@ float4 PS(PS_INPUT input) : SV_Target
 
 	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	//finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
+	
+	float4 shadowPosH = input.PosInLight;
+	shadowPosH.xyz /= shadowPosH.w;
+	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
+	finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r;
+			
 	return finalColor;
 }
 

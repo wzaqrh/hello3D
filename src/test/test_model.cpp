@@ -18,11 +18,18 @@ private:
 
 void TestModel::OnInitLight()
 {
-	auto pt_light =mContext->SceneMng()->AddPointLight();
-	pt_light->SetPosition(Eigen::Vector3f(0, 5, -5));
+	if (mCaseIndex == 0 || mCaseIndex == 1) {
+		auto pt_light = mContext->SceneMng()->AddPointLight();
+		pt_light->SetPosition(Eigen::Vector3f(0, 5, -5));
 
-	auto dir_light = mContext->SceneMng()->AddDirectLight();
-	dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
+		auto dir_light = mContext->SceneMng()->AddDirectLight();
+		dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
+	}
+	else {
+		mContext->SceneMng()->RemoveAllLights();
+		auto dir_light = mContext->SceneMng()->AddDirectLight();
+		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
+	}
 }
 
 void TestModel::OnPostInitDevice()
@@ -33,14 +40,20 @@ void TestModel::OnPostInitDevice()
 	if (mCaseIndex == 0 || mCaseIndex == 1) {
 		mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, mCaseIndex == 0 ? E_MAT_MODEL : E_MAT_MODEL_PBR);
 		mModel->LoadModel("model/Male03/Male02.FBX", R"({"ext":"png","dir":"model/Male03/"})"); mMoveDefScale = 0.07;
+
+		mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+		mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));
 	}
 	else {
+		auto sceneMng = mContext->SceneMng();
+		sceneMng->RemoveAllCameras();
+		sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-1500), 3000, 30);
+
 		mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, mCaseIndex == 2 ? E_MAT_MODEL : E_MAT_MODEL_PBR);
-		mModel->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})"); mMoveDefScale = 0.01;
-	}
+		mModel->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})"); mMoveDefScale = 1;
 	
-	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
-	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));
+		mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	}
 
 	mModel->PlayAnim(0);
 }

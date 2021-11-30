@@ -41,7 +41,7 @@ Camera::Camera(ResourceManager& resMng)
 
 Eigen::Vector4f Camera::ProjectPoint(const Eigen::Vector4f& pos) const
 {
-	Transform3fAffine t(mView * mProjection);
+	Transform3fAffine t(mProjection * mView);
 	Eigen::Vector4f perspective = t * pos;
 
 	if (perspective.w() != 0) {
@@ -131,7 +131,7 @@ const Eigen::Matrix4f& Camera::GetView() const
 			mTransform->SetPosition(newpos);
 
 			const auto& srt = mTransform->SetMatrixSRT();
-			mWorldView = srt.inverse() * mView;
+			mWorldView = mView * srt.inverse();
 		}
 		mTransform->SetPosition(position);
 	}

@@ -35,19 +35,20 @@ void TestShadowMap::OnInitLight()
 	mContext->SceneMng()->RemoveAllLights();
 	auto dir_light = mContext->SceneMng()->AddDirectLight();
 	dir_light->SetDirection(Eigen::Vector3f(-1, -1, 1));
+	//dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 #endif
 }
 
 #define USE_RENDER_TEXTURE
-#define SCALE_BASE 0.01
+#define SCALE_BASE 1
 void TestShadowMap::OnPostInitDevice()
 {
 	auto sceneMng = mContext->SceneMng();
 	auto rendFac = mContext->RenderableFac();
 
 	sceneMng->RemoveAllCameras();
-	sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-30), 300, 45);
-	sceneMng->GetDefCamera()->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
+	sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-1500), 3000, 30);
+	//sceneMng->GetDefCamera()->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
 
 	{
 		mModel1 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
@@ -55,12 +56,13 @@ void TestShadowMap::OnPostInitDevice()
 		mModel1->GetTransform()->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
 	}
 
+	if (1)
 	{
 		mModel2 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
 		mModel2->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
 		mMoveDefScale = SCALE_BASE * 0.2;
 		mModel2->GetTransform()->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
-		mModel2->GetTransform()->SetPosition(Eigen::Vector3f(5, 5, -5));
+		mModel2->GetTransform()->SetPosition(Eigen::Vector3f(350, 350, -350));
 	}
 }
 
@@ -68,11 +70,11 @@ void TestShadowMap::OnRender()
 {
 	if (mContext->RenderPipe()->BeginFrame()) {
 		mModel1->Update(mTimer->mDeltaTime);
-		mModel2->Update(mTimer->mDeltaTime);
+		if (mModel2) mModel2->Update(mTimer->mDeltaTime);
 
 		RenderOperationQueue opQueue;
 		mModel1->GenRenderOperation(opQueue);
-		mModel2->GenRenderOperation(opQueue);
+		if (mModel2) mModel2->GenRenderOperation(opQueue);
 
 		mContext->RenderPipe()->Render(opQueue, *mContext->SceneMng());
 		mContext->RenderPipe()->EndFrame();

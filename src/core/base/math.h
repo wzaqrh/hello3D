@@ -59,10 +59,10 @@ inline Eigen::Matrix4f MakeOrthographicOffCenterLH(float left, float right,
 
 	Eigen::Matrix4f ortho;
 	ortho <<
-	invWidth + invWidth, 0,   0, -(left + right) * invWidth,
-	0, invHeight + invHeight, 0, -(top + bottom) * invHeight,
-	0, 0,		              q, -nearZ * q,
-	0, 0,					  0, 1;
+	invWidth + invWidth, 0,					    0, -(left + right) * invWidth,
+	0,					 invHeight + invHeight, 0, -(top + bottom) * invHeight,
+	0,					 0,		                q, -nearZ * q,
+	0,					 0,					    0, 1;
 	return ortho;
 }
 

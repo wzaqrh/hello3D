@@ -6,6 +6,10 @@
 #include "core/scene/camera.h"
 #include "core/base/debug.h"
 
+#define DEBUG_SHADOW_CASTER
+
+void testViewProjection(Eigen::Matrix4f view, Eigen::Matrix4f proj);
+
 namespace mir {
 
 #define E_TEXTURE_MAIN 0
@@ -147,14 +151,22 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
-
-		globalParam.View = camera.GetView();
-		globalParam.Projection = camera.GetProjection();
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
+	}
+
+	{
+		Eigen::Matrix4f camera_view = camera.GetView(), camera_proj = camera.GetProjection();
+		testViewProjection(camera_view, camera_proj);
+	}
+
+	{
+		Eigen::Matrix4f light_view, light_proj;
+		light.CalculateLightingViewProjection(camera, light_view, light_proj);
+		testViewProjection(light_view, light_proj);
 	}
 
 	globalParam.WorldInv = globalParam.World.inverse();
@@ -163,6 +175,8 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 	
 	return std::tie(globalParam, lightParam);
 }
+
+
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
 	const std::vector<ILightPtr>& lightsOrder, const std::string& lightMode)
 {
@@ -172,13 +186,15 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	BlendState orgBS = mRenderSys.GetBlendFunc();
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		//_PushFrameBuffer(mShadowMap);
+	#if !defined DEBUG_SHADOW_CASTER
+		_PushFrameBuffer(mShadowMap);
+	#endif
 		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
-		mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
+		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowMap->GetAttachColorTexture(0));
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowMap->GetAttachZStencilTexture());
 
 		auto& skyBox = camera.GetSkyBox();
 		if (skyBox && skyBox->GetTexture())
@@ -218,7 +234,9 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	}
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		//_PopFrameBuffer();
+	#if !defined DEBUG_SHADOW_CASTER
+		_PopFrameBuffer();
+	#endif
 		mRenderSys.SetDepthState(orgDS);
 		mRenderSys.SetBlendFunc(orgBS);
 
@@ -237,8 +255,10 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 	const std::vector<ILightPtr>& lights)
 {
 	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
-	//RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
-	//RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+#if !defined DEBUG_SHADOW_CASTER
+	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
+	RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+#endif
 }
 
 void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& scene)
