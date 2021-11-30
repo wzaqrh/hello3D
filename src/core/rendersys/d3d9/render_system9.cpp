@@ -159,15 +159,18 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
+IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats)
 {
+	BOOST_ASSERT(formats.size() >= 2);
+
 	Texture9Ptr pTextureRV = MakePtr<Texture9>(nullptr);
-	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(format));
+	D3DFORMAT Format = d3d::convert11To9(static_cast<DXGI_FORMAT>(formats[0]));
 	if (CheckHR(mDevice9->CreateTexture(size.x(), size.y(), 1, 
 		D3DUSAGE_RENDERTARGET, Format, D3DPOOL_DEFAULT, &pTextureRV->GetSRV9(), NULL))) return nullptr;
 
 	IDirect3DSurface9 *pSurfaceDepthStencil = nullptr;
-	if (CheckHR(mDevice9->CreateDepthStencilSurface(size.x(), size.y(), D3DFMT_D24X8, D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
+	if (CheckHR(mDevice9->CreateDepthStencilSurface(size.x(), size.y(), 
+		d3d::convert11To9(static_cast<DXGI_FORMAT>(formats.back())), D3DMULTISAMPLE_NONE, 0, TRUE, &pSurfaceDepthStencil, NULL))) return false;
 
 	FrameBuffer9Ptr ret = MakePtr<FrameBuffer9>(pTextureRV, pSurfaceDepthStencil);
 	return ret;

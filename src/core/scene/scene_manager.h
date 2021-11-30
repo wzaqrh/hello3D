@@ -24,14 +24,15 @@ public:
 public:
 	const std::vector<CameraPtr>& GetCameras() const;
 	size_t GetCameraCount() const { return mCameras.size(); }
-	CameraPtr GetCamera(size_t index) const;
-	CameraPtr GetDefCamera() const;
+	CameraPtr GetCamera(size_t index) const { return GetCameras()[index];  }
+	CameraPtr GetDefCamera() const { return GetCameraCount() ? GetCamera(0) : nullptr;  }
 
-	const std::vector<ILightPtr>& GetLights() const { return mLightsByOrder; }
+	const std::vector<ILightPtr>& GetLights() const;
 	size_t GetLightCount() const { return mLightsByOrder.size(); }
-	ILightPtr GetLight(size_t index) const { return mLightsByOrder[index]; }
+	ILightPtr GetLight(size_t index) const { return GetLights()[index]; }
 	ILightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
 private:
+	void ResortLights() const;
 	void ResortCameras() const;
 private:
 	ResourceManager& mResMng;
@@ -40,7 +41,7 @@ private:
 	mutable std::vector<CameraPtr> mCameras;
 	mutable bool mCamerasDirty;
 
-	std::vector<ILightPtr> mLightsByOrder;
+	mutable std::vector<ILightPtr> mLightsByOrder;
 };
 
 };

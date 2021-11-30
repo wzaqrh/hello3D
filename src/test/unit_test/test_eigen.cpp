@@ -5,6 +5,9 @@
 
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
 
+static bool IsEqual(float l, float r) {
+	return std::abs<float>(l - r) < 0.00001;
+}
 static bool IsEqual(const Eigen::Matrix4f& m0, const XMMATRIX& m1) {
 	float* arr0 = (float*)&m0;
 	float* arr1 = (float*)&m1;
@@ -80,10 +83,15 @@ TEST_CASE("eigen matrix translate", "eigen_matrix_translate")
 	CHECK(m1._41 == 100);
 }
 
+TEST_CASE("eigen vector length", "eigen_vector_length")
+{
+	Eigen::Vector3f vec = Eigen::Vector3f(3, 4, 0);
+	CHECK(IsEqual(vec.norm(), 5));
+}
+
 TEST_CASE("eigen vector block", "eigen_vector_block")
 {
 	Eigen::Vector4f vec;
-
 	vec.head<3>() = Eigen::Vector3f(0, 0, 0);
 }
 

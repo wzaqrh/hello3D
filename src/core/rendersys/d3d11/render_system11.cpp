@@ -79,10 +79,13 @@ bool RenderSystem11::_FetchBackFrameBufferColor()
 {
 	ID3D11Texture2D* pBackBuffer = NULL;
 	if (CheckHR(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer))) return false;
-	if (CheckHR(mDevice->CreateRenderTargetView(pBackBuffer, NULL, &mBackFrameBuffer.first))) return false;
-	pBackBuffer->Release();
 
-	mCurFrameBuffer.first = mBackFrameBuffer.first;
+	ID3D11RenderTargetView* pRTV = nullptr;
+	if (CheckHR(mDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRTV))) return false;
+
+	mBackFrameBuffer = std::make_shared<FrameBuffer11>();
+	mBackFrameBuffer->SetAttachColor(0, std::make_shared<FrameBufferAttachByView>(pRTV));
+	mCurFrameBuffer = mBackFrameBuffer;
 	return true;
 }
 bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
@@ -105,9 +108,17 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
-	if (CheckHR(mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &mBackFrameBuffer.second))) return false;
+	ID3D11DepthStencilView* pDSV = nullptr;
+	if (CheckHR(mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &pDSV))) return false;
 
-	mCurFrameBuffer.second = mBackFrameBuffer.second;
+	mBackFrameBuffer->SetAttachZStencil(std::make_shared<FrameBufferAttachByView>(pDSV));
+	
+#if defined MIR_RESOURCE_DEBUG
+	for (auto rtv : mBackFrameBuffer->AsRTVs())
+		DEBUG_RES_ADD_DEVICE(mBackFrameBuffer, rtv);
+	DEBUG_RES_ADD_DEVICE(mBackFrameBuffer, mBackFrameBuffer->AsDSV());
+	DEBUG_SET_PRIV_DATA(mBackFrameBuffer, "device.backbuffer");
+#endif
 	return true;
 }
 bool RenderSystem11::_SetRasterizerState()
@@ -133,7 +144,7 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	if (!_CreateDeviceAndSwapChain(rcWidth, rcHeight)) return false;
 
 	if (!_FetchBackFrameBufferColor() || !_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
-	mDeviceContext->OMSetRenderTargets(1, &mBackFrameBuffer.first, mBackFrameBuffer.second);
+	SetFrameBuffer(nullptr);
 
 	if (!_SetRasterizerState()) return false;
 	
@@ -190,12 +201,11 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-static FrameBufferAttachColor11Ptr _CreateFrameBufferAttachColor(ID3D11Device* pDevice, 
-	const Eigen::Vector2i& size, ResourceFormat format) 
+/********** LoadFrameBuffer **********/
+static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
-	FrameBufferAttachColor11Ptr attach = std::make_shared<FrameBufferAttachColor11>();
-	attach->mTexture = std::make_shared<Texture11>();
-	attach->mTexture->Init(format, kHWUsageDefault, size.x(), size.y(), 1, 1);
+	Texture11Ptr texture = std::make_shared<Texture11>();
+	texture->Init(format, kHWUsageDefault, size.x(), size.y(), 1, 1);
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
 	texDesc.Width = size.x();
@@ -216,90 +226,112 @@ static FrameBufferAttachColor11Ptr _CreateFrameBufferAttachColor(ID3D11Device* p
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
-	if (CheckHR(pDevice->CreateShaderResourceView(pTexture, &srvDesc, &attach->mTexture->AsSRV()))) return nullptr;
+	if (CheckHR(pDevice->CreateShaderResourceView(pTexture, &srvDesc, &texture->AsSRV()))) return nullptr;
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = static_cast<DXGI_FORMAT>(format);
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
-	if (CheckHR(pDevice->CreateRenderTargetView(pTexture, &rtvDesc, &attach->mTexture->AsRTV()))) return nullptr;
+	if (CheckHR(pDevice->CreateRenderTargetView(pTexture, &rtvDesc, &texture->AsRTV()))) return nullptr;
 
-	attach->mTexture->SetLoaded();
-	return attach;
+	texture->SetLoaded();
+	return texture;
 }
-
-static FrameBufferAttachZStencil11Ptr _CreateFrameBufferAttachZStencil(ID3D11Device* pDevice,
-	const Eigen::Vector2i& size, ResourceFormat format) 
+static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
-	FrameBufferAttachZStencil11Ptr attach = std::make_shared<FrameBufferAttachZStencil11>();
-	attach->mTexture = std::make_shared<Texture11>();
-	attach->mTexture->Init(format, kHWUsageDefault, size.x(), size.y(), 1, 1);
+	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(format)));
+
+	constexpr bool autoGen = false;
+	constexpr size_t mipCount = 1;
+	
+	const DXGI_FORMAT dsvFmt = static_cast<DXGI_FORMAT>(format);
+	const DXGI_FORMAT texFmt = (format == kFormatD24UNormS8UInt) ? DXGI_FORMAT_R24G8_TYPELESS : dsvFmt;
+	const DXGI_FORMAT srvFmt = (format == kFormatD24UNormS8UInt) ? DXGI_FORMAT_R24_UNORM_X8_TYPELESS : dsvFmt;
+
+	Texture11Ptr texture = std::make_shared<Texture11>();
+	texture->Init(kFormatD24UNormS8UInt, kHWUsageDefault, size.x(), size.y(), 1, 1);
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
 	texDesc.Width = size.x();
 	texDesc.Height = size.y();
-	texDesc.MipLevels = 1;
+	texDesc.MipLevels = autoGen ? 0 : mipCount;
 	texDesc.ArraySize = 1;
-	texDesc.Format = static_cast<DXGI_FORMAT>(format);
+	texDesc.Format = texFmt;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 	ID3D11Texture2D* pTexture = nullptr;
 	if (CheckHR(pDevice->CreateTexture2D(&texDesc, NULL, &pTexture))) return nullptr;
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsv = {};
-	dsv.Format = static_cast<DXGI_FORMAT>(format);
-	dsv.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsv.Texture2D.MipSlice = 0;
-	if (CheckHR(pDevice->CreateDepthStencilView(pTexture, &dsv, &attach->mTexture->AsDSV()))) return nullptr;
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = dsvFmt;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+	if (CheckHR(pDevice->CreateDepthStencilView(pTexture, &dsvDesc, &texture->AsDSV()))) return nullptr;
 
-	attach->mTexture->SetLoaded();
-	return attach;
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = srvFmt;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = autoGen ? -1 : mipCount;
+	if (CheckHR(pDevice->CreateShaderResourceView(pTexture, &srvDesc, &texture->AsSRV()))) return nullptr;
+
+	texture->SetLoaded();
+	return texture;
 }
-
-IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format)
+static FrameBufferAttachByTexture11Ptr _CreateFrameBufferAttachColor(ID3D11Device* pDevice, 
+	const Eigen::Vector2i& size, ResourceFormat format)
+{
+	return format == kFormatUnknown ? nullptr : std::make_shared<FrameBufferAttachByTexture11>(
+		_CreateColorAttachTexture(pDevice, size, format));
+}
+static FrameBufferAttachByTexture11Ptr _CreateFrameBufferAttachZStencil(ID3D11Device* pDevice, 
+	const Eigen::Vector2i& size, ResourceFormat format) 
+{
+	return format == kFormatUnknown ? nullptr : std::make_shared<FrameBufferAttachByTexture11>(
+		_CreateZStencilAttachTexture(pDevice, size, format));
+}
+IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats)
 {
 	BOOST_ASSERT(res);
+	BOOST_ASSERT(formats.size() >= 1);
 
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
-	framebuffer->SetAttachColor(0, _CreateFrameBufferAttachColor(mDevice, size, format));
-	framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size, kFormatD24UNormS8UInt));
+	for (size_t i = 0; i + 1 < formats.size(); ++i) {
+		framebuffer->SetAttachColor(i, _CreateFrameBufferAttachColor(mDevice, size, formats[i]));
+	}
+	framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size, formats.size() >= 2 ? formats.back() : kFormatUnknown));
 
-	auto textureMain = std::static_pointer_cast<Texture11>(framebuffer->GetAttachColorTexture(0));
-	DEBUG_RES_ADD_DEVICE(textureMain, textureMain->AsSRV());
-	DEBUG_RES_ADD_DEVICE(textureMain, textureMain->AsRTV());
+#if defined MIR_RESOURCE_DEBUG
+	for (auto rtv : framebuffer->AsRTVs())
+		DEBUG_RES_ADD_DEVICE(framebuffer, rtv);
+	DEBUG_RES_ADD_DEVICE(framebuffer, framebuffer->AsDSV());
+#endif
 	return framebuffer;
 }
-void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil)
+void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f& color, float depth, uint8_t stencil)
 {
-	if (rendTarget) {
-		auto target11 = std::static_pointer_cast<FrameBuffer11>(rendTarget);
-		mDeviceContext->ClearRenderTargetView(
-			std::static_pointer_cast<FrameBufferAttachColor11>(target11->GetAttachColor(0))->AsRTV(), 
-			(const float*)&color);
-		mDeviceContext->ClearDepthStencilView(
-			std::static_pointer_cast<FrameBufferAttachZStencil11>(target11->GetAttachZStencil())->AsDSV(), 
-			D3D11_CLEAR_DEPTH, depth, stencil);
+	FrameBuffer11Ptr fb11 = fb ? std::static_pointer_cast<FrameBuffer11>(fb) : mCurFrameBuffer;
+	for (auto& rtv : fb11->AsRTVs()) {
+		if (rtv) mDeviceContext->ClearRenderTargetView(rtv, (const float*)&color);
 	}
-	else {
-		mDeviceContext->ClearRenderTargetView(mCurFrameBuffer.first, (const float*)&color);
-		mDeviceContext->ClearDepthStencilView(mCurFrameBuffer.second, D3D11_CLEAR_DEPTH, depth, stencil);
-	}
+	mDeviceContext->ClearDepthStencilView(fb11->AsDSV(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
-void RenderSystem11::SetFrameBuffer(IFrameBufferPtr rendTarget)
+void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 {
 	ID3D11ShaderResourceView* TextureNull = nullptr;
 	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
 
-	auto target11 = std::static_pointer_cast<FrameBuffer11>(rendTarget);
-	mCurFrameBuffer = target11 
-		? std::make_pair(std::static_pointer_cast<FrameBufferAttachColor11>(target11->GetAttachColor(0))->AsRTV(), 
-						 std::static_pointer_cast<FrameBufferAttachZStencil11>(target11->GetAttachZStencil())->AsDSV()) 
-		: mBackFrameBuffer;
-	mDeviceContext->OMSetRenderTargets(1, &mCurFrameBuffer.first, mCurFrameBuffer.second);
+	auto fb11 = std::static_pointer_cast<FrameBuffer11>(fb);
+	mCurFrameBuffer = fb11 ? fb11 : mBackFrameBuffer;
+
+	std::vector<ID3D11RenderTargetView*> vecRTV = mCurFrameBuffer->AsRTVs();
+	mDeviceContext->OMSetRenderTargets(vecRTV.size(), 
+		vecRTV.empty() ? nullptr : &vecRTV[0], 
+		mCurFrameBuffer->AsDSV());
 }
 
 IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr)

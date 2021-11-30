@@ -1,13 +1,16 @@
+test_shadow_map
+test_model 2
+test_spec_skybox
 test_sprite 3
-test_bloom
 test_camera
+
+test_bloom
 test_case.h
 test_framebuffer
 test_label
 test_mesh
-test_model
 test_model_pbr
 test_raw_texture
-test_shadow_map
-test_spec_skybox
+
+
 

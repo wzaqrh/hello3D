@@ -30,7 +30,7 @@ Camera::Camera(ResourceManager& resMng)
 {
 	mFlipY = false;
 	mTransformDirty = true;
-	mIsPespective = true;
+	mType = kCameraPerspective;
 
 	mView = Eigen::Matrix4f::Identity();
 	mProjection = Eigen::Matrix4f::Identity();
@@ -66,17 +66,24 @@ void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 	mView = math::MakeLookAtLH(mEyePos, mLookAtPos, mUpVector);
 	mTransformDirty = true;
 }
-
 void Camera::SetFlipY(bool flip)
 {
 	mFlipY = flip;
-	if (mIsPespective) SetPerspectiveProj(mSize, mFov, mZFar);
-	else SetOthogonalProj(mSize, mZFar);
+	switch (mType) {
+	case kCameraPerspective:
+		SetPerspectiveProj(mSize, mFov, mZFar);
+		break;
+	case kCameraOthogonal:
+		SetOthogonalProj(mSize, mZFar);
+		break;
+	default:
+		break;
+	}
 }
 
 void Camera::SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar)
 {
-	mIsPespective = true;
+	mType = kCameraPerspective;
 
 	mSize = size;
 	mZFar = zFar;
@@ -91,7 +98,7 @@ void Camera::SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double 
 
 void Camera::SetOthogonalProj(const Eigen::Vector2i& size, double zFar)
 {
-	mIsPespective = false;
+	mType = kCameraOthogonal;
 
 	mSize = size;
 	mZFar = zFar;

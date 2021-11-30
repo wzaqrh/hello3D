@@ -66,12 +66,12 @@ void App::Render()
 	mInput->Frame();
 	mContext->Update();
 	//rotate camera
-	if (sceneMng->GetDefCamera()->mIsPespective)
+	if (sceneMng->GetDefCamera()->GetType() == kCameraPerspective)
 	{
 		if (mOriginCameraDistance == 0)
-			mOriginCameraDistance = sceneMng->GetDefCamera()->mEyePos.norm();
+			mOriginCameraDistance = sceneMng->GetDefCamera()->GetEyePos().norm();
 
-		float eyeDistance = sceneMng->GetDefCamera()->mEyePos.norm();
+		float eyeDistance = sceneMng->GetDefCamera()->GetEyePos().norm();
 		if (mInput->GetMouseWheel() != 0)
 		{
 			float wheel = boost::algorithm::clamp(mInput->GetMouseWheel() / 1000.0, -1, 1);
@@ -91,7 +91,7 @@ void App::Render()
 			cpos = Transform3fAffine(euler) * tpos;
 		}
 
-		sceneMng->GetDefCamera()->SetLookAt(cpos, sceneMng->GetDefCamera()->mLookAtPos);
+		sceneMng->GetDefCamera()->SetLookAt(cpos, sceneMng->GetDefCamera()->GetLookAtPos());
 	}
 
 	{

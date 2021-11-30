@@ -15,8 +15,15 @@ interface IFrameBuffer : public IResource
 	virtual IFrameBufferAttachmentPtr GetAttachColor(size_t index) const = 0;
 	virtual IFrameBufferAttachmentPtr GetAttachZStencil() const = 0;
 
-	ITexturePtr GetAttachColorTexture(size_t index) const { return GetAttachColor(index)->AsTexture(); }
-	ITexturePtr GetAttachZStencilTexture() const { return GetAttachZStencil()->AsTexture(); }
+public:
+	ITexturePtr GetAttachColorTexture(size_t index) const { 
+		auto texture = GetAttachColor(index);
+		return texture ? texture->AsTexture() : nullptr; 
+	}
+	ITexturePtr GetAttachZStencilTexture() const { 
+		auto texture = GetAttachZStencil();
+		return texture ? texture->AsTexture() : nullptr;
+	}
 };
 
 }

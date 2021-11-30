@@ -4,7 +4,6 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/rendersys/base_type.h"
-//#include "core/rendersys/hardware_buffer.h"
 
 namespace mir {
 
@@ -32,7 +31,11 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 
 	virtual IResourcePtr CreateResource(DeviceResourceType deviceResType) = 0;
 
-	virtual IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) = 0;
+	//last formats is zstencil attachment
+	virtual IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats) = 0;
+	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat attach0Format) {
+		return LoadFrameBuffer(res, size, std::vector<ResourceFormat>{attach0Format});
+	}
 	virtual void SetFrameBuffer(IFrameBufferPtr rendTarget) = 0;
 	virtual void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
 

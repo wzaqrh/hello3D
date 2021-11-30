@@ -198,7 +198,7 @@ public:
 	std::string FxName, VsEntry;
 };
 struct XmlPassInfo {
-	std::string LightMode, Name, ShortName, PSEntry;
+	std::string LightMode, Name, ShortName, VSEntry, PSEntry;
 };
 struct XmlSubShaderInfo {
 	TemplateT void AddPass(T&& pass) {
@@ -497,10 +497,12 @@ private:
 			pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 			pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
+			pass.VSEntry = vis.shaderInfo.Program.VsEntry;
 			pass.PSEntry = "PS";
 			auto find_program = node_pass.find("PROGRAM");
 			if (find_program != node_pass.not_found()) {
 				auto& node_program = find_program->second;
+				pass.VSEntry = node_program.get<std::string>("VertexEntry", pass.VSEntry);
 				pass.PSEntry = node_program.get<std::string>("PixelEntry", pass.PSEntry);
 			}
 
@@ -614,7 +616,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			builder.SetTopology(shaderInfo.Program.Topo);
 
 			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
-				__launchMode__, shaderInfo.Program.FxName, shaderInfo.Program.VsEntry, passInfo.PSEntry));
+				__launchMode__, shaderInfo.Program.FxName, passInfo.VSEntry, passInfo.PSEntry));
 			builder.SetInputLayout(resourceMng.CreateLayout(
 				__launchMode__, program, shaderInfo.Program.Attr.Layout));
 

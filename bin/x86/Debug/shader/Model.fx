@@ -29,7 +29,7 @@ struct VS_INPUT
 struct SHADOW_PS_INPUT
 {
     float4 Pos : SV_POSITION;
-	float4 Depth : TEXCOORD0;
+	//float4 Depth : TEXCOORD0;
 };
 
 SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
@@ -37,17 +37,16 @@ SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 	SHADOW_PS_INPUT output;
 	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
 	matrix MW = mul(World, transpose(Model));
-	matrix MWVP = mul(Projection, mul(View, MW));
+	matrix MWV = mul(View, MW);
+	matrix MWVP = mul(Projection, MWV);
 	output.Pos = mul(MWVP, skinPos);
-	output.Depth = output.Pos;	
+	//output.Depth = output.Pos;	
 	return output;
 }
 
 float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
 {
-	float depthValue = i.Depth.z / i.Depth.w;
-	float4 finalColor = depthValue;
-	return finalColor;
+	return float4(1.0,1.0,1.0,1.0);
 }
 
 /************ ForwardBase ************/
@@ -78,7 +77,7 @@ PS_INPUT VS(VS_INPUT i)
 	float3 worldpos = mul(MW, skinPos);
 	output.ToLight = unity_LightPosition.xyz - worldpos.xyz * unity_LightPosition.w;
 	
-	matrix LightMWVP = mul(LightProjection,mul(LightView, MW));
+	matrix LightMWVP = mul(LightProjection, mul(LightView, MW));
 	output.PosInLight = mul(LightMWVP, skinPos);
 	
 	output.ToEye = -output.Pos;
@@ -94,7 +93,8 @@ float4 PS(PS_INPUT input) : SV_Target
 		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
 	finalColor.a = 1.0;
 
-	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
+	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
+	//finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
 	return finalColor;
 }
 
@@ -106,6 +106,6 @@ float4 PSAdd(PS_INPUT input) : SV_Target
 		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
 	finalColor.a = 1.0;
 	
-	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
+	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }

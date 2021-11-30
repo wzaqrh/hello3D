@@ -32,8 +32,8 @@ void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float
 }
 
 void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const {
-	view = math::MakeLookAtLH(mCbLight.unity_LightPosition.head<3>(), camera.mLookAtPos, Eigen::Vector3f(0, 1, 0));
-	proj = math::MakeOrthographicOffCenterLH(0, camera.mSize.x(), 0, camera.mSize.y(), 0.01, camera.mZFar);
+	view = math::MakeLookAtLH(mCbLight.unity_LightPosition.head<3>(), Eigen::Vector3f(0,0,0), Eigen::Vector3f(0,1,0));
+	proj = math::MakeOrthographicOffCenterLH(0, camera.GetSize().x(), 0, camera.GetSize().y(), 0.01, camera.GetZFar());
 }
 
 /********** PointLight **********/

@@ -30,6 +30,7 @@ cbuffer cbGlobalParam : register(b0)
 SamplerState samLinear : register(s0);
 SamplerState samAnsp   : register(s1);
 SamplerState samPoint  : register(s2);
+#if 0
 SamplerState samShadow : register(s3) {
     MinFilter = Point;
     MagFilter = Point;
@@ -37,6 +38,17 @@ SamplerState samShadow : register(s3) {
     AddressU = Clamp;
     AddressV = Clamp;	
 };
+#else
+SamplerComparisonState samShadow : register(s3) {
+   //sampler state
+   Filter = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+   AddressU = MIRROR;
+   AddressV = MIRROR;
+
+   //sampler comparison state
+   ComparisonFunc = LESS;
+};
+#endif
 
 Texture2D txMain : register(t0);
 Texture2D txDepthMap : register(t8);
@@ -84,6 +96,8 @@ sampler_state
 float4 GetTextureMain(float2 inputTex) {
 	return GetTexture2D(txMain, samLinear, inputTex);
 }
+
+#if 0
 float GetTextureDepthMap(float2 inputTex) {
 	return GetTexture2D(txDepthMap, samShadow, inputTex);
 }
@@ -133,3 +147,4 @@ float CalLightStrengthWithShadow(float4 posInLight)
 #endif
 	return LightAmount;	
 }
+#endif

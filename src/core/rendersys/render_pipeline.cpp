@@ -16,8 +16,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	:mRenderSys(renderSys)
 	,mScreenSize(size)
 {
-	mShadowCasterOutput = resMng.CreateFrameBuffer(__LaunchSync__, mScreenSize, kFormatR32Float);
-	//SET_DEBUG_NAME(mShadowCasterOutput->mDepthStencilView, "shadow_caster_output");
+	mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, mScreenSize, MakeResFormats(kFormatUnknown, kFormatD24UNormS8UInt));
+	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 }
 
 void RenderPipeline::_PushFrameBuffer(IFrameBufferPtr rendTarget)
@@ -147,43 +147,49 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
+
+		globalParam.View = camera.GetView();
+		globalParam.Projection = camera.GetProjection();
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
 	}
+
 	globalParam.WorldInv = globalParam.World.inverse();
 	globalParam.ViewInv = globalParam.View.inverse();
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
 	
 	return std::tie(globalParam, lightParam);
 }
-
 void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
 	const std::vector<ILightPtr>& lightsOrder, const std::string& lightMode)
 {
 	if (opQueue.IsEmpty()) return;
 
-	DepthState orgState = mRenderSys.GetDepthState();
-	BlendState orgBlend = mRenderSys.GetBlendFunc();
+	DepthState orgDS = mRenderSys.GetDepthState();
+	BlendState orgBS = mRenderSys.GetBlendFunc();
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PushFrameBuffer(mShadowCasterOutput);
-		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(1, 1, 1, 1), 1.0, 0);
-		mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
+		//_PushFrameBuffer(mShadowMap);
+		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
+		mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowCasterOutput->GetAttachColorTexture(0));
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowMap->GetAttachColorTexture(0));
 
 		auto& skyBox = camera.GetSkyBox();
 		if (skyBox && skyBox->GetTexture())
 			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->GetTexture());
 	}
 	else if (lightMode == E_PASS_POSTPROCESS) {
-		if (camera.mPostProcessInput) 
-			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.mPostProcessInput->GetAttachColorTexture(0));
+		if (camera.GetPostProcessInput()) 
+			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.GetPostProcessInput()->GetAttachColorTexture(0));
+	}
+	else {
+
 	}
 
 	if (!lightsOrder.empty()) {
@@ -212,9 +218,9 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	}
 
 	if (lightMode == E_PASS_SHADOWCASTER) {
-		_PopFrameBuffer();
-		mRenderSys.SetDepthState(orgState);
-		mRenderSys.SetBlendFunc(orgBlend);
+		//_PopFrameBuffer();
+		mRenderSys.SetDepthState(orgDS);
+		mRenderSys.SetBlendFunc(orgBS);
 
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
 		mRenderSys.SetTexture(E_TEXTURE_ENV, nullptr);
@@ -222,44 +228,49 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
 	}
+	else {
+
+	}
 }
 
 void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera, 
 	const std::vector<ILightPtr>& lights)
 {
 	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
-	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
-	RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+	//RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
+	//RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
 }
 
 void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& scene)
 {
 	for (auto& camera : scene.GetCameras()) 
 	{
+		//camera's output as framebuffer
 		if (camera->GetOutput()) {
 			_PushFrameBuffer(camera->GetOutput());
-			mRenderSys.ClearFrameBuffer(camera->GetOutput(), Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
+			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
 		}
 
-		//setup framebuffer as camera's post_process_input 
-		if (!camera->GetPostProcessEffects().empty() && camera->mPostProcessInput) {
-			mRenderSys.SetFrameBuffer(camera->mPostProcessInput);
-			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0, 0, 0, 0), 1.0, 0);
+		//camera's post_process_input as framebuffer
+		if (!camera->GetPostProcessEffects().empty() && camera->GetPostProcessInput()) {
+			_PushFrameBuffer(camera->GetPostProcessInput());
+			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
 		}
 
-		//camera's skybox
+		//render camera's skybox
 		if (camera->GetSkyBox()) {
 			RenderOperationQueue opQue;
 			camera->GetSkyBox()->GenRenderOperation(opQue);
 			RenderOpQueue(opQue, *camera, scene.GetLights(), E_PASS_FORWARDBASE);
 		}
 
+		//render camera itself
 		RenderCamera(opQueue, *camera, scene.GetLights());
 
-		//camera's postprocess
-		{
+		//render camera's postprocess
+		if (!camera->GetPostProcessEffects().empty() && camera->GetPostProcessInput()) {
 			DepthState orgState = mRenderSys.GetDepthState();
-			mRenderSys.SetDepthState(DepthState::MakeFor2D(false));
+			mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
 
 			RenderOperationQueue opQue;
 			auto& postProcessEffects = camera->GetPostProcessEffects();
@@ -270,7 +281,9 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 			mRenderSys.SetDepthState(orgState);
 		}
 
-		if (camera->GetOutput()) _PopFrameBuffer();
+		if (camera->GetOutput()) {
+			_PopFrameBuffer();
+		}
 	}
 }
 

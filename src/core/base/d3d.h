@@ -26,6 +26,10 @@ enum CP_FLAGS : unsigned long
 bool ComputePitch(DXGI_FORMAT fmt, size_t width, size_t height,
 	size_t& rowPitch, size_t& slicePitch, int flags);
 
+DXGI_FORMAT MakeTypeless(DXGI_FORMAT fmt);
+
+bool IsDepthStencil(DXGI_FORMAT fmt);
+
 D3DBLEND convert11To9(D3D11_BLEND blend);
 D3DCMPFUNC convert11To9(D3D11_COMPARISON_FUNC cmp);
 DXGI_FORMAT convert9To11(D3DFORMAT fmt);

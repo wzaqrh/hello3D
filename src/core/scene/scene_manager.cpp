@@ -36,8 +36,10 @@ CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, doub
 	return camera;
 }
 
-void SceneManager::ResortCameras() const {
-	if (mCamerasDirty) {
+void SceneManager::ResortCameras() const 
+{
+	if (mCamerasDirty) 
+	{
 		mCamerasDirty = false;
 
 		struct CompCameraByDepth {
@@ -48,19 +50,10 @@ void SceneManager::ResortCameras() const {
 		std::stable_sort(mCameras.begin(), mCameras.end(), CompCameraByDepth());
 	}
 }
-const std::vector<CameraPtr>& SceneManager::GetCameras() const {
+const std::vector<CameraPtr>& SceneManager::GetCameras() const 
+{
 	ResortCameras();
 	return mCameras; 
-}
-CameraPtr SceneManager::GetCamera(size_t index) const { 
-	ResortCameras();
-	mCamerasDirty = true;
-	return mCameras[index]; 
-}
-CameraPtr SceneManager::GetDefCamera() const { 
-	ResortCameras();
-	mCamerasDirty = true;
-	return GetCameraCount() ? GetCamera(0) : nullptr; 
 }
 
 void SceneManager::RemoveAllLights()
@@ -87,6 +80,18 @@ DirectLightPtr SceneManager::AddDirectLight(unsigned camMask)
 	light->SetCameraMask(camMask);
 	mLightsByOrder.push_back(light);
 	return light;
+}
+
+void SceneManager::ResortLights() const 
+{
+	std::sort(mLightsByOrder.begin(), mLightsByOrder.end(), [](const ILightPtr& l, const ILightPtr& r)->bool {
+		return l->GetType() < r->GetType();
+	});
+}
+const std::vector<ILightPtr>& SceneManager::GetLights() const 
+{ 
+	ResortLights();
+	return mLightsByOrder; 
 }
 
 }

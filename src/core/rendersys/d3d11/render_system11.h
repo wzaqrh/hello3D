@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include "core/rendersys/render_system.h"
+#include "core/rendersys/d3d11/predeclare.h"
 
 namespace mir {
 
@@ -18,7 +19,7 @@ public:
 public:
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat format) override;
+	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats) override;
 	void SetFrameBuffer(IFrameBufferPtr rendTarget) override;
 	void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
 
@@ -72,8 +73,8 @@ private:
 	ID3D11DepthStencilState* mDepthStencilState = NULL;
 	ID3D11BlendState* mBlendState = NULL;
 
-	typedef std::pair<ID3D11RenderTargetView*, ID3D11DepthStencilView*> FrameBufferPair;
-	FrameBufferPair mBackFrameBuffer, mCurFrameBuffer;
+	//typedef std::pair<ID3D11RenderTargetView*, ID3D11DepthStencilView*> FrameBufferPair;
+	FrameBuffer11Ptr mBackFrameBuffer, mCurFrameBuffer;
 };
 
 }

@@ -226,10 +226,8 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode,
 	if (findProg == this->mProgramByKey.end()) {
 		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
 		ATOMIC_STATEMENT(mProgramMapLock, this->mProgramByKey.insert(std::make_pair(key, program)));
-	#if defined MIR_RESOURCE_DEBUG
 		DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vsEntry %psEntry).str());
 		DEBUG_SET_CALL(program, launchMode);
-	#endif
 
 		if (launchMode == LaunchAsync) {
 			AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
@@ -430,11 +428,9 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 	if (findIter == this->mTextureByPath.end()) {
 		texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
 		ATOMIC_STATEMENT(mTextureMapLock, this->mTextureByPath.insert(std::make_pair(imgFullpath, texture)));
-	
-	#if defined MIR_RESOURCE_DEBUG
+
 		DEBUG_SET_RES_PATH(texture, (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str());
 		DEBUG_SET_CALL(texture, launchMode);
-	#endif
 
 		if (launchMode == LaunchAsync) {
 			AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
@@ -457,10 +453,8 @@ MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string
 	if (findIter == this->mMaterialByName.end()) {
 		material = this->mMaterialFac.CreateMaterial(launchMode, *this, matName);
 		ATOMIC_STATEMENT(mMaterialMapLock, this->mMaterialByName.insert(std::make_pair(matName, material)));
-	#if defined MIR_RESOURCE_DEBUG
 		DEBUG_SET_RES_PATH(material, (boost::format("name:%1%") %matName).str());
 		DEBUG_SET_CALL(material, launchMode);
-	#endif
 	}
 	else {
 		material = findIter->second;
@@ -481,10 +475,8 @@ AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& 
 		aiRes = this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
 		ATOMIC_STATEMENT(mAiSceneMapLock, this->mAiSceneByKey.insert(std::make_pair(key, aiRes)));
 
-	#if defined MIR_RESOURCE_DEBUG
 		DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
 		DEBUG_SET_CALL(aiRes, launchMode);
-	#endif
 	}
 	else {
 		aiRes = findIter->second;

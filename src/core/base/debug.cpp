@@ -90,38 +90,46 @@ bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data)
 static void SetChildrenPrivateData(const std::vector<void*>& children, const std::string& name)
 {
 	for (auto& child : children)
-		static_cast<ID3D11DeviceChild*>(child)->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
+		if (child) static_cast<ID3D11DeviceChild*>(child)->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
 }
 
 void ResourceAddDebugDevice(IResourcePtr res, void* device)
 {
 #if defined MIR_RESOURCE_DEBUG
-	res->_Debug._DeviceChilds.push_back(device);
-	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	if (res) {
+		res->_Debug._DeviceChilds.push_back(device);
+		SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	}
 #endif
 }
 
 void SetDebugPrivData(IResourcePtr res, const std::string& privData)
 {
 #if defined MIR_RESOURCE_DEBUG
-	res->_Debug._PrivData = (privData);
-	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	if (res) {
+		res->_Debug._PrivData = (privData);
+		SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	}
 #endif
 }
 
 void SetDebugResourcePath(IResourcePtr res, const std::string& resPath)
 {
 #if defined MIR_RESOURCE_DEBUG
-	res->_Debug._ResourcePath = (resPath);
-	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	if (res) {
+		res->_Debug._ResourcePath = (resPath);
+		SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	}
 #endif
 }
 
 void SetDebugCallStack(IResourcePtr res, const std::string& callstack)
 {
 #if defined MIR_RESOURCE_DEBUG
-	res->_Debug._CallStack = (callstack);
-	SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	if (res) {
+		res->_Debug._CallStack = (callstack);
+		SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
+	}
 #endif
 }
 

@@ -9,44 +9,58 @@
 
 namespace mir {
 
-class FrameBufferAttachColor11 : public IFrameBufferAttachment
+interface FrameBufferAttach11: public IFrameBufferAttachment
 {
-public:
-	ITexturePtr AsTexture() const override { return mTexture; }
-	ID3D11RenderTargetView* AsRTV() { return mTexture->AsRTV(); }
-public:
-	Texture11Ptr mTexture;
-};
-typedef std::shared_ptr<FrameBufferAttachColor11> FrameBufferAttachColor11Ptr;
+	virtual ID3D11RenderTargetView* AsRTV() = 0;
+	virtual ID3D11DepthStencilView* AsDSV() = 0;
+}; 
+typedef std::shared_ptr<FrameBufferAttach11> FrameBufferAttach11Ptr;
 
-class FrameBufferAttachZStencil11 : public IFrameBufferAttachment
+class FrameBufferAttachByTexture11 : public FrameBufferAttach11
 {
 public:
+	FrameBufferAttachByTexture11(Texture11Ptr texture) :mTexture(texture) {}
 	ITexturePtr AsTexture() const override { return mTexture; }
-	ID3D11DepthStencilView* AsDSV() { return mTexture->AsDSV(); }
-public:
+	ID3D11RenderTargetView* AsRTV() override { return mTexture->AsRTV(); }
+	ID3D11DepthStencilView* AsDSV() override { return mTexture->AsDSV(); }
+private:
 	Texture11Ptr mTexture;
 };
-typedef std::shared_ptr<FrameBufferAttachZStencil11> FrameBufferAttachZStencil11Ptr;
+typedef std::shared_ptr<FrameBufferAttachByTexture11> FrameBufferAttachByTexture11Ptr;
+
+class FrameBufferAttachByView : public FrameBufferAttach11
+{
+public:
+	FrameBufferAttachByView(ID3D11RenderTargetView* pRTV) :mRTV(pRTV) {}
+	FrameBufferAttachByView(ID3D11DepthStencilView* pDSV) :mDSV(pDSV) {}
+	ITexturePtr AsTexture() const override { return nullptr; }
+	ID3D11RenderTargetView* AsRTV() override { return mRTV; }
+	ID3D11DepthStencilView* AsDSV() override { return mDSV; }
+private:
+	ID3D11RenderTargetView* mRTV = nullptr;
+	ID3D11DepthStencilView* mDSV = nullptr;
+};
+typedef std::shared_ptr<FrameBufferAttachByView> FrameBufferAttachByViewPtr;
 
 class FrameBuffer11 : public ImplementResource<IFrameBuffer>
 {
 public:
-	void SetAttachColor(size_t slot, FrameBufferAttachColor11Ptr attach) {
-		if (mAttachColors.size() < slot + 1)
-			mAttachColors.resize(slot + 1);
-		mAttachColors[slot] = attach;
-	}
-	void SetAttachZStencil(FrameBufferAttachZStencil11Ptr attach) {
+	void SetAttachColor(size_t slot, FrameBufferAttach11Ptr attach);
+	void SetAttachZStencil(FrameBufferAttach11Ptr attach) {
 		mAttachZStencil = attach;
 	}
 
 	size_t GetAttachColorCount() const override { return mAttachColors.size(); }
-	IFrameBufferAttachmentPtr GetAttachColor(size_t index) const { return mAttachColors[index]; }
-	IFrameBufferAttachmentPtr GetAttachZStencil() const { return mAttachZStencil; }
+	IFrameBufferAttachmentPtr GetAttachColor(size_t index) const override { 
+		return !mAttachColors.empty() ? mAttachColors[index] : nullptr; 
+	}
+	IFrameBufferAttachmentPtr GetAttachZStencil() const override { return mAttachZStencil; }
+
+	std::vector<ID3D11RenderTargetView*> AsRTVs() const;
+	ID3D11DepthStencilView* AsDSV() const { return mAttachZStencil ? mAttachZStencil->AsDSV() : nullptr; }
 private:
-	std::vector<FrameBufferAttachColor11Ptr> mAttachColors;
-	FrameBufferAttachZStencil11Ptr mAttachZStencil;
+	std::vector<FrameBufferAttach11Ptr> mAttachColors;
+	FrameBufferAttach11Ptr mAttachZStencil;
 };
 
 }

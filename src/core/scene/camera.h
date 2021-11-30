@@ -7,6 +7,11 @@
 
 namespace mir {
 
+enum CameraType {
+	kCameraPerspective,
+	kCameraOthogonal
+};
+
 class MIR_CORE_API Camera : boost::noncopyable
 {
 public:
@@ -23,27 +28,31 @@ public:
 	unsigned GetDepth() const { return mDepth; }
 
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
-	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
-	void SetOthogonalProj(const Eigen::Vector2i& size, double zFar);
-	
 	void SetFlipY(bool flip);
+
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
 	IFrameBufferPtr FetchPostProcessInput(ResourceFormat format = kFormatR8G8B8A8UNorm);
 	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm);
+private:
+	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
+	void SetOthogonalProj(const Eigen::Vector2i& size, double zFar);
 public:
 	const TransformPtr& GetTransform() const;
 	const SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
 	const std::vector<PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
+	const IFrameBufferPtr& GetPostProcessInput() const { return mPostProcessInput; }
 	const IFrameBufferPtr& GetOutput() const { return mOutput; }
-
+	
 	const Eigen::Matrix4f& GetView() const;
 	const Eigen::Matrix4f& GetProjection() const  { return mProjection; }
 	
+	CameraType GetType() const { return mType; }
 	const Eigen::Vector2i& GetSize() const { return mSize; }
-	int GetWidth() const { return mSize.x(); }
-	int GetHeight() const  { return mSize.y(); }
-	
+	const Eigen::Vector3f& GetLookAtPos() const { return mLookAtPos; }
+	const Eigen::Vector3f& GetEyePos() const { return mEyePos; }
+	float GetZFar() const { return mZFar; }
+
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 private:
@@ -60,13 +69,13 @@ private:
 
 	unsigned mCameraMask = -1;
 	unsigned mDepth = 0;
-public:
+private:
 	IFrameBufferPtr mPostProcessInput, mOutput;
 
 	Eigen::Vector2i mSize;
 	Eigen::Vector3f mEyePos, mLookAtPos, mUpVector;
 
-	bool mIsPespective;
+	CameraType mType;
 	double mFov, mZFar;
 };
 

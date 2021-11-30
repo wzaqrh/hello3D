@@ -76,8 +76,8 @@ struct DepthState {
 	static DepthState MakeFor2D(bool depthEnable) {
 		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskZero };
 	}
-	static DepthState MakeFor3D() {
-		return DepthState{ true, kCompareLess, kDepthWriteMaskAll };
+	static DepthState MakeFor3D(bool depthEnable = true) {
+		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskAll };
 	}
 public:
 	bool DepthEnable;
@@ -242,6 +242,7 @@ enum ResourceFormat {
 	kFormatA8P8 = 114,
 	kFormatB4G4R4A4UNorm = 115
 };
+#define MakeResFormats(...) std::vector<ResourceFormat>{ ##__VA_ARGS__ }
 
 enum PrimitiveTopology {
 	kPrimTopologyUndefined = 0,

@@ -33,7 +33,7 @@ class MIR_CORE_API RenderPipeline
 	const Eigen::Vector2i mScreenSize;
 
 	std::vector<IFrameBufferPtr> mFrameBufferStack;
-	IFrameBufferPtr mShadowCasterOutput;
+	IFrameBufferPtr mShadowMap;
 public:
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size);
 	bool BeginFrame();
