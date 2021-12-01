@@ -3,6 +3,7 @@
 #include "core/scene/scene_manager.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
+#include "core/renderable/cube.h"
 #include "core/base/transform.h"
 
 using namespace mir;
@@ -20,7 +21,8 @@ protected:
 	virtual void OnPostInitDevice() override;
 	virtual void OnInitLight() override;
 private:
-	AssimpModelPtr mModel1, mModel2 = nullptr;
+	AssimpModelPtr mModel1, mModel2;
+	CubePtr mCube;
 };
 
 void TestShadowMap::OnInitLight()
@@ -50,11 +52,17 @@ void TestShadowMap::OnPostInitDevice()
 	sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-1500), 3000, 30);
 	//sceneMng->GetDefCamera()->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
 
+	if (1)
+	{
+		const int SizeInf = 10000;
+		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 200), Eigen::Vector3f(SizeInf, SizeInf, 2));
+	}
+
 	{
 		mModel1 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
 		mModel1->LoadModel("model/rock/rock.obj", R"({"dir":"model/rock/"})");
 		mModel1->GetTransform()->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
-		//mModel1->GetTransform()->SetPosition(Eigen::Vector3f(0, -200, 0));
+		mModel1->GetTransform()->SetPosition(Eigen::Vector3f(100, 100, 10));
 		mTransform = mModel1->GetTransform();
 	}
 
@@ -71,11 +79,12 @@ void TestShadowMap::OnPostInitDevice()
 void TestShadowMap::OnRender()
 {
 	if (mContext->RenderPipe()->BeginFrame()) {
-		mModel1->Update(mTimer->mDeltaTime);
+		if (mModel1) mModel1->Update(mTimer->mDeltaTime);
 		if (mModel2) mModel2->Update(mTimer->mDeltaTime);
 
 		RenderOperationQueue opQueue;
-		mModel1->GenRenderOperation(opQueue);
+		if (mCube) mCube->GenRenderOperation(opQueue);
+		if (mModel1) mModel1->GenRenderOperation(opQueue);
 		if (mModel2) mModel2->GenRenderOperation(opQueue);
 
 		mContext->RenderPipe()->Render(opQueue, *mContext->SceneMng());

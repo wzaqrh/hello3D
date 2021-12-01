@@ -290,6 +290,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
 			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
 			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
+			weightedSkin.hasAlbedo = mesh->HasTexture(kTexturePbrAlbedo);
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};

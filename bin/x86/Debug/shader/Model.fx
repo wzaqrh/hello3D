@@ -49,8 +49,7 @@ SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
 {
 	float z = i.Pos.z / i.Pos.w;
-	//return float4(z,z,z,z);
-	return GetTexture2D(txMain, samLinear, i.Tex);
+	return float4(1,1,1,1);
 }
 
 /************ ForwardBase ************/
@@ -58,53 +57,80 @@ struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
-	
 	float3 Normal : NORMAL0;//eye space
 	float3 ToEye  : TEXCOORD1;//eye space
 	float3 ToLight : TEXCOORD2;//eye space
-	float4 PosInLight : TEXCOORD3;//world space
+	float4 PosInLight : TEXCOORD3;//light's ndc space
 };
 
 PS_INPUT VS(VS_INPUT i)
 {
 	PS_INPUT output = (PS_INPUT)0;
-
 	matrix MW = mul(World, transpose(Model));
-	matrix MWV = mul(View, MW);
 	
+	//Normal
 	float4 skinNormal = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0));
-	output.Normal = normalize(mul(MWV, skinNormal).xyz);
+	output.Normal = normalize(mul(mul(View, MW), skinNormal).xyz);
 	
+	//ToLight
 	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
-	output.Pos = mul(MWV, skinPos);
+	output.Pos = mul(MW, skinPos);
+	output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
 	
-	float3 worldpos = mul(MW, skinPos);
-	output.ToLight = unity_LightPosition.xyz - worldpos.xyz * unity_LightPosition.w;
+	//PosInLight
+	output.PosInLight = mul(MW, skinPos);
+	output.PosInLight = mul(LightView, output.PosInLight);
+	output.PosInLight = mul(LightProjection, output.PosInLight);
 	
-	matrix LightMWVP = mul(LightProjection, mul(LightView, MW));
-	output.PosInLight = mul(LightMWVP, skinPos);
-	
+	//ToEye
+	output.Pos = mul(View, output.Pos);
 	output.ToEye = -output.Pos;
+	
+	//Pos
     output.Pos = mul(Projection, output.Pos);
 	output.Tex = i.Tex;
     return output;
 }
 
+inline float3 GetAlbedo(float2 uv) {
+	float3 albedo;
+	if (hasAlbedo) albedo = GetTexture2D(txMain, samLinear, uv).rgb;
+	else albedo = float3(1.0,1.0,1.0);	
+	return albedo;
+}
+
 float4 PS(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
-		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
 	finalColor.a = 1.0;
 
 	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	//finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
 	
+#if 0
 	float4 shadowPosH = input.PosInLight;
 	shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
 	finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r;
-			
+	
+	finalColor.rgb = shadowPosH.z;
+#elif 0
+	float4 shadowPosH = input.Pos;
+	shadowPosH.xyz /= shadowPosH.w;
+	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
+	//shadowPosH.y = 1.0 - shadowPosH.y;
+	//finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r;
+	//finalColor.rgb = shadowPosH.z;
+
+	//finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r - shadowPosH.z + 0.5;
+	
+	//finalColor.rgb = txDepthMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, shadowPosH.z).r;	
+	
+	finalColor.rgb = input.Pos.xyz / input.Pos.w;
+#endif
+	clip(-1);
+		
 	return finalColor;
 }
 
@@ -112,8 +138,7 @@ float4 PS(PS_INPUT input) : SV_Target
 float4 PSAdd(PS_INPUT input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
-		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
 	finalColor.a = 1.0;
 	
 	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);

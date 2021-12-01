@@ -7,6 +7,7 @@ cbuffer cbWeightedSkin : register(b2)
 	int hasMetalness;
 	int hasRoughness;
 	int hasAO;
+	int hasAlbedo;
 }
 
 float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)

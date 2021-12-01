@@ -6,7 +6,7 @@
 #include "core/scene/camera.h"
 #include "core/base/debug.h"
 
-#define DEBUG_SHADOW_CASTER
+//#define DEBUG_SHADOW_CASTER
 
 void testViewProjection(Eigen::Matrix4f view, Eigen::Matrix4f proj);
 

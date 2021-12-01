@@ -58,8 +58,11 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
 	// NDC空间的深度值
-    float depth = shadowPosH.z;
+    float depth = shadowPosH.z - 0.1;
 
+#if !defined PCF_SHADOW
+	return shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, depth).r;
+#else
 	// 纹素在纹理坐标下的宽高
     const float dx = SMAP_DX;
 
@@ -85,5 +88,6 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 			shadowPosH.xy + offsets[i], depth).r;
     }
     
-    return percentLit /= 9.0f;
+    return percentLit /= 9.0f;	
+#endif
 }

@@ -15,6 +15,7 @@ struct cbWeightedSkin
 	unsigned int hasMetalness;
 	unsigned int hasRoughness;
 	unsigned int hasAO;
+	unsigned int hasAlbedo;
 };
 
 struct cbUnityMaterial

@@ -1,5 +1,5 @@
-test_cube
 test_shadow_map
+test_cube 1
 test_model 2
 
 test_spec_skybox
