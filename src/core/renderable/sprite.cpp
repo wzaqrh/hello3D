@@ -4,26 +4,38 @@
 
 namespace mir {
 
-/********** Quad **********/
+/********** SpriteVertexQuad **********/
 SpriteVertexQuad::SpriteVertexQuad()
 {
 	DoSetTexCoords(Eigen::Vector2f(0, 0), Eigen::Vector2f(1, 1));
 	SetColor(Eigen::Vector4f(1, 1, 1, 1));
 }
 
-SpriteVertexQuad::SpriteVertexQuad(float x, float y, float w, float h)
+SpriteVertexQuad::SpriteVertexQuad(const Eigen::Vector2f& origin, const Eigen::Vector2f& size)
 {
-	SetRect(x, y, w, h);
+	SetCornerByRect(origin, size);
 	DoSetTexCoords(Eigen::Vector2f(0, 0), Eigen::Vector2f(1, 1));
 	SetColor(Eigen::Vector4f(1, 1, 1, 1));
 }
 
-void SpriteVertexQuad::SetRect(float x, float y, float w, float h)
+void SpriteVertexQuad::SetCornerByRect(const Eigen::Vector2f& org, const Eigen::Vector2f& size, float z)
 {
-	lb.Pos = Eigen::Vector3f(x, y, 0);
-	lt.Pos = Eigen::Vector3f(x, y + h, 0);
-	rt.Pos = Eigen::Vector3f(x + w, y + h, 0);
-	rb.Pos = Eigen::Vector3f(x + w, y, 0);
+	lb().Pos = Eigen::Vector3f(org.x(), org.y(), z);
+	lt().Pos = Eigen::Vector3f(org.x(), org.y() + size.y(), z);
+	rt().Pos = Eigen::Vector3f(org.x() + size.x(), org.y() + size.y(), z);
+	rb().Pos = Eigen::Vector3f(org.x() + size.x(), org.y(), z);
+}
+void SpriteVertexQuad::SetCornerByLBRT(const Eigen::Vector2f& pLB, const Eigen::Vector2f& pRT, float z)
+{
+	SetCornerByRect(pLB, pRT - pLB, z);
+}
+
+void SpriteVertexQuad::SetCornerByVector(const Eigen::Vector3f& org, const Eigen::Vector3f& right, const Eigen::Vector3f& up)
+{
+	lb().Pos = org;
+	lt().Pos = org + up;
+	rt().Pos = org + up + right;
+	rb().Pos = org + right;
 }
 
 void SpriteVertexQuad::SetColor(const Eigen::Vector4f& color)
@@ -34,32 +46,28 @@ void SpriteVertexQuad::SetColor(const Eigen::Vector4f& color)
 		static_cast<unsigned char>(color.z() * 255),
 		static_cast<unsigned char>(color.w() * 255),
 	};
-	lb.Color = *((int*)c);
-	lt.Color = *((int*)c);
-	rt.Color = *((int*)c);
-	rb.Color = *((int*)c);
+	for (size_t i = 0; i < kCubeConerFrontCount; ++i)
+		Coners[i].Color = *((int*)c);
 }
 
 void SpriteVertexQuad::SetZ(float z)
 {
-	lb.Pos.z() = z;
-	lt.Pos.z() = z;
-	rt.Pos.z() = z;
-	rb.Pos.z() = z;
+	for (size_t i = 0; i < kCubeConerFrontCount; ++i)
+		Coners[i].Pos.z() = z;
 }
 
 void SpriteVertexQuad::FlipY()
 {
-	std::swap(lb.Tex.y(), rt.Tex.y());
-	DoSetTexCoords(lb.Tex, rt.Tex);
+	std::swap(lb().Tex.y(), rt().Tex.y());
+	DoSetTexCoords(lb().Tex, rt().Tex);
 }
 
 void SpriteVertexQuad::DoSetTexCoords(Eigen::Vector2f plb, Eigen::Vector2f prt)
 {
-	lb.Tex = Eigen::Vector2f(plb.x(), plb.y());
-	lt.Tex = Eigen::Vector2f(plb.x(), prt.y());
-	rt.Tex = Eigen::Vector2f(prt.x(), prt.y());
-	rb.Tex = Eigen::Vector2f(prt.x(), plb.y());
+	lb().Tex = Eigen::Vector2f(plb.x(), plb.y());
+	lt().Tex = Eigen::Vector2f(plb.x(), prt.y());
+	rt().Tex = Eigen::Vector2f(prt.x(), prt.y());
+	rb().Tex = Eigen::Vector2f(prt.x(), plb.y());
 }
 
 void SpriteVertexQuad::SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vector2f& uv1)
@@ -73,10 +81,10 @@ constexpr uint32_t CIndices[] = {
 };
 Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName)
 	: mResourceMng(resourceMng)
-	, mQuad(0, 0, 0, 0)
+	, mQuad(Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0))
 	, mQuadDirty(true)
 	, mFlipY(true)
-	, mSize(0, 0)
+	, mSize(1, 1)
 	, mPosition(0, 0)
 {
 	mTransform = std::make_shared<Transform>();
@@ -87,13 +95,10 @@ Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::strin
 	if (mFlipY) mQuad.FlipY();
 }
 
-Sprite::~Sprite()
-{}
-
 void Sprite::SetPosition(const Eigen::Vector3f& pos)
 {
-	mPosition = Eigen::Vector2f(pos.x(), pos.y());
-	mQuad.SetRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y());
+	mPosition = pos.head<2>();
+	mQuad.SetCornerByRect(mPosition, mSize);
 	mQuad.SetZ(pos.z());
 	mQuadDirty = true;
 }
@@ -108,7 +113,7 @@ void Sprite::SetSize(const Eigen::Vector2f& sz)
 
 	if (mSize != size) {
 		mSize = size;
-		mQuad.SetRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y());
+		mQuad.SetCornerByRect(mPosition, mSize);
 		mQuadDirty = true;
 	}
 }

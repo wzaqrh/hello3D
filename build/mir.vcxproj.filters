@@ -190,6 +190,9 @@
     <ClInclude Include="..\src\core\base\thread.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\renderable\cube.h">
+      <Filter>src\core\renderable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -314,6 +317,9 @@
     </ClCompile>
     <ClCompile Include="..\src\test\unit_test\test_camera_light.cpp">
       <Filter>src\unit_test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\renderable\cube.cpp">
+      <Filter>src\core\renderable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

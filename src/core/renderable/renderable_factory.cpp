@@ -4,6 +4,7 @@
 #include "core/renderable/mesh.h"
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
+#include "core/renderable/cube.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/post_process.h"
 #include "core/scene/camera.h"
@@ -38,6 +39,14 @@ SpritePtr RenderableFactory::CreateColorLayer(string_cref matName)
 MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, string_cref matName)
 {
 	return Mesh::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_SPRITE), vertCount, indexCount);
+}
+
+CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize)
+{
+	auto cube = Cube::Create(mLaunchMode, mResourceMng, E_MAT_SPRITE);
+	cube->SetPosition(center);
+	cube->SetHalfSize(halfsize);
+	return cube;
 }
 
 AssimpModelPtr RenderableFactory::CreateAssimpModel(const TransformPtr& transform, string_cref matName)

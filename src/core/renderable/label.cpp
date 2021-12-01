@@ -190,7 +190,7 @@ void Label::ForceLayout()
 				start.y() + (pen.y() + startPenY - (ch.Size.y() - ch.Bearing.y()) * mScale));
 
 			auto& quad = mCharSeq[i].quad;
-			quad.SetRect(pos.x(), pos.y(), (ch.BBox.xMax - ch.BBox.xMin), (ch.BBox.yMax - ch.BBox.yMin));
+			quad.SetCornerByRect(pos.cast<float>(), Eigen::Vector2f(ch.BBox.xMax - ch.BBox.xMin, ch.BBox.yMax - ch.BBox.yMin));
 		}
 	}
 

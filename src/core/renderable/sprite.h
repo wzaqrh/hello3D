@@ -15,16 +15,23 @@ struct SpriteVertex {
 
 struct SpriteVertexQuad {
 	SpriteVertexQuad();
-	SpriteVertexQuad(float x, float y, float w, float h);
-	void SetRect(float x, float y, float w, float h);
-	void SetColor(const Eigen::Vector4f& color);
+	SpriteVertexQuad(const Eigen::Vector2f& origin, const Eigen::Vector2f& size);
+	void SetCornerByRect(const Eigen::Vector2f& origin, const Eigen::Vector2f& size, float z = 0);
+	void SetCornerByLBRT(const Eigen::Vector2f& pLB, const Eigen::Vector2f& pRT, float z);
+	void SetCornerByVector(const Eigen::Vector3f& pLB, const Eigen::Vector3f& right, const Eigen::Vector3f& up);
 	void SetZ(float z);
+	void SetColor(const Eigen::Vector4f& color);
 	void FlipY();
 	void SetTexCoord(const Eigen::Vector2f& uv0, const Eigen::Vector2f& uv1);
+
+	SpriteVertex& lb() { return Coners[kCubeConerFrontLeftBottom]; }
+	SpriteVertex& lt() { return Coners[kCubeConerFrontLeftTop]; }
+	SpriteVertex& rt() { return Coners[kCubeConerFrontRightTop]; }
+	SpriteVertex& rb() { return Coners[kCubeConerFrontRightBottom]; }
 private:
 	void DoSetTexCoords(Eigen::Vector2f plb, Eigen::Vector2f prt);
-public:
-	SpriteVertex lb, lt, rt, rb;
+private:
+	SpriteVertex Coners[kCubeConerFrontCount];
 };
 
 class MIR_CORE_API Sprite : public IRenderable 
@@ -33,7 +40,6 @@ class MIR_CORE_API Sprite : public IRenderable
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
 	Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName = "");
 public:
-	~Sprite();
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetSize(const Eigen::Vector2f& size);
 	void SetTexture(const ITexturePtr& Texture);

@@ -34,13 +34,13 @@ void TestShadowMap::OnInitLight()
 #else
 	mContext->SceneMng()->RemoveAllLights();
 	auto dir_light = mContext->SceneMng()->AddDirectLight();
-	dir_light->SetDirection(Eigen::Vector3f(-1, -1, 1));
-	//dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
+	//dir_light->SetDirection(Eigen::Vector3f(-1, -1, 1));
+	dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 #endif
 }
 
 #define USE_RENDER_TEXTURE
-#define SCALE_BASE 1
+#define SCALE_BASE 100
 void TestShadowMap::OnPostInitDevice()
 {
 	auto sceneMng = mContext->SceneMng();
@@ -52,17 +52,19 @@ void TestShadowMap::OnPostInitDevice()
 
 	{
 		mModel1 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
-		mModel1->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
+		mModel1->LoadModel("model/rock/rock.obj", R"({"dir":"model/rock/"})");
 		mModel1->GetTransform()->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
+		//mModel1->GetTransform()->SetPosition(Eigen::Vector3f(0, -200, 0));
+		mTransform = mModel1->GetTransform();
 	}
 
-	if (1)
+	if (0)
 	{
 		mModel2 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
-		mModel2->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
+		mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
 		mMoveDefScale = SCALE_BASE * 0.2;
 		mModel2->GetTransform()->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
-		mModel2->GetTransform()->SetPosition(Eigen::Vector3f(350, 350, -350));
+		mModel2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -300));
 	}
 }
 

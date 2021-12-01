@@ -18,7 +18,7 @@ public:
 		: mLaunchMode(launchMode), mResourceMng(resourceMng), mAsset(*asset), mResult(asset)
 	{}
 	~AiSceneLoader() {}
-	void ExecuteAsyncPart(const std::string& imgPath, const std::string& redirectResource) 
+	bool ExecuteAsyncPart(const std::string& imgPath, const std::string& redirectResource) 
 	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
@@ -59,6 +59,7 @@ public:
 			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(
 				imgFullpath.string(), ImportFlags);
 		}
+		return mAsset.mScene != nullptr;
 	}
 	AiScenePtr ExecuteSyncPart() 
 	{
@@ -286,12 +287,14 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 	if (launchMode == LaunchAsync) {
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			loader->ExecuteAsyncPart(assetPath, redirectRes);
-			nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob) {
-				loader->ExecuteSyncPart();
+			if (loader->ExecuteAsyncPart(assetPath, redirectRes)) {
+				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob) {
+					loader->ExecuteSyncPart();
+					return true;
+				});
 				return true;
-			});
-			return true;
+			}
+			else return false;
 		}, res);
 		return res;
 	}

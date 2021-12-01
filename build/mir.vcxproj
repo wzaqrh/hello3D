@@ -51,6 +51,7 @@
     <ClInclude Include="..\src\core\mir_export.h" />
     <ClInclude Include="..\src\core\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\assimp_model.h" />
+    <ClInclude Include="..\src\core\renderable\cube.h" />
     <ClInclude Include="..\src\core\renderable\font.h" />
     <ClInclude Include="..\src\core\renderable\label.h" />
     <ClInclude Include="..\src\core\renderable\mesh.h" />
@@ -107,6 +108,7 @@
     <ClCompile Include="..\src\core\dllmain.cpp" />
     <ClCompile Include="..\src\core\mir.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp" />
+    <ClCompile Include="..\src\core\renderable\cube.cpp" />
     <ClCompile Include="..\src\core\renderable\font.cpp" />
     <ClCompile Include="..\src\core\renderable\label.cpp" />
     <ClCompile Include="..\src\core\renderable\mesh.cpp" />
