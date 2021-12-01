@@ -29,27 +29,23 @@ struct VS_INPUT
 struct SHADOW_PS_INPUT
 {
     float4 Pos : SV_POSITION;
-	//float4 Depth : TEXCOORD0;
-	float2 Tex  : TEXCOORD0;
 };
 
 SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 {
 	SHADOW_PS_INPUT output;
-	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos, 1.0));
 	matrix MW = mul(World, transpose(Model));
 	matrix MWV = mul(View, MW);
 	matrix MWVP = mul(Projection, MWV);
 	output.Pos = mul(MWVP, skinPos);
-	//output.Depth = output.Pos;	
-	output.Tex = i.Tex;
 	return output;
 }
 
 float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
 {
 	float z = i.Pos.z / i.Pos.w;
-	return float4(1,1,1,1);
+	return float4(0.467,0.533,0.6,1);
 }
 
 /************ ForwardBase ************/
@@ -106,30 +102,16 @@ float4 PS(PS_INPUT input) : SV_Target
 	finalColor.a = 1.0;
 
 	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
-	//finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
-	
+	finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
 #if 0
 	float4 shadowPosH = input.PosInLight;
 	shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
+	shadowPosH.y = 1.0 - shadowPosH.y;
+	
 	finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r;
-	
-	finalColor.rgb = shadowPosH.z;
-#elif 0
-	float4 shadowPosH = input.Pos;
-	shadowPosH.xyz /= shadowPosH.w;
-	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
-	//shadowPosH.y = 1.0 - shadowPosH.y;
-	//finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r;
-	//finalColor.rgb = shadowPosH.z;
-
-	//finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r - shadowPosH.z + 0.5;
-	
-	//finalColor.rgb = txDepthMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, shadowPosH.z).r;	
-	
-	finalColor.rgb = input.Pos.xyz / input.Pos.w;
+	//finalColor.rgb *= txDepthMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, shadowPosH.z).r;
 #endif
-	clip(-1);
 		
 	return finalColor;
 }

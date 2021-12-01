@@ -2,7 +2,7 @@
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
 
-void testViewProjection(Eigen::Matrix4f view, Eigen::Matrix4f proj);
+void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj);
 
 namespace mir {
 
@@ -44,9 +44,7 @@ void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::M
 
 	auto hs = camera.GetSize() / 2;
 	proj = math::MakeOrthographicOffCenterLH(-hs.x(), hs.x(), -hs.y(), hs.y(), 0.01, distance * 1.5);
-#if 1
-	testViewProjection(view, proj);
-#endif
+	proj = Transform3Projective(proj).scale(Eigen::Vector3f(1, -1, 1)).matrix();
 }
 
 

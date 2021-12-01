@@ -5,10 +5,9 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
 #include "core/base/debug.h"
+#include "test/unit_test/unit_test.h"
 
 //#define DEBUG_SHADOW_CASTER
-
-void testViewProjection(Eigen::Matrix4f view, Eigen::Matrix4f proj);
 
 namespace mir {
 
@@ -156,17 +155,16 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
+
+		test::CompareLightCameraByViewProjection(light, camera, {});
 	}
 
 	{
-		Eigen::Matrix4f camera_view = camera.GetView(), camera_proj = camera.GetProjection();
-		testViewProjection(camera_view, camera_proj);
-	}
+		test::TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
 
-	{
 		Eigen::Matrix4f light_view, light_proj;
 		light.CalculateLightingViewProjection(camera, light_view, light_proj);
-		testViewProjection(light_view, light_proj);
+		test::TestViewProjectionWithCases(light_view, light_proj);
 	}
 
 	globalParam.WorldInv = globalParam.World.inverse();
@@ -257,7 +255,7 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
 #if !defined DEBUG_SHADOW_CASTER
 	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
-	RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+	//RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
 #endif
 }
 

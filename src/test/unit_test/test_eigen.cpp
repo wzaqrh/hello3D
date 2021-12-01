@@ -1,14 +1,14 @@
 #include <windows.h>
 #include <xnamath.h>
 #include <catch.hpp>
-#include "core/base/math.h"
+#include "test/unit_test/unit_test.h"
 
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
+using namespace mir::test;
 
-static bool IsEqual(float l, float r) {
-	return std::abs<float>(l - r) < 0.00001;
-}
-static bool IsEqual(const Eigen::Matrix4f& m0, const XMMATRIX& m1) {
+namespace mir {
+namespace test {
+bool IsEqual(const Eigen::Matrix4f& m0, const XMMATRIX& m1) {
 	float* arr0 = (float*)&m0;
 	float* arr1 = (float*)&m1;
 	for (size_t i = 0; i < 16; ++i) {
@@ -17,12 +17,20 @@ static bool IsEqual(const Eigen::Matrix4f& m0, const XMMATRIX& m1) {
 	}
 	return true;
 }
-static bool IsEqual(const Eigen::Vector4f& v0, const XMVECTOR& v1) {
+bool IsEqual(const Eigen::Vector4f& v0, const XMVECTOR& v1) {
 	if (!IsEqual(v0.x(), XMVectorGetX(v1))) return false;
 	if (!IsEqual(v0.y(), XMVectorGetY(v1))) return false;
 	if (!IsEqual(v0.z(), XMVectorGetZ(v1))) return false;
 	if (!IsEqual(v0.w(), XMVectorGetW(v1))) return false;
 	return true;
+}
+bool IsEqual(const Eigen::Vector3f& v0, const XMVECTOR& v1) {
+	if (!IsEqual(v0.x(), XMVectorGetX(v1))) return false;
+	if (!IsEqual(v0.y(), XMVectorGetY(v1))) return false;
+	if (!IsEqual(v0.z(), XMVectorGetZ(v1))) return false;
+	return true;
+}
+}
 }
 
 static_assert(sizeof(Eigen::Matrix4f) == sizeof(XMMATRIX), "");
@@ -76,6 +84,10 @@ TEST_CASE("eigen is right hand", "[eigen_is_right_hand]")
 	XMMATRIX p1 = XMMatrixPerspectiveFovLH(50 / 180.0 * XM_PI, 1280.0f/720, 0.01, 10);
 	m1 *= p1;
 	CHECK(IsEqual(m0, m1));*/
+
+	Eigen::Vector3f v0 = Eigen::Vector3f(7, -4, 3).cross(Eigen::Vector3f(3, -9, 1));
+	XMVECTOR v1 = XMVector3Cross(XMVectorSet(7, -4, 3, 0), XMVectorSet(3, -9, 1, 0));
+	CHECK(IsEqual(v0, v1));
 }
 
 TEST_CASE("eigen matrix translate", "eigen_matrix_translate")
@@ -135,8 +147,8 @@ TEST_CASE("eigen matrix block", "eigen_matrix_block")
 }
 
 TEST_CASE("mir matrix MakeLookAtLH", "mir_matrix_MakeLookAtLH") {
-	Eigen::Vector3f eye(0, 0, -10);
-	Eigen::Vector3f target(0, 0, 0);
+	Eigen::Vector3f eye(50, 70, -10);
+	Eigen::Vector3f target(10, -10, 0);
 	Eigen::Vector3f up(0, 1, 0);
 	Eigen::Matrix4f m0 = mir::math::MakeLookAtLH(eye, target, up);
 
@@ -157,8 +169,6 @@ TEST_CASE("mir matrix MakeLookAtLH", "mir_matrix_MakeLookAtLH") {
 		CHECK(IsEqual(v0, v1));
 	}
 }
-
-
 
 TEST_CASE("mir matrix MakePerspectiveFovLH", "mir_matrix_MakePerspectiveFovLH") {
 	float fov = 60 / 180.0 * XM_PI;
@@ -235,33 +245,4 @@ TEST_CASE("eigen matrix multiple", "eigen_matrix_multiple") {
 		float v1x = XMVectorGetX(v1), v1y = XMVectorGetY(v1), v1z = XMVectorGetZ(v1), v1w = XMVectorGetW(v1);
 		CHECK(IsEqual(v0, v1));
 	}
-}
-
-#include <future>
-#include <iostream>
-TEST_CASE("std_future", "std_future") {
-#if 0
-	std::future<int> result = std::async([]()->int {
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		std::cout << "packaged_task";
-		return 7;
-});
-#else
-	std::packaged_task<int()> task([]()->int {
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		std::cout << "packaged_task finished";
-		return 7;
-	});
-	std::future<int> result = task.get_future();
-#endif
-	{
-		std::future<int> shared_result = std::move(result);
-		std::cout << "continue before packaged_task";
-	}
-	std::future<int> shared_result = std::move(result);
-	CHECK(!result.valid());
-
-	task();
-	int a = shared_result.get();
-	CHECK(!shared_result.valid());
 }

@@ -57,11 +57,13 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 	// 透视除法
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
+	
 	// NDC空间的深度值
-    float depth = shadowPosH.z - 0.1;
+    float depth = shadowPosH.z;
 
 #if !defined PCF_SHADOW
-	return shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, depth).r;
+	//return shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, depth).r;
+	return step(shadowPosH.z, txDepthMap.Sample(samLinear, shadowPosH.xy).r);
 #else
 	// 纹素在纹理坐标下的宽高
     const float dx = SMAP_DX;

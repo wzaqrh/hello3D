@@ -26,6 +26,8 @@ cbuffer cbGlobalParam : register(b0)
 	float4 glstate_lightmodel_ambient;
 }
 
+#define clOrange 255,165,0
+
 #if SHADER_MODEL > 30000
 SamplerState samLinear : register(s0);
 SamplerState samAnsp   : register(s1);
@@ -39,14 +41,13 @@ SamplerState samShadow : register(s3) {
     AddressV = Clamp;	
 };
 #else
-SamplerComparisonState samShadow : register(s3) {
-   //sampler state
+SamplerComparisonState samShadow : register(s8) {
    Filter = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-   AddressU = MIRROR;
-   AddressV = MIRROR;
-
-   //sampler comparison state
-   ComparisonFunc = LESS;
+   AddressU = BORDER;
+   AddressV = BORDER;
+   AddressW = BORDER;
+   
+   ComparisonFunc = LESS_EQUAL;
 };
 #endif
 

@@ -41,7 +41,7 @@ Camera::Camera(ResourceManager& resMng)
 
 Eigen::Vector4f Camera::ProjectPoint(const Eigen::Vector4f& pos) const
 {
-	Transform3fAffine t(mProjection * mView);
+	Transform3fAffine t(mProjection * GetView());
 	Eigen::Vector4f perspective = t * pos;
 
 	if (perspective.w() != 0) {

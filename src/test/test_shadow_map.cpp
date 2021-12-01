@@ -5,6 +5,7 @@
 #include "core/renderable/sprite.h"
 #include "core/renderable/cube.h"
 #include "core/base/transform.h"
+#include "test/unit_test/unit_test.h"
 
 using namespace mir;
 
@@ -34,10 +35,7 @@ void TestShadowMap::OnInitLight()
 	mLight->SetAttenuation(0.001);
 	//mLight->SetPosition(0, 0, -150);
 #else
-	mContext->SceneMng()->RemoveAllLights();
-	auto dir_light = mContext->SceneMng()->AddDirectLight();
-	//dir_light->SetDirection(Eigen::Vector3f(-1, -1, 1));
-	dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
+
 #endif
 }
 
@@ -47,10 +45,17 @@ void TestShadowMap::OnPostInitDevice()
 {
 	auto sceneMng = mContext->SceneMng();
 	auto rendFac = mContext->RenderableFac();
+	auto size = mContext->ResourceMng()->WinSize() / 2;
+
+	sceneMng->RemoveAllLights();
+	auto dir_light = sceneMng->AddDirectLight();
+	dir_light->SetDirection(Eigen::Vector3f(-1, -1, 3));
 
 	sceneMng->RemoveAllCameras();
-	sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-1500), 3000, 30);
-	//sceneMng->GetDefCamera()->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
+	auto camera = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -1500), 3000); 
+	camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
+
+	test::CompareLightCameraByViewProjection(*dir_light, *camera, {});
 
 	if (1)
 	{
@@ -58,6 +63,7 @@ void TestShadowMap::OnPostInitDevice()
 		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 200), Eigen::Vector3f(SizeInf, SizeInf, 2));
 	}
 
+	if (1)
 	{
 		mModel1 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
 		mModel1->LoadModel("model/rock/rock.obj", R"({"dir":"model/rock/"})");

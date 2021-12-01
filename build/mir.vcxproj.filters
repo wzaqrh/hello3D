@@ -193,6 +193,9 @@
     <ClInclude Include="..\src\core\renderable\cube.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\test\unit_test\unit_test.h">
+      <Filter>src\unit_test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -320,6 +323,9 @@
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\cube.cpp">
       <Filter>src\core\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\unit_test\unit_test.cpp">
+      <Filter>src\unit_test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

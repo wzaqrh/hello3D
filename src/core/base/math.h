@@ -15,23 +15,16 @@ inline Eigen::Matrix4f MakeLookAtLH(const Eigen::Vector3f& eye,
 	const Eigen::Vector3f& at,
 	const Eigen::Vector3f& up)
 {
+	Eigen::Vector3f n = (at - eye).normalized();  //z' = n = normalize(at-eye)
+	Eigen::Vector3f u = up.cross(n).normalized(); //x' = u = normalize(up x z');
+	Eigen::Vector3f v = n.cross(u);			      //y' = v = z' x x'
+
 	Eigen::Matrix4f view;
-
-	Eigen::Vector3f n = (at - eye).normalized(); //z' = n = normalize(at-eye)
-	Eigen::Vector3f u = up.cross(n).normalized();//x' = u = normalize(up x z');
-	Eigen::Vector3f v = n.cross(u);				 //y' = v = z' x x'
-	view.block<3, 1>(0, 0) = u;
-	view.block<3, 1>(0, 1) = v;
-	view.block<3, 1>(0, 2) = n;
-
-	view(0, 3) = -u.dot(eye);
-	view(1, 3) = -v.dot(eye);
-	view(2, 3) = -n.dot(eye);
-
-	view(3, 0) = 0;
-	view(3, 1) = 0;
-	view(3, 2) = 0;
-	view(3, 3) = 1;
+	view <<
+		u.x(), u.y(), u.z(), -u.dot(eye),
+		v.x(), v.y(), v.z(), -v.dot(eye),
+		n.x(), n.y(), n.z(), -n.dot(eye),
+			0,	   0,	  0,		   1;
 	return view;
 }
 

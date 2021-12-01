@@ -4,6 +4,7 @@
 	<PROGRAM>
 		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerLight</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		
 		<FileName>Sprite</FileName>

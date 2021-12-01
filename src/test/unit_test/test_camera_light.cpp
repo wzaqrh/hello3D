@@ -1,8 +1,8 @@
 #include <catch.hpp>
 #include <iostream>
 #include <boost/format.hpp>
+#include "test/unit_test/unit_test.h"
 #include "core/mir.h"
-#include "core/base/math.h"
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
 
@@ -30,34 +30,7 @@ TEST_CASE("calculate direct-light's view projection", "DirectLight_CalculateLigh
 	}
 }
 
-bool checkInNDC(Eigen::Vector4f p) {
-	if (p.x() < -1 || p.x() > 1) return false;
-	if (p.y() < -1 || p.y() > 1) return false;
-	if (p.z() < 0 || p.z() > 1) return false;
-	return true;
-}
-void testViewProjection(Eigen::Matrix4f view, Eigen::Matrix4f proj)
-{
-	//view = math::MakeLookAtLH(Eigen::Vector3f(0.57, 0.57, -0.57) * 1024, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
-	//proj = math::MakeOrthographicOffCenterLH(0, 1024, 0, 768, -10, 1024);
-
-	Eigen::Vector4f posArr[] = {
-		//Eigen::Vector4f(0, 0,  0, 1),
-		//Eigen::Vector4f(5, 5, -5, 1),
-		Eigen::Vector4f(10, 10, 0, 1),
-		Eigen::Vector4f(10, 10, -150, 1),
-		//Eigen::Vector4f(10, 0, -1, 1)
-	};
-	for (size_t i = 0; i < sizeof(posArr) / sizeof(posArr[0]); ++i) {
-		auto pos = posArr[i];
-		Eigen::Vector4f perspective = Transform3Projective(proj * view) * pos; perspective /= perspective.w();
-		Eigen::Vector4f world = Transform3Projective(view) * pos; world /= world.w();
-		//Eigen::Vector4f perspective2 = Transform3Projective(proj) * pos; perspective2 /= perspective2.w();
-		//BOOST_ASSERT(checkInNDC(perspective));
-		//BOOST_ASSERT(checkInNDC(perspective2));
-		pos = posArr[i];
-	}
-}
+#if 0
 TEST_CASE("mir_light bug 1201.308", "mir_light_bug1201.308")
 {
 	auto engine = std::make_shared<Mir>(__LaunchSync__);
@@ -69,12 +42,48 @@ TEST_CASE("mir_light bug 1201.308", "mir_light_bug1201.308")
 	
 	{
 		Eigen::Matrix4f camera_view = camera->GetView(), camera_proj = camera->GetProjection();
-		testViewProjection(camera_view, camera_proj);
+		test::TestViewProjectionWithCases(camera_view, camera_proj);
 	}
 
 	{
 		Eigen::Matrix4f light_view, light_proj;
 		dir_light->CalculateLightingViewProjection(*camera, light_view, light_proj);
-		testViewProjection(light_view, light_proj);
+		test::TestViewProjectionWithCases(light_view, light_proj);
 	}
 }
+
+TEST_CASE("mir_camera ProjectPoint", "mir_camera_ProjectPoint")
+{
+	auto engine = std::make_shared<Mir>(__LaunchSync__);
+	auto sceneMng = engine->SceneMng();
+	
+	sceneMng->RemoveAllLights();
+	auto dir_light = sceneMng->AddDirectLight();
+	dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
+
+	sceneMng->RemoveAllCameras();
+	auto camera = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -1500), 3000); 	
+	camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
+
+	auto ndc = camera->ProjectPoint(Eigen::Vector3f(100, 100, 10));
+	CHECK(test::IsEqual(ndc, Eigen::Vector3f(-0.8046875, -0.739583313, 0.503331661)));
+}
+
+TEST_CASE("mir_camera ProjectPoint 2", "mir_camera_ProjectPoint2")
+{
+	auto engine = std::make_shared<Mir>(__LaunchSync__);
+	auto sceneMng = engine->SceneMng();
+	auto rendFac = engine->RenderableFac();
+	auto size = engine->ResourceMng()->WinSize() / 2;
+
+	sceneMng->RemoveAllLights();
+	auto dir_light = sceneMng->AddDirectLight();
+	dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
+
+	sceneMng->RemoveAllCameras();
+	auto camera = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -1500), 3000); 
+	camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
+
+	test::CompareLightCameraByViewProjection(*dir_light, *camera, {});
+}
+#endif
