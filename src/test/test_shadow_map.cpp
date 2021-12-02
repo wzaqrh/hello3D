@@ -72,13 +72,13 @@ void TestShadowMap::OnPostInitDevice()
 		mTransform = mModel1->GetTransform();
 	}
 
-	if (0)
+	if (1)
 	{
 		mModel2 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
 		mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
 		mMoveDefScale = SCALE_BASE * 0.2;
 		mModel2->GetTransform()->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
-		mModel2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -300));
+		mModel2->GetTransform()->SetPosition(Eigen::Vector3f(100, 100, 10) + Eigen::Vector3f(100, 100, -300));
 	}
 }
 

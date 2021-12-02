@@ -51,7 +51,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, const Data& data) = 0;
 
 	virtual IBlobDataPtr CompileShader(const ShaderCompileDesc& desc, const Data& data) = 0;
-	virtual IShaderPtr CreateShader(int shaderType, const ShaderCompileDesc& desc, IBlobDataPtr data) = 0;
+	virtual IShaderPtr CreateShader(int shaderType, IBlobDataPtr data) = 0;
 	virtual IProgramPtr LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders) = 0;
 	virtual void SetProgram(IProgramPtr program) = 0;
 	

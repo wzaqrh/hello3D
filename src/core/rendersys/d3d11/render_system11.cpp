@@ -394,7 +394,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 
 	return blob;
 }
-IShaderPtr RenderSystem11::CreateShader(int type, const ShaderCompileDesc& desc, IBlobDataPtr data)
+IShaderPtr RenderSystem11::CreateShader(int type, IBlobDataPtr data)
 {
 	switch (type) {
 	case kShaderVertex: {

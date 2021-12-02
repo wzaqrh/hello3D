@@ -87,9 +87,9 @@ public:
 		return mResult;
 	}
 	TemplateArgs AiScenePtr Execute(T &&...args) {
-		ExecuteAsyncPart(std::forward<T>(args)...);
-		AiScenePtr result = ExecuteSyncPart();
-		if (result) result->SetLoaded();
+		AiScenePtr result = nullptr;
+		if (ExecuteAsyncPart(std::forward<T>(args)...))
+			result = ExecuteSyncPart();
 		return result;
 	}
 	TemplateArgs AiScenePtr operator()(T &&...args) {
@@ -296,11 +296,11 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 			}
 			else return false;
 		}, res);
-		return res;
 	}
 	else {
-		return loader->Execute(assetPath, redirectRes);
+		res->SetLoaded(nullptr != loader->Execute(assetPath, redirectRes));
 	}
+	return res;
 }
 
 }

@@ -117,7 +117,8 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler, ThreadSafe);
 
-	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe;
+	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, 
+		ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe);
 
 	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) ThreadSafe {
@@ -147,7 +148,7 @@ public:
 	AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 private:
 	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
-		const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe;
+		const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
 	ITexturePtr _LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
 		const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
 private:
@@ -256,11 +257,12 @@ private:
 private:
 	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {
-		std::string name, vsEntry, psEntry;
+		std::string name;
+		ShaderCompileDesc vertexSCD, pixelSCD;
 		bool operator<(const ProgramKey& other) const {
 			if (name != other.name) return name < other.name;
-			if (vsEntry != other.vsEntry) return vsEntry < other.vsEntry;
-			return psEntry < other.psEntry;
+			if (!(vertexSCD == other.vertexSCD)) return vertexSCD < other.vertexSCD;
+			return pixelSCD < other.pixelSCD;
 		}
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;

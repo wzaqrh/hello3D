@@ -4,15 +4,18 @@
 
 namespace mir {
 
+/********** data **********/
 struct Data {
 	static Data MakeNull() { return Data{ nullptr, 0 }; }
 	
 	template<class T> static Data MakeSize(const T& v) { return Data{ nullptr, sizeof(v) }; }
 	template<class T> static Data MakeSize(const std::vector<T>& v) { return Data{ nullptr, sizeof(T) * v.size() }; }
-	static Data MakeSize(size_t size) { return Data{ nullptr, size }; } 
+	template<class T> static Data MakeSize(std::vector<T>&& v) { static_assert(false, ""); }
+	static Data MakeSize(size_t size) { return Data{ nullptr, size }; }
 
 	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
 	template<class T> static Data Make(const std::vector<T>& v) { return Data{ (void*)&v[0], sizeof(T) * v.size() }; }
+	template<class T> static Data Make(std::vector<T>&& v) { static_assert(false, ""); }
 	static Data Make(const void* data, size_t size) { return Data{ data, size }; }
 
 	bool NotNull() const { return Bytes != nullptr; }
@@ -21,12 +24,45 @@ public:
 	size_t Size;
 };
 
+/********** shader **********/
 struct ShaderCompileMacro {
 	std::string Name, Definition;
 };
 struct ShaderCompileDesc {
 	std::vector<ShaderCompileMacro> Macros;
 	std::string EntryPoint, ShaderModel, SourcePath;
+};
+inline bool operator==(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
+	return l.Name == r.Name 
+		&& l.Definition == r.Definition;
+}
+inline bool operator<(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
+	if (l.Name != r.Name) return l.Name < r.Name;
+	return l.Definition < r.Definition;
+}
+inline bool operator==(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
+	return l.EntryPoint == r.EntryPoint 
+		&& l.ShaderModel == r.ShaderModel 
+		&& l.SourcePath == r.SourcePath 
+		&& l.Macros == r.Macros;
+}
+inline bool operator<(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
+	if (l.EntryPoint != r.EntryPoint) return l.EntryPoint < r.EntryPoint;
+	if (l.ShaderModel != r.ShaderModel) return l.ShaderModel < r.ShaderModel;
+	if (l.SourcePath != r.SourcePath) return l.SourcePath < r.SourcePath;
+	return l.Macros < r.Macros;
+}
+
+/********** states **********/
+enum CompareFunc {
+	kCompareNever = 1,
+	kCompareLess = 2,
+	kCompareEqual = 3,
+	kCompareLessEqual = 4,
+	kCompareGreater = 5,
+	kCompareNotEqual = 6,
+	kCompareGreaterEqual = 7,
+	kCompareAlways = 8
 };
 
 enum BlendFunc {
@@ -56,17 +92,14 @@ struct BlendState {
 public:
 	BlendFunc Src, Dst;
 };
-
-enum CompareFunc {
-	kCompareNever = 1,
-	kCompareLess = 2,
-	kCompareEqual = 3,
-	kCompareLessEqual = 4,
-	kCompareGreater = 5,
-	kCompareNotEqual = 6,
-	kCompareGreaterEqual = 7,
-	kCompareAlways = 8
-};
+inline bool operator==(const BlendState& l, const BlendState& r) {
+	return l.Src == r.Src
+		&& l.Dst == r.Dst;
+}
+inline bool operator<(const BlendState& l, const BlendState& r) {
+	if (l.Src != r.Src) return l.Src < r.Src;
+	return l.Dst < r.Dst;
+}
 
 enum DepthWriteMask {
 	kDepthWriteMaskZero = 0,
@@ -84,6 +117,16 @@ public:
 	CompareFunc CmpFunc;
 	DepthWriteMask WriteMask;
 };
+inline bool operator==(const DepthState& l, const DepthState& r) {
+	return l.DepthEnable == r.DepthEnable
+		&& l.CmpFunc == r.CmpFunc
+		&& l.WriteMask == r.WriteMask;
+}
+inline bool operator<(const DepthState& l, const DepthState& r) {
+	if (l.DepthEnable != r.DepthEnable) return l.DepthEnable < r.DepthEnable;
+	if (l.CmpFunc != r.CmpFunc) return l.CmpFunc < r.CmpFunc;
+	return l.WriteMask < r.WriteMask;
+}
 
 enum SamplerFilterMode {
 	kSamplerFilterMinMagMipPoint = 0,
@@ -244,6 +287,7 @@ enum ResourceFormat {
 };
 #define MakeResFormats(...) std::vector<ResourceFormat>{ ##__VA_ARGS__ }
 
+/********** cube && face **********/
 enum CubeFace {
 	kCubeFacePosX,
 	kCubeFaceNegX,
@@ -281,6 +325,7 @@ enum CubeConerMask {
 static_assert(MAKE_CORNER(kCubeConerFront, kCubeConerLeft, kCubeConerTop) == kCubeConerFrontLeftTop, "");
 static_assert(MAKE_CORNER(kCubeConerFront, kCubeConerRight, kCubeConerTop) == kCubeConerFrontRightTop, "");
 
+/********** input layout **********/
 enum PrimitiveTopology {
 	kPrimTopologyUndefined = 0,
 	kPrimTopologyPointList = 1,
@@ -340,6 +385,7 @@ struct LayoutInputElement {
 	unsigned InstanceDataStepRate;
 };
 
+/********** buffer **********/
 enum HWMemoryUsage {
 	kHWUsageDefault = 0,
 	kHWUsageImmutable = 1,

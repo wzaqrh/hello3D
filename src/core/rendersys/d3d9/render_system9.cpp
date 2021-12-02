@@ -408,7 +408,7 @@ IBlobDataPtr RenderSystem9::CompileShader(const ShaderCompileDesc& compileDesc, 
 	return nullptr;
 }
 
-IShaderPtr RenderSystem9::CreateShader(int type, const ShaderCompileDesc& desc, IBlobDataPtr data)
+IShaderPtr RenderSystem9::CreateShader(int type, IBlobDataPtr data)
 {
 	return nullptr;
 }

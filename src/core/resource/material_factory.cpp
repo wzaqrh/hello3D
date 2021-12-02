@@ -198,7 +198,8 @@ public:
 	std::string FxName, VsEntry;
 };
 struct XmlPassInfo {
-	std::string LightMode, Name, ShortName, VSEntry, PSEntry;
+	ShaderCompileDesc VertexSCD, PixelSCD;
+	std::string LightMode, Name, ShortName;
 };
 struct XmlSubShaderInfo {
 	TemplateT void AddPass(T&& pass) {
@@ -497,13 +498,21 @@ private:
 			pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 			pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
-			pass.VSEntry = vis.shaderInfo.Program.VsEntry;
-			pass.PSEntry = "PS";
+			pass.VertexSCD.EntryPoint = vis.shaderInfo.Program.VsEntry;
+			pass.PixelSCD.EntryPoint = "";
 			auto find_program = node_pass.find("PROGRAM");
 			if (find_program != node_pass.not_found()) {
 				auto& node_program = find_program->second;
-				pass.VSEntry = node_program.get<std::string>("VertexEntry", pass.VSEntry);
-				pass.PSEntry = node_program.get<std::string>("PixelEntry", pass.PSEntry);
+				pass.VertexSCD.EntryPoint = node_program.get<std::string>("VertexEntry", pass.VertexSCD.EntryPoint);
+				pass.PixelSCD.EntryPoint = node_program.get<std::string>("PixelEntry", pass.PixelSCD.EntryPoint);
+				
+				auto find_macros = node_program.find("Macros");
+				if (find_macros != node_program.not_found()) {
+					auto& node_macros = find_macros->second;
+					for (auto& it : node_macros)
+						pass.VertexSCD.Macros.push_back(ShaderCompileMacro{it.first, it.second.data()});
+					pass.PixelSCD.Macros = pass.VertexSCD.Macros;
+				}
 			}
 
 			subShader.AddPass(std::move(pass));
@@ -616,7 +625,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			builder.SetTopology(shaderInfo.Program.Topo);
 
 			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
-				launchMode, shaderInfo.Program.FxName, passInfo.VSEntry, passInfo.PSEntry));
+				launchMode, shaderInfo.Program.FxName, passInfo.VertexSCD, passInfo.PixelSCD));
 			builder.SetInputLayout(resourceMng.CreateLayout(
 				launchMode, program, shaderInfo.Program.Attr.Layout));
 
@@ -645,8 +654,9 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const std::string& matName) {
 	MaterialAsset matAsset;
 	auto entry = mMatAssetMng->MatNameToAsset()(matName);
-	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, entry.ShaderName, entry.VariantName, matAsset))
+	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, entry.ShaderName, entry.VariantName, matAsset)) {
 		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset);
+	}
 	else {
 		MaterialPtr mat = std::make_shared<Material>();
 		mat->SetLoaded(false);

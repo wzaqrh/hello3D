@@ -136,111 +136,91 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 	}
 }
 
+inline boost::filesystem::path MakeShaderSourcePath(const std::string& name) {
+	std::string filepath = "shader/" + name + ".fx";
+	return boost::filesystem::system_complete(filepath);
+}
+inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc) {
+	std::string asmName = name;
+	asmName += "_" + desc.EntryPoint;
+	asmName += " " + desc.ShaderModel;
+	for (const auto& macro : desc.Macros)
+		asmName += " (" + macro.Name + "=" + macro.Definition + ")";
+	asmName += ".cso";
+	std::string filepath = "shader/d3d11/" + asmName;
+	return boost::filesystem::system_complete(filepath);
+}
 IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
-	const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe
+	const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
-	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
-	boost::filesystem::path vsAsmPath = "shader/d3d11/" + name + "_" + vsEntryOrVS + ".cso";
-	vsAsmPath = boost::filesystem::system_complete(vsAsmPath);
-
-	if (boost::filesystem::exists(vsAsmPath)) {
-
-		ShaderCompileDesc descVS = {
-			{{"SHADER_MODEL", "40000"}},
-			vsEntry, "vs_4_0", vsAsmPath.string()
-		};
-		auto blobVS = std::make_shared<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
-
-		std::string psEntryOrPS = !psEntry.empty() ? psEntry : "PS";
-		boost::filesystem::path psAsmPath = "shader/d3d11/" + name + "_" + psEntryOrPS + ".cso";
-		psAsmPath = boost::filesystem::system_complete(psAsmPath);
-		ShaderCompileDesc descPS = {
-			{{"SHADER_MODEL", "40000"}},
-			psEntry, "ps_4_0", psAsmPath.string()
-		};
-		auto blobPS = std::make_shared<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
-
-		if (nextJob == nullptr) {
-			std::vector<IShaderPtr> shaders;
-			shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-			shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
-			for (auto& it : shaders)
-				it->SetLoaded();
-			return this->mRenderSys.LoadProgram(program, shaders);
+	IBlobDataPtr blobVS, blobPS;
+	if (!vertexSCD.EntryPoint.empty()) {
+		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD);
+		if (boost::filesystem::exists(vsAsmPath)) {
+			blobVS = std::make_shared<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
 		}
 		else {
-			nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
-				std::vector<IShaderPtr> shaders;
-				shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-				shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
-				for (auto& it : shaders)
-					it->SetLoaded();
-				return nullptr != this->mRenderSys.LoadProgram(program, shaders);
-			});
-			return program;
+			vertexSCD.SourcePath = MakeShaderSourcePath(name).string();
+			std::vector<char> bytes = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
+			if (!bytes.empty()) blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bytes));
 		}
+	}
+
+	if (!pixelSCD.EntryPoint.empty()) {
+		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD);
+		if (boost::filesystem::exists(psAsmPath)) {
+			blobPS = std::make_shared<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
+		}
+		else {
+			pixelSCD.SourcePath = MakeShaderSourcePath(name).string();
+			std::vector<char> bytes = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
+			if (!bytes.empty()) blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bytes));
+		}
+	}
+
+	auto loadProgram = [blobVS, blobPS, this](IProgramPtr program)->IProgramPtr {
+		std::vector<IShaderPtr> shaders;
+		if (blobVS) shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, blobVS));
+		if (blobPS) shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, blobPS));
+		for (auto& it : shaders)
+			it->SetLoaded();
+		return this->mRenderSys.LoadProgram(program, shaders);
+	};
+	if (nextJob == nullptr) {
+		return loadProgram(program);
 	}
 	else {
-		std::string vsPsPath = boost::filesystem::system_complete("shader/" + name + ".fx").string();
-		std::vector<char> bytes = input::ReadFile(vsPsPath.c_str(), "rb");
-		if (!bytes.empty()) {
-			ShaderCompileDesc descVS = {
-				{{"SHADER_MODEL", "40000"}},
-				vsEntry, "vs_4_0", vsPsPath
-			};
-			IBlobDataPtr blobVS = this->mRenderSys.CompileShader(descVS, Data::Make(&bytes[0], bytes.size()));
-
-			ShaderCompileDesc descPS = {
-				{{"SHADER_MODEL", "40000"}},
-				psEntry, "ps_4_0", vsPsPath
-			};
-			IBlobDataPtr blobPS = (psEntry != "") ? this->mRenderSys.CompileShader(descPS, Data::Make(&bytes[0], bytes.size())) : nullptr;
-
-			if (nextJob == nullptr) {
-				std::vector<IShaderPtr> shaders;
-				shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-				if (blobPS) 
-					shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
-				for (auto& it : shaders)
-					it->SetLoaded();
-				return this->mRenderSys.LoadProgram(program, shaders);
-			}
-			else {
-				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
-					std::vector<IShaderPtr> shaders;
-					shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, descVS, blobVS));
-					if (blobPS) 
-						shaders.push_back(this->mRenderSys.CreateShader(kShaderPixel, descPS, blobPS));
-					for (auto& it : shaders)
-						it->SetLoaded();
-					return nullptr != this->mRenderSys.LoadProgram(program, shaders);
-				});
-				return program;
-			}
-		}
+		nextJob->InitSync([loadProgram](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
+			return nullptr != loadProgram(std::static_pointer_cast<IProgram>(res));
+		});
+		return program;
 	}
-	return nullptr;
 }
 IProgramPtr ResourceManager::CreateProgram(Launch launchMode, 
-	const std::string& name, const std::string& vsEntry, const std::string& psEntry) ThreadSafe
+	const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
+	if (vertexSCD.ShaderModel.empty()) vertexSCD.ShaderModel = "vs_4_0";
+	vertexSCD.Macros.push_back({ "SHADER_MODEL", "40000" });
+	
+	if (pixelSCD.ShaderModel.empty()) pixelSCD.ShaderModel = "ps_4_0";
+	pixelSCD.Macros.push_back({ "SHADER_MODEL", "40000" });
+
 	IProgramPtr program = nullptr;
-	ProgramKey key{ name, vsEntry, psEntry };
+	ProgramKey key{ name, vertexSCD, pixelSCD };
 	ATOMIC_STATEMENT(mProgramMapLock, program = this->mProgramByKey[key]);
 	if (program == nullptr) {
 		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
 		ATOMIC_STATEMENT(mProgramMapLock, this->mProgramByKey.insert(std::make_pair(key, program)));
-		DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vsEntry %psEntry).str());
+		DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str());
 		DEBUG_SET_CALL(program, launchMode);
 
 		if (launchMode == LaunchAsync) {
-			AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
-				return nullptr != _LoadProgram(std::static_pointer_cast<IProgram>(res), nextJob, name, vsEntry, psEntry);
+			AddLoadResourceJob(launchMode, [this,name,vertexSCD,pixelSCD](IResourcePtr res, LoadResourceJobPtr nextJob) {
+				return nullptr != _LoadProgram(std::static_pointer_cast<IProgram>(res), nextJob, name, vertexSCD, pixelSCD);
 			}, program, nullptr);
 		}
 		else {
-			program = _LoadProgram(program, nullptr, name, vsEntry, psEntry);
-			program->SetLoaded();
+			program->SetLoaded(nullptr != _LoadProgram(program, nullptr, name, vertexSCD, pixelSCD));
 		}
 	}
 	return program;
