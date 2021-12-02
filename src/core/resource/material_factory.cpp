@@ -616,9 +616,9 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			builder.SetTopology(shaderInfo.Program.Topo);
 
 			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
-				__launchMode__, shaderInfo.Program.FxName, passInfo.VSEntry, passInfo.PSEntry));
+				launchMode, shaderInfo.Program.FxName, passInfo.VSEntry, passInfo.PSEntry));
 			builder.SetInputLayout(resourceMng.CreateLayout(
-				__launchMode__, program, shaderInfo.Program.Attr.Layout));
+				launchMode, program, shaderInfo.Program.Attr.Layout));
 
 			for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 				const auto& elem = shaderInfo.Program.Samplers[k];

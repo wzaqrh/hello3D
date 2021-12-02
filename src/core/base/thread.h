@@ -25,6 +25,6 @@ private:
 #define ATOMIC_LOCK(LCK) for (bool expected = false; !LCK.compare_exchange_strong(expected, true, std::memory_order_acq_rel); expected = true);
 #define ATOMIC_UNLOCK(LCK) LCK.store(false, std::memory_order_release);
 
-#define ATOMIC_STATEMENT(LCK, STATEMENT) ATOMIC_LOCK(LCK); STATEMENT; ATOMIC_UNLOCK(LCK)
+#define ATOMIC_STATEMENT(LCK, STATEMENT) do { ATOMIC_LOCK(LCK); STATEMENT; ATOMIC_UNLOCK(LCK); } while(0)
 
 }
