@@ -43,7 +43,10 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 
 	virtual IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data) = 0;
-	virtual void SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count) = 0;
+	virtual void SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count) = 0;
+	void SetVertexBuffers(const std::vector<IVertexBufferPtr>& vertexBuffers, size_t slot = 0) { 
+		SetVertexBuffers(slot, &vertexBuffers[0], vertexBuffers.size()); 
+	}
 	void SetVertexBuffer(IVertexBufferPtr vertexBuffer, size_t slot = 0) { SetVertexBuffers(slot, &vertexBuffer, 1); }
 
 	virtual IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data) = 0;

@@ -1,3 +1,12 @@
+struct vbWeightedSkin
+{
+	float3 Normal : NORMAL;
+	float3 Tangent : NORMAL1;
+	float3 BiTangent : NORMAL2;
+	float4 BlendWeights : BLENDWEIGHT;
+	uint4  BlendIndices : BLENDINDICES;
+};
+
 static const int MAX_MATRICES = 56;
 cbuffer cbWeightedSkin : register(b2)
 {
@@ -7,9 +16,10 @@ cbuffer cbWeightedSkin : register(b2)
 	int hasMetalness;
 	int hasRoughness;
 	int hasAO;
+	int hasAlbedo;
 }
 
-float4 Skinning(float4 iBlendWeights, int4 iBlendIndices, float4 iPos)
+float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
 {
     float4 Pos = float4(0.0,0.0,0.0,iPos.w); 	
 	Pos.xyz += mul(iPos, Models[iBlendIndices.x]).xyz * iBlendWeights.x;

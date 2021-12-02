@@ -37,26 +37,41 @@ void TestModel::OnPostInitDevice()
 	//mContext->SceneMng()->GetDefCamera()->SetSkyBox(
 	//	mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
 
-	if (mCaseIndex == 0 || mCaseIndex == 1) {
-		mModel = mContext->RenderableFac()->CreateAssimpModel(nullptr, mCaseIndex == 0 ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+	switch (mCaseIndex) {
+	case 0:
+	case 1: {
+		mModel = mContext->RenderableFac()->CreateAssimpModel(nullptr, !(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
 		mModel->LoadModel("model/Male03/Male02.FBX", R"({"ext":"png","dir":"model/Male03/"})"); mMoveDefScale = 0.07;
 
 		mTransform = mModel->GetTransform();
 		mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 		mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));
-	}
-	else {
+	}break;
+	case 2:
+	case 3:
+	case 4:
+	case 5:{
 		auto sceneMng = mContext->SceneMng();
 		sceneMng->RemoveAllCameras();
-		sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-1500), 3000, 30);
+		sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -1500), 3000, 30);
 
-		mModel = mContext->RenderableFac()->CreateAssimpModel(nullptr, mCaseIndex == 2 ? E_MAT_MODEL : E_MAT_MODEL_PBR);
-		mModel->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})"); mMoveDefScale = 1;
-		
-		mTransform = mModel->GetTransform();
-		mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+		mModel = mContext->RenderableFac()->CreateAssimpModel(nullptr, !(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		if (mCaseIndex < 4) {
+			mModel->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})"); 
+			mMoveDefScale = 1;
+			mModel->GetTransform()->SetPosition(Eigen::Vector3f(0, -100, 0));
+		}
+		else {
+			mModel->LoadModel("model/rock/rock.obj", R"({"dir":"model/rock/"})");
+			mMoveDefScale = 100;
+			mModel->GetTransform()->SetPosition(Eigen::Vector3f(100, 100, 10));
+		}
+	}break;
+	default:
+		break;
 	}
-
+	mModel->GetTransform()->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	mTransform = mModel->GetTransform();
 	mModel->PlayAnim(0);
 }
 

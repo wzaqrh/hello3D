@@ -238,7 +238,7 @@ IVertexBufferPtr RenderSystem9::LoadVertexBuffer(IResourcePtr res, int stride, i
 	return ret;
 }
 
-void RenderSystem9::SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count)
+void RenderSystem9::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count)
 {
 	for (size_t i = 0; i < count; ++i) {
 		auto vertexBuffer = vertexBuffers[i];
@@ -579,13 +579,13 @@ inline int CalPrimCount(int indexCount, D3DPRIMITIVETYPE topo) {
 void RenderSystem9::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	D3DPRIMITIVETYPE topo9 = d3d::convert11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
-	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.VertexBuffer->GetBufferSize() / op.VertexBuffer->GetStride(), topo9));
+	mDevice9->DrawPrimitive(topo9, 0, CalPrimCount(op.VertexBuffers[0]->GetBufferSize() / op.VertexBuffers[0]->GetStride(), topo9));
 }
 void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	D3DPRIMITIVETYPE topo9 = d3d::convert11To9(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
 	//if (_CanDraw())
 	mDevice9->DrawIndexedPrimitive(topo9, 
-		0, 0, op.VertexBuffer->GetBufferSize() / op.VertexBuffer->GetStride(), 0, 
+		0, 0, op.VertexBuffers[0]->GetBufferSize() / op.VertexBuffers[0]->GetStride(), 0, 
 		CalPrimCount(op.IndexBuffer->GetCount(), topo9));
 }
 

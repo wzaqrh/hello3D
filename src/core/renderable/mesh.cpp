@@ -44,7 +44,7 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 		RenderOperation op = {};
 		op.Material = mMaterial;
 		op.IndexBuffer = mIndexBuffer;
-		op.VertexBuffer = mVertexBuffer;
+		op.AddVertexBuffer(mVertexBuffer);
 		op.Textures = mSubMeshs[i].Textures;
 		op.IndexPos = mSubMeshs[i].IndicePos;
 		op.IndexCount = mSubMeshs[i].IndiceCount;

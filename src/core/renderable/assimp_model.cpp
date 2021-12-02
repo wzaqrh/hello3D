@@ -296,9 +296,10 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 				RenderOperation op = {};
 				op.Material = mMaterial;
 				op.IndexBuffer = mesh->GetIndexBuffer();
-				op.VertexBuffer = mesh->GetVertexBuffer();
+				op.AddVertexBuffer(mesh->GetVBOSurface());
+				op.AddVertexBuffer(mesh->GetVBOSkeleton());
 				op.Textures = *mesh->GetTextures();
-				op.SetConstantBufferBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
+				op.SetUBOBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 			}

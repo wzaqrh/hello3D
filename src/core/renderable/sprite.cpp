@@ -90,7 +90,7 @@ int Sprite::GenRenderOperation(RenderOperationQueue& opList)
 	RenderOperation op = {};
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
-	op.VertexBuffer = mVertexBuffer;
+	op.AddVertexBuffer(mVertexBuffer);
 	if (mTexture) op.Textures.Add(mTexture);
 	op.WorldTransform = mTransform->GetMatrix();
 	op.CameraMask = mCameraMask;

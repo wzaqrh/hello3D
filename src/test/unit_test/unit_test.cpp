@@ -71,6 +71,8 @@ void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& c
 
 		Eigen::Matrix4f camera_view = camera.GetView(), camera_proj = camera.GetProjection();
 		camera_ndc = Transform3Projective(camera_proj * camera_view) * cube_position;
+		camera_ndc.head<3>() /= camera_ndc.w();
+		camera_ndc.w() = 1;
 
 		camera_ndc1 = camera.ProjectPoint(cube_position);
 		BOOST_ASSERT(IsEqual(camera_ndc, camera_ndc1));

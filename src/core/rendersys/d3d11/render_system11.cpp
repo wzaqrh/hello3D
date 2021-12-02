@@ -470,7 +470,7 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, 
 	ret->Init(pVertexBuffer, data.Size, usage, stride, offset);
 	return ret;
 }
-void RenderSystem11::SetVertexBuffers(size_t slot, IVertexBufferPtr vertexBuffers[], size_t count)
+void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count)
 {
 	BOOST_ASSERT(count >= 1);
 	if (count == 1) {
@@ -789,7 +789,7 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 
 void RenderSystem11::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	mDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));
-	mDeviceContext->Draw(op.VertexBuffer->GetBufferSize() / op.VertexBuffer->GetStride(), 0);
+	mDeviceContext->Draw(op.VertexBuffers[0]->GetCount(), 0);
 }
 void RenderSystem11::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	mDeviceContext->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(topo));

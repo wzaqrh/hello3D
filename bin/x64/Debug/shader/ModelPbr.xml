@@ -4,7 +4,8 @@
 	<Include>Model</Include>
 	
 	<PROGRAM>
-		<UseAttribute>attrPos3NormalTangentTexBlendWeightBlendIndicesBitangent</UseAttribute>
+		<UseAttribute>vbSurface</UseAttribute>
+		<UseAttribute>vbWeightedSkin</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
@@ -32,7 +33,7 @@
 			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
 			<PROGRAM> 
 				<VertexEntry>VSShadowCaster</VertexEntry> 
-				<PixelEntry>PSShadowCaster</PixelEntry>
+				<PixelEntry></PixelEntry>
 			</PROGRAM>
 		</Pass>
 		<Pass>

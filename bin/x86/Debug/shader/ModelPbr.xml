@@ -33,7 +33,7 @@
 			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
 			<PROGRAM> 
 				<VertexEntry>VSShadowCaster</VertexEntry> 
-				<PixelEntry>PSShadowCaster</PixelEntry>
+				<PixelEntry></PixelEntry>
 			</PROGRAM>
 		</Pass>
 		<Pass>

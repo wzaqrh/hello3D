@@ -1,7 +1,7 @@
 <Shader Name="Standard">
 	<PROGRAM>		
 		<Attribute Name="vbSurface">
-			<Element SemanticName="POSITION" Format="6" SemanticIndex="0" InputSlot="0"></Element>
+			<Element SemanticName="POSITION" Format="6" SemanticIndex="0"></Element>
 			<Element SemanticName="COLOR" 	 Format="28"></Element>
 			<Element SemanticName="TEXCOORD" Format="16"></Element>
 		</Attribute>

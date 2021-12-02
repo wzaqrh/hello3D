@@ -56,7 +56,7 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 			if (lastTex != nullptr) {
 				RenderOperation op = {};
 				op.Material = mMaterial;
-				op.VertexBuffer = mVertexBuffer;
+				op.AddVertexBuffer(mVertexBuffer);
 				op.IndexBuffer = mIndexBuffer;
 				op.IndexBase = 4 * (i - lastCount);
 				op.IndexCount = 6 * lastCount;
@@ -75,7 +75,7 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 	if (lastTex) {
 		RenderOperation op = {};
 		op.Material = mMaterial;
-		op.VertexBuffer = mVertexBuffer;
+		op.AddVertexBuffer(mVertexBuffer);
 		op.IndexBuffer = mIndexBuffer;
 		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);
 		op.IndexCount = 6 * lastCount;

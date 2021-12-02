@@ -28,15 +28,6 @@ private:
 
 void TestShadowMap::OnInitLight()
 {
-#if 0
-	mLight = mContext->SceneMng()->AddPointLight();//1, -1, 1
-	float ddd = 10;
-	mLight->SetPosition(Eigen::Vector3f(ddd, ddd, -ddd));
-	mLight->SetAttenuation(0.001);
-	//mLight->SetPosition(0, 0, -150);
-#else
-
-#endif
 }
 
 #define USE_RENDER_TEXTURE

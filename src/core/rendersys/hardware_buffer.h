@@ -21,6 +21,8 @@ interface IVertexBuffer : public IHardwareBuffer
 {
 	virtual int GetStride() const = 0;
 	virtual int GetOffset() const = 0;
+
+	int GetCount() const { return GetBufferSize() / GetStride(); }
 };
 
 interface IIndexBuffer : public IHardwareBuffer

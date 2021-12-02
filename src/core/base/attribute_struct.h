@@ -6,6 +6,8 @@ namespace mir {
 
 struct vbSurface 
 {
+	vbSurface() :Pos(0, 0, 0), Color(0), Tex(0, 0) {}
+public:
 	Eigen::Vector3f Pos;
 	unsigned int Color;
 	Eigen::Vector2f Tex;
@@ -45,12 +47,17 @@ public:
 
 struct vbSkeleton
 {
+	vbSkeleton() 
+	: Normal(0, 0, 0), Tangent(0, 0, 0), BiTangent(0, 0, 0)
+	, BlendWeights(0, 0, 0, 0), BlendIndices(0, 0, 0, 0) 
+	{}
+public:
 	Eigen::Vector3f Normal;
 	Eigen::Vector3f Tangent;
 	Eigen::Vector3f BiTangent;
 
 	Eigen::Vector4f BlendWeights;
-	unsigned int BlendIndices[4];
+	Eigen::Vector4i BlendIndices;
 };
 
 }

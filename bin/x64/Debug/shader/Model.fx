@@ -14,98 +14,89 @@ texture  textureNormal : register(t2);
 sampler2D txNormal : register(s2) = sampler_state { Texture = <textureNormal>; };
 #endif
 
-struct VS_INPUT
-{
-	float3 Pos : POSITION;
-	float3 Normal : NORMAL;
-	float3 Tangent : NORMAL1;
-	float2 Tex  : TEXCOORD0;
-	float4 BlendWeights : BLENDWEIGHT;
-	int4  BlendIndices : BLENDINDICES;
-	float3 BiTangent : NORMAL2;
-};
-
 /************ ShadowCaster ************/
-struct SHADOW_PS_INPUT
+struct ShadowCasterPixelInput
 {
     float4 Pos : SV_POSITION;
-	float4 Depth : TEXCOORD0;
 };
 
-SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
+ShadowCasterPixelInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 {
-	SHADOW_PS_INPUT output;
-	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	ShadowCasterPixelInput output;
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
 	matrix MW = mul(World, transpose(Model));
-	matrix MWVP = mul(Projection, mul(View, MW));
+	matrix MWV = mul(View, MW);
+	matrix MWVP = mul(Projection, MWV);
 	output.Pos = mul(MWVP, skinPos);
-	output.Depth = output.Pos;	
 	return output;
 }
 
-float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
+float4 PSShadowCaster(ShadowCasterPixelInput input) : SV_Target
 {
-	float depthValue = i.Depth.z / i.Depth.w;
-	float4 finalColor = depthValue;
-	return finalColor;
+	return float4(0.467,0.533,0.6,1);
 }
 
 /************ ForwardBase ************/
-struct PS_INPUT
+struct PixelInput
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
-	
 	float3 Normal : NORMAL0;//eye space
 	float3 ToEye  : TEXCOORD1;//eye space
 	float3 ToLight : TEXCOORD2;//eye space
-	float4 PosInLight : TEXCOORD3;//world space
+	float4 PosInLight : TEXCOORD3;//light's ndc space
 };
 
-PS_INPUT VS(VS_INPUT i)
+PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 {
-	PS_INPUT output = (PS_INPUT)0;
-
+	PixelInput output = (PixelInput)0;
 	matrix MW = mul(World, transpose(Model));
-	matrix MWV = mul(View, MW);
 	
-	float4 skinNormal = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0));
-	output.Normal = normalize(mul(MWV, skinNormal).xyz);
+	//Normal
+	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
+	output.Normal = normalize(mul(mul(View, MW), skinNormal).xyz);
 	
-	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
-	output.Pos = mul(MWV, skinPos);
+	//ToLight
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
+	output.Pos = mul(MW, skinPos);
+	output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
 	
-	float3 worldpos = mul(MW, skinPos);
-	output.ToLight = unity_LightPosition.xyz - worldpos.xyz * unity_LightPosition.w;
+	//PosInLight
+	output.PosInLight = mul(MW, skinPos);
+	output.PosInLight = mul(LightView, output.PosInLight);
+	output.PosInLight = mul(LightProjection, output.PosInLight);
 	
-	matrix LightMWVP = mul(LightProjection,mul(LightView, MW));
-	output.PosInLight = mul(LightMWVP, skinPos);
-	
+	//ToEye
+	output.Pos = mul(View, output.Pos);
 	output.ToEye = -output.Pos;
+	
+	//Pos
     output.Pos = mul(Projection, output.Pos);
-	output.Tex = i.Tex;
+	output.Tex = surf.Tex;
     return output;
 }
 
-float4 PS(PS_INPUT input) : SV_Target
+inline float3 GetAlbedo(float2 uv) {
+	float3 albedo;
+	if (hasAlbedo) albedo = GetTexture2D(txMain, samLinear, uv).rgb;
+	else albedo = float3(1.0,1.0,1.0);	
+	return albedo;
+}
+
+float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
-		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
+	finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
 	finalColor.a = 1.0;
-
-	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }
 
 /************ ForwardAdd ************/
-float4 PSAdd(PS_INPUT input) : SV_Target
+float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
-		GetTexture2D(txMain, samLinear, input.Tex), LightType == 3);
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
 	finalColor.a = 1.0;
-	
-	finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }

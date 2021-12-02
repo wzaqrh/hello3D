@@ -12,21 +12,27 @@ namespace mir {
 /********** RenderOperation **********/
 struct RenderOperation {
 	RenderOperation() 
-		: IndexPos(0), IndexCount(0), IndexBase(0), WorldTransform(Eigen::Matrix4f::Identity()), CameraMask(-1) {}
-	template<class T> void SetConstantBufferBytes(const std::string& cbName, const T& value) {
-		CBDataByName[cbName].assign((char*)&value, (char*)&value + sizeof(value));
+		: IndexPos(0), IndexCount(0), IndexBase(0), WorldTransform(Eigen::Matrix4f::Identity()), CameraMask(-1) 
+	{}
+	template<class T> void SetUBOBytes(const std::string& cbName, const T& value) {
+		UBOBytesByName[cbName].assign((char*)&value, (char*)&value + sizeof(value));
+	}
+	void AddVertexBuffer(IVertexBufferPtr vbo) {
+		VertexBuffers.push_back(vbo);
 	}
 public:
 	MaterialPtr Material;
-	IVertexBufferPtr VertexBuffer;
+	
+	std::vector<IVertexBufferPtr> VertexBuffers;
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> VertBufferByPass;
+	
 	IIndexBufferPtr IndexBuffer;
 	short IndexPos, IndexCount, IndexBase;
+	
 	TextureBySlot Textures;
+	
 	Eigen::Matrix4f WorldTransform;
-	typedef std::function<void(RenderSystem& renderSys, const Pass& pass, const RenderOperation& op)> PassCallback;
-	PassCallback OnBind, OnUnbind;
-	std::map<std::string, std::vector<char>> CBDataByName;
+	std::map<std::string, std::vector<char>> UBOBytesByName;
 	unsigned CameraMask;
 };
 

@@ -2,8 +2,9 @@
 	<Include>Standard</Include>
 	
 	<PROGRAM>
-		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
+		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerLight</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		
 		<FileName>Sprite</FileName>
@@ -12,7 +13,12 @@
 	
 	<SubShader>
 		<Pass>
-			<PROGRAM> <PixelEntry>PS</PixelEntry> </PROGRAM>
+			<PROGRAM> 
+				<Macros>
+					<DEBUG_SHADOW_MAP>0</DEBUG_SHADOW_MAP>
+				</Macros>
+				<PixelEntry>PS</PixelEntry> 
+			</PROGRAM>
 		</Pass>
 	</SubShader>
 </Shader>

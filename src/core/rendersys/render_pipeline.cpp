@@ -67,10 +67,9 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 		if (textures.Count() > 0)
 			mRenderSys.SetTextures(E_TEXTURE_MAIN, &textures.Textures[0], textures.Textures.size());
 
-		if (op.OnBind) 
-			op.OnBind(mRenderSys, *pass, op);
+		//if (op.OnBind) op.OnBind(mRenderSys, *pass, op);
 
-		for (auto& cbBytes : op.CBDataByName)
+		for (auto& cbBytes : op.UBOBytesByName)
 			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
 
 		BindPass(pass);
@@ -78,8 +77,7 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 		if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
 		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
 
-		if (op.OnUnbind) 
-			op.OnUnbind(mRenderSys, *pass, op);
+		//if (op.OnUnbind) op.OnUnbind(mRenderSys, *pass, op);
 	}
 
 	if (iterCnt >= 0) {
@@ -97,7 +95,7 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes) {
 		//SetVertexLayout(pass->mInputLayout);
-		mRenderSys.SetVertexBuffer(op.VertexBuffer);
+		mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		mRenderSys.SetIndexBuffer(op.IndexBuffer);
 
 		TextureBySlot textures = op.Textures;
@@ -106,7 +104,7 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 		for (int i = pass->mRTIterators.size() - 1; i >= 0; --i) {
 			auto iter = op.VertBufferByPass.find(std::make_pair(pass, i));
 			if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
-			else mRenderSys.SetVertexBuffer(op.VertexBuffer);
+			else mRenderSys.SetVertexBuffers(op.VertexBuffers);
 			
 			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
 			RenderPass(pass, textures, i, op);
@@ -114,7 +112,7 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 		}
 		auto iter = op.VertBufferByPass.find(std::make_pair(pass, -1));
 		if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
-		else mRenderSys.SetVertexBuffer(op.VertexBuffer);
+		else mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		
 		RenderPass(pass, textures, -1, op);
 	}

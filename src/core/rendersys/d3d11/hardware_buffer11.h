@@ -29,9 +29,6 @@ public:
 		Stride = stride;
 		Offset = offset;
 	}
-	int GetCount() const {
-		return hd.BufferSize / Stride;
-	}
 public:
 	HWMemoryUsage GetUsage() const override { return hd.Usage; }
 	int GetBufferSize() const override { return hd.BufferSize; }

@@ -1,10 +1,11 @@
 <Shader Name="Standard">
-	<PROGRAM>
-		<Attribute Name="attrPos3Color4Tex2">
-			<Element SemanticName="POSITION" Format="6" SemanticIndex="0" InputSlot="0"></Element>
+	<PROGRAM>		
+		<Attribute Name="vbSurface">
+			<Element SemanticName="POSITION" Format="6" SemanticIndex="0"></Element>
 			<Element SemanticName="COLOR" 	 Format="28"></Element>
 			<Element SemanticName="TEXCOORD" Format="16"></Element>
 		</Attribute>
+		
 		<Uniform Name="cbGlobalParam" Slot="0">
 			<Element Name="World" 		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 			<Element Name="View" 	 	Type="matrix"></Element>
@@ -22,6 +23,7 @@
 			<Element Name="LightType" 	 	Type="int"></Element>
 			<Element Name="HasDepthMap" 	Type="int"></Element>
 		</Uniform>
+		
 		<Sampler Name="samStandard">
 			<Element Slot="0" Filter="0x15"></Element>
 			<Element Slot="1" Filter="0x55"></Element>

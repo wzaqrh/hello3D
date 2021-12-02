@@ -71,7 +71,7 @@ int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	RenderOperation op = {};
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
-	op.VertexBuffer = mVertexBuffer;
+	op.AddVertexBuffer(mVertexBuffer);
 	op.Textures.Add(mMainTex->GetAttachColorTexture(0));
 	op.WorldTransform = Eigen::Matrix4f::Identity();
 	op.VertBufferByPass = mVertBufferByPass;

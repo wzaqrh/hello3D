@@ -185,14 +185,14 @@ struct XmlProgramInfo {
 		}
 	}
 	TemplateT void AddAttribute(T&& attr) {
-		Attr = std::forward<T>(attr);
+		Attr.push_back(std::forward<T>(attr));
 	}
 	TemplateT void AddSamplers(T&& samplers) {
 		Samplers.Add(std::forward<T>(samplers));
 	}
 public:
 	PrimitiveTopology Topo;
-	XmlAttributeInfo Attr;
+	std::vector<XmlAttributeInfo> Attr;
 	std::vector<XmlUniformInfo> Uniforms;
 	XmlSamplersInfo Samplers;
 	std::string FxName, VsEntry;
@@ -373,7 +373,7 @@ private:
 			Name = PropertyTreePath(nodeProgram, it.second, index).Path.string();
 			mAttrByName.insert(std::make_pair(Name, attribute));
 
-			vis.shaderInfo.Program.AddAttribute(attribute);
+			vis.shaderInfo.Program.AddAttribute(std::move(attribute));
 			++index;
 		}
 	}
@@ -624,23 +624,40 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 			builder.SetTopology(shaderInfo.Program.Topo);
 
-			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(
-				launchMode, shaderInfo.Program.FxName, passInfo.VertexSCD, passInfo.PixelSCD));
-			builder.SetInputLayout(resourceMng.CreateLayout(
-				launchMode, program, shaderInfo.Program.Attr.Layout));
+			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(launchMode, 
+				shaderInfo.Program.FxName, passInfo.VertexSCD, passInfo.PixelSCD));
+			
+			if (shaderInfo.Program.Attr.size() == 1) {
+				builder.SetInputLayout(resourceMng.CreateLayout(launchMode, 
+					program, shaderInfo.Program.Attr[0].Layout));
+			}
+			else if (shaderInfo.Program.Attr.size() > 1) {
+				auto layout_compose = shaderInfo.Program.Attr[0].Layout;
+				for (size_t slot = 1; slot < shaderInfo.Program.Attr.size(); ++slot) {
+					const auto& layout_slot = shaderInfo.Program.Attr[slot].Layout;
+					for (const auto& element_slot : layout_slot) {
+						layout_compose.push_back(element_slot);
+						layout_compose.back().InputSlot = slot;
+					}
+					builder.SetInputLayout(resourceMng.CreateLayout(launchMode, program, layout_compose));
+				}
+			}
+			else {
+				BOOST_ASSERT(false);
+			}
 
 			for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
 				const auto& elem = shaderInfo.Program.Samplers[k];
-				builder.AddSampler(resourceMng.CreateSampler(
-					__launchMode__, elem.first, kCompareNever));
+				builder.AddSampler(resourceMng.CreateSampler(launchMode, 
+					elem.first, kCompareNever));
 			}
 		}
 	}
 
 	for (size_t slot = 0; slot < shaderInfo.Program.Uniforms.size(); ++slot) {
 		auto& uniformSlot = shaderInfo.Program.Uniforms[slot];
-		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(
-			__launchMode__, uniformSlot.Decl, kHWUsageDefault, Data::Make(uniformSlot.Data)), 
+		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(launchMode, 
+			uniformSlot.Decl, kHWUsageDefault, Data::Make(uniformSlot.Data)), 
 			uniformSlot.ShortName, uniformSlot.IsUnique, slot);
 	}
 
