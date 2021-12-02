@@ -46,7 +46,7 @@ void TestMesh::OnPostInitDevice()
 	mMesh = mContext->RenderableFac()->CreateMesh();
 
 	for (int i = 0; i < spriteCount; ++i)
-		mMesh->SetVertexs((MeshVertex*)mSprites[i]->GetVertexData(), 4, 4 * i);
+		mMesh->SetVertexs((vbSurface*)mSprites[i]->GetVertexData(), 4, 4 * i);
 	
 	mMesh->SetSubMeshCount(spriteCount);
 	unsigned int indices[6 * spriteCount] = { 0, 1, 2, 0, 2, 3 };

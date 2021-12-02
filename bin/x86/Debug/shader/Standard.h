@@ -1,3 +1,10 @@
+struct vbSurface
+{
+    float3 Pos : POSITION;
+    float4 Color : COLOR;
+	float2 Tex  : TEXCOORD0;
+};
+
 cbuffer cbPerLight : register(b1)
 {
 	matrix LightView;
@@ -97,55 +104,3 @@ sampler_state
 float4 GetTextureMain(float2 inputTex) {
 	return GetTexture2D(txMain, samLinear, inputTex);
 }
-
-#if 0
-float GetTextureDepthMap(float2 inputTex) {
-	return GetTexture2D(txDepthMap, samShadow, inputTex);
-}
-
-//implements
-#define SHADOW_EPSILON 0.00005f
-#define SMAP_SIZE 512
-float CalLightStrengthWithShadow(float4 posInLight)
-{
-    float2 projPosInLight = 0.5 * posInLight.xy / posInLight.w + float2(0.5, 0.5);
-    projPosInLight.y = 1.0f - projPosInLight.y;
-	
-	float LightAmount;
-#if 0
-	float depthInLight = posInLight.z / posInLight.w - SHADOW_EPSILON;
-	float depthMap = txDepthMap.Sample(samShadow, projPosInLight).r;
-	if (depthInLight < depthMap) {
-		LightAmount = 1.0;
-	}
-	else {
-		LightAmount = 0.0;
-	}
-#else
-	if (HasDepthMap > 0) {
-		float depthInLight = posInLight.z / posInLight.w - SHADOW_EPSILON;
-		
-		float2 texelpos = SMAP_SIZE * projPosInLight;
-		
-		// Determine the lerp amounts           
-		float2 lerps = frac(texelpos);
-
-		//read in bilerp stamp, doing the shadow checks
-		float sourcevals[4];
-		sourcevals[0] = (GetTextureDepthMap(projPosInLight) < depthInLight) ? 0.0f : 1.0f;  
-		sourcevals[1] = (GetTextureDepthMap(projPosInLight + float2(1.0/SMAP_SIZE, 0)) < depthInLight) ? 0.0f : 1.0f;  
-		sourcevals[2] = (GetTextureDepthMap(projPosInLight + float2(0, 1.0/SMAP_SIZE)) < depthInLight) ? 0.0f : 1.0f;  
-		sourcevals[3] = (GetTextureDepthMap(projPosInLight + float2(1.0/SMAP_SIZE, 1.0/SMAP_SIZE)) < depthInLight) ? 0.0f : 1.0f;  
-		
-		// lerp between the shadow values to calculate our light amount
-		LightAmount = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
-						   lerp(sourcevals[2], sourcevals[3], lerps.x),
-						   lerps.y);
-	}
-	else {
-		LightAmount = 1.0;
-	}
-#endif
-	return LightAmount;	
-}
-#endif

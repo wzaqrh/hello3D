@@ -13,7 +13,7 @@ Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& m
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(mIndices));
 
 	mVertices.resize(vertCount);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(__launchMode__, sizeof(MeshVertex), 0, Data::MakeSize(mVertices));
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
 }
@@ -67,14 +67,14 @@ void Mesh::Clear()
 	mSubMeshs[0].IndicePos = 0;
 }
 
-void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount)
+void Mesh::SetVertexs(const vbSurface* vertData, int vertCount)
 {
 	mVertDirty = true;
 	mVertPos = vertCount;
 	mVertices.assign(vertData, vertData + vertCount);
 }
 
-void Mesh::SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos)
+void Mesh::SetVertexs(const vbSurface* vertData, int vertCount, int vertPos)
 {
 	mVertDirty = true;
 	mVertPos = max(mVertPos, vertPos + vertCount);
@@ -87,7 +87,7 @@ void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
 	mVertDirty = true;
 	mVertPos = max(mVertPos, count);
 	for (int i = 0; i < mVertPos; ++i)
-		mVertices[i].Position = posData[i];
+		mVertices[i].Pos = posData[i];
 }
 
 void Mesh::SetColors(const Eigen::Vector4f* colorData, int count)
@@ -110,7 +110,7 @@ void Mesh::SetUVs(const Eigen::Vector2f* uvData, int count)
 	mVertDirty = true;
 	mVertPos = max(mVertPos, count);
 	for (int i = 0; i < mVertPos; ++i)
-		mVertices[i].UV = uvData[i];
+		mVertices[i].Tex = uvData[i];
 }
 
 void Mesh::SetSubMeshCount(int count)

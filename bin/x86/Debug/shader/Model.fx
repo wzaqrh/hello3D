@@ -14,27 +14,16 @@ texture  textureNormal : register(t2);
 sampler2D txNormal : register(s2) = sampler_state { Texture = <textureNormal>; };
 #endif
 
-struct VS_INPUT
-{
-	float3 Pos : POSITION;
-	float3 Normal : NORMAL;
-	float3 Tangent : NORMAL1;
-	float2 Tex  : TEXCOORD0;
-	float4 BlendWeights : BLENDWEIGHT;
-	uint4  BlendIndices : BLENDINDICES;
-	float3 BiTangent : NORMAL2;
-};
-
 /************ ShadowCaster ************/
-struct SHADOW_PS_INPUT
+struct ShadowCasterPixelInput
 {
     float4 Pos : SV_POSITION;
 };
 
-SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
+ShadowCasterPixelInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 {
-	SHADOW_PS_INPUT output;
-	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos, 1.0));
+	ShadowCasterPixelInput output;
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
 	matrix MW = mul(World, transpose(Model));
 	matrix MWV = mul(View, MW);
 	matrix MWVP = mul(Projection, MWV);
@@ -42,14 +31,13 @@ SHADOW_PS_INPUT VSShadowCaster( VS_INPUT i)
 	return output;
 }
 
-float4 PSShadowCaster(SHADOW_PS_INPUT i) : SV_Target
+float4 PSShadowCaster(ShadowCasterPixelInput input) : SV_Target
 {
-	float z = i.Pos.z / i.Pos.w;
 	return float4(0.467,0.533,0.6,1);
 }
 
 /************ ForwardBase ************/
-struct PS_INPUT
+struct PixelInput
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
@@ -59,17 +47,17 @@ struct PS_INPUT
 	float4 PosInLight : TEXCOORD3;//light's ndc space
 };
 
-PS_INPUT VS(VS_INPUT i)
+PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 {
-	PS_INPUT output = (PS_INPUT)0;
+	PixelInput output = (PixelInput)0;
 	matrix MW = mul(World, transpose(Model));
 	
 	//Normal
-	float4 skinNormal = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Normal.xyz, 0.0));
+	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
 	output.Normal = normalize(mul(mul(View, MW), skinNormal).xyz);
 	
 	//ToLight
-	float4 skinPos = Skinning(i.BlendWeights, i.BlendIndices, float4(i.Pos.xyz, 1.0));
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
 	output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
 	
@@ -84,7 +72,7 @@ PS_INPUT VS(VS_INPUT i)
 	
 	//Pos
     output.Pos = mul(Projection, output.Pos);
-	output.Tex = i.Tex;
+	output.Tex = surf.Tex;
     return output;
 }
 
@@ -95,34 +83,20 @@ inline float3 GetAlbedo(float2 uv) {
 	return albedo;
 }
 
-float4 PS(PS_INPUT input) : SV_Target
+float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
-	finalColor.a = 1.0;
-
-	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
-#if 0
-	float4 shadowPosH = input.PosInLight;
-	shadowPosH.xyz /= shadowPosH.w;
-	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
-	shadowPosH.y = 1.0 - shadowPosH.y;
-	
-	finalColor.rgb = txDepthMap.Sample(samLinear, shadowPosH.xy).r;
-	//finalColor.rgb *= txDepthMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, shadowPosH.z).r;
-#endif
-		
+	finalColor.a = 1.0;
 	return finalColor;
 }
 
 /************ ForwardAdd ************/
-float4 PSAdd(PS_INPUT input) : SV_Target
+float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
 	finalColor.a = 1.0;
-	
-	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
 	return finalColor;
 }

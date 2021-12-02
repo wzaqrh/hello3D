@@ -3,19 +3,12 @@
 	<Include>Skeleton</Include>
 	
 	<PROGRAM>
+		<UseAttribute>vbSurface</UseAttribute>
+		<UseAttribute>vbWeightedSkin</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseSampler>samStandard</UseSampler>
-		<Attribute Name="attrPos3NormalTangentTexBlendWeightBlendIndicesBitangent">
-			<Element Format="6"  SemanticName="POSITION"></Element>
-			<Element Format="6"  SemanticName="NORMAL"></Element>
-			<Element Format="6"  SemanticName="NORMAL" SemanticIndex="1"></Element>
-			<Element Format="16" SemanticName="TEXCOORD"></Element>
-			<Element Format="2"  SemanticName="BLENDWEIGHT"></Element>
-			<Element Format="3"  SemanticName="BLENDINDICES"></Element>
-			<Element Format="6"  SemanticName="NORMAL" SemanticIndex="2"></Element>
-		</Attribute>
 		
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>

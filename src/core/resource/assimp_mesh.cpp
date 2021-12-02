@@ -6,14 +6,17 @@ namespace mir {
 
 /********** TMesh **********/
 AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng, const aiMesh* data,
-	std::vector<AssimpMeshVertex>&& vertices, std::vector<UINT>&& indices, TextureBySlotPtr textures)
+	std::vector<vbSurface>&& surfVertexs, std::vector<vbSkeleton>&& skeletonVertexs, 
+	std::vector<UINT>&& indices, TextureBySlotPtr textures)
 	: mAiMesh(data)
-	, mVertices(std::move(vertices))
+	, mSurfVertexs(std::move(surfVertexs))
+	, mSkeletonVertexs(std::move(skeletonVertexs))
 	, mIndices(std::move(indices))
 	, mTextures(textures)
 {
 	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt,  Data::Make(mIndices));
-	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(AssimpMeshVertex), 0, Data::Make(mVertices));
+	mVBOSurface = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::Make(mSurfVertexs));
+	mVBOSkeleton = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
 }
 
 bool AssimpMesh::HasTexture(int slot) const
@@ -25,7 +28,8 @@ bool AssimpMesh::HasTexture(int slot) const
 
 bool AssimpMesh::IsLoaded() const
 {
-	return (mVertexBuffer->IsLoaded()
+	return (mVBOSurface->IsLoaded()
+		&& mVBOSkeleton->IsLoaded()
 		&& mIndexBuffer->IsLoaded()
 		&& mTextures->IsLoaded());
 }

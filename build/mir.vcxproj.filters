@@ -196,6 +196,9 @@
     <ClInclude Include="..\src\test\unit_test\unit_test.h">
       <Filter>src\unit_test</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\attribute_struct.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -326,6 +329,9 @@
     </ClCompile>
     <ClCompile Include="..\src\test\unit_test\unit_test.cpp">
       <Filter>src\unit_test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\base\attribute_struct.cpp">
+      <Filter>src\core\base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

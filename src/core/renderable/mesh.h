@@ -2,15 +2,10 @@
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
 #include "core/base/launch.h"
+#include "core/base/attribute_struct.h"
 #include "core/renderable/renderable.h"
 
 namespace mir {
-
-struct MeshVertex {
-	Eigen::Vector3f Position;
-	int Color;
-	Eigen::Vector2f UV;
-};
 
 class MIR_CORE_API Mesh : public IRenderable 
 {
@@ -20,8 +15,8 @@ class MIR_CORE_API Mesh : public IRenderable
 		int vertCount = 1024, int indexCount = 1024);
 public:
 	void Clear();
-	void SetVertexs(const MeshVertex* vertData, int vertCount);
-	void SetVertexs(const MeshVertex* vertData, int vertCount, int vertPos);
+	void SetVertexs(const vbSurface* vertData, int vertCount);
+	void SetVertexs(const vbSurface* vertData, int vertCount, int vertPos);
 	void SetPositions(const Eigen::Vector3f* posData, int count);
 	void SetColors(const Eigen::Vector4f* colorData, int count);
 	void SetUVs(const Eigen::Vector2f* uvData, int count);
@@ -35,7 +30,7 @@ private:
 	MaterialPtr mMaterial;
 
 	int mVertPos = 0, mVertDirty = false;
-	std::vector<MeshVertex> mVertices;
+	std::vector<vbSurface> mVertices;
 	IVertexBufferPtr mVertexBuffer;
 
 	int mIndiceDirty = false;

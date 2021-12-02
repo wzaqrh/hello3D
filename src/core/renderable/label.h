@@ -37,7 +37,7 @@ private:
 
 	std::string mString;
 	struct CharEntry {
-		SpriteVertexQuad quad;
+		vbSurfaceQuad quad;
 		FontCharactorPtr charInfo;
 		ITexturePtr texture;
 		Eigen::Vector2i pen;//dot space

@@ -1,3 +1,12 @@
+struct vbWeightedSkin
+{
+	float3 Normal : NORMAL;
+	float3 Tangent : NORMAL1;
+	float3 BiTangent : NORMAL2;
+	float4 BlendWeights : BLENDWEIGHT;
+	uint4  BlendIndices : BLENDINDICES;
+};
+
 static const int MAX_MATRICES = 56;
 cbuffer cbWeightedSkin : register(b2)
 {

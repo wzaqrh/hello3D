@@ -109,37 +109,41 @@ private:
 			processNode(child, rawScene);
 		}
 	}
-	static void ReCalculateTangents(std::vector<AssimpMeshVertex>& vertices, const std::vector<uint32_t>& indices) {
+	static void ReCalculateTangents(std::vector<vbSurface>& surfVerts, 
+		std::vector<vbSkeleton>& skeletonVerts,
+		const std::vector<uint32_t>& indices) 
+	{
 		for (int i = 0; i < indices.size(); i += 3) {
-			// Shortcuts for vertices
-			AssimpMeshVertex& v0 = vertices[indices[i + 0]];
-			AssimpMeshVertex& v1 = vertices[indices[i + 1]];
-			AssimpMeshVertex& v2 = vertices[indices[i + 2]];
+			//vbSurface
+			vbSurface& surf0 = surfVerts[indices[i + 0]];
+			vbSurface& surf1 = surfVerts[indices[i + 1]];
+			vbSurface& surf2 = surfVerts[indices[i + 2]];
 
 			// Shortcuts for UVs
-			Eigen::Vector2f& uv0 = v0.Tex;
-			Eigen::Vector2f& uv1 = v1.Tex;
-			Eigen::Vector2f& uv2 = v2.Tex;
+			Eigen::Vector2f& uv0 = surf0.Tex;
+			Eigen::Vector2f& uv1 = surf1.Tex;
+			Eigen::Vector2f& uv2 = surf2.Tex;
 
 			// Edges of the triangle : postion delta
-			Eigen::Vector3f deltaPos1 = v1.Pos - v0.Pos;
-			Eigen::Vector3f deltaPos2 = v2.Pos - v0.Pos;
+			Eigen::Vector3f deltaPos1 = surf1.Pos - surf0.Pos;
+			Eigen::Vector3f deltaPos2 = surf2.Pos - surf0.Pos;
 
-			// UV delta
+			//vbSkeleton
+			vbSkeleton& skin0 = skeletonVerts[indices[i + 0]];
+			vbSkeleton& skin1 = skeletonVerts[indices[i + 1]];
+			vbSkeleton& skin2 = skeletonVerts[indices[i + 2]];
 			Eigen::Vector2f deltaUV1 = uv1 - uv0;
 			Eigen::Vector2f deltaUV2 = uv2 - uv0;
-		#if !defined MESH_VETREX_POSTEX
 			float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
 			Eigen::Vector3f tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
-			v0.Tangent = v0.Tangent + tangent;
-			v1.Tangent = v1.Tangent + tangent;
-			v2.Tangent = v2.Tangent + tangent;
+			skin0.Tangent = skin0.Tangent + tangent;
+			skin1.Tangent = skin1.Tangent + tangent;
+			skin2.Tangent = skin2.Tangent + tangent;
 
 			Eigen::Vector3f bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
-			v0.BiTangent = v0.BiTangent + bitangent;
-			v1.BiTangent = v1.BiTangent + bitangent;
-			v2.BiTangent = v2.BiTangent + bitangent;
-		#endif
+			skin0.BiTangent = skin0.BiTangent + bitangent;
+			skin1.BiTangent = skin1.BiTangent + bitangent;
+			skin2.BiTangent = skin2.BiTangent + bitangent;
 		}
 	}
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene) {
@@ -186,7 +190,8 @@ private:
 	}
 	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
 		// Data to fill
-		std::vector<AssimpMeshVertex> vertices;
+		std::vector<vbSurface> surfVerts;
+		std::vector<vbSkeleton> skeletonVerts;
 		std::vector<uint32_t> indices;
 		TextureBySlotPtr texturesPtr = std::make_shared<TextureBySlot>();
 		TextureBySlot& textures = *texturesPtr;
@@ -198,35 +203,34 @@ private:
 		}
 
 		for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
-			AssimpMeshVertex vertex;
-			memset(&vertex, 0, sizeof(vertex));
-			vertex.Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
+			vbSurface surf = {};
+			surf.Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
 			if (mesh->mTextureCoords[0]) {
-				vertex.Tex.x() = mesh->mTextureCoords[0][vertexId].x;
-				vertex.Tex.y() = mesh->mTextureCoords[0][vertexId].y;
+				surf.Tex.x() = mesh->mTextureCoords[0][vertexId].x;
+				surf.Tex.y() = mesh->mTextureCoords[0][vertexId].y;
 			}
-		#if !defined MESH_VETREX_POSTEX
-			if (mesh->mNormals) vertex.Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
-			if (mesh->mTangents) vertex.Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
-			if (mesh->mBitangents) vertex.BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
-		#endif
-			vertices.push_back(vertex);
+			surfVerts.push_back(surf);
+
+			vbSkeleton skin = {};
+			if (mesh->mNormals) skin.Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
+			if (mesh->mTangents) skin.Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
+			if (mesh->mBitangents) skin.BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
+			skeletonVerts.push_back(skin);
 		}
 
-	#if !defined MESH_VETREX_POSTEX
 		if (mesh->HasBones()) {
 			std::map<int, int> spMap;
 			for (int boneId = 0; boneId < mesh->mNumBones; ++boneId) {
 				aiBone* bone = mesh->mBones[boneId];
 				for (int k = 0; k < bone->mNumWeights; ++k) {
 					aiVertexWeight& vw = bone->mWeights[k];
-					if (vw.mVertexId >= 0 && vw.mVertexId < vertices.size()) {
+					if (vw.mVertexId >= 0 && vw.mVertexId < skeletonVerts.size()) {
 						int sp = spMap[vw.mVertexId];
 						if (sp < 4) {
-							FLOAT* BlendWeights = (FLOAT*)&vertices[vw.mVertexId].BlendWeights;
+							FLOAT* BlendWeights = (FLOAT*)&skeletonVerts[vw.mVertexId].BlendWeights;
 							BlendWeights[sp] = vw.mWeight;
 
-							unsigned int* BlendIndices = (unsigned int*)&vertices[vw.mVertexId].BlendIndices;
+							unsigned int* BlendIndices = (unsigned int*)&skeletonVerts[vw.mVertexId].BlendIndices;
 							BlendIndices[sp] = boneId;
 
 							spMap[vw.mVertexId]++;
@@ -235,7 +239,6 @@ private:
 				}
 			}
 		}
-	#endif
 
 		for (UINT i = 0; i < mesh->mNumFaces; i++) {
 			aiFace face = mesh->mFaces[i];
@@ -244,7 +247,7 @@ private:
 		}
 
 		if (mesh->mNormals && mesh->mTangents == nullptr) {
-			ReCalculateTangents(vertices, indices);
+			ReCalculateTangents(surfVerts, skeletonVerts, indices);
 		}
 
 		if (mesh->mMaterialIndex >= 0) {
@@ -264,7 +267,8 @@ private:
 		}
 
 		return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, 
-			std::move(vertices), std::move(indices), texturesPtr);
+			std::move(surfVerts), std::move(skeletonVerts), 
+			std::move(indices), texturesPtr);
 	}
 private:
 	const Launch mLaunchMode;

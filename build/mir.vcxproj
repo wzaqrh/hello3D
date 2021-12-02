@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\core\base\attribute_struct.h" />
     <ClInclude Include="..\src\core\base\d3d.h" />
     <ClInclude Include="..\src\core\base\debug.h" />
     <ClInclude Include="..\src\core\base\declare_macros.h" />
@@ -102,6 +103,7 @@
     <ClInclude Include="..\src\test\unit_test\unit_test.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\base\attribute_struct.cpp" />
     <ClCompile Include="..\src\core\base\d3d.cpp" />
     <ClCompile Include="..\src\core\base\debug.cpp" />
     <ClCompile Include="..\src\core\base\input.cpp" />

@@ -34,7 +34,7 @@ Label::Label(Launch launchMode, ResourceManager& resourceMng, FontPtr font)
 	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_LABEL);
 
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SpriteVertex), 0, Data::MakeSize(sizeof(SpriteVertexQuad) * CMaxStringLength));
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
 }
 
 int Label::GenRenderOperation(RenderOperationQueue& opList)
@@ -196,7 +196,7 @@ void Label::ForceLayout()
 
 	if (mCharSeq.size() > 0) 
 	{
-		std::vector<SpriteVertexQuad> quadArray;
+		std::vector<vbSurfaceQuad> quadArray;
 		for (int i = 0; i < mCharSeqOrder.size(); ++i) {
 			int idx = mCharSeqOrder[i];
 			assert(idx >= 0 && idx < mCharSeq.size());
