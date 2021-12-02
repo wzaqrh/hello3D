@@ -164,14 +164,17 @@ public:
 	bool IsUnique;
 	int Slot;
 };
-struct XmlSamplersInfo {
-	void Add(const XmlSamplersInfo& other) {
+struct XmlSamplerInfoSet {
+	void Add(SamplerFilterMode filterMode, size_t slot) {
+		Samplers.emplace_back(std::make_pair(filterMode, slot));
+	}
+	void Add(const XmlSamplerInfoSet& other) {
 		Samplers.insert(Samplers.end(), other.Samplers.begin(), other.Samplers.end());
 	}
 	size_t size() const { return Samplers.size(); }
-	const std::pair<SamplerFilterMode, int>& operator[](size_t pos) const { return Samplers[pos]; }
+	const std::pair<SamplerFilterMode, size_t>& operator[](size_t pos) const { return Samplers[pos]; }
 public:
-	std::vector<std::pair<SamplerFilterMode, int>> Samplers;
+	std::vector<std::pair<SamplerFilterMode, size_t>> Samplers;
 };
 struct XmlProgramInfo {
 	TemplateT void AddUniform(T&& uniform, int slot = -1) {
@@ -188,13 +191,13 @@ struct XmlProgramInfo {
 		Attr.push_back(std::forward<T>(attr));
 	}
 	TemplateT void AddSamplers(T&& samplers) {
-		Samplers.Add(std::forward<T>(samplers));
+		SamplerSet.Add(std::forward<T>(samplers));
 	}
 public:
 	PrimitiveTopology Topo;
 	std::vector<XmlAttributeInfo> Attr;
 	std::vector<XmlUniformInfo> Uniforms;
-	XmlSamplersInfo Samplers;
+	XmlSamplerInfoSet SamplerSet;
 	std::string FxName, VsEntry;
 };
 struct XmlPassInfo {
@@ -277,7 +280,7 @@ class MaterialAssetManager
 	std::map<std::string, XmlShaderInfo> mIncludeByName, mShaderByName, mShaderVariantByName;
 	std::map<std::string, XmlAttributeInfo> mAttrByName;
 	std::map<std::string, XmlUniformInfo> mUniformByName;
-	std::map<std::string, XmlSamplersInfo> mSamplersByName;
+	std::map<std::string, XmlSamplerInfoSet> mSamplerSetByName;
 	std::shared_ptr<MaterialNameToAssetMapping> mMatNameToAsset;
 public:
 	MaterialAssetManager() {
@@ -356,10 +359,10 @@ private:
 				auto& layoutJ = attribute.Layout[j];
 				layoutJ = LayoutInputElement{
 					element.second.get<std::string>("<xmlattr>.SemanticName"),
-					element.second.get<UINT>("<xmlattr>.SemanticIndex", 0),
-					static_cast<ResourceFormat>(element.second.get<UINT>("<xmlattr>.Format")),
-					element.second.get<UINT>("<xmlattr>.InputSlot", 0),
-					element.second.get<UINT>("<xmlattr>.ByteOffset", byteOffset),
+					element.second.get<uint32_t>("<xmlattr>.SemanticIndex", 0),
+					static_cast<ResourceFormat>(element.second.get<uint32_t>("<xmlattr>.Format")),
+					element.second.get<uint32_t>("<xmlattr>.InputSlot", 0),
+					element.second.get<uint32_t>("<xmlattr>.ByteOffset", byteOffset),
 					kLayoutInputPerVertexData,
 					0
 				};
@@ -446,28 +449,35 @@ private:
 			Name = PropertyTreePath(nodeProgram, it.second, index).Path.string();
 			mUniformByName.insert(std::make_pair(Name, uniform));
 
-			vis.shaderInfo.Program.AddUniform(uniform);
+			vis.shaderInfo.Program.AddUniform(std::move(uniform));
 			++index;
 		}
 	}
 	void VisitSamplers(const PropertyTreePath& nodeProgram, Visitor& vis) {
+		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseSampler"))) {
+			std::string refName = it.second.data();
+			auto find_iter = mSamplerSetByName.find(refName);
+			if (find_iter != mSamplerSetByName.end()) {
+				vis.shaderInfo.Program.AddSamplers(find_iter->second);
+			}
+		}
+
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Sampler"))) {
-			XmlSamplersInfo sampler;
-			for (auto& element : it.second.get_child("Element")) {
-				sampler.Samplers.emplace_back(std::make_pair(
-					static_cast<SamplerFilterMode>(element.second.get<int>("<xmlattr>.Slot", 0)),
-					element.second.get<int>("<xmlattr>.Filter", kSamplerFilterMinMagMipLinear)
-				));
+			XmlSamplerInfoSet samplerSet;
+			for (auto& node_element : it.second.get_child("Element")) {
+				samplerSet.Add(static_cast<SamplerFilterMode>(node_element.second.get<int>("<xmlattr>.Filter", kSamplerFilterMinMagMipLinear)),
+					node_element.second.get<int>("<xmlattr>.Slot", 0)
+				);
 			}
 
 			std::string Name = it.second.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
-			mSamplersByName.insert(std::make_pair(Name, sampler));
+			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
 
 			Name = PropertyTreePath(nodeProgram, it.second, index).Path.string();
-			mSamplersByName.insert(std::make_pair(Name, sampler));
+			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
 
-			vis.shaderInfo.Program.AddSamplers(sampler);
+			vis.shaderInfo.Program.AddSamplers(std::move(samplerSet));
 			++index;
 		}
 	}
@@ -646,10 +656,9 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 				BOOST_ASSERT(false);
 			}
 
-			for (size_t k = 0; k < shaderInfo.Program.Samplers.size(); ++k) {
-				const auto& elem = shaderInfo.Program.Samplers[k];
-				builder.AddSampler(resourceMng.CreateSampler(launchMode, 
-					elem.first, kCompareNever));
+			for (size_t k = 0; k < shaderInfo.Program.SamplerSet.size(); ++k) {
+				const auto& elem = shaderInfo.Program.SamplerSet[k];
+				builder.AddSampler(resourceMng.CreateSampler(launchMode, elem.first, kCompareNever));
 			}
 		}
 	}
@@ -657,7 +666,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	for (size_t slot = 0; slot < shaderInfo.Program.Uniforms.size(); ++slot) {
 		auto& uniformSlot = shaderInfo.Program.Uniforms[slot];
 		builder.AddConstBufferToTech(resourceMng.CreateConstBuffer(launchMode, 
-			uniformSlot.Decl, kHWUsageDefault, Data::Make(uniformSlot.Data)), 
+			uniformSlot.Decl, kHWUsageDynamic, Data::Make(uniformSlot.Data)), 
 			uniformSlot.ShortName, uniformSlot.IsUnique, slot);
 	}
 

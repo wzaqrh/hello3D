@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus>
+    <Session activeView="0">
+        <mainView activeIndex="2">
+            <File firstVisibleLine="220" xOffset="0" scrollWidth="2758" startPos="6344" endPos="6344" selMode="0" offset="0" wrapCount="1" lang="C#" encoding="-1" userReadOnly="no" filename="D:\Documents\MyDoc\graphics\&#x56FE;&#x5F62;&#x6570;&#x5B66;.cs" backupFilePath="" originalFileLastModifTimestamp="-2145930571" originalFileLastModifTimestampHigh="30926337" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="-318569472" mapWrapIndentMode="-1" mapIsWrap="no">
+                <Fold line="0" />
+                <Fold line="67" />
+                <Fold line="86" />
+                <Fold line="92" />
+                <Fold line="99" />
+                <Fold line="133" />
+                <Fold line="138" />
+                <Fold line="297" />
+                <Fold line="347" />
+                <Fold line="355" />
+                <Fold line="376" />
+                <Fold line="415" />
+                <Fold line="427" />
+                <Fold line="470" />
+                <Fold line="476" />
+                <Fold line="489" />
+                <Fold line="510" />
+                <Fold line="518" />
+                <Fold line="551" />
+                <Fold line="565" />
+                <Fold line="568" />
+                <Fold line="612" />
+                <Fold line="621" />
+                <Fold line="689" />
+                <Fold line="694" />
+                <Fold line="699" />
+                <Fold line="706" />
+                <Fold line="713" />
+                <Fold line="722" />
+                <Fold line="728" />
+                <Fold line="739" />
+                <Fold line="773" />
+                <Fold line="778" />
+                <Fold line="790" />
+                <Fold line="791" />
+                <Fold line="805" />
+                <Fold line="809" />
+                <Fold line="846" />
+                <Fold line="854" />
+                <Fold line="886" />
+                <Fold line="889" />
+                <Fold line="894" />
+                <Fold line="919" />
+                <Fold line="927" />
+                <Fold line="1002" />
+                <Fold line="1010" />
+                <Fold line="1022" />
+                <Fold line="1065" />
+                <Fold line="1076" />
+                <Fold line="1082" />
+                <Fold line="1118" />
+                <Fold line="1145" />
+                <Fold line="1154" />
+                <Fold line="1176" />
+                <Fold line="1182" />
+                <Fold line="1189" />
+                <Fold line="1213" />
+                <Fold line="1221" />
+                <Fold line="1277" />
+            </File>
+            <File firstVisibleLine="89" xOffset="0" scrollWidth="1469" startPos="3178" endPos="3178" selMode="0" offset="0" wrapCount="1" lang="C++" encoding="-1" userReadOnly="no" filename="D:\ProjectWork1\mir\bin\x86\Debug\shader\UnityShader&#x7B14;&#x8BB0;.fx" backupFilePath="" originalFileLastModifTimestamp="1891979275" originalFileLastModifTimestampHigh="30925937" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="208" startPos="12" endPos="12" selMode="0" offset="0" wrapCount="1" lang="None (Normal Text)" encoding="-1" userReadOnly="no" filename="C:\mir\bin\x86\Debug\test_cmdline.txt" backupFilePath="" originalFileLastModifTimestamp="-1841193691" originalFileLastModifTimestampHigh="30926724" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
+        </mainView>
+        <subView activeIndex="0" />
+        <FileBrowser latestSelectedItem="C:\mir\bin\x86\Debug\shader\Sprite.xml">
+            <root foldername="C:\mir\bin\x86\Debug\shader" />
+        </FileBrowser>
+    </Session>
+</NotepadPlus>

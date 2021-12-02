@@ -153,17 +153,15 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
-
-		test::CompareLightCameraByViewProjection(light, camera, {});
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, {}));
 	}
 
-	{
-		test::TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
-
+	MIR_TEST_CASE(
+		TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
 		Eigen::Matrix4f light_view, light_proj;
 		light.CalculateLightingViewProjection(camera, light_view, light_proj);
-		test::TestViewProjectionWithCases(light_view, light_proj);
-	}
+		TestViewProjectionWithCases(light_view, light_proj);
+	);
 
 	globalParam.WorldInv = globalParam.World.inverse();
 	globalParam.ViewInv = globalParam.View.inverse();

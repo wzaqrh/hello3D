@@ -75,7 +75,7 @@ void App::Render()
 		if (mInput->GetMouseWheel() != 0)
 		{
 			float wheel = boost::algorithm::clamp(mInput->GetMouseWheel() / 1000.0, -1, 1);
-			eyeDistance -= wheel * 8;
+			eyeDistance -= wheel * 0.8 * eyeDistance;
 		}
 		Eigen::Vector3f tpos(0, 0, -eyeDistance);
 

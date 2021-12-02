@@ -100,7 +100,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	output.BiTangent = normalize(mul(MW, Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.BiTangent.xyz, 0.0))).xyz);
 	output.Normal = normalize(mul(MW, Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0))).xyz);
 	
-	float4 skinPos = Skinning(surf.BlendWeights, surf.BlendIndices, float4(surf.Pos, 1.0));
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
 	output.Pos = mul(MW, skinPos);
 	output.SurfacePosition = output.Pos.xyz;
 	
@@ -115,7 +115,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
 	output.TangentBasis = mul((float3x3)MW, transpose(TBN));
 	
-	output.Tex = skin.Tex;
+	output.Tex = surf.Tex;
     return output;
 }
 

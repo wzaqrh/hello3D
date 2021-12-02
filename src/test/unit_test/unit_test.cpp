@@ -24,6 +24,8 @@ bool IsEqual(Eigen::Vector4f l, Eigen::Vector4f r) {
 
 bool CheckInNDC(Eigen::Vector4f p)
 {
+	p.head<3>() /= p.w();
+	p.w() = 1;
 	if (p.x() < -1 || p.x() > 1) return false;
 	if (p.y() < -1 || p.y() > 1) return false;
 	if (p.z() < 0 || p.z() > 1) return false;

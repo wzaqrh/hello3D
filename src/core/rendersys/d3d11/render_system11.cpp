@@ -11,6 +11,7 @@
 #include "core/base/d3d.h"
 #include "core/base/debug.h"
 #include "core/base/input.h"
+#include "core/base/macros.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d11/blob11.h"
 #include "core/rendersys/d3d11/program11.h"
@@ -29,16 +30,14 @@ namespace mir {
 #define PtrRaw(T) T.get()
 
 RenderSystem11::RenderSystem11()
-{
-}
+{}
 RenderSystem11::~RenderSystem11()
-{
-}
+{}
 
 bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 {
 	uint32_t createDeviceFlags = 0;
-#ifdef _DEBUG
+#if defined MIR_D3D11_DEBUG
 	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -66,6 +65,7 @@ bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
 	for (size_t i = 0; i < driverTypes.size(); i++) {
 		if (SUCCEEDED(D3D11CreateDeviceAndSwapChain(NULL, driverTypes[i], NULL, createDeviceFlags,
@@ -380,7 +380,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 	}
 
 	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined(_DEBUG) && defined(MIR_D3D11_DEBUG)
+#if defined(MIR_D3D11_DEBUG)
 	shaderFlags |= D3DCOMPILE_DEBUG;
 #endif
 
@@ -425,21 +425,23 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 		switch (iter->GetType()) {
 		case kShaderVertex:
 			program->SetVertex(std::static_pointer_cast<VertexShader11>(iter));
+			break;
 		case kShaderPixel:
 			program->SetPixel(std::static_pointer_cast<PixelShader11>(iter));
+			break;
 		default:
 			break;
 		}
 	}
 	
-	DEBUG_RES_ADD_DEVICE(program, program->mVertex->GetShader11());
-	DEBUG_RES_ADD_DEVICE(program, program->mPixel->GetShader11());
+	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mVertex, GetShader11()));
+	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mPixel, GetShader11()));
 	return program;
 }
 void RenderSystem11::SetProgram(IProgramPtr program)
 {
-	mDeviceContext->VSSetShader(std::static_pointer_cast<VertexShader11>(program->GetVertex())->GetShader11(), NULL, 0);
-	mDeviceContext->PSSetShader(std::static_pointer_cast<PixelShader11>(program->GetPixel())->GetShader11(), NULL, 0);
+	mDeviceContext->VSSetShader(NULLABLE(std::static_pointer_cast<VertexShader11>(program->GetVertex()), GetShader11()), NULL, 0);
+	mDeviceContext->PSSetShader(NULLABLE(std::static_pointer_cast<PixelShader11>(program->GetPixel()), GetShader11()), NULL, 0);
 }
 
 IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data)
