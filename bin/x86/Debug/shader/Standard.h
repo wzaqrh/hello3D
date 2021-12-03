@@ -16,8 +16,7 @@ cbuffer cbPerLight : register(b1)
 	float4 unity_LightAtten;	//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	float4 unity_SpotDirection;
 
-	int LightType;
-	int HasDepthMap;
+	bool IsSpotLight;
 }
 
 cbuffer cbGlobalParam : register(b0)
@@ -31,6 +30,7 @@ cbuffer cbGlobalParam : register(b0)
 	matrix ProjectionInv;
 
 	float4 glstate_lightmodel_ambient;
+	bool HasDepthMap;
 }
 
 #define clOrange 255,165,0

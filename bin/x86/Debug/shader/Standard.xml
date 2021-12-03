@@ -16,6 +16,7 @@
 			<Element Name="ProjectionInv"	Type="matrix"></Element>
 			
 			<Element Name="glstate_lightmodel_ambient" Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
+			<Element Name="HasDepthMap" 	Type="bool"></Element>
 		</Uniform>
 		<Uniform Name="cbPerLight" Slot="1">
 			<Element Name="LightView" 	 	Type="matrix"></Element>
@@ -27,8 +28,7 @@
 			<Element Name="unity_LightAtten"	Type="float4"></Element>
 			<Element Name="unity_SpotDirection"	Type="float4"></Element>
 			
-			<Element Name="LightType" 	 	Type="int"></Element>
-			<Element Name="HasDepthMap" 	Type="int"></Element>
+			<Element Name="IsSpotLight" 	 	Type="bool"></Element>
 		</Uniform>
 		
 		<Sampler Name="samStandard">

@@ -1,10 +1,13 @@
 test_model 1
-test_shadow_map
 test_sprite 1
+test_shadow_map
+
 
 test_cube 1
+
 test_spec_skybox
 test_camera
+
 test_bloom
 test_case.h
 test_framebuffer

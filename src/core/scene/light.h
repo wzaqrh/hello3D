@@ -24,8 +24,7 @@ struct _declspec(align(16)) cbPerLight {
 	Eigen::Vector4f unity_LightAtten;//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	Eigen::Vector4f unity_SpotDirection;
 
-	unsigned int LightType;//directional=1,point=2,spot=3
-	unsigned int HasDepthMap;
+	BOOL IsSpotLight;
 };
 
 interface MIR_CORE_API ILight : boost::noncopyable 

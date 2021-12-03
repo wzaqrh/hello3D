@@ -595,7 +595,7 @@ float4 PS(PixelInput input) : SV_Target
 	
 	float4 finalColor;
 	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
-	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, false);
+	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, IsSpotLight, false);
 	finalColor.w = 1.0;
 	
 	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
@@ -644,7 +644,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 	
 	float4 finalColor;
 	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
-	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, LightType == 3, true);
+	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, IsSpotLight, true);
 	finalColor.w = 1.0;
 		
 	return finalColor;

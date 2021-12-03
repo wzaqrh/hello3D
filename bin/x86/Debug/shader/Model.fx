@@ -86,7 +86,7 @@ inline float3 GetAlbedo(float2 uv) {
 float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 	finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
 	finalColor.a = 1.0;
 	return finalColor;
@@ -96,7 +96,7 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), LightType == 3);
+	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }

@@ -331,7 +331,8 @@ private:
 	static ConstBufferElementType ConvertStringToConstBufferElementType(
 		const std::string& str, int count, int& size) {
 		ConstBufferElementType result = kCBElementMax;
-		if (str == "int") result = kCBElementInt, size = 4;
+		if (str == "bool") result = kCBElementBool, size = 4;
+		else if (str == "int") result = kCBElementInt, size = 4;
 		else if (str == "float") result = kCBElementFloat, size = 4;
 		else if (str == "float4") result = kCBElementFloat4, size = 16;
 		else if (str == "matrix") result = kCBElementMatrix, size = 64;
@@ -417,6 +418,7 @@ private:
 				std::string strDefault = element.second.get<std::string>("<xmlattr>.Default", "");
 				if (!strDefault.empty()) {
 					switch (uniformElementType) {
+					case kCBElementBool:
 					case kCBElementInt: {
 						*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
 					}break;
