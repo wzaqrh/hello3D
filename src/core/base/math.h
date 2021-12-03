@@ -5,6 +5,8 @@
 #include <Eigen/SVD>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
+
+typedef int BOOL;
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
 typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
 

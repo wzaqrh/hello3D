@@ -24,6 +24,7 @@ public:
 	Eigen::Matrix4f ProjectionInv;
 
 	Eigen::Vector4f glstate_lightmodel_ambient;
+	int8_t HasDepthMap;
 };
 
 struct cbPerLight;

@@ -143,8 +143,7 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 	cbPerLight lightParam = {};
 
 	lightParam = light.MakeCbLight();
-	lightParam.HasDepthMap = castShadow ? TRUE : FALSE;
-	lightParam.LightType = light.GetType() + 1;
+	lightParam.IsSpotLight = light.GetType() == kLightSpot;
 
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
@@ -213,6 +212,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 				cbGlobalParam globalParam;
 				cbPerLight lightParam;
 				std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, *lightsOrder[0]);
+				globalParam.HasDepthMap = mShadowMap != nullptr;
 
 				if (firstLight) {
 					firstLight = false;
@@ -253,7 +253,7 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
 #if !defined DEBUG_SHADOW_CASTER
 	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
-	//RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+	RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
 #endif
 }
 

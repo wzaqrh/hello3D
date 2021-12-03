@@ -1,6 +1,8 @@
-test_shadow_map
-test_model 0
+test_model 1
 test_sprite 1
+test_shadow_map
+
+
 test_cube 1
 
 test_spec_skybox
