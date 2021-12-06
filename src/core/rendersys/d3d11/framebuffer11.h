@@ -13,6 +13,7 @@ interface FrameBufferAttach11: public IFrameBufferAttachment
 {
 	virtual ID3D11RenderTargetView* AsRTV() = 0;
 	virtual ID3D11DepthStencilView* AsDSV() = 0;
+	virtual ID3D11ShaderResourceView* AsSRV() = 0;
 }; 
 typedef std::shared_ptr<FrameBufferAttach11> FrameBufferAttach11Ptr;
 
@@ -23,6 +24,7 @@ public:
 	ITexturePtr AsTexture() const override { return mTexture; }
 	ID3D11RenderTargetView* AsRTV() override { return mTexture->AsRTV(); }
 	ID3D11DepthStencilView* AsDSV() override { return mTexture->AsDSV(); }
+	ID3D11ShaderResourceView* AsSRV() override { return mTexture->AsSRV(); }
 private:
 	Texture11Ptr mTexture;
 };
@@ -36,6 +38,7 @@ public:
 	ITexturePtr AsTexture() const override { return nullptr; }
 	ID3D11RenderTargetView* AsRTV() override { return mRTV; }
 	ID3D11DepthStencilView* AsDSV() override { return mDSV; }
+	ID3D11ShaderResourceView* AsSRV() override { return nullptr; }
 private:
 	ID3D11RenderTargetView* mRTV = nullptr;
 	ID3D11DepthStencilView* mDSV = nullptr;
@@ -56,6 +59,7 @@ public:
 	}
 	IFrameBufferAttachmentPtr GetAttachZStencil() const override { return mAttachZStencil; }
 
+	std::vector<ID3D11ShaderResourceView*> AsSRVs() const;
 	std::vector<ID3D11RenderTargetView*> AsRTVs() const;
 	ID3D11DepthStencilView* AsDSV() const { return mAttachZStencil ? mAttachZStencil->AsDSV() : nullptr; }
 private:

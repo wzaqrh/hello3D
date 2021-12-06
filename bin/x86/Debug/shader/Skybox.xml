@@ -3,7 +3,9 @@
 	
 	<PROGRAM>
 		<Topology>5</Topology>
-		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
+		<Attribute Name="vbSkybox">
+			<Element SemanticName="POSITION" Format="6"></Element>
+		</Attribute>
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		

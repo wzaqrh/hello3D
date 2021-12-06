@@ -56,7 +56,7 @@ void TestShadowMap::OnPostInitDevice()
 
 	if (1)
 	{
-		mModel1 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
+		mModel1 = rendFac->CreateAssimpModel(E_MAT_MODEL);
 		mModel1->LoadModel("model/rock/rock.obj", R"({"dir":"model/rock/"})");
 		mModel1->GetTransform()->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
 		mModel1->GetTransform()->SetPosition(Eigen::Vector3f(100, 100, 10));
@@ -65,7 +65,7 @@ void TestShadowMap::OnPostInitDevice()
 
 	if (1)
 	{
-		mModel2 = rendFac->CreateAssimpModel(nullptr, E_MAT_MODEL);
+		mModel2 = rendFac->CreateAssimpModel(E_MAT_MODEL);
 		mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
 		mMoveDefScale = SCALE_BASE * 0.2;
 		mModel2->GetTransform()->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));

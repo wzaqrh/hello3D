@@ -33,7 +33,7 @@ public:
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
 	IFrameBufferPtr FetchPostProcessInput(ResourceFormat format = kFormatR8G8B8A8UNorm);
-	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm);
+	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm, ResourceFormat zstencilFmt = kFormatD24UNormS8UInt);
 private:
 	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
 	void SetOthogonalProj(const Eigen::Vector2i& size, double zFar);

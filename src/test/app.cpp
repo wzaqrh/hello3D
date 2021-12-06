@@ -19,7 +19,8 @@ App::App()
 	mMoveDefScale = 1.0f;
 
 	mTransform = std::make_shared<mir::Transform>();
-	mBackgndColor = Eigen::Vector4f(0.0f, 0.125f, 0.3f, 1.0f);
+	//mBackgndColor = Eigen::Vector4f(0.5f, 0.5f, 0.5f, 1.0f);
+	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
 	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()

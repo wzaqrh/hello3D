@@ -54,6 +54,8 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
                        Texture2D shadowMap,
 					   float4 shadowPosH)
 {
+	if (!HasDepthMap) return 1.0;
+	
 	// 透视除法
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
@@ -87,9 +89,11 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
     for (int i = 0; i < 9; ++i)
     {
         //percentLit += shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy + offsets[i], depth).r;
-		percentLit += step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy).r);
+		//percentLit += step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy + offsets[i]).r);
+		percentLit += step(1.0, depth);
 	}
     
-    return percentLit /= 9.0f;	
+    return percentLit /= 9.0f;
+	//return 1.0f;	
 #endif
 }

@@ -36,6 +36,13 @@ void Cube::SetColor(const Eigen::Vector4f& color)
 	mVertexDirty = true;
 }
 
+void Cube::SetColor(unsigned bgra)
+{
+	unsigned char* cc = (unsigned char*)&bgra;
+	mColor = Eigen::Vector4f(cc[2], cc[1], cc[0], cc[3])  / 255.0f;
+	mVertexDirty = true;
+}
+
 int Cube::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (!mMaterial->IsLoaded()

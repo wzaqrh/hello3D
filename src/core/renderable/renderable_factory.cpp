@@ -41,17 +41,18 @@ MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, string_cref
 	return Mesh::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_SPRITE), vertCount, indexCount);
 }
 
-CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize)
+CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra)
 {
 	auto cube = Cube::Create(mLaunchMode, mResourceMng, E_MAT_SPRITE);
 	cube->SetPosition(center);
 	cube->SetHalfSize(halfsize);
+	cube->SetColor(bgra);
 	return cube;
 }
 
-AssimpModelPtr RenderableFactory::CreateAssimpModel(const TransformPtr& transform, string_cref matName)
+AssimpModelPtr RenderableFactory::CreateAssimpModel(string_cref matName)
 {
-	return AssimpModel::Create(mLaunchMode, mResourceMng, transform, NotEmptyOr(matName, E_MAT_MODEL));
+	return AssimpModel::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_MODEL));
 }
 
 LabelPtr RenderableFactory::CreateLabel(string_cref fontPath, int fontSize)

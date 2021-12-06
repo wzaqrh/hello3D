@@ -79,9 +79,10 @@ void TestPBR::OnPostInitDevice()
 		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross.dds"));
 	TIME_PROFILE(Lesson6_OnPostInitDevice);
 
-	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL_PBR);
+	mModel = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL_PBR);
 	mModel->LoadModel("model/Male03/Male03.FBX"); 
 	mMoveDefScale = 0.07;
+	mTransform = mModel->GetTransform();
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 	mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));}
 

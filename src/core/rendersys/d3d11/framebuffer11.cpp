@@ -24,4 +24,13 @@ std::vector<ID3D11RenderTargetView*> FrameBuffer11::AsRTVs() const {
 	return vec;
 }
 
+std::vector<ID3D11ShaderResourceView*> FrameBuffer11::AsSRVs() const {
+	std::vector<ID3D11ShaderResourceView*> vec;
+	for (size_t i = 0; i < mAttachColors.size(); ++i)
+		vec.push_back(mAttachColors[i]->AsSRV());
+	if (mAttachZStencil) 
+		vec.push_back(mAttachZStencil->AsSRV());
+	return vec;
+}
+
 }

@@ -240,6 +240,9 @@ static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen
 static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(format)));
+	BOOST_ASSERT(format == kFormatD24UNormS8UInt 
+		|| format == kFormatD32Float
+		|| format == kFormatD16UNorm);
 
 	constexpr bool autoGen = false;
 	constexpr size_t mipCount = 1;
@@ -298,6 +301,7 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 {
 	BOOST_ASSERT(res);
 	BOOST_ASSERT(formats.size() >= 1);
+	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(formats.back())) || formats.back() == kFormatUnknown);
 
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
 	for (size_t i = 0; i + 1 < formats.size(); ++i) {
@@ -308,6 +312,8 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 #if defined MIR_RESOURCE_DEBUG
 	for (auto rtv : framebuffer->AsRTVs())
 		DEBUG_RES_ADD_DEVICE(framebuffer, rtv);
+	for (auto srv : framebuffer->AsSRVs())
+		DEBUG_RES_ADD_DEVICE(framebuffer, srv);
 	DEBUG_RES_ADD_DEVICE(framebuffer, framebuffer->AsDSV());
 #endif
 	return framebuffer;
@@ -316,9 +322,11 @@ void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f&
 {
 	FrameBuffer11Ptr fb11 = fb ? std::static_pointer_cast<FrameBuffer11>(fb) : mCurFrameBuffer;
 	for (auto& rtv : fb11->AsRTVs()) {
-		if (rtv) mDeviceContext->ClearRenderTargetView(rtv, (const float*)&color);
+		if (rtv) 
+			mDeviceContext->ClearRenderTargetView(rtv, (const float*)&color);
 	}
-	mDeviceContext->ClearDepthStencilView(fb11->AsDSV(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
+	if (fb11->AsDSV()) 
+		mDeviceContext->ClearDepthStencilView(fb11->AsDSV(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 {
@@ -396,12 +404,19 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 }
 IShaderPtr RenderSystem11::CreateShader(int type, IBlobDataPtr data)
 {
+#if 0
+	ID3D11ShaderReflection* pReflector = NULL;
+	D3DReflect(data->GetBytes(), data->GetSize(), IID_ID3D11ShaderReflection, (void**)&pReflector);
+
+	D3D11_SHADER_INPUT_BIND_DESC bindDesc;
+	pReflector->GetResourceBindingDescByName("cbPerLight", &bindDesc);
+#endif
 	switch (type) {
 	case kShaderVertex: {
 		VertexShader11Ptr ret = MakePtr<VertexShader11>(data);
 		if (debug::CheckCompileFailed(
 			mDevice->CreateVertexShader(data->GetBytes(), data->GetSize(), NULL, &ret->mShader), data))
-			return nullptr;
+			return nullptr;		
 		return ret;
 	}break;
 	case kShaderPixel: {
