@@ -1,3 +1,5 @@
+#include "HLSLSupport.h"
+
 struct vbSurface
 {
     float3 Pos : POSITION;
@@ -33,30 +35,11 @@ cbuffer cbGlobalParam : register(b0)
 	bool HasDepthMap;
 }
 
-#define clOrange 255,165,0
-
 #if SHADER_MODEL > 30000
 SamplerState samLinear : register(s0);
 SamplerState samAnsp   : register(s1);
 SamplerState samPoint  : register(s2);
-#if 0
-SamplerState samShadow : register(s3) {
-    MinFilter = Point;
-    MagFilter = Point;
-    MipFilter = Point;
-    AddressU = Clamp;
-    AddressV = Clamp;	
-};
-#else
-SamplerComparisonState samShadow : register(s8) {
-   Filter = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-   AddressU = BORDER;
-   AddressV = BORDER;
-   AddressW = BORDER;
-   
-   ComparisonFunc = LESS_EQUAL;
-};
-#endif
+SamplerComparisonState samShadow : register(s8);
 
 Texture2D txMain : register(t0);
 Texture2D txDepthMap : register(t8);
@@ -67,35 +50,13 @@ TextureCube txSkybox : register(t9);
 #define GetTextureCubeLevel(TEX, SAMPLER, COORD, LOD) TEX.SampleLevel(SAMPLER, COORD, LOD)
 #else
 texture  textureMain : register(t0);
-sampler2D txMain : register(s0) =
-sampler_state
-{
-    Texture = <textureMain>;
-};
+sampler2D txMain : register(s0);
 
 texture  textureDepthMap : register(t8);
-sampler2D txDepthMap : register(s8) =
-sampler_state
-{
-    Texture = <textureDepthMap>;
-    MinFilter = Point;
-    MagFilter = Point;
-    MipFilter = Point;
-	AddressU = Clamp;
-	AddressV = Clamp;
-};
+sampler2D txDepthMap : register(s8);
 
 texture  textureSkybox : register(t9);
-samplerCUBE txSkybox : register(s9) =
-sampler_state
-{
-    Texture = <textureSkybox>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+samplerCUBE txSkybox : register(s9);
 
 #define GetTexture2D(TEX, SAMPLER, COORD) tex2D(TEX, COORD)
 #define GetTextureCube(TEX, SAMPLER, COORD) texCUBE(TEX, COORD)

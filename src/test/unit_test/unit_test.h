@@ -1,4 +1,5 @@
 #pragma once
+#include "core/mir_config.h"
 #include "core/base/math.h"
 #include "core/predeclare.h"
 #include "core/mir_export.h"
@@ -17,3 +18,9 @@ MIR_CORE_API void CompareLightCameraByViewProjection(const ILight& dir_light, co
 
 }
 }
+
+#if defined MIR_TEST
+#define MIR_TEST_CASE(STATEMENT) do { using namespace mir::test; STATEMENT; } while(0)
+#else
+#define MIR_TEST_CASE(STATEMENT)
+#endif

@@ -137,6 +137,17 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 	}
 }
 
+static cbGlobalParam MakeAutoParam(const Camera& camera) 
+{
+	cbGlobalParam globalParam = {};
+	globalParam.View = camera.GetView();
+	globalParam.Projection = camera.GetProjection();
+
+	globalParam.WorldInv = globalParam.World.inverse();
+	globalParam.ViewInv = globalParam.View.inverse();
+	globalParam.ProjectionInv = globalParam.Projection.inverse();
+	return globalParam;
+}
 static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool castShadow, const ILight& light)
 {
 	cbGlobalParam globalParam = {};
@@ -152,17 +163,15 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
-
-		test::CompareLightCameraByViewProjection(light, camera, {});
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, {}));
 	}
 
-	{
-		test::TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
-
+	MIR_TEST_CASE(
+		TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
 		Eigen::Matrix4f light_view, light_proj;
 		light.CalculateLightingViewProjection(camera, light_view, light_proj);
-		test::TestViewProjectionWithCases(light_view, light_proj);
-	}
+		TestViewProjectionWithCases(light_view, light_proj);
+	);
 
 	globalParam.WorldInv = globalParam.World.inverse();
 	globalParam.ViewInv = globalParam.View.inverse();
@@ -187,6 +196,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
 		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
+		mShadowMapGenerated = false;
 	}
 	else if (lightMode == E_PASS_FORWARDBASE) {
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowMap->GetAttachZStencilTexture());
@@ -206,26 +216,43 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 	if (!lightsOrder.empty()) {
 		BlendState originBlend = mRenderSys.GetBlendFunc();
 		
-		bool firstLight = true;
+		ILightPtr firstLight = nullptr;
 		for (size_t i = 0; i < lightsOrder.size(); ++i) {
-			if (lightsOrder[i]->GetCameraMask() & camera.GetCameraMask()) {
+			if (lightsOrder[i]->GetCameraMask() & camera.GetCameraMask()) {					
 				cbGlobalParam globalParam;
 				cbPerLight lightParam;
-				std::tie(globalParam, lightParam) = MakeAutoParam(camera, lightMode == E_PASS_SHADOWCASTER, *lightsOrder[0]);
-				globalParam.HasDepthMap = mShadowMap != nullptr;
+				if (lightMode == E_PASS_SHADOWCASTER) {
+					if (lightsOrder[i]->GetType() == kLightDirectional) {
+						mShadowMapGenerated = true;
+						std::tie(globalParam, lightParam) = MakeAutoParam(camera, true, *lightsOrder[i]);
+						globalParam.HasDepthMap = false;
+						RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
+					}
+					break;
+				}
+				else if (lightMode == E_PASS_FORWARDBASE) {
+					if (firstLight == nullptr) {
+						firstLight = lightsOrder[i];
+						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 
-				if (firstLight) {
-					firstLight = false;
-					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
-					RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
+						std::tie(globalParam, lightParam) = MakeAutoParam(camera, false, *firstLight);
+						globalParam.HasDepthMap = mShadowMapGenerated;
+						RenderLight(opQueue, E_PASS_FORWARDBASE, camera.GetCameraMask(), lightParam, globalParam);
+					}
+					else {
+						mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
+
+						std::tie(globalParam, lightParam) = MakeAutoParam(camera, false, *firstLight);
+						globalParam.HasDepthMap = mShadowMapGenerated;
+						RenderLight(opQueue, E_PASS_FORWARDADD, camera.GetCameraMask(), lightParam, globalParam);
+					}
 				}
 				else {
-					mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
-					auto lightModeEx = (lightMode != E_PASS_FORWARDBASE) ? lightMode : E_PASS_FORWARDADD;
-					RenderLight(opQueue, lightModeEx, camera.GetCameraMask(), lightParam, globalParam);
-				}
-			}
-		}
+					globalParam = MakeAutoParam(camera);
+					RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
+				}//if lightMode
+			}//if lightsOrder[i].GetCameraMask & camera.GetCameraMask
+		}//for lightsOrder
 		mRenderSys.SetBlendFunc(originBlend);
 	}
 

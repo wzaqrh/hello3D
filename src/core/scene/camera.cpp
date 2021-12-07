@@ -156,10 +156,10 @@ IFrameBufferPtr Camera::FetchPostProcessInput(ResourceFormat format)
 	return mPostProcessInput;
 }
 
-IFrameBufferPtr Camera::FetchOutput(ResourceFormat format)
+IFrameBufferPtr Camera::FetchOutput(ResourceFormat format, ResourceFormat zstencilFmt)
 {
 	if (mOutput == nullptr) {
-		mOutput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mSize, format);
+		mOutput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mSize, MakeResFormats(format,zstencilFmt));
 	}
 	return mOutput;
 }

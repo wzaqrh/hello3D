@@ -2,46 +2,38 @@
 #include "Standard.h"
 
 #if SHADER_MODEL > 30000
-TextureCube tcubeSkybox : register(t0);
+TextureCube _MainTex : register(t0);
 #else
 texture  textureCubeSkybox : register(t0);
-samplerCUBE tcubeSkybox : register(s0) =
-sampler_state
-{
-    Texture = <textureCubeSkybox>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+samplerCUBE _MainTex : register(s0);
 #endif
 
-struct VS_INPUT
+struct VertexInput
 {
     float4 Pos : POSITION;
 };
 
-struct PS_INPUT
+struct PixelInput
 {
     float4 Pos : SV_POSITION;
 	float3 Tex : TEXCOORD0;
 };
 
-PS_INPUT VS(VS_INPUT input)
+PixelInput VS(VertexInput input)
 {
-	PS_INPUT output = (PS_INPUT)0;
+	PixelInput output = (PixelInput)0;
 	output.Pos = input.Pos;
 	
-	matrix WVPInv = mul(WorldInv,mul(ViewInv,ProjectionInv));
+	matrix WVPInv = mul(WorldInv, mul(ViewInv, ProjectionInv));
 	output.Tex = normalize(mul(WVPInv, input.Pos));
     return output;
 }
 
-float4 PS(PS_INPUT input) : SV_Target
+float4 PS(PixelInput input) : SV_Target
 {	
-	float4 finalColor = 1.0;
-	finalColor.rgb = GetTextureCube(tcubeSkybox, samLinear, input.Tex);
+	float4 finalColor;
+	finalColor.rgb = GetTextureCube(_MainTex, samLinear, input.Tex);
+	finalColor.a = 1.0;
 	return finalColor;
 }
 

@@ -24,17 +24,12 @@ public:
 	Eigen::Matrix4f ProjectionInv;
 
 	Eigen::Vector4f glstate_lightmodel_ambient;
-	int8_t HasDepthMap;
+	BOOL HasDepthMap;
 };
 
 struct cbPerLight;
 class MIR_CORE_API RenderPipeline
 {
-	RenderSystem& mRenderSys;
-	const Eigen::Vector2i mScreenSize;
-
-	std::vector<IFrameBufferPtr> mFrameBufferStack;
-	IFrameBufferPtr mShadowMap;
 public:
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size);
 	bool BeginFrame();
@@ -53,6 +48,13 @@ private:
 		const std::vector<ILightPtr>& lights, const std::string& lightMode);
 	void RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera,
 		const std::vector<ILightPtr>& lights);
+private:
+	RenderSystem& mRenderSys;
+	const Eigen::Vector2i mScreenSize;
+
+	std::vector<IFrameBufferPtr> mFrameBufferStack;
+	IFrameBufferPtr mShadowMap;
+	bool mShadowMapGenerated;
 };
 
 }

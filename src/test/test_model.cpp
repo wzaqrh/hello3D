@@ -40,7 +40,7 @@ void TestModel::OnPostInitDevice()
 	switch (mCaseIndex) {
 	case 0:
 	case 1: {
-		mModel = mContext->RenderableFac()->CreateAssimpModel(nullptr, !(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		mModel = mContext->RenderableFac()->CreateAssimpModel(!(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
 		mModel->LoadModel("model/Male03/Male02.FBX", R"({"ext":"png","dir":"model/Male03/"})"); mMoveDefScale = 0.07;
 
 		mTransform = mModel->GetTransform();
@@ -55,7 +55,8 @@ void TestModel::OnPostInitDevice()
 		sceneMng->RemoveAllCameras();
 		sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -1500), 3000, 30);
 
-		mModel = mContext->RenderableFac()->CreateAssimpModel(nullptr, !(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		mModel = mContext->RenderableFac()->CreateAssimpModel(!(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		mTransform = mModel->GetTransform();
 		if (mCaseIndex < 4) {
 			mModel->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})"); 
 			mMoveDefScale = 1;

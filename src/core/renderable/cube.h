@@ -17,6 +17,7 @@ public:
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetHalfSize(const Eigen::Vector3f& size);
 	void SetColor(const Eigen::Vector4f& color);
+	void SetColor(unsigned bgra);
 public:
 	int GenRenderOperation(RenderOperationQueue& opList) override;
 	const MaterialPtr& GetMaterial() const { return mMaterial; }

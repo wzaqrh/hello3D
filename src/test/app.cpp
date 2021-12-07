@@ -19,7 +19,8 @@ App::App()
 	mMoveDefScale = 1.0f;
 
 	mTransform = std::make_shared<mir::Transform>();
-	mBackgndColor = Eigen::Vector4f(0.0f, 0.125f, 0.3f, 1.0f);
+	//mBackgndColor = Eigen::Vector4f(0.5f, 0.5f, 0.5f, 1.0f);
+	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
 	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()
@@ -75,7 +76,7 @@ void App::Render()
 		if (mInput->GetMouseWheel() != 0)
 		{
 			float wheel = boost::algorithm::clamp(mInput->GetMouseWheel() / 1000.0, -1, 1);
-			eyeDistance -= wheel * 8;
+			eyeDistance -= wheel * 0.8 * eyeDistance;
 		}
 		Eigen::Vector3f tpos(0, 0, -eyeDistance);
 

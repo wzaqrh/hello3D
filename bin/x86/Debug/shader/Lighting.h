@@ -54,16 +54,18 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
                        Texture2D shadowMap,
 					   float4 shadowPosH)
 {
+	if (!HasDepthMap) return 1.0;
+	
 	// 透视除法
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
 	
 	// NDC空间的深度值
     float depth = shadowPosH.z;
-
+#define PCF_SHADOW
 #if !defined PCF_SHADOW
 	//return shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, depth).r;
-	return step(shadowPosH.z, txDepthMap.Sample(samLinear, shadowPosH.xy).r);
+	return step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy).r);
 #else
 	// 纹素在纹理坐标下的宽高
     const float dx = SMAP_DX;
@@ -86,10 +88,12 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 	[unroll]
     for (int i = 0; i < 9; ++i)
     {
-        percentLit += shadowMap.SampleCmpLevelZero(samShadow,
-			shadowPosH.xy + offsets[i], depth).r;
-    }
+        //percentLit += shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy + offsets[i], depth).r;
+		//percentLit += step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy + offsets[i]).r);
+		percentLit += step(1.0, depth);
+	}
     
-    return percentLit /= 9.0f;	
+    return percentLit /= 9.0f;
+	//return 1.0f;	
 #endif
 }

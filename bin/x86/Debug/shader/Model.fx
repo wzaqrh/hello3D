@@ -62,8 +62,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
 	
 	//PosInLight
-	output.PosInLight = mul(MW, skinPos);
-	output.PosInLight = mul(LightView, output.PosInLight);
+	output.PosInLight = mul(LightView, output.Pos);
 	output.PosInLight = mul(LightProjection, output.PosInLight);
 	
 	//ToEye

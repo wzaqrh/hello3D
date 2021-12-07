@@ -23,11 +23,11 @@ void TestCube::OnPostInitDevice()
 	auto size = mContext->ResourceMng()->WinSize() / 2;
 	switch (mCaseIndex) {
 	case 0: {
-		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, -201), Eigen::Vector3f(200, 200, 200));
+		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, -201), Eigen::Vector3f(200, 200, 200), 0xffff6347);
 	}break;
 	case 1: {
 		const int SizeInf = 10000;
-		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(SizeInf, SizeInf, 1));
+		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(SizeInf, SizeInf, 1), 0xffff6347);
 	}break;
 	default:
 		break;

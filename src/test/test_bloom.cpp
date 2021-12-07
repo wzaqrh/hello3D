@@ -25,9 +25,10 @@ void TestBloom::OnPostInitDevice()
 	camera->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
 	camera->AddPostProcessEffect(rendFac->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM, *camera));
 
-	mModel = mContext->RenderableFac()->CreateAssimpModel(mTransform, E_MAT_MODEL); 
+	mModel = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL); 
 	mModel->LoadModel("model/Spaceship/Spaceship.fbx"); 
 	mMoveDefScale = 0.01;
+	mTransform = mModel->GetTransform();
 	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
 }
 

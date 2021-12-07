@@ -10,7 +10,7 @@ Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::strin
 	, mQuad(Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0))
 	, mQuadDirty(true)
 	, mFlipY(true)
-	, mSize(1, 1)
+	, mSize(0, 0)
 	, mPosition(0, 0)
 {
 	mTransform = std::make_shared<Transform>();

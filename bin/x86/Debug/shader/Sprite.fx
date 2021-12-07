@@ -33,7 +33,7 @@ float4 PS(PixelInput input) : SV_Target
 #if !DEBUG_SHADOW_MAP
 	finalColor *= GetTextureMain(input.Tex);
 #else
-	finalColor *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
+	finalColor.xyz = float3(0, 0, CalcShadowFactor(samShadow, txDepthMap, input.PosInLight));
 #endif
 	return finalColor;
 }

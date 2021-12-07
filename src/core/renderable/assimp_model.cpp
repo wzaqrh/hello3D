@@ -123,10 +123,10 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, TransformPtr pMove, const std::string& matType)
+AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, const std::string& matType)
 	:mLaunchMode(launchMode), mResourceMng(resourceMng)
 {
-	mTransform = pMove ? pMove : std::make_shared<Transform>();
+	mTransform = std::make_shared<Transform>();
 	mMaterial = resourceMng.CreateMaterial(launchMode, matType);
 }
 
