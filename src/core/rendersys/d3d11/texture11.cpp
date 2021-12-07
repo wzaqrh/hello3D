@@ -6,9 +6,11 @@ namespace mir {
 Texture11::Texture11()
 {
 	mAutoGenMipmap = false;
-	mWidth = mHeight = mFaceCount = mMipCount = 0;
+	mFaceCount = mMipCount = 0;
+	mSize = mRealSize = Eigen::Vector2i(0, 0);
 	mFormat = kFormatUnknown;
 	mUsage = kHWUsageDefault;
+
 	mSRV = nullptr;
 	mRTV = nullptr;
 	mDSV = nullptr;
@@ -16,8 +18,8 @@ Texture11::Texture11()
 
 void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap)
 {
-	mWidth = width;
-	mHeight = height;
+	mSize = Eigen::Vector2i(width, height);
+	mRealSize = Eigen::Vector2i(0, 0);
 	mFaceCount = std::max<int>(faceCount, 1);
 	mMipCount = std::max<int>(mipmap, 1);
 	mAutoGenMipmap = mipmap < 0;
@@ -25,21 +27,20 @@ void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int 
 	mUsage = usage;
 
 	mSRV = nullptr;
+	mRTV = nullptr;
+	mDSV = nullptr;
 }
 
-D3D11_TEXTURE2D_DESC Texture11::GetDesc()
+void Texture11::OnLoaded()
 {
-	if (mSRV != nullptr) {
+	if (mSRV != nullptr) 
+	{
 		ID3D11Texture2D* pTexture;
-		mSRV->GetResource((ID3D11Resource **)&pTexture);
+		mSRV->GetResource((ID3D11Resource**)&pTexture);
 
 		D3D11_TEXTURE2D_DESC desc;
 		pTexture->GetDesc(&desc);
-		return desc;
-	}
-	else {
-		D3D11_TEXTURE2D_DESC desc = { 0 };
-		return desc;
+		mRealSize = Eigen::Vector2i(desc.Width, desc.Height);
 	}
 }
 

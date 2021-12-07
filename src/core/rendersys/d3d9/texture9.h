@@ -24,8 +24,8 @@ public:
 	IDirect3DTexture9*& GetSRV9() { return mTexture; }
 	IDirect3DCubeTexture9*& GetSRVCube9() { return mTextureCube; }
 
-	int GetWidth() const override { return mWidth; }
-	int GetHeight() const override { return mHeight; }
+	Eigen::Vector2i GetSize() const override { return mSize; }
+	Eigen::Vector2i GetRealSize() const override { return mRealSize; }
 	ResourceFormat GetFormat() const override { return mFormat; }
 	HWMemoryUsage GetUsage() const override { return kHWUsageDefault; }
 	int GetMipmapCount() const override { return mMipCount; }
@@ -34,7 +34,8 @@ public:
 private:
 	D3DSURFACE_DESC GetDesc();
 private:
-	int mWidth, mHeight, mMipCount;
+	int mMipCount;
+	Eigen::Vector2i mSize, mRealSize;
 	ResourceFormat mFormat;
 	IDirect3DTexture9 *mTexture;
 	IDirect3DCubeTexture9* mTextureCube;

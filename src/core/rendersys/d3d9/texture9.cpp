@@ -7,7 +7,8 @@ Texture9::Texture9(IDirect3DTexture9 *texture)
 	: mTexture(texture)
 	, mTextureCube(nullptr)
 {
-	mWidth = 0, mHeight = 0, mMipCount = 0;
+	mSize = mRealSize = Eigen::Vector2i(0, 0);
+	mMipCount = 0;
 	mFormat = kFormatUnknown;
 
 	/*SetDeviceObject((IUnknown**)&mTexture);
@@ -24,8 +25,8 @@ Texture9::Texture9(int width, int height, ResourceFormat format, int mipmap)
 	: mTexture(nullptr)
 	, mTextureCube(nullptr)
 {
-	mWidth = width;
-	mHeight = height;
+	mSize = Eigen::Vector2i(width, height);
+	mRealSize = Eigen::Vector2i(0, 0);
 	mMipCount = mipmap;
 	mFormat = format;
 

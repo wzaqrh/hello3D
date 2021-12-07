@@ -24,22 +24,23 @@ public:
 	Texture11();
 	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
 
-	ResourceFormat GetFormat() const override { return mFormat; }
-	HWMemoryUsage GetUsage() const override { return mUsage; }
-	int GetWidth() const override { return mWidth; }
-	int GetHeight() const override { return mHeight; }
-	int GetMipmapCount() const override { return mMipCount; }
-	int GetFaceCount() const override { return mFaceCount; }
-	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
-
 	ID3D11ShaderResourceView*& AsSRV() { return mSRV; }
 	ID3D11RenderTargetView*& AsRTV() { return mRTV; }
 	ID3D11DepthStencilView*& AsDSV() { return mDSV; }
-private:
-	D3D11_TEXTURE2D_DESC GetDesc();
+
+	void OnLoaded() override;
+public:
+	ResourceFormat GetFormat() const override { return mFormat; }
+	HWMemoryUsage GetUsage() const override { return mUsage; }
+	Eigen::Vector2i GetSize() const override { return mSize; }
+	Eigen::Vector2i GetRealSize() const override { return mRealSize; }
+	int GetMipmapCount() const override { return mMipCount; }
+	int GetFaceCount() const override { return mFaceCount; }
+	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
 private:
 	bool mAutoGenMipmap;
-	int mWidth, mHeight, mFaceCount, mMipCount;
+	int mFaceCount, mMipCount;
+	Eigen::Vector2i mSize, mRealSize;
 	ResourceFormat mFormat;
 	HWMemoryUsage mUsage;
 	ID3D11ShaderResourceView* mSRV;

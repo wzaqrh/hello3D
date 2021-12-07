@@ -39,7 +39,6 @@ public:
 private:
 	ConstBufferDecl& mDecl;
 };
-#define MAKE_CBDESC(CB) (CB::GetDesc())
 
 /********** MaterialBuilder **********/
 struct MaterialBuilder
