@@ -2,6 +2,8 @@
 #include "Standard.h"
 #include "Lighting.h"
 
+MIR_DECLARE_TEX2D(_MainTex, 0);
+
 struct PixelInput
 {
     float4 Pos : SV_POSITION;
@@ -31,7 +33,7 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor = input.Color;
 #if !DEBUG_SHADOW_MAP
-	finalColor *= GetTextureMain(input.Tex);
+	finalColor *= MIR_SAMPLE_TEX2D(_MainTex, input.Tex);
 #else
 	finalColor.xyz = float3(0, 0, CalcShadowFactor(samShadow, txDepthMap, input.PosInLight));
 #endif

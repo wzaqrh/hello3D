@@ -1,12 +1,7 @@
 /********** Skybox **********/
 #include "Standard.h"
 
-#if SHADER_MODEL > 30000
-TextureCube _MainTex : register(t0);
-#else
-texture  textureCubeSkybox : register(t0);
-samplerCUBE _MainTex : register(s0);
-#endif
+MIR_DECLARE_TEXCUBE(_MainTex, 0);
 
 struct VertexInput
 {
@@ -32,7 +27,7 @@ PixelInput VS(VertexInput input)
 float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = GetTextureCube(_MainTex, samLinear, input.Tex);
+	finalColor.rgb = MIR_SAMPLE_TEXCUBE(_MainTex, input.Tex).rgb;
 	finalColor.a = 1.0;
 	return finalColor;
 }

@@ -3,16 +3,15 @@
 #include "Skeleton.h"
 #include "Lighting.h"
 
-#if SHADER_MODEL > 30000
-Texture2D txSpecular : register(t1);
-Texture2D txNormal : register(t2);
-#else
-texture  textureSpecular : register(t1);
-sampler2D txSpecular : register(s1) = sampler_state { Texture = <textureSpecular>; };
+MIR_DECLARE_TEX2D(txAlbedo, 0);
 
-texture  textureNormal : register(t2);
-sampler2D txNormal : register(s2) = sampler_state { Texture = <textureNormal>; };
-#endif
+inline float3 GetAlbedo(float2 uv) 
+{
+	float3 albedo;
+	if (hasAlbedo) albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
+	else albedo = float3(1.0,1.0,1.0);
+	return albedo;
+}
 
 /************ ShadowCaster ************/
 struct ShadowCasterPixelInput
@@ -75,18 +74,11 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     return output;
 }
 
-inline float3 GetAlbedo(float2 uv) {
-	float3 albedo;
-	if (hasAlbedo) albedo = GetTexture2D(txMain, samLinear, uv).rgb;
-	else albedo = float3(1.0,1.0,1.0);	
-	return albedo;
-}
-
 float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
-	finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
+	//finalColor.rgb *= CalcShadowFactor(MIR_PASS_SHADOWMAP(txDepthMap), input.PosInLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }

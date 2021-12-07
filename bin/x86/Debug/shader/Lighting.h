@@ -50,32 +50,26 @@ inline float3 MirBlinnPhongLight(float3 toLight, float3 normal, float3 toEye, fl
 static const float SMAP_SIZE = 2048.0f;
 static const float SMAP_DX = 1.0f / SMAP_SIZE;
 
-float CalcShadowFactor(SamplerComparisonState samShadow,
-                       Texture2D shadowMap,
-					   float4 shadowPosH)
+float CalcShadowFactor(MIR_ARGS_SHADOWMAP(shadowMap), float4 shadowPosH)
 {
 	if (!HasDepthMap) return 1.0;
 	
-	// 透视除法
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
-	
-	// NDC空间的深度值
-    float depth = shadowPosH.z;
 #define PCF_SHADOW
 #if !defined PCF_SHADOW
-	//return shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy, depth).r;
-	return step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy).r);
+	return MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r;
+	//return step(depth, MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r);
 #else
 	// 纹素在纹理坐标下的宽高
     const float dx = SMAP_DX;
 
     float percentLit = 0.0f;
-    const float2 offsets[9] =
-    {
-        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
-		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx)
+    const float3 offsets[9] = 
+	{
+        float3(-dx, -dx,  0.0f), float3(0.0f, -dx, 0.0f),  float3(dx, -dx, 0.0f),
+		float3(-dx, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(dx, 0.0f, 0.0f),
+		float3(-dx, +dx,  0.0f), float3(0.0f, +dx, 0.0f),  float3(dx, +dx, 0.0f)
     };
 
     // samShadow为compareValue <= sampleValue时为1.0f(反之为0.0f), 对相邻四个纹素进行采样比较
@@ -88,12 +82,11 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 	[unroll]
     for (int i = 0; i < 9; ++i)
     {
-        //percentLit += shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy + offsets[i], depth).r;
+		float3 shadowPosOffset = shadowPosH + offsets[i];
+        percentLit += MIR_SAMPLE_SHADOW(shadowMap, shadowPosOffset).r;
 		//percentLit += step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy + offsets[i]).r);
-		percentLit += step(1.0, depth);
 	}
     
     return percentLit /= 9.0f;
-	//return 1.0f;	
 #endif
 }

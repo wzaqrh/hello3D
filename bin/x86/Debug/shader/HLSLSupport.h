@@ -46,7 +46,7 @@
     #define MIR_ALLOWED_MRT_COUNT 8
 #endif
 
-#if (SHADER_TARGET < 30)
+#if (SHADER_MODEL < 30)
     //no fast coherent dynamic branching on these hardware
 #else
     #define MIR_FAST_COHERENT_DYNAMIC_BRANCHING 1
@@ -142,9 +142,12 @@
 // MIR_SAMPLE_SHADOW_PROJ samples with a projected coordinate (UV and Z divided by w).
 #if defined(SHADER_API_D3D11)
     // DX11 & hlslcc platforms: built-in PCF
-    #define MIR_DECLARE_SHADOWMAP(tex) Texture2D tex; SamplerComparisonState sampler##tex
-    #define MIR_DECLARE_TEXCUBE_SHADOWMAP(tex) TextureCube tex; SamplerComparisonState sampler##tex
+    #define MIR_DECLARE_SHADOWMAP(tex,slot) Texture2D tex :register(t##slot); SamplerComparisonState sampler##tex :register(s##slot)
+    #define MIR_ARGS_SHADOWMAP(tex) Texture2D tex, SamplerComparisonState sampler##tex
+	#define MIR_PASS_SHADOWMAP(tex) tex, sampler##tex
+	#define MIR_DECLARE_TEXCUBE_SHADOWMAP(tex) TextureCube tex; SamplerComparisonState sampler##tex
     #define MIR_SAMPLE_SHADOW(tex,coord) tex.SampleCmpLevelZero (sampler##tex,(coord).xy,(coord).z)
+	
     #define MIR_SAMPLE_SHADOW_PROJ(tex,coord) tex.SampleCmpLevelZero (sampler##tex,(coord).xy/(coord).w,(coord).z/(coord).w)
     #if defined(SHADER_API_GLCORE) || defined(SHADER_API_GLES3) || defined(SHADER_API_VULKAN) || defined(SHADER_API_SWITCH)
         // GLSL does not have textureLod(samplerCubeShadow, ...) support. GLES2 does not have core support for samplerCubeShadow, so we ignore it.
@@ -154,8 +157,10 @@
     #endif
 #else
     // Fallback / No built-in shadowmap comparison sampling: regular texture sample and do manual depth comparison
-    #define MIR_DECLARE_SHADOWMAP(tex) sampler2D_float tex
-    #define MIR_DECLARE_TEXCUBE_SHADOWMAP(tex) samplerCUBE_float tex
+    #define MIR_DECLARE_SHADOWMAP(tex,slot) sampler2D_float tex
+    #define MIR_ARGS_SHADOWMAP(tex) sampler2D_float tex
+	#define MIR_PASS_SHADOWMAP(tex) tex
+	#define MIR_DECLARE_TEXCUBE_SHADOWMAP(tex) samplerCUBE_float tex
     #define MIR_SAMPLE_SHADOW(tex,coord) ((SAMPLE_DEPTH_TEXTURE(tex,(coord).xy) < (coord).z) ? 0.0 : 1.0)
     #define MIR_SAMPLE_SHADOW_PROJ(tex,coord) ((SAMPLE_DEPTH_TEXTURE_PROJ(tex,MIR_PROJ_COORD(coord)) < ((coord).z/(coord).w)) ? 0.0 : 1.0)
     #define MIR_SAMPLE_TEXCUBE_SHADOW(tex,coord) ((SAMPLE_DEPTH_CUBE_TEXTURE(tex,(coord).xyz) < (coord).w) ? 0.0 : 1.0)
@@ -180,9 +185,11 @@
     #define MIR_SEPARATE_TEXTURE_SAMPLER
 
     // 2D textures
-	#define MIR_DECLARE_TEX2D(tex, slot) Texture2D tex : register(t##slot); SamplerState sampler##tex : register(s##slot)
-    #define MIR_DECLARE_TEX2D_NOSAMPLER(tex) Texture2D tex
-    #define MIR_DECLARE_TEX2D_NOSAMPLER_INT(tex) Texture2D<int4> tex
+	#define MIR_DECLARE_TEX2D(tex,slot) Texture2D tex :register(t##slot); SamplerState sampler##tex :register(s##slot)
+    #define MIR_ARGS_TEX2D(tex) Texture2D tex, SamplerState sampler##tex
+	#define MIR_PASS_TEX2D(tex) tex, sampler##tex
+	#define MIR_DECLARE_TEX2D_NOSAMPLER(tex) Texture2D tex
+	#define MIR_DECLARE_TEX2D_NOSAMPLER_INT(tex) Texture2D<int4> tex
     #define MIR_DECLARE_TEX2D_NOSAMPLER_UINT(tex) Texture2D<uint4> tex
     #define MIR_SAMPLE_TEX2D(tex,coord) tex.Sample (sampler##tex,coord)
     #define MIR_SAMPLE_TEX2D_SAMPLER(tex,samplertex,coord) tex.Sample (sampler##samplertex,coord)
@@ -196,7 +203,7 @@
 #endif
 
     // Cubemaps
-    #define MIR_DECLARE_TEXCUBE(tex) TextureCube tex; SamplerState sampler##tex
+    #define MIR_DECLARE_TEXCUBE(tex,slot) TextureCube tex :register(t##slot); SamplerState sampler##tex :register(s##slot)
     #define MIR_ARGS_TEXCUBE(tex) TextureCube tex, SamplerState sampler##tex
     #define MIR_PASS_TEXCUBE(tex) tex, sampler##tex
     #define MIR_PASS_TEXCUBE_SAMPLER(tex,samplertex) tex, sampler##samplertex
@@ -252,7 +259,9 @@
 #else
     // DX9 style HLSL syntax; same object for texture+sampler
     // 2D textures
-    #define MIR_DECLARE_TEX2D(tex) sampler2D tex
+    #define MIR_DECLARE_TEX2D(tex, slot) sampler2D tex
+	#define MIR_ARGS_TEX2D(tex) sampler2D tex
+	#define MIR_PASS_TEX2D(tex) tex
     #define MIR_DECLARE_TEX2D_HALF(tex) sampler2D_half tex
     #define MIR_DECLARE_TEX2D_FLOAT(tex) sampler2D_float tex
 
@@ -263,7 +272,7 @@
     #define MIR_SAMPLE_TEX2D(tex,coord) tex2D (tex,coord)
     #define MIR_SAMPLE_TEX2D_SAMPLER(tex,samplertex,coord) tex2D (tex,coord)
     // Cubemaps
-    #define MIR_DECLARE_TEXCUBE(tex) samplerCUBE tex
+    #define MIR_DECLARE_TEXCUBE(tex,slot) samplerCUBE tex
     #define MIR_ARGS_TEXCUBE(tex) samplerCUBE tex
     #define MIR_PASS_TEXCUBE(tex) tex
     #define MIR_PASS_TEXCUBE_SAMPLER(tex,samplertex) tex

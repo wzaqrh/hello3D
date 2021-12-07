@@ -3,40 +3,11 @@
 #include "Skeleton.h"
 #include "Lighting.h"
 
-#if SHADER_MODEL > 30000
-//Texture2D txAlbedo : register(t0);//rgb
-#define txAlbedo txMain
-Texture2D txNormal : register(t1);//rgb
-Texture2D txMetalness : register(t2);//r
-Texture2D txSmoothness : register(t3);//r
-Texture2D txAmbientOcclusion : register(t4);//r
-#else
-texture  textureAlbedo : register(t0);
-sampler2D txAlbedo : register(s0) = sampler_state { 
-	Texture = <textureAlbedo>; 
-};
-
-texture  textureNormal : register(t1);
-sampler2D txNormal : register(s1) = sampler_state { 
-	Texture = <textureNormal>; 
-};
-
-texture  textureMetalness : register(t2);
-sampler2D txMetalness : register(s2) = sampler_state { 
-	Texture = <textureMetalness>; 
-};
-
-texture  textureSmoothness : register(t3);
-sampler2D txSmoothness : register(s3) = sampler_state { 
-	Texture = <textureSmoothness>;
-};
-
-texture  textureAmbientOcclusion : register(t4);
-sampler2D txAmbientOcclusion : register(s4) = sampler_state { 
-	Texture = <textureAmbientOcclusion>; 	
-};
-#endif
-
+MIR_DECLARE_TEX2D(txAlbedo, 0);
+MIR_DECLARE_TEX2D(txNormal, 1);
+MIR_DECLARE_TEX2D(txMetalness, 2);
+MIR_DECLARE_TEX2D(txSmoothness, 3);
+MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 
 cbuffer cbUnityMaterial : register(b3)
 {
@@ -139,8 +110,8 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 #ifdef _SPECGLOSSMAP//Shader='Standard(Specular setup)' -> 'Specular'=$texture
     #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     #else
-		sg.rgb = GetTexture2D(txMetalness, samLinear, uv).rgb;
-		sg.a = GetTexture2D(txSmoothness, samLinear, uv).r;
+		sg.rgb = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
+		sg.a = MIR_SAMPLE_TEX2D(txSmoothness, uv).r;
     #endif
     sg.a *= _GlossMapScale;//Shader='Standard' -> 'Smoothness Scale'=[0,1]
 #else
@@ -149,7 +120,7 @@ float4 SpecularGloss(float2 uv)//float4(_SpecColor.rgb, tex2D(_MainTex, uv).a * 
 }
 float3 Albedo(float2 i_tex)//_Color.rgb * tex2D(_MainTex, texcoords.xy).rgb
 {
-	return _Color.rgb * GetTexture2D(txAlbedo, samLinear, i_tex).rgb;
+	return _Color.rgb * MIR_SAMPLE_TEX2D(txAlbedo, i_tex).rgb;
 }
 float SpecularStrength(float3 specular)//max(specular.rgb)
 {
@@ -189,8 +160,8 @@ float2 MetallicGloss(float2 uv)
 	//_METALLICGLOSSMAP
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     #else
-        mg.x = GetTexture2D(txMetalness, samLinear, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
-		mg.y = GetTexture2D(txSmoothness, samLinear, uv).r;
+        mg.x = MIR_SAMPLE_TEX2D(txMetalness, uv).r;//_MetallicGlossMap("Metallic", 2D) = "white" {}
+		mg.y = MIR_SAMPLE_TEX2D(txSmoothness, uv).r;
     #endif
 	mg.y *= _GlossMapScale;
 	//_METALLICGLOSSMAP
@@ -239,7 +210,7 @@ float Alpha(float2 uv)//_Color.a
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return _Color.a;
 #else
-    return GetTexture2D(txAlbedo, samLinear, uv).a * _Color.a;
+    return MIR_SAMPLE_TEX2D(txAlbedo, uv).a * _Color.a;
 #endif
 }
 float3 PreMultiplyAlpha(float3 diffColor, float alpha, float oneMinusReflectivity, out float outModifiedAlpha)//diffColor*alpha,1-oneMinusReflectivity + alpha*oneMinusReflectivity
@@ -285,9 +256,9 @@ float LerpOneTo(float b, float t)
 float Occlusion(float2 uv)//1-_OcclusionStrength + tex2D(_OcclusionMap, uv).g*_OcclusionStrength
 {
 #if (SHADER_TARGET < 30)
-    return GetTexture2D(txAmbientOcclusion, samLinear, uv).g;
+    return MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).g;
 #else
-    float occ = GetTexture2D(txAmbientOcclusion, samLinear, uv).g;
+    float occ = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).g;
     return LerpOneTo(occ, _OcclusionStrength);
 #endif
 }
@@ -377,7 +348,7 @@ float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
     float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
     float3 R = glossIn.reflUVW;
 	
-    float4 rgbm = GetTextureCubeLevel(txSkybox, samLinear, R, mip);
+    float4 rgbm = MIR_SAMPLE_TEXCUBE_LOD(txSkybox, R, mip);
     //skybox tone mapping
 	rgbm.rgb *= (1.0f + rgbm.rgb/1.5f);
 	rgbm.rgb /= (1.0f + rgbm.rgb);
@@ -572,7 +543,7 @@ float3x3 CalTBN(float3 normal, float3 tangent, float3 bitangent) {
 	return float3x3(t,b,n);
 }
 float3 GetBumpBySampler(float3x3 tbn, float2 texcoord) {
-	float3 bump = GetTexture2D(txNormal, samLinear, texcoord).xyz * 2.0 - 1.0;
+	float3 bump = MIR_SAMPLE_TEX2D(txNormal, texcoord).xyz * 2.0 - 1.0;
 	bump = mul(bump, tbn);
 	return bump;
 }
@@ -585,7 +556,7 @@ float4 PS(PixelInput input) : SV_Target
 	if (hasNormal > 0) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
-		float3 rawNormal = GetTexture2D(txNormal, samLinear, input.Tex).xyz;
+		float3 rawNormal = MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz;
 		normal = normalize(2.0 * rawNormal - 1.0);
 		normal = normalize(mul(input.TangentBasis, normal));
 	}
@@ -598,24 +569,23 @@ float4 PS(PixelInput input) : SV_Target
 	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, IsSpotLight, false);
 	finalColor.w = 1.0;
 	
-	//finalColor.rgb *= CalLightStrengthWithShadow(input.PosInLight);
-	finalColor.rgb *= CalcShadowFactor(samShadow, txDepthMap, input.PosInLight);
+	//finalColor.rgb *= CalcShadowFactor(MIR_PASS_SHADOWMAP(txDepthMap), input.PosInLight);
 #if 0
 	{
 		float3 ao;
 		if (hasAO)
-			ao = GetTexture2D(txAmbientOcclusion, samLinear, input.Tex).xyz;
+			ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, input.Tex).xyz;
 		else
 			ao = 0.0;
 		
-		float3 albedo = GetTexture2D(txAlbedo, samLinear, input.Tex).rgb; 
+		float3 albedo = MIR_SAMPLE_TEX2D(txAlbedo, input.Tex).rgb; 
 		albedo = pow(albedo, 2.2);
 		
 		float3 ambient = albedo * ao * 0.03;
 		finalColor.xyz += ambient;
 	}
 #endif
-	//float4 c = GetTexture2D(txAlbedo, samLinear, input.Tex).rgba;
+	//float4 c = MIR_SAMPLE_TEX2D(txAlbedo, input.Tex).rgba;
 	//finalColor.rgb = float4(c.rgb * c.a,c.a);
 	
     //finalColor.xyz = finalColor.xyz / (finalColor.xyz + 1.0); // HDR tonemapping
@@ -634,7 +604,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 	if (hasNormal > 0) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
-		float3 rawNormal = GetTexture2D(txNormal, samLinear, input.Tex).xyz;
+		float3 rawNormal = MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz;
 		normal = normalize(2.0 * rawNormal - 1.0);
 		normal = normalize(mul(input.TangentBasis, normal));
 	}
