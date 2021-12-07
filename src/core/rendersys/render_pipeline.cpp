@@ -11,6 +11,7 @@
 
 namespace mir {
 
+#define TEXTURE_SLOT_START 0
 #define E_TEXTURE_MAIN 0
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
@@ -45,8 +46,8 @@ void RenderPipeline::BindPass(const PassPtr& pass)
 
 	mRenderSys.SetVertexLayout(pass->mInputLayout);
 
-	if (!pass->mSamplers.empty())
-		mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
+	if (!pass->mSamplers.empty()) mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
+	else mRenderSys.SetSamplers(0, nullptr, 0);
 }
 
 void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op)
@@ -64,11 +65,11 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 	}
 
 	{
-		if (textures.Count() > 0)
-			mRenderSys.SetTextures(E_TEXTURE_MAIN, &textures.Textures[0], textures.Textures.size());
-
 		//if (op.OnBind) op.OnBind(mRenderSys, *pass, op);
 
+		if (textures.Count() > 0) mRenderSys.SetTextures(TEXTURE_SLOT_START, &textures.Textures[0], textures.Textures.size());
+		else mRenderSys.SetTextures(TEXTURE_SLOT_START, nullptr, 0);
+		
 		for (auto& cbBytes : op.UBOBytesByName)
 			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
 

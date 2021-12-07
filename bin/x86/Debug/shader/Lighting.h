@@ -56,7 +56,7 @@ float CalcShadowFactor(MIR_ARGS_SHADOWMAP(shadowMap), float4 shadowPosH)
 	
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
-#define PCF_SHADOW
+//#define PCF_SHADOW
 #if !defined PCF_SHADOW
 	return MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r;
 	//return step(depth, MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r);

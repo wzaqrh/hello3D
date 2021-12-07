@@ -9,7 +9,14 @@
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
-		<UseSampler>samStandard</UseSampler>
+		<UseTexture>txGlobal</UseTexture>
+		<Texture>
+			<Element Slot="0" Filter="0x15" Address="1"></Element>
+			<Element Slot="1" Filter="0x15" Address="1"></Element>
+			<Element Slot="2" Filter="0x15" Address="1"></Element>
+			<Element Slot="3" Filter="0x15" Address="1"></Element>
+			<Element Slot="4" Filter="0x15" Address="1"></Element>
+		</Texture>
 		
 		<Uniform Name="cbUnityMaterial" Slot="3">
 			<Element Name="_SpecColor"			Type="float4" Default="1,1,1,1"></Element>

@@ -3,11 +3,13 @@
 	
 	<PROGRAM>
 		<Topology>5</Topology>
-		<Attribute Name="vbSkybox">
+		<Attribute>
 			<Element SemanticName="POSITION" Format="6"></Element>
 		</Attribute>
 		<UseUniform>cbGlobalParam</UseUniform>
-		<UseSampler>samStandard</UseSampler>
+		<Texture>
+			<Element Slot="0" Filter="0x15" Address="3"></Element>
+		</Texture>
 		
 		<FileName>Skybox</FileName>
 		<VertexEntry>VS</VertexEntry>

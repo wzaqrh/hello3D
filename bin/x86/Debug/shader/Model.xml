@@ -8,7 +8,10 @@
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
-		<UseSampler>samStandard</UseSampler>
+		<UseTexture>txGlobal</UseTexture>
+		<Texture>
+			<Element Slot="0">txAlbedo</Element>
+		</Texture>
 		
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>

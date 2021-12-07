@@ -78,7 +78,7 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
-	//finalColor.rgb *= CalcShadowFactor(MIR_PASS_SHADOWMAP(txDepthMap), input.PosInLight);
+	finalColor.rgb *= CalcShadowFactor(MIR_PASS_SHADOWMAP(txDepthMap), input.PosInLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }

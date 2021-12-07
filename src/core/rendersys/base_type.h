@@ -63,6 +63,7 @@ inline bool operator<(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
 
 /********** states **********/
 enum CompareFunc {
+	kCompareUnkown = 0,
 	kCompareNever = 1,
 	kCompareLess = 2,
 	kCompareEqual = 3,
@@ -173,6 +174,24 @@ enum SamplerFilterMode {
 	kSamplerFilterMaximumMinMagLinearMipPoint = 0x194,
 	kSamplerFilterMaximumMinMagMipLinear = 0x195,
 	kSamplerFilterMaximumAnisotropic = 0x1d5
+};
+enum AddressMode {
+	kAddressUnkown = 0,
+	kAddressWrap = 1,
+	kAddressMirror = 2,
+	kAddressClamp = 3,
+	kAddressBorder = 4,
+	kAddressMirrorOnce = 5
+};
+struct SamplerDesc {
+	static SamplerDesc Make(SamplerFilterMode filter, CompareFunc cmpFunc,
+		AddressMode addrU = kAddressWrap, AddressMode addrV = kAddressWrap, AddressMode addrW = kAddressWrap) {
+		return SamplerDesc{filter, cmpFunc, addrU, addrV, addrW};
+	}
+public:
+	SamplerFilterMode Filter;
+	CompareFunc CmpFunc;
+	AddressMode AddressU, AddressV, AddressW;
 };
 
 enum ResourceFormat {
@@ -335,7 +354,7 @@ static_assert(MAKE_CORNER(kCubeConerFront, kCubeConerRight, kCubeConerTop) == kC
 
 /********** input layout **********/
 enum PrimitiveTopology {
-	kPrimTopologyUndefined = 0,
+	kPrimTopologyUnkown = 0,
 	kPrimTopologyPointList = 1,
 	kPrimTopologyLineList = 2,
 	kPrimTopologyLineStrip = 3,

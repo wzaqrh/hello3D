@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <d3d11.h>
+#include "core/mir_config.h"
 #include "core/rendersys/texture.h"
 
 namespace mir {
@@ -12,6 +13,9 @@ public:
 	ID3D11SamplerState*& GetSampler11() { return mSampler; }
 public:
 	ID3D11SamplerState* mSampler = nullptr;
+#if defined MIR_RESOURCE_DEBUG
+	SamplerDesc mDesc;
+#endif
 };
 
 class Texture11 : public ImplementResource<ITexture>

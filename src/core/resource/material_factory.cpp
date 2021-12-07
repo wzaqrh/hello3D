@@ -95,15 +95,13 @@ public:
 		mResourceMng.AddResourceDependency(mMaterial, program);
 		return program;
 	}
-	MaterialBuilder& AddSampler(ISamplerStatePtr sampler, int count = 1) {
-		while (count-- > 0)
-			mCurPass->AddSampler(sampler);
+	MaterialBuilder& AddSampler(ISamplerStatePtr sampler) {
+		mCurPass->AddSampler(sampler);
 		mResourceMng.AddResourceDependency(mMaterial, sampler);
 		return *this;
 	}
-	MaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler, int count = 1) {
-		while (count-- > 0)
-			mCurTech->AddSampler(sampler);
+	MaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler) {
+		mCurTech->AddSampler(sampler);
 		mResourceMng.AddResourceDependency(mMaterial, sampler);
 		return *this;
 	}
@@ -165,16 +163,28 @@ public:
 	int Slot;
 };
 struct XmlSamplerInfoSet {
-	void Add(SamplerFilterMode filterMode, size_t slot) {
-		Samplers.emplace_back(std::make_pair(filterMode, slot));
+	TemplateT void Add(T&& samplerDesc, int slot) {
+		if (slot >= 0) {
+			if (Samplers.size() < slot + 1)
+				Samplers.resize(slot + 1);
+			Samplers[slot] = std::forward<T>(samplerDesc);
+		}
+		else {
+			Samplers.push_back(std::forward<T>(samplerDesc));
+		}
 	}
 	void Add(const XmlSamplerInfoSet& other) {
-		Samplers.insert(Samplers.end(), other.Samplers.begin(), other.Samplers.end());
+		if (Samplers.size() < other.Samplers.size())
+			Samplers.resize(other.Samplers.size());
+		for (size_t i = 0; i < other.Samplers.size(); ++i) {
+			if (Samplers[i].CmpFunc == kCompareUnkown)
+				Samplers[i] = other.Samplers[i];
+		}
 	}
-	size_t size() const { return Samplers.size(); }
-	const std::pair<SamplerFilterMode, size_t>& operator[](size_t pos) const { return Samplers[pos]; }
+	size_t Count() const { return Samplers.size(); }
+	const SamplerDesc& operator[](size_t pos) const { return Samplers[pos]; }
 public:
-	std::vector<std::pair<SamplerFilterMode, size_t>> Samplers;
+	std::vector<SamplerDesc> Samplers;
 };
 struct XmlProgramInfo {
 	TemplateT void AddUniform(T&& uniform, int slot = -1) {
@@ -351,12 +361,13 @@ private:
 
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Attribute"))) {
+			auto& node_attribute = it.second;
 			XmlAttributeInfo attribute;
 
-			int elementCount = it.second.count("Element");
+			int elementCount = node_attribute.count("Element");
 			attribute.Layout.resize(elementCount);
 			int byteOffset = 0, j = 0;
-			for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
+			for (auto& element : boost::make_iterator_range(node_attribute.equal_range("Element"))) {
 				auto& layoutJ = attribute.Layout[j];
 				layoutJ = LayoutInputElement{
 					element.second.get<std::string>("<xmlattr>.SemanticName"),
@@ -371,10 +382,10 @@ private:
 				++j;
 			}
 
-			std::string Name = it.second.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
+			std::string Name = node_attribute.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
 			mAttrByName.insert(std::make_pair(Name, attribute));
 
-			Name = PropertyTreePath(nodeProgram, it.second, index).Path.string();
+			Name = PropertyTreePath(nodeProgram, node_attribute, index).Path.string();
 			mAttrByName.insert(std::make_pair(Name, attribute));
 
 			vis.shaderInfo.Program.AddAttribute(std::move(attribute));
@@ -393,13 +404,14 @@ private:
 
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Uniform"))) {
+			auto& node_uniform = it.second;
 			XmlUniformInfo uniform;
-			uniform.IsUnique = it.second.get<bool>("<xmlattr>.IsUnique", true);
+			uniform.IsUnique = node_uniform.get<bool>("<xmlattr>.IsUnique", true);
 
 			ConstBufferDeclBuilder builder(uniform.Decl);
 
 			int byteOffset = 0;
-			for (auto& element : boost::make_iterator_range(it.second.equal_range("Element"))) {
+			for (auto& element : boost::make_iterator_range(node_uniform.equal_range("Element"))) {
 				int size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
 				int count = element.second.get<int>("<xmlattr>.Count", 0);
 				int offset = element.second.get<int>("<xmlattr>.Offset", byteOffset);
@@ -440,15 +452,15 @@ private:
 			int dataSize = uniform.Data.size();
 			if (dataSize & 15) uniform.Data.resize((dataSize + 15)/16*16);
 
-			uniform.Slot = it.second.get<int>("<xmlattr>.Slot", -1);
+			uniform.Slot = node_uniform.get<int>("<xmlattr>.Slot", -1);
 
-			std::string Name = it.second.get<std::string>("<xmlattr>.Name");
-			uniform.ShortName = it.second.get<std::string>("<xmlattr>.ShortName", Name);
+			std::string Name = node_uniform.get<std::string>("<xmlattr>.Name");
+			uniform.ShortName = node_uniform.get<std::string>("<xmlattr>.ShortName", Name);
 
-			Name = it.second.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
+			Name = node_uniform.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
 			mUniformByName.insert(std::make_pair(Name, uniform));
 
-			Name = PropertyTreePath(nodeProgram, it.second, index).Path.string();
+			Name = PropertyTreePath(nodeProgram, node_uniform, index).Path.string();
 			mUniformByName.insert(std::make_pair(Name, uniform));
 
 			vis.shaderInfo.Program.AddUniform(std::move(uniform));
@@ -456,7 +468,7 @@ private:
 		}
 	}
 	void VisitSamplers(const PropertyTreePath& nodeProgram, Visitor& vis) {
-		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseSampler"))) {
+		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseTexture"))) {
 			std::string refName = it.second.data();
 			auto find_iter = mSamplerSetByName.find(refName);
 			if (find_iter != mSamplerSetByName.end()) {
@@ -465,18 +477,33 @@ private:
 		}
 
 		int index = 0;
-		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Sampler"))) {
+		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Texture"))) {
+			auto& node_texture = it.second;
 			XmlSamplerInfoSet samplerSet;
-			for (auto& node_element : it.second.get_child("Element")) {
-				samplerSet.Add(static_cast<SamplerFilterMode>(node_element.second.get<int>("<xmlattr>.Filter", kSamplerFilterMinMagMipLinear)),
-					node_element.second.get<int>("<xmlattr>.Slot", 0)
-				);
+			for (auto& it : boost::make_iterator_range(node_texture.equal_range("Element"))) {
+				auto& node_element = it.second;
+				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
+				
+				SamplerFilterMode filter = (cmpFunc != kCompareNever) ? kSamplerFilterCmpMinMagLinearMipPoint : kSamplerFilterMinMagMipLinear;
+				filter = static_cast<SamplerFilterMode>(node_element.get<int>("<xmlattr>.Filter", filter));
+
+				int address = (cmpFunc != kCompareNever) ? kAddressBorder : kAddressClamp;
+				address = node_element.get<int>("<xmlattr>.Address", address);
+				
+				int slot = node_element.get<int>("<xmlattr>.Slot", -1);
+				samplerSet.Add(SamplerDesc::Make(
+					filter,
+					cmpFunc,
+					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressU", address)),
+					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressV", address)),
+					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressW", address))
+				), slot);
 			}
 
-			std::string Name = it.second.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
+			std::string Name = node_texture.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
 			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
 
-			Name = PropertyTreePath(nodeProgram, it.second, index).Path.string();
+			Name = PropertyTreePath(nodeProgram, node_texture, index).Path.string();
 			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
 
 			vis.shaderInfo.Program.AddSamplers(std::move(samplerSet));
@@ -658,12 +685,15 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 				BOOST_ASSERT(false);
 			}
 
-			for (size_t k = 0; k < shaderInfo.Program.SamplerSet.size(); ++k) {
-				const auto& elem = shaderInfo.Program.SamplerSet[k];
-				builder.AddSampler(resourceMng.CreateSampler(launchMode, elem.first, kCompareNever));
+			//builder.ClearSamplersToTech();
+			for (size_t k = 0; k < shaderInfo.Program.SamplerSet.Count(); ++k) {
+				const auto& sd = shaderInfo.Program.SamplerSet[k];
+				builder.AddSampler(sd.CmpFunc != kCompareUnkown 
+					? resourceMng.CreateSampler(launchMode, sd) 
+					: nullptr);
 			}
-		}
-	}
+		}//for subShaderInfo.Passes
+	}//for shaderInfo.SubShaders
 
 	for (size_t slot = 0; slot < shaderInfo.Program.Uniforms.size(); ++slot) {
 		auto& uniformSlot = shaderInfo.Program.Uniforms[slot];
@@ -674,7 +704,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 
 	builder.CloneTechnique(*this, "d3d9");
 	builder.ClearSamplersToTech();
-	builder.AddSamplerToTech(resourceMng.CreateSampler(launchMode, kSamplerFilterMinMagMipLinear, kCompareNever));
+	builder.AddSamplerToTech(resourceMng.CreateSampler(launchMode, SamplerDesc::Make(kSamplerFilterMinMagMipLinear, kCompareNever)));
 
 	return builder.Build();
 }

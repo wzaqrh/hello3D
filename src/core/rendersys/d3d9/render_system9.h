@@ -49,7 +49,7 @@ public:
 	IProgramPtr LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders) override;
 	void SetProgram(IProgramPtr program) override;
 
-	ISamplerStatePtr LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc comp) override;
+	ISamplerStatePtr LoadSampler(IResourcePtr res, const SamplerDesc& samplerDesc) override;
 	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
 
 	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr) override;

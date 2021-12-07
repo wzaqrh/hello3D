@@ -2,9 +2,8 @@
 	<Include>Standard</Include>
 	
 	<PROGRAM>
-		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
+		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
-		<UseSampler>samStandard</UseSampler>
 		
 		<FileName>LayerColor</FileName>
 		<VertexEntry>VS</VertexEntry>

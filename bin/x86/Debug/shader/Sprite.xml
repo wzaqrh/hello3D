@@ -5,7 +5,10 @@
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
-		<UseSampler>samStandard</UseSampler>
+		<UseTexture>txGlobal</UseTexture>
+		<Texture>
+			<Element Slot="0" Filter="0x15" CompFunc="2" Address="1"></Element>
+		</Texture>
 		
 		<FileName>Sprite</FileName>
 		<VertexEntry>VS</VertexEntry>

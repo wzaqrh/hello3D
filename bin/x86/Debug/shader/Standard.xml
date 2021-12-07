@@ -31,10 +31,9 @@
 			<Element Name="IsSpotLight" 	 	Type="bool"></Element>
 		</Uniform>
 		
-		<Sampler Name="samStandard">
-			<Element Slot="0" Filter="0x15"></Element>
-			<Element Slot="1" Filter="0x55"></Element>
-			<Element Slot="2" Filter="0x0"></Element>
-		</Sampler>
+		<Texture Name="txGlobal">
+			<Element Slot="8" CompFunc="4">txDepthMap</Element>
+			<Element Slot="9" Filter="0x15">txSkybox</Element>
+		</Texture>
 	</PROGRAM>
 </Shader>

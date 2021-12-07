@@ -703,9 +703,10 @@ static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(ITextureP
 	}
 	return views;
 }
-void RenderSystem11::SetTextures(size_t slot, ITexturePtr textures[], size_t count) {
+void RenderSystem11::SetTextures(size_t slot, ITexturePtr textures[], size_t count) 
+{
 	std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures, count);
-	mDeviceContext->PSSetShaderResources(slot, texViews.size(), &texViews[0]);
+	mDeviceContext->PSSetShaderResources(slot, texViews.size(), !texViews.empty() ? &texViews[0] : nullptr);
 }
 bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
@@ -736,38 +737,45 @@ bool RenderSystem11::LoadRawTextureData(ITexturePtr texture, char* data, int dat
 	return true;
 }
 
-ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc cmpFunc)
+ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc& desc)
 {
 	BOOST_ASSERT(res);
-
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = static_cast<D3D11_FILTER>(filter);
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;//D3D11_TEXTURE_ADDRESS_MIRROR
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.Filter = static_cast<D3D11_FILTER>(desc.Filter);
+	sampDesc.AddressU = static_cast<D3D11_TEXTURE_ADDRESS_MODE>(desc.AddressU);
+	sampDesc.AddressV = static_cast<D3D11_TEXTURE_ADDRESS_MODE>(desc.AddressV);
+	sampDesc.AddressW = static_cast<D3D11_TEXTURE_ADDRESS_MODE>(desc.AddressW);
 	sampDesc.MipLODBias = 0.0f;
-	sampDesc.MaxAnisotropy = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
-	sampDesc.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(cmpFunc);
-	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
+	sampDesc.MaxAnisotropy = (desc.Filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
+	sampDesc.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(desc.CmpFunc);
+	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 1.0;
 	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	sampDesc.MaxLOD = 64;
 
-	ID3D11SamplerState* pSamplerLinear = nullptr;
-	if (CheckHR(mDevice->CreateSamplerState(&sampDesc, &pSamplerLinear)))
+	ID3D11SamplerState* pSampler = nullptr;
+	if (CheckHR(mDevice->CreateSamplerState(&sampDesc, &pSampler)))
 		return nullptr;
 
 	SamplerState11Ptr ret = std::static_pointer_cast<SamplerState11>(res);
-	ret->Init(pSamplerLinear);
+	ret->Init(pSampler);
+#if defined MIR_RESOURCE_DEBUG
+	ret->mDesc = desc;
+#endif
+
+	D3D11_SAMPLER_DESC desc1;
+	pSampler->GetDesc(&desc1);
+	BOOST_ASSERT(desc1.ComparisonFunc == desc.CmpFunc);
+
 	return ret;
 }
 void RenderSystem11::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count)
 {
-	BOOST_ASSERT(count > 0);
+	BOOST_ASSERT(count >= 0);
 	std::vector<ID3D11SamplerState*> passSamplers(count);
 	for (size_t i = 0; i < count; ++i)
 		passSamplers[i] = samplers[i] ? std::static_pointer_cast<SamplerState11>(samplers[i])->GetSampler11() : nullptr;
-	mDeviceContext->PSSetSamplers(0, passSamplers.size(), &passSamplers[0]);
+	mDeviceContext->PSSetSamplers(0, passSamplers.size(), !passSamplers.empty() ? &passSamplers[0] : nullptr);
 }
 
 void RenderSystem11::SetBlendFunc(const BlendState& blendFunc)

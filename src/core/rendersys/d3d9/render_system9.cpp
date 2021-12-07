@@ -419,7 +419,7 @@ IProgramPtr RenderSystem9::LoadProgram(IResourcePtr res, const std::vector<IShad
 }
 #endif
 
-ISamplerStatePtr RenderSystem9::LoadSampler(IResourcePtr res, SamplerFilterMode filter, CompareFunc cmpFunc)
+ISamplerStatePtr RenderSystem9::LoadSampler(IResourcePtr res, const SamplerDesc& samplerDesc)
 {
 	SamplerState9Ptr ret = MakePtr<SamplerState9>();
 	
@@ -428,12 +428,12 @@ ISamplerStatePtr RenderSystem9::LoadSampler(IResourcePtr res, SamplerFilterMode 
 	ret->mStates[D3DSAMP_ADDRESSW] = d3d::convert11To9(D3D11_TEXTURE_ADDRESS_WRAP);
 	ret->mStates[D3DSAMP_BORDERCOLOR] = D3DCOLOR_ARGB(0,0,0,0);
 
-	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = d3d::convert11To9(static_cast<D3D11_FILTER>(filter));
+	std::map<D3DSAMPLERSTATETYPE, D3DTEXTUREFILTERTYPE> fts = d3d::convert11To9(static_cast<D3D11_FILTER>(samplerDesc.Filter));
 	for (auto& iter : fts)
 		ret->mStates[iter.first] = iter.second;
 
 	ret->mStates[D3DSAMP_MIPMAPLODBIAS] = 0.0f;
-	ret->mStates[D3DSAMP_MAXANISOTROPY] = (filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
+	ret->mStates[D3DSAMP_MAXANISOTROPY] = (samplerDesc.Filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	ret->mStates[D3DSAMP_MAXMIPLEVEL] = D3D11_FLOAT32_MAX;
 
 	return ret;
