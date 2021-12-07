@@ -8,7 +8,7 @@
 		</Attribute>
 		<UseUniform>cbGlobalParam</UseUniform>
 		<Texture>
-			<Element Slot="0" Filter="0x15" Address="3"></Element>
+			<Element Slot="0" Filter="0x15" Address="3">_MainTex</Element>
 		</Texture>
 		
 		<FileName>Skybox</FileName>

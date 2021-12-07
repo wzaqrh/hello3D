@@ -1,7 +1,7 @@
-test_camera 0
-test_shadow_map
-test_model 4
+test_camera_output 0
 test_sprite 1
 test_spec_skybox
+test_shadow_map
+test_model 4
 test_cube 0
 test_framebuffer

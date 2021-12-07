@@ -35,8 +35,9 @@ public:
 	IFrameBufferPtr FetchOutput2PostProcess(ResourceFormat format = kFormatR8G8B8A8UNorm);
 	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm, ResourceFormat zstencilFmt = kFormatD24UNormS8UInt);
 private:
-	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
-	void SetOthogonalProj(const Eigen::Vector2i& size, double zFar);
+	void RecalculateProjection();
+	void SetPerspectiveProjection(const Eigen::Vector2i& size, double fov, double zFar);
+	void SetOthogonalProjection(const Eigen::Vector2i& size, double zFar);
 public:
 	const TransformPtr& GetTransform() const;
 	const SkyBoxPtr& GetSkyBox() const { return mSkyBox; }

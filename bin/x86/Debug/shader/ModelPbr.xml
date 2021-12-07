@@ -11,11 +11,11 @@
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
 		<Texture>
-			<Element Slot="0" Filter="0x15" Address="1"></Element>
-			<Element Slot="1" Filter="0x15" Address="1"></Element>
-			<Element Slot="2" Filter="0x15" Address="1"></Element>
-			<Element Slot="3" Filter="0x15" Address="1"></Element>
-			<Element Slot="4" Filter="0x15" Address="1"></Element>
+			<Element Slot="0">txAlbedo</Element>
+			<Element Slot="1">txNormal</Element>
+			<Element Slot="2">txMetalness</Element>
+			<Element Slot="3">txSmoothness</Element>
+			<Element Slot="4">txAmbientOcclusion</Element>
 		</Texture>
 		
 		<Uniform Name="cbUnityMaterial" Slot="3">

@@ -14,7 +14,7 @@ CameraPtr Camera::CreatePerspective(ResourceManager& resMng, const Eigen::Vector
 	CameraPtr camera = std::make_shared<Camera>(resMng);
 	camera->mScreenSize = size;
 	camera->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
-	camera->SetPerspectiveProj(size, fov, far1);
+	camera->SetPerspectiveProjection(size, fov, far1);
 	return camera;
 }
 
@@ -24,7 +24,7 @@ CameraPtr Camera::CreateOthogonal(ResourceManager& resMng, const Eigen::Vector2i
 	CameraPtr camera = std::make_shared<Camera>(resMng);
 	camera->mScreenSize = size;
 	camera->SetLookAt(eyePos, Eigen::Vector3f(0, 0, 0));
-	camera->SetOthogonalProj(size, far1);
+	camera->SetOthogonalProjection(size, far1);
 	return camera;
 }
 
@@ -71,19 +71,24 @@ void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 void Camera::SetFlipY(bool flip)
 {
 	mFlipY = flip;
+	RecalculateProjection();
+}
+
+void Camera::RecalculateProjection()
+{
 	switch (mType) {
 	case kCameraPerspective:
-		SetPerspectiveProj(mScreenSize, mFov, mZFar);
+		SetPerspectiveProjection(mScreenSize, mFov, mZFar);
 		break;
 	case kCameraOthogonal:
-		SetOthogonalProj(mScreenSize, mZFar);
+		SetOthogonalProjection(mScreenSize, mZFar);
 		break;
 	default:
 		break;
 	}
 }
 
-void Camera::SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar)
+void Camera::SetPerspectiveProjection(const Eigen::Vector2i& size, double fov, double zFar)
 {
 	mType = kCameraPerspective;
 
@@ -96,11 +101,11 @@ void Camera::SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double 
 
 #if !defined CAMERA_CENTER_IS_ZERO
 	mTransform->SetPosition(Eigen::Vector3f(mSize.x() / 2, mSize.y() / 2, 0));
-#endif
 	mTransformDirty = true;
+#endif
 }
 
-void Camera::SetOthogonalProj(const Eigen::Vector2i& size, double zFar)
+void Camera::SetOthogonalProjection(const Eigen::Vector2i& size, double zFar)
 {
 	mType = kCameraOthogonal;
 
@@ -111,8 +116,8 @@ void Camera::SetOthogonalProj(const Eigen::Vector2i& size, double zFar)
 	if (mFlipY) mProjection = Transform3Projective(mProjection).scale(Eigen::Vector3f(1, -1, 1)).matrix();
 #if !defined CAMERA_CENTER_IS_ZERO
 	mTransform->SetPosition(Eigen::Vector3f(mSize.x() / 2, mSize.y() / 2, 0));
-#endif
 	mTransformDirty = true;
+#endif
 }
 
 const TransformPtr& Camera::GetTransform() const

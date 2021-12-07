@@ -52,6 +52,7 @@ void TestCameraOutput::OnPostInitDevice()
 			camera2->SetDepth(1);
 			camera2->SetCameraMask(cameraMask2);
 			camera2->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
+			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
 
 			auto light2 = sceneMng->AddPointLight();
 			light2->SetCameraMask(cameraMask2);

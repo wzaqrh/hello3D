@@ -7,7 +7,7 @@
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
 		<Texture>
-			<Element Slot="0" Filter="0x15" CompFunc="2" Address="1"></Element>
+			<Element Slot="0">_MainTex</Element>
 		</Texture>
 		
 		<FileName>Sprite</FileName>
