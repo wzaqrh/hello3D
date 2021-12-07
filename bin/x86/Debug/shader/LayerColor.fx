@@ -1,6 +1,5 @@
 /********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
 #include "Standard.h"
-Texture2D txDiffuse : register(t0);
 
 struct PixelInput
 {

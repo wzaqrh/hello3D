@@ -1,4 +1,9 @@
+#ifndef STANDARD_H
+#define STANDARD_H
 #include "HLSLSupport.h"
+
+MIR_DECLARE_SHADOWMAP(txDepthMap, 8);
+MIR_DECLARE_TEX2D(txSkybox, 9);
 
 struct vbSurface
 {
@@ -34,6 +39,4 @@ cbuffer cbGlobalParam : register(b0)
 	float4 glstate_lightmodel_ambient;
 	bool HasDepthMap;
 }
-
-MIR_DECLARE_SHADOWMAP(txDepthMap, 8);
-MIR_DECLARE_TEX2D(txSkybox, 9);
+#endif

@@ -8,7 +8,7 @@
 
 using namespace mir;
 
-class TestCamera : public App
+class TestCameraOutput : public App
 {
 protected:
 	void OnRender() override;
@@ -20,7 +20,7 @@ private:
 };
 
 #define SCALE_BASE 0.01
-void TestCamera::OnPostInitDevice()
+void TestCameraOutput::OnPostInitDevice()
 {
 	auto sceneMng = mContext->SceneMng();
 	auto rendFac = mContext->RenderableFac();
@@ -71,11 +71,12 @@ void TestCamera::OnPostInitDevice()
 	if (mCaseIndex == 1)
 	{
 		const int SizeInf = 10000;
-		mCube0 = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 269.99), Eigen::Vector3f(SizeInf, SizeInf, 1));
-		mCube1 = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, -29.99), Eigen::Vector3f(25, 25, 1));
+		mCube0 = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 269.99), Eigen::Vector3f(SizeInf, SizeInf, 1), 0xffff6347);
+		mCube1 = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, -29.99), Eigen::Vector3f(25, 25, 1), 0xffff4763);
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
+	if (mCaseIndex == 0)
 	{
 		auto camera1 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 		camera1->SetDepth(2);
@@ -99,7 +100,7 @@ void TestCamera::OnPostInitDevice()
 	}
 }
 
-void TestCamera::OnRender()
+void TestCameraOutput::OnRender()
 {
 	if (mContext->RenderPipe()->BeginFrame()) {
 		if (mModel2) mModel2->Update(mTimer->mDeltaTime);
@@ -116,4 +117,4 @@ void TestCamera::OnRender()
 	}
 }
 
-auto reg = AppRegister<TestCamera>("test_camera");
+auto reg = AppRegister<TestCameraOutput>("test_camera_output");

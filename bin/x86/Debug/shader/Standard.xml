@@ -32,7 +32,7 @@
 		</Uniform>
 		
 		<Texture Name="txGlobal">
-			<Element Slot="8" CompFunc="4">txDepthMap</Element>
+			<Element Slot="8" CompFunc="2">txDepthMap</Element>
 			<Element Slot="9" Filter="0x15">txSkybox</Element>
 		</Texture>
 	</PROGRAM>

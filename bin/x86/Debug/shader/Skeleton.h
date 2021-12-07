@@ -1,3 +1,6 @@
+#ifndef SKELETON_H
+#define SKELETON_H
+
 struct vbWeightedSkin
 {
 	float3 Normal : NORMAL;
@@ -28,3 +31,4 @@ float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
 	Pos.xyz += mul(iPos, Models[iBlendIndices.w]).xyz * (1.0 - iBlendWeights.x - iBlendWeights.y - iBlendWeights.z);
 	return Pos;
 }
+#endif

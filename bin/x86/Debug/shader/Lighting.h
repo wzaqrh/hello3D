@@ -49,17 +49,15 @@ inline float3 MirBlinnPhongLight(float3 toLight, float3 normal, float3 toEye, fl
 
 static const float SMAP_SIZE = 2048.0f;
 static const float SMAP_DX = 1.0f / SMAP_SIZE;
-
 float CalcShadowFactor(MIR_ARGS_SHADOWMAP(shadowMap), float4 shadowPosH)
 {
 	if (!HasDepthMap) return 1.0;
 	
     shadowPosH.xyz /= shadowPosH.w;
 	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
-//#define PCF_SHADOW
+#define PCF_SHADOW
 #if !defined PCF_SHADOW
 	return MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r;
-	//return step(depth, MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r);
 #else
 	// 纹素在纹理坐标下的宽高
     const float dx = SMAP_DX;

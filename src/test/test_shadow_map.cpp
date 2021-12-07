@@ -51,7 +51,7 @@ void TestShadowMap::OnPostInitDevice()
 	if (1)
 	{
 		const int SizeInf = 10000;
-		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 200), Eigen::Vector3f(SizeInf, SizeInf, 2));
+		mCube = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 200), Eigen::Vector3f(SizeInf, SizeInf, 2), 0xffff6347);
 	}
 
 	if (1)

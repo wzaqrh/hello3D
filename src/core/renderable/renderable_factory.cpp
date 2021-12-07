@@ -41,9 +41,9 @@ MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, string_cref
 	return Mesh::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_SPRITE), vertCount, indexCount);
 }
 
-CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra)
+CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra, string_cref matName)
 {
-	auto cube = Cube::Create(mLaunchMode, mResourceMng, E_MAT_SPRITE);
+	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_LAYERCOLOR));
 	cube->SetPosition(center);
 	cube->SetHalfSize(halfsize);
 	cube->SetColor(bgra);
@@ -70,7 +70,7 @@ PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName
 {
 	PostProcessPtr process;
 	if (effectName == E_MAT_POSTPROC_BLOOM) {
-		process = Bloom::Create(mLaunchMode, mResourceMng, camera.FetchPostProcessInput());
+		process = Bloom::Create(mLaunchMode, mResourceMng, camera.FetchOutput2PostProcess());
 		camera.AddPostProcessEffect(process);
 	}
 	return process;

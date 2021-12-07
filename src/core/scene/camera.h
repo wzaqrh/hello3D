@@ -15,9 +15,9 @@ enum CameraType {
 class MIR_CORE_API Camera : boost::noncopyable
 {
 public:
-	static CameraPtr CreatePerspective(ResourceManager& resMng, const Eigen::Vector2i& size, 
+	static CameraPtr CreatePerspective(ResourceManager& resMng, const Eigen::Vector2i& screensize, 
 		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100, double fov = 45.0);
-	static CameraPtr CreateOthogonal(ResourceManager& resMng, const Eigen::Vector2i& size, 
+	static CameraPtr CreateOthogonal(ResourceManager& resMng, const Eigen::Vector2i& screensize, 
 		Eigen::Vector3f eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100);
 	Camera(ResourceManager& resMng);
 
@@ -32,7 +32,7 @@ public:
 
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
-	IFrameBufferPtr FetchPostProcessInput(ResourceFormat format = kFormatR8G8B8A8UNorm);
+	IFrameBufferPtr FetchOutput2PostProcess(ResourceFormat format = kFormatR8G8B8A8UNorm);
 	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm, ResourceFormat zstencilFmt = kFormatD24UNormS8UInt);
 private:
 	void SetPerspectiveProj(const Eigen::Vector2i& size, double fov, double zFar);
@@ -48,7 +48,7 @@ public:
 	const Eigen::Matrix4f& GetProjection() const  { return mProjection; }
 	
 	CameraType GetType() const { return mType; }
-	const Eigen::Vector2i& GetSize() const { return mSize; }
+	const Eigen::Vector2i& GetSize() const { return mScreenSize; }
 	const Eigen::Vector3f& GetLookAtPos() const { return mLookAtPos; }
 	const Eigen::Vector3f& GetEyePos() const { return mEyePos; }
 	float GetZFar() const { return mZFar; }
@@ -72,7 +72,7 @@ private:
 private:
 	IFrameBufferPtr mPostProcessInput, mOutput;
 
-	Eigen::Vector2i mSize;
+	Eigen::Vector2i mScreenSize, mSize;
 	Eigen::Vector3f mEyePos, mLookAtPos, mUpVector;
 
 	CameraType mType;

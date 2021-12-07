@@ -14,7 +14,7 @@ public:
 	SpritePtr CreateColorLayer(string_cref matName = "");
 	SpritePtr CreateSprite(string_cref imgpath = "", string_cref matName = "");
 	MeshPtr CreateMesh(int vertCount = 1024, int indexCount = 1024, string_cref matName = "");
-	CubePtr CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra = -1);
+	CubePtr CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra = -1, string_cref matName = "");
 	AssimpModelPtr CreateAssimpModel(string_cref matName = "");
 	LabelPtr CreateLabel(string_cref fontPath, int fontSize);
 	PostProcessPtr CreatePostProcessEffect(string_cref effectName, Camera& camera);

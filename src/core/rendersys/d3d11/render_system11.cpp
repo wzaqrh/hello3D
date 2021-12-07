@@ -762,11 +762,6 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc
 #if defined MIR_RESOURCE_DEBUG
 	ret->mDesc = desc;
 #endif
-
-	D3D11_SAMPLER_DESC desc1;
-	pSampler->GetDesc(&desc1);
-	BOOST_ASSERT(desc1.ComparisonFunc == desc.CmpFunc);
-
 	return ret;
 }
 void RenderSystem11::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count)
