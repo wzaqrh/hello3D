@@ -61,7 +61,7 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 				op.IndexBase = 4 * (i - lastCount);
 				op.IndexCount = 6 * lastCount;
 				op.Textures.Add(lastTex);
-				op.WorldTransform = mTransform->GetMatrix();
+				op.WorldTransform = mTransform->GetSRT();
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 				++count;
@@ -80,7 +80,7 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);
 		op.IndexCount = 6 * lastCount;
 		op.Textures.Add(lastTex);
-		op.WorldTransform = mTransform->GetMatrix();
+		op.WorldTransform = mTransform->GetSRT();
 		opList.AddOP(op);
 		++count;
 	}

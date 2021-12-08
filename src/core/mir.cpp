@@ -27,9 +27,8 @@ bool Mir::Initialize(HWND hWnd) {
 	mAiResourceFac = std::make_shared<AiResourceFactory>();
 	mResourceMng = std::make_shared<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
 	
-	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, *mResourceMng, mRenderSys->WinSize());
-	mSceneMng = std::make_shared<SceneManager>(*mResourceMng, mRenderSys->WinSize(), 
-		Camera::CreatePerspective(*mResourceMng, mRenderSys->WinSize()));
+	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, *mResourceMng);
+	mSceneMng = std::make_shared<SceneManager>(*mResourceMng);
 
 	mRenderableFac = std::make_shared<RenderableFactory>(*mResourceMng, mLaunchMode);
 	return true;
@@ -49,6 +48,11 @@ void Mir::Update()
 {
 	mRenderSys->Update(0);
 	mResourceMng->UpdateForLoading();
+}
+
+Eigen::Vector2i Mir::WinSize() const
+{
+	return mRenderSys->WinSize();
 }
 
 }

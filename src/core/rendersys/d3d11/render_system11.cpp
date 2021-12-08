@@ -75,7 +75,7 @@ bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 	}
 	return false;
 }
-bool RenderSystem11::_FetchBackFrameBufferColor()
+bool RenderSystem11::_FetchBackFrameBufferColor(int width, int height)
 {
 	ID3D11Texture2D* pBackBuffer = NULL;
 	if (CheckHR(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer))) return false;
@@ -84,6 +84,7 @@ bool RenderSystem11::_FetchBackFrameBufferColor()
 	if (CheckHR(mDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRTV))) return false;
 
 	mBackFrameBuffer = std::make_shared<FrameBuffer11>();
+	mBackFrameBuffer->SetSize(Eigen::Vector2i(width, height));
 	mBackFrameBuffer->SetAttachColor(0, std::make_shared<FrameBufferAttachByView>(pRTV));
 	mCurFrameBuffer = mBackFrameBuffer;
 	return true;
@@ -143,7 +144,8 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 
 	if (!_CreateDeviceAndSwapChain(rcWidth, rcHeight)) return false;
 
-	if (!_FetchBackFrameBufferColor() || !_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
+	if (!_FetchBackFrameBufferColor(rcWidth, rcHeight) 
+	 || !_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
 	SetFrameBuffer(nullptr);
 
 	if (!_SetRasterizerState()) return false;
@@ -304,9 +306,9 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(formats.back())) || formats.back() == kFormatUnknown);
 
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
-	for (size_t i = 0; i + 1 < formats.size(); ++i) {
+	framebuffer->SetSize(size);
+	for (size_t i = 0; i + 1 < formats.size(); ++i)
 		framebuffer->SetAttachColor(i, _CreateFrameBufferAttachColor(mDevice, size, formats[i]));
-	}
 	framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size, formats.size() >= 2 ? formats.back() : kFormatUnknown));
 
 #if defined MIR_RESOURCE_DEBUG
@@ -333,8 +335,15 @@ void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 	ID3D11ShaderResourceView* TextureNull = nullptr;
 	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
 
+	auto prevFbSize = mCurFrameBuffer->GetSize();
+
 	auto fb11 = std::static_pointer_cast<FrameBuffer11>(fb);
 	mCurFrameBuffer = fb11 ? fb11 : mBackFrameBuffer;
+
+	if (mCurFrameBuffer->GetSize() != prevFbSize) {
+		auto fbsize = mCurFrameBuffer->GetSize();
+		SetViewPort(0, 0, fbsize.x(), fbsize.y());
+	}
 
 	std::vector<ID3D11RenderTargetView*> vecRTV = mCurFrameBuffer->AsRTVs();
 	mDeviceContext->OMSetRenderTargets(vecRTV.size(), 

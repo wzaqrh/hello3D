@@ -11,11 +11,11 @@ namespace mir {
 class MIR_CORE_API SceneManager : boost::noncopyable 
 {
 public:
-	SceneManager(ResourceManager& resMng, const Eigen::Vector2i& screenSize, CameraPtr defCamera);
+	SceneManager(ResourceManager& resMng);
 	
 	void RemoveAllCameras();
-	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1, unsigned camMask = -1);
-	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov, unsigned camMask = -1);
+	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), float zFar = 100, unsigned camMask = -1);
+	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), float zFar = 100, float fov = 45, unsigned camMask = -1);
 
 	void RemoveAllLights();
 	SpotLightPtr AddSpotLight(unsigned camMask = -1);
@@ -36,7 +36,6 @@ private:
 	void ResortCameras() const;
 private:
 	ResourceManager& mResMng;
-	Eigen::Vector2i mScreenSize;
 
 	mutable std::vector<CameraPtr> mCameras;
 	mutable bool mCamerasDirty;

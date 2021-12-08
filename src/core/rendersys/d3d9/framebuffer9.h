@@ -41,12 +41,14 @@ public:
 	FrameBuffer9();
 	FrameBuffer9(Texture9Ptr colorTexture, IDirect3DSurface9* depthStencilBuffer);
 	
+	Eigen::Vector2i GetSize() const override { return mSize; }
 	size_t GetAttachColorCount() const override { return mAttachColors.size(); }
 	IFrameBufferAttachmentPtr GetAttachColor(size_t index) const { return mAttachColors[index]; }
 	IFrameBufferAttachmentPtr GetAttachZStencil() const { return mAttachZStencil; }
 private:
 	std::vector<FrameBufferAttachColor9Ptr> mAttachColors;
 	FrameBufferAttachZStencil9Ptr mAttachZStencil;
+	Eigen::Vector2i mSize;
 };
 
 }

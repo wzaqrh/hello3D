@@ -13,6 +13,20 @@
 namespace mir {
 
 class MIR_CORE_API Mir {
+public:
+	Mir(Launch launchMode);
+	~Mir();
+	bool Initialize(HWND hWnd);
+	void Dispose();
+	void Update();
+public:
+	Eigen::Vector2i WinSize() const;
+	inline const RenderSystemPtr& RenderSys() const { return mRenderSys; }
+	inline const ResourceManagerPtr& ResourceMng() const { return mResourceMng; }
+	inline const RenderPipelinePtr& RenderPipe() const { return mRenderPipe; }
+	inline const RenderableFactoryPtr& RenderableFac() const { return mRenderableFac; }
+	inline const SceneManagerPtr& SceneMng() const { return mSceneMng; }
+private:
 	Launch mLaunchMode;
 	RenderSystemPtr mRenderSys;
 	MaterialFactoryPtr mMaterialFac;
@@ -21,18 +35,6 @@ class MIR_CORE_API Mir {
 	RenderPipelinePtr mRenderPipe;
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
-public:
-	Mir(Launch launchMode);
-	~Mir();
-	bool Initialize(HWND hWnd);
-	void Dispose();
-	void Update();
-public:
-	inline const RenderSystemPtr& RenderSys() { return mRenderSys; }
-	inline const ResourceManagerPtr& ResourceMng() { return mResourceMng; }
-	inline const RenderPipelinePtr& RenderPipe() { return mRenderPipe; }
-	inline const RenderableFactoryPtr& RenderableFac() { return mRenderableFac; }
-	inline const SceneManagerPtr& SceneMng() { return mSceneMng; }
 };
 
 }

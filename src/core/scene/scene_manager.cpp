@@ -7,29 +7,27 @@
 
 namespace mir {
 
-SceneManager::SceneManager(ResourceManager& resMng, const Eigen::Vector2i& screenSize, CameraPtr defCamera)
+SceneManager::SceneManager(ResourceManager& resMng)
 	: mResMng(resMng)
-	, mScreenSize(screenSize)
 	, mCamerasDirty(false)
 {
-	if (defCamera) mCameras.push_back(defCamera);
 }
 
 void SceneManager::RemoveAllCameras()
 {
 	mCameras.clear();
 }
-CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, double far1, unsigned camMask)
+CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, float zFar, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreateOthogonal(mResMng, mScreenSize, eyePos, far1);
+	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, zFar);
 	camera->SetCameraMask(camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, double far1, double fov, unsigned camMask)
+CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, float zFar, float fov, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreatePerspective(mResMng, mScreenSize, eyePos, far1, fov);
+	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, zFar, fov);
 	camera->SetCameraMask(camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;

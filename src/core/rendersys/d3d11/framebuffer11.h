@@ -53,6 +53,10 @@ public:
 		mAttachZStencil = attach;
 	}
 
+	void SetSize(Eigen::Vector2i size) { 
+		mSize = size;
+	}
+	Eigen::Vector2i GetSize() const override { return mSize; }
 	size_t GetAttachColorCount() const override { return mAttachColors.size(); }
 	IFrameBufferAttachmentPtr GetAttachColor(size_t index) const override { 
 		return !mAttachColors.empty() ? mAttachColors[index] : nullptr; 
@@ -65,6 +69,7 @@ public:
 private:
 	std::vector<FrameBufferAttach11Ptr> mAttachColors;
 	FrameBufferAttach11Ptr mAttachZStencil;
+	Eigen::Vector2i mSize;
 };
 
 }

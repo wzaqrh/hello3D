@@ -82,7 +82,7 @@ void TestCameraOutput::OnPostInitDevice()
 		auto camera1 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 		camera1->SetDepth(2);
 		camera1->SetCameraMask(cameraMask1);
-		auto cam1Size = camera1->GetSize() / 2;
+		auto halfSize = mContext->WinSize() / 2;
 
 		auto light1 = sceneMng->AddPointLight();
 		light1->SetCameraMask(cameraMask1);
@@ -93,11 +93,11 @@ void TestCameraOutput::OnPostInitDevice()
 		mSpriteCam1 = mContext->RenderableFac()->CreateSprite();
 		mSpriteCam1->SetCameraMask(cameraMask1);
 		//auto fetchTexture = resMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
-		auto fetchTexture = camera2->FetchOutput()->GetAttachColorTexture(0);
+		auto fetchTexture = camera2->SetOutput(0.5)->GetAttachColorTexture(0);
 		DEBUG_SET_PRIV_DATA(fetchTexture, "camera2 output");
 		mSpriteCam1->SetTexture(fetchTexture);
-		mSpriteCam1->SetPosition(Eigen::Vector3f(cam1Size.x(), cam1Size.y(), 0));
-		mSpriteCam1->SetSize(cam1Size.cast<float>());
+		mSpriteCam1->SetPosition(Eigen::Vector3f(halfSize.x(), halfSize.y(), 0));
+		mSpriteCam1->SetSize(halfSize.cast<float>());
 	}
 }
 

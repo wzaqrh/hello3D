@@ -13,11 +13,11 @@ typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
 namespace mir {
 namespace math {
 	
-inline Eigen::Matrix4f MakeLookAtLH(const Eigen::Vector3f& eye,
-	const Eigen::Vector3f& at,
+inline Eigen::Matrix4f MakeLookForwardLH(const Eigen::Vector3f& eye,
+	const Eigen::Vector3f& forward,
 	const Eigen::Vector3f& up)
 {
-	Eigen::Vector3f n = (at - eye).normalized();  //z' = n = normalize(at-eye)
+	Eigen::Vector3f n = /*(at - eye)*/forward.normalized();  //z' = n = normalize(at-eye)
 	Eigen::Vector3f u = up.cross(n).normalized(); //x' = u = normalize(up x z');
 	Eigen::Vector3f v = n.cross(u);			      //y' = v = z' x x'
 
@@ -26,8 +26,15 @@ inline Eigen::Matrix4f MakeLookAtLH(const Eigen::Vector3f& eye,
 		u.x(), u.y(), u.z(), -u.dot(eye),
 		v.x(), v.y(), v.z(), -v.dot(eye),
 		n.x(), n.y(), n.z(), -n.dot(eye),
-			0,	   0,	  0,		   1;
+		0, 0, 0, 1;
 	return view;
+}
+
+inline Eigen::Matrix4f MakeLookAtLH(const Eigen::Vector3f& eye,
+	const Eigen::Vector3f& at,
+	const Eigen::Vector3f& up)
+{
+	return MakeLookForwardLH(eye, at - eye, up);
 }
 
 inline Eigen::Matrix4f MakePerspectiveFovLH(float fovY, float aspect, float nearZ, float farZ)
@@ -61,5 +68,58 @@ inline Eigen::Matrix4f MakeOrthographicOffCenterLH(float left, float right,
 	return ortho;
 }
 
+/********** point **********/
+namespace point {
+
+inline Eigen::Vector4f One() {
+	return Eigen::Vector4f(1, 1, 1, 1);
+}
+inline Eigen::Vector4f Origin() {
+	return Eigen::Vector4f(0, 0, 0, 1);
+}
+
+}
+/********** vec **********/
+namespace vec {
+
+inline Eigen::Vector3f One() {
+	return Eigen::Vector3f(1, 1, 1);
+}
+inline Eigen::Vector3f Zero() {
+	return Eigen::Vector3f(0, 0, 0);
+}
+
+inline Eigen::Vector3f Forward() {
+	return Eigen::Vector3f(0, 0, 1);
+}
+inline Eigen::Vector3f Backward() {
+	return Eigen::Vector3f(0, 0, -1);
+}
+inline Eigen::Vector3f Up() {
+	return Eigen::Vector3f(0, 1, 0);
+}
+inline Eigen::Vector3f Down() {
+	return Eigen::Vector3f(0, -1, 0);
+}
+inline Eigen::Vector3f Right() {
+	return Eigen::Vector3f(1, 0, 0);
+}
+inline Eigen::Vector3f Left() {
+	return Eigen::Vector3f(-1, 0, 0);
+}
+
+}
+
+/********** camera **********/
+namespace cam {
+
+inline Eigen::Vector3f DefEye() {
+	return Eigen::Vector3f(0, 0, -10);
+}
+inline Eigen::Vector3f Zero() {
+	return Eigen::Vector3f(0, 0, 0);
+}
+
+}
 }
 }

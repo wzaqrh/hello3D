@@ -31,6 +31,7 @@ protected:
 	virtual void OnPostInitDevice() {};
 	virtual void OnRender() = 0;
 	virtual void OnInitLight();
+	virtual void OnInitCamera();
 protected:
 	Eigen::Matrix4f GetWorldTransform();
 protected:

@@ -78,7 +78,7 @@ void TestRT::OnPostInitDevice()
 			camera1->SetCameraMask(cameraMask1);
 			auto winCenter = winSize / 2;
 
-			mFrameBuffer = camera2->FetchOutput();
+			mFrameBuffer = camera2->SetOutput(0.25);
 			DEBUG_SET_PRIV_DATA(mFrameBuffer, "camera2 output");
 
 			mFBSprite = mContext->RenderableFac()->CreateSprite();

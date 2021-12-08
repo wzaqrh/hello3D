@@ -11,10 +11,10 @@ interface IFrameBufferAttachment : boost::noncopyable
 
 interface IFrameBuffer : public IResource
 {
+	virtual Eigen::Vector2i GetSize() const = 0;
 	virtual size_t GetAttachColorCount() const = 0;
 	virtual IFrameBufferAttachmentPtr GetAttachColor(size_t index) const = 0;
 	virtual IFrameBufferAttachmentPtr GetAttachZStencil() const = 0;
-
 public:
 	ITexturePtr GetAttachColorTexture(size_t index) const { 
 		auto texture = GetAttachColor(index);

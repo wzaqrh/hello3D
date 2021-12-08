@@ -59,7 +59,7 @@ public:
 	void EndScene() override;
 private:
 	bool _CreateDeviceAndSwapChain(int width, int height);
-	bool _FetchBackFrameBufferColor();
+	bool _FetchBackFrameBufferColor(int width, int height);
 	bool _FetchBackBufferZStencil(int width, int height);
 	bool _SetRasterizerState(); 
 private:

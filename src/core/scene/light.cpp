@@ -36,13 +36,12 @@ void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float
 
 void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
 {
-	float width = std::max<int>(camera.GetSize().x(), camera.GetSize().y());
-	//float depth = std::abs<float>(camera.GetZFar());
-	float depth = (camera.GetLookAtPos() - camera.GetEyePos()).norm();
+	float width = std::max<int>(camera.GetWinSize().x(), camera.GetWinSize().y());
+	float depth = camera.GetForwardLength();
 	float distance = sqrtf(width * width + depth * depth);
-	view = math::MakeLookAtLH(mCbLight.unity_LightPosition.head<3>() * distance, camera.GetLookAtPos(), Eigen::Vector3f(0,1,0));
+	view = math::MakeLookAtLH(mCbLight.unity_LightPosition.head<3>() * distance, camera.GetLookAt(), Eigen::Vector3f(0,1,0));
 
-	auto hs = camera.GetSize() / 2;
+	auto hs = camera.GetWinSize() / 2;
 	proj = math::MakeOrthographicOffCenterLH(-hs.x(), hs.x(), -hs.y(), hs.y(), 0.01, distance * 1.5);
 	proj = Transform3Projective(proj).scale(Eigen::Vector3f(1, -1, 1)).matrix();
 }

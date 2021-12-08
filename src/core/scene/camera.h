@@ -5,6 +5,10 @@
 #include "core/rendersys/base_type.h"
 #include "core/base/transform.h"
 
+#if defined TRANSFORM_QUATERNION
+#define CAMERA_TRANSFORM
+#endif
+
 namespace mir {
 
 enum CameraType {
@@ -15,11 +19,17 @@ enum CameraType {
 class MIR_CORE_API Camera : boost::noncopyable
 {
 public:
-	static CameraPtr CreatePerspective(ResourceManager& resMng, const Eigen::Vector2i& screensize, 
-		const Eigen::Vector3f& eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100, double fov = 45.0);
-	static CameraPtr CreateOthogonal(ResourceManager& resMng, const Eigen::Vector2i& screensize, 
-		const Eigen::Vector3f& eyePos = Eigen::Vector3f(0,0,-10), double far1 = 100);
+	static CameraPtr CreatePerspective(ResourceManager& resMng, const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
+		float zfar = 100, float fov = 45.0);
+	static CameraPtr CreateOthogonal(ResourceManager& resMng, const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
+		float zfar = 100);
 	Camera(ResourceManager& resMng);
+
+	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up = math::vec::Up());
+	void SetForwardLength(float length);
+	void SetZRange(const Eigen::Vector2f& zRange);
+	void SetFov(float fov);
+	void SetYFlipped(bool flip);
 
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
 	unsigned GetCameraMask() const { return mCameraMask; }
@@ -27,16 +37,12 @@ public:
 	void SetDepth(unsigned depth) { mDepth = depth; }
 	unsigned GetDepth() const { return mDepth; }
 
-	void SetSize(const Eigen::Vector2i& size);
-	const Eigen::Vector2i& GetSize() const { return mSize; }
-
-	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
-	void SetYFlipped(bool flip);
-
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
 	IFrameBufferPtr FetchOutput2PostProcess(ResourceFormat format = kFormatR8G8B8A8UNorm);
-	IFrameBufferPtr FetchOutput(ResourceFormat format = kFormatR8G8B8A8UNorm, ResourceFormat zstencilFmt = kFormatD24UNormS8UInt);
+	IFrameBufferPtr SetOutput(float scale = 1, 
+		std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
+	IFrameBufferPtr SetOutput(IFrameBufferPtr output);
 public:
 	const TransformPtr& GetTransform() const;
 	const SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
@@ -49,37 +55,44 @@ public:
 	
 	CameraType GetType() const { return mType; }
 	const Eigen::Vector2i& GetWinSize() const { return mScreenSize; }
-	const Eigen::Vector3f& GetLookAtPos() const { return mLookAtPos; }
-	const Eigen::Vector3f& GetEyePos() const { return mEyePos; }
-	float GetZFar() const { return mZFar; }
+
+	Eigen::Vector3f GetEye() const;
+	Eigen::Vector3f GetLookAt() const;
+	Eigen::Vector3f GetForward() const;
+	float GetForwardLength() const;
 
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 private:
-	void InitAsPerspective(const Eigen::Vector2i& screensize, const Eigen::Vector3f& eyePos, double far1, double fov);
-	void InitAsOthogonal(const Eigen::Vector2i& screensize, const Eigen::Vector3f& eyePos, double far1);
+	const Eigen::Vector2i& GetSize() const { return mSize; }
+	void InitAsPerspective(const Eigen::Vector2i& screensize, const Eigen::Vector3f& eyePos, float zfar, float fov);
+	void InitAsOthogonal(const Eigen::Vector2i& screensize, const Eigen::Vector3f& eyePos, float zfar);
 	void RecalculateProjection() const;
+	void RecalculateView() const;
 private:
 	ResourceManager& mResourceMng;
-
+	TransformPtr mTransform;
 	SkyBoxPtr mSkyBox;
 	std::vector<PostProcessPtr> mPostProcessEffects;
-
-	TransformPtr mTransform;
-	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
-	bool mFlipY;
-	mutable bool mTransformOrViewDirty, mProjectionDirty;
-
+	IFrameBufferPtr mPostProcessInput, mOutput;
+	
 	unsigned mCameraMask = -1;
 	unsigned mDepth = 0;
 private:
-	IFrameBufferPtr mPostProcessInput, mOutput;
-
-	Eigen::Vector2i mScreenSize, mSize;
-	Eigen::Vector3f mEyePos, mLookAtPos, mUpVector;
-
 	CameraType mType;
-	double mFov, mZFar;
+	Eigen::Vector2i mScreenSize, mSize;
+#if defined CAMERA_TRANSFORM
+	Eigen::Vector3f mUpVector;
+	float mForwardLength;
+#else
+	Eigen::Vector3f mEyePos, mForwardVector, mUpVector;
+#endif
+	Eigen::Vector2f mZRange;
+	float mFov;
+	bool mFlipY;
+
+	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
+	mutable bool mViewDirty, mProjectionDirty;
 };
 
 }

@@ -61,7 +61,7 @@ int Cube::GenRenderOperation(RenderOperationQueue& opList)
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
-	op.WorldTransform = mTransform->GetMatrix();
+	op.WorldTransform = mTransform->GetSRT();
 	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
 	return 1;

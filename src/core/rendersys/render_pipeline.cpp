@@ -16,11 +16,10 @@ namespace mir {
 #define E_TEXTURE_DEPTH_MAP 8
 #define E_TEXTURE_ENV 9
 
-RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size)
+RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	:mRenderSys(renderSys)
-	,mScreenSize(size)
 {
-	mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, mScreenSize, MakeResFormats(kFormatUnknown, kFormatD24UNormS8UInt));
+	mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), MakeResFormats(kFormatUnknown, kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 }
 

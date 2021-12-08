@@ -320,7 +320,7 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 	int count = opList.Count();
 	DoDraw(mAiScene->mRootNode, opList);
 
-	Eigen::Matrix4f world = mTransform->GetMatrix();
+	Eigen::Matrix4f world = mTransform->GetSRT();
 	for (int i = count; i < opList.Count(); ++i)
 		opList[i].WorldTransform = world;
 

@@ -31,7 +31,7 @@ struct cbPerLight;
 class MIR_CORE_API RenderPipeline
 {
 public:
-	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Eigen::Vector2i& size);
+	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng);
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);
@@ -50,7 +50,6 @@ private:
 		const std::vector<ILightPtr>& lights);
 private:
 	RenderSystem& mRenderSys;
-	const Eigen::Vector2i mScreenSize;
 
 	std::vector<IFrameBufferPtr> mFrameBufferStack;
 	IFrameBufferPtr mShadowMap;

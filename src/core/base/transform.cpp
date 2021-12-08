@@ -5,93 +5,151 @@ namespace mir {
 
 Transform::Transform()
 {
-	mScale = Eigen::Vector3f(1, 1, 1);
-	mFlip = Eigen::Vector3f(1, 1, 1);
-	mPosition = Eigen::Vector3f(0, 0, 0);
-	mEuler = Eigen::Vector3f(0, 0, 0);
-	mMatrix = Eigen::Matrix4f::Identity();
+	mScale = math::vec::One();
+	mFlip = math::vec::One();
+	mTranslation = math::vec::Zero();
+#if defined TRANSFORM_QUATERNION
+	mQuat = Eigen::Quaternionf::Identity();
+#else
+	mEuler = math::vec::Zero();
+#endif
+	mSRT = Eigen::Matrix4f::Identity();
+	mForward = math::vec::Forward();
 }
 
-void Transform::SetScale(const Eigen::Vector3f& s)
+void Transform::SetScale(const Eigen::Vector3f& scale)
 {
-	mScale = s;
+	mScale = scale;
 	mDirty = true;
 }
 
 void Transform::SetPosition(const Eigen::Vector3f& position)
 {
-	mPosition = position;
+	mTranslation = position;
 	mDirty = true;
 }
 
 void Transform::SetEuler(const Eigen::Vector3f& euler)
 {
+#if defined TRANSFORM_QUATERNION
+	mQuat = Eigen::AngleAxisf(euler.z(), Eigen::Vector3f::UnitZ())
+		* Eigen::AngleAxisf(euler.x(), Eigen::Vector3f::UnitX())
+		* Eigen::AngleAxisf(euler.y(), Eigen::Vector3f::UnitY());
+#else
 	mEuler = euler;
+#endif
 	mDirty = true;
 }
 
-void Transform::SetFlipY(bool flip)
+void Transform::SetQuaternion(const Eigen::Quaternionf& quat)
+{
+#if defined TRANSFORM_QUATERNION
+	mQuat = quat;
+#endif
+	mDirty = true;
+}
+
+void Transform::SetYFlipped(bool flip)
 {
 	mFlip.y() = flip ? -1 : 1;
 	mDirty = true;
 }
 
-bool Transform::IsFlipY() const
+bool Transform::IsYFlipped() const
 {
 	return mFlip.y() < 0;
 }
 
-const Eigen::Matrix4f& Transform::SetMatrixSRT()
+bool Transform::IsIdentity() const
 {
-	if (mDirty)
-	{
-		mDirty = false;
+	CheckDirtyAndRecalculate();
+	return mSRT.isIdentity();
+}
 
-		Transform3fAffine srt = Transform3fAffine::Identity();
-		srt.scale(mScale);
-		if (mFlip.x() != 1 || mFlip.y() != 1 || mFlip.z() != 1)
-			srt.scale(mFlip);
-		if (mEuler.x() != 0 || mEuler.x() != 0 || mEuler.z() != 0) {
-			auto euler = Eigen::AngleAxisf(mEuler.z(), Eigen::Vector3f::UnitZ())
-				* Eigen::AngleAxisf(mEuler.x(), Eigen::Vector3f::UnitX())
-				* Eigen::AngleAxisf(mEuler.y(), Eigen::Vector3f::UnitY());
-			srt.rotate(euler);
-		}
-		if (mPosition.x() != 0 || mPosition.y() != 0 || mPosition.z() != 0)
-			srt.pretranslate(mPosition);
+const Eigen::Vector3f& Transform::GetForward() const
+{
+	CheckDirtyAndRecalculate();
+	BOOST_ASSERT(fabs(mForward.norm() - 1.0) < 0.001);
+	return mForward;
+}
 
-		mMatrix = srt.matrix();
+const Eigen::Matrix4f& Transform::GetSRT() const
+{
+	CheckDirtyAndRecalculate();
+	return mSRT;
+}
+
+/********** CheckDirtyAndRecalculate **********/
+void Transform::CalculateTSR(Eigen::Matrix4f& matrix) const
+{
+	Transform3fAffine t = Transform3fAffine::Identity();
+	t.pretranslate(mTranslation);
+	
+	t.prescale(mScale);
+	t.prescale(mFlip);
+	
+#if defined TRANSFORM_QUATERNION
+	t.prerotate(mQuat);
+#else
+	if (mEuler.any()) {
+		auto euler = Eigen::AngleAxisf(mEuler.z(), Eigen::Vector3f::UnitZ())
+			* Eigen::AngleAxisf(mEuler.x(), Eigen::Vector3f::UnitX())
+			* Eigen::AngleAxisf(mEuler.y(), Eigen::Vector3f::UnitY());
+		t.rotate(euler);
 	}
-	return mMatrix;
+#endif
+
+	matrix = t.matrix();
 }
 
-const Eigen::Matrix4f& Transform::SetMatrixTSR()
+void Transform::CalculateSRT(Eigen::Matrix4f& matrix) const
 {
-	if (mDirty)
-	{
-		mDirty = false;
-
-		Transform3fAffine tsr = Transform3fAffine::Identity();
-		tsr.translate(mPosition);
-		if (mScale.x() != 1 || mScale.y() != 1 || mScale.z() != 1)
-			tsr.scale(mScale);
-		if (mFlip.x() != 1 || mFlip.y() != 1 || mFlip.z() != 1)
-			tsr.scale(mFlip);
-		if (mEuler.x() != 0 || mEuler.x() != 0 || mEuler.z() != 0) {
-			auto euler = Eigen::AngleAxisf(mEuler.z(), Eigen::Vector3f::UnitZ())
-				* Eigen::AngleAxisf(mEuler.x(), Eigen::Vector3f::UnitX())
-				* Eigen::AngleAxisf(mEuler.y(), Eigen::Vector3f::UnitY());
-			tsr.rotate(euler);
-		}
-
-		mMatrix = tsr.matrix();
+	Transform3fAffine t = Transform3fAffine::Identity();
+	t.prescale(mScale);
+	t.prescale(mFlip);
+	
+#if defined TRANSFORM_QUATERNION
+	t.prerotate(mQuat);
+#else
+	if (mEuler.any()) {
+		auto euler = Eigen::AngleAxisf(mEuler.z(), Eigen::Vector3f::UnitZ())
+			* Eigen::AngleAxisf(mEuler.x(), Eigen::Vector3f::UnitX())
+			* Eigen::AngleAxisf(mEuler.y(), Eigen::Vector3f::UnitY());
+		t.rotate(euler);
 	}
-	return mMatrix;
+#endif
+	
+	t.pretranslate(mTranslation);
+
+	matrix = t.matrix();
 }
 
-const Eigen::Matrix4f& Transform::GetMatrix()
+void Transform::CalculateForward(Eigen::Vector3f& forward) const
 {
-	return SetMatrixSRT();
+	forward = math::vec::Forward();
+
+#if defined TRANSFORM_QUATERNION
+	forward = mQuat * forward;
+#else
+	if (mEuler.any()) {
+		Transform3fAffine t = Transform3fAffine::Identity();
+
+		auto euler = Eigen::AngleAxisf(mEuler.z(), Eigen::Vector3f::UnitZ())
+			* Eigen::AngleAxisf(mEuler.x(), Eigen::Vector3f::UnitX())
+			* Eigen::AngleAxisf(mEuler.y(), Eigen::Vector3f::UnitY());
+		t.rotate(euler);
+
+		forward = t * forward;
+	}
+#endif
 }
 
+void Transform::CheckDirtyAndRecalculate() const
+{
+	if (mDirty) {
+		mDirty = false;
+		CalculateSRT(mSRT);
+		CalculateForward(mForward);
+	}
+}
 }

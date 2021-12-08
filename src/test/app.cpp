@@ -39,6 +39,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 		mContext->Dispose();
 		return false;
 	}
+	OnInitCamera();
 	OnInitLight();
 	OnPostInitDevice();
 
@@ -46,6 +47,10 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 	mTimer = new mir::debug::Timer;
 	mOriginCameraDistance = 0;
 	return true;
+}
+void App::OnInitCamera()
+{
+	mContext->SceneMng()->AddPerspectiveCamera();
 }
 void App::OnInitLight()
 {
@@ -61,24 +66,30 @@ void App::Render()
 	auto renderSys = mContext->RenderSys();
 	auto sceneMng = mContext->SceneMng();
 
-	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
-
 	mTimer->Update();
 	mInput->Frame();
 	mContext->Update();
+
+	auto camera0 = sceneMng->GetDefCamera();
 	//rotate camera
-	if (sceneMng->GetDefCamera()->GetType() == kCameraPerspective)
+	if (camera0 && camera0->GetType() == kCameraPerspective)
 	{
 		if (mOriginCameraDistance == 0)
-			mOriginCameraDistance = sceneMng->GetDefCamera()->GetEyePos().norm();
+			mOriginCameraDistance = camera0->GetForwardLength();
 
-		float eyeDistance = sceneMng->GetDefCamera()->GetEyePos().norm();
-		if (mInput->GetMouseWheel() != 0)
-		{
+		float eyeDistance = camera0->GetForwardLength();
+		if (mInput->GetMouseWheel() != 0) {
 			float wheel = boost::algorithm::clamp(mInput->GetMouseWheel() / 1000.0, -1, 1);
 			eyeDistance -= wheel * 0.8 * eyeDistance;
 		}
-		Eigen::Vector3f tpos(0, 0, -eyeDistance);
+
+	#if 1
+		Eigen::Vector2i m = mInput->GetMouseRightLocation();
+		float eulerX = 3.14 * m.x() / renderSys->WinSize().x();
+		float eulerY = 3.14 * m.y() / renderSys->WinSize().y();
+		camera0->GetTransform()->SetEuler(Eigen::Vector3f(0, eulerX, eulerY));
+	#else
+		Eigen::Vector3f tpos = Eigen::Vector3f(0, 0, -eyeDistance) + camera0->GetLookAt();
 
 		Eigen::Vector3f cpos;
 		{
@@ -92,9 +103,11 @@ void App::Render()
 			cpos = Transform3fAffine(euler) * tpos;
 		}
 
-		sceneMng->GetDefCamera()->SetLookAt(cpos, sceneMng->GetDefCamera()->GetLookAtPos());
+		camera0->SetLookAt(cpos, camera0->GetLookAt());
+	#endif
 	}
 
+	//rotate target
 	{
 		Eigen::Vector2i m = mInput->GetMouseLeftLocation();
 		float angy = 3.14 * -m.x() / renderSys->WinSize().x(), angx = 3.14 * -m.y() / renderSys->WinSize().y();
@@ -104,6 +117,7 @@ void App::Render()
 		//mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));
 	}
 
+	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
 	OnRender();
 }
 
@@ -119,7 +133,7 @@ void App::SetCaseIndex(int caseIndex)
 
 Eigen::Matrix4f App::GetWorldTransform()
 {
-	return mTransform->GetMatrix();
+	return mTransform->GetSRT();
 }
 
 std::string& GetCurrentAppName() {
