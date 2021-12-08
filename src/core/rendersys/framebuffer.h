@@ -24,6 +24,8 @@ public:
 		auto texture = GetAttachZStencil();
 		return texture ? texture->AsTexture() : nullptr;
 	}
+	int GetWidth() const { return GetSize().x(); }
+	int GetHeight() const { return GetSize().y(); }
 };
 
 }

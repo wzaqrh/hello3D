@@ -15,8 +15,8 @@
 			<Element Name="ViewInv" 	 Type="matrix"></Element>
 			<Element Name="ProjectionInv"	Type="matrix"></Element>
 			
-			<Element Name="glstate_lightmodel_ambient" Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
-			<Element Name="HasDepthMap" 	Type="bool"></Element>
+			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
+			<Element Name="_ShadowMapTexture_TexelSize" Type="float4"></Element>
 		</Uniform>
 		<Uniform Name="cbPerLight" Slot="1">
 			<Element Name="LightView" 	 	Type="matrix"></Element>
@@ -32,7 +32,7 @@
 		</Uniform>
 		
 		<Texture Name="txGlobal">
-			<Element Slot="8" CompFunc="2">txDepthMap</Element>
+			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
 			<Element Slot="9" Filter="0x15">txSkybox</Element>
 		</Texture>
 	</PROGRAM>

@@ -35,7 +35,7 @@ float4 PS(PixelInput input) : SV_Target
 #if !DEBUG_SHADOW_MAP
 	finalColor *= MIR_SAMPLE_TEX2D(_MainTex, input.Tex);
 #else
-	finalColor.xyz = float3(0, 0, CalcShadowFactor(samShadow, txDepthMap, input.PosInLight));
+	finalColor.xyz = float3(0, 0, CalcShadowFactor(input.PosInLight));
 #endif
 	return finalColor;
 }

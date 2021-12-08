@@ -7,8 +7,9 @@
 namespace mir {
 namespace test {
 
+#define EPS 0.0001
 bool IsEqual(float l, float r) {
-	return std::abs<float>(l - r) < 0.00001;
+	return std::abs<float>(l - r) < EPS;
 }
 bool IsEqual(Eigen::Vector3f l, Eigen::Vector3f r) {
 	return IsEqual(l.x(), r.x())
@@ -24,11 +25,13 @@ bool IsEqual(Eigen::Vector4f l, Eigen::Vector4f r) {
 
 bool CheckInNDC(Eigen::Vector4f p)
 {
-	p.head<3>() /= p.w();
-	p.w() = 1;
-	if (p.x() < -1 || p.x() > 1) return false;
-	if (p.y() < -1 || p.y() > 1) return false;
-	if (p.z() < 0 || p.z() > 1) return false;
+	p /= p.w();
+	BOOST_ASSERT(p.x() >= -1-EPS && p.x() <= 1+EPS);
+	BOOST_ASSERT(p.y() >= -1-EPS && p.y() <= 1+EPS);
+	BOOST_ASSERT(p.z() >= 0-EPS && p.z() <= 1+EPS);
+	if (p.x() < -1-EPS || p.x() > 1+EPS) return false;
+	if (p.y() < -1-EPS || p.y() > 1+EPS) return false;
+	if (p.z() < 0-EPS || p.z() > 1+EPS) return false;
 	return true;
 }
 void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj)
@@ -55,10 +58,12 @@ void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj)
 }
 void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, std::vector<Eigen::Vector4f> positions)
 {
+	constexpr bool castShadow = true;
+//#define ONLY_CHECK_PROJ
 	static std::vector<Eigen::Vector4f> local_positions = {
-		Eigen::Vector4f(100, 0, -100, 1.0),
-		Eigen::Vector4f(-1024/2, 0, 200, 1.0),
-		Eigen::Vector4f(1024/2, 0, 200, 1.0),
+		Eigen::Vector4f(100, 0, -20, 1.0),
+		Eigen::Vector4f(-1024/2, 0, 70, 1.0),
+		Eigen::Vector4f(1024/2, 0, 70, 1.0),
 	};
 	positions.insert(positions.end(), local_positions.begin(), local_positions.end());
 
@@ -66,18 +71,39 @@ void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& c
 	for (size_t i = 0; i < positions.size(); ++i) {
 		auto cube_position = positions[i];
 		Eigen::Matrix4f light_view, light_proj;
-		dir_light.CalculateLightingViewProjection(camera, light_view, light_proj);
+		dir_light.CalculateLightingViewProjection(camera, castShadow, light_view, light_proj);
 		light_ndc = Transform3Projective(light_view) * cube_position;
 		light_ndc = Transform3Projective(light_proj) * cube_position;
+	#if !defined ONLY_CHECK_PROJ
 		light_ndc = Transform3Projective(light_proj * light_view) * cube_position;
+	#endif
+		if (!castShadow) {
+			light_ndc /= light_ndc.w();
+			light_ndc.head<2>() = (light_ndc.head<2>() - Eigen::Vector2f(0.5, 0.5)) * 2;
+			light_ndc.y() = -light_ndc.y();
+		}
 
 		Eigen::Matrix4f camera_view = camera.GetView(), camera_proj = camera.GetProjection();
+		camera_ndc = Transform3Projective(camera_proj) * cube_position;
+	#if !defined ONLY_CHECK_PROJ
 		camera_ndc = Transform3Projective(camera_proj * camera_view) * cube_position;
-		camera_ndc.head<3>() /= camera_ndc.w();
-		camera_ndc.w() = 1;
+	#endif
+		camera_ndc /= camera_ndc.w();
 
 		camera_ndc1 = camera.ProjectPoint(cube_position);
+
+		if (i < positions.size() - local_positions.size()) {
+			BOOST_ASSERT(IsEqual(camera_ndc.x(), light_ndc.x()));
+			BOOST_ASSERT(IsEqual(camera_ndc.y(), light_ndc.y()));
+		}
+	#if !defined ONLY_CHECK_PROJ
+		if (i < positions.size() - local_positions.size()) {
+			BOOST_ASSERT(CheckInNDC(light_ndc));
+			BOOST_ASSERT(CheckInNDC(camera_ndc));
+			BOOST_ASSERT(CheckInNDC(camera_ndc1));
+		}
 		BOOST_ASSERT(IsEqual(camera_ndc, camera_ndc1));
+	#endif
 	}
 }
 

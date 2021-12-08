@@ -566,10 +566,9 @@ float4 PS(PixelInput input) : SV_Target
 	
 	float4 finalColor;
 	float3 toLight = unity_LightPosition.xyz - input.SurfacePosition * unity_LightPosition.w;
-	finalColor.xyz = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, IsSpotLight, false);
-	finalColor.w = 1.0;
-	
-	//finalColor.rgb *= CalcShadowFactor(MIR_PASS_SHADOWMAP(txDepthMap), input.PosInLight);
+	finalColor.rgb = CalLight(toLight, normalize(input.Normal), toEye, input.Tex, IsSpotLight, false);
+	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
+	finalColor.a = 1.0;
 #if 0
 	{
 		float3 ao;

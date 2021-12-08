@@ -157,19 +157,19 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 	lightParam.IsSpotLight = light.GetType() == kLightSpot;
 
 	if (castShadow) {
-		light.CalculateLightingViewProjection(camera, globalParam.View, globalParam.Projection);
+		light.CalculateLightingViewProjection(camera, castShadow, globalParam.View, globalParam.Projection);
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
-		light.CalculateLightingViewProjection(camera, lightParam.LightView, lightParam.LightProjection);
+		light.CalculateLightingViewProjection(camera, false, lightParam.LightView, lightParam.LightProjection);
 		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, {}));
 	}
 
 	MIR_TEST_CASE(
 		TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
 		Eigen::Matrix4f light_view, light_proj;
-		light.CalculateLightingViewProjection(camera, light_view, light_proj);
+		light.CalculateLightingViewProjection(camera, false, light_view, light_proj);
 		TestViewProjectionWithCases(light_view, light_proj);
 	);
 
@@ -225,7 +225,7 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 					if (lightsOrder[i]->GetType() == kLightDirectional) {
 						mShadowMapGenerated = true;
 						std::tie(globalParam, lightParam) = MakeAutoParam(camera, true, *lightsOrder[i]);
-						globalParam.HasDepthMap = false;
+						globalParam._ShadowMapTexture_TexelSize = math::point::Zero();
 						RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
 					}
 					break;
@@ -236,14 +236,18 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 
 						std::tie(globalParam, lightParam) = MakeAutoParam(camera, false, *firstLight);
-						globalParam.HasDepthMap = mShadowMapGenerated;
+						globalParam._ShadowMapTexture_TexelSize.head<2>() = mShadowMapGenerated 
+							? Eigen::Vector2f(1.0/mShadowMap->GetWidth(), 1.0/mShadowMap->GetHeight()) 
+							: Eigen::Vector2f::Zero();
 						RenderLight(opQueue, E_PASS_FORWARDBASE, camera.GetCameraMask(), lightParam, globalParam);
 					}
 					else {
 						mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 
 						std::tie(globalParam, lightParam) = MakeAutoParam(camera, false, *firstLight);
-						globalParam.HasDepthMap = mShadowMapGenerated;
+						globalParam._ShadowMapTexture_TexelSize.head<2>() = mShadowMapGenerated 
+							? Eigen::Vector2f(1.0/mShadowMap->GetWidth(), 1.0/mShadowMap->GetHeight()) 
+							: Eigen::Vector2f::Zero();
 						RenderLight(opQueue, E_PASS_FORWARDADD, camera.GetCameraMask(), lightParam, globalParam);
 					}
 				}

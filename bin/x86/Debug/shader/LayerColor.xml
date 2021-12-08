@@ -4,6 +4,8 @@
 	<PROGRAM>
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerLight</UseUniform>
+		<UseTexture>txGlobal</UseTexture>
 		
 		<FileName>LayerColor</FileName>
 		<VertexEntry>VS</VertexEntry>
@@ -11,7 +13,12 @@
 	
 	<SubShader>
 		<Pass>
-			<PROGRAM> <PixelEntry>PS</PixelEntry> </PROGRAM>
+			<PROGRAM> 
+				<Macros>
+					<DEBUG_SHADOW_MAP>1</DEBUG_SHADOW_MAP>
+				</Macros>
+				<PixelEntry>PS</PixelEntry> 
+			</PROGRAM>
 		</Pass>
 	</SubShader>
 </Shader>

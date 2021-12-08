@@ -74,6 +74,9 @@ namespace point {
 inline Eigen::Vector4f One() {
 	return Eigen::Vector4f(1, 1, 1, 1);
 }
+inline Eigen::Vector4f Zero() {
+	return Eigen::Vector4f(0, 0, 0, 0);
+}
 inline Eigen::Vector4f Origin() {
 	return Eigen::Vector4f(0, 0, 0, 1);
 }

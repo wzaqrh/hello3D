@@ -8,13 +8,15 @@ namespace mir {
 
 #define interface struct
 
-enum LightType {
+enum LightType 
+{
 	kLightDirectional,
 	kLightPoint,
 	kLightSpot
 };
 
-struct _declspec(align(16)) cbPerLight {
+struct _declspec(align(16)) cbPerLight 
+{
 	Eigen::Matrix4f LightView;
 	Eigen::Matrix4f LightProjection;
 
@@ -32,7 +34,7 @@ interface MIR_CORE_API ILight : boost::noncopyable
 	virtual ~ILight() {}
 	virtual LightType GetType() const = 0;
 	virtual cbPerLight MakeCbLight() const = 0;
-	virtual void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const = 0;
+	virtual void CalculateLightingViewProjection(const Camera& camera, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const = 0;
 	
 	virtual void SetCameraMask(unsigned mask) = 0;
 	virtual unsigned GetCameraMask() const = 0;
@@ -49,7 +51,7 @@ public:
 	void SetCameraMask(unsigned mask) override final { mCameraMask = mask; }
 	unsigned GetCameraMask() const override final { return mCameraMask; }
 
-	void CalculateLightingViewProjection(const Camera& camera, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const override;
+	void CalculateLightingViewProjection(const Camera& camera, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const override;
 	LightType GetType() const override { return kLightDirectional; }
 	cbPerLight MakeCbLight() const override { return mCbLight; }
 protected:

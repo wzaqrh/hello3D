@@ -63,6 +63,8 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	//PosInLight
 	output.PosInLight = mul(LightView, output.Pos);
 	output.PosInLight = mul(LightProjection, output.PosInLight);
+	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
+	output.PosInLight.z -= bias * output.PosInLight.w;
 	
 	//ToEye
 	output.Pos = mul(View, output.Pos);
@@ -78,7 +80,7 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
-	//finalColor.rgb *= CalcShadowFactor(MIR_PASS_SHADOWMAP(txDepthMap), input.PosInLight);
+	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }

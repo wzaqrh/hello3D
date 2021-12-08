@@ -1,3 +1,6 @@
+#define SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
+#define PCF_SHADOW
+
 inline float3 MirLambertLight(float3 toLight, float3 normal, float3 albedo, bool spotLight)
 {
     float3 lightColor = glstate_lightmodel_ambient.xyz;
@@ -47,44 +50,47 @@ inline float3 MirBlinnPhongLight(float3 toLight, float3 normal, float3 toEye, fl
     return lightColor * atten;
 }
 
-static const float SMAP_SIZE = 2048.0f;
-static const float SMAP_DX = 1.0f / SMAP_SIZE;
-float CalcShadowFactor(MIR_ARGS_SHADOWMAP(shadowMap), float4 shadowPosH)
+inline float3 UnityCombineShadowcoordComponents(float2 baseUV, float2 deltaUV, float depth, float3 receiverPlaneDepthBias)
 {
-	if (!HasDepthMap) return 1.0;
+    float3 uv = float3(baseUV + deltaUV, depth + receiverPlaneDepthBias.z);
+    uv.z += dot(deltaUV, receiverPlaneDepthBias.xy);
+    return uv;
+}
+inline half UnitySampleShadowmap_PCF3x3NoHardwareSupport(float4 coord, float3 receiverPlaneDepthBias)
+{
+    half shadow = 1;
+#ifdef SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
+    // when we don't have hardware PCF sampling, then the above 5x5 optimized PCF really does not work.
+    // Fallback to a simple 3x3 sampling with averaged results.
+    float2 base_uv = coord.xy;
+    float2 ts = _ShadowMapTexture_TexelSize.xy;
+    shadow = 0;
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, -ts.y), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, 0), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, 0), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(ts.x, 0), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, ts.y), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, ts.y), coord.z, receiverPlaneDepthBias));
+    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(ts.x, ts.y), coord.z, receiverPlaneDepthBias));
+    shadow /= 9.0;
+#endif
+    return shadow;
+}
+
+float CalcShadowFactor(float4 shadowPosH)
+{
+	if (_ShadowMapTexture_TexelSize.x == 0) return 1.0;
 	
     shadowPosH.xyz /= shadowPosH.w;
-	shadowPosH.xy = shadowPosH.xy * 0.5 + 0.5;
-#define PCF_SHADOW
-#if !defined PCF_SHADOW
-	return MIR_SAMPLE_SHADOW(shadowMap, shadowPosH).r;
+#if DEBUG_SHADOW_MAP >= 2
+	return shadowPosH.z;
+#endif
+
+#if defined PCF_SHADOW
+	return UnitySampleShadowmap_PCF3x3NoHardwareSupport(shadowPosH, float3(0,0,0));
 #else
-	// 纹素在纹理坐标下的宽高
-    const float dx = SMAP_DX;
-
-    float percentLit = 0.0f;
-    const float3 offsets[9] = 
-	{
-        float3(-dx, -dx,  0.0f), float3(0.0f, -dx, 0.0f),  float3(dx, -dx, 0.0f),
-		float3(-dx, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(dx, 0.0f, 0.0f),
-		float3(-dx, +dx,  0.0f), float3(0.0f, +dx, 0.0f),  float3(dx, +dx, 0.0f)
-    };
-
-    // samShadow为compareValue <= sampleValue时为1.0f(反之为0.0f), 对相邻四个纹素进行采样比较
-    // 并根据采样点位置进行双线性插值
-    // float result0 = depth <= s0;  // .s0      .s1          
-    // float result1 = depth <= s1;
-    // float result2 = depth <= s2;  //     .depth
-    // float result3 = depth <= s3;  // .s2      .s3
-    // float result = BilinearLerp(result0, result1, result2, result3, a, b);  // a b为算出的插值相对位置                           
-	[unroll]
-    for (int i = 0; i < 9; ++i)
-    {
-		float3 shadowPosOffset = shadowPosH + offsets[i];
-        percentLit += MIR_SAMPLE_SHADOW(shadowMap, shadowPosOffset).r;
-		//percentLit += step(depth, txDepthMap.Sample(samLinear, shadowPosH.xy + offsets[i]).r);
-	}
-    
-    return percentLit /= 9.0f;
+	return MIR_SAMPLE_SHADOW(_ShadowMapTexture, shadowPosH).r;
 #endif
 }

@@ -199,8 +199,14 @@
     <ClInclude Include="..\src\core\base\attribute_struct.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\base\macros.h">
-      <Filter>src\core\base</Filter>
+    <ClInclude Include="..\bin\x86\Debug\shader\HLSLSupport.h">
+      <Filter>src\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\bin\x86\Debug\shader\Skeleton.h">
+      <Filter>src\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\bin\x86\Debug\shader\Standard.h">
+      <Filter>src\shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -380,5 +386,65 @@
     <Filter Include="src\core\rendersys\interface">
       <UniqueIdentifier>{9bdcc5a6-7e83-4a77-840a-cc086231b1e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\shader">
+      <UniqueIdentifier>{850b275f-17d8-48d5-a3e4-9553376a3584}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\bin\x86\Debug\shader\Bloom.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\Label.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\LayerColor.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\Model.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\ModelPbr.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\Skybox.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\Sprite.fx">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\bin\x86\Debug\shader\Lighting.h">
+      <Filter>src\shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\bin\x86\Debug\shader\Bloom.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\LayerColor.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Model.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\ModelPbr.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Skeleton.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Skybox.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Sprite.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Standard.xml">
+      <Filter>src\shader</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\x86\Debug\shader\shader.np++">
+      <Filter>src\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
