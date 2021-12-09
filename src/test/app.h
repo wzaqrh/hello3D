@@ -35,13 +35,14 @@ protected:
 protected:
 	Eigen::Matrix4f GetWorldTransform();
 protected:
-	mir::Mir* mContext = nullptr;
-	mir::input::D3DInput* mInput = nullptr;
-	mir::debug::Timer* mTimer;
-	mir::TransformPtr mTransform;
-	float mMoveDefScale, mOriginCameraDistance;
 	Eigen::Vector4f mBackgndColor;
 	int mCaseIndex = 0;
+	mir::Mir* mContext = nullptr;
+	mir::TransformPtr mTransform;
+	mir::debug::Timer* mTimer = nullptr;
+private:
+	mir::input::D3DInput* mInput = nullptr;
+	Eigen::Vector3f mCameraInitInvLengthForward, mCameraInitLookAt;
 public:
 	std::string mName;
 	HWND mHnd;

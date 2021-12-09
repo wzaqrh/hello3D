@@ -18,7 +18,7 @@ void TestCube::OnPostInitDevice()
 {
 	auto sceneMng = mContext->SceneMng();
 	sceneMng->RemoveAllCameras();
-	sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0,0,-1500), 3000, 30);
+	sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -1500), Eigen::Vector3f(0.01, 3000, 30));
 
 	auto size = mContext->ResourceMng()->WinSize() / 2;
 	switch (mCaseIndex) {

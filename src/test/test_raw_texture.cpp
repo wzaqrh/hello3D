@@ -74,7 +74,7 @@ ITexturePtr TestRawTexture::LoadTexture(std::string filename)
 void TestRawTexture::OnPostInitDevice()
 {
 	mContext->SceneMng()->RemoveAllCameras();
-	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
+	mContext->SceneMng()->AddOthogonalCamera(Eigen::Vector3f(0,0,-10));
 
 	mSprite = mContext->RenderableFac()->CreateSprite("smile.bmp", E_MAT_SPRITE);
 

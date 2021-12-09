@@ -17,18 +17,16 @@ void SceneManager::RemoveAllCameras()
 {
 	mCameras.clear();
 }
-CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, float zFar, unsigned camMask)
+CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, const Eigen::Vector3f& near_far_fov, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, zFar);
-	camera->SetCameraMask(camMask);
+	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), near_far_fov, camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, float zFar, float fov, unsigned camMask)
+CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, const Eigen::Vector3f& near_far_fov, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, zFar, fov);
-	camera->SetCameraMask(camMask);
+	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), near_far_fov, camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;

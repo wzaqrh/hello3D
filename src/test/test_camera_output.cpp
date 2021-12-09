@@ -18,6 +18,9 @@ private:
 	SpritePtr mSprite1, mSpriteCam1;
 	CubePtr mCube0, mCube1;
 };
+/*mCaseIndex
+0：透视相机 点光 带天空盒
+*/
 
 #define SCALE_BASE 0.01
 void TestCameraOutput::OnPostInitDevice()
@@ -37,7 +40,7 @@ void TestCameraOutput::OnPostInitDevice()
 		float scale = SCALE_BASE;
 		if (mCaseIndex == 1) 
 		{
-			camera2 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -30), 300);
+			camera2 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -30), Eigen::Vector3f(0.01, 300, 0));
 			camera2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -30));
 			camera2->SetDepth(1);
 			camera2->SetCameraMask(cameraMask2);
@@ -50,8 +53,8 @@ void TestCameraOutput::OnPostInitDevice()
 		}
 		else 
 		{
-			camera2 = sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -30), 300, 45);
-			camera2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -30));
+			camera2 = sceneMng->AddPerspectiveCamera(winCenter + Eigen::Vector3f(0, 0, -30), Eigen::Vector3f(0.01, 300, 45));
+			camera2->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(0, 0, -30));
 			camera2->SetDepth(1);
 			camera2->SetCameraMask(cameraMask2);
 			camera2->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
@@ -69,10 +72,10 @@ void TestCameraOutput::OnPostInitDevice()
 		mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
 		mModel2->PlayAnim(0);
 		mTransform = mModel2->GetTransform();
-		mTransform->SetPosition(Eigen::Vector3f::Zero());
+		mTransform->SetPosition(winCenter + Eigen::Vector3f::Zero());
 	}
 
-	if (mCaseIndex == 1 || mCaseIndex == 0)
+	if (mCaseIndex == 1)
 	{
 		const int SizeInf = 10000;
 		mCube0 = mContext->RenderableFac()->CreateCube(winCenter + Eigen::Vector3f(0, 0, 269.99), 
@@ -82,9 +85,9 @@ void TestCameraOutput::OnPostInitDevice()
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
-	if (mCaseIndex == 0 && 0)
+	if (mCaseIndex == 0)
 	{
-		auto camera1 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
+		auto camera1 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0,0,-10));
 		camera1->SetDepth(2);
 		camera1->SetCameraMask(cameraMask1);
 

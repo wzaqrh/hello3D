@@ -19,7 +19,7 @@ private:
 void TestBloom::OnPostInitDevice()
 {
 	mContext->SceneMng()->RemoveAllCameras();
-	auto camera = mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0,0,-10), 300, 45);
+	auto camera = mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0,0,-10), Eigen::Vector3f(0.01, 300, 45));
 	
 	auto rendFac = mContext->RenderableFac();
 	camera->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
@@ -27,9 +27,9 @@ void TestBloom::OnPostInitDevice()
 
 	mModel = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL); 
 	mModel->LoadModel("model/Spaceship/Spaceship.fbx"); 
-	mMoveDefScale = 0.01;
 	mTransform = mModel->GetTransform();
-	mTransform->SetScale(Eigen::Vector3f(mMoveDefScale, mMoveDefScale, mMoveDefScale));
+	#define SCALE_BASE 0.01
+	mTransform->SetScale(Eigen::Vector3f(SCALE_BASE, SCALE_BASE, SCALE_BASE));
 }
 
 void TestBloom::OnRender()

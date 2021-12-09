@@ -14,8 +14,12 @@ public:
 	SceneManager(ResourceManager& resMng);
 	
 	void RemoveAllCameras();
-	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), float zFar = 100, unsigned camMask = -1);
-	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), float zFar = 100, float fov = 45, unsigned camMask = -1);
+	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(),
+		const Eigen::Vector3f& near_far_fov = math::cam::DefNearFarFov(),
+		unsigned camMask = -1);
+	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
+		const Eigen::Vector3f& near_far_fov = math::cam::DefNearFarFov(),
+		unsigned camMask = -1);
 
 	void RemoveAllLights();
 	SpotLightPtr AddSpotLight(unsigned camMask = -1);

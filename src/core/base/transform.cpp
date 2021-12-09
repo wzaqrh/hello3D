@@ -69,7 +69,7 @@ bool Transform::IsIdentity() const
 const Eigen::Vector3f& Transform::GetForward() const
 {
 	CheckDirtyAndRecalculate();
-	BOOST_ASSERT(fabs(mForward.norm() - 1.0) < 0.001);
+	BOOST_ASSERT(fabs(mForward.norm() - 1.0) < 0.01);
 	return mForward;
 }
 

@@ -13,14 +13,9 @@ using namespace mir;
 
 App::App()
 {
-	mContext = nullptr;
-	mInput = nullptr;
-	mTimer = nullptr;
-	mMoveDefScale = 1.0f;
-
+	mCameraInitInvLengthForward = Eigen::Vector3f::Zero();
+	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
 	mTransform = std::make_shared<mir::Transform>();
-	//mBackgndColor = Eigen::Vector4f(0.5f, 0.5f, 0.5f, 1.0f);
-	mBackgndColor = Eigen::Vector4f(0.3f, 0.3f, 0.3f, 0.0f);
 	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()
@@ -45,7 +40,6 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 
 	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
 	mTimer = new mir::debug::Timer;
-	mOriginCameraDistance = 0;
 	return true;
 }
 void App::OnInitCamera()
@@ -70,41 +64,33 @@ void App::Render()
 	mInput->Frame();
 	mContext->Update();
 
-	auto camera0 = sceneMng->GetDefCamera();
 	//rotate camera
+	auto camera0 = sceneMng->GetDefCamera();
 	if (camera0 && camera0->GetType() == kCameraPerspective)
 	{
-		if (mOriginCameraDistance == 0)
-			mOriginCameraDistance = camera0->GetForwardLength();
-
-		float eyeDistance = camera0->GetForwardLength();
-		if (mInput->GetMouseWheel() != 0) {
-			float wheel = boost::algorithm::clamp(mInput->GetMouseWheel() / 1000.0, -1, 1);
-			eyeDistance -= wheel * 0.8 * eyeDistance;
+		auto camTranform = camera0->GetTransform();
+		if (!mCameraInitInvLengthForward.any()) {
+			mCameraInitInvLengthForward = -camera0->GetForward() * camera0->GetForwardLength();
+			mCameraInitLookAt = camera0->GetLookAt();
 		}
+		
+		float forwardLength = camera0->GetForwardLength();
+		if (mInput->GetMouseWheelChange() != 0)
+			forwardLength -= mInput->GetMouseWheelChange() * 0.8 * forwardLength;
 
-	#if 1
-		Eigen::Vector2i m = mInput->GetMouseRightLocation();
-		float eulerX = 3.14 * m.x() / renderSys->WinSize().x();
-		float eulerY = 3.14 * m.y() / renderSys->WinSize().y();
-		camera0->GetTransform()->SetEuler(Eigen::Vector3f(0, eulerX, eulerY));
-	#else
-		Eigen::Vector3f tpos = Eigen::Vector3f(0, 0, -eyeDistance) + camera0->GetLookAt();
-
-		Eigen::Vector3f cpos;
+		Eigen::Vector3f curInvForward = mCameraInitInvLengthForward.normalized();
 		{
 			Eigen::Vector2i m = mInput->GetMouseRightLocation();
-			float eulerY = 3.14 * m.x() / renderSys->WinSize().x();
-			float eulerX = 3.14 * m.y() / renderSys->WinSize().y();
+			float mx = 3.14 * m.x() / renderSys->WinSize().x();
+			float my = 3.14 * m.y() / renderSys->WinSize().y();
 
-			Eigen::Quaternion<float> euler = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
-				* Eigen::AngleAxisf(eulerX, Eigen::Vector3f::UnitX())
-				* Eigen::AngleAxisf(eulerY, Eigen::Vector3f::UnitY());
-			cpos = Transform3fAffine(euler) * tpos;
+			Eigen::Quaternion<float> euler = Eigen::AngleAxisf(my, Eigen::Vector3f::UnitZ())
+				* Eigen::AngleAxisf(0, Eigen::Vector3f::UnitX())
+				* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY());
+			curInvForward = Transform3fAffine(euler) * curInvForward;
 		}
 
-		camera0->SetLookAt(cpos, camera0->GetLookAt());
-	#endif
+		camera0->SetLookAt(mCameraInitLookAt + curInvForward * forwardLength, mCameraInitLookAt);
 	}
 
 	//rotate target
@@ -112,9 +98,6 @@ void App::Render()
 		Eigen::Vector2i m = mInput->GetMouseLeftLocation();
 		float angy = 3.14 * -m.x() / renderSys->WinSize().x(), angx = 3.14 * -m.y() / renderSys->WinSize().y();
 		mTransform->SetEuler(Eigen::Vector3f(angx, angy, 0));
-
-		//float scalez = boost::algorithm::clamp(mMoveDefScale * (1000 + m.z()) / 1000.0f, 0.00001f, 10.0f);
-		//mTransform->SetScale(Eigen::Vector3f(scalez, scalez, scalez));
 	}
 
 	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);

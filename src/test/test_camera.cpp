@@ -25,32 +25,34 @@ void TestCamera::OnPostInitDevice()
 	auto rendFac = mContext->RenderableFac();
 	auto resMng = mContext->ResourceMng();
 	auto screenCenter = resMng->WinSize() / 2;
+	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
+	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
 
 	sceneMng->RemoveAllCameras();
 	sceneMng->RemoveAllLights();
 
 	if (mCaseIndex >= 4) {
-		CameraPtr camera = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -30), 300);
+		CameraPtr camera = sceneMng->AddOthogonalCamera(test1::cam::Eye(), test1::cam::NearFarFov());
 		camera->GetTransform()->SetScale(Eigen::Vector3f(0.5, 0.5, 1));
 		//camera->GetTransform()->SetPosition(Eigen::Vector3f(-screenCenter.x(), 0, 0));
 
 		auto light = sceneMng->AddDirectLight();
-		light->SetDirection(Eigen::Vector3f(0, 0, 10));
+		light->SetDirection(test1::vec::DirLight());
 
 		mSprite = mContext->RenderableFac()->CreateSprite("model/smile.png");
-		mSprite->SetPosition(Eigen::Vector3f(screenCenter.x() - 240, screenCenter.y() - 240, 0));
+		mSprite->SetPosition(winCenter + Eigen::Vector3f(-halfSize.x()/2, -halfSize.y()/2, 0));
 	}
 	else {
-		CameraPtr camera = sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -30), 300, 45);
+		CameraPtr camera = sceneMng->AddPerspectiveCamera(winCenter + test1::cam::Eye(), test1::cam::NearFarFov());
 		switch (mCaseIndex) {
 		case 0: {
-			camera->GetTransform()->SetPosition(Eigen::Vector3f(5, -5, -30));
+			camera->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(5, -5, -30));
 		}break;
 		case 1: {
-			camera->GetTransform()->SetScale(Eigen::Vector3f(0.5, 2, 1));
+			camera->GetTransform()->SetScale(winCenter + Eigen::Vector3f(0.5, 2, 1));
 		}break;
 		case 2: {
-			camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -30));
+			camera->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(0, 0, -30));
 		}break;
 		default:
 			break;
@@ -67,7 +69,7 @@ void TestCamera::OnPostInitDevice()
 		mModel->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
 		mModel->PlayAnim(0);
 		mTransform = mModel->GetTransform();
-		mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
+		mTransform->SetPosition(winCenter + Eigen::Vector3f::Zero());
 	}
 }
 

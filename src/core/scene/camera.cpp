@@ -8,19 +8,6 @@ namespace mir {
 
 #define CAMERA_CENTER_IS_ZERO
 
-CameraPtr Camera::CreatePerspective(ResourceManager& resMng, const Eigen::Vector3f& eyePos, float zfar, float fov)
-{
-	CameraPtr camera = std::make_shared<Camera>(resMng);
-	camera->InitAsPerspective(resMng.WinSize(), eyePos, zfar, fov);
-	return camera;
-}
-CameraPtr Camera::CreateOthogonal(ResourceManager& resMng, const Eigen::Vector3f& eyePos, float zfar)
-{
-	CameraPtr camera = std::make_shared<Camera>(resMng);
-	camera->InitAsOthogonal(resMng.WinSize(), eyePos, zfar);
-	return camera;
-}
-
 Camera::Camera(ResourceManager& resMng)
 	: mResourceMng(resMng)
 {
@@ -32,29 +19,31 @@ Camera::Camera(ResourceManager& resMng)
 	mTransform = std::make_shared<Transform>();
 }
 
-void Camera::InitAsPerspective(const Eigen::Vector2i& screensize, const Eigen::Vector3f& eyePos, float zfar, float fov) 
+void Camera::InitAsPerspective(const Eigen::Vector2i& screensize, 
+	const Eigen::Vector3f& eyePos, 
+	const Eigen::Vector3f& length_forward, 
+	const Eigen::Vector3f& near_far_fov,
+	unsigned cameraMask) 
 {
 	mType = kCameraPerspective;
 	mSize = mScreenSize = screensize;
-	SetZRange(Eigen::Vector2f(0.01, zfar));
-	SetFov(fov);
-	SetLookAt(eyePos, math::vec::Zero(), math::vec::Up());
-#if !defined CAMERA_CENTER_IS_ZERO
-	mTransform->SetPosition(Eigen::Vector3f(mScreenSize.x() / 2, mScreenSize.y() / 2, 0));
-	mViewDirty = true;
-#endif
+	SetZRange(near_far_fov.head<2>());
+	SetFov(near_far_fov.z());
+	SetLookAt(eyePos, eyePos + length_forward, math::vec::Up());
+	SetCameraMask(cameraMask);
 	mProjectionDirty = true;
 }
-void Camera::InitAsOthogonal(const Eigen::Vector2i& screensize, const Eigen::Vector3f& eyePos, float zfar) 
+void Camera::InitAsOthogonal(const Eigen::Vector2i& screensize, 
+	const Eigen::Vector3f& eyePos, 
+	const Eigen::Vector3f& length_forward, 
+	const Eigen::Vector3f& near_far_fov,
+	unsigned cameraMask)
 {
 	mType = kCameraOthogonal;
 	mSize = mScreenSize = screensize;
-	SetZRange(Eigen::Vector2f(0.01, zfar));
-	SetLookAt(eyePos, math::vec::Zero(), math::vec::Up());
-#if !defined CAMERA_CENTER_IS_ZERO
-	mTransform->SetPosition(Eigen::Vector3f(mScreenSize.x() / 2, mScreenSize.y() / 2, 0));
-	mViewDirty = true;
-#endif
+	SetZRange(near_far_fov.head<2>());
+	SetLookAt(eyePos, eyePos + length_forward, math::vec::Up());
+	SetCameraMask(cameraMask);
 	mProjectionDirty = true;
 }
 
@@ -195,8 +184,10 @@ void Camera::RecalculateView() const
 	Transform3fAffine t(Transform3fAffine::Identity());
 	{
 		Eigen::Vector3f center(mScreenSize.x() / 2, mScreenSize.y() / 2, 0);
-		if (mType == kCameraOthogonal) 
+		if (mType == kCameraOthogonal) {
+			t.translate(center);//consider orho-camera's anchor is screen-center
 			t.pretranslate(-center);//[0->sreen.w]  -> relative2screen_center[-screen.hw, screen.hw]
+		}
 
 		auto s = mTransform->GetScale();
 		t.prescale(Eigen::Vector3f(1 / s.x(), 1 / s.y(), 1 / s.z()));
@@ -232,7 +223,7 @@ const Eigen::Matrix4f& Camera::GetView() const
 
 Eigen::Vector4f Camera::ProjectPoint(const Eigen::Vector4f& pos) const
 {
-	Eigen::Vector4f perspective = Transform3Projective(mProjection * GetView()) * pos;
+	Eigen::Vector4f perspective = Transform3Projective(GetProjection() * GetView()) * pos;
 
 	if (perspective.w() != 0) {
 		perspective.head<3>() /= perspective.w();

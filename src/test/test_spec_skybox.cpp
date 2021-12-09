@@ -10,20 +10,27 @@ class TestSpecSkybox : public App
 {
 protected:
 	virtual void OnRender() override;
-	virtual void OnInitLight() override;
 	virtual void OnPostInitDevice() override;
 };
-
-void TestSpecSkybox::OnInitLight()
-{
-	auto light2 = mContext->SceneMng()->AddDirectLight();
-	light2->SetDirection(Eigen::Vector3f(0, 0, 1));
-}
+/*mCaseIndex
+0：透视相机 观察到天空盒	 
+1：透视相机有位移, 由于zrange远小于相机长宽, 观察到天空盒背景极度拉伸 
+*/
 
 void TestSpecSkybox::OnPostInitDevice()
 {
-	mContext->SceneMng()->GetDefCamera()->SetSkyBox(
-		mContext->RenderableFac()->CreateSkybox("model/uffizi_cross_mip.dds"));//bc1a mipmap cube
+	auto sceneMng = mContext->SceneMng();
+	auto rendFac = mContext->RenderableFac();
+	auto resMng = mContext->ResourceMng();
+	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
+	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
+
+	if (mCaseIndex == 1) {
+		sceneMng->RemoveAllCameras();
+		sceneMng->AddPerspectiveCamera(winCenter + test1::cam1::Eye(), test1::cam1::NearFarFov());
+	}
+
+	sceneMng->GetDefCamera()->SetSkyBox(rendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
 }
 
 void TestSpecSkybox::OnRender()

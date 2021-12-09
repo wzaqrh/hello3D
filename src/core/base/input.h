@@ -16,7 +16,7 @@ public:
 	void Frame();
 	Eigen::Vector2i GetMouseLeftLocation() const { return mMouseL; }
 	Eigen::Vector2i GetMouseRightLocation() const { return mMouseR; }
-	float GetMouseWheel() const { return mMouseWheel; }
+	float GetMouseWheelChange() const { return mMouseWheel; }
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();

@@ -83,7 +83,7 @@ void D3DInput::Process()
 		mMouseR.x() = boost::algorithm::clamp(mMouseR.x() + m_mouseState.lX, -m_screenWidth, m_screenWidth);
 		mMouseR.y() = boost::algorithm::clamp(mMouseR.y() + m_mouseState.lY, -m_screenHeight, m_screenHeight);
 	}
-	mMouseWheel = m_mouseState.lZ;
+	mMouseWheel = boost::algorithm::clamp(m_mouseState.lZ / 1000.0, -1, 1);
 	mMouseMiddleDown = (m_mouseState.rgbButtons[2] & 0x80);
 }
 
