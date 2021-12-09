@@ -424,14 +424,14 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 	return texture;
 }
 
-MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& matName) ThreadSafe ThreadSafe
+MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe ThreadSafe
 {
 	MaterialPtr material = nullptr;
 	ATOMIC_STATEMENT(mMaterialMapLock, material = this->mMaterialByName[matName]);
 	if (material == nullptr) {
 		material = this->mMaterialFac.CreateMaterial(launchMode, *this, matName);
 		ATOMIC_STATEMENT(mMaterialMapLock, this->mMaterialByName.insert(std::make_pair(matName, material)));
-		DEBUG_SET_RES_PATH(material, (boost::format("name:%1%") %matName).str());
+		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.VariantName).str());
 		DEBUG_SET_CALL(material, launchMode);
 	}
 	return material;

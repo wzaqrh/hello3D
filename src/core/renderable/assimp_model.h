@@ -2,7 +2,7 @@
 #include "core/mir_export.h"
 #include "core/base/launch.h"
 #include "core/resource/assimp_resource.h"
-#include "core/renderable/renderable.h"
+#include "core/renderable/renderable_base.h"
 
 namespace mir {
 
@@ -46,7 +46,8 @@ struct cbUnityGlobal
 	Eigen::Vector4f _Unity_SpecCube0_HDR;
 };
 
-struct AiAnimeNode {
+struct AiAnimeNode 
+{
 	void Init(size_t serializeIndex, const AiNodePtr& node) {
 		SerilizeIndex = serializeIndex;
 		ChannelIndex = -1;
@@ -58,7 +59,8 @@ public:
 	aiMatrix4x4 LocalTransform;
 	aiMatrix4x4 GlobalTransform;
 };
-struct AiAnimeTree {
+struct AiAnimeTree 
+{
 	void Init(const std::vector<AiNodePtr>& serializeNodes) {
 		mNodeBySerializeIndex.assign(serializeNodes.begin(), serializeNodes.end());
 		mAnimeNodes.resize(serializeNodes.size());
@@ -87,28 +89,22 @@ public:
 	std::vector<AiNodePtr> mNodeBySerializeIndex;
 };
 
-class MIR_CORE_API AssimpModel : public IRenderable 
+class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp 
 {
+	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
-	AssimpModel(Launch launchMode, ResourceManager& resourceMng, const std::string& matType);
+	AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matType);
 public:
-	~AssimpModel();
 	void LoadModel(const std::string& assetPath, const std::string& redirectResource = "");
 	void PlayAnim(int Index);
-	
-	void Update(float dt);
-	int GenRenderOperation(RenderOperationQueue& opList) override;
 
-	const TransformPtr& GetTransform() const { return mTransform; }
+	void Update(float dt);
+	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const AiNodePtr& node, size_t meshIndexIndex);
 	void DoDraw(const AiNodePtr& node, RenderOperationQueue& opList);
 private:
-	const Launch mLaunchMode;
-	ResourceManager& mResourceMng;
-	MaterialPtr mMaterial;
-	TransformPtr mTransform;
 	AiScenePtr mAiScene;
 	AiAnimeTree mAnimeTree;
 	std::function<void()> mInitAnimeTreeTask, mPlayAnimTask;

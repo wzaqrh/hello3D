@@ -3,12 +3,9 @@
 
 namespace mir {
 
-SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const std::string& imgName)
-	:mResourceMng(resourceMng)
+SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, const std::string& imgName)
+	:Super(launchMode, resourceMng, matName)
 {
-	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_SKYBOX);
-	mIndexBuffer = nullptr;
-
 	SkyboxVertex Vertexs[4];
 	float fHighW = -1.0f - (1.0f / (float)mResourceMng.WinSize().x());
 	float fHighH = -1.0f - (1.0f / (float)mResourceMng.WinSize().y());
@@ -20,7 +17,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const std::strin
 	Vertexs[3].pos = Eigen::Vector4f(fHighW, fHighH, 1.0f, 1.0f);
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
 
-	mMainTex = mResourceMng.CreateTextureByFile(launchMode, imgName);
+	mTexture = mResourceMng.CreateTextureByFile(launchMode, imgName);
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
 	Eigen::Vector3f pos0 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fLowH, 1.0f));
@@ -30,26 +27,12 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const std::strin
 #endif
 }
 
-SkyBox::~SkyBox()
+void SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 {
-}
-
-int SkyBox::GenRenderOperation(RenderOperationQueue& opList)
-{
-	if (!mMaterial->IsLoaded() 
-		|| !mVertexBuffer->IsLoaded() 
-		|| (mMainTex && !mMainTex->IsLoaded()))
-		return 0;
-
 	RenderOperation op = {};
-	op.Material = mMaterial;
-	op.IndexBuffer = mIndexBuffer;
-	op.AddVertexBuffer(mVertexBuffer);
-	op.Textures.Add(mMainTex);
-	op.WorldTransform = Eigen::Matrix4f::Identity();
-	op.CameraMask = mCameraMask;
+	if (!MakeRenderOperation(op)) return;
+
 	opList.AddOP(op);
-	return 1;
 }
 
 }

@@ -84,12 +84,14 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">4.1</ShaderModel>
     </FxCompile>
     <ClInclude Include="..\src\core\base\attribute_struct.h" />
+    <ClInclude Include="..\src\core\base\base_type.h" />
     <ClInclude Include="..\src\core\base\d3d.h" />
     <ClInclude Include="..\src\core\base\debug.h" />
     <ClInclude Include="..\src\core\base\declare_macros.h" />
     <ClInclude Include="..\src\core\base\il_helper.h" />
     <ClInclude Include="..\src\core\base\input.h" />
     <ClInclude Include="..\src\core\base\launch.h" />
+    <ClInclude Include="..\src\core\base\material_load_param.h" />
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
@@ -107,10 +109,10 @@
     <ClInclude Include="..\src\core\renderable\post_process.h" />
     <ClInclude Include="..\src\core\renderable\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\renderable.h" />
+    <ClInclude Include="..\src\core\renderable\renderable_base.h" />
     <ClInclude Include="..\src\core\renderable\renderable_factory.h" />
     <ClInclude Include="..\src\core\renderable\skybox.h" />
     <ClInclude Include="..\src\core\renderable\sprite.h" />
-    <ClInclude Include="..\src\core\rendersys\base_type.h" />
     <ClInclude Include="..\src\core\rendersys\blob.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\blob11.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\framebuffer11.h" />
@@ -164,6 +166,7 @@
     <ClCompile Include="..\src\core\renderable\label.cpp" />
     <ClCompile Include="..\src\core\renderable\mesh.cpp" />
     <ClCompile Include="..\src\core\renderable\post_process.cpp" />
+    <ClCompile Include="..\src\core\renderable\renderable_base.cpp" />
     <ClCompile Include="..\src\core\renderable\renderable_factory.cpp" />
     <ClCompile Include="..\src\core\renderable\skybox.cpp" />
     <ClCompile Include="..\src\core\renderable\sprite.cpp" />

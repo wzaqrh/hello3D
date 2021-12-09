@@ -123,14 +123,8 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, const std::string& matType)
-	:mLaunchMode(launchMode), mResourceMng(resourceMng)
-{
-	mTransform = std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(launchMode, matType);
-}
-
-AssimpModel::~AssimpModel()
+AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
+	:Super(launchMode, resourceMng, matName)
 {}
 
 void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
@@ -310,12 +304,12 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 		DoDraw(node->Children[i], opList);
 }
 
-int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
+void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (!mMaterial->IsLoaded() 
 		|| !mAiScene->IsLoaded() 
 		|| !mAnimeTree.IsInited())
-		return 0;
+		return;
 
 	int count = opList.Count();
 	DoDraw(mAiScene->mRootNode, opList);
@@ -323,8 +317,6 @@ int AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 	Eigen::Matrix4f world = mTransform->GetSRT();
 	for (int i = count; i < opList.Count(); ++i)
 		opList[i].WorldTransform = world;
-
-	return opList.Count() - count;
 }
 
 }

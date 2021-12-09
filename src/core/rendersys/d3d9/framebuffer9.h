@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <d3d9.h>
 #include "core/base/math.h"
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 #include "core/rendersys/framebuffer.h"
 #include "core/rendersys/d3d9/predeclare.h"
 #include "core/rendersys/d3d9/texture9.h"

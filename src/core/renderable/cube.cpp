@@ -5,15 +5,13 @@
 namespace mir {
 	
 /********** Cube **********/
-Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const std::string& matName)
-	: mResourceMng(resourceMng)
+Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
+	: Super(launchMode, resourceMng, matName)
 	, mVertexDirty(true)
 	, mHalfSize(1, 1, 1)
 	, mPosition(0, 0, 0)
 	, mColor(1, 1, 1, 1)
 {
-	mTransform = std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(__launchMode__, matName != "" ? matName : E_MAT_SPRITE);
 	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(vbSurfaceCube::GetIndices()));
 	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(mVertexData)));
 }
@@ -43,12 +41,10 @@ void Cube::SetColor(unsigned bgra)
 	mVertexDirty = true;
 }
 
-int Cube::GenRenderOperation(RenderOperationQueue& opList)
+void Cube::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded()
-		|| !mVertexBuffer->IsLoaded()
-		|| !mIndexBuffer->IsLoaded())
-		return 0;
+	RenderOperation op = {};
+	if (!MakeRenderOperation(op)) return;
 
 	if (mVertexDirty) {
 		mVertexDirty = false;
@@ -57,14 +53,7 @@ int Cube::GenRenderOperation(RenderOperationQueue& opList)
 		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mVertexData));
 	}
 
-	RenderOperation op = {};
-	op.Material = mMaterial;
-	op.IndexBuffer = mIndexBuffer;
-	op.AddVertexBuffer(mVertexBuffer);
-	op.WorldTransform = mTransform->GetSRT();
-	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
-	return 1;
 }
 
 

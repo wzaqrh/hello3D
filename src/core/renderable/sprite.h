@@ -4,33 +4,25 @@
 #include "core/base/launch.h"
 #include "core/base/attribute_struct.h"
 #include "core/rendersys/predeclare.h"
-#include "core/renderable/renderable.h"
+#include "core/renderable/renderable_base.h"
 
 namespace mir {
 
-class MIR_CORE_API Sprite : public IRenderable 
+class MIR_CORE_API Sprite : public RenderableSingleRenderOp 
 {
+	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
-	Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName = "");
+	Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
 public:
+	void SetTexture(const ITexturePtr& Texture) override;
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetSize(const Eigen::Vector2f& size);
-	void SetTexture(const ITexturePtr& Texture);
 	void SetColor(const Eigen::Vector4f& color);
 	void SetFlipY(bool flipY);
 public:
-	int GenRenderOperation(RenderOperationQueue& opList) override;
+	void GenRenderOperation(RenderOperationQueue& opList) override;
 	const vbSurfaceQuad* GetVertexData() const { return &mQuad; }
-	const MaterialPtr& GetMaterial() const { return mMaterial; }
-	const TransformPtr& GetTransform() const { return mTransform; }
-private:
-	ResourceManager& mResourceMng;
-	ITexturePtr mTexture = nullptr;
-	IVertexBufferPtr mVertexBuffer;
-	IIndexBufferPtr mIndexBuffer;
-	MaterialPtr mMaterial;
-	TransformPtr mTransform;
 private:
 	vbSurfaceQuad mQuad;
 	bool mQuadDirty;

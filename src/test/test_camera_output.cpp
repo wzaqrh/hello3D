@@ -25,6 +25,8 @@ void TestCameraOutput::OnPostInitDevice()
 	auto sceneMng = mContext->SceneMng();
 	auto rendFac = mContext->RenderableFac();
 	auto resMng = mContext->ResourceMng();
+	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
+	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
 
 	sceneMng->RemoveAllCameras();
 	sceneMng->RemoveAllLights();
@@ -36,7 +38,7 @@ void TestCameraOutput::OnPostInitDevice()
 		if (mCaseIndex == 1) 
 		{
 			camera2 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -30), 300);
-			camera2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
+			camera2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -30));
 			camera2->SetDepth(1);
 			camera2->SetCameraMask(cameraMask2);
 
@@ -49,6 +51,7 @@ void TestCameraOutput::OnPostInitDevice()
 		else 
 		{
 			camera2 = sceneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -30), 300, 45);
+			camera2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -30));
 			camera2->SetDepth(1);
 			camera2->SetCameraMask(cameraMask2);
 			camera2->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
@@ -66,23 +69,24 @@ void TestCameraOutput::OnPostInitDevice()
 		mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
 		mModel2->PlayAnim(0);
 		mTransform = mModel2->GetTransform();
-		mTransform->SetPosition(Eigen::Vector3f(0, 0, 0));
+		mTransform->SetPosition(Eigen::Vector3f::Zero());
 	}
 
-	if (mCaseIndex == 1)
+	if (mCaseIndex == 1 || mCaseIndex == 0)
 	{
 		const int SizeInf = 10000;
-		mCube0 = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, 269.99), Eigen::Vector3f(SizeInf, SizeInf, 1), 0xffff6347);
-		mCube1 = mContext->RenderableFac()->CreateCube(Eigen::Vector3f(0, 0, -29.99), Eigen::Vector3f(25, 25, 1), 0xffff4763);
+		mCube0 = mContext->RenderableFac()->CreateCube(winCenter + Eigen::Vector3f(0, 0, 269.99), 
+			Eigen::Vector3f(SizeInf, SizeInf, 1), 0xffff6347);
+		mCube1 = mContext->RenderableFac()->CreateCube(winCenter + Eigen::Vector3f(0, 0, -29.99), 
+			Eigen::Vector3f(25, 25, 1), 0xffff4763);
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
-	if (mCaseIndex == 0)
+	if (mCaseIndex == 0 && 0)
 	{
 		auto camera1 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0,0,-10), 100);
 		camera1->SetDepth(2);
 		camera1->SetCameraMask(cameraMask1);
-		auto halfSize = mContext->WinSize() / 2;
 
 		auto light1 = sceneMng->AddPointLight();
 		light1->SetCameraMask(cameraMask1);
@@ -96,7 +100,7 @@ void TestCameraOutput::OnPostInitDevice()
 		auto fetchTexture = camera2->SetOutput(0.5)->GetAttachColorTexture(0);
 		DEBUG_SET_PRIV_DATA(fetchTexture, "camera2 output");
 		mSpriteCam1->SetTexture(fetchTexture);
-		mSpriteCam1->SetPosition(Eigen::Vector3f(halfSize.x(), halfSize.y(), 0));
+		mSpriteCam1->SetPosition(winCenter);
 		mSpriteCam1->SetSize(halfSize.cast<float>());
 	}
 }

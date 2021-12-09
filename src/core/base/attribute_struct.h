@@ -1,6 +1,6 @@
 #pragma once
 #include "core/base/math.h"
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 
 namespace mir {
 

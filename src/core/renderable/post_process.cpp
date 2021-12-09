@@ -46,8 +46,8 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex)
-	:mResourceMng(resourceMng)
+PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex)
+	:Super(launchMode, resourceMng, matName)
 {
 	mMainTex = mainTex;
 
@@ -56,28 +56,14 @@ PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, IFrame
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
-PostProcess::~PostProcess()
+void PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 {
-}
-
-int PostProcess::GenRenderOperation(RenderOperationQueue& opList)
-{
-	if (!mMaterial->IsLoaded() 
-		|| !mVertexBuffer->IsLoaded() 
-		|| !mIndexBuffer->IsLoaded() 
-		|| !mMainTex->IsLoaded())
-		return 0;
-
 	RenderOperation op = {};
-	op.Material = mMaterial;
-	op.IndexBuffer = mIndexBuffer;
-	op.AddVertexBuffer(mVertexBuffer);
-	op.Textures.Add(mMainTex->GetAttachColorTexture(0));
-	op.WorldTransform = Eigen::Matrix4f::Identity();
+	if (!MakeRenderOperation(op)) return;
+
+	op.Textures[0] = mMainTex->GetAttachColorTexture(0);
 	op.VertBufferByPass = mVertBufferByPass;
-	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
-	return 1;
 }
 
 /********** cbBloom **********/
@@ -158,11 +144,9 @@ IVertexBufferPtr GetVertBufByRT(Launch launchMode, ResourceManager& resourceMng,
 	return resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
-Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex)
-	:PostProcess(launchMode, resourceMng, mainTex)
+Bloom::Bloom(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex)
+	:Super(launchMode, resourceMng, matName, mainTex)
 {
-	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_POSTPROC_BLOOM);
-
 	auto curTech = mMaterial->CurTech();
 	for (auto& pass : curTech->mPasses) {
 		if (pass->mRenderTarget) {

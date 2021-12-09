@@ -3,7 +3,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/declare_macros.h"
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 #include "core/resource/resource.h"
 
 namespace mir {

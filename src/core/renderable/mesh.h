@@ -3,15 +3,16 @@
 #include "core/base/declare_macros.h"
 #include "core/base/launch.h"
 #include "core/base/attribute_struct.h"
-#include "core/renderable/renderable.h"
+#include "core/renderable/renderable_base.h"
 
 namespace mir {
 
-class MIR_CORE_API Mesh : public IRenderable 
+class MIR_CORE_API Mesh : public RenderableSingleRenderOp 
 {
+	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
-	Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& matName, 
+	Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, 
 		int vertCount = 1024, int indexCount = 1024);
 public:
 	void Clear();
@@ -23,19 +24,14 @@ public:
 	void SetSubMeshCount(int count);
 	void SetIndices(const unsigned int* indiceData, int indicePos, int indiceCount, int indiceBase, int subMeshIndex);
 	void SetTexture(int slot, ITexturePtr texture, int subMeshIndex);
-public:
-	int GenRenderOperation(RenderOperationQueue& opList) override;
 private:
-	ResourceManager& mResourceMng;
-	MaterialPtr mMaterial;
-
+	void GenRenderOperation(RenderOperationQueue& opList) override;
+private:
 	int mVertPos = 0, mVertDirty = false;
 	std::vector<vbSurface> mVertices;
-	IVertexBufferPtr mVertexBuffer;
 
 	int mIndiceDirty = false;
 	std::vector<unsigned int> mIndices;
-	IIndexBufferPtr mIndexBuffer;
 
 	struct SubMesh {
 		short IndicePos, IndiceCount, IndiceBase;

@@ -1,6 +1,6 @@
 #pragma once
 #include "core/rendersys/predeclare.h"
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 #include "core/resource/resource.h"
 
 namespace mir {

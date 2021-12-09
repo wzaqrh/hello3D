@@ -5,16 +5,14 @@
 namespace mir {
 
 /********** TSprite **********/
-Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const std::string& matName)
-	: mResourceMng(resourceMng)
+Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
+	: Super(launchMode, resourceMng, matName)
 	, mQuad(Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0))
 	, mQuadDirty(true)
 	, mFlipY(true)
 	, mSize(0, 0)
 	, mPosition(0, 0)
 {
-	mTransform = std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(__launchMode__, matName != "" ? matName : E_MAT_SPRITE);
 	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(vbSurfaceQuad::GetIndices()));
 	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad)));
 
@@ -74,28 +72,17 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 	}
 }
 
-int Sprite::GenRenderOperation(RenderOperationQueue& opList)
+void Sprite::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded() 
-		|| !mVertexBuffer->IsLoaded() 
-		|| !mIndexBuffer->IsLoaded()
-		|| (mTexture && !mTexture->IsLoaded()))
-		return 0;
+	RenderOperation op = {};
+	if (!MakeRenderOperation(op)) return;
 
 	if (mQuadDirty) {
 		mQuadDirty = false;
 		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
 	}
-
-	RenderOperation op = {};
-	op.Material = mMaterial;
-	op.IndexBuffer = mIndexBuffer;
-	op.AddVertexBuffer(mVertexBuffer);
-	if (mTexture) op.Textures.Add(mTexture);
 	op.WorldTransform = mTransform->GetSRT();
-	op.CameraMask = mCameraMask;
 	opList.AddOP(op);
-	return 1;
 }
 
 }

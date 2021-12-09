@@ -708,10 +708,10 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	return builder.Build();
 }
 
-MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const std::string& matName) {
+MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matParam) {
 	MaterialAsset matAsset;
-	auto entry = mMatAssetMng->MatNameToAsset()(matName);
-	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, entry.ShaderName, entry.VariantName, matAsset)) {
+	//auto entry = mMatAssetMng->MatNameToAsset()(matParam.ShaderName);
+	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, matParam.ShaderName, matParam.VariantName, matAsset)) {
 		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset);
 	}
 	else {

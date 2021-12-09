@@ -1,5 +1,5 @@
 #include "core/rendersys/d3d9/program9.h"
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 #include "core/base/debug.h"
 
 namespace mir {

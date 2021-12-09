@@ -2,7 +2,7 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 #include "core/base/transform.h"
 
 #if defined TRANSFORM_QUATERNION

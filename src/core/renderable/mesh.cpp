@@ -4,11 +4,9 @@
 namespace mir {
 
 /********** Mesh **********/
-Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& matName, int vertCount, int indexCount)
-	:mResourceMng(resourceMng)
+Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, int vertCount, int indexCount)
+	:Super(launchMode, resourceMng, matName)
 {
-	mMaterial = resourceMng.CreateMaterial(__launchMode__, matName != "" ? matName : E_MAT_SPRITE);
-
 	mIndices.resize(indexCount);
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(mIndices));
 
@@ -18,12 +16,12 @@ Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const std::string& m
 	mSubMeshs.resize(1);
 }
 
-int Mesh::GenRenderOperation(RenderOperationQueue& opList)
+void Mesh::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (!mMaterial->IsLoaded()
 		|| !mVertexBuffer->IsLoaded()
 		|| !mIndexBuffer->IsLoaded())
-		return 0;
+		return;
 
 	if (mVertDirty)
 	{
@@ -38,22 +36,21 @@ int Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	}
 
 	int opCount = 0;
-	for (int i = 0; i < mSubMeshs.size(); ++i)
-	if (mSubMeshs[i].IndiceCount > 0)
-	{
-		RenderOperation op = {};
-		op.Material = mMaterial;
-		op.IndexBuffer = mIndexBuffer;
-		op.AddVertexBuffer(mVertexBuffer);
-		op.Textures = mSubMeshs[i].Textures;
-		op.IndexPos = mSubMeshs[i].IndicePos;
-		op.IndexCount = mSubMeshs[i].IndiceCount;
-		op.IndexBase = mSubMeshs[i].IndiceBase;
-		op.CameraMask = mCameraMask;
-		opList.AddOP(op);
-		++opCount;
+	for (int i = 0; i < mSubMeshs.size(); ++i) {
+		if (mSubMeshs[i].IndiceCount > 0) {
+			RenderOperation op = {};
+			op.Material = mMaterial;
+			op.IndexBuffer = mIndexBuffer;
+			op.AddVertexBuffer(mVertexBuffer);
+			op.Textures = mSubMeshs[i].Textures;
+			op.IndexPos = mSubMeshs[i].IndicePos;
+			op.IndexCount = mSubMeshs[i].IndiceCount;
+			op.IndexBase = mSubMeshs[i].IndiceBase;
+			op.CameraMask = mCameraMask;
+			opList.AddOP(op);
+			++opCount;
+		}
 	}
-	return opCount;
 }
 
 void Mesh::Clear()

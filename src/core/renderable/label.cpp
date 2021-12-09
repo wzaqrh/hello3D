@@ -25,24 +25,20 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-Label::Label(Launch launchMode, ResourceManager& resourceMng, FontPtr font)
-	:mResourceMng(resourceMng)
+Label::Label(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, FontPtr font)
+	:Super(launchMode, resourceMng, matName)
 {
 	mFont = font;
-
-	mTransform = std::make_shared<Transform>();
-	mMaterial = resourceMng.CreateMaterial(launchMode, E_MAT_LABEL);
-
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
 }
 
-int Label::GenRenderOperation(RenderOperationQueue& opList)
+void Label::GenRenderOperation(RenderOperationQueue& opList)
 {
 	if (!mMaterial->IsLoaded()
 		|| !mVertexBuffer->IsLoaded()
 		|| !mIndexBuffer->IsLoaded())
-		return 0;
+		return;
 
 	int count = 0;
 	ITexturePtr lastTex;
@@ -84,8 +80,6 @@ int Label::GenRenderOperation(RenderOperationQueue& opList)
 		opList.AddOP(op);
 		++count;
 	}
-
-	return count;
 }
 
 void Label::SetSize(bool autoSize, const Eigen::Vector2f& size)

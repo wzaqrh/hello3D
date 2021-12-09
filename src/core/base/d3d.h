@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <d3d9.h>
-#include "core/rendersys/base_type.h"
+#include "core/base/base_type.h"
 
 namespace mir {
 namespace d3d {

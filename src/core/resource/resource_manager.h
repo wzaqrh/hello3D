@@ -4,8 +4,9 @@
 #include <boost/assert.hpp>
 #include "core/mir_export.h"
 #include "core/base/stl.h"
-#include "core/base/declare_macros.h"
 #include "core/base/launch.h"
+#include "core/base/declare_macros.h"
+#include "core/base/material_load_param.h"
 #include "core/predeclare.h"
 #include "core/rendersys/blob.h"
 #include "core/rendersys/program.h"
@@ -141,7 +142,7 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	MaterialPtr CreateMaterial(Launch launchMode, const std::string& matName) ThreadSafe;
+	MaterialPtr CreateMaterial(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial, ThreadSafe);
 	MaterialPtr CloneMaterial(Launch launchMode, const Material& material) ThreadSafe;
 
@@ -268,7 +269,7 @@ private:
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTextureByPath;
 	std::mutex mTexLock;
-	std::map<std::string, MaterialPtr> mMaterialByName;
+	std::map<MaterialLoadParam, MaterialPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;
 		bool operator<(const AiResourceKey& other) const {

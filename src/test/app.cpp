@@ -20,7 +20,7 @@ App::App()
 
 	mTransform = std::make_shared<mir::Transform>();
 	//mBackgndColor = Eigen::Vector4f(0.5f, 0.5f, 0.5f, 1.0f);
-	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
+	mBackgndColor = Eigen::Vector4f(0.3f, 0.3f, 0.3f, 0.0f);
 	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()

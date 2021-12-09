@@ -2,7 +2,7 @@
 #include "core/mir_export.h"
 #include "core/base/declare_macros.h"
 #include "core/base/launch.h"
-#include "core/renderable/renderable.h"
+#include "core/renderable/renderable_base.h"
 
 namespace mir {
 
@@ -18,20 +18,16 @@ public:
 	void SetFlipY(bool flipY);
 	void SetZ(float z);
 };
-class MIR_CORE_API PostProcess : public IRenderable 
+class MIR_CORE_API PostProcess : public RenderableSingleRenderOp 
 {
+	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 protected:
-	PostProcess(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex);
+	PostProcess(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
 public:
-	~PostProcess();
-	int GenRenderOperation(RenderOperationQueue& opList) override;
+	void GenRenderOperation(RenderOperationQueue& opList) override;
 protected:
-	ResourceManager& mResourceMng;
 	IFrameBufferPtr mMainTex;
-	IVertexBufferPtr mVertexBuffer;
-	IIndexBufferPtr mIndexBuffer;
-	MaterialPtr mMaterial;
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 };
 
@@ -45,10 +41,10 @@ public:
 };
 class MIR_CORE_API Bloom : public PostProcess 
 {
+	typedef PostProcess Super;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Bloom);
-	Bloom(Launch launchMode, ResourceManager& resourceMng, IFrameBufferPtr mainTex);
-public:
+	Bloom(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
 };
 
 }
