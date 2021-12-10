@@ -17,18 +17,20 @@ class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 public:
 	void SetTexture(const ITexturePtr& Texture) override;
 	void SetPosition(const Eigen::Vector3f& pos);
-	void SetSize(const Eigen::Vector2f& size);
+	void SetAnchor(const Eigen::Vector3f& anchor);
+	void SetSize(const Eigen::Vector3f& size);
 	void SetColor(const Eigen::Vector4f& color);
-	void SetFlipY(bool flipY);
 public:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 	const vbSurfaceQuad* GetVertexData() const { return &mQuad; }
 private:
 	vbSurfaceQuad mQuad;
 	bool mQuadDirty;
-	Eigen::Vector2f mPosition;
-	Eigen::Vector2f mSize;
-	bool mFlipY;
+	Eigen::Vector3f mAnchor;
+	Eigen::Vector3f mPosition;
+	Eigen::Vector3f mSize;
+	Eigen::Vector4f mColor;
+	//bool mFlipY;
 };
 
 }

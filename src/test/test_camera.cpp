@@ -17,59 +17,56 @@ private:
 	AssimpModelPtr mModel;
 	SpritePtr mSprite;
 };
+/*mCaseIndex
+0：观察到飞机偏左上
+1：观察到飞机与背景扁平
+2：观察到飞机变小(远离飞机)
+*/
 
 #define SCALE_BASE 0.01
 void TestCamera::OnPostInitDevice()
 {
-	auto sceneMng = mContext->SceneMng();
-	auto rendFac = mContext->RenderableFac();
-	auto resMng = mContext->ResourceMng();
-	auto screenCenter = resMng->WinSize() / 2;
-	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
-	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
-
-	sceneMng->RemoveAllCameras();
-	sceneMng->RemoveAllLights();
+	mScneMng->RemoveAllCameras();
+	mScneMng->RemoveAllLights();
 
 	if (mCaseIndex >= 4) {
-		CameraPtr camera = sceneMng->AddOthogonalCamera(test1::cam::Eye(), test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
 		camera->GetTransform()->SetScale(Eigen::Vector3f(0.5, 0.5, 1));
 		//camera->GetTransform()->SetPosition(Eigen::Vector3f(-screenCenter.x(), 0, 0));
 
-		auto light = sceneMng->AddDirectLight();
+		auto light = mScneMng->AddDirectLight();
 		light->SetDirection(test1::vec::DirLight());
 
 		mSprite = mContext->RenderableFac()->CreateSprite("model/smile.png");
-		mSprite->SetPosition(winCenter + Eigen::Vector3f(-halfSize.x()/2, -halfSize.y()/2, 0));
+		mSprite->SetPosition(mWinCenter + Eigen::Vector3f(-mHalfSize.x()/2, -mHalfSize.y()/2, 0));
 	}
 	else {
-		CameraPtr camera = sceneMng->AddPerspectiveCamera(winCenter + test1::cam::Eye(), test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
 		switch (mCaseIndex) {
 		case 0: {
-			camera->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(5, -5, -30));
+			camera->GetTransform()->SetPosition(mWinCenter + Eigen::Vector3f(5, -5, -30));
 		}break;
 		case 1: {
-			camera->GetTransform()->SetScale(winCenter + Eigen::Vector3f(0.5, 2, 1));
+			camera->GetTransform()->SetScale(mWinCenter + Eigen::Vector3f(0.5, 2, 1));
 		}break;
 		case 2: {
-			camera->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(0, 0, -30));
+			camera->GetTransform()->SetPosition(mWinCenter + Eigen::Vector3f(0, 0, -100));
 		}break;
 		default:
 			break;
 		}
-		camera->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-		auto light = sceneMng->AddPointLight();
+		auto light = mScneMng->AddPointLight();
 		light->SetPosition(Eigen::Vector3f(10, 10, -10));
 		light->SetAttenuation(0.001);
 
 		mModel = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL);
-		mModel->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
-		float scale = SCALE_BASE;
-		mModel->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
-		mModel->PlayAnim(0);
+		mModel->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 		mTransform = mModel->GetTransform();
-		mTransform->SetPosition(winCenter + Eigen::Vector3f::Zero());
+		mTransform->SetScale(test1::res::model_sship::Scale());
+		mTransform->SetPosition(mWinCenter + Eigen::Vector3f::Zero());
+		mModel->PlayAnim(0);
 	}
 }
 

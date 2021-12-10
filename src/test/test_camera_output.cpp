@@ -13,98 +13,88 @@ class TestCameraOutput : public App
 protected:
 	void OnRender() override;
 	void OnPostInitDevice() override;
+	void OnInitLight() override {}
+	void OnInitCamera() override {}
 private:
 	AssimpModelPtr mModel2;
 	SpritePtr mSprite1, mSpriteCam1;
 	CubePtr mCube0, mCube1;
 };
 /*mCaseIndex
-0：透视相机 点光 带天空盒
+0：透视相机 点光 带天空盒 观察到左下角lenna，右上角天空+飞机
+1：正交相机 方向光 观察到飞机
 */
 
 #define SCALE_BASE 0.01
 void TestCameraOutput::OnPostInitDevice()
 {
-	auto sceneMng = mContext->SceneMng();
-	auto rendFac = mContext->RenderableFac();
-	auto resMng = mContext->ResourceMng();
-	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
-	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
-
-	sceneMng->RemoveAllCameras();
-	sceneMng->RemoveAllLights();
-
 	constexpr unsigned cameraMask2 = 0x01;
 	CameraPtr camera2;
 	{
-		float scale = SCALE_BASE;
 		if (mCaseIndex == 1) 
 		{
-			camera2 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -30), Eigen::Vector3f(0.01, 300, 0));
-			camera2->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -30));
-			camera2->SetDepth(1);
+			camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
 			camera2->SetCameraMask(cameraMask2);
+			camera2->SetDepth(1);
 
-			auto light2 = sceneMng->AddDirectLight();
+			auto light2 = mScneMng->AddDirectLight();
 			light2->SetCameraMask(cameraMask2);
-			light2->SetDirection(Eigen::Vector3f(0, 0, 10));
-
-			scale = 0.1;
+			light2->SetDirection(test1::vec::DirLight());
 		}
 		else 
 		{
-			camera2 = sceneMng->AddPerspectiveCamera(winCenter + Eigen::Vector3f(0, 0, -30), Eigen::Vector3f(0.01, 300, 45));
-			camera2->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(0, 0, -30));
-			camera2->SetDepth(1);
-			camera2->SetCameraMask(cameraMask2);
-			camera2->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
+			camera2 = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
+			camera2->SetCameraMask(cameraMask2);
+			camera2->SetDepth(1);
+			camera2->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-			auto light2 = sceneMng->AddPointLight();
+			auto light2 = mScneMng->AddPointLight();
 			light2->SetCameraMask(cameraMask2);
-			light2->SetPosition(Eigen::Vector3f(10, 10, -10));
-			light2->SetAttenuation(0.001);
+			light2->SetPosition(mWinCenter + Eigen::Vector3f(10, 10, -10));
+			light2->SetAttenuation(0.0001);
 		}
 
-		mModel2 = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL);
-		mModel2->LoadModel("model/Spaceship/Spaceship.fbx", R"({"dir":"model/Spaceship/"})");
+		mModel2 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+		mModel2->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 		mModel2->SetCameraMask(cameraMask2);
-		mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
-		mModel2->PlayAnim(0);
 		mTransform = mModel2->GetTransform();
-		mTransform->SetPosition(winCenter + Eigen::Vector3f::Zero());
+		mTransform->SetScale(test1::res::model_sship::Scale());
+		mTransform->SetPosition(mWinCenter + Eigen::Vector3f::Zero());
+		mModel2->PlayAnim(0);
+
+		if (camera2->GetType() == kCameraOthogonal)
+			mTransform->SetScale(mTransform->GetScale() * 50);
 	}
 
 	if (mCaseIndex == 1)
 	{
-		const int SizeInf = 10000;
-		mCube0 = mContext->RenderableFac()->CreateCube(winCenter + Eigen::Vector3f(0, 0, 269.99), 
-			Eigen::Vector3f(SizeInf, SizeInf, 1), 0xffff6347);
-		mCube1 = mContext->RenderableFac()->CreateCube(winCenter + Eigen::Vector3f(0, 0, -29.99), 
-			Eigen::Vector3f(25, 25, 1), 0xffff4763);
+		mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
+		mCube1 = test1::res::cube::near_plane::Create(mRendFac, mWinCenter);
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
 	if (mCaseIndex == 0)
 	{
-		auto camera1 = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0,0,-10));
+		auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
 		camera1->SetDepth(2);
 		camera1->SetCameraMask(cameraMask1);
 
-		auto light1 = sceneMng->AddPointLight();
+		auto light1 = mScneMng->AddPointLight();
 		light1->SetCameraMask(cameraMask1);
 
-		mSprite1 = mContext->RenderableFac()->CreateSprite("model/lenna.dds");
+		mSprite1 = mRendFac->CreateSprite("model/lenna.dds");
 		mSprite1->SetCameraMask(cameraMask1);
+		mSprite1->GetTransform()->SetPosition(-mHalfSize);
 
-		mSpriteCam1 = mContext->RenderableFac()->CreateSprite();
+		mSpriteCam1 = mRendFac->CreateSprite();
 		mSpriteCam1->SetCameraMask(cameraMask1);
-		//auto fetchTexture = resMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
+		//auto fetchTexture = mResMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
 		auto fetchTexture = camera2->SetOutput(0.5)->GetAttachColorTexture(0);
 		DEBUG_SET_PRIV_DATA(fetchTexture, "camera2 output");
 		mSpriteCam1->SetTexture(fetchTexture);
-		mSpriteCam1->SetPosition(winCenter);
-		mSpriteCam1->SetSize(halfSize.cast<float>());
+		mSpriteCam1->SetPosition(mWinCenter);
+		mSpriteCam1->SetSize(mHalfSize.cast<float>());
 	}
 }
 

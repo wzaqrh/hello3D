@@ -6,7 +6,7 @@
 
 namespace mir {
 
-#define CAMERA_CENTER_IS_ZERO
+//#define OTHO_CAMERA_TRASNFORM_CENTER_MAPTO_SCREEN_CENTER
 
 Camera::Camera(ResourceManager& resMng)
 	: mResourceMng(resMng)
@@ -54,7 +54,7 @@ void Camera::SetZRange(const Eigen::Vector2f& zRange)
 }
 void Camera::SetFov(float fov)
 {
-	mFov = fov / 180.0 * boost::math::constants::pi<float>();
+	mFov = fov / boost::math::constants::radian<float>();
 	mViewDirty = true;
 }
 void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up)
@@ -131,31 +131,6 @@ void Camera::RecalculateProjection() const
 			.prescale(Eigen::Vector3f(1, -1, 1))
 			.matrix();
 	}
-#if 0
-	if (mScreenSize != mSize) {
-		float w2 = 1.0f * mSize.x() / mScreenSize.x();
-		float h2 = 1.0f * mSize.y() / mScreenSize.y();
-		mProjection = Transform3Projective(mProjection)
-			.pretranslate(Eigen::Vector3f(1, 1, 0))//[(-1,-1), (1,1)] => [(0,0), (2,2)]
-			.prescale(Eigen::Vector3f(w2, h2, 1))//[(0,0), (2,2)] => [(0,0), (w,h)]
-			.pretranslate(Eigen::Vector3f(-1, -1, 0))//[(0,0), (w,h)] => [(-1,-1), (w-1,h-1)]
-			.pretranslate(Eigen::Vector3f(0, 2 - h2*2, 0))//[(-1,-1), (w-1,h-1)] => 若rt比屏幕小, 则rt位置范围[(-1,1-h), (-1+w,1)]
-			.matrix();
-	#if 0
-		Transform3Projective t = Transform3Projective::Identity();
-		t.pretranslate(Eigen::Vector3f(1, 1, 0))
-		.prescale(Eigen::Vector3f(1.0f * mSize.x() / mScreenSize.x(), 1.0f * mSize.y() / mScreenSize.y(), 1))
-		.pretranslate(Eigen::Vector3f(-1, -1, 0));
-		Eigen::Vector4f lb = t * Eigen::Vector4f(-1, -1, 0, 1);
-		Eigen::Vector4f rt = t * Eigen::Vector4f(1, 1, 0, 1);
-		mProjection = mProjection;
-	#elif 0
-		Eigen::Vector4f lb = Transform3Projective(mProjection) * Eigen::Vector4f(0, 0, 0, 1);
-		Eigen::Vector4f rt = Transform3Projective(mProjection) * Eigen::Vector4f(1024, 768, 0, 1);
-		mProjection = mProjection;
-	#endif
-	}
-#endif
 }
 const Eigen::Matrix4f& Camera::GetProjection() const
 {
@@ -168,14 +143,6 @@ const Eigen::Matrix4f& Camera::GetProjection() const
 
 void Camera::RecalculateView() const
 {
-#if !defined CAMERA_CENTER_IS_ZERO
-	const auto& srt = mTransform->SetMatrixSRT();
-	Transform3fAffine t(srt.inverse());//[0->sreen.w]  -> relative2screen_center[-screen.hw, screen.hw]
-
-	t.pretranslate(mTransform->GetPosition());//[-screen.hw, screen.hw] -> [0->sreen.w]
-
-	mWorldView = mView * t.matrix();//[0->sreen.w] -> view_space
-#else
 #if defined CAMERA_TRANSFORM
 	auto eyePos = mTransform->GetPosition();
 	auto forward = mTransform->GetForward();
@@ -209,7 +176,6 @@ void Camera::RecalculateView() const
 	t.pretranslate(center + mTransform->GetPosition());//[-screen.hw, screen.hw] -> [0->sreen.w]
 
 	mWorldView = mView * t.matrix();//[0->sreen.w] -> view_space
-#endif
 #endif
 }
 const Eigen::Matrix4f& Camera::GetView() const

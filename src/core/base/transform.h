@@ -37,6 +37,7 @@ public:
 	const Eigen::Vector3f& GetScale() const { return mScale; }
 	const Eigen::Vector3f& GetPosition() const { return mTranslation; }
 	RotationOrder GetEulerOrder() const { return kExtrinsicZXY; }
+	const Eigen::Quaternionf& GetQuaternion() const { return mQuat; }
 	bool IsYFlipped() const;
 	
 	bool IsIdentity() const;

@@ -5,6 +5,7 @@
 #include "core/rendersys/render_system.h"
 #include "core/scene/scene_manager.h"
 #include "test/app.h"
+#include "test/test_case.h"
 
 using namespace mir;
 
@@ -34,6 +35,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 		mContext->Dispose();
 		return false;
 	}
+	SetMir(mContext);
 	OnInitCamera();
 	OnInitLight();
 	OnPostInitDevice();
@@ -44,7 +46,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 }
 void App::OnInitCamera()
 {
-	mContext->SceneMng()->AddPerspectiveCamera();
+	mContext->SceneMng()->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
 }
 void App::OnInitLight()
 {
@@ -58,15 +60,15 @@ void App::CleanUp()
 void App::Render()
 {
 	auto renderSys = mContext->RenderSys();
-	auto sceneMng = mContext->SceneMng();
+	auto mScneMng = mContext->SceneMng();
 
 	mTimer->Update();
 	mInput->Frame();
 	mContext->Update();
 
 	//rotate camera
-	auto camera0 = sceneMng->GetDefCamera();
-	if (camera0 && camera0->GetType() == kCameraPerspective)
+	auto camera0 = mScneMng->GetDefCamera();
+	if (camera0/* && camera0->GetType() == kCameraPerspective*/)
 	{
 		auto camTranform = camera0->GetTransform();
 		if (!mCameraInitInvLengthForward.any()) {
@@ -78,16 +80,16 @@ void App::Render()
 		if (mInput->GetMouseWheelChange() != 0)
 			forwardLength -= mInput->GetMouseWheelChange() * 0.8 * forwardLength;
 
-		Eigen::Vector3f curInvForward = mCameraInitInvLengthForward.normalized();
+		Eigen::Vector3f curInvForward = -camera0->GetForward();
 		{
-			Eigen::Vector2i m = mInput->GetMouseRightLocation();
-			float mx = 3.14 * m.x() / renderSys->WinSize().x();
-			float my = 3.14 * m.y() / renderSys->WinSize().y();
+			Eigen::Vector2f m = mInput->GetMouseRightLocation();
+			float mx = -3.14 * m.x();
+			float my = -3.14 * 0.5 * m.y();
 
-			Eigen::Quaternion<float> euler = Eigen::AngleAxisf(my, Eigen::Vector3f::UnitZ())
-				* Eigen::AngleAxisf(0, Eigen::Vector3f::UnitX())
+			Eigen::Quaternionf quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
+				* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
 				* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY());
-			curInvForward = Transform3fAffine(euler) * curInvForward;
+			curInvForward = Transform3fAffine(quat) * curInvForward;
 		}
 
 		camera0->SetLookAt(mCameraInitLookAt + curInvForward * forwardLength, mCameraInitLookAt);
@@ -95,9 +97,14 @@ void App::Render()
 
 	//rotate target
 	{
-		Eigen::Vector2i m = mInput->GetMouseLeftLocation();
-		float angy = 3.14 * -m.x() / renderSys->WinSize().x(), angx = 3.14 * -m.y() / renderSys->WinSize().y();
-		mTransform->SetEuler(Eigen::Vector3f(angx, angy, 0));
+		Eigen::Vector2f m = mInput->GetMouseLeftLocation();
+		float mx = 3.14 * -m.x();
+		float my = 3.14 * -m.y();
+		auto quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
+			* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
+			* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY()) 
+			* mTransform->GetQuaternion();
+		mTransform->SetQuaternion(quat);
 	}
 
 	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
@@ -141,4 +148,14 @@ IApp* CreateApp(std::string name)
 	IApp* gApp = entry();
 	gApp->Create();
 	return gApp;
+}
+
+void MirManager::SetMir(mir::Mir* ctx)
+{
+	mScneMng = ctx->SceneMng();
+	mRendFac = ctx->RenderableFac();
+	mResMng = ctx->ResourceMng();
+	auto size = ctx->ResourceMng()->WinSize();
+	mHalfSize = Eigen::Vector3f(size.x() / 2, size.y() / 2, 0);
+	mWinCenter = Eigen::Vector3f(0, 0, 0);
 }

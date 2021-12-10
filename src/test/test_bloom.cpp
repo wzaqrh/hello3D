@@ -21,9 +21,9 @@ void TestBloom::OnPostInitDevice()
 	mContext->SceneMng()->RemoveAllCameras();
 	auto camera = mContext->SceneMng()->AddPerspectiveCamera(Eigen::Vector3f(0,0,-10), Eigen::Vector3f(0.01, 300, 45));
 	
-	auto rendFac = mContext->RenderableFac();
-	camera->SetSkyBox(rendFac->CreateSkybox("model/uffizi_cross.dds"));
-	camera->AddPostProcessEffect(rendFac->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM, *camera));
+	auto mRendFac = mContext->RenderableFac();
+	camera->SetSkyBox(mRendFac->CreateSkybox("model/uffizi_cross.dds"));
+	camera->AddPostProcessEffect(mRendFac->CreatePostProcessEffect(E_MAT_POSTPROC_BLOOM, *camera));
 
 	mModel = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL); 
 	mModel->LoadModel("model/Spaceship/Spaceship.fbx"); 

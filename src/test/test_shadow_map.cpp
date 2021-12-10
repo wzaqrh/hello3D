@@ -27,20 +27,47 @@ private:
 3: 正交相机, '摄像头'与'平行光'重合, 观察到'小平面'颜色比'大平面'深 (LayerColor.xml DEBUG_SHADOW_MAP=2)
 */
 
-#define USE_RENDER_TEXTURE
-#define SCALE_BASE 100
 void TestShadowMap::OnPostInitDevice()
 {
-	auto sceneMng = mContext->SceneMng();
-	auto rendFac = mContext->RenderableFac();
-	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
-	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
-
-	if (mCaseIndex == 2 || mCaseIndex == 3)
+	if (mCaseIndex == 0 || mCaseIndex == 1) 
 	{
-		CameraPtr camera = sceneMng->AddOthogonalCamera(winCenter + test1::cam::Eye(), test1::cam::NearFarFov());
+		auto dir_light = mScneMng->AddDirectLight();
+		dir_light->SetDirection(Eigen::Vector3f(-1, -1, 1));
 
-		auto light = sceneMng->AddDirectLight();
+		if (mCaseIndex == 0) {
+			mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		}
+		else {
+			auto camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+			test::CompareLightCameraByViewProjection(*dir_light, *camera, {});
+			camera->GetTransform()->SetScale(camera->GetTransform()->GetScale() / 50);
+		}
+
+		if (1) {
+			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
+		}
+
+		if (1) {
+			mModel1 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel1->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
+			mTransform = mModel1->GetTransform();
+			mTransform->SetScale(test1::res::model_rock::Scale() * 5);
+			mTransform->SetPosition(test1::res::model_rock::Pos() + Eigen::Vector3f(0,0,50));
+		}
+
+		if (1) {
+			mModel2 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
+			float scale = 1;
+			mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
+			mModel2->GetTransform()->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(10, 10, -10));
+		}
+	}
+	else if (mCaseIndex == 2 || mCaseIndex == 3)
+	{
+		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+
+		auto light = mScneMng->AddDirectLight();
 		if (mCaseIndex == 2) 
 		{
 			light->SetDirection(Eigen::Vector3f(2, 0, 10));
@@ -49,79 +76,27 @@ void TestShadowMap::OnPostInitDevice()
 		{
 			light->SetDirection(test1::vec::DirLight());
 			test::CompareLightCameraByViewProjection(*light, *camera, {
-				Eigen::Vector4f(0, 768, test1::cam::Eye().z() + 1, 1.0),
-				Eigen::Vector4f(1024, 0, test1::cam::Eye().z() + test1::cam::NearFarFov().y() - 1, 1.0),
-				Eigen::Vector4f(77, 400, 0, 1.0),
-				Eigen::Vector4f(600, 77, 0, 1.0),
+				Eigen::Vector4f(0, 768, test1::cam::Near(), 1),
+				Eigen::Vector4f(1024, 0, test1::cam::Far(), 1),
+				Eigen::Vector4f(77, 400, 0, 1),
+				Eigen::Vector4f(600, 77, 0, 1),
 			});
 		}
 
 		if (1) 
 		{
-			const int SizeBig = 10000, SizeSmall = 25;
-			mCube0 = rendFac->CreateCube(
-				winCenter + Eigen::Vector3f(-SizeBig*0.5, -SizeBig*0.5, test1::cam::Eye().z() + test1::cam::NearFarFov().y() - 10),
-				Eigen::Vector3f(SizeBig, SizeBig, 1),
-				0xffff6347
-			);
-			mCube1 = rendFac->CreateCube(
-				winCenter + Eigen::Vector3f(-SizeSmall*0.5, -SizeSmall*0.5, test1::cam::Eye().z() + 1),
-				Eigen::Vector3f(SizeSmall, SizeSmall, 1),
-				0xffff4763
-			);
+			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
+			mCube1 = test1::res::cube::near_plane::Create(mRendFac, mWinCenter);
 		}
 
-		if (mCaseIndex == 2 && 0)
+		if (mCaseIndex == 2)
 		{
-			mModel2 = rendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel2 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
 			mModel2->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 			mTransform = mModel2->GetTransform();
-			mTransform->SetScale(test1::res::model_sship::Scale() * 0.2);
-			mTransform->SetPosition(winCenter + Eigen::Vector3f(0, 0, 0));
+			mTransform->SetScale(test1::res::model_sship::Scale() * 10);
+			mTransform->SetPosition(mWinCenter + Eigen::Vector3f(0, 0, 0));
 			mModel2->PlayAnim(0);
-		}
-	}
-	else if (mCaseIndex == 0 || mCaseIndex == 1)
-	{
-		auto dir_light = sceneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(-1, -1, 3));
-
-		if (mCaseIndex == 0) 
-		{
-			auto camera = sceneMng->AddOthogonalCamera(winCenter + test1::cam::Eye(), test1::cam::NearFarFov());
-			test::CompareLightCameraByViewProjection(*dir_light, *camera, {});
-		}
-		else 
-		{
-			sceneMng->AddPerspectiveCamera(winCenter + test1::cam::Eye(), test1::cam::NearFarFov());
-		}
-
-		if (1) 
-		{
-			const int SizeInf = 10000;
-			mCube0 = mContext->RenderableFac()->CreateCube(
-				winCenter + Eigen::Vector3f(-SizeInf*0.5, -SizeInf*0.5, 200), 
-				Eigen::Vector3f(SizeInf, SizeInf, 2), 
-				0xffff6347
-			);
-		}
-
-		if (1) 
-		{
-			mModel1 = rendFac->CreateAssimpModel(E_MAT_MODEL);
-			mModel1->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
-			mTransform = mModel1->GetTransform();
-			mTransform->SetScale(test1::res::model_rock::Scale());
-			mTransform->SetPosition(winCenter + Eigen::Vector3f(100, 100, 10));
-		}
-
-		if (1) 
-		{
-			mModel2 = rendFac->CreateAssimpModel(E_MAT_MODEL);
-			mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
-			float scale = SCALE_BASE * 0.2;
-			mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
-			mModel2->GetTransform()->SetPosition(winCenter + Eigen::Vector3f(100, 100, 10) + Eigen::Vector3f(100, 100, -300));
 		}
 	}
 }

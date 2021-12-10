@@ -19,64 +19,58 @@ private:
 0,1：透视相机 观察到模型：传奇战士 + 天空
 2,3: 透视相机 观察到模型：飞机
 4,5：透视相机 观察到模型：石头（在右上角）
+
+6,7：正交相机 观察到模型：传奇战士 + 天空
+8,9: 正交相机 观察到模型：飞机
+10,11：正交相机 观察到模型：石头（在右上角）
 */
 
 void TestModel::OnPostInitDevice()
 {
-	auto sceneMng = mContext->SceneMng();
-	auto rendFac = mContext->RenderableFac();
-	auto resMng = mContext->ResourceMng();
-	auto halfSize = mContext->ResourceMng()->WinSize() / 2;
-	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
+	int caseIndex = mCaseIndex % 6;
+	bool useOtho = mCaseIndex >= 6;
 
-	if (mCaseIndex == 0 || mCaseIndex == 1) 
+	if (caseIndex == 0 || caseIndex == 1) 
 	{
-		auto pt_light = sceneMng->AddPointLight();
-		pt_light->SetPosition(winCenter + Eigen::Vector3f(0, 5, -5));
+		auto pt_light = mScneMng->AddPointLight();
+		pt_light->SetPosition(mWinCenter + Eigen::Vector3f(0, 5, -5));
 
-		auto dir_light = sceneMng->AddDirectLight();
+		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
 	}
 	else 
 	{
-		auto dir_light = sceneMng->AddDirectLight();
+		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}
 
-	switch (mCaseIndex) {
+	mir::CameraPtr camera = useOtho 
+		? mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov())
+		: mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+
+	switch (caseIndex) {
 	case 0:
 	case 1: {
-		sceneMng->GetDefCamera()->SetSkyBox(rendFac->CreateSkybox(test1::res::Sky()));
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-		mModel = rendFac->CreateAssimpModel(!(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
-		mModel->LoadModel(test1::res::model_mir::Path(), test1::res::model_mir::Rd());
-		mTransform = mModel->GetTransform();
-		mTransform->SetScale(test1::res::model_mir::Scale());
-		mTransform->SetPosition(Eigen::Vector3f(0, -5, 0));
+		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		mTransform = test1::res::model_mir::Init(mModel, mWinCenter);
 	}break;
 	case 2:
 	case 3:
 	case 4:
 	case 5: {
-		sceneMng->AddPerspectiveCamera(winCenter + test1::cam::Eye(), test1::cam::NearFarFov());
-
-		mModel = rendFac->CreateAssimpModel(!(mCaseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
-		if (mCaseIndex < 4) {
-			mModel->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd()); 
-			mTransform = mModel->GetTransform();
-			mTransform->SetScale(test1::res::model_sship::Scale());
-			mTransform->SetPosition(winCenter + Eigen::Vector3f(0, -100, 0));
-		}
-		else {
-			mModel->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
-			mTransform = mModel->GetTransform();
-			mTransform->SetScale(test1::res::model_rock::Scale());
-			mTransform->SetPosition(winCenter + Eigen::Vector3f(100, 100, 10));
-		}
+		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		if (caseIndex == 2 || caseIndex == 3) mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+		else mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
 	}break;
 	default:
 		break;
 	}
+
+	if (camera->GetType() == kCameraOthogonal)
+		mTransform->SetScale(mTransform->GetScale() * 50);
+
 	mModel->PlayAnim(0);
 }
 

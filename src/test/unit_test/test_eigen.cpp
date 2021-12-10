@@ -88,6 +88,10 @@ TEST_CASE("eigen is right hand", "[eigen_is_right_hand]")
 	Eigen::Vector3f v0 = Eigen::Vector3f(7, -4, 3).cross(Eigen::Vector3f(3, -9, 1));
 	XMVECTOR v1 = XMVector3Cross(XMVectorSet(7, -4, 3, 0), XMVectorSet(3, -9, 1, 0));
 	CHECK(IsEqual(v0, v1));
+
+	v0 = Eigen::Vector3f(7, -4, 3).cwiseProduct(Eigen::Vector3f(3, -9, 1));
+	v1 = XMVectorMultiply(XMVectorSet(7, -4, 3, 0), XMVectorSet(3, -9, 1, 0));
+	CHECK(IsEqual(v0, v1));
 }
 
 TEST_CASE("eigen matrix translate", "eigen_matrix_translate")

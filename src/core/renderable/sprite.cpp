@@ -7,29 +7,35 @@ namespace mir {
 /********** TSprite **********/
 Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
 	: Super(launchMode, resourceMng, matName)
-	, mQuad(Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0))
+	, mQuad(Eigen::Vector2f::Zero(), Eigen::Vector2f::Zero())
 	, mQuadDirty(true)
-	, mFlipY(true)
-	, mSize(0, 0)
-	, mPosition(0, 0)
+	, mColor(Eigen::Vector4f::Ones())
+	, mSize(Eigen::Vector3f::Zero())
+	, mPosition(Eigen::Vector3f::Zero())
+	, mAnchor(Eigen::Vector3f::Zero())
 {
 	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(vbSurfaceQuad::GetIndices()));
 	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad)));
 
-	if (mFlipY) mQuad.FlipY();
+	mQuad.FlipY();
 }
 
 void Sprite::SetPosition(const Eigen::Vector3f& pos)
 {
-	mPosition = pos.head<2>();
-	mQuad.SetCornerByRect(mPosition, mSize);
-	mQuad.SetZ(pos.z());
+	mPosition = pos;
 	mQuadDirty = true;
 }
 
-void Sprite::SetSize(const Eigen::Vector2f& sz)
+//position = origin + size * anchor
+void Sprite::SetAnchor(const Eigen::Vector3f& anchor)
 {
-	Eigen::Vector2f size = sz;
+	mAnchor = anchor;
+	mQuadDirty = true;
+}
+
+void Sprite::SetSize(const Eigen::Vector3f& sz)
+{
+	Eigen::Vector3f size = sz;
 	if (mTexture && !size.any()) {
 		size.x() = mTexture->GetWidth();
 		size.y() = mTexture->GetHeight();
@@ -37,11 +43,11 @@ void Sprite::SetSize(const Eigen::Vector2f& sz)
 
 	if (mSize != size) {
 		mSize = size;
-		mQuad.SetCornerByRect(mPosition, mSize);
 		mQuadDirty = true;
 	}
 }
 
+#if 0
 void Sprite::SetFlipY(bool flipY)
 {
 	if (mFlipY != flipY) {
@@ -50,10 +56,11 @@ void Sprite::SetFlipY(bool flipY)
 		mQuadDirty = true;
 	}
 }
+#endif
 
 void Sprite::SetColor(const Eigen::Vector4f& color)
 {
-	mQuad.SetColor(color);
+	mColor = color;
 	mQuadDirty = true;
 }
 
@@ -79,6 +86,12 @@ void Sprite::GenRenderOperation(RenderOperationQueue& opList)
 
 	if (mQuadDirty) {
 		mQuadDirty = false;
+
+		Eigen::Vector3f origin = mPosition - mAnchor.cwiseProduct(mSize);
+		mQuad.SetCornerByRect(origin.head<2>(), mSize.head<2>());
+		mQuad.SetZ(mPosition.z());
+		mQuad.SetColor(mColor);
+
 		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
 	}
 	op.WorldTransform = mTransform->GetSRT();

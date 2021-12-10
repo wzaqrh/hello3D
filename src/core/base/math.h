@@ -111,6 +111,38 @@ inline Eigen::Vector3f Left() {
 	return Eigen::Vector3f(-1, 0, 0);
 }
 
+namespace anchor {
+inline Eigen::Vector3f LeftBottom() {
+	return Eigen::Vector3f(0, 0, 0);
+}
+inline Eigen::Vector3f Left() {
+	return Eigen::Vector3f(0, 0.5, 0);
+}
+inline Eigen::Vector3f LeftTop() {
+	return Eigen::Vector3f(0, 1, 0);
+}
+
+inline Eigen::Vector3f Bottom() {
+	return Eigen::Vector3f(0.5, 0, 0);
+}
+inline Eigen::Vector3f Center() {
+	return Eigen::Vector3f(0.5, 0.5, 0);
+}
+inline Eigen::Vector3f Top() {
+	return Eigen::Vector3f(0.5, 1, 0);
+}
+
+inline Eigen::Vector3f RightBottom() {
+	return Eigen::Vector3f(1, 0, 0);
+}
+inline Eigen::Vector3f Right() {
+	return Eigen::Vector3f(1, 0.5, 0);
+}
+inline Eigen::Vector3f RightTop() {
+	return Eigen::Vector3f(1, 1, 0);
+}
+}
+
 }
 
 /********** camera **********/
@@ -120,7 +152,7 @@ inline Eigen::Vector3f DefEye() {
 	return Eigen::Vector3f(0, 0, -10);
 }
 inline Eigen::Vector3f DefNearFarFov() {
-	return Eigen::Vector3f(0.01, 100, 45);
+	return Eigen::Vector3f(0.3, 1000, 60);
 }
 inline Eigen::Vector3f Zero() {
 	return Eigen::Vector3f(0, 0, 0);

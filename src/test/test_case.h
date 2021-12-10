@@ -3,50 +3,82 @@
 
 namespace test1 {
 
+namespace math {
+float ToRadian(float angle);
+}
+
 namespace vec {
-inline Eigen::Vector3f DirLight() { return Eigen::Vector3f(0, 0, 10); }
-inline Eigen::Vector3f PosLight() { return Eigen::Vector3f(300, 300, 0); }
+Eigen::Vector3f DirLight();
+Eigen::Vector3f PosLight();
 }
 
 namespace cam {
-inline Eigen::Vector3f Eye() { return Eigen::Vector3f(0, 0, -1000); }
-inline Eigen::Vector3f NearFarFov() { return Eigen::Vector3f(0.01, 3000, 45); }
+Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
+Eigen::Vector3f NearFarFov();
+float Near();
+float Far();
+void AdjustScale(mir::CameraPtr cam1);
 }
 namespace cam1 {
-inline Eigen::Vector3f Eye() { return Eigen::Vector3f(0, 0, -30); }
-inline Eigen::Vector3f NearFarFov() { return Eigen::Vector3f(0.01, 300, 45); }
+Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
+Eigen::Vector3f NearFarFov();
+float Near();
+float Far();
+}
+namespace cam_otho {
+Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
+Eigen::Vector3f NearFarFov();
+float Near();
+float Far();
 }
 
 namespace res {
-inline std::string Sky() { return "model/uffizi_cross.dds"; }
+
+std::string Sky();
+
+namespace cube {
+namespace far_plane {
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter);
+}
+namespace near_plane {
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter);
+}
+}
 
 namespace png {
-inline std::string Kenny() { return "model/theyKilledKenny.png"; }
+std::string Kenny();
+void SetPos(mir::SpritePtr sp, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor = mir::math::vec::anchor::LeftBottom());
 }
 namespace hdr {
-inline std::string Kenny() { return "model/theyKilledKenny.hdr"; }
+std::string Kenny();
 }
 namespace dds {
-inline std::string Kenny() { return "model/theyKilledKenny.dds"; }
-inline std::string Lenna() { return "model/lenna.dds"; }
+std::string Kenny();
+std::string Lenna();
 }
 
 namespace model_mir {
-inline std::string Path() { return "model/Male03/Male02.FBX"; }
-inline std::string Rd() { return R"({"ext":"png","dir":"model/Male03/"})"; }
-inline Eigen::Vector3f Scale() { return Eigen::Vector3f(0.07, 0.07, 0.07); }
+std::string Path();
+std::string Rd();
+Eigen::Vector3f Scale();
+Eigen::Vector3f Pos();
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f winCenter);
 }
 
 namespace model_sship {
-inline std::string Path() { return "model/Spaceship/Spaceship.fbx"; }
-inline std::string Rd() { return R"({"dir":"model/Spaceship/"})"; }
-inline Eigen::Vector3f Scale() { return Eigen::Vector3f(1, 1, 1); }
+std::string Path();
+std::string Rd();
+Eigen::Vector3f Scale();
+Eigen::Vector3f Pos();
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f winCenter);
 }
 
 namespace model_rock {
-inline std::string Path() { return "model/rock/rock.obj"; }
-inline std::string Rd() { return R"({"dir":"model/rock/"})"; }
-inline Eigen::Vector3f Scale() { return Eigen::Vector3f(100, 100, 100); }
+std::string Path();
+std::string Rd();
+Eigen::Vector3f Scale();
+Eigen::Vector3f Pos();
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter);
 }
 }
 

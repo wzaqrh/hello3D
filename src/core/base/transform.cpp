@@ -43,10 +43,12 @@ void Transform::SetEuler(const Eigen::Vector3f& euler)
 
 void Transform::SetQuaternion(const Eigen::Quaternionf& quat)
 {
-#if defined TRANSFORM_QUATERNION
-	mQuat = quat;
-#endif
-	mDirty = true;
+	if (quat != Eigen::Quaternionf::Identity()) {
+	#if defined TRANSFORM_QUATERNION
+		mQuat = quat;
+	#endif
+		mDirty = true;
+	}
 }
 
 void Transform::SetYFlipped(bool flip)

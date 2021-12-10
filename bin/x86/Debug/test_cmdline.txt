@@ -1,10 +1,10 @@
-test_camera_output 1
-test_framebuffer 1
-test_shadow_map 1
-test_model 0
+6 2
+test_sprite 5
+test_model 5
+test_cube 1
 test_spec_skybox 1
-test_sprite 4
+test_shadow_map 3
 
+test_framebuffer 3
 test_camera 2
-
-test_cube 0
+test_camera_output 1

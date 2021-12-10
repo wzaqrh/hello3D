@@ -8,9 +8,9 @@ namespace mir {
 Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
 	: Super(launchMode, resourceMng, matName)
 	, mVertexDirty(true)
-	, mHalfSize(1, 1, 1)
-	, mPosition(0, 0, 0)
-	, mColor(1, 1, 1, 1)
+	, mHalfSize(Eigen::Vector3f::Ones())
+	, mPosition(Eigen::Vector3f::Zero())
+	, mColor(Eigen::Vector4f::Ones())
 {
 	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(vbSurfaceCube::GetIndices()));
 	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(mVertexData)));

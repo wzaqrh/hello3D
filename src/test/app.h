@@ -14,7 +14,19 @@ struct IApp
 	virtual void SetCaseIndex(int caseIndex) = 0;
 };
 
-class App : public IApp
+class MirManager
+{
+public:
+	void SetMir(mir::Mir* ctx);
+protected:
+	mir::SceneManagerPtr mScneMng;
+	mir::RenderableFactoryPtr mRendFac;
+	mir::ResourceManagerPtr mResMng;
+	Eigen::Vector3f mHalfSize;
+	Eigen::Vector3f mWinCenter;
+};
+
+class App : public IApp, public MirManager
 {
 public:
 	App();

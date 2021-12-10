@@ -33,9 +33,23 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	else {
 		FILE* fd = fopen("test_cmdline.txt", "r");
 		if (fd) {
-			char szAppName[260];
-			fscanf(fd, "%s %d", szAppName, &caseIndex);
-			appName = szAppName;
+			bool scanf_eof = false;
+			do {
+				char szAppName[260];
+				if (scanf_eof = fscanf(fd, "%s %d", szAppName, &caseIndex) == EOF)
+					break;
+				if (strlen(szAppName) > 0 && szAppName[0] >= '0' && szAppName[0] <= '9') {
+					int appNameIndex = atoi(szAppName) + 1;
+					while (appNameIndex--) {
+						int tempIndex;
+						if (scanf_eof = fscanf(fd, "%s %d", szAppName, &tempIndex) == EOF)
+							break;
+					}
+				}
+				appName = szAppName;
+			} while (0);
+			if (scanf_eof) 
+				MessageBoxA(NULL, "parse test_cmdline.txt error", "error", MB_OK);
 			fclose(fd);
 		}
 	}

@@ -8,13 +8,13 @@ using namespace mir;
 class TestSprite : public App
 {
 protected:
-	virtual void OnRender() override;
-	virtual void OnPostInitDevice() override;
+	void OnRender() override;
+	void OnPostInitDevice() override;
 private:
 	SpritePtr mSprite;
 };
 /*mCaseIndex
-0：
+0：观察到kenny占整个屏幕
 1: 观察到kenny占右上半区
 2：观察到kenny占整个屏幕
 3: 观察到kenny占右下半区
@@ -25,59 +25,50 @@ private:
 
 void TestSprite::OnPostInitDevice()
 {
-	auto sceneMng = mContext->SceneMng();
-	auto rendFac = mContext->RenderableFac();
-	auto resMng = mContext->ResourceMng();
-	auto halfSize = mContext->ResourceMng()->WinSize().cast<float>() / 2;
-	auto winCenter = Eigen::Vector3f(halfSize.x(), halfSize.y(), 0);
-
-	sceneMng->RemoveAllCameras();
-	sceneMng->AddOthogonalCamera(winCenter + Eigen::Vector3f(0, 0, -10));
+	mScneMng->RemoveAllCameras();
+	mScneMng->AddOthogonalCamera(test1::cam_otho::Eye(mWinCenter));
 
 	Launch sync = __LaunchSync__;
 	switch (mCaseIndex) {
 	case 0: {
-		mSprite = rendFac->CreateSprite();
-		mSprite->SetTexture(resMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
+		mSprite = mRendFac->CreateSprite();
+		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
+		mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::dds::Kenny()));
 
-		mSprite->SetPosition(Eigen::Vector3f::Zero());
-		mSprite->SetSize(halfSize);
+		test1::res::png::SetPos(mSprite, -mHalfSize, mHalfSize * 2);
 	}break;
 	case 1: {
-		mSprite = rendFac->CreateSprite();
-		mSprite->SetTexture(resMng->CreateTextureByFile(sync, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
+		mSprite = mRendFac->CreateSprite();
+		mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
-		mSprite->SetPosition(winCenter);
-		mSprite->SetSize(halfSize);
+		test1::res::png::SetPos(mSprite, mHalfSize, mHalfSize, mir::math::vec::anchor::RightTop());
 	}break;
 	case 2: {
-		mSprite = rendFac->CreateSprite(test1::res::png::Kenny());
+		mSprite = mRendFac->CreateSprite(test1::res::png::Kenny());
 
-		mSprite->SetPosition(Eigen::Vector3f::Zero());
-		mSprite->SetSize(halfSize * 2);
+		test1::res::png::SetPos(mSprite, mWinCenter, mHalfSize * 2, mir::math::vec::anchor::Center());
 	}break;
 	case 3: {
-		mSprite = rendFac->CreateSprite(test1::res::hdr::Kenny());//zlib
+		mSprite = mRendFac->CreateSprite(test1::res::hdr::Kenny());//zlib
 
-		mSprite->SetPosition(Eigen::Vector3f(halfSize.x(), 0, 0));
-		mSprite->SetSize(halfSize);
+		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mHalfSize, mir::math::vec::anchor::LeftTop());
 	}break;
 	case 4: {
-		mSprite = rendFac->CreateSprite(test1::res::dds::Lenna());//bc1a
+		mSprite = mRendFac->CreateSprite(test1::res::dds::Lenna());//bc1a
 
-		mSprite->SetPosition(winCenter);
+		mSprite->SetPosition(mWinCenter);
+		mSprite->SetAnchor(mir::math::vec::anchor::Center());
 	}break;
 	case 5: {
-		mSprite = rendFac->CreateSprite(test1::res::dds::Kenny());//bc1a + mipmap
+		mSprite = mRendFac->CreateSprite(test1::res::dds::Kenny());//bc1a + mipmap
 
-		mSprite->SetPosition(winCenter - Eigen::Vector3f(halfSize.x()/2, halfSize.y()/2, 0));
-		mSprite->SetSize(halfSize);
+		test1::res::png::SetPos(mSprite, -mHalfSize / 2, mHalfSize);
 	}break;
 	case 6: {
-		mSprite = rendFac->CreateSprite();
-		mSprite->SetTexture(resMng->CreateTextureByFileAsync(test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
+		mSprite = mRendFac->CreateSprite();
+		mSprite->SetTexture(mResMng->CreateTextureByFileAsync(test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
-		mSprite->SetPosition(Eigen::Vector3f::Zero());
+		mSprite->SetPosition(-mHalfSize);
 	}break;
 	default:
 		break;

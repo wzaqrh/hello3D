@@ -82,9 +82,10 @@ void TestRawTexture::OnPostInitDevice()
 		-mContext->RenderSys()->WinSize().x() / 2, 
 		-mContext->RenderSys()->WinSize().y() / 2, 
 		0));
-	mSprite->SetSize(Eigen::Vector2f(
+	mSprite->SetSize(Eigen::Vector3f(
 		mContext->RenderSys()->WinSize().x(), 
-		mContext->RenderSys()->WinSize().y()));
+		mContext->RenderSys()->WinSize().y(),
+		0));
 }
 
 void TestRawTexture::OnRender()

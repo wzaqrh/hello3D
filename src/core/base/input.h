@@ -14,8 +14,8 @@ public:
 	~D3DInput();
 	bool Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
 	void Frame();
-	Eigen::Vector2i GetMouseLeftLocation() const { return mMouseL; }
-	Eigen::Vector2i GetMouseRightLocation() const { return mMouseR; }
+	Eigen::Vector2f GetMouseLeftLocation() const { return mMouseL; }
+	Eigen::Vector2f GetMouseRightLocation() const { return mMouseR; }
 	float GetMouseWheelChange() const { return mMouseWheel; }
 private:
 	bool ReadKeyboard();
@@ -30,7 +30,7 @@ private:
 	DIMOUSESTATE m_mouseState;
 
 	long m_screenWidth = 0, m_screenHeight = 0;
-	Eigen::Vector2i mMouseL, mMouseR;
+	Eigen::Vector2f mMouseL, mMouseR;
 	float mMouseWheel;
 	bool mMouseMiddleDown;
 };

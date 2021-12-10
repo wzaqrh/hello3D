@@ -8,18 +8,15 @@
     <Filter Include="Source Files\test_cases">
       <UniqueIdentifier>{2f5c94b4-518f-4c86-ae96-1d7eb7e32e27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\framework">
+      <UniqueIdentifier>{b6a3ee8f-88b4-4f01-a277-fcb83462a1dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\test\app.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\test\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\test\test_model.cpp">
-      <Filter>Source Files\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_raw_texture.cpp">
       <Filter>Source Files\test_cases</Filter>
     </ClCompile>
     <ClCompile Include="..\src\test\test_shadow_map.cpp">
@@ -29,9 +26,6 @@
       <Filter>Source Files\test_cases</Filter>
     </ClCompile>
     <ClCompile Include="..\src\test\test_sprite.cpp">
-      <Filter>Source Files\test_cases</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\test_bloom.cpp">
       <Filter>Source Files\test_cases</Filter>
     </ClCompile>
     <ClCompile Include="..\src\test\test_framebuffer.cpp">
@@ -46,13 +40,19 @@
     <ClCompile Include="..\src\test\test_camera.cpp">
       <Filter>Source Files\test_cases</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\test\test_case.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\app.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\test\app.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\framework</Filter>
     </ClInclude>
     <ClInclude Include="..\src\test\test_case.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\framework</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

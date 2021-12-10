@@ -38,7 +38,7 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
 	if (mTexture) op.Textures.Add(mTexture);
-	op.WorldTransform = Eigen::Matrix4f::Identity();
+	op.WorldTransform = mTransform->GetSRT();
 	op.CameraMask = mCameraMask;
 	return true;
 }
