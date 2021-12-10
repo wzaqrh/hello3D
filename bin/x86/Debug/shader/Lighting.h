@@ -84,7 +84,7 @@ float CalcShadowFactor(float4 shadowPosH)
 	if (_ShadowMapTexture_TexelSize.x == 0) return 1.0;
 	
     shadowPosH.xyz /= shadowPosH.w;
-#if DEBUG_SHADOW_MAP >= 2
+#if DEBUG_SHADOW_MAP
 	return shadowPosH.z;
 #endif
 

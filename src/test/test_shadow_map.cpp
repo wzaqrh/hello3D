@@ -75,18 +75,22 @@ void TestShadowMap::OnPostInitDevice()
 		else 
 		{
 			light->SetDirection(test1::vec::DirLight());
-			test::CompareLightCameraByViewProjection(*light, *camera, {
+			/*test::CompareLightCameraByViewProjection(*light, *camera, {
 				Eigen::Vector4f(0, 768, test1::cam::Near(), 1),
 				Eigen::Vector4f(1024, 0, test1::cam::Far(), 1),
 				Eigen::Vector4f(77, 400, 0, 1),
 				Eigen::Vector4f(600, 77, 0, 1),
-			});
+			});*/
 		}
 
 		if (1) 
 		{
-			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
-			mCube1 = test1::res::cube::near_plane::Create(mRendFac, mWinCenter);
+			mir::MaterialLoadParam mat = E_MAT_LAYERCOLOR;
+			if (mCaseIndex == 2) mat.VariantName = "test_shadow_map_case2";
+			else if (mCaseIndex == 3) mat.VariantName = "test_shadow_map_case3";
+
+			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter, mat);
+			mCube1 = test1::res::cube::near_plane::Create(mRendFac, mWinCenter, mat);
 		}
 
 		if (mCaseIndex == 2)

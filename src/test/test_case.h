@@ -38,10 +38,10 @@ std::string Sky();
 
 namespace cube {
 namespace far_plane {
-mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter);
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
 namespace near_plane {
-mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter);
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
 }
 

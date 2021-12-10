@@ -44,7 +44,7 @@ MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, const Mater
 
 CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra, const MaterialLoadParam& matName)
 {
-	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_LAYERCOLOR));
+	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MaterialLoadParam(E_MAT_LAYERCOLOR, "Cube")));
 	cube->SetPosition(center);
 	cube->SetHalfSize(halfsize);
 	cube->SetColor(bgra);

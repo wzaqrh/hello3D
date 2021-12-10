@@ -13,10 +13,7 @@
 	
 	<SubShader>
 		<Pass>
-			<PROGRAM> 
-				<Macros>
-					<DEBUG_SHADOW_MAP>1</DEBUG_SHADOW_MAP>
-				</Macros>
+			<PROGRAM>
 				<PixelEntry>PS</PixelEntry> 
 			</PROGRAM>
 		</Pass>

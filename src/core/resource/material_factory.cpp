@@ -44,7 +44,7 @@ private:
 struct MaterialBuilder
 {
 public:
-	MaterialBuilder(ResourceManager& resMng, Launch launchMode, bool addTechPass = true) 
+	MaterialBuilder(ResourceManager& resMng, Launch launchMode, bool addTechPass = true)
 		:mResourceMng(resMng), mLaunchMode(launchMode) {
 		mMaterial = std::make_shared<Material>();
 		if (addTechPass) {
@@ -108,13 +108,13 @@ public:
 		mCurTech->ClearSamplers();
 		return *this;
 	}
-	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer, 
+	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer,
 		const std::string& name = "", bool isUnique = true, int slot = -1) {
 		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
 		mResourceMng.AddResourceDependency(mMaterial, buffer);
 		return *this;
 	}
-	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer, 
+	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer,
 		const std::string& name = "", bool isUnique = true, int slot = -1) {
 		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
 		mResourceMng.AddResourceDependency(mMaterial, buffer);
@@ -185,10 +185,28 @@ struct XmlSamplerInfoSet {
 public:
 	std::vector<SamplerDesc> Samplers;
 };
+struct SCDHelper 
+{
+	SCDHelper(ShaderCompileDesc& scd) :mSCD(scd) {}
+	void AddMacro(const ShaderCompileMacro& macro) {
+		auto find_it = std::find_if(mSCD.Macros.begin(), mSCD.Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
+			return elem.Name == macro.Name;
+		});
+		if (find_it == mSCD.Macros.end())
+			mSCD.Macros.push_back(macro);
+	}
+	void Merge(const ShaderCompileDesc& other) {
+		for (const auto& it : other.Macros) {
+			AddMacro(it);
+		}
+	}
+private:
+	ShaderCompileDesc& mSCD;
+};
 struct XmlProgramInfo {
 	TemplateT void AddUniform(T&& uniform, int slot = -1) {
 		if (slot >= 0) {
-			if (Uniforms.size() < slot + 1) 
+			if (Uniforms.size() < slot + 1)
 				Uniforms.resize(slot + 1);
 			Uniforms[slot] = std::forward<T>(uniform);
 		}
@@ -202,15 +220,24 @@ struct XmlProgramInfo {
 	TemplateT void AddSamplers(T&& samplers) {
 		SamplerSet.Add(std::forward<T>(samplers));
 	}
+	void Merge(const XmlProgramInfo& other) {
+		Topo = other.Topo;
+		Attr = other.Attr;
+		Uniforms = other.Uniforms;
+		SamplerSet = other.SamplerSet;
+		SCDHelper(VertexSCD).Merge(other.VertexSCD);
+		SCDHelper(PixelSCD).Merge(other.PixelSCD);
+	}
 public:
-	PrimitiveTopology Topo;
+	PrimitiveTopology Topo = kPrimTopologyTriangleList;
 	std::vector<XmlAttributeInfo> Attr;
 	std::vector<XmlUniformInfo> Uniforms;
 	XmlSamplerInfoSet SamplerSet;
-	std::string FxName, VsEntry;
+	//std::string FxName, VsEntry;
+	ShaderCompileDesc VertexSCD, PixelSCD;
 };
 struct XmlPassInfo {
-	ShaderCompileDesc VertexSCD, PixelSCD;
+	XmlProgramInfo Program;
 	std::string LightMode, Name, ShortName;
 };
 struct XmlSubShaderInfo {
@@ -509,11 +536,29 @@ private:
 			++index;
 		}
 	}
+	static void ParseProgram(const boost_property_tree::ptree& nodeProgram, XmlProgramInfo& programInfo) {
+		auto& vertexScd = programInfo.VertexSCD;
+		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
+		vertexScd.EntryPoint = nodeProgram.get<std::string>("VertexEntry", vertexScd.EntryPoint);
+
+		auto& pixelScd = programInfo.PixelSCD;
+		pixelScd.SourcePath = vertexScd.SourcePath;
+		pixelScd.EntryPoint = nodeProgram.get<std::string>("PixelEntry", pixelScd.EntryPoint);
+
+		SCDHelper vertScd(vertexScd);
+		auto find_macros = nodeProgram.find("Macros");
+		if (find_macros != nodeProgram.not_found()) {
+			auto& node_macros = find_macros->second;
+			for (auto& it : node_macros)
+				vertScd.AddMacro(ShaderCompileMacro{ it.first, it.second.data() });
+			pixelScd.Macros = vertexScd.Macros;
+		}
+	}
 	void VisitProgram(const PropertyTreePath& nodeProgram, Visitor& vis) {
-		vis.shaderInfo.Program.FxName = nodeProgram->get<std::string>("FileName", "");
-		vis.shaderInfo.Program.VsEntry = nodeProgram->get<std::string>("VertexEntry", "");
+		ParseProgram(nodeProgram.Node, vis.shaderInfo.Program);
+
 		vis.shaderInfo.Program.Topo = static_cast<PrimitiveTopology>(
-			nodeProgram->get<int>("Topology", kPrimTopologyTriangleList));
+			nodeProgram->get<int>("Topology", vis.shaderInfo.Program.Topo));
 		VisitAttributes(nodeProgram, vis);
 		VisitUniforms(nodeProgram, vis);
 		VisitSamplers(nodeProgram, vis);
@@ -536,21 +581,12 @@ private:
 			pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 			pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
-			pass.VertexSCD.EntryPoint = vis.shaderInfo.Program.VsEntry;
-			pass.PixelSCD.EntryPoint = "";
+			pass.Program = vis.shaderInfo.Program;
 			auto find_program = node_pass.find("PROGRAM");
 			if (find_program != node_pass.not_found()) {
 				auto& node_program = find_program->second;
-				pass.VertexSCD.EntryPoint = node_program.get<std::string>("VertexEntry", pass.VertexSCD.EntryPoint);
-				pass.PixelSCD.EntryPoint = node_program.get<std::string>("PixelEntry", pass.PixelSCD.EntryPoint);
-				
-				auto find_macros = node_program.find("Macros");
-				if (find_macros != node_program.not_found()) {
-					auto& node_macros = find_macros->second;
-					for (auto& it : node_macros)
-						pass.VertexSCD.Macros.push_back(ShaderCompileMacro{it.first, it.second.data()});
-					pass.PixelSCD.Macros = pass.VertexSCD.Macros;
-				}
+
+				ParseProgram(node_program, pass.Program);
 			}
 
 			subShader.AddPass(std::move(pass));
@@ -575,18 +611,42 @@ private:
 			}
 		}
 	}
-	void VisitShaderVariant(const PropertyTreePath& nodeVariant,
-		const std::string& variantName,
-		XmlShaderInfo& shaderInfo) {
+	void VisitVariant(const PropertyTreePath& nodeVariant, XmlShaderInfo& shaderInfo) {
 		for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("UseShader"))) {
 			ParseShaderXml(it.second.data(), shaderInfo);
 		}
 
-		for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("Variant"))) {
-			std::string name = it.second.get<std::string>("<xmlattr>.Name");
-			if (name == variantName) {
-				shaderInfo.Program.Topo = static_cast<PrimitiveTopology>(
-					it.second.get<int>("Topology"), shaderInfo.Program.Topo);
+		int index = 0;
+		for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("PROGRAM"))) {
+			auto& node_program = it.second;
+			ParseProgram(node_program, shaderInfo.Program);
+
+			for (auto& tech : shaderInfo.SubShaders) {
+				for (auto& pass : tech.Passes) {
+					pass.Program.Merge(shaderInfo.Program);
+					pass.Program.Merge(shaderInfo.Program);
+				}
+			}
+		}
+	}
+	void VisitShaderVariants(const PropertyTreePath& nodeShaderVariant, 
+		const std::string& shaderName, const std::string& variantName, XmlShaderInfo& shaderInfo) {
+		for (auto& it : boost::make_iterator_range(nodeShaderVariant->equal_range("Variant"))) {
+			auto& node_variant = it.second;
+			std::string useShader = node_variant.get<std::string>("UseShader");
+			if (useShader == shaderName) {
+				std::string name = node_variant.get<std::string>("<xmlattr>.Name");
+				if (name == variantName) {
+					VisitVariant(node_variant, shaderInfo);
+					return;
+				}
+
+				for (auto& it : boost::make_iterator_range(node_variant.equal_range("AliasName"))) {
+					if (it.second.data() == variantName) {
+						VisitVariant(node_variant, shaderInfo);
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -614,18 +674,16 @@ private:
 		}
 		return result;
 	}
-	bool ParseShaderVariantXml(const std::string& shaderName,
-		const std::string& variantName,
-		XmlShaderInfo& shaderInfo) {
+	bool ParseShaderVariantXml(const std::string& shaderName, const std::string& variantName, XmlShaderInfo& shaderInfo) {
 		bool result;
 		std::string strKey = shaderName + "/" + variantName;
 		auto find_iter = mShaderVariantByName.find(strKey);
 		if (find_iter == mShaderVariantByName.end()) {
-			std::string filename = "shader/" + shaderName + "Variant.xml";
+			std::string filename = "shader/Variants.xml";
 			if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filename, pt);
-				VisitShaderVariant(pt.get_child("Variant"), variantName, shaderInfo);
+				VisitShaderVariants(pt.get_child("ShaderVariants"), shaderName, variantName, shaderInfo);
 				mShaderVariantByName.insert(std::make_pair(strKey, shaderInfo));
 				result = true;
 			}
@@ -657,13 +715,14 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	for (size_t i = 0; i < shaderInfo.SubShaders.size(); ++i) {
 		auto& subShaderInfo = shaderInfo.SubShaders[i];
 		for (size_t j = 0; j < subShaderInfo.Passes.size(); ++j) {
-			auto& passInfo = subShaderInfo.Passes[j];
+			const auto& passInfo = subShaderInfo.Passes[j];
 
 			builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 			builder.SetTopology(shaderInfo.Program.Topo);
 
+
 			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(launchMode, 
-				shaderInfo.Program.FxName, passInfo.VertexSCD, passInfo.PixelSCD));
+				shaderInfo.Program.VertexSCD.SourcePath, passInfo.Program.VertexSCD, passInfo.Program.PixelSCD));
 			
 			if (shaderInfo.Program.Attr.size() == 1) {
 				builder.SetInputLayout(resourceMng.CreateLayout(launchMode, 

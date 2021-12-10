@@ -35,22 +35,24 @@ std::string Sky() { return "model/uffizi_cross.dds"; }
 
 namespace cube {
 namespace far_plane {
-mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter) {
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeBig = 8192;
 	return rendFac->CreateCube(
 		winCenter + Eigen::Vector3f(0, 0, 300),
 		Eigen::Vector3f(SizeBig, SizeBig, 1),
-		0xffff6347
+		0xffff6347,
+		matname
 	);
 }
 }
 namespace near_plane {
-mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter) {
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeSmall = 4;
 	return rendFac->CreateCube(
 		winCenter + Eigen::Vector3f(-SizeSmall, -SizeSmall, test1::cam::Near()),
 		Eigen::Vector3f(SizeSmall * 2, SizeSmall * 2, 1),
-		0xffff4763
+		0xffff4763,
+		matname
 	);
 }
 }
