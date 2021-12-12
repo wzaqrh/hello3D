@@ -59,15 +59,11 @@ void Camera::SetFov(float fov)
 }
 void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up)
 {
-#if defined CAMERA_TRANSFORM
 	mTransform->SetPosition(eye);
 	auto forward = at - eye;
-	mTransform->SetQuaternion(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
+	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mForwardLength = forward.norm();
-#else
-	mEyePos = eye;
-	mForwardVector = at - eye;
-#endif
+
 	mUpVector = up;
 	mViewDirty = true;
 }
@@ -85,33 +81,22 @@ void Camera::SetYFlipped(bool flip)
 }
 
 /********** query **********/
-#if defined CAMERA_TRANSFORM
-Eigen::Vector3f Camera::GetEye() const {
+Eigen::Vector3f Camera::GetEye() const 
+{
 	return mTransform->GetPosition();
 }
-Eigen::Vector3f Camera::GetLookAt() const {
+Eigen::Vector3f Camera::GetLookAt() const 
+{
 	return mTransform->GetPosition() + mTransform->GetForward() * mForwardLength;
 }
-Eigen::Vector3f Camera::GetForward() const {
+Eigen::Vector3f Camera::GetForward() const 
+{
 	return mTransform->GetForward();
 }
-float Camera::GetForwardLength() const {
+float Camera::GetForwardLength() const 
+{
 	return mForwardLength;
 }
-#else
-Eigen::Vector3f Camera::GetEye() const { 
-	return mEyePos; 
-}
-Eigen::Vector3f Camera::GetLookAt() const { 
-	return mEyePos + mForwardVector; 
-}
-Eigen::Vector3f Camera::GetForward() const {
-	return mForwardVector.normalized();
-}
-float Camera::GetForwardLength() const {
-	return mForwardVector.norm();
-}
-#endif
 
 void Camera::RecalculateProjection() const
 {
@@ -143,7 +128,6 @@ const Eigen::Matrix4f& Camera::GetProjection() const
 
 void Camera::RecalculateView() const
 {
-#if defined CAMERA_TRANSFORM
 	auto eyePos = mTransform->GetPosition();
 	auto forward = mTransform->GetForward();
 	mView = math::MakeLookForwardLH(eyePos, forward, mUpVector);
@@ -163,20 +147,6 @@ void Camera::RecalculateView() const
 			t.pretranslate(center);//[-screen.hw, screen.hw] -> [0->sreen.w]
 	}
 	mWorldView = mView * t.matrix();//[0->sreen.w] -> view_space
-#else
-	mView = math::MakeLookForwardLH(mEyePos, mForwardVector, mUpVector);
-
-	Eigen::Vector3f center(mScreenSize.x() / 2, mScreenSize.y() / 2, 0);
-	Transform3fAffine t = Transform3fAffine::Identity();
-	t.pretranslate(-center);//[0->sreen.w]  -> relative2screen_center[-screen.hw, screen.hw]
-
-	const auto& srt = mTransform->GetSRT();
-	t = Transform3fAffine(srt.inverse() * t.matrix());
-
-	t.pretranslate(center + mTransform->GetPosition());//[-screen.hw, screen.hw] -> [0->sreen.w]
-
-	mWorldView = mView * t.matrix();//[0->sreen.w] -> view_space
-#endif
 }
 const Eigen::Matrix4f& Camera::GetView() const
 {

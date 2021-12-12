@@ -1,4 +1,4 @@
-4 3
+4 0
 test_sprite 5
 test_model 5
 test_cube 1

@@ -103,8 +103,8 @@ void App::Render()
 		auto quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
 			* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
 			* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY()) 
-			* mTransform->GetQuaternion();
-		mTransform->SetQuaternion(quat);
+			* mTransform->GetRotation();
+		mTransform->SetRotation(quat);
 	}
 
 	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);

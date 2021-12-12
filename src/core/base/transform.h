@@ -3,8 +3,6 @@
 #include "core/base/predeclare.h"
 #include "core/base/base_type.h"
 
-#define TRANSFORM_QUATERNION
-
 namespace mir {
 
 enum RotationOrder {
@@ -28,39 +26,38 @@ enum RotationOrder {
 struct MIR_CORE_API Transform {
 public:
 	Transform();
-	void SetScale(const Eigen::Vector3f& s);
+	
 	void SetPosition(const Eigen::Vector3f& position);
+	void Translate(const Eigen::Vector3f& translation);
+
+	void SetScale(const Eigen::Vector3f& s);
+
 	void SetEuler(const Eigen::Vector3f& euler);
-	void SetQuaternion(const Eigen::Quaternionf& quat);
-	void SetYFlipped(bool flip);
+	void SetRotation(const Eigen::Quaternionf& quat);
+	void Rotate(const Eigen::Vector3f& euler);
+	void RotateAround(const Eigen::Vector3f& point, const Eigen::Vector3f& axis, float angle);
 public:
+	const Eigen::Vector3f& GetPosition() const { return mPosition; }
 	const Eigen::Vector3f& GetScale() const { return mScale; }
-	const Eigen::Vector3f& GetPosition() const { return mTranslation; }
 	RotationOrder GetEulerOrder() const { return kExtrinsicZXY; }
-	const Eigen::Quaternionf& GetQuaternion() const { return mQuat; }
-	bool IsYFlipped() const;
+	const Eigen::Quaternionf& GetRotation() const { return mQuat; }
 	
 	bool IsIdentity() const;
-	const Eigen::Vector3f& GetForward() const;
 	const Eigen::Matrix4f& GetSRT() const;
+	Eigen::Vector3f GetForward() const;
+	Eigen::Vector3f GetRight() const;
+	Eigen::Vector3f GetUp() const;
 private:
 	void CalculateSRT(Eigen::Matrix4f& matrix) const;
 	void CalculateTSR(Eigen::Matrix4f& matrix) const;
-	void CalculateForward(Eigen::Vector3f& forward) const;
 	void CheckDirtyAndRecalculate() const;
 private:
-	Eigen::Vector3f mTranslation;
+	Eigen::Vector3f mPosition;
 	Eigen::Vector3f mScale;
-#if defined TRANSFORM_QUATERNION
 	Eigen::Quaternionf mQuat;
-#else
-	Eigen::Vector3f mEuler;//ZXY
-#endif
-	Eigen::Vector3f mFlip;
 
-	mutable bool mDirty = false;
 	mutable Eigen::Matrix4f mSRT;
-	mutable Eigen::Vector3f mForward;
+	mutable bool mDirty = false;
 };
 
 }

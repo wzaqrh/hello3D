@@ -6,10 +6,6 @@
 #include "core/base/transform.h"
 #include "core/base/declare_macros.h"
 
-#if defined TRANSFORM_QUATERNION
-#define CAMERA_TRANSFORM
-#endif
-
 namespace mir {
 
 enum CameraType {
@@ -96,12 +92,8 @@ private:
 private:
 	CameraType mType;
 	Eigen::Vector2i mScreenSize, mSize;
-#if defined CAMERA_TRANSFORM
 	Eigen::Vector3f mUpVector;
 	float mForwardLength;
-#else
-	Eigen::Vector3f mEyePos, mForwardVector, mUpVector;
-#endif
 	Eigen::Vector2f mZRange;
 	float mFov;
 	bool mFlipY;
