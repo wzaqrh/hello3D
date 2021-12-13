@@ -15,15 +15,6 @@ protected:
 private:
 	AssimpModelPtr mModel;
 };
-/*mCaseIndex
-0,1：透视相机 观察到模型：传奇战士 + 天空
-2,3: 透视相机 观察到模型：飞机
-4,5：透视相机 观察到模型：石头（在右上角）
-
-6,7：正交相机 观察到模型：传奇战士 + 天空
-8,9: 正交相机 观察到模型：飞机
-10,11：正交相机 观察到模型：石头（在右上角）
-*/
 
 void TestDefferedPath::OnPostInitDevice()
 {

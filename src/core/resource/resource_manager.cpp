@@ -427,13 +427,15 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe ThreadSafe
 {
 	MaterialPtr material = nullptr;
-	ATOMIC_STATEMENT(mMaterialMapLock, material = this->mMaterialByName[matName]);
-	if (material == nullptr) {
-		material = this->mMaterialFac.CreateMaterial(launchMode, *this, matName);
-		ATOMIC_STATEMENT(mMaterialMapLock, this->mMaterialByName.insert(std::make_pair(matName, material)));
-		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.VariantName).str());
-		DEBUG_SET_CALL(material, launchMode);
-	}
+	ATOMIC_STATEMENT(mMaterialMapLock, 
+		material = this->mMaterialByName[matName];
+		if (material == nullptr) {
+			material = this->mMaterialFac.CreateMaterial(launchMode, *this, matName);
+			this->mMaterialByName.insert(std::make_pair(matName, material));
+			DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.VariantName).str());
+			DEBUG_SET_CALL(material, launchMode);
+		}
+	);
 	return material;
 }
 MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& material) ThreadSafe
@@ -445,14 +447,15 @@ AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& 
 {
 	AiScenePtr aiRes = nullptr;
 	AiResourceKey key{ assetPath, redirectRes };
-	ATOMIC_STATEMENT(mAiSceneMapLock, aiRes = this->mAiSceneByKey[key]);
-	if (aiRes == nullptr) {
-		aiRes = this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
-		ATOMIC_STATEMENT(mAiSceneMapLock, this->mAiSceneByKey.insert(std::make_pair(key, aiRes)));
-
-		DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
-		DEBUG_SET_CALL(aiRes, launchMode);
-	}
+	ATOMIC_STATEMENT(mAiSceneMapLock, 
+		aiRes = this->mAiSceneByKey[key];
+		if (aiRes == nullptr) {
+			aiRes = this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes);
+			this->mAiSceneByKey.insert(std::make_pair(key, aiRes));
+			DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
+			DEBUG_SET_CALL(aiRes, launchMode);
+		}
+	);
 	return aiRes;
 }
 
