@@ -61,7 +61,7 @@ void TestCamera::OnPostInitDevice()
 		light->SetPosition(Eigen::Vector3f(10, 10, -10));
 		light->SetAttenuation(0.001);
 
-		mModel = mContext->RenderableFac()->CreateAssimpModel(E_MAT_MODEL);
+		mModel = mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
 		mModel->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 		mTransform = mModel->GetTransform();
 		mTransform->SetScale(test1::res::model_sship::Scale());

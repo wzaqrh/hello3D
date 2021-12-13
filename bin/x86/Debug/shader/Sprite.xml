@@ -3,7 +3,7 @@
 	
 	<PROGRAM>
 		<UseAttribute>vbSurface</UseAttribute>
-		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
 		<Texture>

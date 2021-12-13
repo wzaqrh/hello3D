@@ -83,7 +83,7 @@ void TestRT::OnPostInitDevice()
 			camera2->SetCameraMask(cameraMask2);
 			camera2->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-			mModel = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel->SetCameraMask(cameraMask2);
 			mModel->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
 			mTransform = mModel->GetTransform();

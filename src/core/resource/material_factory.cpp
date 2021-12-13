@@ -49,7 +49,7 @@ public:
 		mMaterial = std::make_shared<Material>();
 		if (addTechPass) {
 			AddTechnique();
-			AddPass(E_PASS_FORWARDBASE, "");
+			AddPass(LIGHTMODE_FORWARD_BASE, "");
 		}
 	}
 	MaterialBuilder(ResourceManager& resMng, MaterialPtr material) :mResourceMng(resMng) {
@@ -571,7 +571,7 @@ private:
 			auto& node_pass = it.second;
 			XmlPassInfo pass;
 
-			pass.LightMode = E_PASS_FORWARDBASE;
+			pass.LightMode = LIGHTMODE_FORWARD_BASE;
 			auto find_tags = node_pass.find("Tags");
 			if (find_tags != node_pass.not_found()) {
 				auto& node_tag = find_tags->second;

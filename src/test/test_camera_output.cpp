@@ -55,7 +55,7 @@ void TestCameraOutput::OnPostInitDevice()
 			light2->SetAttenuation(0.0001);
 		}
 
-		mModel2 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+		mModel2 = mRendFac->CreateAssimpModel(MAT_MODEL);
 		mModel2->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 		mModel2->SetCameraMask(cameraMask2);
 		mTransform = mModel2->GetTransform();

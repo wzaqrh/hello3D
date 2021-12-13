@@ -6,7 +6,7 @@
 	<PROGRAM>
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseAttribute>vbWeightedSkin</UseAttribute>
-		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>

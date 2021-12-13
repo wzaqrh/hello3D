@@ -53,14 +53,14 @@ void TestModel::OnPostInitDevice()
 	case 1: {
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
 		mTransform = test1::res::model_mir::Init(mModel, mWinCenter);
 	}break;
 	case 2:
 	case 3:
 	case 4:
 	case 5: {
-		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? E_MAT_MODEL : E_MAT_MODEL_PBR);
+		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
 		if (caseIndex == 2 || caseIndex == 3) mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
 		else mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
 	}break;

@@ -45,13 +45,16 @@ public:
 	void AddOP(const RenderOperation& op) {
 		mOps.push_back(op);
 	}
-	size_t Count() const { return mOps.size(); }
+public:
+	std::vector<RenderOperation>::const_iterator begin() const { return mOps.begin(); }
+	std::vector<RenderOperation>::const_iterator end() const { return mOps.end(); }
+
 	bool IsEmpty() const { return mOps.empty(); }
-
+	size_t Count() const { return mOps.size(); }
+	
 	RenderOperation& At(size_t pos) { return mOps[pos]; }
-	RenderOperation& operator[](size_t pos) { return At(pos); }
-
 	const RenderOperation& At(size_t pos) const { return mOps[pos]; }
+	RenderOperation& operator[](size_t pos) { return At(pos); }
 	const RenderOperation& operator[](size_t pos) const { return At(pos); }
 };
 

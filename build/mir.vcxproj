@@ -97,6 +97,7 @@
     <ClInclude Include="..\src\core\base\stl.h" />
     <ClInclude Include="..\src\core\base\thread.h" />
     <ClInclude Include="..\src\core\base\transform.h" />
+    <ClInclude Include="..\src\core\base\uniform_struct.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
     <ClInclude Include="..\src\core\mir_export.h" />

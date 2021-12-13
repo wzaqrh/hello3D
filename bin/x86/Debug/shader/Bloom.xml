@@ -3,7 +3,7 @@
 	
 	<PROGRAM>
 		<UseAttribute>attrPos3Color4Tex2</UseAttribute>
-		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerFrame</UseUniform>
 		<UseSampler>samStandard</UseSampler>
 		
 		<Uniform Name="cbBloom" Slot="3">

@@ -120,16 +120,15 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 }
 
 void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
-	const cbPerLight* lightParam, cbGlobalParam& globalParam)
+	const cbPerLight* lightParam, cbPerFrame& globalParam)
 {
-	for (int i = 0; i < opQueue.Count(); ++i) {
-		auto& op = opQueue[i];
+	for (const auto& op : opQueue) {
 		if ((op.CameraMask & camMask) && op.Material->IsLoaded()) {
 			auto curTech = op.Material->CurTech();
 
 			globalParam.World = op.WorldTransform;
 			globalParam.WorldInv = globalParam.World.inverse();
-			curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbGlobalParam), Data::Make(globalParam));
+			curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(globalParam));
 			
 			if (lightParam) curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*lightParam));
 
@@ -145,9 +144,9 @@ static cbPerLight MakeCbPerLight(const ILight& light)
 	lightParam.IsSpotLight = light.GetType() == kLightSpot;
 	return lightParam;
 }
-static cbGlobalParam MakeCbGlobalParam(const Camera& camera) 
+static cbPerFrame MakeCbPerFrame(const Camera& camera) 
 {
-	cbGlobalParam globalParam = {};
+	cbPerFrame globalParam = {};
 	globalParam.View = camera.GetView();
 	globalParam.Projection = camera.GetProjection();
 
@@ -156,9 +155,9 @@ static cbGlobalParam MakeCbGlobalParam(const Camera& camera)
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
 	return globalParam;
 }
-static cbGlobalParam MakeCbGlobalParam(const Camera& camera, const ILight& light, bool castShadow, IFrameBufferPtr shadowMap)
+static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, bool castShadow, IFrameBufferPtr shadowMap)
 {
-	cbGlobalParam globalParam = {};
+	cbPerFrame globalParam = {};
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, castShadow, globalParam.View, globalParam.Projection);
 	}
@@ -207,7 +206,7 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 			if ((light->GetCameraMask() & camera.GetCameraMask()) && (light->GetType() == kLightDirectional)) {
 				shadowMapGenerated = true;
 
-				cbGlobalParam globalParam = MakeCbGlobalParam(camera, *light, true, nullptr);
+				cbPerFrame globalParam = MakeCbPerFrame(camera, *light, true, nullptr);
 				cbPerLight lightParam = MakeCbPerLight(*light);
 				RenderLight(opQueue, E_PASS_SHADOWCASTER, camera.GetCameraMask(), &lightParam, globalParam);
 				break;
@@ -236,12 +235,12 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 		mRenderSys.SetTexture(E_TEXTURE_ENV, NULLABLE(camera.GetSkyBox(), GetTexture()));
 			
 		ILightPtr firstLight = nullptr;
-		cbGlobalParam globalParam;
+		cbPerFrame globalParam;
 		for (auto& light : lights) {
 			if (light->GetCameraMask() & camera.GetCameraMask()) {
 				if (firstLight == nullptr) {
 					firstLight = light;
-					globalParam = MakeCbGlobalParam(camera, *firstLight, false, shadowMapGenerated ? mShadowMap : nullptr);
+					globalParam = MakeCbPerFrame(camera, *firstLight, false, shadowMapGenerated ? mShadowMap : nullptr);
 
 					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 					if (auto skybox = camera.GetSkyBox()) {
@@ -276,7 +275,7 @@ void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Cam
 		auto& postProcessEffects = camera.GetPostProcessEffects();
 		for (size_t i = 0; i < postProcessEffects.size(); ++i)
 			postProcessEffects[i]->GenRenderOperation(opQue);
-		RenderLight(opQue, E_PASS_POSTPROCESS, camera.GetCameraMask(), nullptr, MakeCbGlobalParam(camera));
+		RenderLight(opQue, E_PASS_POSTPROCESS, camera.GetCameraMask(), nullptr, MakeCbPerFrame(camera));
 
 		mRenderSys.SetTexture(E_TEXTURE_MAIN, nullptr);
 		mRenderSys.SetDepthState(orgDS);

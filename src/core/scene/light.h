@@ -3,6 +3,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/math.h"
+#include "core/base/uniform_struct.h"
 
 namespace mir {
 
@@ -13,17 +14,6 @@ enum LightType
 	kLightDirectional,
 	kLightPoint,
 	kLightSpot
-};
-
-struct _declspec(align(16)) cbPerLight 
-{
-	Eigen::Vector4f unity_LightPosition;//world space
-	Eigen::Vector4f unity_LightColor;//w(gloss)
-	Eigen::Vector4f unity_SpecColor;//w(shiness)
-	Eigen::Vector4f unity_LightAtten;//x(cutoff), y(1/(1-cutoff)), z(atten^2)
-	Eigen::Vector4f unity_SpotDirection;
-
-	BOOL IsSpotLight;
 };
 
 interface MIR_CORE_API ILight : boost::noncopyable 

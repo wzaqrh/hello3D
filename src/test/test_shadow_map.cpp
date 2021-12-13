@@ -48,7 +48,7 @@ void TestShadowMap::OnPostInitDevice()
 		}
 
 		if (1) {
-			mModel1 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel1 = mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel1->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
 			mTransform = mModel1->GetTransform();
 			mTransform->SetScale(test1::res::model_rock::Scale() * 5);
@@ -56,7 +56,7 @@ void TestShadowMap::OnPostInitDevice()
 		}
 
 		if (1) {
-			mModel2 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel2 = mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
 			float scale = 1;
 			mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
@@ -85,7 +85,7 @@ void TestShadowMap::OnPostInitDevice()
 
 		if (1) 
 		{
-			mir::MaterialLoadParam mat = E_MAT_LAYERCOLOR;
+			mir::MaterialLoadParam mat = MAT_LAYERCOLOR;
 			if (mCaseIndex == 2) mat.VariantName = "test_shadow_map_case2";
 			else if (mCaseIndex == 3) mat.VariantName = "test_shadow_map_case3";
 
@@ -95,7 +95,7 @@ void TestShadowMap::OnPostInitDevice()
 
 		if (mCaseIndex == 2)
 		{
-			mModel2 = mRendFac->CreateAssimpModel(E_MAT_MODEL);
+			mModel2 = mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel2->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 			mTransform = mModel2->GetTransform();
 			mTransform->SetScale(test1::res::model_sship::Scale() * 10);

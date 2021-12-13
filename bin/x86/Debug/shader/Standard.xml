@@ -6,7 +6,7 @@
 			<Element SemanticName="TEXCOORD" Format="16"></Element>
 		</Attribute>
 		
-		<Uniform Name="cbGlobalParam" Slot="0">
+		<Uniform Name="cbPerFrame" Slot="0">
 			<Element Name="World" 		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 			<Element Name="View" 	 	Type="matrix"></Element>
 			<Element Name="Projection" 	Type="matrix"></Element>

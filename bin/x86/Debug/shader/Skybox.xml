@@ -6,7 +6,7 @@
 		<Attribute>
 			<Element SemanticName="POSITION" Format="6"></Element>
 		</Attribute>
-		<UseUniform>cbGlobalParam</UseUniform>
+		<UseUniform>cbPerFrame</UseUniform>
 		<Texture>
 			<Element Slot="0" Filter="0x15" Address="3">_MainTex</Element>
 		</Texture>

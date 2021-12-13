@@ -25,7 +25,7 @@ RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 
 SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, const MaterialLoadParam& matName)
 {
-	SpritePtr sprite = Sprite::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_SPRITE));
+	SpritePtr sprite = Sprite::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_SPRITE));
 	if (! imgpath.empty()) 
 		sprite->SetTexture(mResourceMng.CreateTextureByFile(mLaunchMode, imgpath));
 	return sprite;
@@ -33,18 +33,18 @@ SpritePtr RenderableFactory::CreateSprite(string_cref imgpath, const MaterialLoa
 
 SpritePtr RenderableFactory::CreateColorLayer(const MaterialLoadParam& matName)
 {
-	return Sprite::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_LAYERCOLOR));
+	return Sprite::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_LAYERCOLOR));
 }
 
 MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, const MaterialLoadParam& matName)
 {
-	return Mesh::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_SPRITE), 
+	return Mesh::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_SPRITE), 
 		vertCount, indexCount);
 }
 
 CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra, const MaterialLoadParam& matName)
 {
-	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MaterialLoadParam(E_MAT_LAYERCOLOR, "Cube")));
+	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MaterialLoadParam(MAT_LAYERCOLOR, "Cube")));
 	cube->SetPosition(center);
 	cube->SetHalfSize(halfsize);
 	cube->SetColor(bgra);
@@ -53,24 +53,24 @@ CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen
 
 AssimpModelPtr RenderableFactory::CreateAssimpModel(const MaterialLoadParam& matName)
 {
-	return AssimpModel::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, E_MAT_MODEL));
+	return AssimpModel::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_MODEL));
 }
 
 LabelPtr RenderableFactory::CreateLabel(string_cref fontPath, int fontSize)
 {
 	FontPtr font = mFontCache->GetFont(fontPath, fontSize);
-	return Label::Create(mLaunchMode, mResourceMng, E_MAT_LABEL, font);
+	return Label::Create(mLaunchMode, mResourceMng, MAT_LABEL, font);
 }
 
 SkyBoxPtr RenderableFactory::CreateSkybox(string_cref imgpath)
 {
-	return SkyBox::Create(mLaunchMode, mResourceMng, E_MAT_SKYBOX, imgpath);
+	return SkyBox::Create(mLaunchMode, mResourceMng, MAT_SKYBOX, imgpath);
 }
 
 PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName, Camera& camera)
 {
 	PostProcessPtr process;
-	if (effectName == E_MAT_POSTPROC_BLOOM) {
+	if (effectName == MAT_BLOOM) {
 		process = Bloom::Create(mLaunchMode, mResourceMng, effectName, camera.FetchOutput2PostProcess());
 		camera.AddPostProcessEffect(process);
 	}

@@ -86,6 +86,8 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 struct MIR_CORE_API RenderSystem : public IRenderSystem
 {
 public:
+	float WinWidth() const { return mScreenSize.x(); }
+	float WinHeight() const { return mScreenSize.y(); }
 	Eigen::Vector2i WinSize() const override { return mScreenSize; }
 	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }

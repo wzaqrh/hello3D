@@ -273,7 +273,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			if (mesh->GetRawMesh()->HasBones()) {
 				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
 				size_t boneSize = boneMatArr.size(); 
-				for (int j = 0; j < std::min<int>(MAX_MATRICES, boneSize); ++j)
+				for (int j = 0; j < std::min<int>(cbWeightedSkin::kModelCount, boneSize); ++j)
 					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
 			}
 			else {

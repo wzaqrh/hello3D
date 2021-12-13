@@ -23,7 +23,7 @@ cbuffer cbPerLight : register(b1)
 	bool IsSpotLight;
 }
 
-cbuffer cbGlobalParam : register(b0)
+cbuffer cbPerFrame : register(b0)
 {
 	matrix World;
 	matrix View;

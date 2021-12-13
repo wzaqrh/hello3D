@@ -12,6 +12,7 @@ class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 {
 	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
+	friend class RenderPipeline;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
 	Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
 public:
