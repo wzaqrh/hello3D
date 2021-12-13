@@ -8,6 +8,11 @@
 
 namespace mir {
 
+enum RenderingPath {
+	kRenderPathForward,
+	kRenderPathDeffered
+};
+
 enum CameraType {
 	kCameraPerspective,
 	kCameraOthogonal
@@ -39,6 +44,9 @@ public:
 
 	void SetDepth(unsigned depth) { mDepth = depth; }
 	unsigned GetDepth() const { return mDepth; }
+
+	void SetRenderingPath(RenderingPath path) { mRenderPath = path; }
+	RenderingPath GetRenderingPath() const { return mRenderPath; }
 
 	void SetSkyBox(const SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const PostProcessPtr& postEffect);
@@ -87,6 +95,7 @@ private:
 	std::vector<PostProcessPtr> mPostProcessEffects;
 	IFrameBufferPtr mPostProcessInput, mOutput;
 	
+	RenderingPath mRenderPath = kRenderPathForward;
 	unsigned mCameraMask = -1;
 	unsigned mDepth = 0;
 private:

@@ -39,5 +39,20 @@
 				<PixelEntry>PSAdd</PixelEntry> 
 			</PROGRAM>
 		</Pass>
+		
+		<Pass>
+			<Tags> <LightMode>PrepassBase</LightMode> </Tags>
+			<PROGRAM> 
+				<VertexEntry>VSPrepassBase</VertexEntry> 
+				<PixelEntry>PSPrepassBase</PixelEntry>
+			</PROGRAM>
+		</Pass>
+		<Pass>
+			<Tags> <LightMode>PrepassFinal</LightMode> </Tags>
+			<PROGRAM> 
+				<VertexEntry>VSPrepassFinal</VertexEntry> 
+				<PixelEntry>PSPrepassFinal</PixelEntry>
+			</PROGRAM>
+		</Pass>
 	</SubShader>
 </Shader>

@@ -1,4 +1,4 @@
-4 0
+8 0
 test_sprite 5
 test_model 5
 test_cube 1
@@ -8,3 +8,4 @@ test_shadow_map 0
 test_framebuffer 3
 test_camera 2
 test_camera_output 1
+test_deffered_path 1

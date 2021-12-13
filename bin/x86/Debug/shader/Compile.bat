@@ -22,10 +22,14 @@ SET OUT=d3d11/
 ::fxc "%MACRO%" /T "%PS_VERSION%" /Fo "%OUT%"Model_PSAdd.cso /E PSAdd Model.fx
 ::fxc "%MACRO%" /T "%VS_VERSION%" /Fo "%OUT%"Model_VSShadowCaster.cso /E VSShadowCaster Model.fx
 ::fxc "%MACRO%" /T "%PS_VERSION%" /Fo "%OUT%"Model_PSShadowCaster.cso /E PSShadowCaster Model.fx
+fxc "%MACRO%" /T "%VS_VERSION%" /Fo "%OUT%"Model_VSPrepassBase.cso /E VSPrepassBase Model.fx
+fxc "%MACRO%" /T "%PS_VERSION%" /Fo "%OUT%"Model_PSPrepassBase.cso /E PSPrepassBase Model.fx
+fxc "%MACRO%" /T "%VS_VERSION%" /Fo "%OUT%"Model_VSPrepassFinal.cso /E VSPrepassFinal Model.fx
+fxc "%MACRO%" /T "%PS_VERSION%" /Fo "%OUT%"Model_PSPrepassFinal.cso /E PSPrepassFinal Model.fx
 
 ::ModelPbr
-fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VS.cso /E VS ModelPbr.fx
-fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PS.cso /E PS ModelPbr.fx
+::fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VS.cso /E VS ModelPbr.fx
+::fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PS.cso /E PS ModelPbr.fx
 ::fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PSAdd.cso /E PSAdd ModelPbr.fx
 ::fxc "%MACRO%" /T "%VS_VERSION%" /Fo ModelPbr_VSShadowCaster.cso /E VSShadowCaster ModelPbr.fx
 ::fxc "%MACRO%" /T "%PS_VERSION%" /Fo ModelPbr_PSShadowCaster.cso /E PSShadowCaster ModelPbr.fx

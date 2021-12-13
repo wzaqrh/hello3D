@@ -5,6 +5,10 @@
 MIR_DECLARE_SHADOWMAP(_ShadowMapTexture, 8);
 MIR_DECLARE_TEX2D(txSkybox, 9);
 
+MIR_DECLARE_TEX2D(_GBufferPos, 10);
+MIR_DECLARE_TEX2D(_GBufferNormal, 11);
+MIR_DECLARE_TEX2D(_GBufferAlbedo, 12);
+
 struct vbSurface
 {
     float3 Pos : POSITION;

@@ -24,13 +24,16 @@ private:
 	void RenderOp(const RenderOperation& op, const std::string& lightMode);
 	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
 		const cbPerLight* lightParam, cbPerFrame& globalParam);
-	void RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera,
+	void RenderCameraForward(const RenderOperationQueue& opQueue, const Camera& camera,
+		const std::vector<ILightPtr>& lights);
+	void RenderCameraDeffered(const RenderOperationQueue& opQueue, const Camera& camera,
 		const std::vector<ILightPtr>& lights);
 private:
 	RenderSystem& mRenderSys;
 
 	std::vector<IFrameBufferPtr> mFrameBufferStack;
-	IFrameBufferPtr mShadowMap;
+	IFrameBufferPtr mShadowMap, mGBuffer;
+	SpritePtr mGBufferSprite;
 };
 
 }
