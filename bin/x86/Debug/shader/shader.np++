@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <NotepadPlus>
     <Session activeView="0">
         <mainView activeIndex="3">
@@ -7,10 +8,6 @@
                 <Fold line="95" />
             </File>
             <File firstVisibleLine="0" xOffset="0" scrollWidth="1820" startPos="1205" endPos="1211" selMode="0" offset="0" wrapCount="1" lang="C++" encoding="-1" userReadOnly="no" filename="C:\mir\bin\x86\Debug\shader\Lighting.h" backupFilePath="" originalFileLastModifTimestamp="-1627475542" originalFileLastModifTimestampHigh="30928893" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="544498031" mapWrapIndentMode="-1" mapIsWrap="no" />
-            <File firstVisibleLine="4" xOffset="0" scrollWidth="1820" startPos="1103" endPos="1103" selMode="0" offset="0" wrapCount="1" lang="HTML" encoding="-1" userReadOnly="no" filename="D:\ProjectWork1\MyDoc\&#x7B14;&#x8BB0;\d3d\d3d11&#x53C2;&#x8003;&#x5730;&#x5740;.txt" backupFilePath="" originalFileLastModifTimestamp="1265091736" originalFileLastModifTimestampHigh="30928878" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="16510424" mapWrapIndentMode="-1" mapIsWrap="no" />
-            <File firstVisibleLine="610" xOffset="0" scrollWidth="1820" startPos="21720" endPos="21720" selMode="0" offset="0" wrapCount="3" lang="C#" encoding="-1" userReadOnly="no" filename="D:\ProjectWork1\MyDoc\graphics\&#x56FE;&#x5F62;&#x6570;&#x5B66;.cs" backupFilePath="" originalFileLastModifTimestamp="-1771503933" originalFileLastModifTimestampHigh="30922671" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
-            <File firstVisibleLine="110" xOffset="0" scrollWidth="1820" startPos="6715" endPos="6729" selMode="0" offset="0" wrapCount="1" lang="C#" encoding="-1" userReadOnly="no" filename="D:\ProjectWork1\MyDoc\&#x7B14;&#x8BB0;\unity\&#x624B;&#x518C;.cs" backupFilePath="" originalFileLastModifTimestamp="-1534604245" originalFileLastModifTimestampHigh="30879826" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
-            <File firstVisibleLine="0" xOffset="0" scrollWidth="1690" startPos="0" endPos="0" selMode="0" offset="0" wrapCount="1" lang="C#" encoding="-1" userReadOnly="no" filename="D:\ProjectWork1\MyDoc\&#x7B14;&#x8BB0;\unity\Unity&#x7C7B;&#x603B;&#x7ED3;.cs" backupFilePath="" originalFileLastModifTimestamp="1532105568" originalFileLastModifTimestampHigh="30874393" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="1146880000" mapWrapIndentMode="-1" mapIsWrap="no" />
         </mainView>
         <subView activeIndex="0" />
     </Session>

@@ -13,6 +13,9 @@
 			<Element Slot="0">txAlbedo</Element>
 		</Texture>
 		
+		<Macros>
+			<ENABLE_SHADOW_MAP>1</ENABLE_SHADOW_MAP>
+		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>

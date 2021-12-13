@@ -211,6 +211,9 @@
     <ClInclude Include="..\src\core\base\uniform_struct.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\rendersys_debug.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">

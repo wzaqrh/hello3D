@@ -31,6 +31,9 @@
 			<Element Name="_Unity_SpecCube0_HDR"	 Type="float4" Default="0.5,1,0,0"></Element>
 		</Uniform>
 		
+		<Macros>
+			<ENABLE_SHADOW_MAP>1</ENABLE_SHADOW_MAP>
+		</Macros>
 		<FileName>ModelPbr</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>

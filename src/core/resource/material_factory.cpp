@@ -7,16 +7,15 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include "core/base/d3d.h"
+#include "core/base/rendersys_debug.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/resource_manager.h"
-#include "core/base/d3d.h"
 
 namespace boost_filesystem = boost::filesystem;
 namespace boost_property_tree = boost::property_tree;
 
 namespace mir {
-
-#define TemplateT template <typename T>
 
 /********** ConstBufferDeclBuilder **********/
 struct ConstBufferDeclBuilder
@@ -185,8 +184,7 @@ struct XmlSamplerInfoSet {
 public:
 	std::vector<SamplerDesc> Samplers;
 };
-struct SCDHelper 
-{
+struct SCDHelper {
 	SCDHelper(ShaderCompileDesc& scd) :mSCD(scd) {}
 	void AddMacro(const ShaderCompileMacro& macro) {
 		auto find_it = std::find_if(mSCD.Macros.begin(), mSCD.Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
@@ -551,8 +549,19 @@ private:
 			auto& node_macros = find_macros->second;
 			for (auto& it : node_macros)
 				vertScd.AddMacro(ShaderCompileMacro{ it.first, it.second.data() });
-			pixelScd.Macros = vertexScd.Macros;
 		}
+		pixelScd.Macros = vertexScd.Macros;
+
+#define SCD_ADD_MACRO(MACRO_NAME) vertScd.AddMacro(ShaderCompileMacro{ #MACRO_NAME, boost::lexical_cast<std::string>(MACRO_NAME) });
+	#if defined DEBUG_SHADOW_CASTER
+		SCD_ADD_MACRO(DEBUG_SHADOW_CASTER);
+	#endif
+	#if defined DEBUG_PREPASS_BASE
+		SCD_ADD_MACRO(DEBUG_PREPASS_BASE);
+	#endif
+	#if defined DEBUG_PREPASS_FINAL
+		SCD_ADD_MACRO(DEBUG_PREPASS_FINAL);
+	#endif
 	}
 	void VisitProgram(const PropertyTreePath& nodeProgram, Visitor& vis) {
 		ParseProgram(nodeProgram.Node, vis.shaderInfo.Program);
@@ -719,7 +728,6 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 
 			builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 			builder.SetTopology(shaderInfo.Program.Topo);
-
 
 			IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(launchMode, 
 				shaderInfo.Program.VertexSCD.SourcePath, passInfo.Program.VertexSCD, passInfo.Program.PixelSCD));

@@ -5,12 +5,11 @@
 #include "core/renderable/post_process.h"
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
-#include "core/base/attribute_struct.h"
-#include "core/base/debug.h"
 #include "core/base/macros.h"
+#include "core/base/debug.h"
+#include "core/base/rendersys_debug.h"
+#include "core/base/attribute_struct.h"
 #include "test/unit_test/unit_test.h"
-
-//#define DEBUG_SHADOW_CASTER
 
 namespace mir {
 
@@ -35,7 +34,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
 	mGBufferSprite = Sprite::Create(__LaunchSync__, resMng, MAT_MODEL);
-	mGBufferSprite->SetSize(Eigen::Vector3f(mRenderSys.WinWidth(), mRenderSys.WinHeight(), 0));
+	mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
+	mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
 }
 
 void RenderPipeline::_PushFrameBuffer(IFrameBufferPtr rendTarget)
@@ -244,7 +244,9 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 		}
 
+		DepthState orgDS = mRenderSys.GetDepthState();
 		BlendState orgBS = mRenderSys.GetBlendFunc();
+		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		mRenderSys.SetTexture(TEXTURE_SHADOW_MAP, shadowMapGenerated ? mShadowMap->GetAttachZStencilTexture() : nullptr);
 		mRenderSys.SetTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
 			
@@ -275,6 +277,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 
 		mRenderSys.SetTexture(TEXTURE_SHADOW_MAP, nullptr);
 		mRenderSys.SetTexture(TEXTURE_ENVIROMENT, nullptr);
+		mRenderSys.SetDepthState(orgDS);
 		mRenderSys.SetBlendFunc(orgBS);
 	}
 	
@@ -303,11 +306,9 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 
 	//LIGHTMODE_PREPASS_BASE
 	{
-		_PushFrameBuffer(mGBuffer);
-		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
-
+		DepthState orgDS = mRenderSys.GetDepthState();
 		BlendState orgBS = mRenderSys.GetBlendFunc();
-
+		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		ILightPtr firstLight = nullptr;
 		cbPerFrame globalParam;
 		for (auto& light : lights) {
@@ -315,36 +316,59 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 				if (firstLight == nullptr) {
 					firstLight = light;
 					
-					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
-					if (auto skybox = camera.GetSkyBox()) {
-						RenderOperationQueue opQue;
-						skybox->GenRenderOperation(opQue);
-						globalParam = MakeCbPerFrame(camera);
-						RenderLight(opQue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), nullptr, globalParam);
-					}
+				#if !defined DEBUG_PREPASS_BASE
+					_PushFrameBuffer(mGBuffer);
+				#endif
+					mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
+					{
+						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
+						if (auto skybox = camera.GetSkyBox()) {
+							RenderOperationQueue opQue;
+							skybox->GenRenderOperation(opQue);
+							globalParam = MakeCbPerFrame(camera);
+							RenderLight(opQue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), nullptr, globalParam);
+						}
 
-					globalParam = MakeCbPerFrame(camera, *firstLight, true, nullptr);
-					auto lightParam = MakeCbPerLight(*light);
-					RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), &lightParam, globalParam);
+						globalParam = MakeCbPerFrame(camera, *firstLight, false, nullptr);
+						auto lightParam = MakeCbPerLight(*light);
+						RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), &lightParam, globalParam);
+					}
+				#if !defined DEBUG_PREPASS_BASE
+					_PopFrameBuffer();
 
 					globalParam = MakeCbPerFrame(camera, *firstLight, false, mGBuffer);
+					mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
+				#endif
 				}
 				else {
 					mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 				}
 
+			#if !defined DEBUG_PREPASS_BASE
+				mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
 				mRenderSys.SetTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
 				mRenderSys.SetTexture(TEXTURE_SHADOW_MAP, mGBuffer->GetAttachZStencilTexture());
 				mRenderSys.SetTexture(TEXTURE_GBUFFER_POS, mGBuffer->GetAttachColorTexture(0));
 				mRenderSys.SetTexture(TEXTURE_GBUFFER_NORMAL, mGBuffer->GetAttachColorTexture(1));
 				mRenderSys.SetTexture(TEXTURE_GBUFFER_ALBEDO, mGBuffer->GetAttachColorTexture(2));
+				
+				auto lightParam = MakeCbPerLight(*light);
 				RenderOperationQueue opQue;
 				mGBufferSprite->GenRenderOperation(opQue);
-				RenderLight(opQue, LIGHTMODE_PREPASS_FINAL, -1, nullptr, globalParam);
+				RenderLight(opQue, LIGHTMODE_PREPASS_FINAL, -1, &lightParam, globalParam);
+
+				mRenderSys.SetTexture(TEXTURE_ENVIROMENT, nullptr);
+				mRenderSys.SetTexture(TEXTURE_SHADOW_MAP, nullptr);
+				mRenderSys.SetTexture(TEXTURE_GBUFFER_POS, nullptr);
+				mRenderSys.SetTexture(TEXTURE_GBUFFER_NORMAL, nullptr);
+				mRenderSys.SetTexture(TEXTURE_GBUFFER_ALBEDO, nullptr);
+			#endif
 			}//if light.GetCameraMask & camera.GetCameraMask
 		}//for lights
 
+		mRenderSys.SetTexture(TEXTURE_SHADOW_MAP, nullptr);
 		mRenderSys.SetTexture(TEXTURE_ENVIROMENT, nullptr);
+		mRenderSys.SetDepthState(orgDS);
 		mRenderSys.SetBlendFunc(orgBS);
 	}
 }

@@ -103,7 +103,8 @@ float4 PSAdd(PixelInput input) : SV_Target
 /************ PrepassBase ************/
 struct PSPrepassBaseInput
 {
-    float4 Pos : POSITION;//world space
+	float4 Pos : SV_POSITION;
+    float4 WorldPos : POSITION0;//world space
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL0;
 };
@@ -116,9 +117,14 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
 	output.Normal = mul(MW, skinNormal).xyz;
 	
-	//Pos
+	//WorldPos
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
-	output.Pos = mul(MW, skinPos);
+	output.WorldPos = mul(MW, skinPos);
+	
+	//Pos
+	output.Pos = mul(View, output.WorldPos);
+    output.Pos = mul(Projection, output.Pos);
+	output.WorldPos = output.Pos;
 	
 	//Tex
 	output.Tex = surf.Tex;
@@ -128,19 +134,29 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 struct PSPrepassBaseOutput
 {
 	float4 Pos : SV_Target0;
+#if !DEBUG_PREPASS_BASE
     float4 Normal : SV_Target1;
     float4 Albedo : SV_Target2;
+#endif
 };
 PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
 	PSPrepassBaseOutput output;
-	output.Pos = input.Pos / input.Pos.w;
+#if !DEBUG_PREPASS_BASE
+	output.Pos = input.WorldPos / input.WorldPos.w;
+	output.Pos.xyz = output.Pos.xyz * 0.5 + 0.5;
 
-	output.Normal.rgb = normalize(input.Normal);
+	output.Normal.xyz = normalize(input.Normal);
+	output.Normal.xyz = output.Normal.xyz * 0.5 + 0.5;
 	output.Normal.w = 1.0;
 	
 	output.Albedo.rgb = GetAlbedo(input.Tex);
 	output.Albedo.w = 1.0;
+#else
+	output.Pos.xyz = normalize(input.Normal);
+	output.Pos.xyz = output.Pos.xyz * 0.5 + 0.5;
+	output.Pos.w = 1.0;
+#endif
 	return output;
 }
 
@@ -154,8 +170,7 @@ struct PSPrepassFinalInput
 PSPrepassFinalInput VSPrepassFinal(vbSurface input)
 {
 	PSPrepassFinalInput output;
-	matrix WVP = mul(Projection, mul(View, World));
-    output.Pos = mul(WVP, float4(input.Pos, 1.0));
+    output.Pos = float4(input.Pos, 1.0);
 	output.Tex = input.Tex;
     return output;
 }
@@ -164,12 +179,20 @@ float4 PSPrepassFinal(PSPrepassFinalInput input) : SV_Target
 {
 	float4 finalColor;
 	
-	float4 position = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);
-	float3 normal = normalize(MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex).rgb);
+	float4 position;
+	position.xyz = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz*2.0-1.0;
+	position.w = 1.0;
+	position = mul(mul(ViewInv, ProjectionInv), position);
+	position /= position.w;
+	
+	float3 normal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex).rgb*2.0-1.0;
 	float3 albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex).rgb;
 	
 	float3 toLight_ = unity_LightPosition.xyz - position.xyz * unity_LightPosition.w;
-	float3 toEye = normalize(-mul(View, position.xyz));
+	
+	float4 toEye = mul(View, position);
+	toEye /= toEye.w;
+	toEye = normalize(-toEye);
 	finalColor.rgb = MirBlinnPhongLight(toLight_, normal, toEye, albedo, IsSpotLight);
 	finalColor.a = 1.0;
 	
@@ -181,6 +204,14 @@ float4 PSPrepassFinal(PSPrepassFinalInput input) : SV_Target
 	posInLight.z -= bias * posInLight.w;
 	
 	finalColor.rgb *= CalcShadowFactor(posInLight);
+#endif
+#if DEBUG_PREPASS_FINAL
+	//finalColor.rgb = float3(input.Tex, 0);
+	//finalColor.rgb = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);
+	//finalColor.rgb = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex).rgb;
+	//finalColor.rgb = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex).rgb;
+	//finalColor.rgb = normalize(toLight_) + 0.5;
+	//finalColor.rgb = toEye;
 #endif
 	return finalColor;
 }

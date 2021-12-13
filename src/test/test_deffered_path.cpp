@@ -18,7 +18,7 @@ private:
 
 void TestDefferedPath::OnPostInitDevice()
 {
-	if (mCaseIndex == 0) {
+	if (mCaseIndex == 0 || mCaseIndex == 1) {
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}
@@ -31,9 +31,13 @@ void TestDefferedPath::OnPostInitDevice()
 	}
 
 	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+	if (mCaseIndex == 0) {
+		camera->SetRenderingPath(kRenderPathDeffered);
+	}
 
 	mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
-	mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
+	//mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
+	mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
 }
 
 void TestDefferedPath::OnRender()

@@ -94,6 +94,7 @@
     <ClInclude Include="..\src\core\base\material_load_param.h" />
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
+    <ClInclude Include="..\src\core\base\rendersys_debug.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
     <ClInclude Include="..\src\core\base\thread.h" />
     <ClInclude Include="..\src\core\base\transform.h" />
