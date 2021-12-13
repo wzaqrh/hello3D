@@ -5,6 +5,7 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
 #include "core/base/debug.h"
+#include "core/base/macros.h"
 #include "test/unit_test/unit_test.h"
 
 //#define DEBUG_SHADOW_CASTER
@@ -119,25 +120,32 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 }
 
 void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
-	const cbPerLight& lightParam, cbGlobalParam& globalParam)
+	const cbPerLight* lightParam, cbGlobalParam& globalParam)
 {
 	for (int i = 0; i < opQueue.Count(); ++i) {
 		auto& op = opQueue[i];
 		if ((op.CameraMask & camMask) && op.Material->IsLoaded()) {
+			auto curTech = op.Material->CurTech();
+
 			globalParam.World = op.WorldTransform;
 			globalParam.WorldInv = globalParam.World.inverse();
-			op.Material->CurTech()->UpdateConstBufferByName(mRenderSys, 
-				MAKE_CBNAME(cbGlobalParam), Data::Make(globalParam));
+			curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbGlobalParam), Data::Make(globalParam));
 			
-			op.Material->CurTech()->UpdateConstBufferByName(mRenderSys,
-				MAKE_CBNAME(cbPerLight), Data::Make(lightParam));
+			if (lightParam) curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*lightParam));
 
 			RenderOp(op, lightMode);
 		}
 	}
 }
 
-static cbGlobalParam MakeAutoParam(const Camera& camera) 
+static cbPerLight MakeCbPerLight(const ILight& light)
+{
+	cbPerLight lightParam = {};
+	lightParam = light.MakeCbLight();
+	lightParam.IsSpotLight = light.GetType() == kLightSpot;
+	return lightParam;
+}
+static cbGlobalParam MakeCbGlobalParam(const Camera& camera) 
 {
 	cbGlobalParam globalParam = {};
 	globalParam.View = camera.GetView();
@@ -148,22 +156,21 @@ static cbGlobalParam MakeAutoParam(const Camera& camera)
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
 	return globalParam;
 }
-static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera, bool castShadow, const ILight& light)
+static cbGlobalParam MakeCbGlobalParam(const Camera& camera, const ILight& light, bool castShadow, IFrameBufferPtr shadowMap)
 {
 	cbGlobalParam globalParam = {};
-	cbPerLight lightParam = {};
-
-	lightParam = light.MakeCbLight();
-	lightParam.IsSpotLight = light.GetType() == kLightSpot;
-
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, castShadow, globalParam.View, globalParam.Projection);
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
-		light.CalculateLightingViewProjection(camera, false, lightParam.LightView, lightParam.LightProjection);
+		light.CalculateLightingViewProjection(camera, false, globalParam.LightView, globalParam.LightProjection);
 		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, {}));
+
+		globalParam._ShadowMapTexture_TexelSize.head<2>() = shadowMap
+			? Eigen::Vector2f(1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight())
+			: Eigen::Vector2f::Zero();
 	}
 
 	MIR_TEST_CASE(
@@ -176,91 +183,37 @@ static std::tuple<cbGlobalParam, cbPerLight> MakeAutoParam(const Camera& camera,
 	globalParam.WorldInv = globalParam.World.inverse();
 	globalParam.ViewInv = globalParam.View.inverse();
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
-	
-	return std::tie(globalParam, lightParam);
+	return globalParam;
 }
 
-
-void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
-	const std::vector<ILightPtr>& lightsOrder, const std::string& lightMode)
+void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera, 
+	const std::vector<ILightPtr>& lights)
 {
-	if (opQueue.IsEmpty()) return;
+	if (opQueue.IsEmpty() || lights.empty()) return;
 
-	DepthState orgDS = mRenderSys.GetDepthState();
-	BlendState orgBS = mRenderSys.GetBlendFunc();
-
-	if (lightMode == E_PASS_SHADOWCASTER) {
+	//E_PASS_SHADOWCASTER
+	bool shadowMapGenerated = false;
+	{
 	#if !defined DEBUG_SHADOW_CASTER
 		_PushFrameBuffer(mShadowMap);
 	#endif
-		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
+		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
+		DepthState orgDS = mRenderSys.GetDepthState();
+		BlendState orgBS = mRenderSys.GetBlendFunc();
 		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
-		mShadowMapGenerated = false;
-	}
-	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, mShadowMap->GetAttachZStencilTexture());
 
-		auto& skyBox = camera.GetSkyBox();
-		if (skyBox && skyBox->GetTexture())
-			mRenderSys.SetTexture(E_TEXTURE_ENV, skyBox->GetTexture());
-	}
-	else if (lightMode == E_PASS_POSTPROCESS) {
-		if (camera.GetPostProcessInput()) 
-			mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.GetPostProcessInput()->GetAttachColorTexture(0));
-	}
-	else {
+		for (auto& light : lights) {
+			if ((light->GetCameraMask() & camera.GetCameraMask()) && (light->GetType() == kLightDirectional)) {
+				shadowMapGenerated = true;
 
-	}
+				cbGlobalParam globalParam = MakeCbGlobalParam(camera, *light, true, nullptr);
+				cbPerLight lightParam = MakeCbPerLight(*light);
+				RenderLight(opQueue, E_PASS_SHADOWCASTER, camera.GetCameraMask(), &lightParam, globalParam);
+				break;
+			}
+		}
 
-	if (!lightsOrder.empty()) {
-		BlendState originBlend = mRenderSys.GetBlendFunc();
-		
-		ILightPtr firstLight = nullptr;
-		for (size_t i = 0; i < lightsOrder.size(); ++i) {
-			if (lightsOrder[i]->GetCameraMask() & camera.GetCameraMask()) {					
-				cbGlobalParam globalParam;
-				cbPerLight lightParam;
-				if (lightMode == E_PASS_SHADOWCASTER) {
-					if (lightsOrder[i]->GetType() == kLightDirectional) {
-						mShadowMapGenerated = true;
-						std::tie(globalParam, lightParam) = MakeAutoParam(camera, true, *lightsOrder[i]);
-						globalParam._ShadowMapTexture_TexelSize = math::point::Zero();
-						RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
-					}
-					break;
-				}
-				else if (lightMode == E_PASS_FORWARDBASE) {
-					if (firstLight == nullptr) {
-						firstLight = lightsOrder[i];
-						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
-
-						std::tie(globalParam, lightParam) = MakeAutoParam(camera, false, *firstLight);
-						globalParam._ShadowMapTexture_TexelSize.head<2>() = mShadowMapGenerated 
-							? Eigen::Vector2f(1.0/mShadowMap->GetWidth(), 1.0/mShadowMap->GetHeight()) 
-							: Eigen::Vector2f::Zero();
-						RenderLight(opQueue, E_PASS_FORWARDBASE, camera.GetCameraMask(), lightParam, globalParam);
-					}
-					else {
-						mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
-
-						std::tie(globalParam, lightParam) = MakeAutoParam(camera, false, *firstLight);
-						globalParam._ShadowMapTexture_TexelSize.head<2>() = mShadowMapGenerated 
-							? Eigen::Vector2f(1.0/mShadowMap->GetWidth(), 1.0/mShadowMap->GetHeight()) 
-							: Eigen::Vector2f::Zero();
-						RenderLight(opQueue, E_PASS_FORWARDADD, camera.GetCameraMask(), lightParam, globalParam);
-					}
-				}
-				else {
-					globalParam = MakeAutoParam(camera);
-					RenderLight(opQueue, lightMode, camera.GetCameraMask(), lightParam, globalParam);
-				}//if lightMode
-			}//if lightsOrder[i].GetCameraMask & camera.GetCameraMask
-		}//for lightsOrder
-		mRenderSys.SetBlendFunc(originBlend);
-	}
-
-	if (lightMode == E_PASS_SHADOWCASTER) {
 	#if !defined DEBUG_SHADOW_CASTER
 		_PopFrameBuffer();
 	#endif
@@ -268,23 +221,66 @@ void RenderPipeline::RenderOpQueue(const RenderOperationQueue& opQueue, const Ca
 		mRenderSys.SetBlendFunc(orgBS);
 
 		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
-		mRenderSys.SetTexture(E_TEXTURE_ENV, nullptr);
 	}
-	else if (lightMode == E_PASS_FORWARDBASE) {
-		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
-	}
-	else {
-
-	}
-}
-
-void RenderPipeline::RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera, 
-	const std::vector<ILightPtr>& lights)
-{
-	RenderOpQueue(opQueue, camera, lights, E_PASS_SHADOWCASTER);
+	
 #if !defined DEBUG_SHADOW_CASTER
-	RenderOpQueue(opQueue, camera, lights, E_PASS_FORWARDBASE);
-	RenderOpQueue(opQueue, camera, lights, E_PASS_POSTPROCESS);
+	//E_PASS_FORWARDBASE
+	{
+		if (camera.GetOutput2PostProcess()) {
+			_PushFrameBuffer(camera.GetOutput2PostProcess());
+			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
+		}
+
+		BlendState orgBS = mRenderSys.GetBlendFunc();
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, shadowMapGenerated ? mShadowMap->GetAttachZStencilTexture() : nullptr);
+		mRenderSys.SetTexture(E_TEXTURE_ENV, NULLABLE(camera.GetSkyBox(), GetTexture()));
+			
+		ILightPtr firstLight = nullptr;
+		cbGlobalParam globalParam;
+		for (auto& light : lights) {
+			if (light->GetCameraMask() & camera.GetCameraMask()) {
+				if (firstLight == nullptr) {
+					firstLight = light;
+					globalParam = MakeCbGlobalParam(camera, *firstLight, false, shadowMapGenerated ? mShadowMap : nullptr);
+
+					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
+					if (auto skybox = camera.GetSkyBox()) {
+						RenderOperationQueue opQue;
+						skybox->GenRenderOperation(opQue);
+						RenderLight(opQue, E_PASS_FORWARDBASE, camera.GetCameraMask(), nullptr, globalParam);
+					}
+					auto lightParam = MakeCbPerLight(*light);
+					RenderLight(opQueue, E_PASS_FORWARDBASE, camera.GetCameraMask(), &lightParam, globalParam);
+				}
+				else {
+					mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
+					auto lightParam = MakeCbPerLight(*light);
+					RenderLight(opQueue, E_PASS_FORWARDADD, camera.GetCameraMask(), &lightParam, globalParam);
+				}
+			}//if light.GetCameraMask & camera.GetCameraMask
+		}//for lights
+
+		mRenderSys.SetTexture(E_TEXTURE_DEPTH_MAP, nullptr);
+		mRenderSys.SetTexture(E_TEXTURE_ENV, nullptr);
+		mRenderSys.SetBlendFunc(orgBS);
+	}
+	
+	//E_PASS_POSTPROCESS
+	if (camera.GetOutput2PostProcess())
+	{
+		DepthState orgDS = mRenderSys.GetDepthState();
+		mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
+		mRenderSys.SetTexture(E_TEXTURE_MAIN, camera.GetOutput2PostProcess()->GetAttachColorTexture(0));
+
+		RenderOperationQueue opQue;
+		auto& postProcessEffects = camera.GetPostProcessEffects();
+		for (size_t i = 0; i < postProcessEffects.size(); ++i)
+			postProcessEffects[i]->GenRenderOperation(opQue);
+		RenderLight(opQue, E_PASS_POSTPROCESS, camera.GetCameraMask(), nullptr, MakeCbGlobalParam(camera));
+
+		mRenderSys.SetTexture(E_TEXTURE_MAIN, nullptr);
+		mRenderSys.SetDepthState(orgDS);
+	}
 #endif
 }
 
@@ -292,41 +288,12 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 {
 	for (auto& camera : scene.GetCameras()) 
 	{
-		//camera's output as framebuffer
 		if (camera->GetOutput()) {
 			_PushFrameBuffer(camera->GetOutput());
-			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
+			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 		}
 
-		//camera's post_process_input as framebuffer
-		if (!camera->GetPostProcessEffects().empty() && camera->GetPostProcessInput()) {
-			_PushFrameBuffer(camera->GetPostProcessInput());
-			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f(0,0,0,0), 1.0, 0);
-		}
-
-		//render camera's skybox
-		if (camera->GetSkyBox()) {
-			RenderOperationQueue opQue;
-			camera->GetSkyBox()->GenRenderOperation(opQue);
-			RenderOpQueue(opQue, *camera, scene.GetLights(), E_PASS_FORWARDBASE);
-		}
-
-		//render camera itself
 		RenderCamera(opQueue, *camera, scene.GetLights());
-
-		//render camera's postprocess
-		if (!camera->GetPostProcessEffects().empty() && camera->GetPostProcessInput()) {
-			DepthState orgState = mRenderSys.GetDepthState();
-			mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
-
-			RenderOperationQueue opQue;
-			auto& postProcessEffects = camera->GetPostProcessEffects();
-			for (size_t i = 0; i < postProcessEffects.size(); ++i)
-				postProcessEffects[i]->GenRenderOperation(opQue);
-			RenderOpQueue(opQue, *camera, scene.GetLights(), E_PASS_POSTPROCESS);
-
-			mRenderSys.SetDepthState(orgState);
-		}
 
 		if (camera->GetOutput()) {
 			_PopFrameBuffer();

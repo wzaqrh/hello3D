@@ -23,6 +23,9 @@ public:
 	Eigen::Matrix4f ViewInv;
 	Eigen::Matrix4f ProjectionInv;
 
+	Eigen::Matrix4f LightView;
+	Eigen::Matrix4f LightProjection;
+
 	Eigen::Vector4f glstate_lightmodel_ambient;
 	Eigen::Vector4f _ShadowMapTexture_TexelSize;
 };
@@ -43,9 +46,7 @@ private:
 	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode);
 	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
-		const cbPerLight& lightParam, cbGlobalParam& globalParam);
-	void RenderOpQueue(const RenderOperationQueue& opQueue, const Camera& camera, 
-		const std::vector<ILightPtr>& lights, const std::string& lightMode);
+		const cbPerLight* lightParam, cbGlobalParam& globalParam);
 	void RenderCamera(const RenderOperationQueue& opQueue, const Camera& camera,
 		const std::vector<ILightPtr>& lights);
 private:
@@ -53,7 +54,6 @@ private:
 
 	std::vector<IFrameBufferPtr> mFrameBufferStack;
 	IFrameBufferPtr mShadowMap;
-	bool mShadowMapGenerated;
 };
 
 }

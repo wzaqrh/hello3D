@@ -14,9 +14,6 @@ struct vbSurface
 
 cbuffer cbPerLight : register(b1)
 {
-	matrix LightView;
-	matrix LightProjection;	
-
 	float4 unity_LightPosition;	//world space
 	float4 unity_LightColor;	//w(gross or luminance), 
 	float4 unity_SpecColor;		//w(shiness)
@@ -36,6 +33,9 @@ cbuffer cbGlobalParam : register(b0)
 	matrix ViewInv;
 	matrix ProjectionInv;
 
+	matrix LightView;
+	matrix LightProjection;
+	
 	float4 glstate_lightmodel_ambient;
 	float4 _ShadowMapTexture_TexelSize;
 }

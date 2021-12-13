@@ -50,7 +50,7 @@ public:
 	const TransformPtr& GetTransform() const;
 	const SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
 	const std::vector<PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
-	const IFrameBufferPtr& GetPostProcessInput() const { return mPostProcessInput; }
+	const IFrameBufferPtr& GetOutput2PostProcess() const { return mPostProcessInput; }
 	const IFrameBufferPtr& GetOutput() const { return mOutput; }
 	
 	const Eigen::Matrix4f& GetView() const;

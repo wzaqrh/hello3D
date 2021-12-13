@@ -17,9 +17,6 @@ enum LightType
 
 struct _declspec(align(16)) cbPerLight 
 {
-	Eigen::Matrix4f LightView;
-	Eigen::Matrix4f LightProjection;
-
 	Eigen::Vector4f unity_LightPosition;//world space
 	Eigen::Vector4f unity_LightColor;//w(gloss)
 	Eigen::Vector4f unity_SpecColor;//w(shiness)
