@@ -179,7 +179,7 @@ static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, Eige
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, size, false, globalParam.LightView, globalParam.LightProjection);
-		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, {}));
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
 
 		globalParam._ShadowMapTexture_TexelSize.head<2>() = shadowMap
 			? Eigen::Vector2f(1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight())
@@ -202,10 +202,11 @@ static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, Eige
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const Camera& camera, 
 	const std::vector<ILightPtr>& lights)
 {
-	if (opQueue.IsEmpty() || lights.empty()) return;
+	if (lights.empty()) return;
 
 	//LIGHTMODE_SHADOW_CASTER
 	bool shadowMapGenerated = false;
+	if (!opQueue.IsEmpty())
 	{
 	#if !defined DEBUG_SHADOW_CASTER
 		_PushFrameBuffer(mShadowMap);
@@ -213,7 +214,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 		DepthState orgDS = mRenderSys.GetDepthState();
 		BlendState orgBS = mRenderSys.GetBlendFunc();
-		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
+		mRenderSys.SetDepthState(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		mRenderSys.SetBlendFunc(BlendState::MakeDisable());
 
 		for (auto& light : lights) {
@@ -241,12 +242,11 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 	{
 		if (camera.GetOutput2PostProcess()) {
 			_PushFrameBuffer(camera.GetOutput2PostProcess());
-			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 		}
+		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 
 		DepthState orgDS = mRenderSys.GetDepthState();
 		BlendState orgBS = mRenderSys.GetBlendFunc();
-		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		mRenderSys.SetTexture(TEXTURE_SHADOW_MAP, shadowMapGenerated ? mShadowMap->GetAttachZStencilTexture() : nullptr);
 		mRenderSys.SetTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
 			
@@ -256,18 +256,21 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			if (light->GetCameraMask() & camera.GetCameraMask()) {
 				if (firstLight == nullptr) {
 					firstLight = light;
-					globalParam = MakeCbPerFrame(camera, *firstLight, false, shadowMapGenerated ? mShadowMap : nullptr);
-
-					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
+					globalParam = MakeCbPerFrame(camera, *firstLight, mRenderSys.WinSize(), false, shadowMapGenerated ? mShadowMap : nullptr);
 					if (auto skybox = camera.GetSkyBox()) {
+						mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
+						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 						RenderOperationQueue opQue;
 						skybox->GenRenderOperation(opQue);
 						RenderLight(opQue, LIGHTMODE_FORWARD_BASE, camera.GetCameraMask(), nullptr, globalParam);
 					}
+					mRenderSys.SetDepthState(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+					mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 					auto lightParam = MakeCbPerLight(*light);
 					RenderLight(opQueue, LIGHTMODE_FORWARD_BASE, camera.GetCameraMask(), &lightParam, globalParam);
 				}
 				else {
+					mRenderSys.SetDepthState(DepthState::Make(kCompareLessEqual, kDepthWriteMaskZero));
 					mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 					auto lightParam = MakeCbPerLight(*light);
 					RenderLight(opQueue, LIGHTMODE_FORWARD_ADD, camera.GetCameraMask(), &lightParam, globalParam);
@@ -302,13 +305,12 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 
 void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const Camera& camera, const std::vector<ILightPtr>& lights)
 {
-	if (opQueue.IsEmpty() || lights.empty()) return;
+	if (lights.empty()) return;
 
 	//LIGHTMODE_PREPASS_BASE
 	{
 		DepthState orgDS = mRenderSys.GetDepthState();
 		BlendState orgBS = mRenderSys.GetBlendFunc();
-		mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
 		ILightPtr firstLight = nullptr;
 		cbPerFrame globalParam;
 		for (auto& light : lights) {
@@ -321,14 +323,16 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 				#endif
 					mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 					{
-						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 						if (auto skybox = camera.GetSkyBox()) {
+							mRenderSys.SetDepthState(DepthState::MakeFor3D(false));
+							mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 							RenderOperationQueue opQue;
 							skybox->GenRenderOperation(opQue);
 							globalParam = MakeCbPerFrame(camera);
 							RenderLight(opQue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), nullptr, globalParam);
 						}
-
+						mRenderSys.SetDepthState(DepthState::MakeFor3D(true));
+						mRenderSys.SetBlendFunc(BlendState::MakeAlphaNonPremultiplied());
 						globalParam = MakeCbPerFrame(camera, *firstLight, mRenderSys.WinSize(), false, nullptr);
 						auto lightParam = MakeCbPerLight(*light);
 						RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), &lightParam, globalParam);
@@ -339,7 +343,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 					globalParam = MakeCbPerFrame(camera, *firstLight, mRenderSys.WinSize(), false, mGBuffer);
 					mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 				#endif
-				}
+				}//firstLight == nullptr
 				else {
 					mRenderSys.SetBlendFunc(BlendState::MakeAdditive());
 				}

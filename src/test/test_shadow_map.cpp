@@ -29,43 +29,44 @@ private:
 
 void TestShadowMap::OnPostInitDevice()
 {
+	mScneMng->SetPixelPerUnit(1);
+
 	if (mCaseIndex == 0 || mCaseIndex == 1) 
 	{
 		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(-1, -1, 1));
+		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 
 		if (mCaseIndex == 0) {
-			mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+			mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 		}
 		else {
-			auto camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
-			test::CompareLightCameraByViewProjection(*dir_light, *camera, {});
-			camera->GetTransform()->SetScale(camera->GetTransform()->GetScale() / 50);
+			auto camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
+			test::CompareLightCameraByViewProjection(*dir_light, *camera, mResMng->WinSize(), {});
 		}
 
 		if (1) {
 			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
 		}
 
-		if (1) {
+		if (0) {
 			mModel1 = mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel1->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
 			mTransform = mModel1->GetTransform();
-			mTransform->SetScale(test1::res::model_rock::Scale() * 5);
-			mTransform->SetPosition(test1::res::model_rock::Pos() + Eigen::Vector3f(0,0,50));
+			mTransform->SetScale(test1::res::model_rock::Scale());
+			mTransform->SetPosition(test1::res::model_rock::Pos());
 		}
 
-		if (1) {
+		if (0) {
 			mModel2 = mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
-			float scale = 1;
+			float scale = 0.1;
 			mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
-			mModel2->GetTransform()->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(10, 10, -10));
+			mModel2->GetTransform()->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(2, 2, -2));
 		}
 	}
 	else if (mCaseIndex == 2 || mCaseIndex == 3)
 	{
-		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 
 		auto light = mScneMng->AddDirectLight();
 		if (mCaseIndex == 2) 

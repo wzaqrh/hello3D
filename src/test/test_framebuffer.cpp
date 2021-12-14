@@ -34,7 +34,7 @@ void TestRT::OnPostInitDevice()
 		auto light = mScneMng->AddDirectLight();
 
 		constexpr unsigned cameraMask2 = 0x01;
-		auto camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		auto camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		{
 			camera2->SetDepth(1);
 			camera2->SetCameraMask(cameraMask2);
@@ -47,7 +47,7 @@ void TestRT::OnPostInitDevice()
 
 		constexpr unsigned cameraMask1 = 0x02;
 		{
-			auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+			auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 			camera1->SetDepth(2);
 			camera1->SetCameraMask(cameraMask1);
 
@@ -75,8 +75,8 @@ void TestRT::OnPostInitDevice()
 
 		constexpr unsigned cameraMask2 = 0x01;
 		CameraPtr camera2;
-		if (mCaseIndex == 1) camera2 = mScneMng->AddOthogonalCamera(mWinCenter + Eigen::Vector3f(0, 0, -100), test1::cam::NearFarFov());
-		else camera2 = mScneMng->AddPerspectiveCamera(mWinCenter + Eigen::Vector3f(0, 0, -100), test1::cam::NearFarFov());
+		if (mCaseIndex == 1) camera2 = mScneMng->AddOthogonalCamera(mWinCenter + Eigen::Vector3f(0, 0, -100));
+		else camera2 = mScneMng->AddPerspectiveCamera(mWinCenter + Eigen::Vector3f(0, 0, -100));
 
 		{
 			camera2->SetDepth(1);
@@ -99,7 +99,7 @@ void TestRT::OnPostInitDevice()
 		constexpr unsigned cameraMask1 = 0x02;
 		//if (0)
 		{
-			auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+			auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 			camera1->SetDepth(2);
 			camera1->SetCameraMask(cameraMask1);
 

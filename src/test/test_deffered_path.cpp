@@ -15,29 +15,35 @@ protected:
 private:
 	AssimpModelPtr mModel;
 };
+/*mCaseIndex
+0延迟,1正向：透视相机 平行光+电光 对比观察飞机
+2延迟,3正向: 透视相机 正向平行光  对比观察飞机
+*/
 
 void TestDefferedPath::OnPostInitDevice()
 {
-	if (mCaseIndex == 0 || mCaseIndex == 1) {
-		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
-	}
-	else {
-		auto pt_light = mScneMng->AddPointLight();
-		pt_light->SetPosition(mWinCenter + Eigen::Vector3f(0, 5, -5));
+	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+	camera->SetRenderingPath(RenderingPath((mCaseIndex+1)&1));
 
-		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
-	}
+	switch (mCaseIndex) {
+	case 0:
+	case 1:{
+		mScneMng->AddDirectLight();
+		mScneMng->AddPointLight()->SetPosition(test1::vec::PosLight());
 
-	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
-	if (mCaseIndex == 0) {
-		camera->SetRenderingPath(kRenderPathDeffered);
-	}
+		mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+	}break;
+	case 2:
+	case 3:{
+		mScneMng->AddDirectLight();
 
-	mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
-	//mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
-	mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+		mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+	}break;
+	default:
+		break;
+	}
 }
 
 void TestDefferedPath::OnRender()

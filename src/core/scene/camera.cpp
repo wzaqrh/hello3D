@@ -16,46 +16,64 @@ Camera::Camera(ResourceManager& resMng)
 	mFlipY = false;
 	mType = kCameraPerspective;
 
+	mAspect = 1.0;
 	mTransform = std::make_shared<Transform>();
 }
 
-void Camera::InitAsPerspective(const Eigen::Vector2i& screensize, 
+void Camera::InitAsPerspective(float aspect,
 	const Eigen::Vector3f& eyePos, 
 	const Eigen::Vector3f& length_forward, 
-	const Eigen::Vector3f& near_far_fov,
+	const Eigen::Vector2f& clipPlane,
+	float fov,
 	unsigned cameraMask) 
 {
 	mType = kCameraPerspective;
-	mSize = mScreenSize = screensize;
-	SetZRange(near_far_fov.head<2>());
-	SetFov(near_far_fov.z());
+	//mSize = mScreenSize = screensize;
+	SetClippingPlane(clipPlane);
+	SetFov(fov);
+	SetAspect(aspect);
 	SetLookAt(eyePos, eyePos + length_forward, math::vec::Up());
 	SetCameraMask(cameraMask);
 	mProjectionDirty = true;
 }
-void Camera::InitAsOthogonal(const Eigen::Vector2i& screensize, 
+void Camera::InitAsOthogonal(float aspect,
 	const Eigen::Vector3f& eyePos, 
 	const Eigen::Vector3f& length_forward, 
-	const Eigen::Vector3f& near_far_fov,
+	const Eigen::Vector2f& clipPlane,
+	float othoSize,
 	unsigned cameraMask)
 {
 	mType = kCameraOthogonal;
-	mSize = mScreenSize = screensize;
-	SetZRange(near_far_fov.head<2>());
+	//mSize = mScreenSize = screensize;
+	SetClippingPlane(clipPlane);
+	SetOrthographicSize(othoSize);
+	SetAspect(aspect);
 	SetLookAt(eyePos, eyePos + length_forward, math::vec::Up());
 	SetCameraMask(cameraMask);
 	mProjectionDirty = true;
 }
 
-void Camera::SetZRange(const Eigen::Vector2f& zRange)
+void Camera::SetClippingPlane(const Eigen::Vector2f& zRange)
 {
 	mZRange = zRange;
 	mViewDirty = true;
 }
+
+void Camera::SetAspect(float aspect)
+{
+	mAspect = aspect;
+	mProjectionDirty = mViewDirty = true;
+}
+
 void Camera::SetFov(float fov)
 {
 	mFov = fov / boost::math::constants::radian<float>();
-	mViewDirty = true;
+	mProjectionDirty = true;
+}
+void Camera::SetOrthographicSize(float size)
+{
+	mOrthoSize = size;
+	mProjectionDirty = true;
 }
 void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up)
 {
@@ -98,15 +116,24 @@ float Camera::GetForwardLength() const
 	return mForwardLength;
 }
 
+Eigen::Vector2f Camera::GetOthoWinSize() const
+{
+	float winHeight = mOrthoSize * 2;
+	return Eigen::Vector2f(winHeight * mAspect, winHeight);
+}
+
 void Camera::RecalculateProjection() const
 {
 	switch (mType) {
 	case kCameraPerspective:
-		mProjection = math::MakePerspectiveFovLH(mFov, mScreenSize.x() * 1.0 / mScreenSize.y(), mZRange.x(), mZRange.y());
+		mProjection = math::MakePerspectiveFovLH(mFov, mAspect, mZRange.x(), mZRange.y());
 		break;
-	case kCameraOthogonal:
-		mProjection = math::MakeOrthographicOffCenterLH(0, mScreenSize.x(), 0, mScreenSize.y(), mZRange.x(), mZRange.y());
-		break;
+	case kCameraOthogonal: {
+		Eigen::Vector2f othoWin = GetOthoWinSize();
+		mProjection = math::MakeOrthographicOffCenterLH(0, othoWin.x(),
+			0, othoWin.y(),
+			mZRange.x(), mZRange.y());
+	}break;
 	default:
 		break;
 	}
@@ -134,7 +161,8 @@ void Camera::RecalculateView() const
 
 	Transform3fAffine t(Transform3fAffine::Identity());
 	{
-		Eigen::Vector3f center(mScreenSize.x() / 2, mScreenSize.y() / 2, 0);
+		Eigen::Vector2f othoWin = GetOthoWinSize();
+		Eigen::Vector3f center(othoWin.x() / 2, othoWin.y() / 2, 0);
 		if (mType == kCameraOthogonal) {
 			t.translate(center);//consider orho-camera's anchor is screen-center
 			t.pretranslate(-center);//[0->sreen.w]  -> relative2screen_center[-screen.hw, screen.hw]
@@ -193,7 +221,7 @@ void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
 IFrameBufferPtr Camera::FetchOutput2PostProcess(ResourceFormat format)
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mScreenSize / 4, format);
+		mPostProcessInput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mResourceMng.WinSize(), format);
 		DEBUG_SET_PRIV_DATA(mPostProcessInput, "camera.output_to_post_process");
 	}
 	return mPostProcessInput;
@@ -204,14 +232,14 @@ IFrameBufferPtr Camera::SetOutput(IFrameBufferPtr output)
 	mOutput = output;
 	DEBUG_SET_PRIV_DATA(mOutput, "camera.output");
 
-	mSize = mOutput->GetSize();
+	//mSize = mOutput->GetSize();
 	mProjectionDirty = true;
 
 	return mOutput;
 }
 IFrameBufferPtr Camera::SetOutput(float scale, std::vector<ResourceFormat> formats)
 {
-	return SetOutput(mResourceMng.CreateFrameBuffer(__LaunchSync__, (mScreenSize.cast<float>() * scale).cast<int>(), formats));
+	return SetOutput(mResourceMng.CreateFrameBuffer(__LaunchSync__, (mResourceMng.WinSize().cast<float>() * scale).cast<int>(), formats));
 }
 
 }

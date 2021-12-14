@@ -46,7 +46,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 }
 void App::OnInitCamera()
 {
-	mContext->SceneMng()->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+	mContext->SceneMng()->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 }
 void App::OnInitLight()
 {
@@ -100,9 +100,9 @@ void App::Render()
 		Eigen::Vector2f m = mInput->GetMouseLeftLocation();
 		float mx = 3.14 * -m.x();
 		float my = 3.14 * -m.y();
-		auto quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
+		auto quat = Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitZ())
 			* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
-			* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY()) 
+			* Eigen::AngleAxisf(0, Eigen::Vector3f::UnitY()) 
 			* mTransform->GetRotation();
 		mTransform->SetRotation(quat);
 	}
@@ -158,4 +158,7 @@ void MirManager::SetMir(mir::Mir* ctx)
 	auto size = ctx->ResourceMng()->WinSize();
 	mHalfSize = Eigen::Vector3f(size.x() / 2, size.y() / 2, 0);
 	mWinCenter = Eigen::Vector3f(0, 0, 0);
+
+	float aspect = 1.0 * size.x() / size.y();
+	mCamWinHSize = Eigen::Vector3f(aspect * 5, 5, 0);
 }

@@ -12,14 +12,11 @@ class MIR_CORE_API SceneManager : boost::noncopyable
 {
 public:
 	SceneManager(ResourceManager& resMng);
-	
+	void SetPixelPerUnit(float ppu) { mPixelPerUnit = ppu; }
+
 	void RemoveAllCameras();
-	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(),
-		const Eigen::Vector3f& near_far_fov = math::cam::DefNearFarFov(),
-		unsigned camMask = -1);
-	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
-		const Eigen::Vector3f& near_far_fov = math::cam::DefNearFarFov(),
-		unsigned camMask = -1);
+	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
+	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
 
 	void RemoveAllLights();
 	SpotLightPtr AddSpotLight(unsigned camMask = -1);
@@ -32,7 +29,7 @@ public:
 	CameraPtr GetDefCamera() const { return GetCameraCount() ? GetCamera(0) : nullptr;  }
 
 	const std::vector<ILightPtr>& GetLights() const;
-	size_t GetLightCount() const { return mLightsByOrder.size(); }
+	size_t GetLightCount() const { return mLights.size(); }
 	ILightPtr GetLight(size_t index) const { return GetLights()[index]; }
 	ILightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
 private:
@@ -40,11 +37,11 @@ private:
 	void ResortCameras() const;
 private:
 	ResourceManager& mResMng;
+	float mPixelPerUnit = 100;
 
 	mutable std::vector<CameraPtr> mCameras;
-	mutable bool mCamerasDirty;
-
-	mutable std::vector<ILightPtr> mLightsByOrder;
+	mutable std::vector<ILightPtr> mLights;
+	mutable bool mCamerasDirty, mLightsDirty;
 };
 
 };

@@ -4,6 +4,9 @@
 #include "core/base/debug.h"
 #include "core/predeclare.h"
 
+#define C_WINDOW_WIDTH 1024
+#define C_WINDOW_HEIGHT 768
+
 struct IApp
 {
 	virtual void Create() = 0;
@@ -22,8 +25,7 @@ protected:
 	mir::SceneManagerPtr mScneMng;
 	mir::RenderableFactoryPtr mRendFac;
 	mir::ResourceManagerPtr mResMng;
-	Eigen::Vector3f mHalfSize;
-	Eigen::Vector3f mWinCenter;
+	Eigen::Vector3f mWinCenter, mHalfSize, mCamWinHSize;
 };
 
 class App : public IApp, public MirManager
