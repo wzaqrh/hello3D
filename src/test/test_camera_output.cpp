@@ -33,7 +33,7 @@ void TestCameraOutput::OnPostInitDevice()
 	{
 		if (mCaseIndex == 1) 
 		{
-			camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+			camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 			camera2->SetCameraMask(cameraMask2);
 			camera2->SetDepth(1);
 
@@ -43,7 +43,7 @@ void TestCameraOutput::OnPostInitDevice()
 		}
 		else 
 		{
-			camera2 = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+			camera2 = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
 			camera2->SetCameraMask(cameraMask2);
 			camera2->SetDepth(1);
@@ -76,7 +76,7 @@ void TestCameraOutput::OnPostInitDevice()
 	constexpr unsigned cameraMask1 = 0x02;
 	if (mCaseIndex == 0)
 	{
-		auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		camera1->SetDepth(2);
 		camera1->SetCameraMask(cameraMask1);
 

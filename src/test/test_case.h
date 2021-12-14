@@ -14,20 +14,11 @@ Eigen::Vector3f PosLight();
 
 namespace cam {
 Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
-Eigen::Vector3f NearFarFov();
-float Near();
-float Far();
-void AdjustScale(mir::CameraPtr cam1);
-}
-namespace cam1 {
-Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
-Eigen::Vector3f NearFarFov();
 float Near();
 float Far();
 }
 namespace cam_otho {
 Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
-Eigen::Vector3f NearFarFov();
 float Near();
 float Far();
 }

@@ -89,7 +89,7 @@ float CalcShadowFactor(float4 shadowPosH)
 	
     shadowPosH.xyz /= shadowPosH.w;
 #if DEBUG_SHADOW_MAP
-	return shadowPosH.z;
+	return shadowPosH.y;
 #endif
 
 #if defined PCF_SHADOW

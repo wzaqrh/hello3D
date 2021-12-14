@@ -23,19 +23,23 @@ class MIR_CORE_API Camera : boost::noncopyable
 public:
 	TemplateArgs static CameraPtr CreatePerspective(ResourceManager& resMng, T &&...args) {
 		CameraPtr camera = std::make_shared<Camera>(resMng);
-		camera->InitAsPerspective(resMng.WinSize(), std::forward<T>(args)...);
+		auto size = resMng.WinSize();
+		camera->InitAsPerspective(1.0f*size.x()/size.y(), std::forward<T>(args)...);
 		return camera;
 	}
 	TemplateArgs static CameraPtr CreateOthogonal(ResourceManager& resMng, T &&...args) {
 		CameraPtr camera = std::make_shared<Camera>(resMng);
-		camera->InitAsOthogonal(resMng.WinSize(), std::forward<T>(args)...);
+		auto size = resMng.WinSize();
+		camera->InitAsOthogonal(1.0f*size.x()/size.y(), std::forward<T>(args)...);
 		return camera;
 	}
 	Camera(ResourceManager& resMng);
 
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up = math::vec::Up());
 	void SetForwardLength(float length);
-	void SetZRange(const Eigen::Vector2f& zRange);
+	void SetClippingPlane(const Eigen::Vector2f& zRange);
+	void SetAspect(float aspect);
+	void SetOrthographicSize(float size);
 	void SetFov(float fov);
 	void SetYFlipped(bool flip);
 
@@ -65,26 +69,26 @@ public:
 	const Eigen::Matrix4f& GetProjection() const;
 	
 	CameraType GetType() const { return mType; }
-	const Eigen::Vector2i& GetWinSize() const { return mScreenSize; }
-
 	Eigen::Vector3f GetEye() const;
 	Eigen::Vector3f GetLookAt() const;
 	Eigen::Vector3f GetForward() const;
 	float GetForwardLength() const;
 
+	Eigen::Vector2f GetOthoWinSize() const;
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 private:
-	const Eigen::Vector2i& GetSize() const { return mSize; }
-	void InitAsPerspective(const Eigen::Vector2i& screensize, 
+	void InitAsPerspective(float aspect = 1.0,
 		const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
 		const Eigen::Vector3f& length_forward = math::vec::Forward(), 
-		const Eigen::Vector3f& near_far_fov = math::cam::DefNearFarFov(),
+		const Eigen::Vector2f& clipPlane = math::cam::DefClippingPlane(),
+		float fov = math::cam::DefFov(),
 		unsigned cameraMask = -1);
-	void InitAsOthogonal(const Eigen::Vector2i& screensize, 
+	void InitAsOthogonal(float aspect = 1.0,
 		const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
 		const Eigen::Vector3f& length_forward = math::vec::Forward(), 
-		const Eigen::Vector3f& near_far_fov = math::cam::DefNearFarFov(),
+		const Eigen::Vector2f& clipPlane = math::cam::DefClippingPlane(),
+		float othoSize = math::cam::DefOthoSize(),
 		unsigned cameraMask = -1);
 	void RecalculateProjection() const;
 	void RecalculateView() const;
@@ -100,11 +104,11 @@ private:
 	unsigned mDepth = 0;
 private:
 	CameraType mType;
-	Eigen::Vector2i mScreenSize, mSize;
+	//Eigen::Vector2i mScreenSize, mSize;
 	Eigen::Vector3f mUpVector;
 	float mForwardLength;
 	Eigen::Vector2f mZRange;
-	float mFov;
+	float mFov, mOrthoSize, mAspect;
 	bool mFlipY;
 
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;

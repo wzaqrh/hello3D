@@ -30,7 +30,7 @@ void TestCamera::OnPostInitDevice()
 	mScneMng->RemoveAllLights();
 
 	if (mCaseIndex >= 4) {
-		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		camera->GetTransform()->SetScale(Eigen::Vector3f(0.5, 0.5, 1));
 		//camera->GetTransform()->SetPosition(Eigen::Vector3f(-screenCenter.x(), 0, 0));
 
@@ -41,7 +41,7 @@ void TestCamera::OnPostInitDevice()
 		mSprite->SetPosition(mWinCenter + Eigen::Vector3f(-mHalfSize.x()/2, -mHalfSize.y()/2, 0));
 	}
 	else {
-		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 		switch (mCaseIndex) {
 		case 0: {
 			camera->GetTransform()->SetPosition(mWinCenter + Eigen::Vector3f(5, -5, -30));

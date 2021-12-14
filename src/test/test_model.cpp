@@ -30,23 +30,26 @@ void TestModel::OnPostInitDevice()
 	int caseIndex = mCaseIndex % 6;
 	bool useOtho = mCaseIndex >= 6;
 
-	if (caseIndex == 0 || caseIndex == 1) 
-	{
+	switch (caseIndex) {
+	case 0:
+	case 1:
+	case 2:
+	case 3: {
 		auto pt_light = mScneMng->AddPointLight();
-		pt_light->SetPosition(mWinCenter + Eigen::Vector3f(0, 5, -5));
+		pt_light->SetPosition(Eigen::Vector3f(0, 5, -5));
 
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
-	}
-	else 
-	{
+	}break;
+	default: {
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
+	}break;
 	}
 
 	mir::CameraPtr camera = useOtho 
-		? mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov())
-		: mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter), test1::cam::NearFarFov());
+		? mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter))
+		: mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 
 	switch (caseIndex) {
 	case 0:
@@ -57,12 +60,14 @@ void TestModel::OnPostInitDevice()
 		mTransform = test1::res::model_mir::Init(mModel, mWinCenter);
 	}break;
 	case 2:
-	case 3:
+	case 3: {
+		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
+		mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+	}break;
 	case 4:
 	case 5: {
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		if (caseIndex == 2 || caseIndex == 3) mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
-		else mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
+		mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
 	}break;
 	default:
 		break;

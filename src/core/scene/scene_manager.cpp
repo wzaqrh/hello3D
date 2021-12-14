@@ -10,6 +10,7 @@ namespace mir {
 SceneManager::SceneManager(ResourceManager& resMng)
 	: mResMng(resMng)
 	, mCamerasDirty(false)
+	, mLightsDirty(false)
 {
 }
 
@@ -17,16 +18,18 @@ void SceneManager::RemoveAllCameras()
 {
 	mCameras.clear();
 }
-CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, const Eigen::Vector3f& near_far_fov, unsigned camMask)
+CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), near_far_fov, camMask);
+	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), 
+		math::cam::DefClippingPlane(), math::cam::DefOthoSize() * mPixelPerUnit, camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, const Eigen::Vector3f& near_far_fov, unsigned camMask)
+CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), near_far_fov, camMask);
+	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), 
+		math::cam::DefClippingPlane(), math::cam::DefFov(), camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;
@@ -34,8 +37,7 @@ CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, cons
 
 void SceneManager::ResortCameras() const 
 {
-	if (mCamerasDirty) 
-	{
+	if (mCamerasDirty) {
 		mCamerasDirty = false;
 
 		struct CompCameraByDepth {
@@ -54,40 +56,47 @@ const std::vector<CameraPtr>& SceneManager::GetCameras() const
 
 void SceneManager::RemoveAllLights()
 {
-	mLightsByOrder.clear();
+	mLights.clear();
 }
 SpotLightPtr SceneManager::AddSpotLight(unsigned camMask)
 {
 	SpotLightPtr light = std::make_shared<SpotLight>();
 	light->SetCameraMask(camMask);
-	mLightsByOrder.push_back(light);
+	mLights.push_back(light);
+	mLightsDirty = true;
 	return light;
 }
 PointLightPtr SceneManager::AddPointLight(unsigned camMask)
 {
 	PointLightPtr light = std::make_shared<PointLight>();
 	light->SetCameraMask(camMask);
-	mLightsByOrder.push_back(light);
+	mLights.push_back(light);
+	mLightsDirty = true;
 	return light;
 }
 DirectLightPtr SceneManager::AddDirectLight(unsigned camMask)
 {
 	DirectLightPtr light = std::make_shared<DirectLight>();
 	light->SetCameraMask(camMask);
-	mLightsByOrder.push_back(light);
+	mLights.push_back(light);
+	mLightsDirty = true;
 	return light;
 }
 
 void SceneManager::ResortLights() const 
 {
-	std::sort(mLightsByOrder.begin(), mLightsByOrder.end(), [](const ILightPtr& l, const ILightPtr& r)->bool {
-		return l->GetType() < r->GetType();
-	});
+	if (mLightsDirty) {
+		mLightsDirty = false;
+
+		std::sort(mLights.begin(), mLights.end(), [](const ILightPtr& l, const ILightPtr& r)->bool {
+			return l->GetType() < r->GetType();
+		});
+	}
 }
 const std::vector<ILightPtr>& SceneManager::GetLights() const 
 { 
 	ResortLights();
-	return mLightsByOrder; 
+	return mLights; 
 }
 
 }

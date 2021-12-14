@@ -21,13 +21,11 @@ protected:
 void TestSpecSkybox::OnPostInitDevice()
 {
 	if (mCaseIndex == 0) {
-		CameraPtr camera = mScneMng->AddPerspectiveCamera(mWinCenter + test1::cam::Eye(mWinCenter), 
-			test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
 	}
 	else {
-		CameraPtr camera = mScneMng->AddOthogonalCamera(mWinCenter + test1::cam::Eye(mWinCenter),
-			test1::cam::NearFarFov());
+		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
 	}
 }

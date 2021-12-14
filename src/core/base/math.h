@@ -147,17 +147,18 @@ inline Eigen::Vector3f RightTop() {
 
 /********** camera **********/
 namespace cam {
-
 inline Eigen::Vector3f DefEye() {
 	return Eigen::Vector3f(0, 0, -10);
 }
-inline Eigen::Vector3f DefNearFarFov() {
-	return Eigen::Vector3f(0.3, 1000, 60);
+inline Eigen::Vector2f DefClippingPlane() {
+	return Eigen::Vector2f(0.3, 1000);
 }
-inline Eigen::Vector3f Zero() {
-	return Eigen::Vector3f(0, 0, 0);
+inline float DefFov() {
+	return 60;
 }
-
+inline float DefOthoSize() {
+	return 5;
+}
 }
 }
 }

@@ -1,10 +1,11 @@
-8 0
+5 0
 test_sprite 5
-test_model 5
-test_cube 1
 test_spec_skybox 1
-test_shadow_map 0
+test_cube 1
+test_model 5
+test_light 4
 
+test_shadow_map 0
 test_framebuffer 3
 test_camera 2
 test_camera_output 1

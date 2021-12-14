@@ -115,11 +115,14 @@ enum DepthWriteMask {
 	kDepthWriteMaskAll = 1
 };
 struct DepthState {
-	static DepthState MakeFor2D(bool depthEnable) {
-		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskZero };
+	static DepthState MakeFor2D() {
+		return DepthState{ false, kCompareLess, kDepthWriteMaskZero };
 	}
 	static DepthState MakeFor3D(bool depthEnable = true) {
 		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskAll };
+	}
+	static DepthState Make(CompareFunc cmp, DepthWriteMask mask) {
+		return DepthState{ true, cmp, mask };
 	}
 public:
 	bool DepthEnable;

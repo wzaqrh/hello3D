@@ -36,7 +36,7 @@ void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float
 
 void DirectLight::CalculateLightingViewProjection(const Camera& camera, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
 {
-	Eigen::Vector2i size = camera.GetWinSize();
+	Eigen::Vector2f size = camera.GetOthoWinSize() * 100;
 	float width = std::max<int>(size.x(), size.y());
 	float depth = camera.GetForwardLength();
 	float distance = sqrtf(width * width + depth * depth);
@@ -47,7 +47,7 @@ void DirectLight::CalculateLightingViewProjection(const Camera& camera, bool cas
 	//consider orho-camera's anchor is screen-center
 	view = Transform3Projective(view).translate(Eigen::Vector3f(size.x()/2, size.y()/2, 0)).matrix();
 
-	proj = math::MakeOrthographicOffCenterLH(0, size.x(), 0, size.y(), 0.01, distance * 1.5);
+	proj = math::MakeOrthographicOffCenterLH(0, size.x(), 0, size.y(), 0.3, distance * 1.5);
 	if (!castShadow) {
 		proj = Transform3Projective(proj)
 			.prescale(Eigen::Vector3f(1, -1, 1))

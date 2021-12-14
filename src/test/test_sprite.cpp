@@ -27,6 +27,7 @@ void TestSprite::OnPostInitDevice()
 {
 	mScneMng->RemoveAllCameras();
 	mScneMng->AddOthogonalCamera(test1::cam_otho::Eye(mWinCenter));
+	mScneMng->SetPixelPerUnit(C_WINDOW_HEIGHT / 10.0);
 
 	Launch sync = __LaunchSync__;
 	switch (mCaseIndex) {
@@ -35,23 +36,23 @@ void TestSprite::OnPostInitDevice()
 		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
 		mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::dds::Kenny()));
 
-		test1::res::png::SetPos(mSprite, -mHalfSize, mHalfSize * 2);
+		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 	}break;
 	case 1: {
 		mSprite = mRendFac->CreateSprite();
 		mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
-		test1::res::png::SetPos(mSprite, mHalfSize, mHalfSize, mir::math::vec::anchor::RightTop());
+		test1::res::png::SetPos(mSprite, mCamWinHSize, mCamWinHSize, mir::math::vec::anchor::RightTop());
 	}break;
 	case 2: {
 		mSprite = mRendFac->CreateSprite(test1::res::png::Kenny());
 
-		test1::res::png::SetPos(mSprite, mWinCenter, mHalfSize * 2, mir::math::vec::anchor::Center());
+		test1::res::png::SetPos(mSprite, mWinCenter, mCamWinHSize * 2, mir::math::vec::anchor::Center());
 	}break;
 	case 3: {
 		mSprite = mRendFac->CreateSprite(test1::res::hdr::Kenny());//zlib
 
-		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mHalfSize, mir::math::vec::anchor::LeftTop());
+		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mCamWinHSize, mir::math::vec::anchor::LeftTop());
 	}break;
 	case 4: {
 		mSprite = mRendFac->CreateSprite(test1::res::dds::Lenna());//bc1a
@@ -62,13 +63,13 @@ void TestSprite::OnPostInitDevice()
 	case 5: {
 		mSprite = mRendFac->CreateSprite(test1::res::dds::Kenny());//bc1a + mipmap
 
-		test1::res::png::SetPos(mSprite, -mHalfSize / 2, mHalfSize);
+		test1::res::png::SetPos(mSprite, -mCamWinHSize / 2, mCamWinHSize);
 	}break;
 	case 6: {
 		mSprite = mRendFac->CreateSprite();
 		mSprite->SetTexture(mResMng->CreateTextureByFileAsync(test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
-		mSprite->SetPosition(-mHalfSize);
+		mSprite->SetPosition(-mCamWinHSize);
 	}break;
 	default:
 		break;

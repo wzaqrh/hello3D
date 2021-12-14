@@ -34,6 +34,9 @@ private:
 	TextureBySlotPtr mTextures;
 	IVertexBufferPtr mVBOSurface, mVBOSkeleton;
 	IIndexBufferPtr mIndexBuffer;
+#if defined _DEBUG
+	Eigen::Vector3f mMaxPos, mMinPos;
+#endif
 };
 typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
 

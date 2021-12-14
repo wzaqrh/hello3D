@@ -12,22 +12,20 @@ float ToRadian(float angle) { return angle / boost::math::constants::radian<floa
 
 namespace vec {
 Eigen::Vector3f DirLight() { return Eigen::Vector3f(0, 0, 10); }
-Eigen::Vector3f PosLight() { return Eigen::Vector3f(30, 30, -30); }
+Eigen::Vector3f PosLight() { return Eigen::Vector3f(5, 5, -5); }
 }
 
 namespace cam {
-constexpr float EyeZ = -10;
+constexpr float EyeZ = -10, Diff = 0.5;
 Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter) { return Eigen::Vector3f(0, 0, EyeZ); }
-Eigen::Vector3f NearFarFov() { return Eigen::Vector3f(0.3, 1000, 60); }
-float Near() { return EyeZ + NearFarFov().x(); }
-float Far() { return EyeZ + NearFarFov().y(); }
+float Near() { return EyeZ + 0.3 + Diff; }
+float Far() { return EyeZ + 1000 - Diff; }
 }
 namespace cam_otho {
-constexpr float EyeZ = -10;
+constexpr float EyeZ = -10, Diff = 0.1;
 Eigen::Vector3f Eye(Eigen::Vector3f winCenter) { return Eigen::Vector3f(0, 0, EyeZ); }
-Eigen::Vector3f NearFarFov() { return Eigen::Vector3f(0.3, 1000, 60); }
-float Near() { return EyeZ + NearFarFov().x() + 1; }
-float Far() { return EyeZ + NearFarFov().y() - 1; }
+float Near() { return EyeZ + 0.3 + Diff; }
+float Far() { return EyeZ + 1000 - Diff; }
 }
 
 namespace res {
@@ -92,7 +90,7 @@ mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
 namespace model_sship {
 std::string Path() { return "model/Spaceship/Spaceship.fbx"; }
 std::string Rd() { return R"({"dir":"model/Spaceship/"})"; }
-constexpr float scale = 0.02;
+constexpr float scale = 0.01;
 Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
 Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
 mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
