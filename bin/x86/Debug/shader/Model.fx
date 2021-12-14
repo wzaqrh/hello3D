@@ -64,22 +64,25 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
 	output.Normal = normalize(mul(mul(View, MW), skinNormal).xyz);
 	
-	//ToLight
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
-	output.Pos = mul(View, output.Pos);
-	
-	float4 lightPosition = mul(View, unity_LightPosition);
-	output.ToLight = lightPosition.xyz - output.Pos.xyz * lightPosition.w;
-	
-#if ENABLE_SHADOW_MAP
+
 	//PosInLight
+#if ENABLE_SHADOW_MAP
 	output.PosInLight = mul(LightView, output.Pos);
 	output.PosInLight = mul(LightProjection, output.PosInLight);
-	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
-	output.PosInLight.z -= bias * output.PosInLight.w;
 #endif
 	
+	//ToLight
+	output.Pos = mul(View, output.Pos);	
+	float4 lightPosition = mul(View, unity_LightPosition);
+	output.ToLight = lightPosition.xyz - output.Pos.xyz * lightPosition.w;
+
+#if ENABLE_SHADOW_MAP
+	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
+	output.PosInLight.z -= bias * output.PosInLight.w;	
+#endif
+
 	//ToEye
 	output.ToEye = -output.Pos;
 	

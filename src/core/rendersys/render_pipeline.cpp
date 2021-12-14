@@ -175,13 +175,13 @@ static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, Eige
 	if (castShadow) {
 		light.CalculateLightingViewProjection(camera, size, castShadow, globalParam.View, globalParam.Projection);
 
-		//MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
 		light.CalculateLightingViewProjection(camera, size, false, globalParam.LightView, globalParam.LightProjection);
-		//MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
 
 		globalParam._ShadowMapTexture_TexelSize.head<2>() = shadowMap
 			? Eigen::Vector2f(1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight())

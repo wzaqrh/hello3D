@@ -48,7 +48,7 @@ void TestShadowMap::OnPostInitDevice()
 	case 0: {
 		mControlCamera = false;
 
-		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -1, -1));
+		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -3, -1));
 		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 10, 0));
 		camera->SetForward(mir::math::vec::Down(), mir::math::vec::Forward());
 		//camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
@@ -56,9 +56,6 @@ void TestShadowMap::OnPostInitDevice()
 		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, -100, 0));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));
 		mModelRock->GetTransform()->SetPosition(test1::res::model_sship::Pos() + Eigen::Vector3f(0, -30, 0));
-
-		auto ndc = camera->ProjectPoint(Eigen::Vector3f(4, -30, 0));
-		ndc = ndc;
 	}break;
 	case 1: {
 		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, 1, 3));
