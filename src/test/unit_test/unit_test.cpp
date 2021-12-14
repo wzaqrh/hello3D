@@ -56,7 +56,7 @@ void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj)
 		pos = posArr[i];
 	}
 }
-void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, std::vector<Eigen::Vector4f> positions)
+void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, Eigen::Vector2i size, std::vector<Eigen::Vector4f> positions)
 {
 	constexpr bool castShadow = true;
 //#define ONLY_CHECK_PROJ
@@ -71,7 +71,7 @@ void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& c
 	for (size_t i = 0; i < positions.size(); ++i) {
 		auto cube_position = positions[i];
 		Eigen::Matrix4f light_view, light_proj;
-		dir_light.CalculateLightingViewProjection(camera, castShadow, light_view, light_proj);
+		dir_light.CalculateLightingViewProjection(camera, size, castShadow, light_view, light_proj);
 		light_ndc = Transform3Projective(light_view) * cube_position;
 		light_ndc = Transform3Projective(light_proj) * cube_position;
 	#if !defined ONLY_CHECK_PROJ

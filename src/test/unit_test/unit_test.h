@@ -14,7 +14,7 @@ MIR_CORE_API bool IsEqual(Eigen::Vector4f l, Eigen::Vector4f r);
 MIR_CORE_API bool CheckInNDC(Eigen::Vector4f p);
 
 MIR_CORE_API void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj);
-MIR_CORE_API void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, std::vector<Eigen::Vector4f> positions);
+MIR_CORE_API void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, Eigen::Vector2i size, std::vector<Eigen::Vector4f> positions);
 
 }
 }

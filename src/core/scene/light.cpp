@@ -34,9 +34,9 @@ void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float
 	mCbLight.unity_LightColor.w() = luminance;
 }
 
-void DirectLight::CalculateLightingViewProjection(const Camera& camera, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
+void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Vector2i size, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
 {
-	Eigen::Vector2i size = camera.GetWinSize();
+	//Eigen::Vector2i size = camera.GetWinSize();
 	float width = std::max<int>(size.x(), size.y());
 	float depth = camera.GetForwardLength();
 	float distance = sqrtf(width * width + depth * depth);

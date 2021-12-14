@@ -169,16 +169,16 @@ static cbPerFrame MakeCbPerFrame(const Camera& camera)
 	globalParam.ProjectionInv = globalParam.Projection.inverse();
 	return globalParam;
 }
-static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, bool castShadow, IFrameBufferPtr shadowMap)
+static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, Eigen::Vector2i size, bool castShadow, IFrameBufferPtr shadowMap)
 {
 	cbPerFrame globalParam = {};
 	if (castShadow) {
-		light.CalculateLightingViewProjection(camera, castShadow, globalParam.View, globalParam.Projection);
+		light.CalculateLightingViewProjection(camera, size, castShadow, globalParam.View, globalParam.Projection);
 	}
 	else {
 		globalParam.View = camera.GetView();
 		globalParam.Projection = camera.GetProjection();
-		light.CalculateLightingViewProjection(camera, false, globalParam.LightView, globalParam.LightProjection);
+		light.CalculateLightingViewProjection(camera, size, false, globalParam.LightView, globalParam.LightProjection);
 		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, {}));
 
 		globalParam._ShadowMapTexture_TexelSize.head<2>() = shadowMap
@@ -189,7 +189,7 @@ static cbPerFrame MakeCbPerFrame(const Camera& camera, const ILight& light, bool
 	MIR_TEST_CASE(
 		TestViewProjectionWithCases(camera.GetView(), camera.GetProjection());
 		Eigen::Matrix4f light_view, light_proj;
-		light.CalculateLightingViewProjection(camera, false, light_view, light_proj);
+		light.CalculateLightingViewProjection(camera, size, false, light_view, light_proj);
 		TestViewProjectionWithCases(light_view, light_proj);
 	);
 
@@ -220,7 +220,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			if ((light->GetCameraMask() & camera.GetCameraMask()) && (light->GetType() == kLightDirectional)) {
 				shadowMapGenerated = true;
 
-				cbPerFrame globalParam = MakeCbPerFrame(camera, *light, true, nullptr);
+				cbPerFrame globalParam = MakeCbPerFrame(camera, *light, mRenderSys.WinSize(), true, nullptr);
 				cbPerLight lightParam = MakeCbPerLight(*light);
 				RenderLight(opQueue, LIGHTMODE_SHADOW_CASTER, camera.GetCameraMask(), &lightParam, globalParam);
 				break;
@@ -329,14 +329,14 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 							RenderLight(opQue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), nullptr, globalParam);
 						}
 
-						globalParam = MakeCbPerFrame(camera, *firstLight, false, nullptr);
+						globalParam = MakeCbPerFrame(camera, *firstLight, mRenderSys.WinSize(), false, nullptr);
 						auto lightParam = MakeCbPerLight(*light);
 						RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCameraMask(), &lightParam, globalParam);
 					}
 				#if !defined DEBUG_PREPASS_BASE
 					_PopFrameBuffer();
 
-					globalParam = MakeCbPerFrame(camera, *firstLight, false, mGBuffer);
+					globalParam = MakeCbPerFrame(camera, *firstLight, mRenderSys.WinSize(), false, mGBuffer);
 					mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 				#endif
 				}
