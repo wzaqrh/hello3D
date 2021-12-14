@@ -17,7 +17,7 @@ protected:
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
-	AssimpModelPtr mModel1, mModel2;
+	AssimpModelPtr mModelRock, mModelPlanet, mModelFloor;
 	CubePtr mCube0, mCube1;
 };
 /*mCaseIndex
@@ -31,92 +31,62 @@ void TestShadowMap::OnPostInitDevice()
 {
 	mScneMng->SetPixelPerUnit(1);
 
-	if (mCaseIndex == 0 || mCaseIndex == 1) 
-	{
-		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
-
-		if (mCaseIndex == 0) {
-			mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-		}
-		else {
-			auto camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
-			test::CompareLightCameraByViewProjection(*dir_light, *camera, mResMng->WinSize(), {});
-		}
-
-		if (1) {
-			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
-		}
-
-		if (0) {
-			mModel1 = mRendFac->CreateAssimpModel(MAT_MODEL);
-			mModel1->LoadModel(test1::res::model_rock::Path(), test1::res::model_rock::Rd());
-			mTransform = mModel1->GetTransform();
-			mTransform->SetScale(test1::res::model_rock::Scale());
-			mTransform->SetPosition(test1::res::model_rock::Pos());
-		}
-
-		if (0) {
-			mModel2 = mRendFac->CreateAssimpModel(MAT_MODEL);
-			mModel2->LoadModel("model/planet/planet.obj", R"({"dir":"model/planet/"})");
-			float scale = 0.1;
-			mModel2->GetTransform()->SetScale(Eigen::Vector3f(scale, scale, scale));
-			mModel2->GetTransform()->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(2, 2, -2));
-		}
+	if (1) {
+		mModelFloor = mRendFac->CreateAssimpModel(MAT_MODEL);
+		mModelFloor->LoadModel(test1::res::model_floor::Path(), test1::res::model_floor::Rd());
+		mModelFloor->GetTransform()->SetScale(test1::res::model_floor::Scale() * 10);
 	}
-	else if (mCaseIndex == 2 || mCaseIndex == 3)
-	{
-		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 
-		auto light = mScneMng->AddDirectLight();
-		if (mCaseIndex == 2) 
-		{
-			light->SetDirection(Eigen::Vector3f(2, 0, 10));
-		}
-		else 
-		{
-			light->SetDirection(test1::vec::DirLight());
-			/*test::CompareLightCameraByViewProjection(*light, *camera, {
-				Eigen::Vector4f(0, 768, test1::cam::Near(), 1),
-				Eigen::Vector4f(1024, 0, test1::cam::Far(), 1),
-				Eigen::Vector4f(77, 400, 0, 1),
-				Eigen::Vector4f(600, 77, 0, 1),
-			});*/
-		}
+	if (1) {
+		mModelRock = mRendFac->CreateAssimpModel(MAT_MODEL);
+		mModelRock->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
+		mTransform = mModelRock->GetTransform();
+		mTransform->SetScale(test1::res::model_sship::Scale() * 3);
+	}
 
-		if (1) 
-		{
-			mir::MaterialLoadParam mat = MAT_LAYERCOLOR;
-			if (mCaseIndex == 2) mat.VariantName = "test_shadow_map_case2";
-			else if (mCaseIndex == 3) mat.VariantName = "test_shadow_map_case3";
+	switch (mCaseIndex) {
+	case 0: {
+		mControlCamera = false;
 
-			mCube0 = test1::res::cube::far_plane::Create(mRendFac, mWinCenter, mat);
-			mCube1 = test1::res::cube::near_plane::Create(mRendFac, mWinCenter, mat);
-		}
+		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -1, -1));
+		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 10, 0));
+		camera->SetForward(mir::math::vec::Down(), mir::math::vec::Forward());
+		//camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-		if (mCaseIndex == 2)
-		{
-			mModel2 = mRendFac->CreateAssimpModel(MAT_MODEL);
-			mModel2->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
-			mTransform = mModel2->GetTransform();
-			mTransform->SetScale(test1::res::model_sship::Scale() * 10);
-			mTransform->SetPosition(mWinCenter + Eigen::Vector3f(0, 0, 0));
-			mModel2->PlayAnim(0);
-		}
+		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, -100, 0));
+		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));
+		mModelRock->GetTransform()->SetPosition(test1::res::model_sship::Pos() + Eigen::Vector3f(0, -30, 0));
+
+		auto ndc = camera->ProjectPoint(Eigen::Vector3f(4, -30, 0));
+		ndc = ndc;
+	}break;
+	case 1: {
+		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, 1, 3));
+		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -10));
+		camera->SetForward(mir::math::vec::Forward(), mir::math::vec::Up());
+
+		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, 0, 100));
+		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14 / 2, 0, 0));
+		mTransform->SetPosition(test1::res::model_sship::Pos() + Eigen::Vector3f(0, 0, 30));
+	}break;
+	default:
+		break;
 	}
 }
 
 void TestShadowMap::OnRender()
 {
 	if (mContext->RenderPipe()->BeginFrame()) {
-		if (mModel1) mModel1->Update(mTimer->mDeltaTime);
-		if (mModel2) mModel2->Update(mTimer->mDeltaTime);
+		if (mModelFloor) mModelFloor->Update(mTimer->mDeltaTime);
+		if (mModelRock) mModelRock->Update(mTimer->mDeltaTime);
+		if (mModelPlanet) mModelPlanet->Update(mTimer->mDeltaTime);
 
 		RenderOperationQueue opQueue;
 		if (mCube0) mCube0->GenRenderOperation(opQueue);
 		if (mCube1) mCube1->GenRenderOperation(opQueue);
-		if (mModel1) mModel1->GenRenderOperation(opQueue);
-		if (mModel2) mModel2->GenRenderOperation(opQueue);
+		if (mModelFloor) mModelFloor->GenRenderOperation(opQueue);
+		if (mModelRock) mModelRock->GenRenderOperation(opQueue);
+		if (mModelPlanet) mModelPlanet->GenRenderOperation(opQueue);
 
 		mContext->RenderPipe()->Render(opQueue, *mContext->SceneMng());
 		mContext->RenderPipe()->EndFrame();

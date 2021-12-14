@@ -14,25 +14,32 @@ inline float3 GetAlbedo(float2 uv)
 }
 
 /************ ShadowCaster ************/
-struct ShadowCasterPixelInput
+struct PSShadowCasterInput 
 {
-    float4 Pos : SV_POSITION;
+	float4 Pos  : SV_POSITION;
+	float4 Pos0 : POSITION0;
 };
 
-ShadowCasterPixelInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
+PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 {
-	ShadowCasterPixelInput output;
+	PSShadowCasterInput output;
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
 	matrix MW = mul(World, transpose(Model));
 	matrix MWV = mul(View, MW);
 	matrix MWVP = mul(Projection, MWV);
 	output.Pos = mul(MWVP, skinPos);
+	output.Pos0 = output.Pos;
 	return output;
 }
 
-float4 PSShadowCaster(ShadowCasterPixelInput input) : SV_Target
+float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 {
-	return float4(0.467,0.533,0.6,1);
+	float4 finalColor = float4(0,0,0,1);
+	//finalColor.xy = input.Pos0.xy / input.Pos0.w;
+	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
+	//finalColor.y = 0;
+	finalColor.z = input.Pos0.z / input.Pos0.w;
+	return finalColor;
 }
 
 /************ ForwardBase ************/
@@ -42,7 +49,7 @@ struct PixelInput
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL0;//eye space
 	float3 ToEye  : TEXCOORD1;//eye space
-	float3 ToLight : TEXCOORD2;//world space
+	float3 ToLight : TEXCOORD2;//eye space
 #if ENABLE_SHADOW_MAP
 	float4 PosInLight : TEXCOORD3;//light's ndc space
 #endif
@@ -60,7 +67,10 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	//ToLight
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
-	output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
+	output.Pos = mul(View, output.Pos);
+	
+	float4 lightPosition = mul(View, unity_LightPosition);
+	output.ToLight = lightPosition.xyz - output.Pos.xyz * lightPosition.w;
 	
 #if ENABLE_SHADOW_MAP
 	//PosInLight
@@ -71,7 +81,6 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 #endif
 	
 	//ToEye
-	output.Pos = mul(View, output.Pos);
 	output.ToEye = -output.Pos;
 	
 	//Pos
@@ -103,8 +112,8 @@ float4 PSAdd(PixelInput input) : SV_Target
 /************ PrepassBase ************/
 struct PSPrepassBaseInput
 {
-	float4 Pos : SV_POSITION;
-    float4 WorldPos : POSITION0;//world space
+	float4 Pos  : SV_POSITION;
+    float4 Pos0 : POSITION0;//world space
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL0;
 };
@@ -117,14 +126,12 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
 	output.Normal = mul(MW, skinNormal).xyz;
 	
-	//WorldPos
-	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
-	output.WorldPos = mul(MW, skinPos);
-	
 	//Pos
-	output.Pos = mul(View, output.WorldPos);
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
+	output.Pos = mul(MW, skinPos);
+	output.Pos = mul(View, output.Pos);
     output.Pos = mul(Projection, output.Pos);
-	output.WorldPos = output.Pos;
+	output.Pos0 = output.Pos;
 	
 	//Tex
 	output.Tex = surf.Tex;
@@ -143,7 +150,7 @@ PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
 	PSPrepassBaseOutput output;
 #if !DEBUG_PREPASS_BASE
-	output.Pos = input.WorldPos / input.WorldPos.w;
+	output.Pos = input.Pos0 / input.Pos0.w;
 	output.Pos.xyz = output.Pos.xyz * 0.5 + 0.5;
 
 	output.Normal.xyz = normalize(input.Normal);

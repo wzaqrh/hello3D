@@ -36,6 +36,7 @@ public:
 	Camera(ResourceManager& resMng);
 
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up = math::vec::Up());
+	void SetForward(const Eigen::Vector3f& forward, const Eigen::Vector3f& up);
 	void SetForwardLength(float length);
 	void SetClippingPlane(const Eigen::Vector2f& zRange);
 	void SetAspect(float aspect);
@@ -72,6 +73,7 @@ public:
 	Eigen::Vector3f GetEye() const;
 	Eigen::Vector3f GetLookAt() const;
 	Eigen::Vector3f GetForward() const;
+	Eigen::Vector3f GetUp() const { return mUpVector; }
 	float GetForwardLength() const;
 
 	Eigen::Vector2f GetOthoWinSize() const;

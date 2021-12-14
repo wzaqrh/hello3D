@@ -68,7 +68,7 @@ void App::Render()
 
 	//rotate camera
 	auto camera0 = mScneMng->GetDefCamera();
-	if (camera0/* && camera0->GetType() == kCameraPerspective*/)
+	if (camera0 && mControlCamera)
 	{
 		auto camTranform = camera0->GetTransform();
 		if (!mCameraInitInvLengthForward.any()) {
@@ -96,6 +96,7 @@ void App::Render()
 	}
 
 	//rotate target
+	if (mTransform)
 	{
 		Eigen::Vector2f m = mInput->GetMouseLeftLocation();
 		float mx = 3.14 * -m.x();
@@ -105,6 +106,13 @@ void App::Render()
 			* Eigen::AngleAxisf(0, Eigen::Vector3f::UnitY()) 
 			* mTransform->GetRotation();
 		mTransform->SetRotation(quat);
+
+		if (mInput->IsKeyPressed(DIK_UPARROW)) {
+			mTransform->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(0,0,5));
+		}
+		else if (mInput->IsKeyPressed(DIK_DOWNARROW)) {
+			mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0,0,5));
+		}
 	}
 
 	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);

@@ -16,6 +16,7 @@ Camera::Camera(ResourceManager& resMng)
 	mFlipY = false;
 	mType = kCameraPerspective;
 
+	mOrthoSize = mFov = 0;
 	mAspect = 1.0;
 	mTransform = std::make_shared<Transform>();
 }
@@ -82,6 +83,13 @@ void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, co
 	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mForwardLength = forward.norm();
 
+	mUpVector = up;
+	mViewDirty = true;
+}
+
+void Camera::SetForward(const Eigen::Vector3f& forward, const Eigen::Vector3f& up)
+{
+	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mUpVector = up;
 	mViewDirty = true;
 }

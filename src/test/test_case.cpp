@@ -36,7 +36,7 @@ namespace far_plane {
 mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeBig = 8192;
 	return rendFac->CreateCube(
-		winCenter + Eigen::Vector3f(0, 0, 300),
+		Eigen::Vector3f(0, 0, test1::cam::Far()),
 		Eigen::Vector3f(SizeBig, SizeBig, 1),
 		0xffff6347,
 		matname
@@ -47,8 +47,19 @@ namespace near_plane {
 mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeSmall = 4;
 	return rendFac->CreateCube(
-		winCenter + Eigen::Vector3f(-SizeSmall, -SizeSmall, test1::cam::Near()),
-		Eigen::Vector3f(SizeSmall * 2, SizeSmall * 2, 1),
+		Eigen::Vector3f(0, 0, test1::cam::Near()),
+		Eigen::Vector3f(SizeSmall, SizeSmall, 1),
+		0xffff4763,
+		matname
+	);
+}
+}
+namespace floor {
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
+	constexpr int Inf = 65536;
+	return rendFac->CreateCube(
+		Eigen::Vector3f(0, y, Inf / 2),
+		Eigen::Vector3f(Inf, 1, Inf / 2),
 		0xffff4763,
 		matname
 	);
@@ -116,5 +127,34 @@ mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
 }
 }
 
+namespace model_floor {
+std::string Path() { return "model/floor/floor.obj"; }
+std::string Rd() { return R"({"dir":"model/floor/"})"; }
+constexpr float scale = 0.3;
+Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
+Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
+	model->LoadModel(Path(), Rd());
+	mir::TransformPtr transform = model->GetTransform();
+	transform->SetScale(Scale());
+	transform->SetPosition(mWinCenter + Pos());
+	return transform;
+}
+}
+
+namespace model_planet {
+std::string Path() { return "model/planet/planet.obj"; }
+std::string Rd() { return R"({"dir":"model/planet/"})"; }
+constexpr float scale = 0.1;
+Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
+Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
+	model->LoadModel(Path(), Rd());
+	mir::TransformPtr transform = model->GetTransform();
+	transform->SetScale(Scale());
+	transform->SetPosition(mWinCenter + Pos());
+	return transform;
+}
+}
 }
 }

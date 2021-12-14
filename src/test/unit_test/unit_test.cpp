@@ -61,9 +61,7 @@ void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& c
 	constexpr bool castShadow = true;
 //#define ONLY_CHECK_PROJ
 	static std::vector<Eigen::Vector4f> local_positions = {
-		/*Eigen::Vector4f( hsize.x() * 0.2, 0, -20, 1),
-		Eigen::Vector4f(-hsize.x(),		  0, 70, 1),
-		Eigen::Vector4f( hsize.x(),       0, 70, 1),*/
+		Eigen::Vector4f(0, 0, 0, 1),
 	};
 	positions.insert(positions.end(), local_positions.begin(), local_positions.end());
 

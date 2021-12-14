@@ -53,6 +53,7 @@ protected:
 	int mCaseIndex = 0;
 	mir::Mir* mContext = nullptr;
 	mir::TransformPtr mTransform;
+	bool mControlCamera = true;
 	mir::debug::Timer* mTimer = nullptr;
 private:
 	mir::input::D3DInput* mInput = nullptr;

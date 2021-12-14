@@ -53,7 +53,8 @@ bool D3DInput::Init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenH
 
 bool D3DInput::ReadKeyboard()
 {
-	HRESULT result = m_keyboard->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
+	memset(m_keyboardState, 0, sizeof(m_keyboardState));
+	HRESULT result = m_keyboard->GetDeviceState(sizeof(m_keyboardState), m_keyboardState);
 	if (FAILED(result)) {
 		if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED)) {
 			m_keyboard->Acquire();
@@ -98,11 +99,17 @@ void D3DInput::Process()
 	mMouseMiddleDown = (m_mouseState.rgbButtons[2] & 0x80);
 }
 
+bool D3DInput::IsKeyPressed(int key) 
+{
+	return (m_keyboardState[key] & 0x80); 
+}
+
 void D3DInput::Frame()
 {
 	if (ReadMouse()) {
 		Process();
 	}
+	ReadKeyboard();
 }
 
 /********** Functions **********/

@@ -34,6 +34,9 @@ mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter
 namespace near_plane {
 mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
+namespace floor {
+mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
+}
 }
 
 namespace png {
@@ -65,6 +68,22 @@ mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f winCenter);
 }
 
 namespace model_rock {
+std::string Path();
+std::string Rd();
+Eigen::Vector3f Scale();
+Eigen::Vector3f Pos();
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter);
+}
+
+namespace model_floor {
+std::string Path();
+std::string Rd();
+Eigen::Vector3f Scale();
+Eigen::Vector3f Pos();
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter);
+}
+
+namespace model_planet {
 std::string Path();
 std::string Rd();
 Eigen::Vector3f Scale();

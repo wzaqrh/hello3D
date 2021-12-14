@@ -17,6 +17,7 @@ public:
 	Eigen::Vector2f GetMouseLeftLocation() const { return mMouseL; }
 	Eigen::Vector2f GetMouseRightLocation() const { return mMouseR; }
 	float GetMouseWheelChange() const { return mMouseWheel; }
+	bool IsKeyPressed(int key);
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();

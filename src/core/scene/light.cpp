@@ -42,11 +42,9 @@ void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::V
 
 	Eigen::Vector3f lookat = camera.GetLookAt();
 	Eigen::Vector3f forward = -mCbLight.unity_LightPosition.head<3>();
-	view = math::MakeLookForwardLH(lookat - forward * distance, forward, math::vec::Up());
-	//consider orho-camera's anchor is screen-center
-	view = Transform3Projective(view).translate(Eigen::Vector3f(size.x()/2, size.y()/2, 0)).matrix();
+	view = math::MakeLookForwardLH(lookat - forward * distance, forward, camera.GetUp());
 
-	proj = math::MakeOrthographicOffCenterLH(0, size.x(), 0, size.y(), 0.3, distance * 1.5);
+	proj = math::MakeOrthographicOffCenterLH(-size.x()/2, size.x()/2, -size.y()/2, size.y()/2, 0.3, distance * 1.5);
 	if (!castShadow) {
 		proj = Transform3Projective(proj)
 			.prescale(Eigen::Vector3f(1, -1, 1))

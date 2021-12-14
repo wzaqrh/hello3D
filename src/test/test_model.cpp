@@ -19,16 +19,15 @@ private:
 0,1：透视相机 观察到模型：传奇战士 + 天空
 2,3: 透视相机 观察到模型：飞机
 4,5：透视相机 观察到模型：石头（在右上角）
+6,7: 透视相机 观察到模型：地板
 
-6,7：正交相机 观察到模型：传奇战士 + 天空
-8,9: 正交相机 观察到模型：飞机
-10,11：正交相机 观察到模型：石头（在右上角）
+8-15: 正交相机
 */
 
 void TestModel::OnPostInitDevice()
 {
-	int caseIndex = mCaseIndex % 6;
-	bool useOtho = mCaseIndex >= 6;
+	int caseIndex = mCaseIndex % 8;
+	bool useOtho = mCaseIndex >= 8;
 
 	switch (caseIndex) {
 	case 0:
@@ -40,6 +39,11 @@ void TestModel::OnPostInitDevice()
 
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
+	}break;
+	case 6:
+	case 7:{
+		auto dir_light = mScneMng->AddDirectLight();
+		dir_light->SetDirection(Eigen::Vector3f(0, -1, 1));
 	}break;
 	default: {
 		auto dir_light = mScneMng->AddDirectLight();
@@ -68,6 +72,11 @@ void TestModel::OnPostInitDevice()
 	case 5: {
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
 		mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
+	}break;
+	case 6:
+	case 7: {
+		mModel = mRendFac->CreateAssimpModel(!(caseIndex & 1) ? MAT_MODEL : MAT_MODEL_PBR);
+		mTransform = test1::res::model_floor::Init(mModel, mWinCenter);
 	}break;
 	default:
 		break;
