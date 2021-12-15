@@ -6,7 +6,7 @@
 #endif
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "d3d9.lib")
-#ifdef DEBUG
+#ifdef _DEBUG
 #pragma comment(lib, "d3dx9d.lib")
 #else
 #pragma comment(lib, "d3dx9.lib")
@@ -14,7 +14,7 @@
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d11.lib")
-#ifdef DEBUG
+#ifdef _DEBUG
 #pragma comment(lib, "d3dx11d.lib")
 #pragma comment(lib, "d3dx10d.lib")
 #else

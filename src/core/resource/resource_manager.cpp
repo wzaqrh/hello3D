@@ -42,10 +42,10 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& mater
 	mProgramMapLock = mTextureMapLock = mMaterialMapLock = mAiSceneMapLock = false;
 	mLoadTaskCtxMapLock = mResDependGraphLock = false;
 
-	ilInit();
+	//ilInit();
 	
 	constexpr int CThreadPoolNumber = 8;
-	mThreadPool = std::make_shared<ThreadPool>(CThreadPoolNumber);
+	mThreadPool = std::make_shared<ThreadPool>(CThreadPoolNumber, ilInit, ilShutDown);
 }
 ResourceManager::~ResourceManager()
 {
@@ -55,7 +55,7 @@ void ResourceManager::Dispose() ThreadSafe
 {
 	if (mThreadPool) {
 		mThreadPool = nullptr;
-		ilShutDown();
+		//ilShutDown();
 	}
 }
 
@@ -246,7 +246,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 	
 	FILE* fd = fopen(imgFullpath.c_str(), "rb"); BOOST_ASSERT(fd);
 	if (fd) {
-		/*if (nextJob) */this->mTexLock.lock();
+		//this->mTexLock.lock();
 
 		ILuint imageId = ilGenImage();
 		ilBindImage(imageId);
@@ -406,7 +406,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 		}
 
 		ilDeleteImage(imageId);
-		/*if (nextJob) */this->mTexLock.unlock();
+		//this->mTexLock.unlock();
 		fclose(fd);
 	}//if fd
 	return ret;

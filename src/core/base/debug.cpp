@@ -2,6 +2,7 @@
 #include <d3dcompiler.h>
 #include <dxerr.h>
 #include <boost/assert.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "core/base/debug.h"
 #include "core/rendersys/blob.h"
 #include "core/resource/resource.h"
@@ -15,6 +16,10 @@ TimeProfile::TimeProfile(const std::string& name)
 {
 	mName = name;
 	mCurTime = timeGetTime();
+
+	char szBuf[260];
+	sprintf(szBuf, "%s : %d\n", mName.c_str(), mCurTime);
+	OutputDebugStringA(szBuf);
 }
 
 TimeProfile::~TimeProfile()
