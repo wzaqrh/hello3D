@@ -12,13 +12,15 @@ struct MaterialFactory : boost::noncopyable
 	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 public:
 	MaterialFactory();
-	MaterialPtr CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
+	MaterialPtr CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
+		const MaterialLoadParam& matName, MaterialPtr matRes = nullptr);
 	
 	MaterialPtr CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& material);
 	TechniquePtr CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& technique);
 	PassPtr ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& pass);
 private:
-	MaterialPtr CreateMaterialByMaterialAsset(Launch launchMode, ResourceManager& resourceMng, const MaterialAsset& matAsset);
+	MaterialPtr CreateMaterialByMaterialAsset(Launch launchMode, ResourceManager& resourceMng, 
+		const MaterialAsset& matAsset, MaterialPtr matRes = nullptr);
 };
 
 }

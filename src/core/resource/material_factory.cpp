@@ -8,6 +8,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include "core/base/d3d.h"
+#include "core/base/macros.h"
 #include "core/base/rendersys_debug.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/resource_manager.h"
@@ -43,18 +44,9 @@ private:
 struct MaterialBuilder
 {
 public:
-	MaterialBuilder(ResourceManager& resMng, Launch launchMode, bool addTechPass = true)
+	MaterialBuilder(ResourceManager& resMng, Launch launchMode, MaterialPtr mat = nullptr)
 		:mResourceMng(resMng), mLaunchMode(launchMode) {
-		mMaterial = std::make_shared<Material>();
-		if (addTechPass) {
-			AddTechnique();
-			AddPass(LIGHTMODE_FORWARD_BASE, "");
-		}
-	}
-	MaterialBuilder(ResourceManager& resMng, MaterialPtr material) :mResourceMng(resMng) {
-		mMaterial = material;
-		mCurTech = material->CurTech();
-		mCurPass = mCurTech->mPasses.empty() ? nullptr : mCurTech->mPasses[mCurTech->mPasses.size() - 1];
+		mMaterial = IF_OR(mat, std::make_shared<Material>());
 	}
 	MaterialBuilder& AddTechnique(const std::string& name = "d3d11") {
 		mCurTech = std::make_shared<Technique>();
@@ -715,9 +707,9 @@ MaterialFactory::MaterialFactory()
 }
 
 MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode, 
-	ResourceManager& resourceMng, const MaterialAsset& matAsset) 
+	ResourceManager& resourceMng, const MaterialAsset& matAsset, MaterialPtr matRes) 
 {
-	MaterialBuilder builder(resourceMng, launchMode, false);
+	MaterialBuilder builder(resourceMng, launchMode, matRes);
 	builder.AddTechnique("d3d11");
 
 	const auto& shaderInfo = matAsset.ShaderInfo;
@@ -775,16 +767,16 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	return builder.Build();
 }
 
-MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matParam) {
+MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
+	const MaterialLoadParam& matParam, MaterialPtr matRes) {
 	MaterialAsset matAsset;
-	//auto entry = mMatAssetMng->MatNameToAsset()(matParam.ShaderName);
 	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, matParam.ShaderName, matParam.VariantName, matAsset)) {
-		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset);
+		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset, matRes);
 	}
 	else {
-		MaterialPtr mat = std::make_shared<Material>();
-		mat->SetLoaded(false);
-		return mat;
+		matRes = IF_OR(matRes, std::make_shared<Material>());
+		matRes->SetLoaded(false);
+		return matRes;
 	}
 }
 

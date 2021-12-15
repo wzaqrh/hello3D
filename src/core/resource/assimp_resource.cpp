@@ -6,10 +6,9 @@
 #include "core/resource/material.h"
 #include "core/resource/resource_manager.h"
 #include "core/base/debug.h"
+#include "core/base/macros.h"
 
 namespace mir {
-
-#define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
 
 /********** AiSceneLoader **********/
 class AiSceneLoader {
@@ -54,7 +53,6 @@ public:
 				aiProcess_OptimizeMeshes |
 				aiProcess_Debone |
 				aiProcess_ValidateDataStructure;*/
-			TIME_PROFILE(Assimp_Importer);
 			mAsset.mImporter = new Assimp::Importer;
 			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(
 				imgFullpath.string(), ImportFlags);
@@ -282,15 +280,14 @@ typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** AiAssetManager **********/
 
 AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng, 
-	const std::string& assetPath, const std::string& redirectRes)
+	const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes)
 {
-	TIME_PROFILE(AiResourceFactory_CreateAiScene);
-	AiScenePtr res = std::make_shared<AiScene>();
-
+	AiScenePtr res = IF_OR(aiRes, std::make_shared<AiScene>());
 	AiSceneLoaderPtr loader = std::make_shared<AiSceneLoader>(launchMode, resourceMng, res);
 	if (launchMode == LaunchAsync) {
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") %assetPath %redirectRes).str());
 			if (loader->ExecuteAsyncPart(assetPath, redirectRes)) {
 				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob) {
 					loader->ExecuteSyncPart();
@@ -302,6 +299,7 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 		}, res);
 	}
 	else {
+		TIME_PROFILE((boost::format("aiResFac.CreateAiScene %1% %2%") %assetPath %redirectRes).str());
 		res->SetLoaded(nullptr != loader->Execute(assetPath, redirectRes));
 	}
 	return res;

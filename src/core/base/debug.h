@@ -44,14 +44,20 @@ void Log(const D3DCAPS9& caps);
 
 #if defined _DEBUG
 #define CheckHR(HR)					mir::debug::CheckHResultFailed(HR)
-#define TIME_PROFILE(NAME)			mir::debug::TimeProfile NAME(#NAME)
-#define TIME_PROFILE2(NAME1,NAME2)	mir::debug::TimeProfile NAME(#NAME1+(":"+NAME2))
 #define DEBUG_LOG(MSG1)				mir::debug::Log(MSG1)
 #else
 #define CheckHR(HR)					FAILED(HR)
-#define TIME_PROFILE(NAME)
-#define TIME_PROFILE2(NAME1,NAME2)
 #define DEBUG_LOG(MSG1)				
+#endif
+
+#if defined MIR_TIME_DEBUG
+#define TIME_PROFILE(MSG1)				mir::debug::TimeProfile tp0(MSG1)
+#define TIME_PROFILE1(MSG1)				mir::debug::TimeProfile tp1(MSG1)
+#define TIME_PROFILE2(MSG1)				mir::debug::TimeProfile tp2(MSG1)
+#else
+#define TIME_PROFILE(MSG1)	
+#define TIME_PROFILE1(MSG1)
+#define TIME_PROFILE2(MSG1)	
 #endif
 
 #if defined MIR_RESOURCE_DEBUG

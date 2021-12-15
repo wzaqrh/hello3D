@@ -375,7 +375,7 @@ IProgramPtr RenderSystem9::CreateProgramByCompile(IResourcePtr res, const std::s
 	const std::string& vsEntry,
 	const std::string& psEntry)
 {
-	TIME_PROFILE2(CreateProgramByCompile, vsPath);
+	TIME_PROFILE(CreateProgramByCompile, vsPath);
 
 	Program9Ptr program = MakePtr<Program9>();
 	program->SetVertex(_CreateVS(vsPath, vsEntry));
@@ -388,7 +388,7 @@ IProgramPtr RenderSystem9::CreateProgramByFXC(IResourcePtr res, const std::strin
 	const std::string& vsEntry,
 	const std::string& psEntry)
 {
-	TIME_PROFILE2(CreateProgramByFXC, (name));
+	TIME_PROFILE(CreateProgramByFXC, (name));
 	Program9Ptr program = MakePtr<Program9>();
 
 	std::string vsEntryOrVS = !vsEntry.empty() ? vsEntry : "VS";
