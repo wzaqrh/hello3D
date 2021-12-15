@@ -21,10 +21,8 @@ private:
 	CubePtr mCube0, mCube1;
 };
 /*mCaseIndex
-0：透视相机, 观察到正常阴影: 小球阴影打到石头 (LayerColor.xml DEBUG_SHADOW_MAP=0)
-1: 正交相机, 观察到正常阴影: 小球阴影打到石头 (LayerColor.xml DEBUG_SHADOW_MAP=0)
-2：正交相机, '飞机'阴影打到'平面', 观察到阴影位置是否在'飞机'右侧 (LayerColor.xml DEBUG_SHADOW_MAP=1)
-3: 正交相机, '摄像头'与'平行光'重合, 观察到'小平面'颜色比'大平面'深 (LayerColor.xml DEBUG_SHADOW_MAP=2)
+0：透视相机, 相机朝下 方向光朝下偏前 飞机投影到地板
+1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
 */
 
 void TestShadowMap::OnPostInitDevice()
@@ -50,8 +48,8 @@ void TestShadowMap::OnPostInitDevice()
 
 		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -3, -1));
 		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 10, 0));
-		camera->SetForward(mir::math::vec::Down(), mir::math::vec::Forward());
-		//camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
+		camera->SetForward(mir::math::vec::Down());
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
 		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, -100, 0));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));
@@ -60,7 +58,7 @@ void TestShadowMap::OnPostInitDevice()
 	case 1: {
 		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, 1, 3));
 		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -10));
-		camera->SetForward(mir::math::vec::Forward(), mir::math::vec::Up());
+		camera->SetForward(mir::math::vec::Forward());
 
 		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, 0, 100));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14 / 2, 0, 0));

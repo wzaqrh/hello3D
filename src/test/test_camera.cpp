@@ -13,60 +13,77 @@ class TestCamera : public App
 protected:
 	void OnRender() override;
 	void OnPostInitDevice() override;
+	void OnInitLight() override {}
+	void OnInitCamera() override {}
 private:
 	AssimpModelPtr mModel;
 	SpritePtr mSprite;
 };
 /*mCaseIndex
-0：观察到飞机偏左上
-1：观察到飞机与背景扁平
-2：观察到飞机变小(远离飞机)
+0-5: 透视相机
+0: 相机朝下			观察到俯视飞机
+1：相机移动			观察到飞机偏左上
+2：相机移动			观察到飞机变小(远离飞机)
+3：相机缩放			观察到飞机与背景扁平
+4：相机缩放(1,-1,1)  观察到屏幕翻转
+5：相机绕z轴180度转动	观察到屏幕180旋转
+
+6-11: 正交相机
+6->0
+7->1
+8->2
+9->3
+10->4
+11->5
 */
 
-#define SCALE_BASE 0.01
 void TestCamera::OnPostInitDevice()
 {
-	mScneMng->RemoveAllCameras();
-	mScneMng->RemoveAllLights();
+	constexpr int CaseCountMod = 6;
+	int caseIndex = mCaseIndex % CaseCountMod;
+	int cameraType = mCaseIndex / CaseCountMod;
+	mScneMng->SetPixelPerUnit(1);
 
-	if (mCaseIndex >= 4) {
-		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
-		camera->GetTransform()->SetScale(Eigen::Vector3f(0.5, 0.5, 1));
-		//camera->GetTransform()->SetPosition(Eigen::Vector3f(-screenCenter.x(), 0, 0));
-
-		auto light = mScneMng->AddDirectLight();
-		light->SetDirection(test1::vec::DirLight());
-
-		mSprite = mContext->RenderableFac()->CreateSprite("model/smile.png");
-		mSprite->SetPosition(mWinCenter + Eigen::Vector3f(-mHalfSize.x()/2, -mHalfSize.y()/2, 0));
-	}
-	else {
-		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-		switch (mCaseIndex) {
-		case 0: {
-			camera->GetTransform()->SetPosition(mWinCenter + Eigen::Vector3f(5, -5, -30));
-		}break;
-		case 1: {
-			camera->GetTransform()->SetScale(mWinCenter + Eigen::Vector3f(0.5, 2, 1));
-		}break;
-		case 2: {
-			camera->GetTransform()->SetPosition(mWinCenter + Eigen::Vector3f(0, 0, -100));
-		}break;
-		default:
-			break;
-		}
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
-
-		auto light = mScneMng->AddPointLight();
-		light->SetPosition(Eigen::Vector3f(10, 10, -10));
-		light->SetAttenuation(0.001);
-
+	if (1)
+	{
 		mModel = mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
 		mModel->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
 		mTransform = mModel->GetTransform();
 		mTransform->SetScale(test1::res::model_sship::Scale());
-		mTransform->SetPosition(mWinCenter + Eigen::Vector3f::Zero());
-		mModel->PlayAnim(0);
+		mTransform->SetPosition(test1::res::model_sship::Pos());
+		if (cameraType == 0)
+			mTransform->SetScale(mTransform->GetScale() * 2);
+	}
+
+	mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -1, 1));
+
+	mControlCamera = false;
+	CameraPtr camera = mScneMng->AddCameraByType((CameraType)cameraType, Eigen::Vector3f(0, 0, -10));
+	camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
+	switch (caseIndex) {
+	case 0: {
+		camera->SetForward(mir::math::vec::Down());
+		camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 10, 0));
+
+		mTransform->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(0, -30, 0));
+	}break;
+	case 1: {
+		camera->GetTransform()->SetPosition(Eigen::Vector3f(2.5, -2.5, -30));
+	}break;
+	case 2: {
+		camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, -100));
+	}break;
+	case 3: {
+		camera->GetTransform()->SetScale(Eigen::Vector3f(0.5, 2, 1));
+	}break;
+	case 4: {
+		camera->GetTransform()->SetScale(Eigen::Vector3f(1, -1, 1));
+	}break;
+	case 5: {
+		camera->GetTransform()->Rotate(Eigen::Vector3f(0, 0, math::ToRadian(180)));
+	}break;
+	default:
+		break;
 	}
 }
 

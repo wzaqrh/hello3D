@@ -11,6 +11,10 @@ namespace test {
 bool IsEqual(float l, float r) {
 	return std::abs<float>(l - r) < EPS;
 }
+bool IsEqual(Eigen::Vector2f l, Eigen::Vector2f r) {
+	return IsEqual(l.x(), r.x())
+		&& IsEqual(l.y(), r.y());
+}
 bool IsEqual(Eigen::Vector3f l, Eigen::Vector3f r) {
 	return IsEqual(l.x(), r.x())
 		&& IsEqual(l.y(), r.y())

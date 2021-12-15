@@ -154,7 +154,7 @@ TEST_CASE("mir matrix MakeLookAtLH", "mir_matrix_MakeLookAtLH") {
 	Eigen::Vector3f eye(50, 70, -10);
 	Eigen::Vector3f target(10, -10, 0);
 	Eigen::Vector3f up(0, 1, 0);
-	Eigen::Matrix4f m0 = mir::math::MakeLookAtLH(eye, target, up);
+	Eigen::Matrix4f m0 = mir::math::cam::MakeLookAtLH(eye, target, up);
 
 	XMVECTOR Eye = XMVectorSet(eye.x(), eye.y(), eye.z(), 0.0f);
 	XMVECTOR At = XMVectorSet(target.x(), target.y(), target.z(), 0.0f);
@@ -181,7 +181,7 @@ TEST_CASE("mir matrix MakePerspectiveFovLH", "mir_matrix_MakePerspectiveFovLH") 
 	float aspect = width / height;
 	float zNear = 0.01;
 	float zFar = 10;
-	Eigen::Matrix4f m0 = mir::math::MakePerspectiveFovLH(fov, aspect, zNear, zFar);
+	Eigen::Matrix4f m0 = mir::math::cam::MakePerspectiveFovLH(fov, aspect, zNear, zFar);
 	XMMATRIX m1 = XMMatrixPerspectiveFovLH(fov, aspect, zNear, zFar);
 	CHECK(IsEqual(m0, m1));
 
@@ -201,7 +201,7 @@ TEST_CASE("mir matrix MakeOrthographicOffCenterLH", "mir_matrix_MakeOrthographic
 	float height = 720;
 	float zNear = 0.01;
 	float zFar = 10;
-	Eigen::Matrix4f m0 = mir::math::MakeOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
+	Eigen::Matrix4f m0 = mir::math::cam::MakeOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
 	XMMATRIX m1 = XMMatrixOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
 	CHECK(IsEqual(m0, m1));
 
@@ -220,7 +220,7 @@ TEST_CASE("eigen matrix multiple", "eigen_matrix_multiple") {
 	Eigen::Vector3f eye(0, 0, -10);
 	Eigen::Vector3f target(0, 0, 0);
 	Eigen::Vector3f up(0, 1, 0);
-	Eigen::Matrix4f m0 = mir::math::MakeLookAtLH(eye, target, up);
+	Eigen::Matrix4f m0 = mir::math::cam::MakeLookAtLH(eye, target, up);
 
 	XMVECTOR Eye = XMVectorSet(eye.x(), eye.y(), eye.z(), 0.0f);
 	XMVECTOR At = XMVectorSet(target.x(), target.y(), target.z(), 0.0f);
@@ -233,7 +233,7 @@ TEST_CASE("eigen matrix multiple", "eigen_matrix_multiple") {
 		float height = 720;
 		float zNear = 0.01;
 		float zFar = 10;
-		Eigen::Matrix4f p0 = mir::math::MakeOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
+		Eigen::Matrix4f p0 = mir::math::cam::MakeOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
 		XMMATRIX p1 = XMMatrixOrthographicOffCenterLH(0, width, 0, height, zNear, zFar);
 		m0 = p0 * m0;
 		m1 = m1 * p1;

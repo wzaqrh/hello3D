@@ -8,6 +8,7 @@ namespace mir {
 namespace test {
 
 MIR_CORE_API bool IsEqual(float l, float r);
+MIR_CORE_API bool IsEqual(Eigen::Vector2f l, Eigen::Vector2f r);
 MIR_CORE_API bool IsEqual(Eigen::Vector3f l, Eigen::Vector3f r);
 MIR_CORE_API bool IsEqual(Eigen::Vector4f l, Eigen::Vector4f r);
 

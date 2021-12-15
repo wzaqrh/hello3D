@@ -35,17 +35,15 @@ public:
 	}
 	Camera(ResourceManager& resMng);
 
-	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up = math::vec::Up());
-	void SetForward(const Eigen::Vector3f& forward, const Eigen::Vector3f& up);
-	void SetForwardLength(float length);
+	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
+	void SetForward(const Eigen::Vector3f& forward);
 	void SetClippingPlane(const Eigen::Vector2f& zRange);
 	void SetAspect(float aspect);
 	void SetOrthographicSize(float size);
 	void SetFov(float fov);
-	void SetYFlipped(bool flip);
 
-	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
-	unsigned GetCameraMask() const { return mCameraMask; }
+	void SetCullingMask(unsigned mask) { mCameraMask = mask; }
+	unsigned GetCullingMask() const { return mCameraMask; }
 
 	void SetDepth(unsigned depth) { mDepth = depth; }
 	unsigned GetDepth() const { return mDepth; }
@@ -68,17 +66,15 @@ public:
 	
 	const Eigen::Matrix4f& GetView() const;
 	const Eigen::Matrix4f& GetProjection() const;
-	
-	CameraType GetType() const { return mType; }
-	Eigen::Vector3f GetEye() const;
-	Eigen::Vector3f GetLookAt() const;
-	Eigen::Vector3f GetForward() const;
-	Eigen::Vector3f GetUp() const { return mUpVector; }
-	float GetForwardLength() const;
-
-	Eigen::Vector2f GetOthoWinSize() const;
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
+
+	CameraType GetType() const { return mType; }
+	Eigen::Vector3f GetLookAt() const;
+	Eigen::Vector3f GetForward() const;
+	float GetForwardLength() const { return mForwardLength; }
+	Eigen::Vector3f GetUp() const;
+	Eigen::Vector2f GetOthoWinSize() const;
 private:
 	void InitAsPerspective(float aspect = 1.0,
 		const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
@@ -101,17 +97,14 @@ private:
 	std::vector<PostProcessPtr> mPostProcessEffects;
 	IFrameBufferPtr mPostProcessInput, mOutput;
 	
-	RenderingPath mRenderPath = kRenderPathForward;
-	unsigned mCameraMask = -1;
-	unsigned mDepth = 0;
+	RenderingPath mRenderPath;
+	unsigned mCameraMask;
+	unsigned mDepth;
 private:
 	CameraType mType;
-	//Eigen::Vector2i mScreenSize, mSize;
-	Eigen::Vector3f mUpVector;
-	float mForwardLength;
-	Eigen::Vector2f mZRange;
-	float mFov, mOrthoSize, mAspect;
-	bool mFlipY;
+	Eigen::Vector2f mClipPlane;
+	float mFov, mOrthoSize;
+	float mAspect, mForwardLength;
 
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 	mutable bool mViewDirty, mProjectionDirty;

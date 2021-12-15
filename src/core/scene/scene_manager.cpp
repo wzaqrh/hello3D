@@ -18,18 +18,18 @@ void SceneManager::RemoveAllCameras()
 {
 	mCameras.clear();
 }
-CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
+CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), 
-		math::cam::DefClippingPlane(), math::cam::DefOthoSize() * mPixelPerUnit, camMask);
+	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()),
+		math::cam::DefClippingPlane(), math::cam::DefFov(), camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
+CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
 {
-	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), 
-		math::cam::DefClippingPlane(), math::cam::DefFov(), camMask);
+	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), 
+		math::cam::DefClippingPlane(), math::cam::DefOthoSize() * mPixelPerUnit, camMask);
 	mCameras.push_back(camera);
 	mCamerasDirty = true;
 	return camera;

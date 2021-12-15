@@ -10,8 +10,8 @@ using namespace mir;
 
 TEST_CASE("calculate direct-light's view projection", "DirectLight_CalculateLightingViewProjection")
 {
-	auto view = mir::math::MakeLookAtLH(Eigen::Vector3f(616, 616, -616), Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
-	auto proj =  mir::math::MakeOrthographicOffCenterLH(0, 1024, 0, 768, -1067, 10);
+	auto view = mir::math::cam::MakeLookAtLH(Eigen::Vector3f(616, 616, -616), Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
+	auto proj =  mir::math::cam::MakeOrthographicOffCenterLH(0, 1024, 0, 768, -1067, 10);
 
 	Eigen::Vector4f posArr[] = {
 		Eigen::Vector4f(5, 5, -5, 1),

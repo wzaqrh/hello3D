@@ -29,10 +29,12 @@ private:
 
 void TestLight::OnPostInitDevice()
 {
-	constexpr int LightTypeCount = 4;
-	mScneMng->SetPixelPerUnit(1);
+	constexpr int CaseCountMod = 4;
+	int caseIndex = mCaseIndex % CaseCountMod;
+	int cameraType = mCaseIndex / CaseCountMod;
+	//mScneMng->SetPixelPerUnit(1);
 
-	switch (mCaseIndex % LightTypeCount) {
+	switch (caseIndex) {
 	case 0: {
 		mScneMng->AddPointLight()->SetPosition(Eigen::Vector3f(0, 10, -5));
 	}break;
@@ -53,11 +55,8 @@ void TestLight::OnPostInitDevice()
 	}break;
 	}
 
-	CameraPtr camera;
-	if (mCaseIndex / LightTypeCount == 0)
-		camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-	else
-		camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->AddCameraByType((CameraType)cameraType, test1::cam::Eye(mWinCenter));
+	camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
 	mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
 	mTransform = test1::res::model_sship::Init(mModel, mWinCenter);

@@ -46,8 +46,7 @@ void Transform::Rotate(const Eigen::Vector3f& euler)
 	auto quat = Eigen::AngleAxisf(euler.z(), Eigen::Vector3f::UnitZ())
 		* Eigen::AngleAxisf(euler.x(), Eigen::Vector3f::UnitX())
 		* Eigen::AngleAxisf(euler.y(), Eigen::Vector3f::UnitY());
-	//mPosition = quat * mPosition;
-	mQuat = quat;
+	mQuat *= quat;
 	mDirty = true;
 }
 void Transform::RotateAround(const Eigen::Vector3f& point, const Eigen::Vector3f& axis, float angle)

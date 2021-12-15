@@ -3,22 +3,25 @@
 #include "core/resource/resource_manager.h"
 #include "core/base/debug.h"
 #include "core/base/math.h"
+#include "test/unit_test/unit_test.h"
 
 namespace mir {
-
-//#define OTHO_CAMERA_TRASNFORM_CENTER_MAPTO_SCREEN_CENTER
 
 Camera::Camera(ResourceManager& resMng)
 	: mResourceMng(resMng)
 {
+	mTransform = std::make_shared<Transform>();
+	mRenderPath = kRenderPathForward;
+	mCameraMask = -1;
+	mDepth = 0;
+
+	mType = kCameraPerspective;
+	mClipPlane = Eigen::Vector2f::Zero();
+	mFov = mOrthoSize = 0;
+	mAspect = mForwardLength = 1.0;
+
 	mViewDirty = true;
 	mProjectionDirty = true;
-	mFlipY = false;
-	mType = kCameraPerspective;
-
-	mOrthoSize = mFov = 0;
-	mAspect = 1.0;
-	mTransform = std::make_shared<Transform>();
 }
 
 void Camera::InitAsPerspective(float aspect,
@@ -29,12 +32,11 @@ void Camera::InitAsPerspective(float aspect,
 	unsigned cameraMask) 
 {
 	mType = kCameraPerspective;
-	//mSize = mScreenSize = screensize;
 	SetClippingPlane(clipPlane);
 	SetFov(fov);
 	SetAspect(aspect);
-	SetLookAt(eyePos, eyePos + length_forward, math::vec::Up());
-	SetCameraMask(cameraMask);
+	SetLookAt(eyePos, eyePos + length_forward);
+	SetCullingMask(cameraMask);
 	mProjectionDirty = true;
 }
 void Camera::InitAsOthogonal(float aspect,
@@ -45,27 +47,24 @@ void Camera::InitAsOthogonal(float aspect,
 	unsigned cameraMask)
 {
 	mType = kCameraOthogonal;
-	//mSize = mScreenSize = screensize;
 	SetClippingPlane(clipPlane);
 	SetOrthographicSize(othoSize);
 	SetAspect(aspect);
-	SetLookAt(eyePos, eyePos + length_forward, math::vec::Up());
-	SetCameraMask(cameraMask);
+	SetLookAt(eyePos, eyePos + length_forward);
+	SetCullingMask(cameraMask);
 	mProjectionDirty = true;
 }
 
 void Camera::SetClippingPlane(const Eigen::Vector2f& zRange)
 {
-	mZRange = zRange;
+	mClipPlane = zRange;
 	mViewDirty = true;
 }
-
 void Camera::SetAspect(float aspect)
 {
 	mAspect = aspect;
 	mProjectionDirty = mViewDirty = true;
 }
-
 void Camera::SetFov(float fov)
 {
 	mFov = fov / boost::math::constants::radian<float>();
@@ -76,81 +75,81 @@ void Camera::SetOrthographicSize(float size)
 	mOrthoSize = size;
 	mProjectionDirty = true;
 }
-void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at, const Eigen::Vector3f& up)
+void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 {
-	mTransform->SetPosition(eye);
 	auto forward = at - eye;
-	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mForwardLength = forward.norm();
-
-	mUpVector = up;
+	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
+	mTransform->SetPosition(eye);
 	mViewDirty = true;
 }
-
-void Camera::SetForward(const Eigen::Vector3f& forward, const Eigen::Vector3f& up)
+void Camera::SetForward(const Eigen::Vector3f& forward)
 {
 	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
-	mUpVector = up;
 	mViewDirty = true;
-}
-
-void Camera::SetForwardLength(float length)
-{
-	mForwardLength = length;
-	mViewDirty = true;
-}
-
-void Camera::SetYFlipped(bool flip)
-{
-	mFlipY = flip;
-	mProjectionDirty = true;
 }
 
 /********** query **********/
-Eigen::Vector3f Camera::GetEye() const 
-{
-	return mTransform->GetPosition();
-}
-Eigen::Vector3f Camera::GetLookAt() const 
+Eigen::Vector3f Camera::GetLookAt() const
 {
 	return mTransform->GetPosition() + mTransform->GetForward() * mForwardLength;
 }
-Eigen::Vector3f Camera::GetForward() const 
+Eigen::Vector3f Camera::GetForward() const
 {
 	return mTransform->GetForward();
 }
-float Camera::GetForwardLength() const 
+Eigen::Vector3f Camera::GetUp() const
 {
-	return mForwardLength;
+	return mTransform->GetUp();
 }
-
 Eigen::Vector2f Camera::GetOthoWinSize() const
 {
+	BOOST_ASSERT(mType == kCameraOthogonal);
 	float winHeight = mOrthoSize * 2;
 	return Eigen::Vector2f(winHeight * mAspect, winHeight);
 }
 
+//#define OTHO_PROJ_CENTER_NOT_ZERO
 void Camera::RecalculateProjection() const
 {
 	switch (mType) {
 	case kCameraPerspective:
-		mProjection = math::MakePerspectiveFovLH(mFov, mAspect, mZRange.x(), mZRange.y());
+		mProjection = math::cam::MakePerspectiveFovLH(mFov, mAspect, mClipPlane.x(), mClipPlane.y());
 		break;
 	case kCameraOthogonal: {
+	#if defined OTHO_PROJ_CENTER_NOT_ZERO
 		Eigen::Vector2f othoWin = GetOthoWinSize();
-		mProjection = math::MakeOrthographicOffCenterLH(0, othoWin.x(),
+		mProjection = math::cam::MakeOrthographicOffCenterLH(0, othoWin.x(),
 			0, othoWin.y(),
-			mZRange.x(), mZRange.y());
+			mClipPlane.x(), mClipPlane.y());
+
+		auto lb = Transform3Projective(mProjection) * Eigen::Vector4f(0, 0, 0, 1); lb /= lb.w();
+		BOOST_ASSERT(test::IsEqual(lb.head<2>(), Eigen::Vector2f(-1, -1)));
+		auto rt = Transform3Projective(mProjection) * Eigen::Vector4f(othoWin.x(), othoWin.y(), 0, 1); rt /= rt.w();
+		BOOST_ASSERT(test::IsEqual(rt.head<2>(), Eigen::Vector2f(1, 1)));
+	#else
+		Eigen::Vector2f othoWin = GetOthoWinSize() / 2;
+		mProjection = math::cam::MakeOrthographicOffCenterLH(-othoWin.x(), othoWin.x(),
+			-othoWin.y(), othoWin.y(),
+			mClipPlane.x(), mClipPlane.y());
+
+		/*auto lb = Transform3Projective(mProjection) * Eigen::Vector4f(-othoWin.x(), -othoWin.y(), 0, 1); lb /= lb.w();
+		BOOST_ASSERT(test::IsEqual(lb.head<2>(), Eigen::Vector2f(-1, -1)));
+		auto rt = Transform3Projective(mProjection) * Eigen::Vector4f(othoWin.x(), othoWin.y(), 0,1); rt /= rt.w();
+		BOOST_ASSERT(test::IsEqual(rt.head<2>(), Eigen::Vector2f(1, 1)));*/
+	#endif
 	}break;
 	default:
 		break;
 	}
 
+#if 0
 	if (mFlipY) {
 		mProjection = Transform3Projective(mProjection)
 			.prescale(Eigen::Vector3f(1, -1, 1))
 			.matrix();
 	}
+#endif
 }
 const Eigen::Matrix4f& Camera::GetProjection() const
 {
@@ -165,24 +164,26 @@ void Camera::RecalculateView() const
 {
 	auto eyePos = mTransform->GetPosition();
 	auto forward = mTransform->GetForward();
-	mView = math::MakeLookForwardLH(eyePos, forward, mUpVector);
+	auto up = mTransform->GetUp();
+	mView = math::cam::MakeLookForwardLH(eyePos, forward, up);
 
 	Transform3fAffine t(Transform3fAffine::Identity());
 	{
-		Eigen::Vector2f othoWin = GetOthoWinSize();
-		Eigen::Vector3f center(othoWin.x() / 2, othoWin.y() / 2, 0);
-		if (mType == kCameraOthogonal) {
-			t.translate(center);//consider orho-camera's anchor is screen-center
-			t.pretranslate(-center);//[0->sreen.w]  -> relative2screen_center[-screen.hw, screen.hw]
-		}
-
 		auto s = mTransform->GetScale();
 		t.prescale(Eigen::Vector3f(1 / s.x(), 1 / s.y(), 1 / s.z()));
 
-		if (mType == kCameraOthogonal)
+	#if defined OTHO_PROJ_CENTER_NOT_ZERO
+		if (mType == kCameraOthogonal) {
+			Eigen::Vector2f othoWin = GetOthoWinSize();
+			Eigen::Vector3f center(othoWin.x() / 2, othoWin.y() / 2, 0);
 			t.pretranslate(center);//[-screen.hw, screen.hw] -> [0->sreen.w]
+		}
+	#endif
 	}
-	mWorldView = mView * t.matrix();//[0->sreen.w] -> view_space
+	mWorldView = t.matrix() * mView;
+
+	/*auto lb = Transform3Projective(mWorldView) * Eigen::Vector4f(-5, -5, 0, 1); lb /= lb.w();
+	auto rt = Transform3Projective(mWorldView) * Eigen::Vector4f(5, 5, 0, 1); rt /= rt.w();*/
 }
 const Eigen::Matrix4f& Camera::GetView() const
 {

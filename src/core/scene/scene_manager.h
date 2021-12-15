@@ -15,8 +15,11 @@ public:
 	void SetPixelPerUnit(float ppu) { mPixelPerUnit = ppu; }
 
 	void RemoveAllCameras();
-	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
 	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
+	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
+	TemplateArgs CameraPtr AddCameraByType(CameraType camType, T &&...args) {
+		return (camType == kCameraPerspective) ? AddPerspectiveCamera(std::forward<T>(args)...) : AddOthogonalCamera(std::forward<T>(args)...);
+	}
 
 	void RemoveAllLights();
 	SpotLightPtr AddSpotLight(unsigned camMask = -1);

@@ -34,7 +34,7 @@ void TestCameraOutput::OnPostInitDevice()
 		if (mCaseIndex == 1) 
 		{
 			camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
-			camera2->SetCameraMask(cameraMask2);
+			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
 
 			auto light2 = mScneMng->AddDirectLight();
@@ -45,7 +45,7 @@ void TestCameraOutput::OnPostInitDevice()
 		{
 			camera2 = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
-			camera2->SetCameraMask(cameraMask2);
+			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
 			camera2->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
@@ -78,7 +78,7 @@ void TestCameraOutput::OnPostInitDevice()
 	{
 		auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		camera1->SetDepth(2);
-		camera1->SetCameraMask(cameraMask1);
+		camera1->SetCullingMask(cameraMask1);
 
 		auto light1 = mScneMng->AddPointLight();
 		light1->SetCameraMask(cameraMask1);

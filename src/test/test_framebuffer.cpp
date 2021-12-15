@@ -37,7 +37,7 @@ void TestRT::OnPostInitDevice()
 		auto camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		{
 			camera2->SetDepth(1);
-			camera2->SetCameraMask(cameraMask2);
+			camera2->SetCullingMask(cameraMask2);
 
 			mSprite2 = mRendFac->CreateSprite(test1::res::dds::Kenny());
 			mSprite2->SetCameraMask(cameraMask2);
@@ -49,7 +49,7 @@ void TestRT::OnPostInitDevice()
 		{
 			auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 			camera1->SetDepth(2);
-			camera1->SetCameraMask(cameraMask1);
+			camera1->SetCullingMask(cameraMask1);
 
 			mFrameBuffer = camera2->SetOutput(0.25);
 			DEBUG_SET_PRIV_DATA(mFrameBuffer, "camera2 output");
@@ -80,7 +80,7 @@ void TestRT::OnPostInitDevice()
 
 		{
 			camera2->SetDepth(1);
-			camera2->SetCameraMask(cameraMask2);
+			camera2->SetCullingMask(cameraMask2);
 			camera2->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
 			mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
@@ -101,7 +101,7 @@ void TestRT::OnPostInitDevice()
 		{
 			auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 			camera1->SetDepth(2);
-			camera1->SetCameraMask(cameraMask1);
+			camera1->SetCullingMask(cameraMask1);
 
 			mFrameBuffer = mResMng->CreateFrameBufferSync(mHalfSize.cast<int>().head<2>() / 2, 
 				MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
