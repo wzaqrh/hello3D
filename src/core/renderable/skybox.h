@@ -8,6 +8,7 @@
 namespace mir {
 
 struct SkyboxVertex {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Eigen::Vector4f pos;
 };
 
@@ -18,6 +19,7 @@ class MIR_CORE_API SkyBox : public RenderableSingleRenderOp
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(SkyBox);
 	SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, const std::string& imgName);
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 };
 

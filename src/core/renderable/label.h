@@ -17,6 +17,7 @@ class MIR_CORE_API Label : public RenderableSingleRenderOp
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Label);
 	Label(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, FontPtr font);
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetString(const std::string& str);
 	void SetSize(bool autoCalSize, const Eigen::Vector2f& size);
 public:

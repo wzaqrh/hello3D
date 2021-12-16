@@ -9,8 +9,7 @@ namespace mir {
 struct MaterialAsset;
 struct MaterialFactory : boost::noncopyable
 {
-	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
-public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	MaterialFactory();
 	MaterialPtr CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
 		const MaterialLoadParam& matName, MaterialPtr matRes = nullptr);
@@ -21,6 +20,8 @@ public:
 private:
 	MaterialPtr CreateMaterialByMaterialAsset(Launch launchMode, ResourceManager& resourceMng, 
 		const MaterialAsset& matAsset, MaterialPtr matRes = nullptr);
+private:
+	std::shared_ptr<class MaterialAssetManager> mMatAssetMng;
 };
 
 }

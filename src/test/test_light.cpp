@@ -32,7 +32,7 @@ void TestLight::OnPostInitDevice()
 	constexpr int CaseCountMod = 4;
 	int caseIndex = mCaseIndex % CaseCountMod;
 	int cameraType = mCaseIndex / CaseCountMod;
-	//mScneMng->SetPixelPerUnit(1);
+	//SetPPU(1);
 
 	switch (caseIndex) {
 	case 0: {

@@ -11,6 +11,7 @@ struct cbPerLight;
 class MIR_CORE_API RenderPipeline
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng);
 	bool BeginFrame();
 	void EndFrame();

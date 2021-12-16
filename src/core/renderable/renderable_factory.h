@@ -9,6 +9,7 @@ namespace mir {
 class MIR_CORE_API RenderableFactory 
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	typedef const std::string& string_cref;
 	RenderableFactory(ResourceManager& resMng, Launch launchMode);
 	SkyBoxPtr CreateSkybox(string_cref imgpath);

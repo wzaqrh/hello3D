@@ -20,6 +20,7 @@ typedef std::shared_ptr<FrameBufferAttach11> FrameBufferAttach11Ptr;
 class FrameBufferAttachByTexture11 : public FrameBufferAttach11
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	FrameBufferAttachByTexture11(Texture11Ptr texture) :mTexture(texture) {}
 	ITexturePtr AsTexture() const override { return mTexture; }
 	ID3D11RenderTargetView* AsRTV() override { return mTexture->AsRTV(); }
@@ -33,6 +34,7 @@ typedef std::shared_ptr<FrameBufferAttachByTexture11> FrameBufferAttachByTexture
 class FrameBufferAttachByView : public FrameBufferAttach11
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	FrameBufferAttachByView(ID3D11RenderTargetView* pRTV) :mRTV(pRTV) {}
 	FrameBufferAttachByView(ID3D11DepthStencilView* pDSV) :mDSV(pDSV) {}
 	ITexturePtr AsTexture() const override { return nullptr; }
@@ -48,6 +50,7 @@ typedef std::shared_ptr<FrameBufferAttachByView> FrameBufferAttachByViewPtr;
 class FrameBuffer11 : public ImplementResource<IFrameBuffer>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetAttachColor(size_t slot, FrameBufferAttach11Ptr attach);
 	void SetAttachZStencil(FrameBufferAttach11Ptr attach) {
 		mAttachZStencil = attach;

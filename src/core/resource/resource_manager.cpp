@@ -20,7 +20,7 @@ void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
 	if (launchMode == LaunchAsync) {
 		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
 			typedef std::packaged_task<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourcePkgTask;
-			std::shared_ptr<LoadResourcePkgTask> pkg_task = std::make_shared<LoadResourcePkgTask>(loadResCb);
+			std::shared_ptr<LoadResourcePkgTask> pkg_task = CreateInstance<LoadResourcePkgTask>(loadResCb);
 			this->Result = std::move(pkg_task->get_future());
 			auto pool = Pool.lock();
 			if (pool) pool->Post([=]() { (*pkg_task)(res, nextJob); });
@@ -45,7 +45,8 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& mater
 	mLoadTaskCtxMapLock = mResDependGraphLock = false;
 
 	constexpr int CThreadPoolNumber = 8;
-	mThreadPool = std::make_shared<ThreadPool>(CThreadPoolNumber, ilInit, ilShutDown);
+	mThreadPool = CreateInstance<ThreadPool>(CThreadPoolNumber, ilInit, ilShutDown);
+	ilInit();
 }
 ResourceManager::~ResourceManager()
 {
@@ -55,6 +56,7 @@ void ResourceManager::Dispose() ThreadSafe
 {
 	if (mThreadPool) {
 		mThreadPool = nullptr;
+		ilShutDown();
 	}
 }
 
@@ -186,7 +188,7 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 	if (!vertexSCD.EntryPoint.empty()) {
 		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD, mRenderSys.GetPlatform());
 		if (boost::filesystem::exists(vsAsmPath)) {
-			blobVS = std::make_shared<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
+			blobVS = CreateInstance<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
 		}
 		else {
 			vertexSCD.SourcePath = MakeShaderSourcePath(name).string();
@@ -203,7 +205,7 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 	if (!pixelSCD.EntryPoint.empty()) {
 		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD, mRenderSys.GetPlatform());
 		if (boost::filesystem::exists(psAsmPath)) {
-			blobPS = std::make_shared<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
+			blobPS = CreateInstance<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
 		}
 		else {
 			pixelSCD.SourcePath = MakeShaderSourcePath(name).string();
@@ -482,7 +484,7 @@ MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoa
 	ATOMIC_STATEMENT(mMaterialMapLock, 
 		material = this->mMaterialByName[matName];
 		if (material == nullptr) {
-			material = std::make_shared<Material>();
+			material = CreateInstance<Material>();
 			this->mMaterialByName[matName] = material;
 			DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.VariantName).str());
 			DEBUG_SET_CALL(material, launchMode);
@@ -508,7 +510,7 @@ AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& 
 	ATOMIC_STATEMENT(mAiSceneMapLock, 
 		aiRes = this->mAiSceneByKey[key];
 		if (aiRes == nullptr) {
-			aiRes = std::make_shared<AiScene>();
+			aiRes = CreateInstance<AiScene>();
 			this->mAiSceneByKey[key] = aiRes;
 			DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
 			DEBUG_SET_CALL(aiRes, launchMode);

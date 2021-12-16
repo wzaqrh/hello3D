@@ -93,7 +93,7 @@ void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& n
 
 PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
 {
-	PassPtr pass = std::make_shared<Pass>(proto.mLightMode, proto.mName);
+	PassPtr pass = CreateInstance<Pass>(proto.mLightMode, proto.mName);
 	pass->mTopoLogy = proto.mTopoLogy;
 
 	pass->mInputLayout = proto.mInputLayout;
@@ -154,7 +154,7 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 
 TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
 {
-	TechniquePtr technique = std::make_shared<Technique>();
+	TechniquePtr technique = CreateInstance<Technique>();
 	for (int i = 0; i < proto.mPasses.size(); ++i) {
 		PassPtr pass = this->ClonePass(launchMode, resourceMng, *proto.mPasses[i]);
 		technique->AddPass(pass);
@@ -182,7 +182,7 @@ void Material::SetCurTechByName(const std::string& name)
 
 MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
 {
-	MaterialPtr material = std::make_shared<Material>();
+	MaterialPtr material = CreateInstance<Material>();
 	material->Assign(proto);
 	for (int i = 0; i < proto.mTechniques.size(); ++i) {
 		TechniquePtr tech = this->CloneTechnique(launchMode, resourceMng, *proto.mTechniques[i]);

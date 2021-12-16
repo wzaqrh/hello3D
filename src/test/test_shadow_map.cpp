@@ -27,7 +27,7 @@ private:
 
 void TestShadowMap::OnPostInitDevice()
 {
-	mScneMng->SetPixelPerUnit(1);
+	SetPPU(1);
 
 	if (1) {
 		mModelFloor = mRendFac->CreateAssimpModel(MAT_MODEL);

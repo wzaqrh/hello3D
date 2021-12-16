@@ -14,6 +14,7 @@ namespace mir {
 
 class MIR_CORE_API Mir {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Mir(Launch launchMode);
 	~Mir();
 	bool Initialize(HWND hWnd);

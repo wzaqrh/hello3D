@@ -25,6 +25,7 @@ enum RotationOrder {
 
 struct MIR_CORE_API Transform {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Transform();
 	
 	void SetPosition(const Eigen::Vector3f& position);

@@ -21,14 +21,15 @@ enum CameraType {
 class MIR_CORE_API Camera : boost::noncopyable
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	TemplateArgs static CameraPtr CreatePerspective(ResourceManager& resMng, T &&...args) {
-		CameraPtr camera = std::make_shared<Camera>(resMng);
+		CameraPtr camera = CreateInstance<Camera>(resMng);
 		auto size = resMng.WinSize();
 		camera->InitAsPerspective(1.0f*size.x()/size.y(), std::forward<T>(args)...);
 		return camera;
 	}
 	TemplateArgs static CameraPtr CreateOthogonal(ResourceManager& resMng, T &&...args) {
-		CameraPtr camera = std::make_shared<Camera>(resMng);
+		CameraPtr camera = CreateInstance<Camera>(resMng);
 		auto size = resMng.WinSize();
 		camera->InitAsOthogonal(1.0f*size.x()/size.y(), std::forward<T>(args)...);
 		return camera;

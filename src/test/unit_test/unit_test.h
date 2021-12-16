@@ -8,13 +8,13 @@ namespace mir {
 namespace test {
 
 MIR_CORE_API bool IsEqual(float l, float r);
-MIR_CORE_API bool IsEqual(Eigen::Vector2f l, Eigen::Vector2f r);
-MIR_CORE_API bool IsEqual(Eigen::Vector3f l, Eigen::Vector3f r);
-MIR_CORE_API bool IsEqual(Eigen::Vector4f l, Eigen::Vector4f r);
+MIR_CORE_API bool IsEqual(const Eigen::Vector2f& l, const Eigen::Vector2f& r);
+MIR_CORE_API bool IsEqual(const Eigen::Vector3f& l, const Eigen::Vector3f& r);
+MIR_CORE_API bool IsEqual(const Eigen::Vector4f& l, const Eigen::Vector4f& r);
 
-MIR_CORE_API bool CheckInNDC(Eigen::Vector4f p);
+MIR_CORE_API bool CheckInNDC(const Eigen::Vector4f& p);
 
-MIR_CORE_API void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj);
+MIR_CORE_API void TestViewProjectionWithCases(const Eigen::Matrix4f& view, const Eigen::Matrix4f& proj);
 MIR_CORE_API void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, Eigen::Vector2i size, std::vector<Eigen::Vector4f> positions);
 
 }

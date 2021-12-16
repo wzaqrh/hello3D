@@ -42,7 +42,7 @@ void TestCamera::OnPostInitDevice()
 	constexpr int CaseCountMod = 6;
 	int caseIndex = mCaseIndex % CaseCountMod;
 	int cameraType = mCaseIndex / CaseCountMod;
-	mScneMng->SetPixelPerUnit(1);
+	SetPPU(1);
 
 	if (1)
 	{

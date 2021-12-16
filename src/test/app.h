@@ -21,6 +21,7 @@ class MirManager
 {
 public:
 	void SetMir(mir::Mir* ctx);
+	void SetPPU(float ppu);
 protected:
 	mir::SceneManagerPtr mScneMng;
 	mir::RenderableFactoryPtr mRendFac;
@@ -31,6 +32,7 @@ protected:
 class App : public IApp, public MirManager
 {
 public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 	App();
 	~App();
 public:

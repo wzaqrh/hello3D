@@ -16,7 +16,7 @@ App::App()
 {
 	mCameraInitInvLengthForward = Eigen::Vector3f::Zero();
 	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
-	mTransform = std::make_shared<mir::Transform>();
+	mTransform = mir::CreateInstance<mir::Transform>();
 	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()
@@ -169,4 +169,12 @@ void MirManager::SetMir(mir::Mir* ctx)
 
 	float aspect = 1.0 * size.x() / size.y();
 	mCamWinHSize = Eigen::Vector3f(aspect * 5, 5, 0);
+}
+
+void MirManager::SetPPU(float ppu)
+{
+	mScneMng->SetPixelPerUnit(ppu);
+
+	auto size = mScneMng->GetDefCamera()->GetOthoWinSize();
+	mCamWinHSize = Eigen::Vector3f(size.x() / 2, size.y() / 2, 0);
 }

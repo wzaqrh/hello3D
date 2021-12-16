@@ -14,23 +14,23 @@ Mir::~Mir()
 
 bool Mir::Initialize(HWND hWnd) {
 #if 0
-	mRenderSys = std::static_pointer_cast<RenderSystem>(std::make_shared<TRenderSystem9>());
+	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<TRenderSystem9>());
 #else
-	mRenderSys = std::static_pointer_cast<RenderSystem>(std::make_shared<RenderSystem11>());
+	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystem11>());
 #endif
 	if (FAILED(mRenderSys->Initialize(hWnd))) {
 		mRenderSys->Dispose();
 		return false;
 	}
 
-	mMaterialFac = std::make_shared<MaterialFactory>();
-	mAiResourceFac = std::make_shared<AiResourceFactory>();
-	mResourceMng = std::make_shared<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
+	mMaterialFac = CreateInstance<MaterialFactory>();
+	mAiResourceFac = CreateInstance<AiResourceFactory>();
+	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
 	
-	mRenderPipe = std::make_shared<RenderPipeline>(*mRenderSys, *mResourceMng);
-	mSceneMng = std::make_shared<SceneManager>(*mResourceMng);
+	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng);
+	mSceneMng = CreateInstance<SceneManager>(*mResourceMng);
 
-	mRenderableFac = std::make_shared<RenderableFactory>(*mResourceMng, mLaunchMode);
+	mRenderableFac = CreateInstance<RenderableFactory>(*mResourceMng, mLaunchMode);
 	return true;
 }
 

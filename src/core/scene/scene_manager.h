@@ -11,6 +11,7 @@ namespace mir {
 class MIR_CORE_API SceneManager : boost::noncopyable 
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	SceneManager(ResourceManager& resMng);
 	void SetPixelPerUnit(float ppu) { mPixelPerUnit = ppu; }
 

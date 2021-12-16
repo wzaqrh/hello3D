@@ -19,7 +19,7 @@ namespace mir {
 RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 	: mResourceMng(resMng)
 {
-	mFontCache = std::make_shared<FontCache>(mResourceMng);
+	mFontCache = CreateInstance<FontCache>(mResourceMng);
 	mLaunchMode = launchMode;
 }
 

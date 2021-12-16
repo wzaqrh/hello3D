@@ -31,6 +31,7 @@ enum TexturePbrType {
 
 struct AiNode : public std::enable_shared_from_this<AiNode>
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	AiNode(const aiNode* rawNode, const size_t serializeIndex) 
 		: RawNode(rawNode), SerilizeIndex(serializeIndex) {}
 	void AddChild(const AiNodePtr& child) {
@@ -60,7 +61,7 @@ public:
 struct AiScene : public ImplementResource<IResource> 
 {
 	friend class AiSceneLoader;
-public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	AiNodePtr AddNode(const aiNode* rawNode) {
 		AiNodePtr newNode = std::make_shared<AiNode>(rawNode, mNodeBySerializeIndex.size());
 		mNodeBySerializeIndex.push_back(newNode);
@@ -81,6 +82,7 @@ private:
 
 class AiResourceFactory {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	AiScenePtr CreateAiScene(Launch launchMode, ResourceManager& resourceMng,
 		const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes = nullptr);
 };

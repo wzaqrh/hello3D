@@ -5,11 +5,39 @@
 #include <Eigen/SVD>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
+#include <memory>
 #include <boost/math/constants/constants.hpp>
 
 typedef int BOOL;
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
 typedef Eigen::Transform<float, 3, Eigen::Projective> Transform3Projective;
+
+namespace mir {
+	
+#if !defined EIGEN_DONT_ALIGN_STATICALLY
+#define mir_allocator Eigen::aligned_allocator
+#define MIR_MAKE_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+#else
+#define mir_allocator std::allocator
+#define MIR_MAKE_ALIGNED_OPERATOR_NEW
+#endif
+
+template <class _Instance>
+struct CreateInstanceFuncor {
+	std::shared_ptr<_Instance> operator()() const {
+		return std::allocate_shared<_Instance>(mir_allocator<_Instance>());
+	}
+	template <typename... T>
+	std::shared_ptr<_Instance> operator()(T &&...args) const {
+		return std::allocate_shared<_Instance>(mir_allocator<_Instance>(), std::forward<T>(args)...);
+	}
+};
+
+template <class _Instance, typename... T>
+inline std::shared_ptr<_Instance> CreateInstance(T &&...args) {
+	return CreateInstanceFuncor<_Instance>()(std::forward<T>(args)...);
+}
+}
 
 namespace mir {
 namespace math {

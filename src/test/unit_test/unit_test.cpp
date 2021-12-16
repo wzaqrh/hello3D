@@ -11,25 +11,25 @@ namespace test {
 bool IsEqual(float l, float r) {
 	return std::abs<float>(l - r) < EPS;
 }
-bool IsEqual(Eigen::Vector2f l, Eigen::Vector2f r) {
+bool IsEqual(const Eigen::Vector2f& l, const Eigen::Vector2f& r) {
 	return IsEqual(l.x(), r.x())
 		&& IsEqual(l.y(), r.y());
 }
-bool IsEqual(Eigen::Vector3f l, Eigen::Vector3f r) {
+bool IsEqual(const Eigen::Vector3f& l, const Eigen::Vector3f& r) {
 	return IsEqual(l.x(), r.x())
 		&& IsEqual(l.y(), r.y())
 		&& IsEqual(l.z(), r.z());
 }
-bool IsEqual(Eigen::Vector4f l, Eigen::Vector4f r) {
+bool IsEqual(const Eigen::Vector4f& l, const Eigen::Vector4f& r) {
 	return IsEqual(l.x(), r.x())
 		&& IsEqual(l.y(), r.y())
 		&& IsEqual(l.z(), r.z())
 		&& IsEqual(l.w(), r.w());
 }
 
-bool CheckInNDC(Eigen::Vector4f p)
+bool CheckInNDC(const Eigen::Vector4f& _p)
 {
-	p /= p.w();
+	Eigen::Vector4f p = _p / _p.w();
 	BOOST_ASSERT(p.x() >= -1-EPS && p.x() <= 1+EPS);
 	BOOST_ASSERT(p.y() >= -1-EPS && p.y() <= 1+EPS);
 	BOOST_ASSERT(p.z() >= 0-EPS && p.z() <= 1+EPS);
@@ -38,7 +38,7 @@ bool CheckInNDC(Eigen::Vector4f p)
 	if (p.z() < 0-EPS || p.z() > 1+EPS) return false;
 	return true;
 }
-void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj)
+void TestViewProjectionWithCases(const Eigen::Matrix4f& view, const Eigen::Matrix4f& proj)
 {
 	//view = math::MakeLookAtLH(Eigen::Vector3f(0.57, 0.57, -0.57) * 1024, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
 	//proj = math::MakeOrthographicOffCenterLH(0, 1024, 0, 768, -10, 1024);

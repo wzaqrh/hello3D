@@ -26,6 +26,7 @@ typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadRe
 typedef std::function<void(IResourcePtr res)> ResourceLoadedCallback;
 struct LoadResourceJob 
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Init(Launch launchMode, LoadResourceCallback loadResCb);
 	DECLARE_LAUNCH_FUNCTIONS(void, Init);
 public:
@@ -39,8 +40,8 @@ class MIR_CORE_API ResourceManager : boost::noncopyable
 {
 	struct ResourceLoadTaskContext {
 		ResourceLoadTaskContext() {
-			WorkThreadJob = std::make_shared<LoadResourceJob>();
-			MainThreadJob = std::make_shared<LoadResourceJob>();
+			WorkThreadJob = CreateInstance<LoadResourceJob>();
+			MainThreadJob = CreateInstance<LoadResourceJob>();
 		}
 		void Init(Launch launchMode, IResourcePtr res, LoadResourceCallback loadResCb, ThreadPoolPtr pool) {
 			Res = res;
@@ -61,6 +62,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable
 		std::vector<ResourceLoadedCallback> ResLoadedCb;
 	};
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac, AiResourceFactory& aiResFac);
 	~ResourceManager();
 	void Dispose() ThreadSafe;

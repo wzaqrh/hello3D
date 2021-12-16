@@ -10,7 +10,7 @@ namespace mir {
 Camera::Camera(ResourceManager& resMng)
 	: mResourceMng(resMng)
 {
-	mTransform = std::make_shared<Transform>();
+	mTransform = CreateInstance<Transform>();
 	mRenderPath = kRenderPathForward;
 	mCameraMask = -1;
 	mDepth = 0;

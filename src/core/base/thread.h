@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <thread>
 #include "core/base/stl.h"
 #include "core/base/declare_macros.h"
 
@@ -36,8 +37,8 @@ public:
 		std::function<void()> onThreadStart = nullptr, 
 		std::function<void()> onThreadFinish = nullptr) {
 		mIoServiceWork = std::make_unique<boost::asio::io_service::work>(mIoService);
-		//mThreadGroup.create_threads(boost::bind(&boost::asio::io_service::run, &mIoService), threadNum);
 		mThreadGroup.create_threads([onThreadStart,onThreadFinish,this]() {
+			std::thread::id thId = std::this_thread::get_id();
 			if (onThreadStart) onThreadStart();
 			mIoService.run();
 			if (onThreadFinish) onThreadFinish();

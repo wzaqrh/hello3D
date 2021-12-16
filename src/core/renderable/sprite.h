@@ -16,6 +16,7 @@ class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
 	Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetTexture(const ITexturePtr& Texture) override;
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetAnchor(const Eigen::Vector3f& anchor);

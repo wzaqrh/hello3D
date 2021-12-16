@@ -60,7 +60,7 @@ void SceneManager::RemoveAllLights()
 }
 SpotLightPtr SceneManager::AddSpotLight(unsigned camMask)
 {
-	SpotLightPtr light = std::make_shared<SpotLight>();
+	SpotLightPtr light = CreateInstance<SpotLight>();
 	light->SetCameraMask(camMask);
 	mLights.push_back(light);
 	mLightsDirty = true;
@@ -68,7 +68,7 @@ SpotLightPtr SceneManager::AddSpotLight(unsigned camMask)
 }
 PointLightPtr SceneManager::AddPointLight(unsigned camMask)
 {
-	PointLightPtr light = std::make_shared<PointLight>();
+	PointLightPtr light = CreateInstance<PointLight>();
 	light->SetCameraMask(camMask);
 	mLights.push_back(light);
 	mLightsDirty = true;
@@ -76,7 +76,7 @@ PointLightPtr SceneManager::AddPointLight(unsigned camMask)
 }
 DirectLightPtr SceneManager::AddDirectLight(unsigned camMask)
 {
-	DirectLightPtr light = std::make_shared<DirectLight>();
+	DirectLightPtr light = CreateInstance<DirectLight>();
 	light->SetCameraMask(camMask);
 	mLights.push_back(light);
 	mLightsDirty = true;

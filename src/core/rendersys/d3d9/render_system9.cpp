@@ -15,7 +15,7 @@
 
 namespace mir {
 
-#define MakePtr std::make_shared
+#define MakePtr CreateInstance
 #define PtrRaw(T) T.get()
 
 #define FILE_EXT_CSO ".cso"
@@ -122,7 +122,7 @@ void RenderSystem9::Dispose()
 {
 }
 
-static inline D3DCOLOR XMFLOAT2D3DCOLOR(Eigen::Vector4f color) {
+static inline D3DCOLOR XMFLOAT2D3DCOLOR(const Eigen::Vector4f& color) {
 	D3DCOLOR dc = D3DCOLOR_RGBA(int(color.x() * 255), int(color.y() * 255), int(color.z() * 255), int(color.w() * 255));
 	return dc;
 }
@@ -197,7 +197,7 @@ IContantBufferPtr RenderSystem9::LoadConstBuffer(IResourcePtr res, const ConstBu
 {
 	if (res == nullptr) res = CreateResource(kDeviceResourceContantBuffer);
 
-	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(std::make_shared<ConstBufferDecl>(cbDecl));
+	ContantBuffer9Ptr ret = MakePtr<ContantBuffer9>(CreateInstance<ConstBufferDecl>(cbDecl));
 	if (data.NotNull()) {
 		BOOST_ASSERT(data.Size == ret->GetBufferSize());
 		UpdateBuffer(ret, data);

@@ -30,6 +30,7 @@ interface MIR_CORE_API ILight : boost::noncopyable
 class MIR_CORE_API DirectLight : public ILight 
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	DirectLight();
 	void SetDirection(const Eigen::Vector3f& dir);
 	void SetDiffuse(const Eigen::Vector3f& color);
@@ -49,6 +50,7 @@ protected:
 class MIR_CORE_API PointLight : public DirectLight
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	PointLight();
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetAttenuation(float c);
@@ -59,6 +61,7 @@ public:
 class MIR_CORE_API SpotLight : public PointLight
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	SpotLight();
 	void SetSpotDirection(const Eigen::Vector3f& dir);
 	void SetCutOff(float cutoff);

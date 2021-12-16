@@ -46,6 +46,7 @@ public:
 
 struct CBufferEntry 
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	static CBufferEntry MakeEmpty() {
 		return CBufferEntry{nullptr, "", false};
 	}
@@ -64,6 +65,7 @@ class Pass : public ImplementResource<IResource>, std::enable_shared_from_this<P
 {
 	friend class MaterialFactory;
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Pass(const std::string& lightMode, const std::string& name);
 	void AddConstBuffer(const CBufferEntry& cbuffer, int slot);
 	void AddSampler(ISamplerStatePtr sampler);
@@ -93,6 +95,7 @@ class Technique : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Technique() {
 		SetPrepared();
 	}
@@ -128,6 +131,7 @@ class MIR_CORE_API Material : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Material() {
 		SetPrepared();
 	}

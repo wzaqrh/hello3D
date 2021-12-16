@@ -11,6 +11,7 @@ namespace mir {
 
 /********** RenderOperation **********/
 struct RenderOperation {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderOperation() 
 		: IndexPos(0), IndexCount(0), IndexBase(0), WorldTransform(Eigen::Matrix4f::Identity()), CameraMask(-1) 
 	{}
@@ -30,15 +31,15 @@ public:
 	short IndexPos, IndexCount, IndexBase;
 	
 	TextureBySlot Textures;
-	
+
 	Eigen::Matrix4f WorldTransform;
 	std::map<std::string, std::vector<char>> UBOBytesByName;
+
 	unsigned CameraMask;
 };
 
 struct RenderOperationQueue {
-	std::vector<RenderOperation> mOps;
-public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Clear() {
 		mOps.clear();
 	}
@@ -56,6 +57,8 @@ public:
 	const RenderOperation& At(size_t pos) const { return mOps[pos]; }
 	RenderOperation& operator[](size_t pos) { return At(pos); }
 	const RenderOperation& operator[](size_t pos) const { return At(pos); }
+private:
+	std::vector<RenderOperation, mir_allocator<RenderOperation>> mOps;
 };
 
 interface MIR_CORE_API IRenderable : boost::noncopyable 

@@ -44,7 +44,7 @@ FontTextureAtlasPtr FontTexture::AddCharactor(int ch, int w, int h, unsigned cha
 	Eigen::Vector2i pos0(mCol, mRow), pos1(mCol + w, mRow + h);
 	Eigen::Vector2f uv0(pos0.x() * 1.0f / mWidth, pos0.y() * 1.0f / mHeight);
 	Eigen::Vector2f uv1(pos1.x() * 1.0f / mWidth, pos1.y() * 1.0f / mHeight);
-	FontTextureAtlasPtr atlas = std::make_shared<FontTextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
+	FontTextureAtlasPtr atlas = CreateInstance<FontTextureAtlas>(mTexture, uv0, uv1, pos0, pos1);
 
 	for (int y = 0; y < h; ++y)
 		memcpy(&mRawBuffer[(pos0.y() + y) * mWidth + pos0.x()], buffer + y * w, w);
@@ -76,7 +76,7 @@ FontCharactorCache::FontCharactorCache(ResourceManager& resourceMng, FT_Face ftF
 FontTexturePtr FontCharactorCache::AllocFontTexture()
 {
 	Eigen::Vector2i size = { 512,512 };
-	mCurFontTexture = std::make_shared<FontTexture>(mResourceMng, size);
+	mCurFontTexture = CreateInstance<FontTexture>(mResourceMng, size);
 	mFontTextures.push_back(mCurFontTexture);
 	return mCurFontTexture;
 }
@@ -100,7 +100,7 @@ FontCharactorPtr FontCharactorCache::GetCharactor(int ch)
 			if (!CheckError(FT_Render_Glyph(mFtFace->glyph, FT_RENDER_MODE_NORMAL))) break;
 			FT_Glyph glyph; if (!CheckError(FT_Get_Glyph(mFtFace->glyph, &glyph))) break;
 
-			charactor = std::make_shared<FontCharactor>();
+			charactor = CreateInstance<FontCharactor>();
 			charactor->CharIndex = charIndex;
 			charactor->Glyph = glyph;
 			
@@ -130,7 +130,7 @@ Font::Font(ResourceManager& resourceMng, FT_Library ftLib, std::string fontPath,
 	if (!CheckError(FT_Set_Char_Size(mFtFace, fontSize * 64, 0, dpi, 0))) return;
 	if (!CheckError(FT_Select_Charmap(mFtFace, FT_ENCODING_UNICODE))) return;
 
-	mCharactorCache = std::make_shared<FontCharactorCache>(resourceMng, mFtFace);
+	mCharactorCache = CreateInstance<FontCharactorCache>(resourceMng, mFtFace);
 }
 Font::~Font()
 {
@@ -172,7 +172,7 @@ FontPtr FontCache::GetFont(std::string fontPath, int fontSize)
 		font = iter->second;
 	}
 	else {
-		font = std::make_shared<Font>(mResourceMng, mFtLib, fontPath, fontSize, mDPI);
+		font = CreateInstance<Font>(mResourceMng, mFtLib, fontPath, fontSize, mDPI);
 		mFonts.insert(std::make_pair(key, font));
 	}
 	return font;

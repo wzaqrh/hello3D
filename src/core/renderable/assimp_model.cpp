@@ -266,15 +266,34 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 	if (meshArr.MeshCount() > 0) {
 		cbWeightedSkin weightedSkin = {};
 		auto& anode = mAnimeTree.GetNode(node);
+	#if defined EIGEN_DONT_ALIGN_STATICALLY
 		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, anode.GlobalTransform);
-
+	#else
+		const auto& s = anode.GlobalTransform;
+		weightedSkin.Model << 
+			 s.a1, s.b1, s.c1, s.d1,
+			 s.a2, s.b2, s.c2, s.d2,
+			 s.a3, s.b3, s.c3, s.d3,
+			 s.a4, s.b4, s.c4, s.d4;
+	#endif
 		for (int i = 0; i < meshArr.MeshCount(); i++) {
 			AssimpMeshPtr mesh = meshArr[i];
 			if (mesh->GetRawMesh()->HasBones()) {
 				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
 				size_t boneSize = boneMatArr.size(); 
-				for (int j = 0; j < std::min<int>(cbWeightedSkin::kModelCount, boneSize); ++j)
+				for (int j = 0; j < std::min<int>(cbWeightedSkin::kModelCount, boneSize); ++j) {
+				#if defined EIGEN_DONT_ALIGN_STATICALLY
 					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
+				#else
+					const auto& s = boneMatArr[j];
+					weightedSkin.Models[j] <<
+						s.a1, s.b1, s.c1, s.d1,
+						s.a2, s.b2, s.c2, s.d2,
+						s.a3, s.b3, s.c3, s.d3,
+						s.a4, s.b4, s.c4, s.d4;
+				#endif
+				}
+					
 			}
 			else {
 				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();

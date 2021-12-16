@@ -46,10 +46,10 @@ struct MaterialBuilder
 public:
 	MaterialBuilder(ResourceManager& resMng, Launch launchMode, MaterialPtr mat = nullptr)
 		:mResourceMng(resMng), mLaunchMode(launchMode) {
-		mMaterial = IF_OR(mat, std::make_shared<Material>());
+		mMaterial = IF_OR(mat, CreateInstance<Material>());
 	}
 	MaterialBuilder& AddTechnique(const std::string& name = "d3d11") {
-		mCurTech = std::make_shared<Technique>();
+		mCurTech = CreateInstance<Technique>();
 		mCurTech->mName = name;
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
@@ -61,7 +61,7 @@ public:
 		return *this;
 	}
 	MaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
-		mCurPass = std::make_shared<Pass>(lightMode, passName);
+		mCurPass = CreateInstance<Pass>(lightMode, passName);
 		mCurTech->AddPass(mCurPass);
 		return *this;
 	}
@@ -310,7 +310,7 @@ class MaterialAssetManager
 	std::shared_ptr<MaterialNameToAssetMapping> mMatNameToAsset;
 public:
 	MaterialAssetManager() {
-		mMatNameToAsset = std::make_shared<MaterialNameToAssetMapping>();
+		mMatNameToAsset = CreateInstance<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
 	bool GetMaterialAsset(Launch launchMode,
@@ -703,7 +703,7 @@ private:
 /********** TMaterialFactory **********/
 MaterialFactory::MaterialFactory()
 {
-	mMatAssetMng = std::make_shared<MaterialAssetManager>();
+	mMatAssetMng = CreateInstance<MaterialAssetManager>();
 }
 
 MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode, 
@@ -774,7 +774,7 @@ MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& 
 		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset, matRes);
 	}
 	else {
-		matRes = IF_OR(matRes, std::make_shared<Material>());
+		matRes = IF_OR(matRes, CreateInstance<Material>());
 		matRes->SetLoaded(false);
 		return matRes;
 	}

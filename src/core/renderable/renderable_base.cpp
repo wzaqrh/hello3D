@@ -10,7 +10,7 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 	, mLaunchMode(launchMode)
 	, mCameraMask(-1)
 {
-	mTransform = std::make_shared<Transform>();
+	mTransform = CreateInstance<Transform>();
 	mMaterial = resourceMng.CreateMaterial(launchMode, matName);
 }
 

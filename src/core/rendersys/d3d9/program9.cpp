@@ -38,7 +38,7 @@ void ConstantTable::Init(ID3DXConstantTable* constTable, D3DXHANDLE handle, int 
 			mHandleByName.insert(handleName);
 
 			if (constDesc.Class == D3DXPC_STRUCT) {
-				ConstantTablePtr subTab = std::make_shared<ConstantTable>();
+				ConstantTablePtr subTab = CreateInstance<ConstantTable>();
 				subTab->Init(constTable, handleName.second, constDesc.StructMembers);
 				mSubByName[handleName.first] = subTab;
 			}

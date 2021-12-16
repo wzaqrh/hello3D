@@ -15,6 +15,7 @@ class MIR_CORE_API Mesh : public RenderableSingleRenderOp
 	Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, 
 		int vertCount = 1024, int indexCount = 1024);
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Clear();
 	void SetVertexs(const vbSurface* vertData, int vertCount);
 	void SetVertexs(const vbSurface* vertData, int vertCount, int vertPos);

@@ -8,6 +8,7 @@ namespace mir {
 class HardwareBuffer
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	HardwareBuffer(ID3D11Buffer* buffer, size_t bufferSize, HWMemoryUsage usage)
 		:Buffer(buffer), BufferSize(bufferSize), Usage(usage) {}
 	HardwareBuffer() :HardwareBuffer(nullptr, 0, kHWUsageDefault) {}
@@ -23,6 +24,7 @@ public:
 class VertexBuffer11 : public ImplementResource<IVertexBuffer>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	VertexBuffer11() :Stride(0), Offset(0) {}
 	void Init(ID3D11Buffer* buffer, int bufferSize, HWMemoryUsage usage, int stride, int offset) {
 		hd.Init(buffer, bufferSize, usage);
@@ -46,6 +48,7 @@ public:
 class IndexBuffer11 : public ImplementResource<IIndexBuffer>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	IndexBuffer11() :Format(kFormatUnknown) {}
 	void Init(ID3D11Buffer* buffer, int bufferSize, ResourceFormat format, HWMemoryUsage usage) {
 		hd.Init(buffer, bufferSize, usage);
@@ -68,6 +71,7 @@ public:
 class ContantBuffer11 : public ImplementResource<IContantBuffer>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	ContantBuffer11() {}
 	void Init(ID3D11Buffer* buffer, ConstBufferDeclPtr decl, HWMemoryUsage usage);
 public:

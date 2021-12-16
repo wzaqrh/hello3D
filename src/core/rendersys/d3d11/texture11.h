@@ -9,6 +9,7 @@ namespace mir {
 class SamplerState11 : public ImplementResource<ISamplerState> 
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Init(ID3D11SamplerState* sampler) { mSampler = sampler; }
 	ID3D11SamplerState*& GetSampler11() { return mSampler; }
 public:
@@ -21,6 +22,7 @@ public:
 class Texture11 : public ImplementResource<ITexture>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Texture11();
 	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
 

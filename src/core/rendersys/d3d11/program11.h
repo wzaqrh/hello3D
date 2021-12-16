@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <d3d11.h>
+#include "core/base/math.h"
 #include "core/rendersys/d3d11/predeclare.h"
 #include "core/rendersys/program.h"
 
@@ -9,6 +10,7 @@ namespace mir {
 class VertexShader11 : public ImplementResource<IVertexShader>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	VertexShader11(IBlobDataPtr pBlob) :mBlob(pBlob) {}
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 
@@ -22,6 +24,7 @@ public:
 class PixelShader11 : public ImplementResource<IPixelShader>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	PixelShader11(IBlobDataPtr pBlob) :mBlob(pBlob) {}
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 
@@ -35,6 +38,7 @@ public:
 class Program11 : public ImplementResource<IProgram>
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Program11();
 	void SetVertex(VertexShader11Ptr pVertex);
 	void SetPixel(PixelShader11Ptr pPixel);

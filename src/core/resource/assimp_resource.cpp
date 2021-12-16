@@ -107,8 +107,8 @@ private:
 			processNode(child, rawScene);
 		}
 	}
-	static void ReCalculateTangents(std::vector<vbSurface>& surfVerts, 
-		std::vector<vbSkeleton>& skeletonVerts,
+	static void ReCalculateTangents(std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts, 
+		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>& skeletonVerts,
 		const std::vector<uint32_t>& indices) 
 	{
 		for (int i = 0; i < indices.size(); i += 3) {
@@ -188,10 +188,10 @@ private:
 	}
 	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
 		// Data to fill
-		std::vector<vbSurface> surfVerts;
-		std::vector<vbSkeleton> skeletonVerts;
+		std::vector<vbSurface, mir_allocator<vbSurface>> surfVerts;
+		std::vector<vbSkeleton, mir_allocator<vbSkeleton>> skeletonVerts;
 		std::vector<uint32_t> indices;
-		TextureBySlotPtr texturesPtr = std::make_shared<TextureBySlot>();
+		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
 		TextureBySlot& textures = *texturesPtr;
 		textures.Resize(4);
 
@@ -282,8 +282,8 @@ typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng, 
 	const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes)
 {
-	AiScenePtr res = IF_OR(aiRes, std::make_shared<AiScene>());
-	AiSceneLoaderPtr loader = std::make_shared<AiSceneLoader>(launchMode, resourceMng, res);
+	AiScenePtr res = IF_OR(aiRes, CreateInstance<AiScene>());
+	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resourceMng, res);
 	if (launchMode == LaunchAsync) {
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {

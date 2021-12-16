@@ -26,7 +26,7 @@ using Microsoft::WRL::ComPtr;
 
 namespace mir {
 
-#define MakePtr std::make_shared
+#define MakePtr CreateInstance
 #define PtrRaw(T) T.get()
 
 RenderSystem11::RenderSystem11()
@@ -83,9 +83,9 @@ bool RenderSystem11::_FetchBackFrameBufferColor(int width, int height)
 	ID3D11RenderTargetView* pRTV = nullptr;
 	if (CheckHR(mDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRTV))) return false;
 
-	mBackFrameBuffer = std::make_shared<FrameBuffer11>();
+	mBackFrameBuffer = CreateInstance<FrameBuffer11>();
 	mBackFrameBuffer->SetSize(Eigen::Vector2i(width, height));
-	mBackFrameBuffer->SetAttachColor(0, std::make_shared<FrameBufferAttachByView>(pRTV));
+	mBackFrameBuffer->SetAttachColor(0, CreateInstance<FrameBufferAttachByView>(pRTV));
 	mCurFrameBuffer = mBackFrameBuffer;
 	return true;
 }
@@ -112,7 +112,7 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 	ID3D11DepthStencilView* pDSV = nullptr;
 	if (CheckHR(mDevice->CreateDepthStencilView(mDepthStencil, &descDSV, &pDSV))) return false;
 
-	mBackFrameBuffer->SetAttachZStencil(std::make_shared<FrameBufferAttachByView>(pDSV));
+	mBackFrameBuffer->SetAttachZStencil(CreateInstance<FrameBufferAttachByView>(pDSV));
 	
 #if defined MIR_RESOURCE_DEBUG
 	for (auto rtv : mBackFrameBuffer->AsRTVs())
@@ -206,7 +206,7 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 /********** LoadFrameBuffer **********/
 static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
-	Texture11Ptr texture = std::make_shared<Texture11>();
+	Texture11Ptr texture = CreateInstance<Texture11>();
 	texture->Init(format, kHWUsageDefault, size.x(), size.y(), 1, 1);
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
@@ -253,7 +253,7 @@ static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Ei
 	const DXGI_FORMAT texFmt = (format == kFormatD24UNormS8UInt) ? DXGI_FORMAT_R24G8_TYPELESS : dsvFmt;
 	const DXGI_FORMAT srvFmt = (format == kFormatD24UNormS8UInt) ? DXGI_FORMAT_R24_UNORM_X8_TYPELESS : dsvFmt;
 
-	Texture11Ptr texture = std::make_shared<Texture11>();
+	Texture11Ptr texture = CreateInstance<Texture11>();
 	texture->Init(kFormatD24UNormS8UInt, kHWUsageDefault, size.x(), size.y(), 1, 1);
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
@@ -290,13 +290,13 @@ static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Ei
 static FrameBufferAttachByTexture11Ptr _CreateFrameBufferAttachColor(ID3D11Device* pDevice, 
 	const Eigen::Vector2i& size, ResourceFormat format)
 {
-	return format == kFormatUnknown ? nullptr : std::make_shared<FrameBufferAttachByTexture11>(
+	return format == kFormatUnknown ? nullptr : CreateInstance<FrameBufferAttachByTexture11>(
 		_CreateColorAttachTexture(pDevice, size, format));
 }
 static FrameBufferAttachByTexture11Ptr _CreateFrameBufferAttachZStencil(ID3D11Device* pDevice, 
 	const Eigen::Vector2i& size, ResourceFormat format) 
 {
-	return format == kFormatUnknown ? nullptr : std::make_shared<FrameBufferAttachByTexture11>(
+	return format == kFormatUnknown ? nullptr : CreateInstance<FrameBufferAttachByTexture11>(
 		_CreateZStencilAttachTexture(pDevice, size, format));
 }
 IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats)
@@ -582,7 +582,7 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 	ID3D11Buffer* pConstantBuffer = nullptr;
 	if (CheckHR(mDevice->CreateBuffer(&cbDesc, data.Bytes ? &initData : nullptr, &pConstantBuffer))) return nullptr;
 	
-	ret->Init(pConstantBuffer, std::make_shared<ConstBufferDecl>(cbDecl), usage);
+	ret->Init(pConstantBuffer, CreateInstance<ConstBufferDecl>(cbDecl), usage);
 	return ret;
 }
 void RenderSystem11::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program)

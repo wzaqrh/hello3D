@@ -10,6 +10,8 @@ class TestSprite : public App
 protected:
 	void OnRender() override;
 	void OnPostInitDevice() override;
+	void OnInitLight() override {}
+	void OnInitCamera() override {}
 private:
 	SpritePtr mSprite;
 };
@@ -25,9 +27,9 @@ private:
 
 void TestSprite::OnPostInitDevice()
 {
-	mScneMng->RemoveAllCameras();
+	mScneMng->AddDirectLight();
 	mScneMng->AddOthogonalCamera(test1::cam_otho::Eye(mWinCenter));
-	mScneMng->SetPixelPerUnit(C_WINDOW_HEIGHT / 10.0);
+	SetPPU(C_WINDOW_HEIGHT / 10.0);
 
 	Launch sync = __LaunchSync__;
 	switch (mCaseIndex) {

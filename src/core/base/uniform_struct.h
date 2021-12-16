@@ -3,8 +3,11 @@
 
 namespace mir {
 
-struct _declspec(align(16)) cbPerFrame
+#define UNIFORM_ALIGN _declspec(align(16))
+
+struct UNIFORM_ALIGN cbPerFrame
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbPerFrame() {
 		World = View = Projection = Eigen::Matrix4f::Identity();
 		WorldInv = ViewInv = ProjectionInv = Eigen::Matrix4f::Identity();
@@ -28,8 +31,9 @@ public:
 	Eigen::Vector4f _ShadowMapTexture_TexelSize;
 };
 
-struct _declspec(align(16)) cbPerLight
+struct UNIFORM_ALIGN cbPerLight
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbPerLight() {
 		unity_LightPosition = Eigen::Vector4f::Zero();
 		unity_LightColor = Eigen::Vector4f::Zero();
@@ -47,8 +51,9 @@ public:
 	BOOL IsSpotLight;
 };
 
-struct _declspec(align(16)) cbWeightedSkin
+struct UNIFORM_ALIGN cbWeightedSkin
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	enum { kModelCount = 56 };
 	cbWeightedSkin() {
 		Models[0] = Model = Eigen::Matrix4f::Identity();
@@ -68,8 +73,9 @@ public:
 	BOOL hasAlbedo;
 };
 
-struct _declspec(align(16)) cbUnityMaterial
+struct UNIFORM_ALIGN cbUnityMaterial
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbUnityMaterial() {
 		_SpecColor = Eigen::Vector4f::Ones();
 		_Color = Eigen::Vector4f::Ones();
@@ -85,8 +91,9 @@ public:
 	unsigned _SpecLightOff;
 };
 
-struct _declspec(align(16)) cbUnityGlobal
+struct UNIFORM_ALIGN cbUnityGlobal
 {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbUnityGlobal() {
 		_Unity_IndirectSpecColor = Eigen::Vector4f::Zero();
 		_AmbientOrLightmapUV = Eigen::Vector4f(0.01, 0.01, 0.01, 1);

@@ -12,11 +12,12 @@ namespace mir {
 class MIR_CORE_API AssimpMesh
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpMesh);
 	AssimpMesh(Launch launchMode, ResourceManager& resourceMng,
 		const aiMesh* aiMeshData,
-		std::vector<vbSurface>&& surfVertexs,
-		std::vector<vbSkeleton>&& skeletonVertexs,
+		std::vector<vbSurface, mir_allocator<vbSurface>>&& surfVertexs,
+		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>&& skeletonVertexs,
 		std::vector<uint32_t>&& indices,
 		TextureBySlotPtr textures);
 	bool IsLoaded() const;
@@ -28,8 +29,8 @@ public:
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }
 private:
 	const aiMesh* mAiMesh;
-	std::vector<vbSurface> mSurfVertexs;
-	std::vector<vbSkeleton> mSkeletonVertexs;
+	std::vector<vbSurface, mir_allocator<vbSurface>> mSurfVertexs;
+	std::vector<vbSkeleton, mir_allocator<vbSkeleton>> mSkeletonVertexs;
 	std::vector<uint32_t> mIndices;
 	TextureBySlotPtr mTextures;
 	IVertexBufferPtr mVBOSurface, mVBOSkeleton;

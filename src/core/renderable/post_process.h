@@ -7,16 +7,18 @@
 namespace mir {
 
 struct PostProcessVertex {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Eigen::Vector4f Pos;
 	Eigen::Vector2f Tex;
 };
 struct PostProcessVertexQuad {
-	PostProcessVertex lb, lt, rt, rb;
-public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	PostProcessVertexQuad(float x, float y, float w, float h);
 	void SetRect(float x, float y, float w, float h);
 	void SetFlipY(bool flipY);
 	void SetZ(float z);
+public:
+	PostProcessVertex lb, lt, rt, rb;
 };
 class MIR_CORE_API PostProcess : public RenderableSingleRenderOp 
 {

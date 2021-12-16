@@ -2,8 +2,6 @@
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
 
-void TestViewProjectionWithCases(Eigen::Matrix4f view, Eigen::Matrix4f proj);
-
 namespace mir {
 
 /********** DirectLight **********/

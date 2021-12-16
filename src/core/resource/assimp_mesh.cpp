@@ -7,8 +7,9 @@ namespace mir {
 
 /********** TMesh **********/
 AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng, const aiMesh* data,
-	std::vector<vbSurface>&& surfVertexs, std::vector<vbSkeleton>&& skeletonVertexs, 
-	std::vector<UINT>&& indices, TextureBySlotPtr textures)
+	std::vector<vbSurface, mir_allocator<vbSurface>>&& surfVertexs, 
+	std::vector<vbSkeleton, mir_allocator<vbSkeleton>>&& skeletonVertexs, 
+	std::vector<uint32_t>&& indices, TextureBySlotPtr textures)
 	: mAiMesh(data)
 	, mSurfVertexs(std::move(surfVertexs))
 	, mSkeletonVertexs(std::move(skeletonVertexs))

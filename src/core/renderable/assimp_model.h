@@ -57,6 +57,7 @@ class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
 	AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matType);
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void LoadModel(const std::string& assetPath, const std::string& redirectResource = "");
 	void PlayAnim(int Index);
 

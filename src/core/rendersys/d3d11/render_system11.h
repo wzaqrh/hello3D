@@ -9,6 +9,7 @@ namespace mir {
 class RenderSystem11 : public RenderSystem
 {
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderSystem11();
 	~RenderSystem11();
 
