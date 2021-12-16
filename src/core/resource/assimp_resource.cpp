@@ -189,31 +189,72 @@ private:
 		return textures;
 	}
 	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
+		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
+		texturesPtr->Resize(4);
+		if (mesh->mMaterialIndex >= 0) {
+			TextureBySlot& textures = *texturesPtr;
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+			std::vector<ITexturePtr> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, scene);
+			if (diffuseMaps.size() > 0)
+				textures[kTextureDiffuse] = diffuseMaps[0];
+
+			std::vector<ITexturePtr> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, scene);
+			if (specularMaps.size() > 0)
+				textures[kTextureSpecular] = specularMaps[0];
+
+			std::vector<ITexturePtr> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, scene);
+			if (normalMaps.size() > 0)
+				textures[kTextureNormal] = normalMaps[0];
+		}
+
+#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
+#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
 		std::vector<vbSurface, mir_allocator<vbSurface>> surfVerts(mesh->mNumVertices);
 		std::vector<vbSkeleton, mir_allocator<vbSkeleton>> skeletonVerts(mesh->mNumVertices);
 		for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+		#if !defined EIGEN_DONT_ALIGN_STATICALLY
 			surfVerts[vertexId].Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
+		#else
+			VEC_ASSIGN(surfVerts[vertexId].Pos, mesh->mVertices[vertexId]);
+		#endif
 		}
 		if (mesh->mTextureCoords[0]) {
 			const auto& meshTexCoord0 = mesh->mTextureCoords[0];
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				surfVerts[vertexId].Tex.x() = meshTexCoord0[vertexId].x;
 				surfVerts[vertexId].Tex.y() = meshTexCoord0[vertexId].y;
+			#else
+				VEC_ASSIGN1(surfVerts[vertexId].Tex, meshTexCoord0[vertexId], sizeof(Eigen::Vector2f));
+			#endif
 			}
 		}
 		if (mesh->mNormals) {
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
+			#else
+				VEC_ASSIGN(skeletonVerts[vertexId].Normal, mesh->mNormals[vertexId]);
+			#endif
 			}
 		}
 		if (mesh->mTangents) {
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
+			#else
+				VEC_ASSIGN(skeletonVerts[vertexId].Tangent, mesh->mTangents[vertexId]);
+			#endif
 			}
 		}
 		if (mesh->mBitangents) {
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
+			#else
+				VEC_ASSIGN(skeletonVerts[vertexId].BiTangent, mesh->mBitangents[vertexId]);
+			#endif
 			}
 		}
 
@@ -249,25 +290,6 @@ private:
 
 		if (mesh->mNormals && mesh->mTangents == nullptr) {
 			ReCalculateTangents(surfVerts, skeletonVerts, indices);
-		}
-
-		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
-		texturesPtr->Resize(4);
-		if (mesh->mMaterialIndex >= 0) {
-			TextureBySlot& textures = *texturesPtr;
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
-			std::vector<ITexturePtr> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, scene);
-			if (diffuseMaps.size() > 0)
-				textures[kTextureDiffuse] = diffuseMaps[0];
-
-			std::vector<ITexturePtr> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, scene);
-			if (specularMaps.size() > 0)
-				textures[kTextureSpecular] = specularMaps[0];
-
-			std::vector<ITexturePtr> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, scene);
-			if (normalMaps.size() > 0)
-				textures[kTextureNormal] = normalMaps[0];
 		}
 
 		return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, 

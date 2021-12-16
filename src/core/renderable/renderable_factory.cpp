@@ -62,9 +62,9 @@ LabelPtr RenderableFactory::CreateLabel(string_cref fontPath, int fontSize)
 	return Label::Create(mLaunchMode, mResourceMng, MAT_LABEL, font);
 }
 
-SkyBoxPtr RenderableFactory::CreateSkybox(string_cref imgpath)
+SkyBoxPtr RenderableFactory::CreateSkybox(string_cref imgpath, const MaterialLoadParam& matName)
 {
-	return SkyBox::Create(mLaunchMode, mResourceMng, MAT_SKYBOX, imgpath);
+	return SkyBox::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_SKYBOX), imgpath);
 }
 
 PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName, Camera& camera)

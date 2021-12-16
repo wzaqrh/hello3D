@@ -9,7 +9,7 @@ namespace mir {
 
 struct SkyboxVertex {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	Eigen::Vector4f pos;
+	Eigen::Vector3f Pos;
 };
 
 class MIR_CORE_API SkyBox : public RenderableSingleRenderOp 

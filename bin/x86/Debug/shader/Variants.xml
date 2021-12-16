@@ -19,4 +19,13 @@
 			</Macros>
 		</PROGRAM>
 	</Variant>
+	
+	<Variant Name="Skybox/Deprecate">
+		<UseShader>Skybox</UseShader>
+		<PROGRAM>
+			<Macros>
+				<DEPRECATE_SKYBOX>1</DEPRECATE_SKYBOX>
+			</Macros>
+		</PROGRAM>
+	</Variant>
 </ShaderVariants>

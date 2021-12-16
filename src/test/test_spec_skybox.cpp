@@ -14,19 +14,28 @@ protected:
 	void OnInitCamera() override {}
 };
 /*mCaseIndex
-0：透视相机 观察到天空盒	 
-1：正交相机 观察到天空盒	 
+0：透视相机					观察到背景街道
+1：正交相机					观察到背景街道
+2: 透视相机 Deprecate着色器	观察到背景街道
 */
 
 void TestSpecSkybox::OnPostInitDevice()
 {
-	if (mCaseIndex == 0) {
+	switch (mCaseIndex) {
+	case 0: {
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
-	}
-	else {
+	}break;
+	case 1: {
 		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
+	}break;
+	case 2: {
+		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(), MaterialLoadParam{MAT_SKYBOX, "Skybox/Deprecate"}));//bc1a mipmap cube
+	}break;
+	default:
+		break;
 	}
 }
 

@@ -12,7 +12,7 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	typedef const std::string& string_cref;
 	RenderableFactory(ResourceManager& resMng, Launch launchMode);
-	SkyBoxPtr CreateSkybox(string_cref imgpath);
+	SkyBoxPtr CreateSkybox(string_cref imgpath, const MaterialLoadParam& matName = "");
 	SpritePtr CreateColorLayer(const MaterialLoadParam& matName = "");
 	SpritePtr CreateSprite(string_cref imgpath = "", const MaterialLoadParam& matName = "");
 	MeshPtr CreateMesh(int vertCount = 1024, int indexCount = 1024, const MaterialLoadParam& matName = "");

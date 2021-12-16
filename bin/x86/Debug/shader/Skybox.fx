@@ -14,15 +14,27 @@ struct PixelInput
 	float3 Tex : TEXCOORD0;
 };
 
+#if DEPRECATE_SKYBOX
 PixelInput VS(VertexInput input)
 {
-	PixelInput output = (PixelInput)0;
+	PixelInput output;
 	output.Pos = input.Pos;
 	
 	matrix WVPInv = mul(WorldInv, mul(ViewInv, ProjectionInv));
 	output.Tex = normalize(mul(WVPInv, input.Pos));
     return output;
 }
+#else
+PixelInput VS(VertexInput input)
+{
+	PixelInput output;
+	output.Tex = input.Pos.xyz / input.Pos.w;
+	output.Pos.xyz = mul((float3x3)View, output.Tex);
+	output.Pos.w   = 1.0;
+	output.Pos = mul(Projection, output.Pos);
+	return output;
+}
+#endif
 
 float4 PS(PixelInput input) : SV_Target
 {	
@@ -31,5 +43,3 @@ float4 PS(PixelInput input) : SV_Target
 	finalColor.a = 1.0;
 	return finalColor;
 }
-
-
