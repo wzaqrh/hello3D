@@ -17,14 +17,15 @@ AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng, const ai
 	, mTextures(textures)
 {
 	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt,  Data::Make(mIndices));
-	
+	DEBUG_SET_PRIV_DATA(mIndexBuffer, "assimp_mesh.index");
+
 	mVBOSurface = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::Make(mSurfVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.surface");
 
 	mVBOSkeleton = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.skeleton");
 
-#if defined _DEBUG
+#if defined _DEBUG && 0
 	mMinPos = mMaxPos = Eigen::Vector3f::Zero();
 	for (auto& it : mSurfVertexs) {
 		mMinPos.x() = std::min<float>(mMinPos.x(), it.Pos.x());

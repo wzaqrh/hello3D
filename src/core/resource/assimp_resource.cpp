@@ -7,6 +7,7 @@
 #include "core/resource/resource_manager.h"
 #include "core/base/debug.h"
 #include "core/base/macros.h"
+#include <unordered_map>
 
 namespace mir {
 
@@ -147,7 +148,8 @@ private:
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene) {
 		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;
-		for (UINT i = 0; i < mat->GetTextureCount(type); i++) {
+		size_t matCount = mat->GetTextureCount(type);
+		for (UINT i = 0; i < matCount; i++) {
 			aiString str; mat->GetTexture(type, i, &str);
 			std::string key = str.C_Str();
 
@@ -187,49 +189,48 @@ private:
 		return textures;
 	}
 	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
-		// Data to fill
-		std::vector<vbSurface, mir_allocator<vbSurface>> surfVerts;
-		std::vector<vbSkeleton, mir_allocator<vbSkeleton>> skeletonVerts;
-		std::vector<uint32_t> indices;
-		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
-		TextureBySlot& textures = *texturesPtr;
-		textures.Resize(4);
-
-		if (mesh->mMaterialIndex >= 0) {
-			aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-			//if (textype.empty()) textype = determineTextureType(scene, mat);
-		}
-
+		std::vector<vbSurface, mir_allocator<vbSurface>> surfVerts(mesh->mNumVertices);
+		std::vector<vbSkeleton, mir_allocator<vbSkeleton>> skeletonVerts(mesh->mNumVertices);
 		for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
-			surfVerts.emplace_back();
-			vbSurface surf = surfVerts.back();
-			surf.Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
-			if (mesh->mTextureCoords[0]) {
-				surf.Tex.x() = mesh->mTextureCoords[0][vertexId].x;
-				surf.Tex.y() = mesh->mTextureCoords[0][vertexId].y;
+			surfVerts[vertexId].Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
+		}
+		if (mesh->mTextureCoords[0]) {
+			const auto& meshTexCoord0 = mesh->mTextureCoords[0];
+			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+				surfVerts[vertexId].Tex.x() = meshTexCoord0[vertexId].x;
+				surfVerts[vertexId].Tex.y() = meshTexCoord0[vertexId].y;
 			}
-
-			skeletonVerts.emplace_back();
-			vbSkeleton skin = skeletonVerts.back();
-			if (mesh->mNormals) skin.Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
-			if (mesh->mTangents) skin.Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
-			if (mesh->mBitangents) skin.BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
+		}
+		if (mesh->mNormals) {
+			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
+			}
+		}
+		if (mesh->mTangents) {
+			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
+			}
+		}
+		if (mesh->mBitangents) {
+			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+				skeletonVerts[vertexId].BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
+			}
 		}
 
 		if (mesh->HasBones()) {
-			std::map<int, int> spMap;
-			for (int boneId = 0; boneId < mesh->mNumBones; ++boneId) {
-				aiBone* bone = mesh->mBones[boneId];
-				for (int k = 0; k < bone->mNumWeights; ++k) {
-					aiVertexWeight& vw = bone->mWeights[k];
+			std::vector<int> spMap(skeletonVerts.size(), 0);
+			for (size_t boneId = 0; boneId < mesh->mNumBones; ++boneId) {
+				const aiBone* bone = mesh->mBones[boneId];
+				for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
+					const aiVertexWeight& vw = bone->mWeights[weightIndex];
 					if (vw.mVertexId >= 0 && vw.mVertexId < skeletonVerts.size()) {
 						int sp = spMap[vw.mVertexId];
 						if (sp < 4) {
-							FLOAT* BlendWeights = (FLOAT*)&skeletonVerts[vw.mVertexId].BlendWeights;
-							BlendWeights[sp] = vw.mWeight;
+							float* bwArray = (float*)&skeletonVerts[vw.mVertexId].BlendWeights;
+							bwArray[sp] = vw.mWeight;
 
-							unsigned int* BlendIndices = (unsigned int*)&skeletonVerts[vw.mVertexId].BlendIndices;
-							BlendIndices[sp] = boneId;
+							unsigned* biArray = (unsigned*)&skeletonVerts[vw.mVertexId].BlendIndices;
+							biArray[sp] = boneId;
 
 							spMap[vw.mVertexId]++;
 						}
@@ -238,17 +239,22 @@ private:
 			}
 		}
 
+		std::vector<uint32_t> indices;
 		for (size_t i = 0; i < mesh->mNumFaces; i++) {
-			aiFace face = mesh->mFaces[i];
-			for (size_t j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
+			const aiFace& face = mesh->mFaces[i];
+			size_t position = indices.size();
+			indices.resize(position + face.mNumIndices);
+			memcpy(&indices[position], face.mIndices, face.mNumIndices * sizeof(unsigned int));
 		}
 
 		if (mesh->mNormals && mesh->mTangents == nullptr) {
 			ReCalculateTangents(surfVerts, skeletonVerts, indices);
 		}
 
+		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
+		texturesPtr->Resize(4);
 		if (mesh->mMaterialIndex >= 0) {
+			TextureBySlot& textures = *texturesPtr;
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 			std::vector<ITexturePtr> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, scene);
