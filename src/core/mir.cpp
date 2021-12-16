@@ -19,7 +19,7 @@ bool Mir::Initialize(HWND hWnd) {
 	mRenderSys = std::static_pointer_cast<RenderSystem>(std::make_shared<RenderSystem11>());
 #endif
 	if (FAILED(mRenderSys->Initialize(hWnd))) {
-		mRenderSys->CleanUp();
+		mRenderSys->Dispose();
 		return false;
 	}
 
@@ -35,13 +35,17 @@ bool Mir::Initialize(HWND hWnd) {
 }
 
 void Mir::Dispose() {
-	mResourceMng->Dispose();
+	if (mRenderSys) {
+		mRenderableFac = nullptr;
+		mMaterialFac = nullptr;
+		mSceneMng = nullptr;
+		
+		mResourceMng->Dispose();
+		mResourceMng = nullptr;
 
-	mRenderableFac = nullptr;
-	mMaterialFac = nullptr;
-	mSceneMng = nullptr;
-	mResourceMng = nullptr;
-	mRenderSys = nullptr;
+		mRenderSys->Dispose();
+		mRenderSys = nullptr;
+	}
 }
 
 void Mir::Update()

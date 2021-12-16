@@ -2,6 +2,7 @@
 #include <d3dcompiler.h>
 #include <dxerr.h>
 #include <boost/assert.hpp>
+#include <boost/format.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "core/base/debug.h"
 #include "core/rendersys/blob.h"
@@ -17,16 +18,15 @@ TimeProfile::TimeProfile(const std::string& name)
 	mName = name;
 	mCurTime = timeGetTime();
 
-	char szBuf[260];
-	sprintf(szBuf, "%s : %d\n", mName.c_str(), mCurTime);
-	OutputDebugStringA(szBuf);
+	int t2 = mCurTime % 1000;
+	int t1 = mCurTime / 1000 % 1000;
+	int t0 = mCurTime / 1000 / 1000;
+	debug::Log((boost::format("%1% timestamp %2%,%3%,%4%") %mName %t0 %t1 %t2).str());
 }
 
 TimeProfile::~TimeProfile()
 {
-	char szBuf[260];
-	sprintf(szBuf, "%s takes %d ms\n", mName.c_str(), timeGetTime() - mCurTime);
-	OutputDebugStringA(szBuf);
+	debug::Log((boost::format("%1% takes %2% ms") %mName.c_str() %(timeGetTime()-mCurTime)).str());
 }
 
 /********** Timer **********/
@@ -139,9 +139,15 @@ void SetDebugCallStack(IResourcePtr res, const std::string& callstack)
 }
 
 /********** Log **********/
-void Log(const char* msg)
+void Log(const std::string& msg, int level)
 {
-	OutputDebugStringA(msg);
+#if defined MIR_LOG_LEVEL
+	if (level < MIR_LOG_LEVEL) return;
+#endif
+	char szInfo[260];
+	sprintf(szInfo, "t%d ", std::this_thread::get_id());
+	OutputDebugStringA(szInfo);
+	OutputDebugStringA(msg.c_str());
 	OutputDebugStringA("\n");
 }
 

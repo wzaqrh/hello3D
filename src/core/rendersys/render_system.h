@@ -23,12 +23,13 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual ~IRenderSystem() {}
 	virtual bool Initialize(HWND hWnd, RECT vp = { 0,0,0,0 }) = 0;
 	virtual void Update(float dt) = 0;
-	virtual void CleanUp() = 0;
+	virtual void Dispose() = 0;
 	
-	virtual void SetViewPort(int x, int y, int w, int h) = 0;
-
+	/***** query *****/
+	virtual std::string GetPlatform() const = 0;
 	virtual Eigen::Vector2i WinSize() const = 0;
-
+	
+	/***** about resource *****/
 	virtual IResourcePtr CreateResource(DeviceResourceType deviceResType) = 0;
 
 	//last formats is zstencil attachment
@@ -70,12 +71,16 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	void SetTexture(size_t slot, ITexturePtr texture) { SetTextures(slot, &texture, 1); }
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
 
+	/***** about state *****/
+	virtual void SetViewPort(int x, int y, int w, int h) = 0;
+
 	virtual const BlendState& GetBlendFunc() const = 0;
 	virtual void SetBlendFunc(const BlendState& blendFunc) = 0;
 
 	virtual const DepthState& GetDepthState() const = 0;
 	virtual void SetDepthState(const DepthState& depthState) = 0;
 
+	/***** about draw *****/
 	virtual void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) = 0;
 	virtual void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) = 0;
 

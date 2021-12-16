@@ -118,7 +118,7 @@ void RenderSystem9::Update(float dt)
 {
 }
 
-void RenderSystem9::CleanUp()
+void RenderSystem9::Dispose()
 {
 }
 

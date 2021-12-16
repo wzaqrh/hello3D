@@ -20,6 +20,9 @@ public:
 		if (!_CallStack.empty()) _DebugInfo += ", call:" + _CallStack;
 		return _DebugInfo;
 	}
+	const std::string& GetResPath() const {
+		return _ResourcePath;
+	}
 public:
 	std::vector<void*> _DeviceChilds;
 	std::string _PrivData, _ResourcePath, _DebugInfo, _CallStack;

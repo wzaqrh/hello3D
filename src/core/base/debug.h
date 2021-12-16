@@ -36,18 +36,39 @@ void MIR_CORE_API SetDebugPrivData(IResourcePtr res, const std::string& privData
 void MIR_CORE_API SetDebugResourcePath(IResourcePtr res, const std::string& resPath);
 void MIR_CORE_API SetDebugCallStack(IResourcePtr res, const std::string& callstack);
 
-void Log(const char* msg);
+#define LOG_LEVEL_VERVOSE 0
+#define LOG_LEVEL_DEBUG	1
+#define LOG_LEVEL_INFO 2
+#define LOG_LEVEL_WARN 3
+#define LOG_LEVEL_ERROR 4
+#define LOG_LEVEL_NEVER 5
+
+void Log(const std::string& msg, int level = LOG_LEVEL_VERVOSE);
 void Log(const D3DCAPS9& caps);
 
 }
 }
 
+#if defined MIR_LOG_LEVEL && MIR_LOG_LEVEL < LOG_LEVEL_NEVER
+#define DEBUG_LOG(MSG1, LV)			mir::debug::Log(MSG1, LV)
+#define DEBUG_LOG_VERVOSE(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_VERVOSE)
+#define DEBUG_LOG_DEBUG(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_DEBUG)
+#define DEBUG_LOG_INFO(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_INFO)
+#define DEBUG_LOG_WARN(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_WARN)
+#define DEBUG_LOG_ERROR(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_ERROR)
+#else
+#define DEBUG_LOG(MSG1, LV)	
+#define DEBUG_LOG_VERVOSE(MSG1)	
+#define DEBUG_LOG_DEBUG(MSG1)
+#define DEBUG_LOG_INFO(MSG1)
+#define DEBUG_LOG_WARN(MSG1)
+#define DEBUG_LOG_ERROR(MSG1)
+#endif
+
 #if defined _DEBUG
 #define CheckHR(HR)					mir::debug::CheckHResultFailed(HR)
-#define DEBUG_LOG(MSG1)				mir::debug::Log(MSG1)
 #else
-#define CheckHR(HR)					FAILED(HR)
-#define DEBUG_LOG(MSG1)				
+#define CheckHR(HR)					FAILED(HR)	
 #endif
 
 #if defined MIR_TIME_DEBUG

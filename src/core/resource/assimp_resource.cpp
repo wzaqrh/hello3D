@@ -17,7 +17,7 @@ public:
 		: mLaunchMode(launchMode), mResourceMng(resourceMng), mAsset(*asset), mResult(asset)
 	{}
 	~AiSceneLoader() {}
-	bool ExecuteAsyncPart(const std::string& imgPath, const std::string& redirectResource) 
+	bool ExecuteSyncPartTwo(const std::string& imgPath, const std::string& redirectResource) 
 	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
@@ -86,7 +86,7 @@ public:
 	}
 	TemplateArgs AiScenePtr Execute(T &&...args) {
 		AiScenePtr result = nullptr;
-		if (ExecuteAsyncPart(std::forward<T>(args)...))
+		if (ExecuteSyncPartTwo(std::forward<T>(args)...))
 			result = ExecuteSyncPart();
 		return result;
 	}
@@ -201,19 +201,19 @@ private:
 		}
 
 		for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
-			vbSurface surf = {};
+			surfVerts.emplace_back();
+			vbSurface surf = surfVerts.back();
 			surf.Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
 			if (mesh->mTextureCoords[0]) {
 				surf.Tex.x() = mesh->mTextureCoords[0][vertexId].x;
 				surf.Tex.y() = mesh->mTextureCoords[0][vertexId].y;
 			}
-			surfVerts.push_back(surf);
 
-			vbSkeleton skin = {};
+			skeletonVerts.emplace_back();
+			vbSkeleton skin = skeletonVerts.back();
 			if (mesh->mNormals) skin.Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
 			if (mesh->mTangents) skin.Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
 			if (mesh->mBitangents) skin.BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
-			skeletonVerts.push_back(skin);
 		}
 
 		if (mesh->HasBones()) {
@@ -238,9 +238,9 @@ private:
 			}
 		}
 
-		for (UINT i = 0; i < mesh->mNumFaces; i++) {
+		for (size_t i = 0; i < mesh->mNumFaces; i++) {
 			aiFace face = mesh->mFaces[i];
-			for (UINT j = 0; j < face.mNumIndices; j++)
+			for (size_t j = 0; j < face.mNumIndices; j++)
 				indices.push_back(face.mIndices[j]);
 		}
 
@@ -288,11 +288,7 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") %assetPath %redirectRes).str());
-			if (loader->ExecuteAsyncPart(assetPath, redirectRes)) {
-				nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob) {
-					loader->ExecuteSyncPart();
-					return true;
-				});
+			if (loader->ExecuteSyncPartTwo(assetPath, redirectRes) && loader->ExecuteSyncPart()) {
 				return true;
 			}
 			else return false;

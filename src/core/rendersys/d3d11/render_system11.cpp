@@ -163,7 +163,7 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 
 void RenderSystem11::Update(float dt)
 {}
-void RenderSystem11::CleanUp()
+void RenderSystem11::Dispose()
 {}
 
 void RenderSystem11::SetViewPort(int x, int y, int width, int height)

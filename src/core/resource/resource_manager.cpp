@@ -1,10 +1,12 @@
 #include <boost/assert.hpp>
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
 #include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
 #include "core/base/debug.h"
+#include "core/base/macros.h"
 #include "core/base/thread.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
@@ -42,8 +44,6 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& mater
 	mProgramMapLock = mTextureMapLock = mMaterialMapLock = mAiSceneMapLock = false;
 	mLoadTaskCtxMapLock = mResDependGraphLock = false;
 
-	//ilInit();
-	
 	constexpr int CThreadPoolNumber = 8;
 	mThreadPool = std::make_shared<ThreadPool>(CThreadPoolNumber, ilInit, ilShutDown);
 }
@@ -55,7 +55,6 @@ void ResourceManager::Dispose() ThreadSafe
 {
 	if (mThreadPool) {
 		mThreadPool = nullptr;
-		//ilShutDown();
 	}
 }
 
@@ -67,16 +66,23 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 		if (res->IsPreparedNeedLoading()) {
 			ResourceLoadTaskContext ctx;
 			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, ctx = this->mLoadTaskCtxByRes[res.get()]);
-			if (ctx.Res) {
+			if (ctx.Res) 
+			{
 				auto workExecute = std::move(ctx.WorkThreadJob->Execute);
-				if (workExecute) workExecute(ctx.Res, ctx.MainThreadJob);
+				if (workExecute) {
+					//TIME_PROFILE("\t\t'" + res->_Debug.GetResPath() + "' Execute");
+					workExecute(ctx.Res, ctx.MainThreadJob);
+				}
 				BOOST_ASSERT(ctx.WorkThreadJob->Execute == nullptr);
 
 				if (ctx.WorkThreadJob->Result.valid()
-					&& ctx.WorkThreadJob->Result.wait_for(std::chrono::milliseconds(0)) != std::future_status::timeout) {
-					if (ctx.WorkThreadJob->Result.get()) {
+					&& ctx.WorkThreadJob->Result.wait_for(std::chrono::milliseconds(0)) != std::future_status::timeout) 
+				{
+					if (ctx.WorkThreadJob->Result.get()) 
+					{
 						auto mainExecute = std::move(ctx.MainThreadJob->Execute);
 						if (mainExecute) {
+							//TIME_PROFILE("\t\t'" + res->_Debug.GetResPath() + "' mainExecute");
 							mainExecute(ctx.Res, nullptr);
 							res->SetLoaded(ctx.MainThreadJob->Result.get());
 							if (res->IsLoaded()) ctx.FireResourceLoaded();
@@ -85,12 +91,18 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 							res->SetLoaded(true);
 							ctx.FireResourceLoaded();
 						}
+					#if defined MIR_RESOURCE_DEBUG
+						DEBUG_LOG_DEBUG("\t\tres '" + res->_Debug.GetResPath() + "' loaded " + IF_AND_OR(res->IsLoaded(), "success", "fail"));
+					#endif
 					}
 					else {
 						res->SetLoaded(false);
-					}
-				}
-			}
+					#if defined MIR_RESOURCE_DEBUG
+						DEBUG_LOG_DEBUG("\t\tres '" + res->_Debug.GetResPath() + "' loaded fail");
+					#endif
+					}//ctx.WorkThreadJob.Result
+				}//ctx.WorkThreadJob.Result.wait success
+			}//ctx.Res
 			else {
 				res->SetLoaded(true);
 				ctx.FireResourceLoaded();
@@ -139,14 +151,25 @@ inline boost::filesystem::path MakeShaderSourcePath(const std::string& name) {
 	std::string filepath = "shader/" + name + ".fx";
 	return boost::filesystem::system_complete(filepath);
 }
-inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc) {
+inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) {
 	std::string asmName = name;
 	asmName += "_" + desc.EntryPoint;
 	asmName += " " + desc.ShaderModel;
 	for (const auto& macro : desc.Macros)
 		asmName += " (" + macro.Name + "=" + macro.Definition + ")";
+#if defined MIR_RESOURCE_DEBUG
+	auto sourcePath = MakeShaderSourcePath(name);
+	tm lwt;
+	time_t time = boost::filesystem::last_write_time(sourcePath);
+	gmtime_s(&lwt, &time);
+	boost::format fmt(" [%d-%d-%d %d.%d.%d]");
+	fmt %lwt.tm_year %lwt.tm_mon %lwt.tm_mday;
+	fmt %lwt.tm_hour %lwt.tm_min %lwt.tm_sec;
+	asmName += fmt.str();
+	boost::filesystem::create_directories("shader/asm/" + platform);
+#endif
 	asmName += ".cso";
-	std::string filepath = "shader/d3d11/" + asmName;
+	std::string filepath = "shader/asm/" + platform + "/" + asmName;
 	return boost::filesystem::system_complete(filepath);
 }
 IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
@@ -161,26 +184,36 @@ IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPt
 
 	IBlobDataPtr blobVS, blobPS;
 	if (!vertexSCD.EntryPoint.empty()) {
-		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD);
+		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD, mRenderSys.GetPlatform());
 		if (boost::filesystem::exists(vsAsmPath)) {
 			blobVS = std::make_shared<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
 		}
 		else {
 			vertexSCD.SourcePath = MakeShaderSourcePath(name).string();
 			std::vector<char> bytes = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
-			if (!bytes.empty()) blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bytes));
+			if (!bytes.empty()) {
+				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bytes));
+			#if defined MIR_RESOURCE_DEBUG
+				input::WriteFile(vsAsmPath.string().c_str(), "wb", blobVS->GetBytes(), blobVS->GetSize());
+			#endif
+			}
 		}
 	}
 
 	if (!pixelSCD.EntryPoint.empty()) {
-		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD);
+		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD, mRenderSys.GetPlatform());
 		if (boost::filesystem::exists(psAsmPath)) {
 			blobPS = std::make_shared<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
 		}
 		else {
 			pixelSCD.SourcePath = MakeShaderSourcePath(name).string();
 			std::vector<char> bytes = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
-			if (!bytes.empty()) blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bytes));
+			if (!bytes.empty()) {
+				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bytes));
+			#if defined MIR_RESOURCE_DEBUG
+				input::WriteFile(psAsmPath.string().c_str(), "wb", blobPS->GetBytes(), blobPS->GetSize());
+			#endif
+			}
 		}
 	}
 
