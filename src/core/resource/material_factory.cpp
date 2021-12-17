@@ -527,6 +527,8 @@ private:
 		}
 	}
 	static void ParseProgram(const boost_property_tree::ptree& nodeProgram, XmlProgramInfo& programInfo) {
+		programInfo.Topo = static_cast<PrimitiveTopology>(nodeProgram.get<int>("Topology", programInfo.Topo));
+
 		auto& vertexScd = programInfo.VertexSCD;
 		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
 		vertexScd.EntryPoint = nodeProgram.get<std::string>("VertexEntry", vertexScd.EntryPoint);
@@ -557,9 +559,6 @@ private:
 	}
 	void VisitProgram(const PropertyTreePath& nodeProgram, Visitor& vis) {
 		ParseProgram(nodeProgram.Node, vis.shaderInfo.Program);
-
-		vis.shaderInfo.Program.Topo = static_cast<PrimitiveTopology>(
-			nodeProgram->get<int>("Topology", vis.shaderInfo.Program.Topo));
 		VisitAttributes(nodeProgram, vis);
 		VisitUniforms(nodeProgram, vis);
 		VisitSamplers(nodeProgram, vis);

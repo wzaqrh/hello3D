@@ -16,7 +16,7 @@ private:
 	AssimpModelPtr mModel;
 };
 /*mCaseIndex
-0,1：透视相机 观察到模型：传奇战士 + 天空
+0,1：透视相机 观察到传奇战士: 左半有高光, 右边非全暗
 2,3: 透视相机 观察到模型：飞机
 4,5：透视相机 观察到模型：石头（在右上角）
 6,7: 透视相机 观察到模型：地板
@@ -35,10 +35,11 @@ void TestModel::OnPostInitDevice()
 	case 2:
 	case 3: {
 		auto pt_light = mScneMng->AddPointLight();
-		pt_light->SetPosition(Eigen::Vector3f(0, 5, -5));
+		pt_light->SetPosition(Eigen::Vector3f(25, 0, -5));
+		pt_light->SetAttenuation(0.005);
 
 		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(25, 0, 5));
+		dir_light->SetDirection(Eigen::Vector3f(25, 0, 0));
 	}break;
 	case 6:
 	case 7:{

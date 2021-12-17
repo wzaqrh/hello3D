@@ -1,0 +1,367 @@
+<NotepadPlus>
+    <Project name="shader">
+        <File name="bin\x86\Debug\shader\Bloom.fx" />
+        <File name="bin\x86\Debug\shader\Bloom.xml" />
+        <File name="bin\x86\Debug\shader\Compile.bat" />
+        <File name="bin\x86\Debug\shader\HLSLSupport.h" />
+        <File name="bin\x86\Debug\shader\Label.fx" />
+        <File name="bin\x86\Debug\shader\LayerColor.fx" />
+        <File name="bin\x86\Debug\shader\LayerColor.xml" />
+        <File name="bin\x86\Debug\shader\Lighting.h" />
+        <File name="bin\x86\Debug\shader\Model.fx" />
+        <File name="bin\x86\Debug\shader\Model.xml" />
+        <File name="bin\x86\Debug\shader\ModelPbr.fx" />
+        <File name="bin\x86\Debug\shader\ModelPbr.xml" />
+        <File name="bin\x86\Debug\shader\new 1.txt" />
+        <File name="bin\x86\Debug\shader\shader.np++" />
+        <File name="bin\x86\Debug\shader\Skeleton.h" />
+        <File name="bin\x86\Debug\shader\Skeleton.xml" />
+        <File name="bin\x86\Debug\shader\Skybox.fx" />
+        <File name="bin\x86\Debug\shader\Skybox.xml" />
+        <File name="bin\x86\Debug\shader\Sprite.fx" />
+        <File name="bin\x86\Debug\shader\Sprite.xml" />
+        <File name="bin\x86\Debug\shader\Standard.h" />
+        <File name="bin\x86\Debug\shader\Standard.xml" />
+        <File name="bin\x86\Debug\shader\Variants.xml" />
+    </Project>
+    <Project name="bin">
+        <File name="bin\x86\Debug\test_cmdline.txt" />
+    </Project>
+    <Project name="graphics">
+        <File name="C:\MyDoc\graphics\&#x516C;&#x5F0F;.docx" />
+        <File name="C:\MyDoc\graphics\&#x6280;&#x672F;&#x70B9;.cs" />
+        <File name="C:\MyDoc\graphics\&#x56FE;&#x5F62;&#x6570;&#x5B66;.cs" />
+        <File name="C:\MyDoc\graphics\&#x5F15;&#x7528;.cs" />
+    </Project>
+    <Project name="d3d">
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\d3d\d3d11&#x7F16;&#x7A0B;&#x6307;&#x5357;.cs" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\d3d\d3d11&#x53C2;&#x8003;&#x5730;&#x5740;.txt" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\d3d\hlsl&#x7F16;&#x7A0B;&#x6307;&#x5357;.cs" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\d3d\hlsl&#x624B;&#x518C;.cs" />
+    </Project>
+    <Project name="unity">
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\UnityAttribute.cs" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\Unity&#x7C7B;&#x603B;&#x7ED3;.cs" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\&#x624B;&#x518C;.cs" />
+        <Folder name="Unity_builtin_shaders">
+            <Folder name="CGIncludes">
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\AutoLight.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\GLSLSupport.glslinc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\HLSLSupport.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\Lighting.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\SpeedTree8Common.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\SpeedTreeBillboardCommon.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\SpeedTreeCommon.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\SpeedTreeVertex.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\SpeedTreeWind.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\TerrainEngine.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\TerrainPreview.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\TerrainSplatmapCommon.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\TerrainTool.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\Tessellation.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityBuiltin2xTreeLibrary.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityBuiltin3xTreeLibrary.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityCG.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityCG.glslinc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityCustomRenderTexture.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityDeferredLibrary.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityDeprecated.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityGBuffer.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityGlobalIllumination.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityImageBasedLighting.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityInstancing.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityLightingCommon.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityMetaPass.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityPBSLighting.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityShaderUtilities.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityShaderVariables.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityShadowLibrary.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnitySprites.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardBRDF.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardConfig.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardCore.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardCoreForward.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardCoreForwardSimple.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardInput.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardMeta.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardParticleEditor.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardParticleInstancing.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardParticles.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardParticleShadow.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardShadow.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStandardUtils.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStereoExtensions.glslinc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityStereoSupport.glslinc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityUI.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\CGIncludes\UnityUIE.cginc" />
+            </Folder>
+            <Folder name="DefaultResources">
+                <Folder name="PerformanceTools">
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\PerformanceTools\FrameDebuggerRenderTargetDisplay.shader" />
+                </Folder>
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Font.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Internal-BlendShape.compute" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Internal-Clear.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Internal-Colored.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Internal-ErrorShader.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Internal-Skinning-Util.cginc" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResources\Internal-Skinning.compute" />
+            </Folder>
+            <Folder name="DefaultResourcesExtra">
+                <Folder name="AR">
+                    <Folder name="Shaders">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AR\Shaders\TangoARRender.shader" />
+                    </Folder>
+                </Folder>
+                <Folder name="Cubemaps">
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Cubemaps\CubeBlend.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Cubemaps\CubeBlur.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Cubemaps\CubeBlurOdd.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Cubemaps\CubeCopy.shader" />
+                </Folder>
+                <Folder name="GIDebug">
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\GIDebug\ShowLightMask.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\GIDebug\TextureUV.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\GIDebug\UV1sAsPositions.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\GIDebug\VertexColors.shader" />
+                </Folder>
+                <Folder name="Mobile">
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Bumped.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-BumpSpec-1DirectionalLight.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-BumpSpec.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Diffuse.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Lightmap-Unlit.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Particle-Add.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Particle-Alpha-VertexLit.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Particle-Alpha.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Particle-Multiply.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-Skybox.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-VertexLit-OnlyDirectionalLights.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Mobile\Mobile-VertexLit.shader" />
+                </Folder>
+                <Folder name="Nature">
+                    <Folder name="SoftOcclusion">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SoftOcclusion\TreeSoftOcclusionBark.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SoftOcclusion\TreeSoftOcclusionBarkRendertex.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SoftOcclusion\TreeSoftOcclusionLeaves.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SoftOcclusion\TreeSoftOcclusionLeavesRendertex.shader" />
+                    </Folder>
+                    <Folder name="TreeCreator">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorAlbedoRenderTex.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorBark.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorBarkOptimized.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorBarkRendertex.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorLeaves.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorLeavesFast.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorLeavesFastOptimized.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorLeavesOptimized.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorLeavesRendertex.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\TreeCreator\TreeCreatorNormalRendertex.shader" />
+                    </Folder>
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SpeedTree.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SpeedTree8.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Nature\SpeedTreeBillboard.shader" />
+                </Folder>
+                <Folder name="TerrainShaders">
+                    <Folder name="Details">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Details\VertexLit.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Details\WavingGrass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Details\WavingGrassBillboard.shader" />
+                    </Folder>
+                    <Folder name="Splats">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\AddPass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\DiffuseBase.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\DiffuseBaseGen.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\FirstPass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Specular-AddPass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Specular-Base.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Specular-FirstPass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Standard-AddPass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Standard-Base.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Standard-BaseGen.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Standard-FirstPass.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Splats\Terrain-Utilities.shader" />
+                    </Folder>
+                    <Folder name="Trees">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Trees\BillboardTree.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Trees\CameraFacingBillboardTree.shader" />
+                    </Folder>
+                    <Folder name="Utils">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Utils\BrushPreview.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Utils\CrossBlendNeighbors.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Utils\GenNormalmap.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Utils\PaintHeight.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\TerrainShaders\Utils\TerrainLayerUtils.shader" />
+                    </Folder>
+                </Folder>
+                <Folder name="UI">
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-CompositeOverdraw.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Default.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-DefaultETC1.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-DefaultFont.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Lit-Bumped.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Lit-Detail.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Lit-Refraction.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Lit-RefractionDetail.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Lit-Transparent.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Overdraw.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Unlit-Detail.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Unlit-Text.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Unlit-TextDetail.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\UI\UI-Unlit-Transparent.shader" />
+                </Folder>
+                <Folder name="Unlit">
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Unlit\Unlit-Alpha.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Unlit\Unlit-AlphaTest.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Unlit\Unlit-Color.shader" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Unlit\Unlit-Normal.shader" />
+                </Folder>
+                <Folder name="VR">
+                    <Folder name="Shaders">
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\BlitFromTex2DToTexArraySlice.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\BlitTexArraySlice.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\BlitTexArraySliceToDepth.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\BlitTexArraySliceToDepth_MSAA.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\ClippingMask.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\Internal-VRDistortion.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\SpatialMappingOcclusion.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\SpatialMappingWireframe.shader" />
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VR\Shaders\VideoBackground.shader" />
+                    </Folder>
+                </Folder>
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-Bumped.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-BumpSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-Glossy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-Parallax.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-ParallaxSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Alpha-VertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AlphaTest-Bumped.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AlphaTest-BumpSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AlphaTest-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AlphaTest-Glossy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AlphaTest-SoftEdgeUnlit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AlphaTest-VertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\AutodeskInteractive.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Compositing.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Decal.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Flare.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-Bumped.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-BumpSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-Glossy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-Parallax.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-ParallaxSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Illumin-VertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-BlitCopy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-BlitCopyDepth.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-BlitCopyWithDepth.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-BlitToDepth.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-BlitToDepth_MSAA.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-CombineDepthNormals.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-ConvertTexture.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-CubemapToEquirect.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-DeferredReflections.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-DeferredShading.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-DepthNormalsTexture.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-Flare.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-GUIRoundedRect.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-GUITexture.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-GUITextureBlit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-GUITextureClip.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-GUITextureClipText.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-Halo.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-MotionVectors.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-ODSWorldTexture.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-PrePassLighting.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-ScreenSpaceShadows.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-StencilWrite.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-UIRAtlasBlitCopy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Internal-UIRDefault.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Lightmap-Bumped.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Lightmap-BumpSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Lightmap-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Lightmap-Glossy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Lightmap-VertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-Bumped.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-BumpSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-DiffuseDetail.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-DiffuseFast.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-Glossy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-Parallax.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-ParallaxSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Normal-VertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Add.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle AddMultiply.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle AddSmooth.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Alpha Blend.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Anim Alpha Blend.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Blend.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Multiply.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle MultiplyDouble.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Premultiply Blend.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Standard Surface.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle Standard Unlit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Particle VertexLit Blended.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-Bumped.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-BumpNolight.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-BumpSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-BumpVertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-Glossy.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-Parallax.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-ParallaxSpec.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Reflect-VertexLit.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Skybox-Cubed.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Skybox-Panoramic.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Skybox-Procedural.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Skybox.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Sprites-Default.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Sprites-Diffuse.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Sprites-Mask.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\Standard.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\StandardSpecular.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VideoComposite.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VideoDecode.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VideoDecodeAndroid.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VideoDecodeML.shader" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\DefaultResourcesExtra\VideoDecodeOSX.shader" />
+            </Folder>
+            <Folder name="Editor">
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\Editor\StandardParticlesShaderGUI.cs" />
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\Editor\StandardShaderGUI.cs" />
+            </Folder>
+            <Folder name="UnityShader">
+                <Folder name="UnityShader">
+                    <Folder name="Debug">
+                        <Folder name="UnityShader.tlog">
+                            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.tlog\FXC.command.1.tlog" />
+                            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.tlog\fxc.read.1.tlog" />
+                            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.tlog\FXC.write.1.tlog" />
+                            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.tlog\UnityShader.lastbuildstate" />
+                            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.tlog\UnityShader.write.1u.tlog" />
+                            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.tlog\unsuccessfulbuild" />
+                        </Folder>
+                        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\Debug\UnityShader.Build.CppClean.log" />
+                    </Folder>
+                    <Folder name="Release">
+                        <Folder name="UnityShader.tlog" />
+                    </Folder>
+                    <Folder name="x64">
+                        <Folder name="Debug">
+                            <Folder name="UnityShader.tlog" />
+                        </Folder>
+                        <Folder name="Release">
+                            <Folder name="UnityShader.tlog" />
+                        </Folder>
+                    </Folder>
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\UnityShader.vcxproj" />
+                    <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\UnityShader.vcxproj.filters" />
+                </Folder>
+                <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader.sln" />
+            </Folder>
+            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\license.txt" />
+        </Folder>
+    </Project>
+</NotepadPlus>

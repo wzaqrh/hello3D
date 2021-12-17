@@ -10,7 +10,7 @@ struct UNIFORM_ALIGN cbPerFrame
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbPerFrame() {
 		World = View = Projection = Eigen::Matrix4f::Identity();
-		WorldInv = ViewInv = ProjectionInv = Eigen::Matrix4f::Identity();
+		ViewInv = ProjectionInv = Eigen::Matrix4f::Identity();
 		LightView = LightProjection = Eigen::Matrix4f::Identity();
 		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
 		_ShadowMapTexture_TexelSize = Eigen::Vector4f::Zero();
@@ -20,7 +20,6 @@ public:
 	Eigen::Matrix4f View;
 	Eigen::Matrix4f Projection;
 
-	Eigen::Matrix4f WorldInv;
 	Eigen::Matrix4f ViewInv;
 	Eigen::Matrix4f ProjectionInv;
 

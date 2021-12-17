@@ -2,7 +2,6 @@
 	<Include>Standard</Include>
 	
 	<PROGRAM>
-		<Topology>5</Topology>
 		<Attribute>
 			<Element SemanticName="POSITION" Format="6"></Element>
 		</Attribute>

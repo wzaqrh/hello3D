@@ -33,7 +33,6 @@ cbuffer cbPerFrame : register(b0)
 	matrix View;
 	matrix Projection;
 	
-	matrix WorldInv;
 	matrix ViewInv;
 	matrix ProjectionInv;
 

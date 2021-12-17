@@ -85,6 +85,7 @@ void App::Render()
 			Eigen::Vector2f m = mInput->GetMouseRightLocation();
 			float mx = -3.14 * m.x();
 			float my = -3.14 * 0.5 * m.y();
+			(fabs(mx) > fabs(my)) ? my = 0 : mx = 0;
 
 			Eigen::Quaternionf quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
 				* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
@@ -101,6 +102,8 @@ void App::Render()
 		Eigen::Vector2f m = mInput->GetMouseLeftLocation();
 		float mx = 3.14 * -m.x();
 		float my = 3.14 * -m.y();
+		(fabs(mx) > fabs(my)) ? my = 0 : mx = 0;
+
 		auto quat = Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitZ())
 			* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
 			* Eigen::AngleAxisf(0, Eigen::Vector3f::UnitY()) 

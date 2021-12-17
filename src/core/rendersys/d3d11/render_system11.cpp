@@ -126,7 +126,7 @@ bool RenderSystem11::_SetRasterizerState()
 {
 	D3D11_RASTERIZER_DESC wfdesc = {};
 	wfdesc.FillMode = D3D11_FILL_SOLID;
-	wfdesc.CullMode = D3D11_CULL_NONE;
+	wfdesc.CullMode = D3D11_CULL_BACK;
 	ID3D11RasterizerState* pRasterizerState = nullptr;
 	if (CheckHR(mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState))) return false;
 

@@ -77,6 +77,7 @@ SpotLight::SpotLight()
 {
 	SetSpotDirection(Eigen::Vector3f(0, 0, 1));
 	SetAngle(30.0f / 180 * 3.14);
+	mCbLight.IsSpotLight = true;
 }
 
 void SpotLight::SetSpotDirection(const Eigen::Vector3f& dir)

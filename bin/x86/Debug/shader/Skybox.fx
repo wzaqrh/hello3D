@@ -5,7 +5,7 @@ MIR_DECLARE_TEXCUBE(_MainTex, 0);
 
 struct VertexInput
 {
-    float4 Pos : POSITION;
+    float3 Pos : POSITION;
 };
 
 struct PixelInput
@@ -18,20 +18,19 @@ struct PixelInput
 PixelInput VS(VertexInput input)
 {
 	PixelInput output;
-	output.Pos = input.Pos;
+	output.Pos = float4(input.Pos, 1.0);
 	
-	matrix WVPInv = mul(WorldInv, mul(ViewInv, ProjectionInv));
-	output.Tex = normalize(mul(WVPInv, input.Pos));
+	matrix WVPInv = mul(ViewInv, ProjectionInv);
+	output.Tex = normalize(mul(WVPInv, output.Pos));
     return output;
 }
 #else
 PixelInput VS(VertexInput input)
 {
 	PixelInput output;
-	output.Tex = input.Pos.xyz / input.Pos.w;
-	output.Pos.xyz = mul((float3x3)View, output.Tex);
-	output.Pos.w   = 1.0;
-	output.Pos = mul(Projection, output.Pos);
+	output.Tex = float3(input.Pos);
+	output.Pos = mul(View, float4(input.Pos, 0.0));
+	output.Pos = mul(Projection, output.Pos).xyww;
 	return output;
 }
 #endif
