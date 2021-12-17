@@ -348,7 +348,7 @@ float3 Unity_GlossyEnvironment(Unity_GlossyEnvironmentData glossIn)
     float mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
     float3 R = glossIn.reflUVW;
 	
-    float4 rgbm = MIR_SAMPLE_TEXCUBE_LOD(txSkybox, R, mip);
+    float4 rgbm = MIR_SAMPLE_TEXCUBE_LOD(_SpecCube, R, mip);
     //skybox tone mapping
 	rgbm.rgb *= (1.0f + rgbm.rgb/1.5f);
 	rgbm.rgb /= (1.0f + rgbm.rgb);

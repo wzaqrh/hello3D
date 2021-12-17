@@ -163,6 +163,16 @@ inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	auto sourcePath = MakeShaderSourcePath(name);
 	tm lwt;
 	time_t time = boost::filesystem::last_write_time(sourcePath);
+	{
+		boost::filesystem::directory_iterator diter("shader/"), dend;
+		for (; diter != dend; ++diter) {
+			if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".h") {
+				time_t htime = boost::filesystem::last_write_time((*diter).path());
+				time = std::max(time, htime);
+			}
+		}
+	}
+
 	gmtime_s(&lwt, &time);
 	boost::format fmt(" [%d-%d-%d %d.%d.%d]");
 	fmt %lwt.tm_year %lwt.tm_mon %lwt.tm_mday;

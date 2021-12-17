@@ -32,7 +32,7 @@
 		
 		<Texture Name="txGlobal">
 			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
-			<Element Slot="9" Filter="0x15">txSkybox</Element>
+			<Element Slot="9" Filter="0x15" Address="3">_SpecCube</Element>
 			
 			<Element Slot="10" Filter="0x15">_GBufferPos</Element>
 			<Element Slot="11" Filter="0x15">_GBufferNormal</Element>

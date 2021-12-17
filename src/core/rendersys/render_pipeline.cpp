@@ -201,8 +201,8 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			Eigen::Vector4f::Zero(), 1.0, 0);
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
-		auto tex_shaow = mStatesBlock.LockTexture(TEXTURE_SHADOW_MAP, IF_AND_OR(genSM, mShadowMap->GetAttachZStencilTexture(), nullptr));
-		auto tex_env = mStatesBlock.LockTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
+		auto tex_shadow	= mStatesBlock.LockTexture(TEXTURE_SHADOW_MAP, IF_AND_OR(genSM, mShadowMap->GetAttachZStencilTexture(), nullptr));
+		auto tex_env	= mStatesBlock.LockTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
 			
 		ILightPtr firstLight = nullptr;
 		cbPerFrame perFrame;
@@ -299,8 +299,8 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 
 			#if !defined DEBUG_PREPASS_BASE
 				depth_state(DepthState::MakeFor3D(false));
-				auto tex_env	= mStatesBlock.LockTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
 				auto tex_shadow	= mStatesBlock.LockTexture(TEXTURE_SHADOW_MAP, mGBuffer->GetAttachZStencilTexture());
+				auto tex_env	= mStatesBlock.LockTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
 				auto tex_gpos	= mStatesBlock.LockTexture(TEXTURE_GBUFFER_POS, mGBuffer->GetAttachColorTexture(0));
 				auto tex_gnormal = mStatesBlock.LockTexture(TEXTURE_GBUFFER_NORMAL, mGBuffer->GetAttachColorTexture(1));
 				auto tex_galbedo = mStatesBlock.LockTexture(TEXTURE_GBUFFER_ALBEDO, mGBuffer->GetAttachColorTexture(2));

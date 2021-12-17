@@ -15,6 +15,7 @@
 		
 		<Macros>
 			<ENABLE_SHADOW_MAP>1</ENABLE_SHADOW_MAP>
+			<ENABLE_ENVIROMENT_MAP>1</ENABLE_ENVIROMENT_MAP>
 		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>

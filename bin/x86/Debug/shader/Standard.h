@@ -3,7 +3,7 @@
 #include "HLSLSupport.h"
 
 MIR_DECLARE_SHADOWMAP(_ShadowMapTexture, 8);
-MIR_DECLARE_TEX2D(txSkybox, 9);
+MIR_DECLARE_TEXCUBE(_SpecCube, 9);
 
 MIR_DECLARE_TEX2D(_GBufferPos, 10);
 MIR_DECLARE_TEX2D(_GBufferNormal, 11);

@@ -32,26 +32,41 @@ inline float CalcLightAtten(float lengthSq, float3 toLight, bool spotLight) {
 	return atten;
 }
 
-inline float3 MirBlinnPhongLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, bool spotLight)
+inline float3 GetSpecColor(float3 normal, float3 toEye) 
+{
+#if ENABLE_ENVIROMENT_MAP
+    float3 reflUVW = reflect(-toEye, normal);
+	return MIR_SAMPLE_TEXCUBE(_SpecCube, reflUVW).rgb;
+#else
+	return unity_SpecColor.rgb;
+#endif
+}
+
+inline float3 MirBlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo, bool spotLight)
 {
 	//ambient
 	float3 luminance = glstate_lightmodel_ambient.xyz;
-    
-	//lambert
-	float lengthSq = max(dot(toLight, toLight), 0.000001);
-	toLight *= rsqrt(lengthSq);
 	
-	float ndotl = max(0, dot(normal, toLight));
+	//lambert
+	float lengthSq = max(dot(toLight_, toLight_), 0.000001);
+	toLight_ *= rsqrt(lengthSq);
+	
+	float ndotl = max(0, dot(normal, toLight_));
 	luminance += albedo * ndotl * unity_LightColor.rgb;
 	
 	//blinn-phong
-	float3 h = normalize(toLight + toEye);
+#if ENABLE_ENVIROMENT_MAP
+    float3 reflUVW = reflect(-toEye, normal);
+	luminance += MIR_SAMPLE_TEXCUBE(_SpecCube, reflUVW).rgb;
+#else
+	float3 h = normalize(toLight_ + toEye);
 	float ndoth = max(0, dot(normal, h));
 	float spec = pow(ndoth, unity_SpecColor.w*128.0) * unity_LightColor.w;
 	luminance += spec * unity_SpecColor.rgb;
+#endif
 
 	//point lighting, spot lighting
-    return luminance * CalcLightAtten(lengthSq, toLight, spotLight);
+    return luminance * CalcLightAtten(lengthSq, toLight_, spotLight);
 }
 
 inline float3 UnityCombineShadowcoordComponents(float2 baseUV, float2 deltaUV, float depth, float3 receiverPlaneDepthBias)

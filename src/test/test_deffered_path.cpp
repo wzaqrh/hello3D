@@ -23,6 +23,7 @@ private:
 void TestDefferedPath::OnPostInitDevice()
 {
 	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+	camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 	camera->SetRenderingPath(RenderingPath((mCaseIndex+1)&1));
 
 	switch (mCaseIndex) {
