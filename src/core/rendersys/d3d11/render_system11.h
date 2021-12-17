@@ -46,7 +46,7 @@ public:
 	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
 
-	void SetBlendFunc(const BlendState& blendFunc) override;
+	void SetBlendState(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 

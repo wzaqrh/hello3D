@@ -151,7 +151,7 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	if (!_SetRasterizerState()) return false;
 	
 	SetDepthState(DepthState{ true, kCompareLessEqual, kDepthWriteMaskAll });
-	SetBlendFunc(BlendState::MakeAlphaPremultiplied());
+	SetBlendState(BlendState::MakeAlphaPremultiplied());
 
 	if (vp.right == 0 || vp.bottom == 0) 
 		GetClientRect(mHWnd, &vp);
@@ -782,9 +782,9 @@ void RenderSystem11::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_
 	mDeviceContext->PSSetSamplers(0, passSamplers.size(), !passSamplers.empty() ? &passSamplers[0] : nullptr);
 }
 
-void RenderSystem11::SetBlendFunc(const BlendState& blendFunc)
+void RenderSystem11::SetBlendState(const BlendState& blendFunc)
 {
-	mCurBlendFunc = blendFunc;
+	mCurBlendState = blendFunc;
 
 	D3D11_BLEND_DESC blendDesc = { 0 };
 	blendDesc.RenderTarget[0].BlendEnable = true;

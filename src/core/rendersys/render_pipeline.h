@@ -8,7 +8,7 @@ namespace mir {
 
 struct cbPerFrame;
 struct cbPerLight;
-class MIR_CORE_API RenderPipeline
+class MIR_CORE_API RenderPipeline : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
@@ -18,8 +18,6 @@ public:
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);
 	void Draw(IRenderable& renderable, SceneManager& scene);
 private:
-	void _PushFrameBuffer(IFrameBufferPtr rendTarget);
-	void _PopFrameBuffer();
 	void BindPass(const PassPtr& pass);
 	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode);
@@ -31,8 +29,8 @@ private:
 		const std::vector<ILightPtr>& lights);
 private:
 	RenderSystem& mRenderSys;
-
-	std::vector<IFrameBufferPtr> mFrameBufferStack;
+	RenderStatesBlockPtr mStatesBlockPtr;
+	RenderStatesBlock& mStatesBlock;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	SpritePtr mGBufferSprite;
 };

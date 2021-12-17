@@ -217,6 +217,9 @@
     <ClInclude Include="..\src\core\base\macros.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\render_states_block.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">

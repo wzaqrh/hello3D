@@ -102,8 +102,10 @@ public:
 	BlendFunc Src, Dst;
 };
 inline bool operator==(const BlendState& l, const BlendState& r) {
-	return l.Src == r.Src
-		&& l.Dst == r.Dst;
+	return l.Src == r.Src && l.Dst == r.Dst;
+}
+inline bool operator!=(const BlendState& l, const BlendState& r) {
+	return !(l == r);
 }
 inline bool operator<(const BlendState& l, const BlendState& r) {
 	if (l.Src != r.Src) return l.Src < r.Src;
@@ -133,6 +135,9 @@ inline bool operator==(const DepthState& l, const DepthState& r) {
 	return l.DepthEnable == r.DepthEnable
 		&& l.CmpFunc == r.CmpFunc
 		&& l.WriteMask == r.WriteMask;
+}
+inline bool operator!=(const DepthState& l, const DepthState& r) {
+	return !(l == r);
 }
 inline bool operator<(const DepthState& l, const DepthState& r) {
 	if (l.DepthEnable != r.DepthEnable) return l.DepthEnable < r.DepthEnable;

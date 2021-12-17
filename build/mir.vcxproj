@@ -139,6 +139,7 @@
     <ClInclude Include="..\src\core\rendersys\predeclare.h" />
     <ClInclude Include="..\src\core\rendersys\program.h" />
     <ClInclude Include="..\src\core\rendersys\render_pipeline.h" />
+    <ClInclude Include="..\src\core\rendersys\render_states_block.h" />
     <ClInclude Include="..\src\core\rendersys\render_system.h" />
     <ClInclude Include="..\src\core\rendersys\texture.h" />
     <ClInclude Include="..\src\core\resource\assimp_mesh.h" />

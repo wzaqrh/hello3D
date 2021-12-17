@@ -74,8 +74,8 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	/***** about state *****/
 	virtual void SetViewPort(int x, int y, int w, int h) = 0;
 
-	virtual const BlendState& GetBlendFunc() const = 0;
-	virtual void SetBlendFunc(const BlendState& blendFunc) = 0;
+	virtual const BlendState& GetBlendState() const = 0;
+	virtual void SetBlendState(const BlendState& blendFunc) = 0;
 
 	virtual const DepthState& GetDepthState() const = 0;
 	virtual void SetDepthState(const DepthState& depthState) = 0;
@@ -94,11 +94,11 @@ public:
 	float WinWidth() const { return mScreenSize.x(); }
 	float WinHeight() const { return mScreenSize.y(); }
 	Eigen::Vector2i WinSize() const override { return mScreenSize; }
-	const BlendState& GetBlendFunc() const override { return mCurBlendFunc; }
+	const BlendState& GetBlendState() const override { return mCurBlendState; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }
 protected:
 	Eigen::Vector2i mScreenSize;
-	BlendState mCurBlendFunc;
+	BlendState mCurBlendState;
 	DepthState mCurDepthState;
 };
 

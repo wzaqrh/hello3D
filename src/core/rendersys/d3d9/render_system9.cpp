@@ -45,7 +45,7 @@ bool RenderSystem9::Initialize(HWND hWnd, RECT vp)
 	_SetRasterizerState();
 
 	SetDepthState(DepthState::MakeFor3D());
-	SetBlendFunc(BlendState::MakeAlphaPremultiplied());
+	SetBlendState(BlendState::MakeAlphaPremultiplied());
 
 	mDevice9->GetRenderTarget(0, &mBackColorBuffer); mCurColorBuffer = mBackColorBuffer;
 	mDevice9->GetDepthStencilSurface(&mBackDepthStencilBuffer); mCurDepthStencilBuffer = mBackDepthStencilBuffer;
@@ -510,9 +510,9 @@ bool RenderSystem9::LoadRawTextureData(ITexturePtr texture, char* data, int data
 	return true;
 }
 
-void RenderSystem9::SetBlendFunc(const BlendState& blendFunc)
+void RenderSystem9::SetBlendState(const BlendState& blendFunc)
 {
-	mCurBlendFunc = blendFunc;
+	mCurBlendState = blendFunc;
 	mDevice9->SetRenderState(D3DRS_ALPHABLENDENABLE, (blendFunc.Src == kBlendOne && blendFunc.Dst == kBlendZero) ? FALSE : TRUE);
 	mDevice9->SetRenderState(D3DRS_SRCBLEND, d3d::convert11To9(static_cast<D3D11_BLEND>(blendFunc.Src)));
 	mDevice9->SetRenderState(D3DRS_DESTBLEND, d3d::convert11To9(static_cast<D3D11_BLEND>(blendFunc.Dst)));
