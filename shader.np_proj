@@ -23,6 +23,7 @@
         <File name="bin\x86\Debug\shader\Standard.h" />
         <File name="bin\x86\Debug\shader\Standard.xml" />
         <File name="bin\x86\Debug\shader\Variants.xml" />
+        <File name="bin\x86\Debug\shader\LightingPbr.h" />
     </Project>
     <Project name="bin">
         <File name="bin\x86\Debug\test_cmdline.txt" />
@@ -363,5 +364,10 @@
             </Folder>
             <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\license.txt" />
         </Folder>
+    </Project>
+    <Project name="learnOGL">
+        <File name="Example Proj\LearnOpenGL-master\src\6.pbr\1.1.lighting\1.1.pbr.fs" />
+        <File name="Example Proj\LearnOpenGL-master\src\6.pbr\1.1.lighting\1.1.pbr.vs" />
+        <File name="Example Proj\LearnOpenGL-master\src\6.pbr\1.1.lighting\lighting.cpp" />
     </Project>
 </NotepadPlus>
