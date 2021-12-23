@@ -190,22 +190,25 @@ private:
 	}
 	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
 		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
-		texturesPtr->Resize(4);
+		texturesPtr->Resize(5);
 		if (mesh->mMaterialIndex >= 0) {
 			TextureBySlot& textures = *texturesPtr;
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-			std::vector<ITexturePtr> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, scene);
-			if (diffuseMaps.size() > 0)
-				textures[kTextureDiffuse] = diffuseMaps[0];
+			auto loadTexture = [&](size_t pos, aiTextureType type) {
+				std::vector<ITexturePtr> loads = loadMaterialTextures(material, type, scene);
+				if (loads.size() > 0) 
+					textures[pos] = loads[0];
+			};
+			loadTexture(kTexturePbrAlbedo, aiTextureType_BASE_COLOR);
+			loadTexture(kTexturePbrNormal, aiTextureType_NORMAL_CAMERA);
+			loadTexture(kTexturePbrMetalness, aiTextureType_METALNESS);
+			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
+			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
 
-			std::vector<ITexturePtr> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, scene);
-			if (specularMaps.size() > 0)
-				textures[kTextureSpecular] = specularMaps[0];
-
-			std::vector<ITexturePtr> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, scene);
-			if (normalMaps.size() > 0)
-				textures[kTextureNormal] = normalMaps[0];
+			loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
+			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
+			loadTexture(kTextureNormal, aiTextureType_NORMALS);
 		}
 
 #define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))

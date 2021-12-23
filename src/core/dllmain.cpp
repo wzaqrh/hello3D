@@ -23,7 +23,12 @@
 #endif // DEBUG
 #pragma comment(lib, "dxerr.lib")
 #pragma comment(lib, "dxguid.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "assimp-vc140-mtd.lib")
+#else
 #pragma comment(lib, "assimp-vc140-mt.lib")
+#endif
+
 #pragma comment(lib, "freetype.lib")
 #ifdef _DEBUG
 #pragma comment(lib, "DevILd.lib")
