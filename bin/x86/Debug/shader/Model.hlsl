@@ -1,7 +1,6 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.cginc"
 #include "Skeleton.cginc"
-#include "HLSLSupport.cginc"
 #if !DEBUG_PBR
 #include "Lighting.cginc"
 #else
