@@ -348,7 +348,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 			}
 
 			if (format != kFormatUnknown || convertFormat != kFormatUnknown) {
-				std::vector<Data> datas(mipCount * faceCount, {});
+				std::vector<Data> datas(mipCount * faceCount, Data{});
 
 				if (convertFormat != kFormatUnknown)
 					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));

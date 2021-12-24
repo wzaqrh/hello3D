@@ -18,7 +18,7 @@ public:
 		: mLaunchMode(launchMode), mResourceMng(resourceMng), mAsset(*asset), mResult(asset)
 	{}
 	~AiSceneLoader() {}
-	bool ExecuteSyncPartTwo(const std::string& imgPath, const std::string& redirectResource) 
+	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource) 
 	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
@@ -42,6 +42,7 @@ public:
 		}
 		BOOST_ASSERT(mRedirectResourceDir.empty() || mRedirectResourceDir.back() != '/');
 
+		try
 		{
 			constexpr uint32_t ImportFlags =
 				aiProcess_ConvertToLeftHanded |
@@ -55,12 +56,13 @@ public:
 				aiProcess_Debone |
 				aiProcess_ValidateDataStructure;*/
 			mAsset.mImporter = new Assimp::Importer;
-			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(
-				imgFullpath.string(), ImportFlags);
+			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(imgFullpath.string(), ImportFlags);
 		}
+		catch (...) 
+		{}
 		return mAsset.mScene != nullptr;
 	}
-	AiScenePtr ExecuteSyncPart() 
+	AiScenePtr ExecuteSetupData() 
 	{
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
 		processNode(mAsset.mRootNode, mAsset.mScene);
@@ -87,8 +89,8 @@ public:
 	}
 	TemplateArgs AiScenePtr Execute(T &&...args) {
 		AiScenePtr result = nullptr;
-		if (ExecuteSyncPartTwo(std::forward<T>(args)...))
-			result = ExecuteSyncPart();
+		if (ExecuteLoadRawData(std::forward<T>(args)...))
+			result = ExecuteSetupData();
 		return result;
 	}
 	TemplateArgs AiScenePtr operator()(T &&...args) {
@@ -148,12 +150,7 @@ private:
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene) {
 		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;
-#if 0
-		size_t matCount = mat->GetTextureCount(type);
-		for (UINT i = 0; i < matCount; i++) 
-#else
 		for (UINT i = 0; i < 1; i++)
-#endif
 		{
 			aiString str; 
 			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
@@ -207,15 +204,15 @@ private:
 				if (loads.size() > 0) 
 					textures[pos] = loads[0];
 			};
+			loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
+			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
+			loadTexture(kTextureNormal, aiTextureType_NORMALS);
+
 			loadTexture(kTexturePbrAlbedo, aiTextureType_BASE_COLOR);
 			loadTexture(kTexturePbrNormal, aiTextureType_NORMAL_CAMERA);
 			loadTexture(kTexturePbrMetalness, aiTextureType_METALNESS);
 			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
 			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
-
-			/*loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
-			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
-			loadTexture(kTextureNormal, aiTextureType_NORMALS);*/
 		}
 
 #define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
@@ -326,7 +323,7 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") %assetPath %redirectRes).str());
-			if (loader->ExecuteSyncPartTwo(assetPath, redirectRes) && loader->ExecuteSyncPart()) {
+			if (loader->ExecuteLoadRawData(assetPath, redirectRes) && loader->ExecuteSetupData()) {
 				return true;
 			}
 			else return false;

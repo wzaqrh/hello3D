@@ -16,7 +16,7 @@ private:
 	AssimpModelPtr mModel;
 };
 /*mCaseIndex
-0,1：透视相机 观察到传奇战士: 左半有高光, 右边非全暗
+0,1：透视相机 观察到传奇战士: 左半有高光, 右边非全暗 对比https://www.khronos.org/news/press/khronos-releases-wave-of-new-gltf-pbr-3d-material-capabilities
 2,3: 透视相机 观察到模型：飞机
 4,5：透视相机 观察到模型：石头（在右上角）
 6,7: 透视相机 观察到模型：地板

@@ -676,7 +676,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		desc.MiscFlags = 0;
 	}
 
-	std::vector<D3D11_SUBRESOURCE_DATA> initDatas(mipCount * faceCount, {});
+	std::vector<D3D11_SUBRESOURCE_DATA> initDatas(mipCount * faceCount, D3D11_SUBRESOURCE_DATA{});
 	for (size_t face = 0; face < faceCount; ++face) {
 		for (size_t mip = 0; mip < mipCount; ++mip) {
 			size_t index = face * mipCount + mip;
