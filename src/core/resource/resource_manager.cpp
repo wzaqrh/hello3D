@@ -150,7 +150,7 @@ void ResourceManager::AddResourceLoadedObserver(IResourcePtr res, const Resource
 
 /********** Create Program **********/
 inline boost::filesystem::path MakeShaderSourcePath(const std::string& name) {
-	std::string filepath = "shader/" + name + ".fx";
+	std::string filepath = "shader/" + name + ".hlsl";
 	return boost::filesystem::system_complete(filepath);
 }
 inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) {

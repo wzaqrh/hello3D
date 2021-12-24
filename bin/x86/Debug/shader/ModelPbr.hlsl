@@ -1,7 +1,7 @@
 /********** PBR **********/
-#include "Standard.h"
+#include "Standard.cginc"
 #include "Skeleton.h"
-#include "Lighting.h"
+#include "Lighting.cginc"
 
 MIR_DECLARE_TEX2D(txAlbedo, 0);
 MIR_DECLARE_TEX2D(txNormal, 1);

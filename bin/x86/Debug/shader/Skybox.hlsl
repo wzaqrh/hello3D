@@ -1,5 +1,5 @@
 /********** Skybox **********/
-#include "Standard.h"
+#include "Standard.cginc"
 
 MIR_DECLARE_TEXCUBE(_MainTex, 0);
 

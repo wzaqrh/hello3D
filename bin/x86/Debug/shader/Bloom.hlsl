@@ -1,5 +1,5 @@
 /********** Bloom **********/
-#include "Standard.h"
+#include "Standard.cginc"
 
 #if SHADER_MODEL > 30000
 Texture2D txFirst : register(t0);

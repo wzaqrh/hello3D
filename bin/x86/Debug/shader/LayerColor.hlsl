@@ -1,6 +1,6 @@
 /********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
-#include "Standard.h"
-#include "Lighting.h"
+#include "Standard.cginc"
+#include "Lighting.cginc"
 
 /************ ForwardBase ************/
 struct PixelInput

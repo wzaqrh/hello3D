@@ -1,5 +1,5 @@
 /********** Sprite **********/
-#include "Standard.h"
+#include "Standard.cginc"
 
 struct VS_INPUT
 {

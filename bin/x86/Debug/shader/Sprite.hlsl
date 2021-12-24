@@ -1,6 +1,6 @@
 /********** Sprite **********/
-#include "Standard.h"
-#include "Lighting.h"
+#include "Standard.cginc"
+#include "Lighting.cginc"
 
 MIR_DECLARE_TEX2D(_MainTex, 0);
 

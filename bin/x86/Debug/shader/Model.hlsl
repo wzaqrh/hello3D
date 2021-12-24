@@ -1,10 +1,11 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
-#include "Standard.h"
-#include "Skeleton.h"
+#include "Standard.cginc"
+#include "Skeleton.cginc"
+#include "HLSLSupport.cginc"
 #if !DEBUG_PBR
-#include "Lighting.h"
+#include "Lighting.cginc"
 #else
-#include "LightingPbr.h"
+#include "LightingPbr.cginc"
 #endif
 
 MIR_DECLARE_TEX2D(txAlbedo, 0);

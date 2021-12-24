@@ -53,7 +53,7 @@ inline float3 MirBlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, f
 	
 	float ndotl = max(0, dot(normal, toLight_));
 	luminance += albedo * ndotl * unity_LightColor.rgb;
-	
+
 	//blinn-phong
 #if ENABLE_ENVIROMENT_MAP
     float3 reflUVW = reflect(-toEye, normal);

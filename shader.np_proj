@@ -1,30 +1,4 @@
 <NotepadPlus>
-    <Project name="shader">
-        <File name="bin\x86\Debug\shader\Bloom.fx" />
-        <File name="bin\x86\Debug\shader\Bloom.xml" />
-        <File name="bin\x86\Debug\shader\Compile.bat" />
-        <File name="bin\x86\Debug\shader\HLSLSupport.h" />
-        <File name="bin\x86\Debug\shader\Label.fx" />
-        <File name="bin\x86\Debug\shader\LayerColor.fx" />
-        <File name="bin\x86\Debug\shader\LayerColor.xml" />
-        <File name="bin\x86\Debug\shader\Lighting.h" />
-        <File name="bin\x86\Debug\shader\Model.fx" />
-        <File name="bin\x86\Debug\shader\Model.xml" />
-        <File name="bin\x86\Debug\shader\ModelPbr.fx" />
-        <File name="bin\x86\Debug\shader\ModelPbr.xml" />
-        <File name="bin\x86\Debug\shader\new 1.txt" />
-        <File name="bin\x86\Debug\shader\shader.np++" />
-        <File name="bin\x86\Debug\shader\Skeleton.h" />
-        <File name="bin\x86\Debug\shader\Skeleton.xml" />
-        <File name="bin\x86\Debug\shader\Skybox.fx" />
-        <File name="bin\x86\Debug\shader\Skybox.xml" />
-        <File name="bin\x86\Debug\shader\Sprite.fx" />
-        <File name="bin\x86\Debug\shader\Sprite.xml" />
-        <File name="bin\x86\Debug\shader\Standard.h" />
-        <File name="bin\x86\Debug\shader\Standard.xml" />
-        <File name="bin\x86\Debug\shader\Variants.xml" />
-        <File name="bin\x86\Debug\shader\LightingPbr.h" />
-    </Project>
     <Project name="bin">
         <File name="bin\x86\Debug\test_cmdline.txt" />
     </Project>
@@ -369,5 +343,16 @@
         <File name="Example Proj\LearnOpenGL-master\src\6.pbr\1.1.lighting\1.1.pbr.fs" />
         <File name="Example Proj\LearnOpenGL-master\src\6.pbr\1.1.lighting\1.1.pbr.vs" />
         <File name="Example Proj\LearnOpenGL-master\src\6.pbr\1.1.lighting\lighting.cpp" />
+    </Project>
+    <Project name="shader">
+        <File name="bin\x86\Debug\shader\Bloom.xml" />
+        <File name="bin\x86\Debug\shader\LayerColor.xml" />
+        <File name="bin\x86\Debug\shader\Model.xml" />
+        <File name="bin\x86\Debug\shader\ModelPbr.xml" />
+        <File name="bin\x86\Debug\shader\Skeleton.xml" />
+        <File name="bin\x86\Debug\shader\Skybox.xml" />
+        <File name="bin\x86\Debug\shader\Sprite.xml" />
+        <File name="bin\x86\Debug\shader\Standard.xml" />
+        <File name="bin\x86\Debug\shader\Variants.xml" />
     </Project>
 </NotepadPlus>

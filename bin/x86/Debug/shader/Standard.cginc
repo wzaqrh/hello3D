@@ -1,6 +1,6 @@
 #ifndef STANDARD_H
 #define STANDARD_H
-#include "HLSLSupport.h"
+#include "HLSLSupport.cginc"
 
 MIR_DECLARE_SHADOWMAP(_ShadowMapTexture, 8);
 MIR_DECLARE_TEXCUBE(_SpecCube, 9);
