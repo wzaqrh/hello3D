@@ -148,9 +148,16 @@ private:
 	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene) {
 		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;
+#if 0
 		size_t matCount = mat->GetTextureCount(type);
-		for (UINT i = 0; i < matCount; i++) {
-			aiString str; mat->GetTexture(type, i, &str);
+		for (UINT i = 0; i < matCount; i++) 
+#else
+		for (UINT i = 0; i < 1; i++)
+#endif
+		{
+			aiString str; 
+			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
+				continue;
 			std::string key = str.C_Str();
 
 			if (!mRedirectResourceDir.empty()) {
@@ -206,9 +213,9 @@ private:
 			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
 			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
 
-			loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
+			/*loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
 			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
-			loadTexture(kTextureNormal, aiTextureType_NORMALS);
+			loadTexture(kTextureNormal, aiTextureType_NORMALS);*/
 		}
 
 #define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))

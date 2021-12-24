@@ -56,28 +56,29 @@ void TestModel::OnPostInitDevice()
 		? mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter))
 		: mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 
+	test1::res::model model;
 	switch (caseIndex) {
 	case 0:
 	case 1: {
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = test1::res::model_mir::Init(mModel, mWinCenter);
+		mTransform = model.Init("toycar", mModel);
 	}break;
 	case 2:
 	case 3: {
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+		mTransform = model.Init("spaceship", mModel);
 	}break;
 	case 4:
 	case 5: {
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = test1::res::model_rock::Init(mModel, mWinCenter);
+		mTransform = model.Init("rock", mModel);
 	}break;
 	case 6:
 	case 7: {
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex & 1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = test1::res::model_floor::Init(mModel, mWinCenter);
+		mTransform = model.Init("floor", mModel);
 	}break;
 	default:
 		break;

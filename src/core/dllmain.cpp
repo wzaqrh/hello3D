@@ -24,7 +24,7 @@
 #pragma comment(lib, "dxerr.lib")
 #pragma comment(lib, "dxguid.lib")
 #ifdef _DEBUG
-#pragma comment(lib, "assimp-vc140-mtd.lib")
+#pragma comment(lib, "assimp-vc140-mt.lib")
 #else
 #pragma comment(lib, "assimp-vc140-mt.lib")
 #endif

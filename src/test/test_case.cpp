@@ -83,6 +83,64 @@ std::string Kenny() { return "model/theyKilledKenny.dds"; }
 std::string Lenna() { return "model/lenna.dds"; }
 }
 
+struct ModelInfo {
+	std::string mPath, mRd;
+	double mScale, mPosY;
+};
+std::map<std::string, ModelInfo> CResPathMap = {
+	{"toycar", {"model/glTF-Sample-Models-master/2.0/ToyCar/glTF/ToyCar.gltf","",100,0}},
+	{"nanosuit", {"model/nanosuit/nanosuit.obj","",1,0}},
+	{"mir", {"model/Male03/Male02.FBX","",0.05,-5}},
+	{"spaceship", {"model/Spaceship/Spaceship.fbx","",0.01,0}},
+	{"rock", {"model/rock/rock.obj","",1,0}},
+	{"floor", {"model/floor/floor.obj","",0.3,0}},
+	{"planet", {"model/planet/planet.obj","",0.1,0}},
+};
+model::model()
+{
+	mScale = Eigen::Vector3f::Ones();
+	mPos = Eigen::Vector3f::Zero();
+}
+model::model(const std::string& name) : model()
+{
+	Init(name);
+}
+void model::Init(const std::string& name)
+{
+	mName = name;
+	auto iter = CResPathMap.find(name);
+	if (iter != CResPathMap.end()) {
+		mPath = iter->second.mPath;
+		float s = iter->second.mScale;
+		mScale = Eigen::Vector3f(s, s, s);
+		mPos = Eigen::Vector3f(0, iter->second.mPosY, 0);
+	}
+}
+mir::TransformPtr model::Init(const std::string& name, mir::AssimpModelPtr aiModel)
+{
+	Init(name);
+	aiModel->LoadModel(Path(), Rd());
+	mir::TransformPtr transform = aiModel->GetTransform();
+	transform->SetScale(Scale());
+	transform->SetPosition(Pos());
+	return transform;
+}
+
+namespace model_nanosuit {
+std::string Path() { return "model/nanosuit/nanosuit.obj"; }
+std::string Rd() { return R"({"ext":"png","dir":"model/nanosuit/"})"; }
+constexpr float scale = 1;
+Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
+Eigen::Vector3f Pos() { return Eigen::Vector3f(0, -5, 0); }
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
+	model->LoadModel(Path(), Rd());
+	mir::TransformPtr transform = model->GetTransform();
+	transform->SetScale(Scale());
+	transform->SetPosition(mWinCenter + Pos());
+	return transform;
+}
+}
+
 namespace model_mir {
 std::string Path() { return "model/Male03/Male02.FBX"; }
 std::string Rd() { return R"({"ext":"png","dir":"model/Male03/"})"; }

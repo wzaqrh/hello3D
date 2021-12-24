@@ -11,6 +11,7 @@ MIR_DECLARE_TEX2D(txAlbedo, 0);
 MIR_DECLARE_TEX2D(txNormal, 1);
 MIR_DECLARE_TEX2D(txMetalness, 2);
 MIR_DECLARE_TEX2D(txSmoothness, 3);
+MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 
 inline float3 GetAlbedo(float2 uv) 
 {

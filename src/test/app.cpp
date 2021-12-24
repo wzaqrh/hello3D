@@ -104,9 +104,9 @@ void App::Render()
 		float my = 3.14 * -m.y();
 		(fabs(mx) > fabs(my)) ? my = 0 : mx = 0;
 
-		auto quat = Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitZ())
+		auto quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
 			* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
-			* Eigen::AngleAxisf(0, Eigen::Vector3f::UnitY()) 
+			* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY()) 
 			* mTransform->GetRotation();
 		mTransform->SetRotation(quat);
 

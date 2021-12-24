@@ -51,6 +51,29 @@ std::string Kenny();
 std::string Lenna();
 }
 
+struct model {
+	model();
+	model(const std::string& name);
+	void Init(const std::string& name);
+	mir::TransformPtr Init(const std::string& name, mir::AssimpModelPtr model);
+	std::string Path() const { return mPath; }
+	std::string Rd() const { return mRd; }
+	Eigen::Vector3f Scale() const { return mScale; }
+	Eigen::Vector3f Pos() const { return mPos; }
+public:
+	std::string mName;
+	std::string mPath, mRd;
+	Eigen::Vector3f mScale, mPos;
+};
+
+namespace model_nanosuit {
+std::string Path();
+std::string Rd();
+Eigen::Vector3f Scale();
+Eigen::Vector3f Pos();
+mir::TransformPtr Init(mir::AssimpModelPtr model, Eigen::Vector3f winCenter);
+}
+
 namespace model_mir {
 std::string Path();
 std::string Rd();

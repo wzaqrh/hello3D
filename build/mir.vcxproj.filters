@@ -220,6 +220,9 @@
     <ClInclude Include="..\src\core\rendersys\render_states_block.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
+    <ClInclude Include="..\bin\x86\Debug\shader\LightingPbr.h">
+      <Filter>src\shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">

@@ -11,11 +11,15 @@
 		<UseTexture>txGlobal</UseTexture>
 		<Texture>
 			<Element Slot="0">txAlbedo</Element>
+			<Element Slot="1">txNormal</Element>
+			<Element Slot="2">txMetalness</Element>
+			<Element Slot="3">txSmoothness</Element>
+			<Element Slot="4">txAmbientOcclusion</Element>
 		</Texture>
 		
 		<Macros>
 			<ENABLE_SHADOW_MAP>1</ENABLE_SHADOW_MAP>
-			<ENABLE_ENVIROMENT_MAP>1</ENABLE_ENVIROMENT_MAP>
+			<ENABLE_ENVIROMENT_MAP>0</ENABLE_ENVIROMENT_MAP>
 		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>
