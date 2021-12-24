@@ -1,9 +1,16 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.h"
 #include "Skeleton.h"
+#if !DEBUG_PBR
 #include "Lighting.h"
+#else
+#include "LightingPbr.h"
+#endif
 
 MIR_DECLARE_TEX2D(txAlbedo, 0);
+MIR_DECLARE_TEX2D(txNormal, 1);
+MIR_DECLARE_TEX2D(txMetalness, 2);
+MIR_DECLARE_TEX2D(txSmoothness, 3);
 
 inline float3 GetAlbedo(float2 uv) 
 {
@@ -11,6 +18,22 @@ inline float3 GetAlbedo(float2 uv)
 	if (hasAlbedo) albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
 	else albedo = float3(1.0,1.0,1.0);
 	return albedo;
+}
+
+inline float GetMetalness(float2 uv) 
+{
+	float metalness;
+	if (hasMetalness) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
+	else metalness = 0.0;
+	return metalness;
+}
+
+inline float GetSmoothness(float2 uv) 
+{
+	float smoothness;
+	if (hasRoughness) smoothness = MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb;
+	else smoothness = 1.0;
+	return smoothness;
 }
 
 /************ ShadowCaster ************/
@@ -95,7 +118,12 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
+#if !DEBUG_PBR
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+#else
+	finalColor.rgb = MirPbrLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
+		GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+#endif
 	finalColor.a = 1.0;
 #if ENABLE_SHADOW_MAP
 	finalColor.rgb *= CalcShadowFactor(input.PosInLight);

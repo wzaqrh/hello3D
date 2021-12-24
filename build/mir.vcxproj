@@ -83,6 +83,10 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.1</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">4.1</ShaderModel>
     </FxCompile>
+    <ClInclude Include="..\bin\x86\Debug\shader\LightingPbr.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\src\core\base\attribute_struct.h" />
     <ClInclude Include="..\src\core\base\base_type.h" />
     <ClInclude Include="..\src\core\base\d3d.h" />
