@@ -401,20 +401,11 @@
     <Filter Include="src\shader">
       <UniqueIdentifier>{850b275f-17d8-48d5-a3e4-9553376a3584}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\shader\inc">
+      <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\Skeleton.cginc">
-      <Filter>src\shader</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\Standard.cginc">
-      <Filter>src\shader</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc">
-      <Filter>src\shader</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\Lighting.cginc">
-      <Filter>src\shader</Filter>
-    </None>
     <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">
       <Filter>src\shader</Filter>
     </None>
@@ -429,6 +420,21 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\Sprite.hlsl">
       <Filter>src\shader</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Lighting.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Skeleton.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Standard.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc">
+      <Filter>src\shader\inc</Filter>
     </None>
   </ItemGroup>
 </Project>

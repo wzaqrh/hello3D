@@ -147,10 +147,10 @@ private:
 			skin2.BiTangent = skin2.BiTangent + bitangent;
 		}
 	}
-	std::vector<ITexturePtr> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const aiScene* scene) {
+	std::vector<ITexturePtr> loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const aiScene* scene) {
 		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;
-		for (UINT i = 0; i < 1; i++)
+		for (UINT i = 0; i < std::max<int>(1, mat->GetTextureCount(type)); i++)
 		{
 			aiString str; 
 			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
@@ -197,22 +197,24 @@ private:
 		texturesPtr->Resize(5);
 		if (mesh->mMaterialIndex >= 0) {
 			TextureBySlot& textures = *texturesPtr;
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 			auto loadTexture = [&](size_t pos, aiTextureType type) {
 				std::vector<ITexturePtr> loads = loadMaterialTextures(material, type, scene);
-				if (loads.size() > 0) 
+				if (loads.size() > 0)
 					textures[pos] = loads[0];
 			};
 			loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
-			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
 			loadTexture(kTextureNormal, aiTextureType_NORMALS);
+			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
 
 			loadTexture(kTexturePbrAlbedo, aiTextureType_BASE_COLOR);
 			loadTexture(kTexturePbrNormal, aiTextureType_NORMAL_CAMERA);
 			loadTexture(kTexturePbrMetalness, aiTextureType_METALNESS);
 			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
 			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
+
+			loadTexture(kTexturePbrMetalness, aiTextureType_UNKNOWN);
 		}
 
 #define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))

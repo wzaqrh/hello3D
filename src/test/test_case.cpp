@@ -88,7 +88,8 @@ struct ModelInfo {
 	double mScale, mPosY;
 };
 std::map<std::string, ModelInfo> CResPathMap = {
-	{"toycar", {"model/khronos-gltf-pbr/2.0/ToyCar/glTF/ToyCar.gltf","",100,0}},
+	{"toycar", {"model/khronos-gltf-pbr/2.0/ToyCar/glTF/ToyCar.gltf","",120,0}},
+	{"box-space", {"model/khronos-gltf-pbr/2.0/Box With Spaces/glTF/Box With Spaces.gltf","",1,0}},
 	{"nanosuit", {"model/nanosuit/nanosuit.obj","",1,0}},
 	{"mir", {"model/Male03/Male02.FBX","",0.05,-5}},
 	{"spaceship", {"model/Spaceship/Spaceship.fbx","",0.01,0}},

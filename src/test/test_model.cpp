@@ -16,7 +16,9 @@ private:
 	AssimpModelPtr mModel;
 };
 /*mCaseIndex
-0,1：透视相机 观察到传奇战士: 左半有高光, 右边非全暗 对比https://www.khronos.org/news/press/khronos-releases-wave-of-new-gltf-pbr-3d-material-capabilities
+0,1：透视相机 观察到传奇战士: 左半有高光, 右边非全暗 
+对比https://www.khronos.org/news/press/khronos-releases-wave-of-new-gltf-pbr-3d-material-capabilities
+
 2,3: 透视相机 观察到模型：飞机
 4,5：透视相机 观察到模型：石头（在右上角）
 6,7: 透视相机 观察到模型：地板
@@ -31,7 +33,11 @@ void TestModel::OnPostInitDevice()
 
 	switch (caseIndex) {
 	case 0:
-	case 1:
+	case 1: {
+		auto pt_light = mScneMng->AddPointLight();
+		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
+		pt_light->SetAttenuation(0.001);
+	}break;
 	case 2:
 	case 3: {
 		auto pt_light = mScneMng->AddPointLight();
@@ -60,10 +66,12 @@ void TestModel::OnPostInitDevice()
 	switch (caseIndex) {
 	case 0:
 	case 1: {
+		camera->SetLookAt(Eigen::Vector3f(0, 15, 0), Eigen::Vector3f::Zero());
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
 		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = model.Init("toycar", mModel);
+		if (caseIndex == 0) mTransform = model.Init("toycar", mModel);
+		else mTransform = model.Init("box-space", mModel);
 	}break;
 	case 2:
 	case 3: {

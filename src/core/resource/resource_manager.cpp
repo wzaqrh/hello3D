@@ -166,7 +166,7 @@ inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	{
 		boost::filesystem::directory_iterator diter("shader/"), dend;
 		for (; diter != dend; ++diter) {
-			if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".h") {
+			if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".cginc") {
 				time_t htime = boost::filesystem::last_write_time((*diter).path());
 				time = std::max(time, htime);
 			}

@@ -18,8 +18,8 @@ namespace mir {
 
 enum TextureType {
 	kTextureDiffuse,
+	kTextureNormal,
 	kTextureSpecular,
-	kTextureNormal
 };
 enum TexturePbrType {
 	kTexturePbrAlbedo,
