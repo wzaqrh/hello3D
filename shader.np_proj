@@ -7,6 +7,7 @@
         <File name="C:\MyDoc\graphics\&#x6280;&#x672F;&#x70B9;.cs" />
         <File name="C:\MyDoc\graphics\&#x56FE;&#x5F62;&#x6570;&#x5B66;.cs" />
         <File name="C:\MyDoc\graphics\&#x5F15;&#x7528;.cs" />
+        <File name="D:\Documents\MyDoc\graphics\Standard.shader&#x7B14;&#x8BB0;.cs" />
     </Project>
     <Project name="d3d">
         <File name="C:\MyDoc\&#x7B14;&#x8BB0;\d3d\d3d11&#x7F16;&#x7A0B;&#x6307;&#x5357;.cs" />
@@ -354,5 +355,61 @@
         <File name="bin\x86\Debug\shader\Sprite.xml" />
         <File name="bin\x86\Debug\shader\Standard.xml" />
         <File name="bin\x86\Debug\shader\Variants.xml" />
+    </Project>
+    <Project name="mir&#x7B14;&#x8BB0;">
+        <File name="D:\Documents\MyDoc\&#x7B14;&#x8BB0;\mir&#x7B14;&#x8BB0;\Unity ShaderLab&#x53C2;&#x8003;.txt" />
+        <File name="D:\Documents\MyDoc\&#x7B14;&#x8BB0;\mir&#x7B14;&#x8BB0;\UnityShader&#x7B14;&#x8BB0;.fx" />
+        <File name="D:\Documents\MyDoc\&#x7B14;&#x8BB0;\mir&#x7B14;&#x8BB0;\UnityStand.fx" />
+        <File name="D:\Documents\MyDoc\&#x7B14;&#x8BB0;\mir&#x7B14;&#x8BB0;\&#x9634;&#x5F71;.docx" />
+    </Project>
+    <Project name="gltfViewer">
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\animation.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\brdf.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\cubemap.frag" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\cubemap.vert" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\functions.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\gltfSamplerViewerShaders.np_proj" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\ibl.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\material_info.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\pbr.frag" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\primitive.vert" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\punctual.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\textures.glsl" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shaders\tonemapping.glsl" />
+        <Folder name="Renderer">
+            <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\environment_renderer.js" />
+            <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\renderer.js" />
+            <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shader.js" />
+            <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\shader_cache.js" />
+            <File name="thirdparty\thirdparty\glTFSampleViewer\source\Renderer\webgl.js" />
+        </Folder>
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\accessor.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\animation.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\animation_sampler.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\asset.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\buffer.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\buffer_view.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\camera.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\channel.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\gltf.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\gltf_object.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\gltf_utils.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\image.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\image_based_light.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\image_mime_type.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\interpolator.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\light.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\material.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\math_utils.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\mesh.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\node.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\primitive.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\sampler.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\scene.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\skin.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\texture.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\user_camera.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\utils.js" />
+        <File name="thirdparty\thirdparty\glTFSampleViewer\source\gltf\variant.js" />
     </Project>
 </NotepadPlus>

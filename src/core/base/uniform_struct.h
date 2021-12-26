@@ -61,6 +61,9 @@ struct UNIFORM_ALIGN cbWeightedSkin
 		hasRoughness = false;
 		hasAO = false;
 		hasAlbedo = false;
+		BaseColorFactor = 1;
+		RoughnessFactor = 1;
+		MetallicFactor = 1;
 	}
 public:
 	Eigen::Matrix4f Model;
@@ -70,6 +73,9 @@ public:
 	BOOL hasRoughness;
 	BOOL hasAO;
 	BOOL hasAlbedo;
+	float BaseColorFactor;
+	float RoughnessFactor;
+	float MetallicFactor;
 };
 
 struct UNIFORM_ALIGN cbUnityMaterial

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus>
+    <Session activeView="0">
+        <mainView activeIndex="1">
+            <File firstVisibleLine="568" xOffset="0" scrollWidth="1780" startPos="16733" endPos="16733" selMode="0" offset="0" wrapCount="1" lang="JSON" encoding="-1" userReadOnly="no" filename="C:\mir\bin\x86\Debug\model\khronos-gltf-pbr\2.0\ToyCar\glTF\ToyCar.gltf" backupFilePath="" originalFileLastModifTimestamp="-256402176" originalFileLastModifTimestampHigh="30924155" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="1142292480" mapWrapIndentMode="-1" mapIsWrap="no">
+                <Fold line="12" />
+                <Fold line="29" />
+                <Fold line="236" />
+                <Fold line="310" />
+                <Fold line="354" />
+                <Fold line="479" />
+                <Fold line="500" />
+                <Fold line="571" />
+                <Fold line="587" />
+                <Fold line="603" />
+                <Fold line="614" />
+            </File>
+            <File firstVisibleLine="9" xOffset="0" scrollWidth="740" startPos="723" endPos="723" selMode="0" offset="0" wrapCount="1" lang="XML" encoding="-1" userReadOnly="no" filename="C:\mir\bin\x86\Debug\shader\Model.xml" backupFilePath="" originalFileLastModifTimestamp="1522788675" originalFileLastModifTimestampHigh="30931567" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="3932263" mapWrapIndentMode="-1" mapIsWrap="no" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="830" startPos="1059" endPos="1059" selMode="0" offset="0" wrapCount="1" lang="XML" encoding="-1" userReadOnly="no" filename="C:\mir\bin\x86\Debug\shader\Skeleton.xml" backupFilePath="" originalFileLastModifTimestamp="-51992114" originalFileLastModifTimestampHigh="30931559" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="200" startPos="3" endPos="3" selMode="0" offset="0" wrapCount="1" lang="None (Normal Text)" encoding="-1" userReadOnly="no" filename="C:\mir\bin\x86\Debug\test_cmdline.txt" backupFilePath="" originalFileLastModifTimestamp="-1059888799" originalFileLastModifTimestampHigh="30931565" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
+            <File firstVisibleLine="72" xOffset="0" scrollWidth="1832" startPos="631" endPos="640" selMode="0" offset="0" wrapCount="1" lang="C#" encoding="-1" userReadOnly="no" filename="D:\Documents\MyDoc\graphics\Standard.shader&#x7B14;&#x8BB0;.cs" backupFilePath="" originalFileLastModifTimestamp="-29728949" originalFileLastModifTimestampHigh="30931566" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="0" mapWrapIndentMode="-1" mapIsWrap="no" />
+        </mainView>
+        <subView activeIndex="0" />
+    </Session>
+</NotepadPlus>

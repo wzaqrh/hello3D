@@ -16,6 +16,9 @@
 			<Element Name="hasRoughness" Type="int"></Element>
 			<Element Name="hasAO" 		 Type="int"></Element>
 			<Element Name="hasAlbedo" 	 Type="int"></Element>
+			<Element Name="BaseColorFactor"  Type="float"></Element>
+			<Element Name="RoughnessFactor"  Type="float"></Element>
+			<Element Name="MetallicFactor" 	 Type="float"></Element>
 		</Uniform>
 	</PROGRAM>
 </Shader>

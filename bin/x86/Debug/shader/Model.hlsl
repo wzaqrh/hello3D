@@ -1,9 +1,8 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.cginc"
 #include "Skeleton.cginc"
-#if !DEBUG_PBR
 #include "Lighting.cginc"
-#else
+#if DEBUG_PBR > 0
 #include "LightingPbr.cginc"
 #endif
 
@@ -15,26 +14,31 @@ MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 
 inline float3 GetAlbedo(float2 uv) 
 {
-	float3 albedo;
+    float3 albedo = float3(1.0, 1.0, 1.0);
 	if (hasAlbedo) albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
-	else albedo = float3(1.0,1.0,1.0);
-	return albedo;
+    return albedo * BaseColorFactor;
 }
 
 inline float GetMetalness(float2 uv) 
 {
-	float metalness;
-	if (hasMetalness) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
-	else metalness = 0.0;
-	return metalness;
+    float metalness = 0.0;
+    #if OCCLUSION_ROUGHNESS_METALLIC
+    if (hasMetalness) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).b;
+    #else 
+    if (hasMetalness) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
+    #endif
+    return metalness * MetallicFactor;
 }
 
 inline float GetSmoothness(float2 uv) 
 {
-	float smoothness;
-	if (hasRoughness) smoothness = MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb;
-	else smoothness = 1.0;
-	return smoothness;
+    float smoothness = 0.0;
+    #if OCCLUSION_ROUGHNESS_METALLIC
+    if (hasMetalness) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txMetalness, uv).g * RoughnessFactor;
+    #else
+    if (hasRoughness) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb, RoughnessFactor);
+    #endif
+    return smoothness;
 }
 
 /************ ShadowCaster ************/
@@ -74,8 +78,9 @@ struct PixelInput
 	float3 Normal : NORMAL0;//eye space
 	float3 ToEye  : TEXCOORD1;//eye space
 	float3 ToLight : TEXCOORD2;//eye space
+    float3x3 TangentBasis : TEXCOORD3;
 #if ENABLE_SHADOW_MAP
-	float4 PosInLight : TEXCOORD3;//light's ndc space
+	float4 PosInLight : TEXCOORD4;//light's ndc space
 #endif
 };
 
@@ -107,6 +112,9 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	output.PosInLight.z -= bias * output.PosInLight.w;	
 #endif
 
+    float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
+    output.TangentBasis = mul((float3x3)MW, transpose(TBN));
+    
 	//ToEye
 	output.ToEye = -output.Pos;
 	
@@ -119,10 +127,25 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-#if !DEBUG_PBR
+    
+    float3 normal;
+    if (hasNormal > 0)
+    {
+        float3 rawNormal = MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz;
+        normal = normalize(2.0 * rawNormal - 1.0);
+        normal = normalize(mul(input.TangentBasis, normal));
+    }
+    else 
+    {
+        normal = normalize(input.Normal);
+    }
+#if DEBUG_PBR == 0
 	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+#elif DEBUG_PBR == 1
+	finalColor.rgb = UnityPbrLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
+		GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
 #else
-	finalColor.rgb = MirPbrLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
+    finalColor.rgb = GltfPbrLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye),
 		GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
 #endif
 	finalColor.a = 1.0;
