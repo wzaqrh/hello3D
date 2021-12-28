@@ -168,6 +168,7 @@
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Math.cginc" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.cginc" />
     <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
   </ItemGroup>

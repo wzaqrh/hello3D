@@ -1,3 +1,6 @@
+#ifndef LIGHTING_PBR_H
+#define LIGHTING_PBR_H
+
 #define MIR_EPS 1e-7f
 #define MIR_PI  3.141592f
 #define MIR_INV_PI 0.31830988618f
@@ -84,10 +87,6 @@ inline float3 SchlickFresnel(float3 F0, float cosA)
 }
 #endif
 
-inline float3 CookTorranceSpecular(float NdotL, float LdotH, float NdotH, float NdotV, float perceptualRoughness, float3 F0)
-{
-
-}
 #define VectorIdentity float3(1,1,1)
 #define DielectricSpec float4(0.04, 0.04, 0.04, 1.0 - 0.04)
 float3 UnityPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo, float metalness, float smoothness)
@@ -154,3 +153,5 @@ float3 GltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo,
     float ks = 1.0;
     return (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
 }
+
+#endif

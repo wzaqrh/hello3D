@@ -1,3 +1,6 @@
+#ifndef LIGHTING_H
+#define LIGHTING_H
+
 #define SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
 #define PCF_SHADOW
 
@@ -42,7 +45,7 @@ inline float3 GetSpecColor(float3 normal, float3 toEye)
 #endif
 }
 
-inline float3 MirBlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo, bool spotLight)
+inline float3 BlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo, bool spotLight)
 {
 	//ambient
 	float3 luminance = glstate_lightmodel_ambient.xyz;
@@ -113,3 +116,5 @@ float CalcShadowFactor(float4 shadowPosH)
 	return MIR_SAMPLE_SHADOW(_ShadowMapTexture, shadowPosH).r;
 #endif
 }
+
+#endif

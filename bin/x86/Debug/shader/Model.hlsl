@@ -5,6 +5,7 @@
 #if DEBUG_PBR > 0
 #include "LightingPbr.cginc"
 #endif
+#include "Math.cginc"
 
 MIR_DECLARE_TEX2D(txAlbedo, 0);
 MIR_DECLARE_TEX2D(txNormal, 1);
@@ -78,10 +79,15 @@ struct PixelInput
 	float3 Normal : NORMAL0;//eye space
 	float3 ToEye  : TEXCOORD1;//eye space
 	float3 ToLight : TEXCOORD2;//eye space
-    float3x3 TangentBasis : TEXCOORD3;
 #if ENABLE_SHADOW_MAP
-	float4 PosInLight : TEXCOORD4;//light's ndc space
-#endif
+	float4 PosInLight : POSITION0;//light's ndc space
+#endif    
+#if DEBUG_TBN == 2    
+    float3x3 TangentBasis : TEXCOORD3;
+#else
+    float3 EyePos : POSITION1;//eye space
+#endif    
+
 };
 
 PixelInput VS(vbSurface surf, vbWeightedSkin skin)
@@ -95,7 +101,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
-
+    
 	//PosInLight
 #if ENABLE_SHADOW_MAP
 	output.PosInLight = mul(LightView, output.Pos);
@@ -107,13 +113,17 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	float4 lightPosition = mul(View, unity_LightPosition);
 	output.ToLight = lightPosition.xyz - output.Pos.xyz * lightPosition.w;
 
+#if DEBUG_TBN == 2     
+    float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
+    output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));
+#else    
+    output.EyePos = output.Pos.xyz / output.Pos.w;
+#endif   
+    
 #if ENABLE_SHADOW_MAP
 	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
 	output.PosInLight.z -= bias * output.PosInLight.w;	
 #endif
-
-    float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
-    output.TangentBasis = mul((float3x3)MW, transpose(TBN));
     
 	//ToEye
 	output.ToEye = -output.Pos;
@@ -131,22 +141,27 @@ float4 PS(PixelInput input) : SV_Target
     float3 normal;
     if (hasNormal > 0)
     {
-        float3 rawNormal = MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz;
-        normal = normalize(2.0 * rawNormal - 1.0);
-        normal = normalize(mul(input.TangentBasis, normal));
+    #if DEBUG_TBN == 2
+        normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);
+        float3 basis_tangent = normalize(input.TangentBasis[0]);
+        float3 basis_bitangent = normalize(input.TangentBasis[1]);
+        float3 basis_normal = normalize(input.TangentBasis[2]);
+        normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
+        //normal = normalize(mul(input.TangentBasis, normal));
+    #else        
+        normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), input.Tex, input.EyePos, input.Normal);
+    #endif        
     }
     else 
     {
         normal = normalize(input.Normal);
     }
-#if DEBUG_PBR == 0
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+#if DEBUG_PBR == 2
+    finalColor.rgb = GltfPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
 #elif DEBUG_PBR == 1
-	finalColor.rgb = UnityPbrLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), 
-		GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
 #else
-    finalColor.rgb = GltfPbrLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye),
-		GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+    finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 #endif
 	finalColor.a = 1.0;
 #if ENABLE_SHADOW_MAP
@@ -159,7 +174,7 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = MirBlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+	finalColor.rgb = BlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }
@@ -253,9 +268,7 @@ float4 PSPrepassFinal(PSPrepassFinalInput input) : SV_Target
 	float3 toLight_ = unity_LightPosition.xyz - position.xyz * unity_LightPosition.w;
 	
 	float4 toEye = mul(View, position);
-	toEye /= toEye.w;
-	toEye = normalize(-toEye);
-	finalColor.rgb = MirBlinnPhongLight(toLight_, normal, toEye, albedo, IsSpotLight);
+	finalColor.rgb = BlinnPhongLight(toLight_, normal, normalize(-toEye.xyz / toEye.w), albedo, IsSpotLight);
 	finalColor.a = 1.0;
 	
 #if ENABLE_SHADOW_MAP
