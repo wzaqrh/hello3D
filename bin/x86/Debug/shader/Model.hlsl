@@ -16,7 +16,7 @@ MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 inline float3 GetAlbedo(float2 uv) 
 {
     float3 albedo = float3(1.0, 1.0, 1.0);
-	if (hasAlbedo) albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
+	if (EnableAlbedoMap) albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
     return albedo * BaseColorFactor;
 }
 
@@ -24,9 +24,9 @@ inline float GetMetalness(float2 uv)
 {
     float metalness = 0.0;
     #if OCCLUSION_ROUGHNESS_METALLIC
-    if (hasMetalness) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).b;
+    if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).b;
     #else 
-    if (hasMetalness) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
+    if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
     #endif
     return metalness * MetallicFactor;
 }
@@ -35,9 +35,9 @@ inline float GetSmoothness(float2 uv)
 {
     float smoothness = 0.0;
     #if OCCLUSION_ROUGHNESS_METALLIC
-    if (hasMetalness) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txMetalness, uv).g * RoughnessFactor;
+    if (EnableMetalnessMap) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txMetalness, uv).g * RoughnessFactor;
     #else
-    if (hasRoughness) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb, RoughnessFactor);
+    if (EnableRoughnessMap) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb, RoughnessFactor);
     #endif
     return smoothness;
 }
@@ -139,7 +139,7 @@ float4 PS(PixelInput input) : SV_Target
 	float4 finalColor;
     
     float3 normal;
-    if (hasNormal > 0)
+    if (EnableNormalMap)
     {
     #if DEBUG_TBN == 2
         normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);

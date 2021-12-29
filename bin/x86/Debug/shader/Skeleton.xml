@@ -9,13 +9,13 @@
 		</Attribute>
 		
 		<Uniform Name="cbWeightedSkin" IsUnique="false" Slot="2">
-			<Element Name="Model" 	Type="matrix"></Element>
-			<Element Name="Models" 	Type="matrix" Count="56"></Element>
-			<Element Name="hasNormal" 	 Type="int"></Element>
-			<Element Name="hasMetalness" Type="int"></Element>
-			<Element Name="hasRoughness" Type="int"></Element>
-			<Element Name="hasAO" 		 Type="int"></Element>
-			<Element Name="hasAlbedo" 	 Type="int"></Element>
+			<Element Name="Model" Type="matrix"></Element>
+			<Element Name="Models" Type="matrix" Count="56"></Element>
+			<Element Name="EnableNormalMap"           Type="bool"></Element>
+			<Element Name="EnableMetalnessMap"        Type="bool"></Element>
+			<Element Name="EnableRoughnessMap"        Type="bool"></Element>
+			<Element Name="EnableAmbientOcclusionMap" Type="bool"></Element>
+			<Element Name="EnableAlbedoMap"  Type="bool"></Element>
 			<Element Name="BaseColorFactor"  Type="float"></Element>
 			<Element Name="RoughnessFactor"  Type="float"></Element>
 			<Element Name="MetallicFactor" 	 Type="float"></Element>

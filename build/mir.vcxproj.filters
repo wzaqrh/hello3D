@@ -404,15 +404,15 @@
     <Filter Include="src\shader\inc">
       <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\shader\xml">
+      <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">
       <Filter>src\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Model.hlsl">
-      <Filter>src\shader</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\ModelPbr.hlsl">
       <Filter>src\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skybox.hlsl">
@@ -439,5 +439,34 @@
     <None Include="..\bin\x86\Debug\shader\Math.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\bin\x86\Debug\shader\Bloom.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\LayerColor.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Model.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\ModelPbr.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Skeleton.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Skybox.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Sprite.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Standard.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
+    <Xml Include="..\bin\x86\Debug\shader\Variants.xml">
+      <Filter>src\shader\xml</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

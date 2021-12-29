@@ -15,11 +15,11 @@ cbuffer cbWeightedSkin : register(b2)
 {
 	matrix Model;
 	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	
-	int hasNormal;
-	int hasMetalness;
-	int hasRoughness;
-	int hasAO;
-	int hasAlbedo;
+	bool EnableNormalMap;
+	bool EnableMetalnessMap;
+	bool EnableRoughnessMap;
+	bool EnableAmbientOcclusionMap;
+	bool EnableAlbedoMap;
     float BaseColorFactor;
     float RoughnessFactor;
     float MetallicFactor;

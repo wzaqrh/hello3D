@@ -341,15 +341,30 @@
         </Folder>
     </Project>
     <Project name="shader">
-        <File name="bin\x86\Debug\shader\Bloom.xml" />
-        <File name="bin\x86\Debug\shader\LayerColor.xml" />
-        <File name="bin\x86\Debug\shader\Model.xml" />
-        <File name="bin\x86\Debug\shader\ModelPbr.xml" />
-        <File name="bin\x86\Debug\shader\Skeleton.xml" />
-        <File name="bin\x86\Debug\shader\Skybox.xml" />
-        <File name="bin\x86\Debug\shader\Sprite.xml" />
-        <File name="bin\x86\Debug\shader\Standard.xml" />
-        <File name="bin\x86\Debug\shader\Variants.xml" />
+        <Folder name="shader">
+            <File name="bin\x86\Debug\shader\Sprite.hlsl" />
+            <File name="bin\x86\Debug\shader\Skybox.hlsl" />
+            <File name="bin\x86\Debug\shader\Model.hlsl" />
+            <File name="bin\x86\Debug\shader\LayerColor.hlsl" />
+            <File name="bin\x86\Debug\shader\Label.hlsl" />
+        </Folder>
+        <Folder name="cginc">
+            <File name="bin\x86\Debug\shader\Standard.cginc" />
+            <File name="bin\x86\Debug\shader\Skeleton.cginc" />
+            <File name="bin\x86\Debug\shader\Math.cginc" />
+            <File name="bin\x86\Debug\shader\LightingPbr.cginc" />
+            <File name="bin\x86\Debug\shader\Lighting.cginc" />
+            <File name="bin\x86\Debug\shader\HLSLSupport.cginc" />
+        </Folder>
+        <Folder name="xml">
+            <File name="bin\x86\Debug\shader\Variants.xml" />
+            <File name="bin\x86\Debug\shader\Standard.xml" />
+            <File name="bin\x86\Debug\shader\Sprite.xml" />
+            <File name="bin\x86\Debug\shader\Skybox.xml" />
+            <File name="bin\x86\Debug\shader\Skeleton.xml" />
+            <File name="bin\x86\Debug\shader\Model.xml" />
+            <File name="bin\x86\Debug\shader\LayerColor.xml" />
+        </Folder>
     </Project>
     <Project name="mir&#x7B14;&#x8BB0;">
         <File name="C:\MyDoc\&#x7B14;&#x8BB0;\mir&#x7B14;&#x8BB0;\Unity ShaderLab&#x53C2;&#x8003;.txt" />

@@ -553,7 +553,7 @@ float4 PS(PixelInput input) : SV_Target
 	float3 toEye = normalize(input.Eye - input.SurfacePosition);
 	
 	float3 normal;
-	if (hasNormal > 0) {
+	if (EnableNormalMap) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
 		float3 rawNormal = MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz;
@@ -572,7 +572,7 @@ float4 PS(PixelInput input) : SV_Target
 #if 0
 	{
 		float3 ao;
-		if (hasAO)
+		if (EnableAmbientOcclusionMap)
 			ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, input.Tex).xyz;
 		else
 			ao = 0.0;
@@ -600,7 +600,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 	//float3 toEye = normalize(float3(0.0,0.0,-150.0) - input.SurfacePosition);
 	
 	float3 normal;
-	if (hasNormal > 0) {
+	if (EnableNormalMap) {
 		//float3x3 tbn = CalTBN(input.Normal, input.Tangent, input.BiTangent);
 		//normal = GetBumpBySampler(tbn, input.Tex);
 		float3 rawNormal = MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz;

@@ -299,11 +299,11 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();
 			}
 
-			weightedSkin.hasNormal = mesh->HasTexture(kTexturePbrNormal);
-			weightedSkin.hasMetalness = mesh->HasTexture(kTexturePbrMetalness);
-			weightedSkin.hasRoughness = mesh->HasTexture(kTexturePbrRoughness);
-			weightedSkin.hasAO = mesh->HasTexture(kTexturePbrAo);
-			weightedSkin.hasAlbedo = mesh->HasTexture(kTexturePbrAlbedo);
+			weightedSkin.EnableNormalMap = mesh->HasTexture(kTexturePbrNormal);
+			weightedSkin.EnableMetalnessMap = mesh->HasTexture(kTexturePbrMetalness);
+			weightedSkin.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
+			weightedSkin.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
+			weightedSkin.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
