@@ -1,5 +1,6 @@
 #ifndef LIGHTING_H
 #define LIGHTING_H
+#include "Standard.cginc"
 
 #define SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
 #define PCF_SHADOW
@@ -55,7 +56,7 @@ inline float3 BlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, floa
 	toLight_ *= rsqrt(lengthSq);
 	
 	float ndotl = max(0, dot(normal, toLight_));
-	luminance += albedo * ndotl * unity_LightColor.rgb;
+    luminance += albedo;// * ndotl * unity_LightColor.rgb;
 
 	//blinn-phong
 #if ENABLE_ENVIROMENT_MAP

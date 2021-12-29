@@ -5,7 +5,6 @@
 #define MAT_LABEL "Label"
 #define MAT_SKYBOX "Skybox"
 #define MAT_MODEL "Model"
-#define MAT_MODEL_PBR "ModelPbr"
 #define MAT_MODEL_SHADOW "ModelShadow"
 #define MAT_BLOOM "Bloom"
 

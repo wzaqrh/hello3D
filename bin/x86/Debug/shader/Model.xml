@@ -9,6 +9,17 @@
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
+    <Uniform Name="cbModel" IsUnique="false" Slot="3">
+      <Element Name="BaseColorFactor"  Type="float"></Element>
+      <Element Name="RoughnessFactor"  Type="float"></Element>
+      <Element Name="MetallicFactor"   Type="float"></Element>
+      <Element Name="EnableNormalMap"           Type="bool"></Element>
+      <Element Name="EnableMetalnessMap"        Type="bool"></Element>
+      <Element Name="EnableRoughnessMap"        Type="bool"></Element>
+      <Element Name="EnableAmbientOcclusionMap" Type="bool"></Element>
+      <Element Name="EnableAlbedoMap"           Type="bool"></Element>
+	  <Element Name="EnableAOMap_ChGRoughness_ChBMetalness" Type="bool"></Element>
+    </Uniform>   
 		<Texture>
 			<Element Slot="0">txAlbedo</Element>
 			<Element Slot="1">txNormal</Element>
@@ -20,9 +31,9 @@
 		<Macros>
 			<ENABLE_SHADOW_MAP>0</ENABLE_SHADOW_MAP>
 			<ENABLE_ENVIROMENT_MAP>0</ENABLE_ENVIROMENT_MAP>
-			<DEBUG_TBN>0</DEBUG_TBN>
-			<DEBUG_PBR>2</DEBUG_PBR>
 			<OCCLUSION_ROUGHNESS_METALLIC>1</OCCLUSION_ROUGHNESS_METALLIC>
+			<PBR_MODE>2</PBR_MODE>
+			<DEBUG_TBN>0</DEBUG_TBN>
 		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>

@@ -9,8 +9,8 @@
 
 using namespace mir;
 
-//#define AppLaunchMode __LaunchSync__
-#define AppLaunchMode __LaunchAsync__
+#define AppLaunchMode __LaunchSync__
+//#define AppLaunchMode __LaunchAsync__
 
 App::App()
 {
@@ -130,6 +130,10 @@ std::string App::GetName()
 void App::SetCaseIndex(int caseIndex)
 {
 	mCaseIndex = caseIndex;
+}
+void App::SetCaseSecondIndex(int secondIndex)
+{
+	mCaseSecondIndex = secondIndex;
 }
 
 Eigen::Matrix4f App::GetWorldTransform()

@@ -2,7 +2,7 @@
 #define MATH_H
 #include "HLSLSupport.cginc"
 
-inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float3 worldPos, float3 normal)
+inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float3 worldPos, float3 worldNormal)
 {
     float3 tangentNormal = MIR_SAMPLE_TEX2D(normalMap, texCoord).xyz * 2.0 - 1.0;
 
@@ -14,7 +14,7 @@ inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float
 #if DEBUG_TBN == 1
     float3 N = normalize(cross(dpx, dpy));
 #else
-    float3 N = normalize(normal);
+    float3 N = normalize(worldNormal);
 #endif
     
     float3 T = dpdx * duvdy.y - dpdy * duvdx.y;

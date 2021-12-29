@@ -22,7 +22,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
 
 	std::string appName = GetCurrentAppName();
-	int caseIndex = -1;
+	int caseIndex = -1, caseSecondIndex = -1;
 	if (argc > 1) {
 		appName = ConvertLPWSTRToLPSTR(argv[1]);
 		if (argc > 2) caseIndex = atoi(ConvertLPWSTRToLPSTR(argv[2]));
@@ -33,7 +33,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			bool scanf_eof = false;
 			do {
 				char szAppName[260];
-				if (scanf_eof = fscanf(fd, "%s %d", szAppName, &caseIndex) == EOF)
+				if (scanf_eof = fscanf(fd, "%s %d %d", szAppName, &caseIndex, &caseSecondIndex) == EOF)
 					break;
 				if (strlen(szAppName) > 0 && szAppName[0] >= '0' && szAppName[0] <= '9') {
 					int appNameIndex = atoi(szAppName) + 1;
@@ -52,8 +52,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 
 	auto AppDraw = CreateApp(appName);
-	if (caseIndex != -1)
+	if (caseIndex != -1) 
 		AppDraw->SetCaseIndex(caseIndex);
+	if (caseSecondIndex != -1)
+		AppDraw->SetCaseSecondIndex(caseSecondIndex);
 
 	HWND handle;
 	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), &handle)))

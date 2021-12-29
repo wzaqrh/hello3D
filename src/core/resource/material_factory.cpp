@@ -173,6 +173,8 @@ struct XmlSamplerInfoSet {
 	}
 	size_t Count() const { return Samplers.size(); }
 	const SamplerDesc& operator[](size_t pos) const { return Samplers[pos]; }
+	std::vector<SamplerDesc>::const_iterator begin() const { return Samplers.begin(); }
+	std::vector<SamplerDesc>::const_iterator end() const { return Samplers.end(); }
 public:
 	std::vector<SamplerDesc> Samplers;
 };
@@ -182,13 +184,15 @@ struct SCDHelper {
 		auto find_it = std::find_if(mSCD.Macros.begin(), mSCD.Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
 			return elem.Name == macro.Name;
 		});
-		if (find_it == mSCD.Macros.end())
-			mSCD.Macros.push_back(macro);
+		if (find_it == mSCD.Macros.end()) mSCD.Macros.push_back(macro);
+		else find_it->Definition = macro.Definition;
 	}
-	void Merge(const ShaderCompileDesc& other) {
-		for (const auto& it : other.Macros) {
+	void AddMacros(const std::vector<ShaderCompileMacro>& macros) {
+		for (const auto& it : macros)
 			AddMacro(it);
-		}
+	}
+	void AddMacros(const ShaderCompileDesc& other) {
+		AddMacros(other.Macros);
 	}
 private:
 	ShaderCompileDesc& mSCD;
@@ -215,8 +219,8 @@ struct XmlProgramInfo {
 		Attr = other.Attr;
 		Uniforms = other.Uniforms;
 		SamplerSet = other.SamplerSet;
-		SCDHelper(VertexSCD).Merge(other.VertexSCD);
-		SCDHelper(PixelSCD).Merge(other.PixelSCD);
+		SCDHelper(VertexSCD).AddMacros(other.VertexSCD);
+		SCDHelper(PixelSCD).AddMacros(other.PixelSCD);
 	}
 public:
 	PrimitiveTopology Topo = kPrimTopologyTriangleList;
@@ -313,13 +317,10 @@ public:
 		mMatNameToAsset = CreateInstance<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	bool GetMaterialAsset(Launch launchMode,
-		ResourceManager& resourceMng,
-		const std::string& shaderName,
-		const std::string& variantName,
+	bool GetMaterialAsset(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matParam, 
 		MaterialAsset& materialAsset) {
-		if (!variantName.empty()) return ParseShaderVariantXml(shaderName, variantName, materialAsset.ShaderInfo);
-		else return ParseShaderXml(shaderName, materialAsset.ShaderInfo);
+		if (matParam.IsVariant()) return ParseShaderVariantXml(matParam, materialAsset.ShaderInfo);
+		else return ParseShaderXml(matParam.ShaderName, materialAsset.ShaderInfo);
 	}
 public:
 	const MaterialNameToAssetMapping& MatNameToAsset() const {
@@ -629,8 +630,7 @@ private:
 			}
 		}
 	}
-	void VisitShaderVariants(const PropertyTreePath& nodeShaderVariant, 
-		const std::string& shaderName, const std::string& variantName, XmlShaderInfo& shaderInfo) {
+	void VisitShaderVariants(const PropertyTreePath& nodeShaderVariant, const std::string& shaderName, const std::string& variantName, XmlShaderInfo& shaderInfo) {
 		for (auto& it : boost::make_iterator_range(nodeShaderVariant->equal_range("Variant"))) {
 			auto& node_variant = it.second;
 			std::string useShader = node_variant.get<std::string>("UseShader");
@@ -674,21 +674,29 @@ private:
 		}
 		return result;
 	}
-	bool ParseShaderVariantXml(const std::string& shaderName, const std::string& variantName, XmlShaderInfo& shaderInfo) {
+	bool ParseShaderVariantXml(const MaterialLoadParam& matParam, XmlShaderInfo& shaderInfo) {
 		bool result;
-		std::string strKey = shaderName + "/" + variantName;
+		std::string strKey = matParam.ShaderName + "/" + matParam.CalcVariantName();
 		auto find_iter = mShaderVariantByName.find(strKey);
 		if (find_iter == mShaderVariantByName.end()) {
-			std::string filename = "shader/Variants.xml";
-			if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
-				boost_property_tree::ptree pt;
-				boost_property_tree::read_xml(filename, pt);
-				VisitShaderVariants(pt.get_child("ShaderVariants"), shaderName, variantName, shaderInfo);
-				mShaderVariantByName.insert(std::make_pair(strKey, shaderInfo));
-				result = true;
+			if (!matParam.VariantName.empty()) {
+				std::string filename = "shader/Variants.xml";
+				if (result = boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
+					boost_property_tree::ptree pt;
+					boost_property_tree::read_xml(filename, pt);
+					VisitShaderVariants(pt.get_child("ShaderVariants"), matParam.ShaderName, matParam.VariantName, shaderInfo);
+					mShaderVariantByName.insert(std::make_pair(strKey, shaderInfo));
+				}
 			}
 			else {
-				result = false;
+				if (result = ParseShaderXml(matParam.ShaderName, shaderInfo)) {
+					for (auto& subShaderInfo : shaderInfo.SubShaders) {
+						for (auto& passInfo : subShaderInfo.Passes) {
+							SCDHelper(passInfo.Program.VertexSCD).AddMacros(matParam.Macros);
+							SCDHelper(passInfo.Program.PixelSCD).AddMacros(matParam.Macros);
+						}
+					}
+				}
 			}
 		}
 		else {
@@ -712,11 +720,8 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 	builder.AddTechnique("d3d11");
 
 	const auto& shaderInfo = matAsset.ShaderInfo;
-	for (size_t i = 0; i < shaderInfo.SubShaders.size(); ++i) {
-		auto& subShaderInfo = shaderInfo.SubShaders[i];
-		for (size_t j = 0; j < subShaderInfo.Passes.size(); ++j) {
-			const auto& passInfo = subShaderInfo.Passes[j];
-
+	for (const auto& subShaderInfo : shaderInfo.SubShaders) {
+		for (const auto& passInfo : subShaderInfo.Passes) {
 			builder.AddPass(passInfo.LightMode, passInfo.ShortName/*, i == 0*/);
 			builder.SetTopology(shaderInfo.Program.Topo);
 
@@ -743,8 +748,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			}
 
 			//builder.ClearSamplersToTech();
-			for (size_t k = 0; k < shaderInfo.Program.SamplerSet.Count(); ++k) {
-				const auto& sd = shaderInfo.Program.SamplerSet[k];
+			for (const auto& sd : shaderInfo.Program.SamplerSet) {
 				builder.AddSampler(sd.CmpFunc != kCompareUnkown 
 					? resourceMng.CreateSampler(launchMode, sd) 
 					: nullptr);
@@ -769,7 +773,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
 	const MaterialLoadParam& matParam, MaterialPtr matRes) {
 	MaterialAsset matAsset;
-	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, matParam.ShaderName, matParam.VariantName, matAsset)) {
+	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, matParam, matAsset)) {
 		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset, matRes);
 	}
 	else {

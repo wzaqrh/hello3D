@@ -56,26 +56,35 @@ struct UNIFORM_ALIGN cbWeightedSkin
 	enum { kModelCount = 56 };
 	cbWeightedSkin() {
 		Models[0] = Model = Eigen::Matrix4f::Identity();
-		hasNormal = false;
-		hasMetalness = false;
-		hasRoughness = false;
-		hasAO = false;
-		hasAlbedo = false;
-		BaseColorFactor = 1;
-		RoughnessFactor = 1;
-		MetallicFactor = 1;
 	}
 public:
 	Eigen::Matrix4f Model;
 	Eigen::Matrix4f Models[kModelCount];
-	BOOL hasNormal;
-	BOOL hasMetalness;
-	BOOL hasRoughness;
-	BOOL hasAO;
-	BOOL hasAlbedo;
+};
+
+struct UNIFORM_ALIGN cbModel
+{
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	cbModel() {
+		BaseColorFactor = 1;
+		RoughnessFactor = 1;
+		MetallicFactor = 1;
+		EnableNormalMap = false;
+		EnableMetalnessMap = false;
+		EnableRoughnessMap = false;
+		EnableAmbientOcclusionMap = false;
+		EnableAlbedoMap = false;
+		EnableAOMap_ChGRoughness_ChBMetalness = false;
+	}
 	float BaseColorFactor;
 	float RoughnessFactor;
 	float MetallicFactor;
+	BOOL EnableNormalMap;
+	BOOL EnableMetalnessMap;
+	BOOL EnableRoughnessMap;
+	BOOL EnableAmbientOcclusionMap;
+	BOOL EnableAlbedoMap;
+	BOOL EnableAOMap_ChGRoughness_ChBMetalness;
 };
 
 struct UNIFORM_ALIGN cbUnityMaterial

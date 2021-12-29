@@ -15,6 +15,7 @@ struct IApp
 	virtual void CleanUp() = 0;
 	virtual std::string GetName() = 0;
 	virtual void SetCaseIndex(int caseIndex) = 0;
+	virtual void SetCaseSecondIndex(int secondIndex) = 0;
 };
 
 class MirManager
@@ -42,6 +43,7 @@ public:
 	void CleanUp() override;
 	std::string GetName() override;
 	void SetCaseIndex(int caseIndex) override;
+	void SetCaseSecondIndex(int secondIndex) override;
 protected:
 	virtual void OnPreInitDevice() {};
 	virtual void OnPostInitDevice() {};
@@ -52,7 +54,7 @@ protected:
 	Eigen::Matrix4f GetWorldTransform();
 protected:
 	Eigen::Vector4f mBackgndColor;
-	int mCaseIndex = 0;
+	int mCaseIndex = 0, mCaseSecondIndex = 0;
 	mir::Mir* mContext = nullptr;
 	mir::TransformPtr mTransform;
 	bool mControlCamera = true;

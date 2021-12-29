@@ -496,7 +496,7 @@ MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoa
 		if (material == nullptr) {
 			material = CreateInstance<Material>();
 			this->mMaterialByName[matName] = material;
-			DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.VariantName).str());
+			DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.CalcVariantName()).str());
 			DEBUG_SET_CALL(material, launchMode);
 			resNeedLoad = true;
 		}

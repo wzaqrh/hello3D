@@ -16,29 +16,39 @@ private:
 	AssimpModelPtr mModel;
 };
 /*mCaseIndex
-0,1：透视相机 观察到传奇战士: 左半有高光, 右边非全暗 
+0: 小汽车
+1: gltf盒子
 对比https://www.khronos.org/news/press/khronos-releases-wave-of-new-gltf-pbr-3d-material-capabilities
+2: 透视相机 观察到传奇战士: 左半有高光, 右边非全暗
+3: 透视相机 观察到模型：飞机
+4：透视相机 观察到模型：石头（在右上角）
+5: 透视相机 观察到模型：地板
 
-2,3: 透视相机 观察到模型：飞机
-4,5：透视相机 观察到模型：石头（在右上角）
-6,7: 透视相机 观察到模型：地板
-
-8-15: 正交相机
+6-11: 正交相机
 */
+
+inline MaterialLoadParam GetMatName(int secondIndex) {
+	MaterialLoadParamBuilder mlpb(MAT_MODEL);
+	mlpb["PBR_MODE"] = secondIndex % 3;
+	return mlpb;
+}
 
 void TestModel::OnPostInitDevice()
 {
-	int caseIndex = mCaseIndex % 8;
-	bool useOtho = mCaseIndex >= 8;
+	int caseIndex = mCaseIndex % 6;
+	bool useOtho = mCaseIndex >= 6;
 
 	switch (caseIndex) {
-	case 0:
-	case 1: {
+	case 0: {
+		auto dir_light = mScneMng->AddDirectLight();
+		dir_light->SetDirection(Eigen::Vector3f(0, -1, 0));
+	}break;
+	case 1:
+	case 2: {
 		auto pt_light = mScneMng->AddPointLight();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);
 	}break;
-	case 2:
 	case 3: {
 		auto pt_light = mScneMng->AddPointLight();
 		pt_light->SetPosition(Eigen::Vector3f(25, 0, -5));
@@ -47,8 +57,7 @@ void TestModel::OnPostInitDevice()
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(25, 0, 0));
 	}break;
-	case 6:
-	case 7:{
+	case 4:{
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(0, -1, 1));
 	}break;
@@ -65,28 +74,21 @@ void TestModel::OnPostInitDevice()
 	test1::res::model model;
 	switch (caseIndex) {
 	case 0:
-	case 1: {
+	case 1:
+	case 2: {
 		camera->SetLookAt(Eigen::Vector3f(0, 15, 0), Eigen::Vector3f::Zero());
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
 
-		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		if (caseIndex == 0) mTransform = model.Init("toycar", mModel);
-		else mTransform = model.Init("box-space", mModel);
+		mModel = mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
+		std::string modelNameArr[] = { "toycar", "box-space", "mir" };
+		mTransform = model.Init(modelNameArr[caseIndex], mModel);
 	}break;
-	case 2:
-	case 3: {
-		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = model.Init("spaceship", mModel);
-	}break;
-	case 4:
+	case 3:
+	case 4: 
 	case 5: {
-		mModel = mRendFac->CreateAssimpModel(!(caseIndex&1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = model.Init("rock", mModel);
-	}break;
-	case 6:
-	case 7: {
-		mModel = mRendFac->CreateAssimpModel(!(caseIndex & 1) ? MAT_MODEL : MAT_MODEL_PBR);
-		mTransform = model.Init("floor", mModel);
+		mModel = mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
+		std::string modelNameArr[] = { "spaceship", "rock", "floor" };
+		mTransform = model.Init(modelNameArr[caseIndex-3], mModel);
 	}break;
 	default:
 		break;

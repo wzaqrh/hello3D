@@ -190,7 +190,6 @@
     <Xml Include="..\bin\x86\Debug\shader\Bloom.xml" />
     <Xml Include="..\bin\x86\Debug\shader\LayerColor.xml" />
     <Xml Include="..\bin\x86\Debug\shader\Model.xml" />
-    <Xml Include="..\bin\x86\Debug\shader\ModelPbr.xml" />
     <Xml Include="..\bin\x86\Debug\shader\Skeleton.xml" />
     <Xml Include="..\bin\x86\Debug\shader\Skybox.xml" />
     <Xml Include="..\bin\x86\Debug\shader\Sprite.xml" />

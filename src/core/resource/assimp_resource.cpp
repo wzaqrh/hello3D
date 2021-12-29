@@ -59,7 +59,9 @@ public:
 			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(imgFullpath.string(), ImportFlags);
 		}
 		catch (...) 
-		{}
+		{
+			DEBUG_LOG_ERROR("Assimp::Importer ReadFile error");
+		}
 		return mAsset.mScene != nullptr;
 	}
 	AiScenePtr ExecuteSetupData() 
@@ -214,7 +216,7 @@ private:
 			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
 			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
 
-			loadTexture(kTexturePbrMetalness, aiTextureType_UNKNOWN);
+			loadTexture(kTexturePbrAo, aiTextureType_UNKNOWN);
 		}
 
 #define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
@@ -271,6 +273,8 @@ private:
 			std::vector<int> spMap(skeletonVerts.size(), 0);
 			for (size_t boneId = 0; boneId < mesh->mNumBones; ++boneId) {
 				const aiBone* bone = mesh->mBones[boneId];
+				if (bone->mWeights == nullptr) 
+					continue;
 				for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
 					const aiVertexWeight& vw = bone->mWeights[weightIndex];
 					if (vw.mVertexId >= 0 && vw.mVertexId < skeletonVerts.size()) {

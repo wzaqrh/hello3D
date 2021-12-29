@@ -87,15 +87,18 @@ struct ModelInfo {
 	std::string mPath, mRd;
 	double mScale, mPosY;
 };
+#define MakeKhronosGltfResPath(Name) "model/khronos-gltf-pbr/2.0/" Name "/glTF/" Name ".gltf"
+#define MakeResPath1(Name1, Name2, Postfix) "model/" Name1 "/" Name2 "." Postfix
+#define MakeResPath(Name, Postfix) MakeResPath1(Name, Name, Postfix)
 std::map<std::string, ModelInfo> CResPathMap = {
-	{"toycar", {"model/khronos-gltf-pbr/2.0/ToyCar/glTF/ToyCar.gltf","",120,0}},
-	{"box-space", {"model/khronos-gltf-pbr/2.0/Box With Spaces/glTF/Box With Spaces.gltf","",1,0}},
-	{"nanosuit", {"model/nanosuit/nanosuit.obj","",1,0}},
-	{"mir", {"model/Male03/Male02.FBX","",0.05,-5}},
-	{"spaceship", {"model/Spaceship/Spaceship.fbx","",0.01,0}},
-	{"rock", {"model/rock/rock.obj","",1,0}},
-	{"floor", {"model/floor/floor.obj","",0.3,0}},
-	{"planet", {"model/planet/planet.obj","",0.1,0}},
+	{"toycar", {MakeKhronosGltfResPath("ToyCar"),"",120,0}},
+	{"box-space", {MakeKhronosGltfResPath("Box With Spaces"),"",1,0}},
+	{"nanosuit", {MakeResPath("nanosuit", "obj"),"",1,0}},
+	{"mir", {MakeResPath1("Male03", "Male02", "fbx"),"",0.05,-5}},
+	{"spaceship", {MakeResPath("Spaceship", "fbx"),"",0.01,0}},
+	{"rock", {MakeResPath("rock", "obj"),"",1,0}},
+	{"floor", {MakeResPath("floor", "obj"),"",0.3,0}},
+	{"planet", {MakeResPath("planet", "obj"),"",0.1,0}},
 };
 model::model()
 {

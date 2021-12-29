@@ -1,17 +1,32 @@
 /********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.cginc"
 #include "Skeleton.cginc"
-#include "Lighting.cginc"
-#if DEBUG_PBR > 0
-#include "LightingPbr.cginc"
-#endif
 #include "Math.cginc"
+#include "Lighting.cginc"
+#include "LightingPbr.cginc"
+
+#if !defined ENABLE_SHADOW_MAP
+#define ENABLE_SHADOW_MAP 1
+#endif
 
 MIR_DECLARE_TEX2D(txAlbedo, 0);
 MIR_DECLARE_TEX2D(txNormal, 1);
 MIR_DECLARE_TEX2D(txMetalness, 2);
 MIR_DECLARE_TEX2D(txSmoothness, 3);
 MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
+
+cbuffer cbModel : register(b3)
+{
+	float BaseColorFactor;
+    float RoughnessFactor;
+    float MetallicFactor;
+	bool EnableNormalMap;
+	bool EnableMetalnessMap;
+	bool EnableRoughnessMap;
+	bool EnableAmbientOcclusionMap;
+	bool EnableAlbedoMap;
+	bool EnableAOMap_ChGRoughness_ChBMetalness;
+}
 
 inline float3 GetAlbedo(float2 uv) 
 {
@@ -23,23 +38,40 @@ inline float3 GetAlbedo(float2 uv)
 inline float GetMetalness(float2 uv) 
 {
     float metalness = 0.0;
-    #if OCCLUSION_ROUGHNESS_METALLIC
-    if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).b;
-    #else 
-    if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
-    #endif
+    if (EnableAOMap_ChGRoughness_ChBMetalness) metalness = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).b;
+    else if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
     return metalness * MetallicFactor;
 }
 
 inline float GetSmoothness(float2 uv) 
 {
     float smoothness = 0.0;
-    #if OCCLUSION_ROUGHNESS_METALLIC
-    if (EnableMetalnessMap) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txMetalness, uv).g * RoughnessFactor;
-    #else
-    if (EnableRoughnessMap) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb, RoughnessFactor);
-    #endif
+    if (EnableAOMap_ChGRoughness_ChBMetalness) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).g * RoughnessFactor;
+    else if (EnableRoughnessMap) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb, RoughnessFactor);
     return smoothness;
+}
+
+inline float3 GetNormal(float2 uv, float3 eyePos, float3 inputNormal)
+{
+    float3 normal;
+    if (EnableNormalMap)
+    {
+    #if DEBUG_TBN != 2
+        normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, eyePos, inputNormal);
+    #else        
+        normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, uv).xyz - 1.0);
+        float3 basis_tangent = normalize(input.TangentBasis[0]);
+        float3 basis_bitangent = normalize(input.TangentBasis[1]);
+        float3 basis_normal = normalize(input.TangentBasis[2]);
+        normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
+        //normal = normalize(mul(input.TangentBasis, normal));        
+    #endif        
+    }
+    else 
+    {
+        normal = normalize(inputNormal);
+    }	
+	return normal;
 }
 
 /************ ShadowCaster ************/
@@ -82,12 +114,11 @@ struct PixelInput
 #if ENABLE_SHADOW_MAP
 	float4 PosInLight : POSITION0;//light's ndc space
 #endif    
-#if DEBUG_TBN == 2    
-    float3x3 TangentBasis : TEXCOORD3;
-#else
+#if DEBUG_TBN != 2
     float3 EyePos : POSITION1;//eye space
-#endif    
-
+#else
+    float3x3 TangentBasis : TEXCOORD3;
+#endif
 };
 
 PixelInput VS(vbSurface surf, vbWeightedSkin skin)
@@ -113,12 +144,12 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	float4 lightPosition = mul(View, unity_LightPosition);
 	output.ToLight = lightPosition.xyz - output.Pos.xyz * lightPosition.w;
 
-#if DEBUG_TBN == 2     
-    float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
-    output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));
-#else    
+#if DEBUG_TBN != 2 
     output.EyePos = output.Pos.xyz / output.Pos.w;
-#endif   
+#else    
+    float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
+    output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));    
+#endif
     
 #if ENABLE_SHADOW_MAP
 	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
@@ -138,31 +169,17 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
     
-    float3 normal;
-    if (EnableNormalMap)
-    {
-    #if DEBUG_TBN == 2
-        normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);
-        float3 basis_tangent = normalize(input.TangentBasis[0]);
-        float3 basis_bitangent = normalize(input.TangentBasis[1]);
-        float3 basis_normal = normalize(input.TangentBasis[2]);
-        normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
-        //normal = normalize(mul(input.TangentBasis, normal));
-    #else        
-        normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), input.Tex, input.EyePos, input.Normal);
-    #endif        
-    }
-    else 
-    {
-        normal = normalize(input.Normal);
-    }
-#if DEBUG_PBR == 2
-    finalColor.rgb = GltfPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
-#elif DEBUG_PBR == 1
-	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
-#else
+    float3 normal = GetNormal(input.Tex, input.EyePos, input.Normal);
+#if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+#elif PBR_MODE == 1
+	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+#elif PBR_MODE == 2
+    finalColor.rgb = GltfPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+#else
+    #error
 #endif
+    
 	finalColor.a = 1.0;
 #if ENABLE_SHADOW_MAP
 	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
@@ -174,7 +191,8 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	finalColor.rgb = BlinnPhongLight(input.ToLight, normalize(input.Normal), normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+	float3 normal = GetNormal(input.Tex, input.EyePos, input.Normal);
+	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }

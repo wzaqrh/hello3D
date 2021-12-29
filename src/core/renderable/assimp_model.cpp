@@ -299,11 +299,15 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();
 			}
 
-			weightedSkin.EnableNormalMap = mesh->HasTexture(kTexturePbrNormal);
-			weightedSkin.EnableMetalnessMap = mesh->HasTexture(kTexturePbrMetalness);
-			weightedSkin.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
-			weightedSkin.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
-			weightedSkin.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
+			cbModel model = {};
+			model.EnableNormalMap = mesh->HasTexture(kTexturePbrNormal);
+			model.EnableMetalnessMap = mesh->HasTexture(kTexturePbrMetalness);
+			model.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
+			model.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
+			model.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
+			model.EnableAOMap_ChGRoughness_ChBMetalness = model.EnableAmbientOcclusionMap 
+				&& !model.EnableRoughnessMap 
+				&& !model.EnableMetalnessMap;
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
@@ -313,6 +317,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 				op.AddVertexBuffer(mesh->GetVBOSkeleton());
 				op.Textures = *mesh->GetTextures();
 				op.SetUBOBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
+				op.SetUBOBytes(MAKE_CBNAME(cbModel), model);
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 			}

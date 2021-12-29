@@ -15,14 +15,6 @@ cbuffer cbWeightedSkin : register(b2)
 {
 	matrix Model;
 	matrix Models[MAX_MATRICES] : WORLDMATRIXARRAY;	
-	bool EnableNormalMap;
-	bool EnableMetalnessMap;
-	bool EnableRoughnessMap;
-	bool EnableAmbientOcclusionMap;
-	bool EnableAlbedoMap;
-    float BaseColorFactor;
-    float RoughnessFactor;
-    float MetallicFactor;
 }
 
 float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)

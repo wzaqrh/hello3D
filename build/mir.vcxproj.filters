@@ -450,9 +450,6 @@
     <Xml Include="..\bin\x86\Debug\shader\Model.xml">
       <Filter>src\shader\xml</Filter>
     </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\ModelPbr.xml">
-      <Filter>src\shader\xml</Filter>
-    </Xml>
     <Xml Include="..\bin\x86\Debug\shader\Skeleton.xml">
       <Filter>src\shader\xml</Filter>
     </Xml>
