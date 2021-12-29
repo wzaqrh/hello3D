@@ -492,6 +492,11 @@ typedef long long unsigned int ILuint64;
 	#define ILAPI
 #endif
 
+#if defined _MSC_VER
+#define IL_TLVAR __declspec(thread) 
+#elif defined( __GNUC__ )
+#define IL_TLVAR __thread
+#endif
 
 #define IL_SEEK_SET	0
 #define IL_SEEK_CUR	1

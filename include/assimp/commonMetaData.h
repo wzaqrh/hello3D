@@ -39,67 +39,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file commonMetaData.h
+ *  @brief Defines a set of common scene metadata keys.
+ */
 #pragma once
+#ifndef AI_COMMONMETADATA_H_INC
+#define AI_COMMONMETADATA_H_INC
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
-/** @file  MathFunctions.h
-*  @brief Implementation of math utility functions.
- *
-*/
+/// Scene metadata holding the name of the importer which loaded the source asset.
+/// This is always present if the scene was created from an imported asset.
+#define AI_METADATA_SOURCE_FORMAT "SourceAsset_Format"
 
-#include <limits>
+/// Scene metadata holding the version of the source asset as a string, if available.
+/// Not all formats add this metadata.
+#define AI_METADATA_SOURCE_FORMAT_VERSION "SourceAsset_FormatVersion"
 
-namespace Assimp {
-namespace Math {
+/// Scene metadata holding the name of the software which generated the source asset, if available.
+/// Not all formats add this metadata.
+#define AI_METADATA_SOURCE_GENERATOR "SourceAsset_Generator"
 
-/// @brief  Will return the greatest common divisor.
-/// @param  a   [in] Value a.
-/// @param  b   [in] Value b.
-/// @return The greatest common divisor.
-template <typename IntegerType>
-inline IntegerType gcd( IntegerType a, IntegerType b ) {
-	const IntegerType zero = (IntegerType)0;
-	while ( true ) {
-		if ( a == zero ) {
-			return b;
-        }
-		b %= a;
+/// Scene metadata holding the source asset copyright statement, if available.
+/// Not all formats add this metadata.
+#define AI_METADATA_SOURCE_COPYRIGHT "SourceAsset_Copyright"
 
-		if ( b == zero ) {
-			return a;
-        }
-		a %= b;
-	}
-}
-
-/// @brief  Will return the greatest common divisor.
-/// @param  a   [in] Value a.
-/// @param  b   [in] Value b.
-/// @return The greatest common divisor.
-template < typename IntegerType >
-inline IntegerType lcm( IntegerType a, IntegerType b ) {
-	const IntegerType t = gcd (a,b);
-	if (!t) {
-        return t;
-    }
-	return a / t * b;
-}
-/// @brief  Will return the smallest epsilon-value for the requested type.
-/// @return The numercical limit epsilon depending on its type.
-template<class T>
-inline T getEpsilon() {
-    return std::numeric_limits<T>::epsilon();
-}
-
-/// @brief  Will return the constant PI for the requested type.
-/// @return Pi
-template<class T>
-inline T aiPi() {
-    return static_cast<T>(3.14159265358979323846);
-}
-
-} // namespace Math
-} // namespace Assimp
+#endif
