@@ -24,7 +24,7 @@ void TestSpecSkybox::OnPostInitDevice()
 	switch (mCaseIndex) {
 	case 0: {
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(mCaseSecondIndex % 2)));//bc1a mipmap cube
 	}break;
 	case 1: {
 		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));

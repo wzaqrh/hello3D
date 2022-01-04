@@ -1,9 +1,14 @@
 #ifndef LIGHTING_PBR_H
 #define LIGHTING_PBR_H
+#include "IBL.cginc"
 
 #define MIR_EPS 1e-7f
 #define MIR_PI  3.141592f
 #define MIR_INV_PI 0.31830988618f
+
+#if !defined DEBUG_IBL
+#define DEBUG_IBL 2
+#endif
 
 inline float3 DisneyDiffuse(float NdotV, float NdotL, float LdotH, float perceptualRoughness, float3 baseColor)
 {
@@ -128,7 +133,7 @@ float3 UnityPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo
     return finalColor;
 }
 
-float3 GltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo, float metalness, float smoothness)
+float3 gltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo, float metalness, float smoothness)
 {
     float lengthSq = max(dot(toLight_, toLight_), 0.000001);
     toLight_ *= rsqrt(lengthSq);
@@ -141,8 +146,9 @@ float3 GltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo,
     float perceptualRoughness = 1.0 - smoothness;
     float alpha = max(perceptualRoughness * perceptualRoughness, 0.002);
     float3 F0 = lerp(DielectricSpec.rgb, albedo, metalness);
+    float specularWeight = 1.0;
     
-    float3 diffuse = LambertDiffuse(albedo);
+    float3 diffuse = LambertDiffuse(albedo); 
     
     float D = GGXTRDistribution(NdotH, alpha);
     float3 F = SchlickFresnel(F0, LdotH);
@@ -151,7 +157,24 @@ float3 GltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo,
     
     float3 kd = 1.0 - F;
     float ks = 1.0;
-    return (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
+    float3 fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
+    
+#if !DEBUG_IBL
+    fcolor += GetIBLRadianceLambertian(normal, toEye, alpha, albedo * (1.0 - metalness), F0, specularWeight);
+    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);
+#elif DEBUG_IBL == 1
+    fcolor = float3(0,0,0);
+    fcolor += GetIBLRadianceLambertian(normal, toEye, alpha, albedo * (1.0 - metalness), F0, specularWeight);
+    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);
+#elif DEBUG_IBL == 2
+    fcolor = float3(0,0,0);
+    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);
+    //fcolor = float3(perceptualRoughness,perceptualRoughness,perceptualRoughness);
+	//fcolor = albedo;
+    //fcolor = float3(metalness, metalness, metalness);
+#endif    
+
+    return fcolor;
 }
 
 #endif

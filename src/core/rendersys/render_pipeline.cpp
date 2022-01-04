@@ -14,13 +14,17 @@
 
 namespace mir {
 
-#define TEXTURE_SLOT_START 0
-#define TEXTURE_MAIN 0
-#define TEXTURE_SHADOW_MAP 8
-#define TEXTURE_ENVIROMENT 9
-#define TEXTURE_GBUFFER_POS 10
-#define TEXTURE_GBUFFER_NORMAL 11
-#define TEXTURE_GBUFFER_ALBEDO 12
+enum PipeLineTextureSlot {
+	kPipeTextureStart = 0,
+	kPipeTextureMain = 0,
+	kPipeTextureShadowMap = 8,
+	kPipeTextureDiffuseEnv = 9,
+	kPipeTextureSpecEnv = 10,
+	kPipeTextureLUT = 11,
+	kPipeTextureGBufferPos = 13,
+	kPipeTextureGBufferNormal = 14,
+	kPipeTextureGBufferAlbedo = 15
+};
 
 RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	:mRenderSys(renderSys)
@@ -71,8 +75,8 @@ void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, in
 	{
 		//if (op.OnBind) op.OnBind(mRenderSys, *pass, op);
 
-		if (textures.Count() > 0) mRenderSys.SetTextures(TEXTURE_SLOT_START, &textures.Textures[0], textures.Textures.size());
-		else mRenderSys.SetTextures(TEXTURE_SLOT_START, nullptr, 0);
+		if (textures.Count() > 0) mRenderSys.SetTextures(kPipeTextureStart, &textures.Textures[0], textures.Textures.size());
+		else mRenderSys.SetTextures(kPipeTextureStart, nullptr, 0);
 		
 		for (auto& cbBytes : op.UBOBytesByName)
 			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
@@ -201,9 +205,11 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			Eigen::Vector4f::Zero(), 1.0, 0);
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
-		auto tex_shadow	= mStatesBlock.LockTexture(TEXTURE_SHADOW_MAP, IF_AND_OR(genSM, mShadowMap->GetAttachZStencilTexture(), nullptr));
-		auto tex_env	= mStatesBlock.LockTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
-			
+		auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, IF_AND_OR(genSM, mShadowMap->GetAttachZStencilTexture(), nullptr));
+		auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
+		auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
+		auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(camera.GetSkyBox(), GetLutMap()));
+
 		ILightPtr firstLight = nullptr;
 		cbPerFrame perFrame;
 		for (auto& light : lights) 
@@ -240,7 +246,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 	if (camera.GetOutput2PostProcess())
 	{
 		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
-		mStatesBlock.Textures(TEXTURE_MAIN, camera.GetOutput2PostProcess()->GetAttachColorTexture(0));
+		mStatesBlock.Textures(kPipeTextureMain, camera.GetOutput2PostProcess()->GetAttachColorTexture(0));
 
 		RenderOperationQueue opQue;
 		auto& postProcessEffects = camera.GetPostProcessEffects();
@@ -299,11 +305,11 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 
 			#if !defined DEBUG_PREPASS_BASE
 				depth_state(DepthState::MakeFor3D(false));
-				auto tex_shadow	= mStatesBlock.LockTexture(TEXTURE_SHADOW_MAP, mGBuffer->GetAttachZStencilTexture());
-				auto tex_env	= mStatesBlock.LockTexture(TEXTURE_ENVIROMENT, NULLABLE(camera.GetSkyBox(), GetTexture()));
-				auto tex_gpos	= mStatesBlock.LockTexture(TEXTURE_GBUFFER_POS, mGBuffer->GetAttachColorTexture(0));
-				auto tex_gnormal = mStatesBlock.LockTexture(TEXTURE_GBUFFER_NORMAL, mGBuffer->GetAttachColorTexture(1));
-				auto tex_galbedo = mStatesBlock.LockTexture(TEXTURE_GBUFFER_ALBEDO, mGBuffer->GetAttachColorTexture(2));
+				auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mGBuffer->GetAttachZStencilTexture());
+				auto tex_env	= mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
+				auto tex_gpos	= mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
+				auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
+				auto tex_galbedo = mStatesBlock.LockTexture(kPipeTextureGBufferAlbedo, mGBuffer->GetAttachColorTexture(2));
 				RenderOperationQueue opQue;
 				mGBufferSprite->GenRenderOperation(opQue);
 				RenderLight(opQue, LIGHTMODE_PREPASS_FINAL, -1, &MakePerLight(*light), perFrame);

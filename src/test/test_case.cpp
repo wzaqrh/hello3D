@@ -29,7 +29,16 @@ float Far() { return EyeZ + 1000 - Diff; }
 }
 
 namespace res {
-std::string Sky() { return "model/uffizi_cross.dds"; }
+
+#define MakeKhronosGltfEnvPath(Name) "gltf/env/" Name "/" Name ".dds"
+std::string Sky(int index) { 
+	std::string skyArr[] = {
+		"uffizi_cross.dds",
+		MakeKhronosGltfEnvPath("pisa"),
+		MakeKhronosGltfEnvPath("footprint_court")
+	};
+	return "model/" + skyArr[index];
+}
 
 namespace cube {
 namespace far_plane {
@@ -87,18 +96,19 @@ struct ModelInfo {
 	std::string mPath, mRd;
 	double mScale, mPosY;
 };
-#define MakeKhronosGltfResPath(Name) "model/khronos-gltf-pbr/2.0/" Name "/glTF/" Name ".gltf"
+#define MakeKhronosGltfResPath(Name) "model/gltf/2.0/" Name "/glTF/" Name ".gltf"
 #define MakeResPath1(Name1, Name2, Postfix) "model/" Name1 "/" Name2 "." Postfix
 #define MakeResPath(Name, Postfix) MakeResPath1(Name, Name, Postfix)
 std::map<std::string, ModelInfo> CResPathMap = {
-	{"toycar", {MakeKhronosGltfResPath("ToyCar"),"",120,0}},
-	{"box-space", {MakeKhronosGltfResPath("Box With Spaces"),"",1,0}},
 	{"nanosuit", {MakeResPath("nanosuit", "obj"),"",1,0}},
 	{"mir", {MakeResPath1("Male03", "Male02", "fbx"),"",0.05,-5}},
 	{"spaceship", {MakeResPath("Spaceship", "fbx"),"",0.01,0}},
 	{"rock", {MakeResPath("rock", "obj"),"",1,0}},
 	{"floor", {MakeResPath("floor", "obj"),"",0.3,0}},
 	{"planet", {MakeResPath("planet", "obj"),"",0.1,0}},
+	{"toycar", {MakeKhronosGltfResPath("ToyCar"),"",120,0}},
+	{"box-space", {MakeKhronosGltfResPath("Box With Spaces"),"",1,0}},
+	{"damaged-helmet", {MakeKhronosGltfResPath("DamagedHelmet"),"",1,0}},
 };
 model::model()
 {

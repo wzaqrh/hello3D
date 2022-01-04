@@ -1,6 +1,7 @@
 <NotepadPlus>
     <Project name="bin">
         <File name="bin\x86\Debug\test_cmdline.txt" />
+        <File name="C:\MyDoc\&#x811A;&#x672C;.txt" />
     </Project>
     <Project name="graphics">
         <File name="C:\MyDoc\graphics\&#x516C;&#x5F0F;.docx" />
@@ -355,6 +356,7 @@
             <File name="bin\x86\Debug\shader\LightingPbr.cginc" />
             <File name="bin\x86\Debug\shader\Lighting.cginc" />
             <File name="bin\x86\Debug\shader\HLSLSupport.cginc" />
+            <File name="bin\x86\Debug\shader\IBL.cginc" />
         </Folder>
         <Folder name="xml">
             <File name="bin\x86\Debug\shader\Variants.xml" />
@@ -387,6 +389,13 @@
             <File name="thirdparty\glTFSampleViewer\source\Renderer\shaders\punctual.glsl" />
             <File name="thirdparty\glTFSampleViewer\source\Renderer\shaders\textures.glsl" />
             <File name="thirdparty\glTFSampleViewer\source\Renderer\shaders\tonemapping.glsl" />
+        </Folder>
+        <Folder name="renderer">
+            <File name="thirdparty\glTFSampleViewer\source\Renderer\environment_renderer.js" />
+            <File name="thirdparty\glTFSampleViewer\source\Renderer\renderer.js" />
+            <File name="thirdparty\glTFSampleViewer\source\Renderer\shader.js" />
+            <File name="thirdparty\glTFSampleViewer\source\Renderer\shader_cache.js" />
+            <File name="thirdparty\glTFSampleViewer\source\Renderer\webgl.js" />
         </Folder>
     </Project>
 </NotepadPlus>

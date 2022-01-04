@@ -31,7 +31,7 @@ cbuffer cbModel : register(b3)
 inline float3 GetAlbedo(float2 uv) 
 {
     float3 albedo = float3(1.0, 1.0, 1.0);
-	if (EnableAlbedoMap) albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
+	if (EnableAlbedoMap) albedo = MIR_SAMPLE_TEX2D(txAlbedo, float2(uv.x,uv.y)).rgb;
     return albedo * BaseColorFactor;
 }
 
@@ -175,7 +175,7 @@ float4 PS(PixelInput input) : SV_Target
 #elif PBR_MODE == 1
 	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
 #elif PBR_MODE == 2
-    finalColor.rgb = GltfPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+    finalColor.rgb = gltfPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
 #else
     #error
 #endif

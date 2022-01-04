@@ -1,4 +1,4 @@
-3 0 2
+10 0 2
 test_sprite 5
 test_spec_skybox 2
 test_cube 1
@@ -10,3 +10,5 @@ test_framebuffer 3
 test_camera 2
 test_camera_output 1
 test_deffered_path 1
+
+test_gltf 0

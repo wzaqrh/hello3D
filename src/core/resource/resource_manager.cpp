@@ -302,6 +302,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 		case IL_DDS:
 		case IL_TGA:
 		case IL_HDR: 
+		case IL_KTX:
 			ilSetInteger(IL_KEEP_DXTC_DATA, IL_TRUE); 
 			break;
 		default: 
@@ -309,7 +310,8 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 		}
 		BOOST_ASSERT(il_helper::CheckLastError());
 		
-		if (ilFileType != IL_TYPE_UNKNOWN && ilLoadF(ilFileType, fd)) {
+		if (ilFileType != IL_TYPE_UNKNOWN && ilLoadF(ilFileType, fd)) 
+		{
 			ILuint width = ilGetInteger(IL_IMAGE_WIDTH),
 				height = ilGetInteger(IL_IMAGE_HEIGHT),
 				channel = ilGetInteger(IL_IMAGE_CHANNELS),

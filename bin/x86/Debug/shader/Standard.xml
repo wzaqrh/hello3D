@@ -32,11 +32,14 @@
 		
 		<Texture Name="txGlobal">
 			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
-			<Element Slot="9" Filter="0x15" Address="3">_SpecCube</Element>
+
+			<Element Slot="9" Filter="0x15" Address="3">_DiffuseCube</Element>
+			<Element Slot="10" Filter="0x15" Address="3">_SpecCube</Element>
+			<Element Slot="11" Filter="0x15">_LUT</Element>
 			
-			<Element Slot="10" Filter="0x15">_GBufferPos</Element>
-			<Element Slot="11" Filter="0x15">_GBufferNormal</Element>
-			<Element Slot="12" Filter="0x15">_GBufferAlbedo</Element>
+			<Element Slot="13" Filter="0x15">_GBufferPos</Element>
+			<Element Slot="14" Filter="0x15">_GBufferNormal</Element>
+			<Element Slot="15" Filter="0x15">_GBufferAlbedo</Element>
 		</Texture>
 	</PROGRAM>
 </Shader>

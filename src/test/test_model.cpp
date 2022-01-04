@@ -77,7 +77,7 @@ void TestModel::OnPostInitDevice()
 	case 1:
 	case 2: {
 		camera->SetLookAt(Eigen::Vector3f(0, 15, 0), Eigen::Vector3f::Zero());
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(1)));
 
 		mModel = mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
 		std::string modelNameArr[] = { "toycar", "box-space", "mir" };

@@ -8,7 +8,7 @@ namespace mir {
 
 namespace il_helper {
 static const ILenum CSupportILTypes[] = {
-	IL_BMP, IL_PNG, IL_JPG, IL_DDS, IL_TGA, IL_HDR
+	IL_BMP, IL_PNG, IL_JPG, IL_KTX, IL_DDS, IL_TGA, IL_HDR
 };
 static ILenum DetectType(FILE* fd) {
 	for (int i = 0; i < sizeof(CSupportILTypes) / sizeof(CSupportILTypes[0]); ++i) {

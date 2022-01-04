@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include "core/renderable/skybox.h"
 #include "core/resource/resource_manager.h"
 
@@ -70,7 +71,21 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 		mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 
-	mTexture = mResourceMng.CreateTextureByFile(launchMode, imgName);
+	boost::filesystem::path dir(imgName);
+	dir.remove_filename();
+	boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
+	if (boost::filesystem::exists(specularEnvPath)) {
+		boost::filesystem::path lutPath = dir / "lut.png";
+		mLutMap = mResourceMng.CreateTextureByFile(launchMode, lutPath.string());
+
+		boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
+		mDiffuseEnvMap = mResourceMng.CreateTextureByFile(launchMode, diffuseEnvPath.string());
+
+		mTexture = mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string());
+	}
+	else {
+		mTexture = mResourceMng.CreateTextureByFile(launchMode, imgName);
+	}
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
 	Eigen::Vector3f pos0 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fLowH, 1.0f));

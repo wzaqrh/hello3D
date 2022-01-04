@@ -439,6 +439,12 @@
     <None Include="..\bin\x86\Debug\shader\Math.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\IBL.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Debug.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\bin\x86\Debug\shader\Bloom.xml">

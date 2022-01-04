@@ -25,7 +25,7 @@ float Far();
 
 namespace res {
 
-std::string Sky();
+std::string Sky(int index = 0);
 
 namespace cube {
 namespace far_plane {
