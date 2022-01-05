@@ -38,7 +38,7 @@ inline float CalcLightAtten(float lengthSq, float3 toLight, bool spotLight) {
 
 inline float3 GetSpecColor(float3 normal, float3 toEye) 
 {
-#if ENABLE_ENVIROMENT_MAP
+#if ENABLE_ENVIRONMENT_MAP
     float3 reflUVW = reflect(-toEye, normal);
 	return MIR_SAMPLE_TEXCUBE(_SpecCube, reflUVW).rgb;
 #else
@@ -59,7 +59,7 @@ inline float3 BlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, floa
     luminance += albedo;// * ndotl * unity_LightColor.rgb;
 
 	//blinn-phong
-#if ENABLE_ENVIROMENT_MAP
+#if ENABLE_ENVIRONMENT_MAP
     float3 reflUVW = reflect(-toEye, normal);
 	luminance += MIR_SAMPLE_TEXCUBE(_SpecCube, reflUVW).rgb;
 #else

@@ -7,9 +7,11 @@ float clampedDot(float3 x, float3 y)
     return saturate(dot(x, y));
 }
 
-float3 GetDiffuseLight(float3 normal, float3 toEye)
+float3 GetDiffuseLight(float3 normal)
 {
-    float3 reflUVW = normalize(reflect(-toEye, normal));
+#if CubeMapIsRightHandness
+    normal.z = -normal.z;
+#endif    
     return MIR_SAMPLE_TEXCUBE(_DiffuseCube, normal).rgb;
 }
 
@@ -25,7 +27,7 @@ float3 GetIBLRadianceLambertian(float3 normal, float3 toEye, float perceptualRou
     float NdotV = clampedDot(normal, toEye);
     float2 f_ab = MIR_SAMPLE_TEX2D(_LUT, saturate(float2(NdotV, perceptualRoughness))).rg;
 
-    float3 irradiance = GetDiffuseLight(normal, toEye);
+    float3 irradiance = GetDiffuseLight(normal);
 
     float smoothness = 1.0 - perceptualRoughness;
     float3 Fr = max(float3(smoothness,smoothness,smoothness), F0) - F0;

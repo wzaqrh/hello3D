@@ -34,7 +34,8 @@ namespace res {
 std::string Sky(int index) { 
 	std::string skyArr[] = {
 		"uffizi_cross.dds",
-		MakeKhronosGltfEnvPath("pisa"),
+		"footprint_court.dds",
+		//MakeKhronosGltfEnvPath("pisa"),
 		MakeKhronosGltfEnvPath("footprint_court")
 	};
 	return "model/" + skyArr[index];

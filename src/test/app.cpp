@@ -9,8 +9,8 @@
 
 using namespace mir;
 
-#define AppLaunchMode __LaunchSync__
-//#define AppLaunchMode __LaunchAsync__
+//#define AppLaunchMode __LaunchSync__
+#define AppLaunchMode __LaunchAsync__
 
 App::App()
 {

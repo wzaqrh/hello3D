@@ -218,6 +218,8 @@ void AssimpModel::Update(float dt)
 		eval.Update(mElapse);
 
 		VisitNode(mAiScene->mRootNode, mAnimeTree, nodeVec, eval);
+		auto& nodeInfo = mAnimeTree.GetNode(mAiScene->mRootNode);
+		nodeInfo.LocalTransform = aiMatrix4x4();
 	}
 
 	for (int i = 0; i < nodeVec.size(); ++i) {

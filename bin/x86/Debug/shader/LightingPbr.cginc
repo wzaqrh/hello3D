@@ -1,14 +1,11 @@
 #ifndef LIGHTING_PBR_H
 #define LIGHTING_PBR_H
 #include "IBL.cginc"
+#include "Debug.cginc"
 
 #define MIR_EPS 1e-7f
 #define MIR_PI  3.141592f
 #define MIR_INV_PI 0.31830988618f
-
-#if !defined DEBUG_IBL
-#define DEBUG_IBL 2
-#endif
 
 inline float3 DisneyDiffuse(float NdotV, float NdotL, float LdotH, float perceptualRoughness, float3 baseColor)
 {
@@ -148,6 +145,8 @@ float3 gltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo,
     float3 F0 = lerp(DielectricSpec.rgb, albedo, metalness);
     float specularWeight = 1.0;
     
+    float3 fcolor = float3(0, 0, 0);
+#if USE_PUNCTUAL   
     float3 diffuse = LambertDiffuse(albedo); 
     
     float D = GGXTRDistribution(NdotH, alpha);
@@ -157,23 +156,29 @@ float3 gltfPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo,
     
     float3 kd = 1.0 - F;
     float ks = 1.0;
-    float3 fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
-    
-#if !DEBUG_IBL
-    fcolor += GetIBLRadianceLambertian(normal, toEye, alpha, albedo * (1.0 - metalness), F0, specularWeight);
-    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);
-#elif DEBUG_IBL == 1
-    fcolor = float3(0,0,0);
-    fcolor += GetIBLRadianceLambertian(normal, toEye, alpha, albedo * (1.0 - metalness), F0, specularWeight);
-    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);
-#elif DEBUG_IBL == 2
-    fcolor = float3(0,0,0);
-    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);
-    //fcolor = float3(perceptualRoughness,perceptualRoughness,perceptualRoughness);
-	//fcolor = albedo;
-    //fcolor = float3(metalness, metalness, metalness);
+    fcolor += (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
 #endif    
+    
+#if USE_IBL
+    fcolor += GetIBLRadianceLambertian(normal, toEye, alpha, albedo * (1.0 - metalness), F0, specularWeight);
+    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);    
+#endif    
+    
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING
+    fcolor = (normal + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
 
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
+    fcolor = albedo;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC
+    fcolor = float3(metalness, metalness, metalness);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
+    fcolor = float3(perceptualRoughness,perceptualRoughness,perceptualRoughness);
+#elif DEBUG_CHANNEL != 0
+    // In case of missing data for a debug view, render a magenta stripe pattern.
+    fcolor = float4(1, 0, 1, 1);
+    fcolor.r = fcolor.b = float(max(2.0 * sin(0.1 * (toEye.x + toEye.y) * 1024), 0.0) + 0.3);  
+#endif
     return fcolor;
 }
 

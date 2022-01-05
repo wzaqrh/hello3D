@@ -41,6 +41,7 @@ cbuffer cbPerFrame : register(b0)
 	matrix LightView;
 	matrix LightProjection;
 	
+    float4 CameraPosition;
 	float4 glstate_lightmodel_ambient;
 	float4 _ShadowMapTexture_TexelSize;
 }

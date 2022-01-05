@@ -4,6 +4,7 @@
 #include "Math.cginc"
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
+#include "Debug.cginc"
 
 #if !defined ENABLE_SHADOW_MAP
 #define ENABLE_SHADOW_MAP 1
@@ -39,7 +40,7 @@ inline float GetMetalness(float2 uv)
 {
     float metalness = 0.0;
     if (EnableAOMap_ChGRoughness_ChBMetalness) metalness = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).b;
-    else if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).rgb;
+    else if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).r;
     return metalness * MetallicFactor;
 }
 
@@ -47,7 +48,7 @@ inline float GetSmoothness(float2 uv)
 {
     float smoothness = 0.0;
     if (EnableAOMap_ChGRoughness_ChBMetalness) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).g * RoughnessFactor;
-    else if (EnableRoughnessMap) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).rgb, RoughnessFactor);
+    else if (EnableRoughnessMap) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).r, RoughnessFactor);
     return smoothness;
 }
 
@@ -108,14 +109,14 @@ struct PixelInput
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
-	float3 Normal : NORMAL0;//eye space
-	float3 ToEye  : TEXCOORD1;//eye space
-	float3 ToLight : TEXCOORD2;//eye space
+	float3 Normal : NORMAL0;//world space
+	float3 ToEye  : TEXCOORD1;//world space
+	float3 ToLight : TEXCOORD2;//world space
 #if ENABLE_SHADOW_MAP
 	float4 PosInLight : POSITION0;//light's ndc space
 #endif    
 #if DEBUG_TBN != 2
-    float3 EyePos : POSITION1;//eye space
+    float3 SurfPos : POSITION1;//world space
 #else
     float3x3 TangentBasis : TEXCOORD3;
 #endif
@@ -128,10 +129,13 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	
 	//Normal
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
-	output.Normal = normalize(mul(mul(View, MW), skinNormal).xyz);
+	output.Normal = normalize(mul(MW, skinNormal).xyz);
 	
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
+    
+    //ToEye
+	output.ToEye = CameraPosition.xyz - output.Pos.xyz;
     
 	//PosInLight
 #if ENABLE_SHADOW_MAP
@@ -139,13 +143,12 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	output.PosInLight = mul(LightProjection, output.PosInLight);
 #endif
 	
-	//ToLight
-	output.Pos = mul(View, output.Pos);	
-	float4 lightPosition = mul(View, unity_LightPosition);
-	output.ToLight = lightPosition.xyz - output.Pos.xyz * lightPosition.w;
-
+    //ToLight
+    output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
+    
+	//SurfPos	
 #if DEBUG_TBN != 2 
-    output.EyePos = output.Pos.xyz / output.Pos.w;
+    output.SurfPos = output.Pos.xyz / output.Pos.w;
 #else    
     float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
     output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));    
@@ -155,11 +158,9 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
 	output.PosInLight.z -= bias * output.PosInLight.w;	
 #endif
-    
-	//ToEye
-	output.ToEye = -output.Pos;
 	
 	//Pos
+    output.Pos = mul(View, output.Pos);
     output.Pos = mul(Projection, output.Pos);
 	output.Tex = surf.Tex;
     return output;
@@ -169,7 +170,7 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
     
-    float3 normal = GetNormal(input.Tex, input.EyePos, input.Normal);
+    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal);
 #if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 #elif PBR_MODE == 1
@@ -179,6 +180,11 @@ float4 PS(PixelInput input) : SV_Target
 #else
     #error
 #endif
+    
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
+    finalColor.rgb = float3(input.Tex, 0);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
+#endif       
     
 	finalColor.a = 1.0;
 #if ENABLE_SHADOW_MAP
@@ -191,7 +197,7 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	float3 normal = GetNormal(input.Tex, input.EyePos, input.Normal);
+	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal);
 	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;

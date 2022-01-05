@@ -148,6 +148,7 @@ static cbPerFrame MakePerFrame(const Camera& camera)
 
 	perFrameParam.ViewInv = perFrameParam.View.inverse();
 	perFrameParam.ProjectionInv = perFrameParam.Projection.inverse();
+	perFrameParam.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
 	return perFrameParam;
 }
 static cbPerFrame MakeReceiveShadowPerFrame(const Camera& camera, const ILight& light, Eigen::Vector2i size, IFrameBufferPtr shadowMap)
@@ -161,6 +162,9 @@ static cbPerFrame MakeReceiveShadowPerFrame(const Camera& camera, const ILight& 
 		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
 		perFrameParam._ShadowMapTexture_TexelSize.head<2>() = Eigen::Vector2f(1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight());
 	}
+	perFrameParam.ViewInv = perFrameParam.View.inverse();
+	perFrameParam.ProjectionInv = perFrameParam.Projection.inverse();
+	perFrameParam.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
 	return perFrameParam;
 }
 static cbPerFrame MakeCastShadowPerFrame(const Camera& camera, const ILight& light, Eigen::Vector2i size)
@@ -172,6 +176,7 @@ static cbPerFrame MakeCastShadowPerFrame(const Camera& camera, const ILight& lig
 
 	perFrameParam.ViewInv = perFrameParam.View.inverse();
 	perFrameParam.ProjectionInv = perFrameParam.Projection.inverse();
+	perFrameParam.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
 	return perFrameParam;
 }
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const Camera& camera, 

@@ -24,6 +24,8 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 		float negY = -1, top = 1;
 		float negX = -1, right = 1;
 		float negZ = -1, far1 = 1;
+		//-Z
+		int face = 0;
 		Vertexs[0].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
 		Vertexs[1].Pos = Eigen::Vector3f(negX, negY, negZ);
 		Vertexs[2].Pos = Eigen::Vector3f(1.0f, negY, negZ);
@@ -31,43 +33,49 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 		Vertexs[4].Pos = Eigen::Vector3f(1.0f, 1.0f, negZ);
 		Vertexs[5].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
 
-		Vertexs[6].Pos = Eigen::Vector3f(negX, negY, 1.0f);
-		Vertexs[7].Pos = Eigen::Vector3f(negX, negY, negZ);
-		Vertexs[8].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
-		Vertexs[9].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
-		Vertexs[10].Pos = Eigen::Vector3f(negX, 1.0f, 1.0f);
-		Vertexs[11].Pos = Eigen::Vector3f(negX, negY, 1.0f);
+		face = 1;
+		Vertexs[face * 6 + 0].Pos = Eigen::Vector3f(negX, negY, 1.0f);
+		Vertexs[face * 6 + 1].Pos = Eigen::Vector3f(negX, negY, negZ);
+		Vertexs[face * 6 + 2].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
+		Vertexs[face * 6 + 3].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
+		Vertexs[face * 6 + 4].Pos = Eigen::Vector3f(negX, 1.0f, 1.0f);
+		Vertexs[face * 6 + 5].Pos = Eigen::Vector3f(negX, negY, 1.0f);
 
-		Vertexs[12].Pos = Eigen::Vector3f(1.0f, negY, negZ);
-		Vertexs[13].Pos = Eigen::Vector3f(1.0f, negY, 1.0f);
-		Vertexs[14].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
-		Vertexs[15].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
-		Vertexs[16].Pos = Eigen::Vector3f(1.0f, 1.0f, negZ);
-		Vertexs[17].Pos = Eigen::Vector3f(1.0f, negY, negZ);
+		face = 2;
+		Vertexs[face * 6 + 0].Pos = Eigen::Vector3f(1.0f, negY, negZ);
+		Vertexs[face * 6 + 1].Pos = Eigen::Vector3f(1.0f, negY, 1.0f);
+		Vertexs[face * 6 + 2].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+		Vertexs[face * 6 + 3].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+		Vertexs[face * 6 + 4].Pos = Eigen::Vector3f(1.0f, 1.0f, negZ);
+		Vertexs[face * 6 + 5].Pos = Eigen::Vector3f(1.0f, negY, negZ);
 
-		Vertexs[18].Pos = Eigen::Vector3f(negX, negY, 1.0f);
-		Vertexs[19].Pos = Eigen::Vector3f(negX, 1.0f, 1.0f);
-		Vertexs[20].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
-		Vertexs[21].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
-		Vertexs[22].Pos = Eigen::Vector3f(1.0f, negY, 1.0f);
-		Vertexs[23].Pos = Eigen::Vector3f(negX, negY, 1.0f);
+		//+Z
+		face = 3;
+		Vertexs[face * 6 + 0].Pos = Eigen::Vector3f(negX, negY, 1.0f);
+		Vertexs[face * 6 + 1].Pos = Eigen::Vector3f(negX, 1.0f, 1.0f);
+		Vertexs[face * 6 + 2].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+		Vertexs[face * 6 + 3].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+		Vertexs[face * 6 + 4].Pos = Eigen::Vector3f(1.0f, negY, 1.0f);
+		Vertexs[face * 6 + 5].Pos = Eigen::Vector3f(negX, negY, 1.0f);
 
-		Vertexs[24].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
-		Vertexs[25].Pos = Eigen::Vector3f(1.0f, 1.0f, negZ);
-		Vertexs[26].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
-		Vertexs[27].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
-		Vertexs[28].Pos = Eigen::Vector3f(negX, 1.0f, 1.0f);
-		Vertexs[29].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
+		face = 4;
+		Vertexs[face * 6 + 0].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
+		Vertexs[face * 6 + 1].Pos = Eigen::Vector3f(1.0f, 1.0f, negZ);
+		Vertexs[face * 6 + 2].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+		Vertexs[face * 6 + 3].Pos = Eigen::Vector3f(1.0f, 1.0f, 1.0f);
+		Vertexs[face * 6 + 4].Pos = Eigen::Vector3f(negX, 1.0f, 1.0f);
+		Vertexs[face * 6 + 5].Pos = Eigen::Vector3f(negX, 1.0f, negZ);
 
-		Vertexs[30].Pos = Eigen::Vector3f(negX, negY, negZ);
-		Vertexs[31].Pos = Eigen::Vector3f(negX, negY, 1.0f);
-		Vertexs[32].Pos = Eigen::Vector3f(1.0f, negY, negZ);
-		Vertexs[33].Pos = Eigen::Vector3f(1.0f, negY, negZ);
-		Vertexs[34].Pos = Eigen::Vector3f(negX, negY, 1.0f);
-		Vertexs[35].Pos = Eigen::Vector3f(1.0f, negY, 1.0f);
+		face = 5;
+		Vertexs[face * 6 + 0].Pos = Eigen::Vector3f(negX, negY, negZ);
+		Vertexs[face * 6 + 1].Pos = Eigen::Vector3f(negX, negY, 1.0f);
+		Vertexs[face * 6 + 2].Pos = Eigen::Vector3f(1.0f, negY, negZ);
+		Vertexs[face * 6 + 3].Pos = Eigen::Vector3f(1.0f, negY, negZ);
+		Vertexs[face * 6 + 4].Pos = Eigen::Vector3f(negX, negY, 1.0f);
+		Vertexs[face * 6 + 5].Pos = Eigen::Vector3f(1.0f, negY, 1.0f);
 
-		//std::vector<SkyboxVertex> vec(Vertexs + 18, Vertexs + 24);
 		std::vector<SkyboxVertex> vec(Vertexs + 0, Vertexs + 36);
+		//face = 3; vec.assign(Vertexs + face * 6, Vertexs + (face + 1) * 6);
 		mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 

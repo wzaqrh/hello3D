@@ -16,7 +16,8 @@
 			
 			<Element Name="LightView" 	 	Type="matrix"></Element>
 			<Element Name="LightProjection" Type="matrix"></Element>
-			
+
+      <Element Name="CameraPosition" Type="float4"></Element>
 			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
 			<Element Name="_ShadowMapTexture_TexelSize" Type="float4"></Element>
 		</Uniform>

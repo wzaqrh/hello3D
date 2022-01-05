@@ -397,5 +397,38 @@
             <File name="thirdparty\glTFSampleViewer\source\Renderer\shader_cache.js" />
             <File name="thirdparty\glTFSampleViewer\source\Renderer\webgl.js" />
         </Folder>
+        <Folder name="gltfState">
+            <File name="thirdparty\glTFSampleViewer\source\GltfState\gltf_state.js" />
+        </Folder>
+        <Folder name="gltf">
+            <File name="thirdparty\glTFSampleViewer\source\gltf\accessor.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\animation.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\animation_sampler.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\asset.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\buffer.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\buffer_view.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\camera.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\channel.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\gltf.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\gltf_object.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\gltf_utils.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\image.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\image_based_light.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\image_mime_type.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\interpolator.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\light.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\material.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\math_utils.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\mesh.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\node.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\primitive.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\sampler.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\scene.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\skin.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\texture.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\user_camera.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\utils.js" />
+            <File name="thirdparty\glTFSampleViewer\source\gltf\variant.js" />
+        </Folder>
     </Project>
 </NotepadPlus>

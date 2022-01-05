@@ -28,9 +28,13 @@ PixelInput VS(VertexInput input)
 PixelInput VS(VertexInput input)
 {
 	PixelInput output;
-	output.Tex = float3(input.Pos);
-	output.Pos = mul(View, float4(input.Pos, 0.0));
-	output.Pos = mul(Projection, output.Pos).xyww;
+#if !CubeMapIsRightHandness
+	output.Tex = input.Pos;
+#else
+    output.Tex = float3(input.Pos.x, input.Pos.y, -input.Pos.z);
+#endif
+	output.Pos = mul(View, float4(input.Pos, 0.0));//没有平移
+	output.Pos = mul(Projection, output.Pos).xyww;//z永远为1
 	return output;
 }
 #endif

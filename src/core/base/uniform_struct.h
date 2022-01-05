@@ -14,6 +14,7 @@ struct UNIFORM_ALIGN cbPerFrame
 		LightView = LightProjection = Eigen::Matrix4f::Identity();
 		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
 		_ShadowMapTexture_TexelSize = Eigen::Vector4f::Zero();
+		CameraPosition = Eigen::Vector4f::Zero();
 	}
 public:
 	Eigen::Matrix4f World;
@@ -26,6 +27,7 @@ public:
 	Eigen::Matrix4f LightView;
 	Eigen::Matrix4f LightProjection;
 
+	Eigen::Vector4f CameraPosition;
 	Eigen::Vector4f glstate_lightmodel_ambient;
 	Eigen::Vector4f _ShadowMapTexture_TexelSize;
 };

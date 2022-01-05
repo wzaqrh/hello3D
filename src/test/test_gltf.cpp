@@ -19,7 +19,7 @@ private:
 0: 
 */
 
-inline MaterialLoadParam GetMatName(int secondIndex) {
+inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 	MaterialLoadParamBuilder mlpb(MAT_MODEL);
 	mlpb["PBR_MODE"] = 2;
 	return mlpb;
@@ -32,19 +32,24 @@ void TestGLTF::OnPostInitDevice()
 	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0:
-	case 1: {
+	case 1:
+	case 2: {
 		auto dir_light = mScneMng->AddDirectLight();
 		dir_light->SetDirection(Eigen::Vector3f(0, -1, 0));
 
 		camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(2)));
+		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
+		skyMat["CubeMapIsRightHandness"] = TRUE;
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(2), skyMat));
 
-		mModel = mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
-		std::string modelNameArr[] = { "damaged-helmet", "toycar" };
+		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
+		modelMat["CubeMapIsRightHandness"] = TRUE;
+		mModel = mRendFac->CreateAssimpModel(modelMat);
+		std::string modelNameArr[] = { "damaged-helmet", "toycar", "spaceship" };
 		int caseIndex = mCaseIndex;
 		mTransform = model.Init(modelNameArr[caseIndex], mModel);
 	}break;
-	case 2: {
+	case 3: {
 		auto pt_light = mScneMng->AddPointLight();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);

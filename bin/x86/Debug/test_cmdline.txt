@@ -1,4 +1,4 @@
-10 0 2
+10 1 2
 test_sprite 5
 test_spec_skybox 2
 test_cube 1
