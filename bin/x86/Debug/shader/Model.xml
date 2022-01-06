@@ -10,21 +10,23 @@
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
     <Uniform Name="cbModel" IsUnique="false" Slot="3">
-      <Element Name="BaseColorFactor"  Type="float"></Element>
-      <Element Name="RoughnessFactor"  Type="float"></Element>
-      <Element Name="MetallicFactor"   Type="float"></Element>
-      <Element Name="EnableNormalMap"           Type="bool"></Element>
-      <Element Name="EnableMetalnessMap"        Type="bool"></Element>
-      <Element Name="EnableRoughnessMap"        Type="bool"></Element>
-      <Element Name="EnableAmbientOcclusionMap" Type="bool"></Element>
+      <Element Name="AlbedoFactor"            Type="float"></Element>
+      <Element Name="AmbientOcclusionFactor"  Type="float"></Element>
+      <Element Name="RoughnessFactor"         Type="float"></Element>
+      <Element Name="MetallicFactor"          Type="float"></Element>
       <Element Name="EnableAlbedoMap"           Type="bool"></Element>
-	  <Element Name="EnableAOMap_ChGRoughness_ChBMetalness" Type="bool"></Element>
+      <Element Name="EnableNormalMap"           Type="bool"></Element>
+      <Element Name="EnableAmbientOcclusionMap" Type="bool"></Element>
+      <Element Name="EnableRoughnessMap"        Type="bool"></Element>
+      <Element Name="EnableMetalnessMap"        Type="bool"></Element>
+	    <Element Name="AmbientOcclusion_ChannelGRoughness_ChannelBMetalness" Type="bool"></Element>
+      <Element Name="AlbedoMapSRGB"             Type="bool"></Element>
     </Uniform>   
 		<Texture>
 			<Element Slot="0" Address="1">txAlbedo</Element>
 			<Element Slot="1" Address="1">txNormal</Element>
 			<Element Slot="2" Address="1">txMetalness</Element>
-			<Element Slot="3" Address="1">txSmoothness</Element>
+			<Element Slot="3" Address="1">txRoughness</Element>
 			<Element Slot="4" Address="1">txAmbientOcclusion</Element>
 		</Texture>
 		

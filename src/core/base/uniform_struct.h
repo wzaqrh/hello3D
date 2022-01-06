@@ -68,25 +68,29 @@ struct UNIFORM_ALIGN cbModel
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbModel() {
-		BaseColorFactor = 1;
+		AlbedoFactor = 1;
+		AmbientOcclusionFactor = 1;
 		RoughnessFactor = 1;
 		MetallicFactor = 1;
-		EnableNormalMap = false;
-		EnableMetalnessMap = false;
-		EnableRoughnessMap = false;
-		EnableAmbientOcclusionMap = false;
 		EnableAlbedoMap = false;
-		EnableAOMap_ChGRoughness_ChBMetalness = false;
+		EnableNormalMap = false;
+		EnableAmbientOcclusionMap = false;
+		EnableRoughnessMap = false;
+		EnableMetalnessMap = false;
+		AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = false;
+		AlbedoMapSRGB = true;
 	}
-	float BaseColorFactor;
+	float AlbedoFactor;
+	float AmbientOcclusionFactor;
 	float RoughnessFactor;
 	float MetallicFactor;
-	BOOL EnableNormalMap;
-	BOOL EnableMetalnessMap;
-	BOOL EnableRoughnessMap;
-	BOOL EnableAmbientOcclusionMap;
 	BOOL EnableAlbedoMap;
-	BOOL EnableAOMap_ChGRoughness_ChBMetalness;
+	BOOL EnableNormalMap;
+	BOOL EnableAmbientOcclusionMap;
+	BOOL EnableRoughnessMap;
+	BOOL EnableMetalnessMap;
+	BOOL AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
+	BOOL AlbedoMapSRGB;
 };
 
 struct UNIFORM_ALIGN cbUnityMaterial

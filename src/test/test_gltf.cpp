@@ -25,6 +25,10 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 	return mlpb;
 }
 
+void ReadAndPrintBinary(const std::string& path) {
+
+}
+
 void TestGLTF::OnPostInitDevice()
 {
 	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
@@ -35,7 +39,7 @@ void TestGLTF::OnPostInitDevice()
 	case 1:
 	case 2: {
 		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(0, -1, 0));
+		dir_light->SetDirection(Eigen::Vector3f(-0.7399, -0.6428, 0.1983));
 
 		camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
@@ -45,7 +49,7 @@ void TestGLTF::OnPostInitDevice()
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 		mModel = mRendFac->CreateAssimpModel(modelMat);
-		std::string modelNameArr[] = { "damaged-helmet", "toycar", "spaceship" };
+		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space" };
 		int caseIndex = mCaseIndex;
 		mTransform = model.Init(modelNameArr[caseIndex], mModel);
 	}break;

@@ -173,6 +173,7 @@
     <None Include="..\bin\x86\Debug\shader\Math.cginc" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.cginc" />
     <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
+    <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">

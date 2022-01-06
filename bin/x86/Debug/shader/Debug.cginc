@@ -16,15 +16,23 @@
 #define DEBUG_CHANNEL_METTALIC 13
 #define DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS 14
 #if !defined DEBUG_CHANNEL
-#define DEBUG_CHANNEL DEBUG_CHANNEL_METTALIC_ROUGHNESS
+#define DEBUG_CHANNEL DEBUG_CHANNEL_GEOMETRY_NORMAL
 #endif
 
 #if !defined USE_IBL
-#define USE_IBL 0
+#define USE_IBL 1
 #endif
 
 #if !defined USE_PUNCTUAL
-#define USE_PUNCTUAL 1
+#define USE_PUNCTUAL 0
+#endif
+
+#if !defined DEBUG_TBN
+#define DEBUG_TBN 0
+#endif
+
+#if !defined PBR_MODE
+#define PBR_MODE 2
 #endif
 
 #endif

@@ -44,8 +44,9 @@ public:
 
 		try
 		{
+//#define IMPORT_LEFTHAND
 			constexpr uint32_t ImportFlags =
-				aiProcess_ConvertToLeftHanded |
+				//aiProcess_ConvertToLeftHanded |
 				aiProcess_Triangulate |
 				aiProcess_CalcTangentSpace;/* |
 				aiProcess_SortByPType |
@@ -243,10 +244,16 @@ private:
 		}
 		if (mesh->mNormals) {
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined IMPORT_LEFTHAND
+				skeletonVerts[vertexId].Normal.x() = mesh->mNormals[vertexId].x;
+				skeletonVerts[vertexId].Normal.y() = mesh->mNormals[vertexId].y;
+				skeletonVerts[vertexId].Normal.z() = -mesh->mNormals[vertexId].z;
+			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
 			#else
 				VEC_ASSIGN(skeletonVerts[vertexId].Normal, mesh->mNormals[vertexId]);
+			#endif
 			#endif
 			}
 		}
@@ -299,6 +306,10 @@ private:
 			size_t position = indices.size();
 			indices.resize(position + face.mNumIndices);
 			memcpy(&indices[position], face.mIndices, face.mNumIndices * sizeof(unsigned int));
+		#if !defined IMPORT_LEFTHAND
+			for (size_t j = position; j + 3 < position + face.mNumIndices; j += 3)
+				std::swap(indices[j + 1], indices[j + 2]);
+		#endif
 		}
 
 		if (mesh->mNormals && mesh->mTangents == nullptr) {

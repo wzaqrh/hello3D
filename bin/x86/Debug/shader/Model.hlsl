@@ -4,6 +4,7 @@
 #include "Math.cginc"
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
+#include "ToneMapping.cginc"
 #include "Debug.cginc"
 
 #if !defined ENABLE_SHADOW_MAP
@@ -13,65 +14,52 @@
 MIR_DECLARE_TEX2D(txAlbedo, 0);
 MIR_DECLARE_TEX2D(txNormal, 1);
 MIR_DECLARE_TEX2D(txMetalness, 2);
-MIR_DECLARE_TEX2D(txSmoothness, 3);
+MIR_DECLARE_TEX2D(txRoughness, 3);
 MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 
 cbuffer cbModel : register(b3)
 {
-	float BaseColorFactor;
+	float AlbedoFactor;
+    float AmbientOcclusionFactor;
     float RoughnessFactor;
     float MetallicFactor;
-	bool EnableNormalMap;
-	bool EnableMetalnessMap;
-	bool EnableRoughnessMap;
-	bool EnableAmbientOcclusionMap;
 	bool EnableAlbedoMap;
-	bool EnableAOMap_ChGRoughness_ChBMetalness;
+    bool EnableNormalMap;
+	bool EnableAmbientOcclusionMap;
+    bool EnableRoughnessMap;
+	bool EnableMetalnessMap;
+	bool AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
+    bool AlbedoMapSRGB;
 }
 
 inline float3 GetAlbedo(float2 uv) 
 {
-    float3 albedo = float3(1.0, 1.0, 1.0);
-	if (EnableAlbedoMap) albedo = MIR_SAMPLE_TEX2D(txAlbedo, float2(uv.x,uv.y)).rgb;
-    return albedo * BaseColorFactor;
+    float3 albedo = float3(AlbedoFactor, AlbedoFactor, AlbedoFactor);
+    if (EnableAlbedoMap) {
+        albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
+        if (AlbedoMapSRGB) albedo = sRGBToLinear(albedo);
+    }
+    return albedo;
 }
 
-inline float GetMetalness(float2 uv) 
+inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 {
-    float metalness = 0.0;
-    if (EnableAOMap_ChGRoughness_ChBMetalness) metalness = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).b;
-    else if (EnableMetalnessMap) metalness = MIR_SAMPLE_TEX2D(txMetalness, uv).r;
-    return metalness * MetallicFactor;
-}
-
-inline float GetSmoothness(float2 uv) 
-{
-    float smoothness = 0.0;
-    if (EnableAOMap_ChGRoughness_ChBMetalness) smoothness = 1.0 - MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).g * RoughnessFactor;
-    else if (EnableRoughnessMap) smoothness = lerp(1.0, MIR_SAMPLE_TEX2D(txSmoothness, uv).r, RoughnessFactor);
-    return smoothness;
+    float3 value = float3(AmbientOcclusionFactor, RoughnessFactor, MetallicFactor);
+    if (AmbientOcclusion_ChannelGRoughness_ChannelBMetalness) {
+        value *= MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).rgb;
+    }
+    else {
+        if (EnableAmbientOcclusionMap) value.x *= MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).r; 
+        if (EnableRoughnessMap) value.y *= MIR_SAMPLE_TEX2D(txRoughness, uv).r;
+        if (EnableMetalnessMap) value.z *= MIR_SAMPLE_TEX2D(txMetalness, uv).r;
+    }
+    return value;
 }
 
 inline float3 GetNormal(float2 uv, float3 eyePos, float3 inputNormal)
 {
-    float3 normal;
-    if (EnableNormalMap)
-    {
-    #if DEBUG_TBN != 2
-        normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, eyePos, inputNormal);
-    #else        
-        normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, uv).xyz - 1.0);
-        float3 basis_tangent = normalize(input.TangentBasis[0]);
-        float3 basis_bitangent = normalize(input.TangentBasis[1]);
-        float3 basis_normal = normalize(input.TangentBasis[2]);
-        normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
-        //normal = normalize(mul(input.TangentBasis, normal));        
-    #endif        
-    }
-    else 
-    {
-        normal = normalize(inputNormal);
-    }	
+    float3 normal = normalize(inputNormal);
+    if (EnableNormalMap) normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, eyePos, normal);        
 	return normal;
 }
 
@@ -170,25 +158,33 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
     
+#if DEBUG_TBN != 2
     float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal);
+#else        
+    float3 normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);
+    float3 basis_tangent = normalize(input.TangentBasis[0]);
+    float3 basis_bitangent = normalize(input.TangentBasis[1]);
+    float3 basis_normal = normalize(input.TangentBasis[2]);
+    normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
+    //normal = normalize(mul(input.TangentBasis, normal));        
+#endif     
+    
 #if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 #elif PBR_MODE == 1
-	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
+	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
 #elif PBR_MODE == 2
-    finalColor.rgb = gltfPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetMetalness(input.Tex), GetSmoothness(input.Tex));
-#else
-    #error
+    finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
+#endif
+    finalColor.a = 1.0;
+
+#if ENABLE_SHADOW_MAP
+	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
 #endif
     
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
-#endif       
-    
-	finalColor.a = 1.0;
-#if ENABLE_SHADOW_MAP
-	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
 #endif
 	return finalColor;
 }

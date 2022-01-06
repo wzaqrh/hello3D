@@ -307,7 +307,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			model.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
 			model.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
 			model.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
-			model.EnableAOMap_ChGRoughness_ChBMetalness = model.EnableAmbientOcclusionMap 
+			model.AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = model.EnableAmbientOcclusionMap 
 				&& !model.EnableRoughnessMap 
 				&& !model.EnableMetalnessMap;
 

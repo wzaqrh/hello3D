@@ -15,7 +15,7 @@ inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float
 #if DEBUG_TBN == 1
     float3 N = normalize(cross(dpx, dpy));
 #else
-    float3 N = normalize(worldNormal);
+    float3 N = worldNormal;
 #endif  
     
     float3 T = dpdx * duvdy.y - dpdy * duvdx.y;
@@ -30,11 +30,15 @@ inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float
     normal = N;
     normal.z = -normal.z;//compare gltf-sample-viewer
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT
+    N.z = -N.z;
+    T = dpdx * duvdy.y - dpdy * duvdx.y;
+    T = -T;
+    T = normalize(T - dot(T,N)*N);
     normal = T;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT  
     normal = B;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING 
-    normal.z = -normal.z;//compare gltf-sample-viewer
+    normal.xz = -normal.xz;//compare gltf-sample-viewer
 #endif    
     return normal;
 }
