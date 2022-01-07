@@ -37,9 +37,11 @@ void TestGLTF::OnPostInitDevice()
 	switch (mCaseIndex) {
 	case 0:
 	case 1:
-	case 2: {
+	case 2:
+	case 3: {
 		auto dir_light = mScneMng->AddDirectLight();
-		dir_light->SetDirection(Eigen::Vector3f(-0.7399, -0.6428, 0.1983));
+		//dir_light->SetDirection(Eigen::Vector3f(-0.7399, -0.6428, -0.1983));
+		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 
 		camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
@@ -49,11 +51,11 @@ void TestGLTF::OnPostInitDevice()
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 		mModel = mRendFac->CreateAssimpModel(modelMat);
-		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space" };
+		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox" };
 		int caseIndex = mCaseIndex;
 		mTransform = model.Init(modelNameArr[caseIndex], mModel);
 	}break;
-	case 3: {
+	case 4: {
 		auto pt_light = mScneMng->AddPointLight();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);

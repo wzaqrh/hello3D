@@ -31,14 +31,15 @@ inline float SmithJointGGXVisibility(float NdotL, float NdotV, float roughness)
 {
     float lambdaV = NdotL * (NdotV * (1 - roughness) + roughness);
     float lambdaL = NdotV * (NdotL * (1 - roughness) + roughness);
-    return 0.5f / (lambdaV + lambdaL + MIR_EPS);
+    return 0.5 / (lambdaV + lambdaL + MIR_EPS);
 }
 inline float SmithJointGGXFilamentVisibility(float NdotL, float NdotV, float roughness)
 {
     float a2 = roughness * roughness;
     float lambdaV = NdotL * sqrt((1 - a2) * NdotV * NdotV + a2);
     float lambdaL = NdotV * sqrt((1 - a2) * NdotL * NdotL + a2);
-    return 0.5f / (lambdaV + lambdaL + MIR_EPS);
+	if (lambdaV + lambdaL <= 0.0) return 0.0;
+    else return 0.5 / (lambdaV + lambdaL);
 }
 
 inline float3 SchlickFresnel(float3 F0, float3 F90, float VdotH)
@@ -96,7 +97,7 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     float NdotH = saturate(dot(normal, halfView));
     float NdotV = saturate(dot(normal, toEye));
     float perceptualRoughness = ao_rough_metal.y;
-    float roughness = max(perceptualRoughness * perceptualRoughness, 0.002);
+    float roughness = perceptualRoughness * perceptualRoughness;
     float3 F0 = lerp(DielectricSpec.rgb, albedo, ao_rough_metal.z);
     float3 F90 = float3(1,1,1);
     float specularWeight = 1.0;
@@ -119,10 +120,37 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     fcolor += GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight);
     fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);    
 #endif    
-    
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING
+	
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_TO_LIGHT
+	toLight.z = -toLight.z;
+	fcolor = (toLight + 1.0) / 2.0;	
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_TO_VIEW
+	toEye.z = -toEye.z;
+	fcolor = (toEye + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_INTENSITY
+	fcolor = float3(NdotL, NdotL, NdotL);
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF0
+	fcolor = kd * diffuse;
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF1
+	fcolor = ks * specular;
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF2
+	fcolor = float3(D, D, D);
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF3
+	fcolor = float3(V, V, V);
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF4
+	fcolor = F;
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING
     fcolor = (normal + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
+	//fcolor = (kd * diffuse) * unity_LightColor.rgb * NdotL;
+	//fcolor = (ks * specular) * unity_LightColor.rgb * NdotL;
+	fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
     fcolor = linearTosRGB(fcolor);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
     fcolor = linearTosRGB(albedo);
@@ -131,7 +159,6 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
     fcolor = linearTosRGB(float3(perceptualRoughness,perceptualRoughness,perceptualRoughness));
 #elif DEBUG_CHANNEL != 0
-    // In case of missing data for a debug view, render a magenta stripe pattern.
     fcolor = float4(1, 0, 1, 1);
     fcolor.r = fcolor.b = float(max(2.0 * sin(0.1 * (toEye.x + toEye.y) * 1024), 0.0) + 0.3);  
 #endif

@@ -432,4 +432,84 @@
             <File name="thirdparty\glTFSampleViewer\source\gltf\variant.js" />
         </Folder>
     </Project>
+    <Project name="gltfSamplerViewer">
+        <Folder name="gltf">
+            <File name="C:\glTF-Sample-Viewer\source\gltf\accessor.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\animation.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\animation_sampler.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\asset.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\buffer.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\buffer_view.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\camera.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\channel.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\gltf.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\gltf_object.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\gltf_utils.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\image.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\image_based_light.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\image_mime_type.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\interpolator.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\light.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\material.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\math_utils.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\mesh.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\node.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\primitive.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\sampler.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\scene.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\skin.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\texture.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\user_camera.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\utils.js" />
+            <File name="C:\glTF-Sample-Viewer\source\gltf\variant.js" />
+        </Folder>
+        <Folder name="GltfState">
+            <File name="C:\glTF-Sample-Viewer\source\GltfState\gltf_state.js" />
+        </Folder>
+        <Folder name="GltfView">
+            <File name="C:\glTF-Sample-Viewer\source\GltfView\gltf_view.js" />
+        </Folder>
+        <Folder name="libs">
+            <File name="C:\glTF-Sample-Viewer\source\libs\hdrpng.js" />
+            <File name="C:\glTF-Sample-Viewer\source\libs\libktx.js" />
+            <File name="C:\glTF-Sample-Viewer\source\libs\libktx.wasm" />
+        </Folder>
+        <Folder name="Renderer">
+            <File name="C:\glTF-Sample-Viewer\source\Renderer\environment_renderer.js" />
+            <File name="C:\glTF-Sample-Viewer\source\Renderer\renderer.js" />
+            <File name="C:\glTF-Sample-Viewer\source\Renderer\shader.js" />
+            <File name="C:\glTF-Sample-Viewer\source\Renderer\shader_cache.js" />
+            <File name="C:\glTF-Sample-Viewer\source\Renderer\webgl.js" />
+            <Folder name="shader">
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\animation.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\brdf.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\cubemap.frag" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\cubemap.vert" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\functions.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\ibl.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\material_info.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\pbr.frag" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\primitive.vert" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\punctual.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\textures.glsl" />
+                <File name="C:\glTF-Sample-Viewer\source\Renderer\shaders\tonemapping.glsl" />
+            </Folder>
+        </Folder>
+        <Folder name="ResourceLoader">
+            <File name="C:\glTF-Sample-Viewer\source\ResourceLoader\async_file_reader.js" />
+            <File name="C:\glTF-Sample-Viewer\source\ResourceLoader\draco.js" />
+            <File name="C:\glTF-Sample-Viewer\source\ResourceLoader\glb_parser.js" />
+            <File name="C:\glTF-Sample-Viewer\source\ResourceLoader\ktx.js" />
+            <File name="C:\glTF-Sample-Viewer\source\ResourceLoader\loader.js" />
+            <File name="C:\glTF-Sample-Viewer\source\ResourceLoader\resource_loader.js" />
+        </Folder>
+        <Folder name="shaders">
+            <File name="C:\glTF-Sample-Viewer\source\shaders\debug.frag" />
+            <File name="C:\glTF-Sample-Viewer\source\shaders\fullscreen.vert" />
+            <File name="C:\glTF-Sample-Viewer\source\shaders\ibl_filtering.frag" />
+            <File name="C:\glTF-Sample-Viewer\source\shaders\panorama_to_cubemap.frag" />
+        </Folder>
+        <File name="C:\glTF-Sample-Viewer\source\gltf-sample-viewer.js" />
+        <File name="C:\glTF-Sample-Viewer\source\ibl_sampler.js" />
+    </Project>
 </NotepadPlus>

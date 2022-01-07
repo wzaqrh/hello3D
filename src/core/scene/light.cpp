@@ -17,7 +17,7 @@ DirectLight::DirectLight()
 
 void DirectLight::SetDirection(const Eigen::Vector3f& dir)
 {
-	mCbLight.unity_LightPosition = -Eigen::Vector4f(dir.x(), dir.y(), dir.z(), 0).normalized();
+	mCbLight.unity_LightPosition = Eigen::Vector4f(dir.x(), dir.y(), dir.z(), 0).normalized();
 }
 
 void DirectLight::SetDiffuse(const Eigen::Vector3f& color)

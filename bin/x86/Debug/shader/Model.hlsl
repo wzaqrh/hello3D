@@ -62,7 +62,7 @@ inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 t
     float3 normal = normalize(worldNormal);
     if (EnableNormalMap)
     {
-        TBNStruct tbn;
+        float3x3 tbn;
         if (HasTangent) tbn = GetTBN(normal, normalize(tangent), normalize(biTangent));
         else tbn = GetTBN(uv, worldPos, normal);
         normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, tbn);

@@ -110,6 +110,7 @@ std::map<std::string, ModelInfo> CResPathMap = {
 	{"toycar", {MakeKhronosGltfResPath("ToyCar"),"",120,0}},
 	{"box-space", {MakeKhronosGltfResPath("Box With Spaces"),"",1,0}},
 	{"damaged-helmet", {MakeKhronosGltfResPath("DamagedHelmet"),"",1,0}},
+	{"BoomBox", {MakeKhronosGltfResPath("BoomBox"),"",100,0}},
 };
 model::model()
 {
@@ -129,6 +130,12 @@ void model::Init(const std::string& name)
 		float s = iter->second.mScale;
 		mScale = Eigen::Vector3f(s, s, s);
 		mPos = Eigen::Vector3f(0, iter->second.mPosY, 0);
+	}
+	else {
+		mPath = "model/gltf/2.0/" + name + "/glTF/" + name + ".gltf";
+		float s = 1;
+		mScale = Eigen::Vector3f(s, s, s);
+		mPos = Eigen::Vector3f(0, 0, 0);
 	}
 }
 mir::TransformPtr model::Init(const std::string& name, mir::AssimpModelPtr aiModel)
