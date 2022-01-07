@@ -310,6 +310,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			model.AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = model.EnableAmbientOcclusionMap 
 				&& !model.EnableRoughnessMap 
 				&& !model.EnableMetalnessMap;
+			model.HasTangent = mesh->HasTangent();
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};

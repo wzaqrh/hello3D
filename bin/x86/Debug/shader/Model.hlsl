@@ -30,6 +30,7 @@ cbuffer cbModel : register(b3)
 	bool EnableMetalnessMap;
 	bool AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
     bool AlbedoMapSRGB;
+    bool HasTangent;
 }
 
 inline float3 GetAlbedo(float2 uv) 
@@ -56,11 +57,17 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
     return value;
 }
 
-inline float3 GetNormal(float2 uv, float3 eyePos, float3 inputNormal)
+inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent, float3 biTangent)
 {
-    float3 normal = normalize(inputNormal);
-    if (EnableNormalMap) normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, eyePos, normal);        
-	return normal;
+    float3 normal = normalize(worldNormal);
+    if (EnableNormalMap)
+    {
+        TBNStruct tbn;
+        if (HasTangent) tbn = GetTBN(normal, normalize(tangent), normalize(biTangent));
+        else tbn = GetTBN(uv, worldPos, normal);
+        normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, tbn);
+    }
+    return normal;
 }
 
 /************ ShadowCaster ************/
@@ -98,6 +105,8 @@ struct PixelInput
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL0;//world space
+    float3 Tangent : NORMAL1;
+    float3 BiTangent : NORMAL2; 
 	float3 ToEye  : TEXCOORD1;//world space
 	float3 ToLight : TEXCOORD2;//world space
 #if ENABLE_SHADOW_MAP
@@ -119,6 +128,12 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
 	output.Normal = normalize(mul(MW, skinNormal).xyz);
 	
+    float4 skinTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Tangent.xyz, 0.0));
+	output.Tangent = normalize(mul(MW, skinTangent).xyz);
+    
+    float4 skinBiTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.BiTangent.xyz, 0.0));
+	output.BiTangent = normalize(mul(MW, skinBiTangent).xyz);
+    
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
     
@@ -136,7 +151,10 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     
 	//SurfPos	
 #if DEBUG_TBN != 2 
-    output.SurfPos = output.Pos.xyz / output.Pos.w;
+	float4 SurfPos = mul(View, output.Pos);
+	SurfPos = mul(Projection, SurfPos);
+	output.SurfPos = SurfPos.xyz / SurfPos.w;
+    //output.SurfPos = output.Pos.xyz / output.Pos.w;
 #else    
     float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
     output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));    
@@ -159,7 +177,7 @@ float4 PS(PixelInput input) : SV_Target
 	float4 finalColor;
     
 #if DEBUG_TBN != 2
-    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal);
+    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent, input.BiTangent);
 #else        
     float3 normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);
     float3 basis_tangent = normalize(input.TangentBasis[0]);
@@ -193,7 +211,7 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal);
+	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent, input.BiTangent);
 	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;

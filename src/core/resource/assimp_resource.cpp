@@ -44,9 +44,11 @@ public:
 
 		try
 		{
-//#define IMPORT_LEFTHAND
+#define IMPORT_LEFTHAND
 			constexpr uint32_t ImportFlags =
-				//aiProcess_ConvertToLeftHanded |
+			#if defined IMPORT_LEFTHAND
+				aiProcess_ConvertToLeftHanded |
+			#endif
 				aiProcess_Triangulate |
 				aiProcess_CalcTangentSpace;/* |
 				aiProcess_SortByPType |
@@ -259,19 +261,31 @@ private:
 		}
 		if (mesh->mTangents) {
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined IMPORT_LEFTHAND
+				skeletonVerts[vertexId].Tangent.x() = mesh->mTangents[vertexId].x;
+				skeletonVerts[vertexId].Tangent.y() = mesh->mTangents[vertexId].y;
+				skeletonVerts[vertexId].Tangent.z() = -mesh->mTangents[vertexId].z;
+			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
 			#else
 				VEC_ASSIGN(skeletonVerts[vertexId].Tangent, mesh->mTangents[vertexId]);
 			#endif
+			#endif
 			}
 		}
 		if (mesh->mBitangents) {
 			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+			#if !defined IMPORT_LEFTHAND
+				skeletonVerts[vertexId].BiTangent.x() = mesh->mBitangents[vertexId].x;
+				skeletonVerts[vertexId].BiTangent.y() = mesh->mBitangents[vertexId].y;
+				skeletonVerts[vertexId].BiTangent.z() = -mesh->mBitangents[vertexId].z;
+			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
 			#else
 				VEC_ASSIGN(skeletonVerts[vertexId].BiTangent, mesh->mBitangents[vertexId]);
+			#endif
 			#endif
 			}
 		}
@@ -312,13 +326,13 @@ private:
 		#endif
 		}
 
-		if (mesh->mNormals && mesh->mTangents == nullptr) {
+		/*if (mesh->mNormals && mesh->mTangents == nullptr) {
 			ReCalculateTangents(surfVerts, skeletonVerts, indices);
-		}
+		}*/
 
 		return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, 
 			std::move(surfVerts), std::move(skeletonVerts), 
-			std::move(indices), texturesPtr);
+			std::move(indices), texturesPtr, mesh->mTangents != nullptr);
 	}
 private:
 	const Launch mLaunchMode;

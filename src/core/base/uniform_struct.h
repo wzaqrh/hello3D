@@ -79,6 +79,7 @@ struct UNIFORM_ALIGN cbModel
 		EnableMetalnessMap = false;
 		AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = false;
 		AlbedoMapSRGB = true;
+		HasTangent = false;
 	}
 	float AlbedoFactor;
 	float AmbientOcclusionFactor;
@@ -91,6 +92,7 @@ struct UNIFORM_ALIGN cbModel
 	BOOL EnableMetalnessMap;
 	BOOL AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
 	BOOL AlbedoMapSRGB;
+	BOOL HasTangent;
 };
 
 struct UNIFORM_ALIGN cbUnityMaterial

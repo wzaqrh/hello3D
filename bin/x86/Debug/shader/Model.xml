@@ -21,6 +21,7 @@
       <Element Name="EnableMetalnessMap"        Type="bool"></Element>
 	    <Element Name="AmbientOcclusion_ChannelGRoughness_ChannelBMetalness" Type="bool"></Element>
       <Element Name="AlbedoMapSRGB"             Type="bool"></Element>
+      <Element Name="HasTangent"                Type="bool"></Element>
     </Uniform>   
 		<Texture>
 			<Element Slot="0" Address="1">txAlbedo</Element>

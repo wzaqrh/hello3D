@@ -348,6 +348,7 @@
             <File name="bin\x86\Debug\shader\Model.hlsl" />
             <File name="bin\x86\Debug\shader\LayerColor.hlsl" />
             <File name="bin\x86\Debug\shader\Label.hlsl" />
+            <File name="bin\x86\Debug\shader\Debug.cginc" />
         </Folder>
         <Folder name="cginc">
             <File name="bin\x86\Debug\shader\Standard.cginc" />

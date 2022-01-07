@@ -19,8 +19,10 @@ public:
 		std::vector<vbSurface, mir_allocator<vbSurface>>&& surfVertexs,
 		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>&& skeletonVertexs,
 		std::vector<uint32_t>&& indices,
-		TextureBySlotPtr textures);
+		TextureBySlotPtr textures,
+		bool hasTangent);
 	bool IsLoaded() const;
+	bool HasTangent() const { return mHasTangent; }
 	bool HasTexture(int slot) const;
 	const aiMesh* GetRawMesh() const { return mAiMesh; }
 	const TextureBySlotPtr& GetTextures() const { return mTextures; }
@@ -29,6 +31,7 @@ public:
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }
 private:
 	const aiMesh* mAiMesh;
+	bool mHasTangent;
 	std::vector<vbSurface, mir_allocator<vbSurface>> mSurfVertexs;
 	std::vector<vbSkeleton, mir_allocator<vbSkeleton>> mSkeletonVertexs;
 	std::vector<uint32_t> mIndices;
