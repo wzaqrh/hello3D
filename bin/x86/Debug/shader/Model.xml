@@ -11,7 +11,7 @@
 		<UseTexture>txGlobal</UseTexture>
     <Uniform Name="cbModel" IsUnique="false" Slot="3">
       <Element Name="AlbedoFactor"            Type="float"></Element>
-      <Element Name="AmbientOcclusionFactor"  Type="float"></Element>
+      <Element Name="OcclusionStrength"  Type="float"></Element>
       <Element Name="RoughnessFactor"         Type="float"></Element>
       <Element Name="MetallicFactor"          Type="float"></Element>
       <Element Name="EnableAlbedoMap"           Type="bool"></Element>

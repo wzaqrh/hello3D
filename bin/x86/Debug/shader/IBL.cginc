@@ -1,6 +1,7 @@
 #ifndef IBL_H
 #define IBL_H
 #include "Standard.cginc"
+#include "Debug.cginc"
 
 float clampedDot(float3 x, float3 y)
 {
@@ -11,13 +12,16 @@ float3 GetDiffuseLight(float3 normal)
 {
 #if CubeMapIsRightHandness
     normal.z = -normal.z;
-#endif    
+#endif  
     return MIR_SAMPLE_TEXCUBE(_DiffuseCube, normal).rgb;
 }
 
 float3 GetSpecularLight(float3 normal, float3 toEye, float lod)
 {
     float3 reflUVW = normalize(reflect(-toEye, normal));
+#if CubeMapIsRightHandness
+	reflUVW.z = -reflUVW.z;
+#endif	
     return MIR_SAMPLE_TEXCUBE_LOD(_SpecCube, reflUVW, lod).rgb;
 }
 
@@ -40,15 +44,21 @@ float3 GetIBLRadianceLambertian(float3 normal, float3 toEye, float perceptualRou
     float3 FmsEms = Ems * FssEss * F_avg / (1.0 - F_avg * Ems);
     float3 k_D = diffuseColor * (1.0 - FssEss + FmsEms); // we use +FmsEms as indicated by the formula in the blog post (might be a typo in the implementation)
 
-    return (FmsEms + k_D) * irradiance;
+    float3 fcolor = (FmsEms + k_D) * irradiance;
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE_PREFILTER_ENV
+	fcolor = GetDiffuseLight(normal);
+#endif
+	return fcolor;
 }
 
 float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness, float3 F0, float specularWeight)
 {
     float NdotV = clampedDot(normal, toEye);
-    float lod = perceptualRoughness * 1;//float(u_MipCount - 1);
+	float mip = 4.0;//float(u_MipCount - 1);
+    float lod = perceptualRoughness * mip;
 
-    float2 f_ab = MIR_SAMPLE_TEX2D(_LUT, saturate(float2(NdotV, perceptualRoughness))).rg;
+	float2 lut_uv = saturate(float2(NdotV, perceptualRoughness));	
+    float2 f_ab = MIR_SAMPLE_TEX2D(_LUT, lut_uv).rg;
     float3 specularLight = GetSpecularLight(normal, toEye, lod);
 
     float smoothness = 1.0 - perceptualRoughness;
@@ -56,7 +66,16 @@ float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness,
     float3 k_S = F0 + Fr * pow(1.0 - NdotV, 5.0);
     float3 FssEss = k_S * f_ab.x + f_ab.y;
 
-    return specularWeight * specularLight * FssEss;
+    float3 fcolor = specularWeight * specularLight * FssEss;
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL
+	fcolor = float3(mip, mip, mip);
+	fcolor /= 32.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV
+	fcolor = specularLight;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT
+	fcolor = float3(f_ab, 0.0);
+#endif
+	return fcolor;
 }
 
 #endif

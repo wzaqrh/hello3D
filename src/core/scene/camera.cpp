@@ -58,7 +58,7 @@ void Camera::InitAsOthogonal(float aspect,
 void Camera::SetClippingPlane(const Eigen::Vector2f& zRange)
 {
 	mClipPlane = zRange;
-	mViewDirty = true;
+	mProjectionDirty = true;
 }
 void Camera::SetAspect(float aspect)
 {

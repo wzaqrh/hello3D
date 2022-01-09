@@ -117,40 +117,48 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 #endif    
     
 #if USE_IBL
-    fcolor += GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight);
-    fcolor += GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);    
-#endif    
+    float3 ibl_diff = GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight);
+    float3 ibl_spec = GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);    
+	fcolor += (ibl_diff + ibl_spec) * ao_rough_metal.x;
+#endif  
+#if PBR_MODE
+	//fcolor.rgb = linearTosRGB(fcolor.rgb);
+#endif
 	
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_TO_LIGHT
-	toLight.z = -toLight.z;
-	fcolor = (toLight + 1.0) / 2.0;	
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_TO_VIEW
-	toEye.z = -toEye.z;
-	fcolor = (toEye + 1.0) / 2.0;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_INTENSITY
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION
+	fcolor = ao_rough_metal.x;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_VECTOR_L
+	fcolor = toLight;
+	fcolor.z = -fcolor.z;
+	fcolor = (fcolor + 1.0) / 2.0;	
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_VECTOR_V
+	fcolor = toEye;
+	fcolor.z = -fcolor.z;
+	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_INTENSITY_NDOTL
 	fcolor = float3(NdotL, NdotL, NdotL);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_VECTOR_R
+	fcolor = normalize(reflect(-toEye, normal));
+	fcolor.z = -fcolor.z;
 	fcolor = (fcolor + 1.0) / 2.0;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF0
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_DIFFUSE
 	fcolor = kd * diffuse;
-	fcolor = (fcolor + 1.0) / 2.0;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF1
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR
 	fcolor = ks * specular;
-	fcolor = (fcolor + 1.0) / 2.0;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF2
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_D
 	fcolor = float3(D, D, D);
-	fcolor = (fcolor + 1.0) / 2.0;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF3
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_V
 	fcolor = float3(V, V, V);
-	fcolor = (fcolor + 1.0) / 2.0;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF4
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_F
 	fcolor = F;
-	fcolor = (fcolor + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE_PREFILTER_ENV
+    fcolor = GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight); 
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT || DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL	
+	fcolor = GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight); 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING
     fcolor = (normal + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
-	//fcolor = (kd * diffuse) * unity_LightColor.rgb * NdotL;
-	//fcolor = (ks * specular) * unity_LightColor.rgb * NdotL;
-	fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
+	//fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
     fcolor = linearTosRGB(fcolor);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
     fcolor = linearTosRGB(albedo);

@@ -107,7 +107,7 @@ std::map<std::string, ModelInfo> CResPathMap = {
 	{"rock", {MakeResPath("rock", "obj"),"",1,0}},
 	{"floor", {MakeResPath("floor", "obj"),"",0.3,0}},
 	{"planet", {MakeResPath("planet", "obj"),"",0.1,0}},
-	{"toycar", {MakeKhronosGltfResPath("ToyCar"),"",120,0}},
+	{"toycar", {MakeKhronosGltfResPath("ToyCar"),"",1,0}},
 	{"box-space", {MakeKhronosGltfResPath("Box With Spaces"),"",1,0}},
 	{"damaged-helmet", {MakeKhronosGltfResPath("DamagedHelmet"),"",1,0}},
 	{"BoomBox", {MakeKhronosGltfResPath("BoomBox"),"",100,0}},

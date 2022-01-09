@@ -511,5 +511,22 @@
         </Folder>
         <File name="C:\glTF-Sample-Viewer\source\gltf-sample-viewer.js" />
         <File name="C:\glTF-Sample-Viewer\source\ibl_sampler.js" />
+        <Folder name="app_web">
+            <File name="C:\glTF-Sample-Viewer\app_web\index.html" />
+            <File name="C:\glTF-Sample-Viewer\app_web\package.json" />
+            <File name="C:\glTF-Sample-Viewer\app_web\package-lock.json" />
+            <File name="C:\glTF-Sample-Viewer\app_web\rollup.config.js" />
+            <Folder name="src">
+                <File name="C:\glTF-Sample-Viewer\app_web\src\main.js" />
+                <File name="C:\glTF-Sample-Viewer\app_web\src\model_path_provider.js" />
+                <Folder name="ui">
+                    <File name="C:\glTF-Sample-Viewer\app_web\src\ui\sass.scss" />
+                    <File name="C:\glTF-Sample-Viewer\app_web\src\ui\ui.js" />
+                </Folder>
+                <Folder name="logic">
+                    <File name="C:\glTF-Sample-Viewer\app_web\src\logic\uimodel.js" />
+                </Folder>
+            </Folder>
+        </Folder>
     </Project>
 </NotepadPlus>

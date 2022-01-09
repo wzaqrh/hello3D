@@ -32,18 +32,42 @@ void ReadAndPrintBinary(const std::string& path) {
 void TestGLTF::OnPostInitDevice()
 {
 	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+	camera->SetFov(90);
 
 	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0:
 	case 1:
 	case 2:
-	case 3: {
+	case 3: 
+	case 4: {
+		if (mCaseIndex == 1) {
+			auto transform = camera->GetTransform();
+			camera->SetClippingPlane(Eigen::Vector2f(0.001, 2.0));
+			/*transform->SetRotation(Eigen::Quaternionf(-0.330993533,
+				-0.274300218,
+				-0.101194724,
+				0.8971969));*/
+		#if 1
+			Eigen::Vector3f eyePos(-0.0169006381,
+				0.0253599286,
+				-0.0302319955);
+			camera->SetLookAt(eyePos, eyePos + Eigen::Vector3f(0,0,1));
+		#else	
+			camera->SetLookAt(Eigen::Vector3f(-0.0169006381,
+				0.0253599286,
+				-0.0302319955), Eigen::Vector3f(0,0,0));
+		#endif
+			mControlCamera = false;
+		}
+		else {
+			camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
+		}
+
 		auto dir_light = mScneMng->AddDirectLight();
 		//dir_light->SetDirection(Eigen::Vector3f(-0.7399, -0.6428, -0.1983));
 		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
-
-		camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
+		
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(2), skyMat));
@@ -51,11 +75,11 @@ void TestGLTF::OnPostInitDevice()
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 		mModel = mRendFac->CreateAssimpModel(modelMat);
-		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox" };
+		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };
 		int caseIndex = mCaseIndex;
 		mTransform = model.Init(modelNameArr[caseIndex], mModel);
 	}break;
-	case 4: {
+	case 10: {
 		auto pt_light = mScneMng->AddPointLight();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);

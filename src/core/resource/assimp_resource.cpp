@@ -158,8 +158,25 @@ private:
 		for (UINT i = 0; i < std::max<int>(1, mat->GetTextureCount(type)); i++)
 		{
 			aiString str; 
+		#if 1
 			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
 				continue;
+		#else
+			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str)) {
+				switch (type)
+				{
+				case aiTextureType_METALNESS:
+					str.Set("");
+					break;
+				case aiTextureType_DIFFUSE_ROUGHNESS:
+					break;
+				case aiTextureType_AMBIENT_OCCLUSION:
+					break;
+				default:
+					break;
+				}
+			}
+		#endif
 			std::string key = str.C_Str();
 
 			if (!mRedirectResourceDir.empty()) {

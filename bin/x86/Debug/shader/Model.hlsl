@@ -20,7 +20,7 @@ MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 cbuffer cbModel : register(b3)
 {
 	float AlbedoFactor;
-    float AmbientOcclusionFactor;
+    float OcclusionStrength;
     float RoughnessFactor;
     float MetallicFactor;
 	bool EnableAlbedoMap;
@@ -45,12 +45,17 @@ inline float3 GetAlbedo(float2 uv)
 
 inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 {
-    float3 value = float3(AmbientOcclusionFactor, RoughnessFactor, MetallicFactor);
+    float3 value = float3(OcclusionStrength, RoughnessFactor, MetallicFactor);
     if (AmbientOcclusion_ChannelGRoughness_ChannelBMetalness) {
-        value *= MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).rgb;
-    }
+		float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).rgb;
+		value.x = 1.0 + (arm.x - 1.0) * value.x;
+		value.yz *= arm.yz;
+	}
     else {
-        if (EnableAmbientOcclusionMap) value.x *= MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).r; 
+        if (EnableAmbientOcclusionMap) {
+			float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).r;
+			value.x = 1.0 + (ao - 1.0) * value.x;
+		}
         if (EnableRoughnessMap) value.y *= MIR_SAMPLE_TEX2D(txRoughness, uv).r;
         if (EnableMetalnessMap) value.z *= MIR_SAMPLE_TEX2D(txMetalness, uv).r;
     }
@@ -151,10 +156,13 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     
 	//SurfPos	
 #if DEBUG_TBN != 2 
+#if 0	
 	float4 SurfPos = mul(View, output.Pos);
 	SurfPos = mul(Projection, SurfPos);
 	output.SurfPos = SurfPos.xyz / SurfPos.w;
-    //output.SurfPos = output.Pos.xyz / output.Pos.w;
+#else
+	output.SurfPos = output.Pos.xyz / output.Pos.w;
+#endif	
 #else    
     float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
     output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));    
@@ -189,9 +197,9 @@ float4 PS(PixelInput input) : SV_Target
     
 #if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
-#elif PBR_MODE == 1
+#elif PBR_MODE == PBR_UNITY
 	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
-#elif PBR_MODE == 2
+#elif PBR_MODE == PBR_GLTF
     finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
 #endif
     finalColor.a = 1.0;
@@ -203,6 +211,12 @@ float4 PS(PixelInput input) : SV_Target
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
+#elif DEBUG_CHANNEL == DEBUG_CAMERA_POS
+	finalColor.rgb = CameraPosition.xyz;
+	finalColor.rgb = (finalColor.rgb + 1.0) / 2.0;
+#elif DEBUG_CHANNEL == DEBUG_SURFACE_POS
+	finalColor.rgb = input.SurfPos;
+	finalColor.rgb = (finalColor.rgb + 1.0) / 2.0;
 #endif
 	return finalColor;
 }

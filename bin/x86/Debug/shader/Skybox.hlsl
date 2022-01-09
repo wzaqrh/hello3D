@@ -1,5 +1,7 @@
 /********** Skybox **********/
 #include "Standard.cginc"
+#include "ToneMapping.cginc"
+#include "Debug.cginc"
 
 MIR_DECLARE_TEXCUBE(_MainTex, 0);
 
@@ -43,6 +45,9 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MIR_SAMPLE_TEXCUBE(_MainTex, input.Tex).rgb;
+#if PBR_MODE
+	finalColor.rgb = linearTosRGB(finalColor.rgb);
+#endif
 	finalColor.a = 1.0;
 	return finalColor;
 }

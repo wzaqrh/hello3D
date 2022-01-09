@@ -69,7 +69,7 @@ struct UNIFORM_ALIGN cbModel
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbModel() {
 		AlbedoFactor = 1;
-		AmbientOcclusionFactor = 1;
+		OcclusionStrength = 1;
 		RoughnessFactor = 1;
 		MetallicFactor = 1;
 		EnableAlbedoMap = false;
@@ -82,7 +82,7 @@ struct UNIFORM_ALIGN cbModel
 		HasTangent = false;
 	}
 	float AlbedoFactor;
-	float AmbientOcclusionFactor;
+	float OcclusionStrength;
 	float RoughnessFactor;
 	float MetallicFactor;
 	BOOL EnableAlbedoMap;

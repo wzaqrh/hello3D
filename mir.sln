@@ -16,7 +16,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ILStatic", "thirdparty\devI
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "thirdparty\assimp\build\code\assimp.vcxproj", "{1467F5D3-A249-3445-AD4D-690B4B975060}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlTFSampleViewer", "G:\glTF-Sample-Viewer\build\GlTFSampleViewer.vcxproj", "{427BD1C5-F034-4822-AEF1-8997D4B67BBD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlTFSampleViewer", "..\glTF-Sample-Viewer\build\GlTFSampleViewer.vcxproj", "{427BD1C5-F034-4822-AEF1-8997D4B67BBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
