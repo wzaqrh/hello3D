@@ -140,44 +140,42 @@ static cbPerLight MakePerLight(const ILight& light)
 {
 	return light.MakeCbLight();
 }
-static cbPerFrame MakePerFrame(const Camera& camera) 
+static cbPerFrame& MakePerFrame(cbPerFrame& perFrameParam, const Eigen::Vector3f& camPos, const Eigen::Vector2i& fbSize)
 {
-	cbPerFrame perFrameParam = {};
-	perFrameParam.View = camera.GetView();
-	perFrameParam.Projection = camera.GetProjection();
-
 	perFrameParam.ViewInv = perFrameParam.View.inverse();
 	perFrameParam.ProjectionInv = perFrameParam.Projection.inverse();
-	perFrameParam.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
+
+	perFrameParam.CameraPosition.head<3>() = camPos;
+	perFrameParam.FrameBufferSize = Eigen::Vector4f(fbSize.x(), fbSize.y(), 1.0f / fbSize.x(), 1.0f / fbSize.y());
 	return perFrameParam;
 }
-static cbPerFrame MakeReceiveShadowPerFrame(const Camera& camera, const ILight& light, Eigen::Vector2i size, IFrameBufferPtr shadowMap)
+static cbPerFrame MakePerFrame(const Camera& camera, const Eigen::Vector2i& fbSize)
 {
-	cbPerFrame perFrameParam = {};
+	cbPerFrame perFrameParam;
 	perFrameParam.View = camera.GetView();
 	perFrameParam.Projection = camera.GetProjection();
+	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
+}
+static cbPerFrame MakeReceiveShadowPerFrame(const Camera& camera, const Eigen::Vector2i& fbSize, const ILight& light, IFrameBufferPtr shadowMap)
+{
+	cbPerFrame perFrameParam = MakePerFrame(camera, fbSize);
 	if (shadowMap) {
 		constexpr bool castShadow = false;
-		light.CalculateLightingViewProjection(camera, size, castShadow, perFrameParam.LightView, perFrameParam.LightProjection);
-		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
-		perFrameParam._ShadowMapTexture_TexelSize.head<2>() = Eigen::Vector2f(1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight());
+		light.CalculateLightingViewProjection(camera, fbSize, castShadow, perFrameParam.LightView, perFrameParam.LightProjection);
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, fbSize, {}));
+		perFrameParam.ShadowMapSize = Eigen::Vector4f(shadowMap->GetWidth(), shadowMap->GetHeight(), 1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight());
 	}
-	perFrameParam.ViewInv = perFrameParam.View.inverse();
-	perFrameParam.ProjectionInv = perFrameParam.Projection.inverse();
-	perFrameParam.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
 	return perFrameParam;
 }
-static cbPerFrame MakeCastShadowPerFrame(const Camera& camera, const ILight& light, Eigen::Vector2i size)
+static cbPerFrame MakeCastShadowPerFrame(const Camera& camera, const Eigen::Vector2i& fbSize, const ILight& light)
 {
-	cbPerFrame perFrameParam = {};
-	constexpr bool castShadow = true;
-	light.CalculateLightingViewProjection(camera, size, castShadow, perFrameParam.View, perFrameParam.Projection);
-	MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, size, {}));
-
-	perFrameParam.ViewInv = perFrameParam.View.inverse();
-	perFrameParam.ProjectionInv = perFrameParam.Projection.inverse();
-	perFrameParam.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
-	return perFrameParam;
+	cbPerFrame perFrameParam;
+	{
+		constexpr bool castShadow = true;
+		light.CalculateLightingViewProjection(camera, fbSize, castShadow, perFrameParam.View, perFrameParam.Projection);
+		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, fbSize, {}));
+	}
+	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
 }
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const Camera& camera, 
 	const std::vector<ILightPtr>& lights)
@@ -196,7 +194,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		for (auto& light : lights) {
 			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == kLightDirectional)) {
 				genSM = true;
-				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, *light, mRenderSys.WinSize());
+				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, mRenderSys.WinSize(), *light);
 				RenderLight(opQueue, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 				break;
 			}
@@ -227,7 +225,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 
 					depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 					blend_state(BlendState::MakeAlphaNonPremultiplied());
-					perFrame = MakeReceiveShadowPerFrame(camera, *firstLight, mRenderSys.WinSize(), IF_AND_OR(genSM, mShadowMap, nullptr));
+					perFrame = MakeReceiveShadowPerFrame(camera, mRenderSys.WinSize(), *firstLight, IF_AND_OR(genSM, mShadowMap, nullptr));
 					RenderLight(opQueue, LIGHTMODE_FORWARD_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 					
 					if (auto skybox = camera.GetSkyBox()) {
@@ -257,7 +255,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		auto& postProcessEffects = camera.GetPostProcessEffects();
 		for (size_t i = 0; i < postProcessEffects.size(); ++i)
 			postProcessEffects[i]->GenRenderOperation(opQue);
-		RenderLight(opQue, LIGHTMODE_POSTPROCESS, camera.GetCullingMask(), nullptr, MakePerFrame(camera));
+		RenderLight(opQue, LIGHTMODE_POSTPROCESS, camera.GetCullingMask(), nullptr, MakePerFrame(camera, mRenderSys.WinSize()));
 	}
 #endif
 }
@@ -289,7 +287,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 
 						depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 						blend_state(BlendState::MakeAlphaNonPremultiplied());
-						perFrame = MakeReceiveShadowPerFrame(camera, *firstLight, mRenderSys.WinSize(), mGBuffer);
+						perFrame = MakeReceiveShadowPerFrame(camera, mRenderSys.WinSize(), *firstLight, mGBuffer);
 						RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 						
 						if (auto skybox = camera.GetSkyBox()) {

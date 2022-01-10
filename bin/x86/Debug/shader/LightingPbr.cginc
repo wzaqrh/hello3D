@@ -89,7 +89,7 @@ float3 UnityPbrLight(float3 toLight_, float3 normal, float3 toEye, float3 albedo
     return finalColor;
 }
 
-float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, float3 ao_rough_metal)
+float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, float3 ao_rough_metal, float3 emissive)
 {
     float3 halfView = normalize(toLight + toEye);
     float NdotL = saturate(dot(normal, toLight));
@@ -120,13 +120,16 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     float3 ibl_diff = GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight);
     float3 ibl_spec = GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight);    
 	fcolor += (ibl_diff + ibl_spec) * ao_rough_metal.x;
-#endif  
-#if PBR_MODE
-	//fcolor.rgb = linearTosRGB(fcolor.rgb);
+#endif
+	fcolor += emissive;
+#if TONEMAP_MODE
+	fcolor = toneMap(fcolor);
 #endif
 	
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION
-	fcolor = ao_rough_metal.x;
+	fcolor = linearTosRGB(float3(ao_rough_metal.x, ao_rough_metal.x, ao_rough_metal.x));
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_EMISSIVE
+	fcolor = linearTosRGB(emissive);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_VECTOR_L
 	fcolor = toLight;
 	fcolor.z = -fcolor.z;
@@ -155,7 +158,7 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     fcolor = GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight); 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT || DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL	
 	fcolor = GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight); 
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
     fcolor = (normal + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
 	//fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;

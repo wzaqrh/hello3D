@@ -1,4 +1,3 @@
-/********** Multi Light(Direct Point) (eye space) (SpecularMap) **********/
 #include "Standard.cginc"
 #include "Skeleton.cginc"
 #include "Math.cginc"
@@ -16,18 +15,22 @@ MIR_DECLARE_TEX2D(txNormal, 1);
 MIR_DECLARE_TEX2D(txMetalness, 2);
 MIR_DECLARE_TEX2D(txRoughness, 3);
 MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
+MIR_DECLARE_TEX2D(txEmissive, 5);
 
 cbuffer cbModel : register(b3)
 {
 	float AlbedoFactor;
+	float NormalFactor;
     float OcclusionStrength;
     float RoughnessFactor;
     float MetallicFactor;
+	float EmissiveFactor;
 	bool EnableAlbedoMap;
     bool EnableNormalMap;
 	bool EnableAmbientOcclusionMap;
     bool EnableRoughnessMap;
 	bool EnableMetalnessMap;
+	bool EnableEmissiveMap;
 	bool AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
     bool AlbedoMapSRGB;
     bool HasTangent;
@@ -43,12 +46,21 @@ inline float3 GetAlbedo(float2 uv)
     return albedo;
 }
 
+inline float3 GetEmissive(float2 uv) 
+{
+    float3 emissive = float3(EmissiveFactor, EmissiveFactor, EmissiveFactor);
+    if (EnableEmissiveMap) {
+        emissive = MIR_SAMPLE_TEX2D(txEmissive, uv).rgb;
+    }
+    return emissive;
+}
+
 inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 {
     float3 value = float3(OcclusionStrength, RoughnessFactor, MetallicFactor);
     if (AmbientOcclusion_ChannelGRoughness_ChannelBMetalness) {
 		float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).rgb;
-		value.x = 1.0 + (arm.x - 1.0) * value.x;
+		value.x = lerp(1.0, arm.x, value.x);
 		value.yz *= arm.yz;
 	}
     else {
@@ -65,8 +77,7 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent, float3 biTangent)
 {
     float3 normal = normalize(worldNormal);
-    if (EnableNormalMap)
-    {
+    if (EnableNormalMap) {
         float3x3 tbn;
         if (HasTangent) tbn = GetTBN(normal, normalize(tangent), normalize(biTangent));
         else tbn = GetTBN(uv, worldPos, normal);
@@ -200,7 +211,7 @@ float4 PS(PixelInput input) : SV_Target
 #elif PBR_MODE == PBR_UNITY
 	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
 #elif PBR_MODE == PBR_GLTF
-    finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
+    finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex), GetEmissive(input.Tex));
 #endif
     finalColor.a = 1.0;
 
@@ -211,12 +222,17 @@ float4 PS(PixelInput input) : SV_Target
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
+#elif DEBUG_CHANNEL == DEBUG_WINDOW_POS
+	finalColor.xyz = float3(input.Pos.xy * FrameBufferSize.zw, 0);
+	finalColor.y = 1.0 - finalColor.y;
 #elif DEBUG_CHANNEL == DEBUG_CAMERA_POS
-	finalColor.rgb = CameraPosition.xyz;
-	finalColor.rgb = (finalColor.rgb + 1.0) / 2.0;
+	finalColor.xyz = CameraPosition.xyz;
+	finalColor.z = -finalColor.z;
+	finalColor.xyz = (finalColor.xyz + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_SURFACE_POS
-	finalColor.rgb = input.SurfPos;
-	finalColor.rgb = (finalColor.rgb + 1.0) / 2.0;
+	finalColor.xyz = input.SurfPos;
+	finalColor.z = -finalColor.z;
+	finalColor.xyz = (finalColor.xyz * 32 + 1.0) / 2.0;
 #endif
 	return finalColor;
 }

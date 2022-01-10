@@ -86,7 +86,7 @@ inline half UnitySampleShadowmap_PCF3x3NoHardwareSupport(float4 coord, float3 re
     // when we don't have hardware PCF sampling, then the above 5x5 optimized PCF really does not work.
     // Fallback to a simple 3x3 sampling with averaged results.
     float2 base_uv = coord.xy;
-    float2 ts = _ShadowMapTexture_TexelSize.xy;
+    float2 ts = ShadowMapSize.zw;
     shadow = 0;
     shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
     shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, -ts.y), coord.z, receiverPlaneDepthBias));
@@ -104,7 +104,7 @@ inline half UnitySampleShadowmap_PCF3x3NoHardwareSupport(float4 coord, float3 re
 
 float CalcShadowFactor(float4 shadowPosH)
 {
-	if (_ShadowMapTexture_TexelSize.x == 0) return 1.0;
+	if (ShadowMapSize.z == 0) return 1.0;
 	
     shadowPosH.xyz /= shadowPosH.w;
 #if DEBUG_SHADOW_MAP

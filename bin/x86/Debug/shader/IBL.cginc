@@ -1,6 +1,7 @@
 #ifndef IBL_H
 #define IBL_H
 #include "Standard.cginc"
+#include "ToneMapping.cginc"
 #include "Debug.cginc"
 
 float clampedDot(float3 x, float3 y)
@@ -13,7 +14,7 @@ float3 GetDiffuseLight(float3 normal)
 #if CubeMapIsRightHandness
     normal.z = -normal.z;
 #endif  
-    return MIR_SAMPLE_TEXCUBE(_DiffuseCube, normal).rgb;
+	return MIR_SAMPLE_TEXCUBE(_DiffuseCube, normal).rgb;
 }
 
 float3 GetSpecularLight(float3 normal, float3 toEye, float lod)
@@ -54,7 +55,7 @@ float3 GetIBLRadianceLambertian(float3 normal, float3 toEye, float perceptualRou
 float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness, float3 F0, float specularWeight)
 {
     float NdotV = clampedDot(normal, toEye);
-	float mip = 4.0;//float(u_MipCount - 1);
+	float mip = 0.0;//float(u_MipCount - 1);
     float lod = perceptualRoughness * mip;
 
 	float2 lut_uv = saturate(float2(NdotV, perceptualRoughness));	

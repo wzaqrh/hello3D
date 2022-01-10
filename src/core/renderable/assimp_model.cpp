@@ -304,11 +304,13 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			}
 
 			cbModel model = {};
+			model.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
 			model.EnableNormalMap = mesh->HasTexture(kTexturePbrNormal);
 			model.EnableMetalnessMap = mesh->HasTexture(kTexturePbrMetalness);
 			model.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
 			model.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
-			model.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
+			if (model.EnableEmissiveMap = mesh->HasTexture(kTexturePbrEmissive))
+				model.EmissiveFactor = 1;
 			model.AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = model.EnableAmbientOcclusionMap 
 				&& !model.EnableRoughnessMap 
 				&& !model.EnableMetalnessMap;

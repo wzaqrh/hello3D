@@ -12,9 +12,11 @@ struct UNIFORM_ALIGN cbPerFrame
 		World = View = Projection = Eigen::Matrix4f::Identity();
 		ViewInv = ProjectionInv = Eigen::Matrix4f::Identity();
 		LightView = LightProjection = Eigen::Matrix4f::Identity();
-		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
-		_ShadowMapTexture_TexelSize = Eigen::Vector4f::Zero();
+		FrameBufferSize = Eigen::Vector4f::Zero();
+		ShadowMapSize = Eigen::Vector4f::Zero();
 		CameraPosition = Eigen::Vector4f::Zero();
+		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
+		Exposure = 1;
 	}
 public:
 	Eigen::Matrix4f World;
@@ -28,8 +30,10 @@ public:
 	Eigen::Matrix4f LightProjection;
 
 	Eigen::Vector4f CameraPosition;
+	Eigen::Vector4f FrameBufferSize;
+	Eigen::Vector4f ShadowMapSize;
 	Eigen::Vector4f glstate_lightmodel_ambient;
-	Eigen::Vector4f _ShadowMapTexture_TexelSize;
+	float Exposure;
 };
 
 struct UNIFORM_ALIGN cbPerLight
@@ -68,28 +72,25 @@ struct UNIFORM_ALIGN cbModel
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbModel() {
-		AlbedoFactor = 1;
-		OcclusionStrength = 1;
-		RoughnessFactor = 1;
-		MetallicFactor = 1;
-		EnableAlbedoMap = false;
-		EnableNormalMap = false;
-		EnableAmbientOcclusionMap = false;
-		EnableRoughnessMap = false;
-		EnableMetalnessMap = false;
+		EmissiveFactor = 0.0f;
+		MetallicFactor = RoughnessFactor = OcclusionStrength = AlbedoFactor = NormalFactor = 1;
+		EnableEmissiveMap = EnableMetalnessMap = EnableRoughnessMap = EnableAmbientOcclusionMap = EnableNormalMap = EnableAlbedoMap = false;
 		AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = false;
 		AlbedoMapSRGB = true;
 		HasTangent = false;
 	}
 	float AlbedoFactor;
+	float NormalFactor;
 	float OcclusionStrength;
 	float RoughnessFactor;
 	float MetallicFactor;
+	float EmissiveFactor;
 	BOOL EnableAlbedoMap;
 	BOOL EnableNormalMap;
 	BOOL EnableAmbientOcclusionMap;
 	BOOL EnableRoughnessMap;
 	BOOL EnableMetalnessMap;
+	BOOL EnableEmissiveMap;
 	BOOL AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
 	BOOL AlbedoMapSRGB;
 	BOOL HasTangent;

@@ -45,7 +45,7 @@ inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT 
     normal = TBN[1];
 	normal.z = -normal.z;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_SHADING 
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL 
 	//normal = dpdx * 10;
 	//normal = dpdy * 10;
     //normal = float3(duvdx,0) * 10;

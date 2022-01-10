@@ -158,19 +158,33 @@ private:
 		for (UINT i = 0; i < std::max<int>(1, mat->GetTextureCount(type)); i++)
 		{
 			aiString str; 
-		#if 1
+		#if 0
 			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
 				continue;
 		#else
 			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str)) {
 				switch (type)
 				{
+				case aiTextureType_DIFFUSE:
+				case aiTextureType_BASE_COLOR:
+					str.Set("Default_AO");
+					break;
+				case aiTextureType_NORMALS:
+				case aiTextureType_NORMAL_CAMERA:
+					str.Set("Default_normal");
+					break;
+				case aiTextureType_SPECULAR:
+					str.Set("Default_specular");
+					break;
 				case aiTextureType_METALNESS:
-					str.Set("");
+					str.Set("Default_matalness");
+					break;
+				case aiTextureType_EMISSIVE:
+				case aiTextureType_EMISSION_COLOR:
+					str.Set("Default_emissive");
 					break;
 				case aiTextureType_DIFFUSE_ROUGHNESS:
-					break;
-				case aiTextureType_AMBIENT_OCCLUSION:
+					str.Set("Default_diffuse_roughness");
 					break;
 				default:
 					break;
@@ -202,11 +216,11 @@ private:
 						texturePath = texturePath.replace_extension("png");
 				}
 
-				if (!boost::filesystem::exists(texturePath))
-					continue;
-
 				key = texturePath.string();
 			}
+
+			if (!boost::filesystem::is_regular_file(key))
+				continue;
 
 			ITexturePtr texInfo = mResourceMng.CreateTextureByFile(mLaunchMode, key);
 			textures.push_back(texInfo);
@@ -216,7 +230,7 @@ private:
 	}
 	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
 		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
-		texturesPtr->Resize(5);
+		texturesPtr->Resize(6);
 		if (mesh->mMaterialIndex >= 0) {
 			TextureBySlot& textures = *texturesPtr;
 			const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -235,6 +249,7 @@ private:
 			loadTexture(kTexturePbrMetalness, aiTextureType_METALNESS);
 			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
 			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
+			loadTexture(kTexturePbrEmissive, aiTextureType_EMISSIVE);
 
 			loadTexture(kTexturePbrAo, aiTextureType_UNKNOWN);
 		}

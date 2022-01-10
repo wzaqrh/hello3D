@@ -17,16 +17,17 @@
 namespace mir {
 
 enum TextureType {
-	kTextureDiffuse,
-	kTextureNormal,
-	kTextureSpecular,
+	kTextureDiffuse = 0,
+	kTextureNormal = 1,
+	kTextureSpecular = 2,
 };
 enum TexturePbrType {
-	kTexturePbrAlbedo,
-	kTexturePbrNormal,
-	kTexturePbrMetalness,
-	kTexturePbrRoughness,
-	kTexturePbrAo
+	kTexturePbrAlbedo = 0,
+	kTexturePbrNormal = 1,
+	kTexturePbrMetalness = 2,
+	kTexturePbrRoughness = 3,
+	kTexturePbrAo = 4,
+	kTexturePbrEmissive = 5
 };
 
 struct AiNode : public std::enable_shared_from_this<AiNode>
