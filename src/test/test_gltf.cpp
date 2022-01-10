@@ -25,14 +25,10 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-void ReadAndPrintBinary(const std::string& path) {
-
-}
-
 void TestGLTF::OnPostInitDevice()
 {
 	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-	camera->SetFov(90);
+	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 
 	test1::res::model model;
 	switch (mCaseIndex) {
@@ -44,20 +40,18 @@ void TestGLTF::OnPostInitDevice()
 		if (mCaseIndex == 1) {
 			auto transform = camera->GetTransform();
 			camera->SetClippingPlane(Eigen::Vector2f(0.001, 2.0));
-			/*transform->SetRotation(Eigen::Quaternionf(-0.330993533,
-				-0.274300218,
-				-0.101194724,
-				0.8971969));*/
-		#if 1
-			Eigen::Vector3f eyePos(-0.0169006381,
+
+			Eigen::Vector3f eyePos = mir::math::point::ToLeftHand(Eigen::Vector3f(
+				-0.0169006381,
 				0.0253599286,
-				-0.0302319955);
+				0.0302319955));
 			camera->SetLookAt(eyePos, eyePos + Eigen::Vector3f(0,0,1));
-		#else	
-			camera->SetLookAt(Eigen::Vector3f(-0.0169006381,
-				0.0253599286,
-				-0.0302319955), Eigen::Vector3f(0,0,0));
-		#endif
+
+			transform->SetRotation(mir::math::quat::ToLeftHand(Eigen::Quaternionf(
+				0.8971969,
+				-0.330993533,
+				-0.274300218,
+				-0.101194724)));
 			mControlCamera = false;
 		}
 		else {

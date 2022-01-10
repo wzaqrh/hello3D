@@ -4,8 +4,8 @@
 #include "core/base/debug.h"
 #include "core/predeclare.h"
 
-#define C_WINDOW_WIDTH (2884/2)
-#define C_WINDOW_HEIGHT (1724/2)
+#define C_WINDOW_WIDTH (1520)
+#define C_WINDOW_HEIGHT (937)
 
 struct IApp
 {

@@ -53,6 +53,12 @@ inline Eigen::Vector4f Zero() {
 inline Eigen::Vector4f Origin() {
 	return Eigen::Vector4f(0, 0, 0, 1);
 }
+inline Eigen::Vector4f ToLeftHand(const Eigen::Vector4f& p) {
+	return Eigen::Vector4f(p.x(), p.y(), -p.z(), p.w());
+}
+inline Eigen::Vector3f ToLeftHand(const Eigen::Vector3f& p) {
+	return Eigen::Vector3f(p.x(), p.y(), -p.z());
+}
 
 }
 
@@ -83,6 +89,13 @@ inline Eigen::Vector3f Right() {
 }
 inline Eigen::Vector3f Left() {
 	return Eigen::Vector3f(-1, 0, 0);
+}
+
+inline Eigen::Vector4f ToLeftHand(const Eigen::Vector4f& v) {
+	return Eigen::Vector4f(v.x(), v.y(), -v.z(), v.w());
+}
+inline Eigen::Vector3f ToLeftHand(const Eigen::Vector3f& v) {
+	return Eigen::Vector3f(v.x(), v.y(), -v.z());
 }
 
 namespace anchor {
@@ -117,6 +130,14 @@ inline Eigen::Vector3f RightTop() {
 }
 }
 
+}
+
+/********** quat **********/
+namespace quat {
+inline Eigen::Quaternionf ToLeftHand(const Eigen::Quaternionf& q) {
+	float qx = q.x(), qy = q.y(), qz = q.z(), qw = q.w();
+	return Eigen::Quaternionf(-qw, qx, qy, -qz);
+}
 }
 
 /********** camera **********/
