@@ -61,6 +61,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), &handle)))
 		return 0;
 
+	SetWindowPos(handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE);
+	POINT topleft = {0, 0};
+	ClientToScreen(handle, &topleft);
+	SetWindowPos(handle, HWND_NOTOPMOST, 0 - topleft.x, 103 - topleft.y, 0, 0, SWP_NOSIZE);
+
+#if defined _DEBUG
+	RECT rect;
+	GetClientRect(handle, &rect);
+	BOOST_ASSERT(rect.bottom - rect.top == C_WINDOW_HEIGHT);
+	BOOST_ASSERT(rect.right - rect.left == C_WINDOW_WIDTH);
+#endif
+
 	if (!AppDraw->Initialize(hInstance, handle))
 		return 0;
 
@@ -130,6 +142,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pH
 	auto HWnd = CreateWindowA("TutorialWindowClass", name, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
 		NULL);
+
 	if (!HWnd)
 		return E_FAIL;
 

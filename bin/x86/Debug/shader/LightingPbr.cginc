@@ -99,7 +99,7 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     float perceptualRoughness = ao_rough_metal.y;
     float roughness = perceptualRoughness * perceptualRoughness;
     float3 F0 = lerp(DielectricSpec.rgb, albedo, ao_rough_metal.z);
-    float3 F90 = float3(1,1,1);
+    float3 F90 = float3(1, 1, 1);
     float specularWeight = 1.0;
     
     float3 fcolor = float3(0, 0, 0);
@@ -156,7 +156,7 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 	fcolor = F;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE_PREFILTER_ENV
     fcolor = GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight); 
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT || DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL	
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV_UV || DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL	
 	fcolor = GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight); 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
     fcolor = (normal + 1.0) / 2.0;

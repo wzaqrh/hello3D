@@ -357,7 +357,7 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 				int faceSize = width * height * bpp;
 				 
 				auto& bytes = nextJob ? nextJob->Bytes : this->mTempBytes; 
-				bytes.resize(faceSize * mipCount * faceCount);
+				bytes.resize(faceSize * faceCount * 2/*2 > 1+1/2+1/4+1/8...1/2n*/);
 				size_t bytes_position = 0;
 
 				for (int face = 0; face < faceCount; ++face) {

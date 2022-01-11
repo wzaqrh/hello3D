@@ -759,8 +759,8 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc
 	sampDesc.MaxAnisotropy = (desc.Filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	sampDesc.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(desc.CmpFunc);
 	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 1.0;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = 64;
+	sampDesc.MinLOD = FLT_MIN;
+	sampDesc.MaxLOD = FLT_MAX;
 
 	ID3D11SamplerState* pSampler = nullptr;
 	if (CheckHR(mDevice->CreateSamplerState(&sampDesc, &pSampler)))
