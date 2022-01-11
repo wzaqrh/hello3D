@@ -310,11 +310,18 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			model.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
 			model.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
 			if (model.EnableEmissiveMap = mesh->HasTexture(kTexturePbrEmissive))
-				model.EmissiveFactor = 1;
+				model.EmissiveFactor = Eigen::Vector3f::Ones();
 			model.AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = model.EnableAmbientOcclusionMap 
 				&& !model.EnableRoughnessMap 
 				&& !model.EnableMetalnessMap;
 			model.HasTangent = mesh->HasTangent();
+
+			model.AlbedoFactor = mesh->GetFactor(kTexturePbrAlbedo);
+			model.NormalScale = mesh->GetFactor(kTexturePbrNormal).x();
+			model.MetallicFactor = mesh->GetFactor(kTexturePbrMetalness).x();
+			model.RoughnessFactor = mesh->GetFactor(kTexturePbrRoughness).x();
+			model.OcclusionStrength = mesh->GetFactor(kTexturePbrAo).x();
+			model.EmissiveFactor = mesh->GetFactor(kTexturePbrEmissive).head<3>();
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};

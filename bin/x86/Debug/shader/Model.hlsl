@@ -19,12 +19,12 @@ MIR_DECLARE_TEX2D(txEmissive, 5);
 
 cbuffer cbModel : register(b3)
 {
-	float AlbedoFactor;
-	float NormalFactor;
+	float4 AlbedoFactor;
+	float NormalScale;
     float OcclusionStrength;
     float RoughnessFactor;
     float MetallicFactor;
-	float EmissiveFactor;
+	float3 EmissiveFactor;
 	bool EnableAlbedoMap;
     bool EnableNormalMap;
 	bool EnableAmbientOcclusionMap;
@@ -36,19 +36,19 @@ cbuffer cbModel : register(b3)
     bool HasTangent;
 }
 
-inline float3 GetAlbedo(float2 uv) 
+inline float4 GetAlbedo(float2 uv) 
 {
-    float3 albedo = float3(AlbedoFactor, AlbedoFactor, AlbedoFactor);
+    float4 albedo = AlbedoFactor;
     if (EnableAlbedoMap) {
-        albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv).rgb;
-        if (AlbedoMapSRGB) albedo = sRGBToLinear(albedo);
+        albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv);
+        if (AlbedoMapSRGB) albedo.rgb = sRGBToLinear(albedo.rgb);
     }
     return albedo;
 }
 
 inline float3 GetEmissive(float2 uv) 
 {
-    float3 emissive = float3(EmissiveFactor, EmissiveFactor, EmissiveFactor);
+    float3 emissive = EmissiveFactor;
     if (EnableEmissiveMap) {
         emissive = MIR_SAMPLE_TEX2D(txEmissive, uv).rgb;
     }
@@ -206,12 +206,13 @@ float4 PS(PixelInput input) : SV_Target
     //normal = normalize(mul(input.TangentBasis, normal));        
 #endif     
     
+	float4 albedo = GetAlbedo(input.Tex);
 #if !PBR_MODE
-    finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+    finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), albedo.rgb, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex));
+	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), albedo.rgb, GetAmbientOcclusionRoughnessMetalness(input.Tex));
 #elif PBR_MODE == PBR_GLTF
-    finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), GetAlbedo(input.Tex), GetAmbientOcclusionRoughnessMetalness(input.Tex), GetEmissive(input.Tex));
+    finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), albedo.rgb, GetAmbientOcclusionRoughnessMetalness(input.Tex), GetEmissive(input.Tex));
 #endif
     finalColor.a = 1.0;
 
@@ -242,7 +243,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent, input.BiTangent);
-	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex), IsSpotLight);
+	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex).rgb, IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }

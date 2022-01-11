@@ -192,7 +192,9 @@
   <ItemGroup>
     <Xml Include="..\bin\x86\Debug\shader\Bloom.xml" />
     <Xml Include="..\bin\x86\Debug\shader\LayerColor.xml" />
-    <Xml Include="..\bin\x86\Debug\shader\Model.xml" />
+    <Xml Include="..\bin\x86\Debug\shader\Model.xml">
+      <SubType>Designer</SubType>
+    </Xml>
     <Xml Include="..\bin\x86\Debug\shader\Skeleton.xml" />
     <Xml Include="..\bin\x86\Debug\shader\Skybox.xml" />
     <Xml Include="..\bin\x86\Debug\shader\Sprite.xml" />
@@ -359,7 +361,7 @@
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>

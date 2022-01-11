@@ -358,11 +358,16 @@ private:
 	static ConstBufferElementType ConvertStringToConstBufferElementType(
 		const std::string& str, int count, int& size) {
 		ConstBufferElementType result = kCBElementMax;
-		if (str == "bool") result = kCBElementBool, size = 4;
-		else if (str == "int") result = kCBElementInt, size = 4;
-		else if (str == "float") result = kCBElementFloat, size = 4;
-		else if (str == "float4") result = kCBElementFloat4, size = 16;
-		else if (str == "matrix") result = kCBElementMatrix, size = 64;
+		if (str == "bool") result = kCBElementBool, size = sizeof(BOOL);
+		else if (str == "int") result = kCBElementInt, size = sizeof(int);
+		else if (str == "int2") result = kCBElementInt2, size = sizeof(int) * 2;
+		else if (str == "int3") result = kCBElementInt3, size = sizeof(int) * 3;
+		else if (str == "int4") result = kCBElementInt4, size = sizeof(int) * 4;
+		else if (str == "float") result = kCBElementFloat, size = sizeof(float);
+		else if (str == "float2") result = kCBElementFloat2, size = sizeof(float) * 2;
+		else if (str == "float3") result = kCBElementFloat3, size = sizeof(float) * 3;
+		else if (str == "float4") result = kCBElementFloat4, size = sizeof(float) * 4;
+		else if (str == "matrix") result = kCBElementMatrix, size = sizeof(float) * 16;
 		else if (str == "struct") result = kCBElementStruct;
 		size *= std::max<int>(1, count);
 		return result;
@@ -451,14 +456,25 @@ private:
 					case kCBElementInt: {
 						*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
 					}break;
+					case kCBElementInt2:
+					case kCBElementInt3:
+					case kCBElementInt4: {
+						std::vector<boost::iterator_range<std::string::iterator>> lst;
+						boost::split(lst, strDefault, boost::is_any_of(","));
+						const int count = size / sizeof(float);
+						for (int i = 0; i < lst.size() && i < count; ++i)
+							static_cast<int*>(pData)[i] = boost::lexical_cast<int>(lst[i]);
+					}break;
 					case kCBElementFloat: {
 						*static_cast<float*>(pData) = boost::lexical_cast<float>(strDefault);
 					}break;
+					case kCBElementFloat2:
+					case kCBElementFloat3:
 					case kCBElementFloat4:
 					case kCBElementMatrix: {
 						std::vector<boost::iterator_range<std::string::iterator>> lst;
 						boost::split(lst, strDefault, boost::is_any_of(","));
-						int count = (uniformElementType == kCBElementFloat4) ? 4 : 16;
+						const int count = size / sizeof(float);
 						for (int i = 0; i < lst.size() && i < count; ++i)
 							static_cast<float*>(pData)[i] = boost::lexical_cast<float>(lst[i]);
 					}break;

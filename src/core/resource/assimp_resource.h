@@ -6,6 +6,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
+#include <assimp/pbrmaterial.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
 #include <assimp/LogStream.hpp>
@@ -27,7 +28,8 @@ enum TexturePbrType {
 	kTexturePbrMetalness = 2,
 	kTexturePbrRoughness = 3,
 	kTexturePbrAo = 4,
-	kTexturePbrEmissive = 5
+	kTexturePbrEmissive = 5,
+	kTexturePbrMax = 6
 };
 
 struct AiNode : public std::enable_shared_from_this<AiNode>

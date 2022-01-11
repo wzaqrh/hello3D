@@ -228,12 +228,17 @@ private:
 		}
 		return textures;
 	}
-	AssimpMeshPtr processMesh(const aiMesh* mesh, const aiScene* scene) {
-		TextureBySlotPtr texturesPtr = CreateInstance<TextureBySlot>();
-		texturesPtr->Resize(6);
-		if (mesh->mMaterialIndex >= 0) {
-			TextureBySlot& textures = *texturesPtr;
-			const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	AssimpMeshPtr processMesh(const aiMesh* rawMesh, const aiScene* scene) {
+		AssimpMeshPtr meshPtr = AssimpMesh::Create();
+		auto& mesh = *meshPtr;
+		mesh.mAiMesh = rawMesh;
+
+		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
+		mesh.mFactors[kTexturePbrAo] = Eigen::Vector4f::Zero();
+		mesh.mTextures->Resize(kTexturePbrMax);
+		if (rawMesh->mMaterialIndex >= 0) {
+			TextureBySlot& textures = *mesh.mTextures;
+			const aiMaterial* material = scene->mMaterials[rawMesh->mMaterialIndex];
 
 			auto loadTexture = [&](size_t pos, aiTextureType type) {
 				std::vector<ITexturePtr> loads = loadMaterialTextures(material, type, scene);
@@ -252,22 +257,30 @@ private:
 			loadTexture(kTexturePbrEmissive, aiTextureType_EMISSIVE);
 
 			loadTexture(kTexturePbrAo, aiTextureType_UNKNOWN);
+
+			unsigned int channel = 4;
+			material->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, (ai_real*)&mesh.mFactors[kTexturePbrAlbedo], &channel);
+			channel = 4; material->Get("$tex.scale", aiTextureType_NORMALS, 0, mesh.mFactors[kTexturePbrNormal].x());
+			channel = 4; material->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, (ai_real*)&mesh.mFactors[kTexturePbrMetalness], &channel);
+			channel = 4; material->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, (ai_real*)&mesh.mFactors[kTexturePbrRoughness], &channel);
+			channel = 4; material->Get("$tex.strength", aiTextureType_LIGHTMAP, 0, mesh.mFactors[kTexturePbrAo].x());
+			channel = 4; material->Get(AI_MATKEY_COLOR_EMISSIVE, (ai_real*)&mesh.mFactors[kTexturePbrEmissive], &channel);
 		}
 
 #define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
 #define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
-		std::vector<vbSurface, mir_allocator<vbSurface>> surfVerts(mesh->mNumVertices);
-		std::vector<vbSkeleton, mir_allocator<vbSkeleton>> skeletonVerts(mesh->mNumVertices);
-		for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+		std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts(mesh.mSurfVertexs); surfVerts.resize(rawMesh->mNumVertices);
+		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>& skeletonVerts(mesh.mSkeletonVertexs); skeletonVerts.resize(rawMesh->mNumVertices);
+		for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
 		#if !defined EIGEN_DONT_ALIGN_STATICALLY
-			surfVerts[vertexId].Pos = AS_CONST_REF(Eigen::Vector3f, mesh->mVertices[vertexId]);
+			surfVerts[vertexId].Pos = AS_CONST_REF(Eigen::Vector3f, rawMesh->mVertices[vertexId]);
 		#else
-			VEC_ASSIGN(surfVerts[vertexId].Pos, mesh->mVertices[vertexId]);
+			VEC_ASSIGN(surfVerts[vertexId].Pos, rawMesh->mVertices[vertexId]);
 		#endif
 		}
-		if (mesh->mTextureCoords[0]) {
-			const auto& meshTexCoord0 = mesh->mTextureCoords[0];
-			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+		if (rawMesh->mTextureCoords[0]) {
+			const auto& meshTexCoord0 = rawMesh->mTextureCoords[0];
+			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				surfVerts[vertexId].Tex.x() = meshTexCoord0[vertexId].x;
 				surfVerts[vertexId].Tex.y() = meshTexCoord0[vertexId].y;
@@ -276,56 +289,58 @@ private:
 			#endif
 			}
 		}
-		if (mesh->mNormals) {
-			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+		if (rawMesh->mNormals) {
+			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
 			#if !defined IMPORT_LEFTHAND
-				skeletonVerts[vertexId].Normal.x() = mesh->mNormals[vertexId].x;
-				skeletonVerts[vertexId].Normal.y() = mesh->mNormals[vertexId].y;
-				skeletonVerts[vertexId].Normal.z() = -mesh->mNormals[vertexId].z;
+				skeletonVerts[vertexId].Normal.x() = rawMesh->mNormals[vertexId].x;
+				skeletonVerts[vertexId].Normal.y() = rawMesh->mNormals[vertexId].y;
+				skeletonVerts[vertexId].Normal.z() = -rawMesh->mNormals[vertexId].z;
 			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
-				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, mesh->mNormals[vertexId]);
+				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, rawMesh->mNormals[vertexId]);
 			#else
-				VEC_ASSIGN(skeletonVerts[vertexId].Normal, mesh->mNormals[vertexId]);
+				VEC_ASSIGN(skeletonVerts[vertexId].Normal, rawMesh->mNormals[vertexId]);
 			#endif
 			#endif
 			}
 		}
-		if (mesh->mTangents) {
-			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+		if (rawMesh->mTangents) {
+			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
 			#if !defined IMPORT_LEFTHAND
-				skeletonVerts[vertexId].Tangent.x() = mesh->mTangents[vertexId].x;
-				skeletonVerts[vertexId].Tangent.y() = mesh->mTangents[vertexId].y;
-				skeletonVerts[vertexId].Tangent.z() = -mesh->mTangents[vertexId].z;
+				skeletonVerts[vertexId].Tangent.x() = rawMesh->mTangents[vertexId].x;
+				skeletonVerts[vertexId].Tangent.y() = rawMesh->mTangents[vertexId].y;
+				skeletonVerts[vertexId].Tangent.z() = -rawMesh->mTangents[vertexId].z;
 			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
-				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, mesh->mTangents[vertexId]);
+				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, rawMesh->mTangents[vertexId]);
 			#else
-				VEC_ASSIGN(skeletonVerts[vertexId].Tangent, mesh->mTangents[vertexId]);
+				VEC_ASSIGN(skeletonVerts[vertexId].Tangent, rawMesh->mTangents[vertexId]);
 			#endif
 			#endif
 			}
 		}
-		if (mesh->mBitangents) {
-			for (size_t vertexId = 0; vertexId < mesh->mNumVertices; vertexId++) {
+		mesh.mHasTangent = (rawMesh->mTangents != nullptr);
+
+		if (rawMesh->mBitangents) {
+			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
 			#if !defined IMPORT_LEFTHAND
-				skeletonVerts[vertexId].BiTangent.x() = mesh->mBitangents[vertexId].x;
-				skeletonVerts[vertexId].BiTangent.y() = mesh->mBitangents[vertexId].y;
-				skeletonVerts[vertexId].BiTangent.z() = -mesh->mBitangents[vertexId].z;
+				skeletonVerts[vertexId].BiTangent.x() = rawMesh->mBitangents[vertexId].x;
+				skeletonVerts[vertexId].BiTangent.y() = rawMesh->mBitangents[vertexId].y;
+				skeletonVerts[vertexId].BiTangent.z() = -rawMesh->mBitangents[vertexId].z;
 			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
-				skeletonVerts[vertexId].BiTangent = AS_CONST_REF(Eigen::Vector3f, mesh->mBitangents[vertexId]);
+				skeletonVerts[vertexId].BiTangent = AS_CONST_REF(Eigen::Vector3f, rawMesh->mBitangents[vertexId]);
 			#else
-				VEC_ASSIGN(skeletonVerts[vertexId].BiTangent, mesh->mBitangents[vertexId]);
+				VEC_ASSIGN(skeletonVerts[vertexId].BiTangent, rawMesh->mBitangents[vertexId]);
 			#endif
 			#endif
 			}
 		}
 
-		if (mesh->HasBones()) {
+		if (rawMesh->HasBones()) {
 			std::vector<int> spMap(skeletonVerts.size(), 0);
-			for (size_t boneId = 0; boneId < mesh->mNumBones; ++boneId) {
-				const aiBone* bone = mesh->mBones[boneId];
+			for (size_t boneId = 0; boneId < rawMesh->mNumBones; ++boneId) {
+				const aiBone* bone = rawMesh->mBones[boneId];
 				if (bone->mWeights == nullptr) 
 					continue;
 				for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
@@ -346,9 +361,9 @@ private:
 			}
 		}
 
-		std::vector<uint32_t> indices;
-		for (size_t i = 0; i < mesh->mNumFaces; i++) {
-			const aiFace& face = mesh->mFaces[i];
+		std::vector<uint32_t>& indices(mesh.mIndices);
+		for (size_t i = 0; i < rawMesh->mNumFaces; i++) {
+			const aiFace& face = rawMesh->mFaces[i];
 			size_t position = indices.size();
 			indices.resize(position + face.mNumIndices);
 			memcpy(&indices[position], face.mIndices, face.mNumIndices * sizeof(unsigned int));
@@ -361,10 +376,8 @@ private:
 		/*if (mesh->mNormals && mesh->mTangents == nullptr) {
 			ReCalculateTangents(surfVerts, skeletonVerts, indices);
 		}*/
-
-		return AssimpMesh::Create(mLaunchMode, mResourceMng, mesh, 
-			std::move(surfVerts), std::move(skeletonVerts), 
-			std::move(indices), texturesPtr, mesh->mTangents != nullptr);
+		mesh.Build(mLaunchMode, mResourceMng);
+		return meshPtr;
 	}
 private:
 	const Launch mLaunchMode;

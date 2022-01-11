@@ -107,7 +107,12 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBuffe
 		case kCBElementStruct:
 		case kCBElementBool:
 		case kCBElementInt:
+		case kCBElementInt2:
+		case kCBElementInt3:
+		case kCBElementInt4:
 		case kCBElementFloat:
+		case kCBElementFloat2:
+		case kCBElementFloat3:
 		case kCBElementFloat4:
 		default:
 			hr = mTable->SetValue(device, handle, buffer9 + elem.Offset, elem.Size);

@@ -72,19 +72,21 @@ struct UNIFORM_ALIGN cbModel
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbModel() {
-		EmissiveFactor = 0.0f;
-		MetallicFactor = RoughnessFactor = OcclusionStrength = AlbedoFactor = NormalFactor = 1;
+		AlbedoFactor = Eigen::Vector4f::Ones();
+		MetallicFactor = RoughnessFactor = OcclusionStrength = NormalScale = 1;
+		EmissiveFactor = Eigen::Vector3f::Zero();
+		
 		EnableEmissiveMap = EnableMetalnessMap = EnableRoughnessMap = EnableAmbientOcclusionMap = EnableNormalMap = EnableAlbedoMap = false;
 		AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = false;
 		AlbedoMapSRGB = true;
 		HasTangent = false;
 	}
-	float AlbedoFactor;
-	float NormalFactor;
+	Eigen::Vector4f AlbedoFactor;
+	float NormalScale;
 	float OcclusionStrength;
 	float RoughnessFactor;
 	float MetallicFactor;
-	float EmissiveFactor;
+	Eigen::Vector3f EmissiveFactor;
 	BOOL EnableAlbedoMap;
 	BOOL EnableNormalMap;
 	BOOL EnableAmbientOcclusionMap;

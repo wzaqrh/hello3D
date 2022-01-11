@@ -431,7 +431,12 @@ enum HWMemoryUsage {
 enum ConstBufferElementType {
 	kCBElementBool,
 	kCBElementInt,
+	kCBElementInt2,
+	kCBElementInt3,
+	kCBElementInt4,
 	kCBElementFloat,
+	kCBElementFloat2,
+	kCBElementFloat3,
 	kCBElementFloat4,
 	kCBElementMatrix,
 	kCBElementStruct,

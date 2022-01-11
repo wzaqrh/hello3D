@@ -5,19 +5,14 @@
 
 namespace mir {
 
-/********** TMesh **********/
-AssimpMesh::AssimpMesh(Launch launchMode, ResourceManager& resourceMng, const aiMesh* data,
-	std::vector<vbSurface, mir_allocator<vbSurface>>&& surfVertexs, 
-	std::vector<vbSkeleton, mir_allocator<vbSkeleton>>&& skeletonVertexs, 
-	std::vector<uint32_t>&& indices, TextureBySlotPtr textures, bool hasTangent)
-	: mAiMesh(data)
-	, mSurfVertexs(std::move(surfVertexs))
-	, mSkeletonVertexs(std::move(skeletonVertexs))
-	, mIndices(std::move(indices))
-	, mTextures(textures)
-	, mHasTangent(hasTangent)
+AssimpMesh::AssimpMesh()
 {
-	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt,  Data::Make(mIndices));
+	mTextures = CreateInstance<TextureBySlot>();
+}
+
+void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
+{
+	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(mIndices));
 	DEBUG_SET_PRIV_DATA(mIndexBuffer, "assimp_mesh.index");
 
 	mVBOSurface = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::Make(mSurfVertexs));
@@ -45,6 +40,11 @@ bool AssimpMesh::HasTexture(int slot) const
 	return (slot < mTextures->Count()) 
 		&& mTextures->At(slot)
 		&& mTextures->At(slot)->IsLoaded();
+}
+
+Eigen::Vector4f AssimpMesh::GetFactor(int slot) const
+{
+	return slot < mFactors.size() ? mFactors[slot] : Eigen::Vector4f::Zero();
 }
 
 bool AssimpMesh::IsLoaded() const
