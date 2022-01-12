@@ -55,7 +55,7 @@ float3 GetIBLRadianceLambertian(float3 normal, float3 toEye, float perceptualRou
 float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness, float3 F0, float specularWeight)
 {
     float NdotV = clampedDot(normal, toEye);
-	float mip = 8.0;//float(u_MipCount - 1);
+	float mip = 4.0;//float(u_MipCount - 1);
     float lod = perceptualRoughness * mip;
 
 	float2 lut_uv = saturate(float2(NdotV, perceptualRoughness));	
@@ -75,7 +75,8 @@ float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness,
 #if CubeMapIsRightHandness
 	reflUVW.z = -reflUVW.z;
 #endif	
-	fcolor = float4(reflUVW, lod);
+	fcolor = reflUVW;
+	//fcolor = (fcolor + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV
 	fcolor = GetSpecularLight(normal, toEye, 0.0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT

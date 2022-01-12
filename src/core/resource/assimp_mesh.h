@@ -22,7 +22,8 @@ public:
 	bool IsLoaded() const;
 	bool HasTangent() const { return mHasTangent; }
 	bool HasTexture(int slot) const;
-	Eigen::Vector4f GetFactor(int slot) const;
+	const Eigen::Vector4f& GetFactor(int slot) const;
+	const Eigen::Vector4f& GetUvTransform(int slot) const;
 	const aiMesh* GetRawMesh() const { return mAiMesh; }
 	const TextureBySlotPtr& GetTextures() const { return mTextures; }
 	const IVertexBufferPtr& GetVBOSurface() const { return mVBOSurface; }
@@ -36,6 +37,7 @@ private:
 	TextureBySlotPtr mTextures;
 	bool mHasTangent;
 	std::vector<Eigen::Vector4f> mFactors;
+	std::vector<Eigen::Vector4f> mUvTransform;
 	IVertexBufferPtr mVBOSurface, mVBOSkeleton;
 	IIndexBufferPtr mIndexBuffer;
 #if defined _DEBUG

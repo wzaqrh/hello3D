@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.28307.1758
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mir", "build\mir.vcxproj", "{06EDC280-1187-4614-A248-E640C095FA6B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1467F5D3-A249-3445-AD4D-690B4B975060} = {1467F5D3-A249-3445-AD4D-690B4B975060}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "build\test.vcxproj", "{C953C70C-F0B8-495E-963C-BBCEF595D07A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -19,7 +16,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ILStatic", "thirdparty\devI
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "thirdparty\assimp\build\code\assimp.vcxproj", "{1467F5D3-A249-3445-AD4D-690B4B975060}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlTFSampleViewer", "G:\glTF-Sample-Viewer\build\GlTFSampleViewer.vcxproj", "{427BD1C5-F034-4822-AEF1-8997D4B67BBD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlTFSampleViewer", "C:\glTF-Sample-Viewer\build\GlTFSampleViewer.vcxproj", "{427BD1C5-F034-4822-AEF1-8997D4B67BBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -29,10 +29,8 @@ inline float3x3 GetTBN(float2 uv, float3 worldPos, float3 worldNormal)
     return float3x3(T, B, N);
 }
 
-inline float3 GetNormalFromMap(MIR_ARGS_TEX2D(normalMap), float2 texCoord, float3x3 TBN)
+inline float3 GetNormalFromMap(float3 tangentNormal, float3x3 TBN)
 {
-    float3 tangentNormal = MIR_SAMPLE_TEX2D(normalMap, texCoord).xyz * 2.0 - 1.0;
-
     float3 normal = normalize(mul(tangentNormal, TBN));
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
     normal = tangentNormal;

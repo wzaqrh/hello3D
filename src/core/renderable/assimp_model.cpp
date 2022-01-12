@@ -323,6 +323,13 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			model.OcclusionStrength = mesh->GetFactor(kTexturePbrAo).x();
 			model.EmissiveFactor = mesh->GetFactor(kTexturePbrEmissive).head<3>();
 
+			model.AlbedoUV = mesh->GetUvTransform(kTexturePbrAlbedo);
+			model.NormalUV = mesh->GetUvTransform(kTexturePbrNormal);
+			model.MetallicUV = mesh->GetUvTransform(kTexturePbrMetalness);
+			model.RoughnessUV = mesh->GetUvTransform(kTexturePbrRoughness);
+			model.OcclusionUV = mesh->GetUvTransform(kTexturePbrAo);
+			model.EmissiveUV = mesh->GetUvTransform(kTexturePbrEmissive);
+
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
 				op.Material = mMaterial;

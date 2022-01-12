@@ -42,9 +42,15 @@ bool AssimpMesh::HasTexture(int slot) const
 		&& mTextures->At(slot)->IsLoaded();
 }
 
-Eigen::Vector4f AssimpMesh::GetFactor(int slot) const
+static Eigen::Vector4f sDefaultVector4;
+const Eigen::Vector4f& AssimpMesh::GetFactor(int slot) const
 {
-	return slot < mFactors.size() ? mFactors[slot] : Eigen::Vector4f::Zero();
+	return slot < mFactors.size() ? mFactors[slot] : sDefaultVector4;
+}
+
+const Eigen::Vector4f& AssimpMesh::GetUvTransform(int slot) const
+{
+	return slot < mUvTransform.size() ? mUvTransform[slot] : sDefaultVector4;
 }
 
 bool AssimpMesh::IsLoaded() const

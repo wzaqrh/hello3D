@@ -19,28 +19,41 @@ MIR_DECLARE_TEX2D(txEmissive, 5);
 
 cbuffer cbModel : register(b3)
 {
+	float4 AlbedoUV;
+	float4 NormalUV; 
+    float4 OcclusionUV;
+    float4 RoughnessUV;
+    float4 MetallicUV;
+	float4 EmissiveUV;
+	
 	float4 AlbedoFactor;
 	float NormalScale;
     float OcclusionStrength;
     float RoughnessFactor;
     float MetallicFactor;
 	float3 EmissiveFactor;
+	
 	bool EnableAlbedoMap;
     bool EnableNormalMap;
 	bool EnableAmbientOcclusionMap;
     bool EnableRoughnessMap;
 	bool EnableMetalnessMap;
 	bool EnableEmissiveMap;
+	
 	bool AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
     bool AlbedoMapSRGB;
     bool HasTangent;
+}
+
+inline float2 GetUV(float2 uv, float4 uvTransform) {
+	return uv * uvTransform.zw;
 }
 
 inline float4 GetAlbedo(float2 uv) 
 {
     float4 albedo = AlbedoFactor;
     if (EnableAlbedoMap) {
-        albedo = MIR_SAMPLE_TEX2D(txAlbedo, uv);
+        albedo = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoUV));
         if (AlbedoMapSRGB) albedo.rgb = sRGBToLinear(albedo.rgb);
     }
     return albedo;
@@ -50,7 +63,7 @@ inline float3 GetEmissive(float2 uv)
 {
     float3 emissive = EmissiveFactor;
     if (EnableEmissiveMap) {
-        emissive = MIR_SAMPLE_TEX2D(txEmissive, uv).rgb;
+        emissive = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveUV)).rgb;
     }
     return emissive;
 }
@@ -59,17 +72,17 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 {
     float3 value = float3(OcclusionStrength, RoughnessFactor, MetallicFactor);
     if (AmbientOcclusion_ChannelGRoughness_ChannelBMetalness) {
-		float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).rgb;
+		float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).rgb;
 		value.x = lerp(1.0, arm.x, value.x);
 		value.yz *= arm.yz;
 	}
     else {
         if (EnableAmbientOcclusionMap) {
-			float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, uv).r;
+			float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).r;
 			value.x = 1.0 + (ao - 1.0) * value.x;
 		}
-        if (EnableRoughnessMap) value.y *= MIR_SAMPLE_TEX2D(txRoughness, uv).r;
-        if (EnableMetalnessMap) value.z *= MIR_SAMPLE_TEX2D(txMetalness, uv).r;
+        if (EnableRoughnessMap) value.y *= MIR_SAMPLE_TEX2D(txRoughness, GetUV(uv, RoughnessUV)).r;
+        if (EnableMetalnessMap) value.z *= MIR_SAMPLE_TEX2D(txMetalness, GetUV(uv, MetallicUV)).r;
     }
     return value;
 }
@@ -81,7 +94,10 @@ inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 t
         float3x3 tbn;
         if (HasTangent) tbn = GetTBN(normal, normalize(tangent), normalize(biTangent));
         else tbn = GetTBN(uv, worldPos, normal);
-        normal = GetNormalFromMap(MIR_PASS_TEX2D(txNormal), uv, tbn);
+		
+		float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)).xyz * 2.0 - 1.0;
+		tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0));
+        normal = GetNormalFromMap(tangentNormal, tbn);
     }
     return normal;
 }

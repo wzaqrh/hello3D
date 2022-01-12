@@ -46,7 +46,7 @@ float4 PS(PixelInput input) : SV_Target
 	float4 finalColor;
 	finalColor.rgb = MIR_SAMPLE_TEXCUBE(_MainTex, input.Tex).rgb;
 #if PBR_MODE
-	finalColor.rgb = linearTosRGB(finalColor.rgb);
+	finalColor.rgb = toneMap(finalColor.rgb);
 #endif
 	finalColor.a = 1.0;
 	return finalColor;

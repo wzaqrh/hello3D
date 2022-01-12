@@ -10,12 +10,20 @@
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
     <Uniform Name="cbModel" IsUnique="false" Slot="3">
+      <Element Name="AlbedoUV"              Type="float4"></Element>
+      <Element Name="NormalUV"              Type="float4"></Element>
+      <Element Name="OcclusionUV"           Type="float4"></Element>
+      <Element Name="RoughnessUV"           Type="float4"></Element>
+      <Element Name="MetallicUV"            Type="float4"></Element>
+      <Element Name="EmissiveUV"            Type="float4"></Element>
+      
       <Element Name="AlbedoFactor"            Type="float4"></Element>
       <Element Name="NormalScale"             Type="float"></Element>
       <Element Name="OcclusionStrength"       Type="float"></Element>
       <Element Name="RoughnessFactor"         Type="float"></Element>
       <Element Name="MetallicFactor"          Type="float"></Element>
       <Element Name="EmissiveFactor"          Type="float3"></Element>
+      
       <Element Name="EnableAlbedoMap"           Type="bool"></Element>
       <Element Name="EnableNormalMap"           Type="bool"></Element>
       <Element Name="EnableAmbientOcclusionMap" Type="bool"></Element>

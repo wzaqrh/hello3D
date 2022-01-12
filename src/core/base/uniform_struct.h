@@ -76,17 +76,27 @@ struct UNIFORM_ALIGN cbModel
 		MetallicFactor = RoughnessFactor = OcclusionStrength = NormalScale = 1;
 		EmissiveFactor = Eigen::Vector3f::Zero();
 		
+		EmissiveUV = MetallicUV = RoughnessUV = OcclusionUV = NormalUV = AlbedoUV = Eigen::Vector4f::Zero();
+
 		EnableEmissiveMap = EnableMetalnessMap = EnableRoughnessMap = EnableAmbientOcclusionMap = EnableNormalMap = EnableAlbedoMap = false;
 		AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = false;
 		AlbedoMapSRGB = true;
 		HasTangent = false;
 	}
+	Eigen::Vector4f AlbedoUV;
+	Eigen::Vector4f NormalUV;
+	Eigen::Vector4f OcclusionUV;
+	Eigen::Vector4f RoughnessUV;
+	Eigen::Vector4f MetallicUV;
+	Eigen::Vector4f EmissiveUV;
+
 	Eigen::Vector4f AlbedoFactor;
 	float NormalScale;
 	float OcclusionStrength;
 	float RoughnessFactor;
 	float MetallicFactor;
 	Eigen::Vector3f EmissiveFactor;
+
 	BOOL EnableAlbedoMap;
 	BOOL EnableNormalMap;
 	BOOL EnableAmbientOcclusionMap;
