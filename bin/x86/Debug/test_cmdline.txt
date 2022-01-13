@@ -12,3 +12,10 @@ test_camera_output 1
 test_deffered_path 1
 
 test_gltf 0
+
+
+
+
+
+skybox 	1 0 0
+gltf	10 1 2

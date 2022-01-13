@@ -41,6 +41,18 @@ std::string Sky(int index) {
 	return "model/" + skyArr[index];
 }
 
+#define MakeKhronosGltfEnvPath1(Name, file) "gltf/env/" Name "/" file
+namespace sky {
+namespace footprint_court {
+std::string Diffuse() {
+	return "model/" MakeKhronosGltfEnvPath1("footprint_court", "diffuse_env.dds");
+}
+std::string Specular() {
+	return "model/" MakeKhronosGltfEnvPath1("footprint_court", "specular_env.dds");
+}
+}
+}
+
 namespace cube {
 namespace far_plane {
 mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {

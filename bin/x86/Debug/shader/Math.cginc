@@ -44,10 +44,6 @@ inline float3 GetNormalFromMap(float3 tangentNormal, float3x3 TBN)
     normal = TBN[1];
 	normal.z = -normal.z;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL 
-	//normal = dpdx * 10;
-	//normal = dpdy * 10;
-    //normal = float3(duvdx,0) * 10;
-	//normal = float3(duvdy,0) * 10;
     normal.z = -normal.z;//compare gltf-sample-viewer
 #endif
     return normal;

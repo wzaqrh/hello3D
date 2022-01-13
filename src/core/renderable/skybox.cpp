@@ -79,17 +79,19 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 		mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 
-	boost::filesystem::path dir(imgName);
-	dir.remove_filename();
-	boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
-	if (boost::filesystem::exists(specularEnvPath)) {
-		boost::filesystem::path lutPath = dir / "lut.png";
-		mLutMap = mResourceMng.CreateTextureByFile(launchMode, lutPath.string());
+	if (!boost::filesystem::is_regular_file(imgName)) {
+		boost::filesystem::path dir(imgName);
+		dir.remove_filename();
+		boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
+		if (boost::filesystem::exists(specularEnvPath)) {
+			boost::filesystem::path lutPath = dir / "lut.png";
+			mLutMap = mResourceMng.CreateTextureByFile(launchMode, lutPath.string());
 
-		boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
-		mDiffuseEnvMap = mResourceMng.CreateTextureByFile(launchMode, diffuseEnvPath.string());
+			boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
+			mDiffuseEnvMap = mResourceMng.CreateTextureByFile(launchMode, diffuseEnvPath.string());
 
-		mTexture = mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string());
+			mTexture = mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string());
+		}
 	}
 	else {
 		mTexture = mResourceMng.CreateTextureByFile(launchMode, imgName);

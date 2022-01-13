@@ -53,8 +53,9 @@ inline float4 GetAlbedo(float2 uv)
 {
     float4 albedo = AlbedoFactor;
     if (EnableAlbedoMap) {
-        albedo = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoUV));
-        if (AlbedoMapSRGB) albedo.rgb = sRGBToLinear(albedo.rgb);
+		float4 color = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoUV));
+        if (AlbedoMapSRGB) color = sRGBToLinear(color);
+		albedo *= color;
     }
     return albedo;
 }
@@ -63,7 +64,7 @@ inline float3 GetEmissive(float2 uv)
 {
     float3 emissive = EmissiveFactor;
     if (EnableEmissiveMap) {
-        emissive = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveUV)).rgb;
+        emissive *= MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveUV)).rgb;
     }
     return emissive;
 }

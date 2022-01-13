@@ -372,7 +372,8 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 						ILuint mip_width = ilGetInteger(IL_IMAGE_WIDTH),
 							  mip_height = ilGetInteger(IL_IMAGE_HEIGHT);
 						auto& dataFM = datas[face * mipCount + mip];
-						if (convertFormat == kFormatUnknown) {
+						if (convertFormat == kFormatUnknown) 
+						{
 							//直接使用
 							size_t sub_res_size = 0;
 							ILuint dxtFormat = ilGetInteger(IL_DXTC_DATA_FORMAT);

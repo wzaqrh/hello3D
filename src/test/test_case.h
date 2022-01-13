@@ -27,6 +27,13 @@ namespace res {
 
 std::string Sky(int index = 0);
 
+namespace sky {
+namespace footprint_court {
+std::string Diffuse();
+std::string Specular();
+}
+}
+
 namespace cube {
 namespace far_plane {
 mir::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");

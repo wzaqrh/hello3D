@@ -168,7 +168,7 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC
     fcolor = linearTosRGB(float3(ao_rough_metal.z, ao_rough_metal.z, ao_rough_metal.z));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
-    fcolor = linearTosRGB(float3(perceptualRoughness,perceptualRoughness,perceptualRoughness));
+    fcolor = (float3(perceptualRoughness,perceptualRoughness,perceptualRoughness));
 #elif DEBUG_CHANNEL != 0
     fcolor = float4(1, 0, 1, 1);
     fcolor.r = fcolor.b = float(max(2.0 * sin(0.1 * (toEye.x + toEye.y) * 1024), 0.0) + 0.3);  

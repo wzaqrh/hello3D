@@ -24,7 +24,9 @@ FOR %%I in (*.hdr) DO (
 
 FOR %%I in (*.hdr) DO (
 	set CurDir=%%~nI
-	cli.exe -inputPath %%I -distribution Lambertian -outCubeMap diffuse_env.ktx2
-	cli.exe -inputPath %%I -distribution GGX -outCubeMap specular_env.ktx2 -outLUT lut.png
+	cli.exe -inputPath %%I -sampleCount 2048 -mipLevelCount 5 -cubeMapResolution 256 -distribution Lambertian -outCubeMap diffuse_env.ktx2
+	cli.exe -inputPath %%I -sampleCount 1024 -mipLevelCount 5 -cubeMapResolution 256 -distribution GGX            -outCubeMap specular_env.ktx2 -outLUT lut.png
+	REM cli.exe -inputPath %%I -sampleCount 2048 -mipLevelCount 5 -distribution Lambertian -outCubeMap diffuse_env.ktx2
+	REM cli.exe -inputPath %%I -sampleCount 1024 -mipLevelCount 5 -distribution GGX           -outCubeMap specular_env.ktx2 -outLUT lut.png
 )
 pause

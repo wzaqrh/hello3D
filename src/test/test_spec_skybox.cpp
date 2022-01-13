@@ -23,7 +23,10 @@ void TestSpecSkybox::OnPostInitDevice()
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 		MaterialLoadParamBuilder matname = MAT_SKYBOX;
 		matname["CubeMapIsRightHandness"] = TRUE;
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(2), matname));//bc1a mipmap cube
+		if (mCaseSecondIndex == 0)
+			camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::sky::footprint_court::Diffuse(), matname));
+		else
+			camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::sky::footprint_court::Specular(), matname));
 	}break;
 	case 1: {
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
