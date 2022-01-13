@@ -42,6 +42,7 @@ cbuffer cbModel : register(b3)
 	
 	bool AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
     bool AlbedoMapSRGB;
+	bool EmissiveMapSRGB;
     bool HasTangent;
 }
 
@@ -64,17 +65,19 @@ inline float3 GetEmissive(float2 uv)
 {
     float3 emissive = EmissiveFactor;
     if (EnableEmissiveMap) {
-        emissive *= MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveUV)).rgb;
+		float3 color = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveUV)).rgb;
+		if (EmissiveMapSRGB) color = sRGBToLinear(color);
+        emissive *= color;
     }
     return emissive;
 }
 
 inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 {
-    float3 value = float3(OcclusionStrength, RoughnessFactor, MetallicFactor);
+    float3 value = float3(1.0, RoughnessFactor, MetallicFactor);
     if (AmbientOcclusion_ChannelGRoughness_ChannelBMetalness) {
 		float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).rgb;
-		value.x = lerp(1.0, arm.x, value.x);
+		value.x = lerp(1.0, arm.x, OcclusionStrength);
 		value.yz *= arm.yz;
 	}
     else {
@@ -90,16 +93,33 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 
 inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent, float3 biTangent)
 {
-    float3 normal = normalize(worldNormal);
+    float3x3 tbn;
+    if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent), normalize(biTangent));
+	else tbn = GetTBN(uv, worldPos, worldNormal);
+	
+    float3 normal;
     if (EnableNormalMap) {
-        float3x3 tbn;
-        if (HasTangent) tbn = GetTBN(normal, normalize(tangent), normalize(biTangent));
-        else tbn = GetTBN(uv, worldPos, normal);
-		
 		float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)).xyz * 2.0 - 1.0;
 		tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0));
-        normal = GetNormalFromMap(tangentNormal, tbn);
+        normal = normalize(mul(tangentNormal, tbn));
     }
+	else {
+		normal = tbn[2];		  
+	}
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
+    normal = tangentNormal;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL
+    normal = tbn[2];
+    normal.z = -normal.z;//compare gltf-sample-viewer
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT
+    normal = tbn[0];
+	normal.z = -normal.z;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT 
+    normal = tbn[1];
+	normal.z = -normal.z;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL 
+    normal.z = -normal.z;//compare gltf-sample-viewer
+#endif	
     return normal;
 }
 
@@ -240,6 +260,21 @@ float4 PS(PixelInput input) : SV_Target
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
+    fcolor = MakeDummyColor(normalize(input.ToEye));
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION	
+	if (! EnableAmbientOcclusionMap)
+		finalColor.rgb = MakeDummyColor(normalize(input.ToEye));
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
+	if (EnableNormalMap) {
+		finalColor.xyz = normal;
+		finalColor.rgb = (finalColor.xyz + 1.0) / 2.0;
+	}
+	else {
+		finalColor.rgb = MakeDummyColor(normalize(input.ToEye));	
+	}
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
+	finalColor.xyz = normal;
+	finalColor.rgb = (finalColor.xyz + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_WINDOW_POS
 	finalColor.xyz = float3(input.Pos.xy * FrameBufferSize.zw, 0);
 	finalColor.y = 1.0 - finalColor.y;

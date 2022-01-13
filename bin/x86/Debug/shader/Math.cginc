@@ -29,24 +29,4 @@ inline float3x3 GetTBN(float2 uv, float3 worldPos, float3 worldNormal)
     return float3x3(T, B, N);
 }
 
-inline float3 GetNormalFromMap(float3 tangentNormal, float3x3 TBN)
-{
-    float3 normal = normalize(mul(tangentNormal, TBN));
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
-    normal = tangentNormal;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL
-    normal = TBN[2];
-    normal.z = -normal.z;//compare gltf-sample-viewer
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT
-    normal = TBN[0];
-	normal.z = -normal.z;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT 
-    normal = TBN[1];
-	normal.z = -normal.z;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL 
-    normal.z = -normal.z;//compare gltf-sample-viewer
-#endif
-    return normal;
-}
-
 #endif

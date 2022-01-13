@@ -8,6 +8,13 @@
 #define MIR_PI  3.141592f
 #define MIR_INV_PI 0.31830988618f
 
+inline float3 MakeDummyColor(float3 toEye)
+{
+	float3 fcolor = float3(1, 0, 1);
+    fcolor.r = fcolor.b = float(max(2.0 * sin(0.1 * (toEye.x + toEye.y) * 1024), 0.0) + 0.3); 
+	return fcolor;
+}
+
 inline float3 DisneyDiffuse(float NdotV, float NdotL, float LdotH, float perceptualRoughness, float3 baseColor)
 {
     float fd90 = 0.5 + 2 * LdotH * LdotH * perceptualRoughness;
@@ -113,7 +120,9 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     
     float3 kd = float3(1.0, 1.0, 1.0) - specularWeight * F;
     float ks = specularWeight;
-    fcolor += (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
+	diffuse  = kd * diffuse * unity_LightColor.rgb * NdotL;
+	specular = ks * specular * unity_LightColor.rgb * NdotL;
+    fcolor += diffuse + specular;
 #endif    
     
 #if USE_IBL
@@ -158,11 +167,15 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     fcolor = GetIBLRadianceLambertian(normal, toEye, roughness, albedo * (1.0 - ao_rough_metal.z), F0, specularWeight); 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT || DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV_UV || DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL	
 	fcolor = GetIBLRadianceGGX(normal, toEye, perceptualRoughness, F0, specularWeight); 
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
-    fcolor = (normal + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
-	//fcolor = (kd * diffuse + ks * specular) * unity_LightColor.rgb * NdotL;
-    fcolor = linearTosRGB(fcolor);
+    fcolor = float3(0, 0, 0);
+	#if USE_PUNCTUAL
+	fcolor += diffuse + specular;
+	#endif
+	#if USE_IBL
+	fcolor += (ibl_diff + ibl_spec) * ao_rough_metal.x;
+	#endif
+	fcolor = linearTosRGB(fcolor);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
     fcolor = linearTosRGB(albedo);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC
@@ -170,8 +183,7 @@ float3 gltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
     fcolor = (float3(perceptualRoughness,perceptualRoughness,perceptualRoughness));
 #elif DEBUG_CHANNEL != 0
-    fcolor = float4(1, 0, 1, 1);
-    fcolor.r = fcolor.b = float(max(2.0 * sin(0.1 * (toEye.x + toEye.y) * 1024), 0.0) + 0.3);  
+    fcolor = MakeDummyColor(toEye);
 #endif
     return fcolor;
 }

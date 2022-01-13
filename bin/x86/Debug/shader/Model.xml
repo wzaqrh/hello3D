@@ -32,6 +32,7 @@
       <Element Name="EnableEmissiveMap"         Type="bool"></Element>
 	    <Element Name="AmbientOcclusion_ChannelGRoughness_ChannelBMetalness" Type="bool"></Element>
       <Element Name="AlbedoMapSRGB"             Type="bool"></Element>
+      <Element Name="EmissiveMapSRGB"           Type="bool"></Element>
       <Element Name="HasTangent"                Type="bool"></Element>
     </Uniform>   
 		<Texture>

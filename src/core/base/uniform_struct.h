@@ -80,7 +80,7 @@ struct UNIFORM_ALIGN cbModel
 
 		EnableEmissiveMap = EnableMetalnessMap = EnableRoughnessMap = EnableAmbientOcclusionMap = EnableNormalMap = EnableAlbedoMap = false;
 		AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = false;
-		AlbedoMapSRGB = true;
+		EmissiveMapSRGB = AlbedoMapSRGB = true;
 		HasTangent = false;
 	}
 	Eigen::Vector4f AlbedoUV;
@@ -105,6 +105,7 @@ struct UNIFORM_ALIGN cbModel
 	BOOL EnableEmissiveMap;
 	BOOL AmbientOcclusion_ChannelGRoughness_ChannelBMetalness;
 	BOOL AlbedoMapSRGB;
+	BOOL EmissiveMapSRGB;
 	BOOL HasTangent;
 };
 

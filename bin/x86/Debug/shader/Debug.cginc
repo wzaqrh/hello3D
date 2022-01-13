@@ -47,7 +47,7 @@
 #endif
 
 #if !defined USE_PUNCTUAL
-#define USE_PUNCTUAL 1
+#define USE_PUNCTUAL 0
 #endif
 
 #if !defined DEBUG_TBN
