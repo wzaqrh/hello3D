@@ -217,6 +217,9 @@
     <ClInclude Include="..\src\core\rendersys\render_states_block.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\template\container_adapter.h">
+      <Filter>src\core\base\template</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -406,6 +409,9 @@
     </Filter>
     <Filter Include="src\shader\xml">
       <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\base\template">
+      <UniqueIdentifier>{bdf4a8b8-3612-452e-8b10-8db4ad64c50e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

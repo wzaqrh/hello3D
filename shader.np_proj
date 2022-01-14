@@ -8,7 +8,6 @@
         <File name="C:\MyDoc\graphics\&#x6280;&#x672F;&#x70B9;.cs" />
         <File name="C:\MyDoc\graphics\&#x56FE;&#x5F62;&#x6570;&#x5B66;.cs" />
         <File name="C:\MyDoc\graphics\&#x5F15;&#x7528;.cs" />
-        <File name="D:\Documents\MyDoc\graphics\Standard.shader&#x7B14;&#x8BB0;.cs" />
     </Project>
     <Project name="d3d">
         <File name="C:\MyDoc\&#x7B14;&#x8BB0;\d3d\d3d11&#x7F16;&#x7A0B;&#x6307;&#x5357;.cs" />
@@ -339,6 +338,10 @@
                 <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader.sln" />
             </Folder>
             <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\Unity_builtin_shaders\license.txt" />
+        </Folder>
+        <Folder name="shader">
+            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\ShaderLab&#x6559;&#x7A0B;.cs" />
+            <File name="C:\MyDoc\&#x7B14;&#x8BB0;\unity\shader\ShaderLib&#x793A;&#x4F8B;.UnlitShader" />
         </Folder>
     </Project>
     <Project name="shader">

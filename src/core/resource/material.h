@@ -61,7 +61,7 @@ public:
 };
 #define MAKE_CBNAME(V) #V
 
-class Pass : public ImplementResource<IResource>, std::enable_shared_from_this<Pass> 
+class Pass : public ImplementResource<IResource> 
 {
 	friend class MaterialFactory;
 public:
@@ -123,7 +123,6 @@ public:
 	PassPtr GetPassByLightMode(const std::string& lightMode);
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 public:
-	std::string mName;
 	std::vector<PassPtr> mPasses;
 };
 
@@ -132,15 +131,12 @@ class MIR_CORE_API Material : public ImplementResource<IResource>
 	friend class MaterialFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	Material() {
-		SetPrepared();
-	}
+	Material() {}
 	void AddTechnique(TechniquePtr technique) {
 		mTechniques.push_back(technique);
 	}
 
 	TechniquePtr SetCurTechByIdx(int idx);
-	void SetCurTechByName(const std::string& name);
 
 	TechniquePtr CurTech() const { return mTechniques[mCurTechIdx]; }
 private:

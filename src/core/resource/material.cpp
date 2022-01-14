@@ -160,7 +160,6 @@ TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager&
 		technique->AddPass(pass);
 		resourceMng.AddResourceDependency(technique, pass);
 	}
-	technique->mName = proto.mName;
 	return technique;
 }
 
@@ -169,15 +168,6 @@ TechniquePtr Material::SetCurTechByIdx(int idx)
 {
 	mCurTechIdx = idx;
 	return mTechniques[mCurTechIdx];
-}
-
-void Material::SetCurTechByName(const std::string& name)
-{
-	for (size_t idx = 0; idx < mTechniques.size(); ++idx)
-		if (mTechniques[idx]->mName == name) {
-			mCurTechIdx = idx;
-			break;
-		}
 }
 
 MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
