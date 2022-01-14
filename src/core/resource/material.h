@@ -31,10 +31,8 @@ class Pass : public ImplementResource<IResource>
 	friend class MaterialFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	Pass(const std::string& lightMode, const std::string& name);
 	void AddConstBuffer(const CBufferEntry& cbuffer, int slot);
 	void AddSampler(ISamplerStatePtr sampler);
-	
 	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
@@ -44,7 +42,6 @@ public:
 	std::string mLightMode, mName;
 	PrimitiveTopology mTopoLogy;
 	IInputLayoutPtr mInputLayout;
-	//TextureVector mTextures;
 	std::vector<ISamplerStatePtr> mSamplers;
 	std::vector<CBufferEntry> mConstantBuffers;
 	IProgramPtr mProgram;
@@ -56,21 +53,9 @@ class Technique : public ImplementResource<IResource>
 	friend class MaterialFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	Technique() {
-		SetPrepared();
-	}
 	void AddPass(PassPtr pass) {
 		mPasses.push_back(pass);
 	}
-	TemplateArgs void AddConstBuffer(T &&...args) {
-		for (auto& pass : mPasses)
-			pass->AddConstBuffer(std::forward<T>(args)...);
-	}
-	TemplateArgs void AddSampler(T &&...args) {
-		for (auto& pass : mPasses)
-			pass->AddSampler(std::forward<T>(args)...);
-	}
-
 	TemplateArgs void UpdateConstBufferByName(T &&...args) {
 		for (auto& pass : mPasses)
 			pass->UpdateConstBufferByName(std::forward<T>(args)...);
@@ -87,11 +72,9 @@ class MIR_CORE_API Material : public ImplementResource<IResource>
 	friend class MaterialFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	Material() {}
 	void AddTechnique(TechniquePtr technique) {
 		mTechniques.push_back(technique);
 	}
-
 	TechniquePtr SetCurTechByIdx(int idx);
 
 	TechniquePtr CurTech() const { return mTechniques[mCurTechIdx]; }

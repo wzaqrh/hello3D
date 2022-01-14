@@ -56,7 +56,9 @@ public:
 		return *this;
 	}
 	MaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
-		mCurPass = CreateInstance<Pass>(lightMode, passName);
+		mCurPass = CreateInstance<Pass>();
+		mCurPass->mLightMode = lightMode;
+		mCurPass->mName = passName;
 		mCurTech->AddPass(mCurPass);
 		return *this;
 	}
@@ -692,7 +694,7 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 
 			for (const auto& passNode : techniqueNode) {
 				const auto& passProgram = passNode.Program;
-				builder.AddPass(passNode.LightMode, passNode.ShortName/*, i == 0*/);
+				builder.AddPass(passNode.LightMode, passNode.ShortName);
 				builder.SetTopology(passProgram.Topo);
 
 				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(launchMode,
@@ -745,4 +747,66 @@ MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& 
 	}
 }
 
+//Clone Functions
+PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
+{
+	PassPtr result = CreateInstance<Pass>(proto.mLightMode, proto.mName);
+	result->mTopoLogy = proto.mTopoLogy;
+	result->mInputLayout = proto.mInputLayout;
+	result->mProgram = proto.mProgram;
+	result->mFrameBuffer = proto.mFrameBuffer;
+
+	for (const auto& sampler : proto.mSamplers)
+		result->AddSampler(sampler);
+
+	size_t slot = 0;
+	for (auto buffer : proto.mConstantBuffers) {
+		if (!buffer.IsUnique) 
+			buffer.Buffer = resourceMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), buffer.Buffer->GetUsage(), Data::MakeNull());
+		result->AddConstBuffer(buffer, slot);
+		++slot;
+	}
+
+	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
+		resourceMng.AddResourceDependency(result, result->mInputLayout);
+		resourceMng.AddResourceDependency(result, result->mProgram);
+		for (const auto& sampler : result->mSamplers)
+			resourceMng.AddResourceDependency(result, sampler);
+		for (const auto& buffer : result->mConstantBuffers)
+			resourceMng.AddResourceDependency(result, buffer.Buffer);
+	}
+	result->SetCurState(proto.GetCurState());
+	return result;
+}
+
+TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
+{
+	TechniquePtr result = CreateInstance<Technique>();
+	for (const auto& protoPass : proto.mPasses)
+		result->AddPass(this->ClonePass(launchMode, resourceMng, *protoPass));
+
+	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
+		for (const auto& pass : result->mPasses)
+			resourceMng.AddResourceDependency(result, pass);
+	}
+	result->SetCurState(proto.GetCurState());
+	return result;
+}
+
+MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
+{
+	BOOST_ASSERT(!(launchMode == LaunchSync && !proto.IsLoaded()));
+
+	MaterialPtr result = CreateInstance<Material>();
+	for (const auto& protoTech : proto.mTechniques)
+		result->AddTechnique(this->CloneTechnique(launchMode, resourceMng, *protoTech));
+	result->mCurTechIdx = proto.mCurTechIdx;
+
+	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
+		for (const auto& tech : result->mTechniques)
+			resourceMng.AddResourceDependency(result, tech);
+	}
+	result->SetCurState(proto.GetCurState());
+	return result;
+}
 }

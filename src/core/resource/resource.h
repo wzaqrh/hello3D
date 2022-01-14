@@ -74,10 +74,6 @@ public:
 				OnLoaded();
 		}
 	}
-
-	void Assign(const ImplementResource& other) {
-		this->mCurState.store(other.mCurState.load(std::memory_order_consume), std::memory_order_release);
-	}
 protected:
 	virtual void OnLoaded() {}
 private:

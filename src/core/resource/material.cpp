@@ -5,13 +5,6 @@
 namespace mir {
 
 /********** TPass **********/
-Pass::Pass(const std::string& lightMode, const std::string& name)
-	: mLightMode(lightMode)
-	, mName(name)
-{
-	SetPrepared();
-}
-
 void Pass::AddConstBuffer(const CBufferEntry& cbuffer, int slot)
 {
 	if (slot >= 0) {
@@ -62,35 +55,6 @@ void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& n
 	if (buffer) renderSys.UpdateBuffer(buffer, data);
 }
 
-PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
-{
-	PassPtr pass = CreateInstance<Pass>(proto.mLightMode, proto.mName);
-	pass->mTopoLogy = proto.mTopoLogy;
-
-	pass->mInputLayout = proto.mInputLayout;
-	resourceMng.AddResourceDependency(pass, pass->mInputLayout);
-
-	pass->mProgram = proto.mProgram;
-	resourceMng.AddResourceDependency(pass, pass->mProgram);
-
-	for (auto& sampler : proto.mSamplers) {
-		pass->AddSampler(sampler);
-		resourceMng.AddResourceDependency(pass, sampler);
-	}
-
-	for (size_t slot = 0; slot < proto.mConstantBuffers.size(); ++slot) {
-		auto buffer = proto.mConstantBuffers[slot];
-		if (!buffer.IsUnique) 
-			buffer.Buffer = resourceMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), buffer.Buffer->GetUsage(), Data::MakeNull());
-		pass->AddConstBuffer(buffer, slot);
-		resourceMng.AddResourceDependency(pass, buffer.Buffer);
-	}
-
-	pass->mFrameBuffer = proto.mFrameBuffer;
-
-	return pass;
-}
-
 /********** TTechnique **********/
 PassPtr Technique::GetPassByLightMode(const std::string& lightMode)
 {
@@ -115,35 +79,11 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 	return std::move(passVec);
 }
 
-TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
-{
-	TechniquePtr technique = CreateInstance<Technique>();
-	for (int i = 0; i < proto.mPasses.size(); ++i) {
-		PassPtr pass = this->ClonePass(launchMode, resourceMng, *proto.mPasses[i]);
-		technique->AddPass(pass);
-		resourceMng.AddResourceDependency(technique, pass);
-	}
-	return technique;
-}
-
 /********** Material **********/
 TechniquePtr Material::SetCurTechByIdx(int idx)
 {
 	mCurTechIdx = idx;
 	return mTechniques[mCurTechIdx];
-}
-
-MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
-{
-	MaterialPtr material = CreateInstance<Material>();
-	material->Assign(proto);
-	for (int i = 0; i < proto.mTechniques.size(); ++i) {
-		TechniquePtr tech = this->CloneTechnique(launchMode, resourceMng, *proto.mTechniques[i]);
-		material->AddTechnique(tech);
-		resourceMng.AddResourceDependency(material, tech);
-	}
-	material->mCurTechIdx = proto.mCurTechIdx;
-	return material;
 }
 
 }
