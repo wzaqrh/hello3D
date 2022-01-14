@@ -36,7 +36,7 @@ private:
 
 	struct SubMesh {
 		short IndicePos, IndiceCount, IndiceBase;
-		TextureBySlot Textures;
+		TextureVector Textures;
 	};
 	std::vector<SubMesh> mSubMeshs;
 };

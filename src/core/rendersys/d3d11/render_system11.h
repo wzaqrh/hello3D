@@ -33,7 +33,7 @@ public:
 
 	IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data) override;
 	bool UpdateBuffer(IHardwareBufferPtr buffer, const Data& data) override;
-	void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
+	void SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program) override;
 
 	IBlobDataPtr CompileShader(const ShaderCompileDesc& compileDesc, const Data& data) override;
 	IShaderPtr CreateShader(int type, IBlobDataPtr data) override;
@@ -41,7 +41,7 @@ public:
 	void SetProgram(IProgramPtr program) override;
 
 	ISamplerStatePtr LoadSampler(IResourcePtr res, const SamplerDesc& samplerDesc) override;
-	void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) override;
+	void SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count) override;
 
 	IInputLayoutPtr LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr) override;
 	void SetVertexLayout(IInputLayoutPtr layout) override;
@@ -52,7 +52,7 @@ public:
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
-	void SetTextures(size_t slot, ITexturePtr textures[], size_t count) override;
+	void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) override;
 
 	void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
 	void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;

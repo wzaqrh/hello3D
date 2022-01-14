@@ -51,7 +51,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	void SetVertexBuffer(IVertexBufferPtr vertexBuffer, size_t slot = 0) { SetVertexBuffers(slot, &vertexBuffer, 1); }
 
 	virtual IContantBufferPtr LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data) = 0;
-	virtual void SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program) = 0;
+	virtual void SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program) = 0;
 	virtual bool UpdateBuffer(IHardwareBufferPtr buffer, const Data& data) = 0;
 
 	virtual IBlobDataPtr CompileShader(const ShaderCompileDesc& desc, const Data& data) = 0;
@@ -63,11 +63,11 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void SetVertexLayout(IInputLayoutPtr layout) = 0;
 
 	virtual ISamplerStatePtr LoadSampler(IResourcePtr res, const SamplerDesc& samplerDesc) = 0;
-	virtual void SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count) = 0;
+	virtual void SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count) = 0;
 
 	virtual ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) = 0;
-	virtual void SetTextures(size_t slot, ITexturePtr textures[], size_t count) = 0;
+	virtual void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) = 0;
 	void SetTexture(size_t slot, ITexturePtr texture) { SetTextures(slot, &texture, 1); }
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
 

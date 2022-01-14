@@ -19,7 +19,7 @@ public:
 	void Draw(IRenderable& renderable, SceneManager& scene);
 private:
 	void BindPass(const PassPtr& pass);
-	void RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op);
+	void RenderPass(const PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode);
 	void RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
 		const cbPerLight* lightParam, cbPerFrame& globalParam);

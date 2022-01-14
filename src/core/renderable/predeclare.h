@@ -7,7 +7,7 @@ namespace mir {
 #define DECLARE_CLASS(TYPE) class TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr
 
 DECLARE_STRUCT(Transform);
-DECLARE_STRUCT(TextureBySlot);
+DECLARE_STRUCT(TextureVector);
 
 DECLARE_CLASS(SkyBox);
 DECLARE_CLASS(Sprite);

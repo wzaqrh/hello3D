@@ -6,9 +6,7 @@
 namespace mir {
 
 AssimpMesh::AssimpMesh()
-{
-	mTextures = CreateInstance<TextureBySlot>();
-}
+{}
 
 void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
 {
@@ -37,9 +35,9 @@ void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
 
 bool AssimpMesh::HasTexture(int slot) const
 {
-	return (slot < mTextures->Count()) 
-		&& mTextures->At(slot)
-		&& mTextures->At(slot)->IsLoaded();
+	return (slot < mTextures.Count()) 
+		&& mTextures[slot]
+		&& mTextures[slot]->IsLoaded();
 }
 
 static Eigen::Vector4f sDefaultVector4;
@@ -58,7 +56,7 @@ bool AssimpMesh::IsLoaded() const
 	return (mVBOSurface->IsLoaded()
 		&& mVBOSkeleton->IsLoaded()
 		&& mIndexBuffer->IsLoaded()
-		&& mTextures->IsLoaded());
+		&& mTextures.IsLoaded());
 }
 
 }

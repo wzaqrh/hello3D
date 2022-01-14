@@ -57,37 +57,20 @@ void RenderPipeline::BindPass(const PassPtr& pass)
 	else mRenderSys.SetSamplers(0, nullptr, 0);
 }
 
-void RenderPipeline::RenderPass(const PassPtr& pass, TextureBySlot& textures, int iterCnt, const RenderOperation& op)
+void RenderPipeline::RenderPass(const PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op)
 {
-	auto lock = mStatesBlock.LockFrameBuffer(IF_AND_OR(iterCnt >= 0, 
-		pass->mRTIterators[iterCnt], 
-		IF_OR(pass->mRenderTarget, nullptr)));
+	auto lock = mStatesBlock.LockFrameBuffer(IF_OR(pass->mFrameBuffer, nullptr));
 
-	if (iterCnt >= 0) {
-		if (iterCnt + 1 < pass->mRTIterators.size())
-			textures[0] = pass->mRTIterators[iterCnt + 1]->GetAttachColorTexture(0);
-	}
-	else {
-		if (!pass->mRTIterators.empty())
-			textures[0] = pass->mRTIterators[0]->GetAttachColorTexture(0);
-	}
+	if (textures.Count() > 0) mRenderSys.SetTextures(kPipeTextureStart, &textures[0], textures.Count());
+	else mRenderSys.SetTextures(kPipeTextureStart, nullptr, 0);
 
-	{
-		//if (op.OnBind) op.OnBind(mRenderSys, *pass, op);
+	for (auto& cbBytes : op.UBOBytesByName)
+		pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
 
-		if (textures.Count() > 0) mRenderSys.SetTextures(kPipeTextureStart, &textures.Textures[0], textures.Textures.size());
-		else mRenderSys.SetTextures(kPipeTextureStart, nullptr, 0);
-		
-		for (auto& cbBytes : op.UBOBytesByName)
-			pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
+	BindPass(pass);
 
-		BindPass(pass);
-
-		if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
-		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
-
-		//if (op.OnUnbind) op.OnUnbind(mRenderSys, *pass, op);
-	}
+	if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
+	else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
 }
 
 void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode)
@@ -99,18 +82,8 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 		mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		mRenderSys.SetIndexBuffer(op.IndexBuffer);
 
-		TextureBySlot textures = op.Textures;
-		textures.Merge(pass->mTextures);
+		const TextureVector& textures = op.Textures;
 
-		for (int i = pass->mRTIterators.size() - 1; i >= 0; --i) {
-			auto iter = op.VertBufferByPass.find(std::make_pair(pass, i));
-			if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
-			else mRenderSys.SetVertexBuffers(op.VertexBuffers);
-			
-			ITexturePtr first = !textures.Empty() ? textures[0] : nullptr;
-			RenderPass(pass, textures, i, op);
-			textures[0] = first;
-		}
 		auto iter = op.VertBufferByPass.find(std::make_pair(pass, -1));
 		if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
 		else mRenderSys.SetVertexBuffers(op.VertexBuffers);

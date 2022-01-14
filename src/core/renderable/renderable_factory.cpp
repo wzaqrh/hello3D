@@ -70,10 +70,6 @@ SkyBoxPtr RenderableFactory::CreateSkybox(string_cref imgpath, const MaterialLoa
 PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName, Camera& camera)
 {
 	PostProcessPtr process;
-	if (effectName == MAT_BLOOM) {
-		process = Bloom::Create(mLaunchMode, mResourceMng, effectName, camera.FetchOutput2PostProcess());
-		camera.AddPostProcessEffect(process);
-	}
 	return process;
 }
 

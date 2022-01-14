@@ -4,27 +4,6 @@
 
 namespace mir {
 
-/********** TextureBySlot **********/
-void TextureBySlot::Merge(const TextureBySlot& other) 
-{
-	if (Textures.size() < other.Textures.size())
-		Textures.resize(other.Textures.size());
-
-	for (size_t i = 0; i < other.Textures.size(); ++i) {
-		if (other.Textures[i] && other.Textures[i]->IsLoaded()) {
-			Textures[i] = other.Textures[i];
-		}
-	}
-}
-
-bool TextureBySlot::IsLoaded() const {
-	for (size_t i = 0; i < Textures.size(); ++i) {
-		if (Textures[i] && !Textures[i]->IsLoaded())
-			return false;
-	}
-	return true;
-}
-
 /********** TPass **********/
 Pass::Pass(const std::string& lightMode, const std::string& name)
 	: mLightMode(lightMode)
@@ -47,14 +26,6 @@ void Pass::AddConstBuffer(const CBufferEntry& cbuffer, int slot)
 void Pass::AddSampler(ISamplerStatePtr sampler)
 {
 	mSamplers.push_back(sampler);
-}
-void Pass::ClearSamplers()
-{
-	mSamplers.clear();
-}
-void Pass::AddIterTarget(IFrameBufferPtr target)
-{
-	mRTIterators.push_back(target);
 }
 
 std::vector<IContantBufferPtr> Pass::GetConstBuffers() const
@@ -115,15 +86,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 		resourceMng.AddResourceDependency(pass, buffer.Buffer);
 	}
 
-	pass->mRenderTarget = proto.mRenderTarget;
-	for (auto& target : proto.mRTIterators) {
-		pass->AddIterTarget(target);
-		resourceMng.AddResourceDependency(pass, target);
-	}
-
-	pass->mTextures = proto.mTextures;
-	for (auto& tex : proto.mTextures)
-		resourceMng.AddResourceDependency(pass, tex);
+	pass->mFrameBuffer = proto.mFrameBuffer;
 
 	return pass;
 }

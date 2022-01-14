@@ -55,19 +55,9 @@ public:
 		mMaterial->AddTechnique(mCurTech);
 		return *this;
 	}
-	MaterialBuilder& CloneTechnique(MaterialFactory& matFac) {
-		mCurTech = matFac.CloneTechnique(mLaunchMode, mResourceMng, *mCurTech);
-		mMaterial->AddTechnique(mCurTech);
-		return *this;
-	}
 	MaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
 		mCurPass = CreateInstance<Pass>(lightMode, passName);
 		mCurTech->AddPass(mCurPass);
-		return *this;
-	}
-	MaterialBuilder& SetPassName(const std::string& lightMode, const std::string& passName) {
-		mCurPass->mLightMode = lightMode;
-		mCurPass->mName = passName;
 		return *this;
 	}
 
@@ -90,40 +80,10 @@ public:
 		mResourceMng.AddResourceDependency(mMaterial, sampler);
 		return *this;
 	}
-	MaterialBuilder& AddSamplerToTech(ISamplerStatePtr sampler) {
-		mCurTech->AddSampler(sampler);
-		mResourceMng.AddResourceDependency(mMaterial, sampler);
-		return *this;
-	}
-	MaterialBuilder& ClearSamplersToTech() {
-		mCurTech->ClearSamplers();
-		return *this;
-	}
 	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer,
 		const std::string& name = "", bool isUnique = true, int slot = -1) {
 		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
 		mResourceMng.AddResourceDependency(mMaterial, buffer);
-		return *this;
-	}
-	MaterialBuilder& AddConstBufferToTech(IContantBufferPtr buffer,
-		const std::string& name = "", bool isUnique = true, int slot = -1) {
-		mCurTech->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
-		mResourceMng.AddResourceDependency(mMaterial, buffer);
-		return *this;
-	}
-	MaterialBuilder& SetFrameBuffer(IFrameBufferPtr target) {
-		mCurPass->mRenderTarget = target;
-		mResourceMng.AddResourceDependency(mMaterial, target);
-		return *this;
-	}
-	MaterialBuilder& AddIterTarget(IFrameBufferPtr target) {
-		mCurPass->AddIterTarget(target);
-		mResourceMng.AddResourceDependency(mMaterial, target);
-		return *this;
-	}
-	MaterialBuilder& SetTexture(size_t slot, ITexturePtr texture) {
-		mCurPass->mTextures[slot] = texture;
-		mResourceMng.AddResourceDependency(mMaterial, texture);
 		return *this;
 	}
 	MaterialPtr Build() {
@@ -142,6 +102,8 @@ private:
 /********** MaterialAssetManager **********/
 namespace mat_asset {
 struct AttributeNode {
+	bool IsValid() const { return !Layout.empty(); }
+public:
 	std::vector<LayoutInputElement> Layout;
 };
 struct UniformNode {
@@ -158,34 +120,55 @@ struct SamplerNode : public VectorAdapterEx<SamplerDesc> {
 };
 
 struct ShaderCompileDescEx : public ShaderCompileDesc {
-	void MergeMacro(const ShaderCompileMacro& macro) {
+	void AddOrSetMacro(const ShaderCompileMacro& macro) {
 		auto find_it = std::find_if(this->Macros.begin(), this->Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
 			return elem.Name == macro.Name;
 		});
 		if (find_it == this->Macros.end()) this->Macros.push_back(macro);
 		else find_it->Definition = macro.Definition;
 	}
-	void MergeMacros(const std::vector<ShaderCompileMacro>& macros) {
+	void AddOrSetMacros(const std::vector<ShaderCompileMacro>& macros) {
 		for (const auto& it : macros)
-			MergeMacro(it);
+			AddOrSetMacro(it);
 	}
-	void MergeMacros(const ShaderCompileDesc& other) {
-		MergeMacros(other.Macros);
+	void AddMacro(const ShaderCompileMacro& macro) {
+		auto find_it = std::find_if(this->Macros.begin(), this->Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
+			return elem.Name == macro.Name;
+		});
+		if (find_it == this->Macros.end()) this->Macros.push_back(macro);
+	}
+	void AddMacros(const std::vector<ShaderCompileMacro>& macros) {
+		for (const auto& it : macros)
+			AddMacro(it);
+	}
+	void MergeNoOverride(const ShaderCompileDesc& other) {
+		if (EntryPoint.empty()) EntryPoint = other.EntryPoint;
+		if (ShaderModel.empty()) ShaderModel = other.ShaderModel;
+		if (SourcePath.empty()) SourcePath = other.SourcePath;
+		AddMacros(other.Macros);
 	}
 };
-struct AttributeNodeVector : public VectorAdapter<AttributeNode> {};
-struct UniformNodeVector : public VectorAdapter<UniformNode> {};
+struct AttributeNodeVector : public VectorAdapterEx<AttributeNode> {
+	AttributeNodeVector() :VectorAdapterEx<AttributeNode>([](const AttributeNode& v) {return v.IsValid(); }) {}
+};
+struct UniformNodeVector : public VectorAdapterEx<UniformNode> {
+	UniformNodeVector() :VectorAdapterEx<UniformNode>([](const UniformNode& v) {return v.IsValid(); }) {}
+};
 struct ProgramNode {
-	void MergeOverride(const ProgramNode& other) {
+	void MergeNoOverride(const ProgramNode& other) {
 		Topo = other.Topo;
-		Attrs = other.Attrs;
-		Uniforms = other.Uniforms;
-		Samplers = other.Samplers;
-		VertexSCD.MergeMacros(other.VertexSCD);
-		PixelSCD.MergeMacros(other.PixelSCD);
+		Attrs.MergeNoOverride(other.Attrs);
+		Uniforms.MergeNoOverride(other.Uniforms);
+		Samplers.MergeNoOverride(other.Samplers);
+		VertexSCD.MergeNoOverride(other.VertexSCD);
+		PixelSCD.MergeNoOverride(other.PixelSCD);
+	}
+	void Build() {
+		if (Topo == kPrimTopologyUnkown)
+			Topo = kPrimTopologyTriangleList;
 	}
 public:
-	PrimitiveTopology Topo = kPrimTopologyTriangleList;
+	PrimitiveTopology Topo = kPrimTopologyUnkown;
 	AttributeNodeVector Attrs;
 	UniformNodeVector Uniforms;
 	SamplerNode Samplers;
@@ -274,8 +257,11 @@ public:
 	}
 	bool GetMaterialAsset(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matParam, 
 		MaterialAsset& materialAsset) {
-		if (matParam.IsVariant()) return ParseShaderVariantXml(matParam, materialAsset.Shader);
-		else return ParseShaderXml(matParam.ShaderName, materialAsset.Shader);
+		bool result = IF_AND_OR(matParam.IsVariant(),
+			ParseShaderVariantXml(matParam, materialAsset.Shader),
+			ParseShaderXml(matParam.ShaderName, materialAsset.Shader));
+		BOOST_ASSERT(materialAsset.Shader[0].Program.Topo != kPrimTopologyUnkown);
+		return result;
 	}
 public:
 	const MaterialNameToAssetMapping& MatNameToAsset() const {
@@ -513,7 +499,7 @@ private:
 		if (find_macros != nodeProgram.not_found()) {
 			auto& node_macros = find_macros->second;
 			for (auto& it : node_macros)
-				vertexScd.MergeMacro(ShaderCompileMacro{ it.first, it.second.data() });
+				vertexScd.AddOrSetMacro(ShaderCompileMacro{ it.first, it.second.data() });
 		}
 		pixelScd.Macros = vertexScd.Macros;
 
@@ -535,7 +521,7 @@ private:
 		VisitSamplers(nodeProgram, programNode);
 	}
 
-	void VisitSubShader(const PropertyTreePath& nodeTechnique, const CategoryNode& categNode, TechniqueNode& techniqueNode) {
+	void VisitSubShader(const PropertyTreePath& nodeTechnique, TechniqueNode& techniqueNode) {
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
 			auto& node_pass = it.second;
@@ -551,7 +537,6 @@ private:
 			pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 			pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
-			pass.Program = categNode.Program;
 			auto find_program = node_pass.find("PROGRAM");
 			if (find_program != node_pass.not_found()) {
 				auto& node_program = find_program->second;
@@ -572,7 +557,7 @@ private:
 		if (!vis.JustInclude) {
 			index = 0;
 			for (auto& it : boost::make_iterator_range(nodeCategory->equal_range("SubShader"))) {
-				VisitSubShader(PropertyTreePath(nodeCategory, it.second, index++), categNode, categNode.Emplace());
+				VisitSubShader(PropertyTreePath(nodeCategory, it.second, index++), categNode.Emplace());
 			}
 		}
 	}
@@ -588,11 +573,12 @@ private:
 		}
 	}
 	void BuildShaderNode(ShaderNode& shaderNode) {
-		for (auto& categ : shaderNode) {
-			for (auto& tech : categ) {
-				for (auto& pass : tech) {
-					pass.Program.VertexSCD.MergeMacros(categ.Program.VertexSCD);
-					pass.Program.PixelSCD.MergeMacros(categ.Program.PixelSCD);
+		for (auto& categNode : shaderNode) {
+			categNode.Program.Build();
+			for (auto& techNode : categNode) {
+				for (auto& passNode : techNode) {
+					passNode.Program.MergeNoOverride(categNode.Program);
+					passNode.Program.Build();
 				}
 			}
 		}
@@ -669,8 +655,8 @@ private:
 					for (auto& categNode : shaderNode) {
 						for (auto& techniqueNode : categNode) {
 							for (auto& passNode : techniqueNode) {
-								passNode.Program.VertexSCD.MergeMacros(matParam.Macros);
-								passNode.Program.PixelSCD.MergeMacros(matParam.Macros);
+								passNode.Program.VertexSCD.AddOrSetMacros(matParam.Macros);
+								passNode.Program.PixelSCD.AddOrSetMacros(matParam.Macros);
 							}
 						}
 					}
@@ -707,20 +693,19 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			for (const auto& passNode : techniqueNode) {
 				const auto& passProgram = passNode.Program;
 				builder.AddPass(passNode.LightMode, passNode.ShortName/*, i == 0*/);
-				builder.SetTopology(categNode.Program.Topo);
+				builder.SetTopology(passProgram.Topo);
 
 				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(launchMode,
-					categNode.Program.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD));
+					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD));
 
-				BOOST_ASSERT(categNode.Program.Attrs.Count() >= 0);
-				if (categNode.Program.Attrs.Count() == 1) {
-					builder.SetInputLayout(resourceMng.CreateLayout(launchMode,
-						program, categNode.Program.Attrs[0].Layout));
+				BOOST_ASSERT(passProgram.Attrs.Count() >= 0);
+				if (passProgram.Attrs.Count() == 1) {
+					builder.SetInputLayout(resourceMng.CreateLayout(launchMode, program, passProgram.Attrs[0].Layout));
 				}
-				else if (categNode.Program.Attrs.Count() > 1) {
-					auto layout_compose = categNode.Program.Attrs[0].Layout;
+				else if (passProgram.Attrs.Count() > 1) {
+					auto layout_compose = passProgram.Attrs[0].Layout;
 					int slot = 1;
-					for (const auto& attrNode : boost::make_iterator_range(categNode.Program.Attrs.Range(1))) {
+					for (const auto& attrNode : boost::make_iterator_range(passProgram.Attrs.Range(1))) {
 						for (const auto& element_slot : attrNode.Layout) {
 							layout_compose.push_back(element_slot);
 							layout_compose.back().InputSlot = slot;
@@ -730,13 +715,13 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 					}
 				}
 
-				for (const auto& sampler : categNode.Program.Samplers) {
+				for (const auto& sampler : passProgram.Samplers) {
 					builder.AddSampler(sampler.CmpFunc != kCompareUnkown
 						? resourceMng.CreateSampler(launchMode, sampler)
 						: nullptr);
 				}
 
-				for (auto& uniform : categNode.Program.Uniforms) {
+				for (auto& uniform : passProgram.Uniforms) {
 					builder.AddConstBuffer(resourceMng.CreateConstBuffer(launchMode,
 						uniform.Decl, kHWUsageDynamic, Data::Make(uniform.Data)),
 						uniform.ShortName, uniform.IsUnique, uniform.Slot);

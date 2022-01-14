@@ -1,6 +1,7 @@
 #pragma once
 #include "core/rendersys/predeclare.h"
 #include "core/base/base_type.h"
+#include "core/base/template/container_adapter.h"
 #include "core/resource/resource.h"
 
 namespace mir {
@@ -21,6 +22,27 @@ interface ITexture : public IResource
 
 	int GetWidth() const { return GetSize().x(); }
 	int GetHeight() const { return GetSize().y(); }
+};
+
+struct TextureVector : public VectorAdapter<std::shared_ptr<ITexture>>
+{
+	void Merge(const TextureVector& other) {
+		if (mElements.size() < other.mElements.size())
+			mElements.resize(other.mElements.size());
+
+		for (size_t i = 0; i < other.mElements.size(); ++i) {
+			if (other.mElements[i] && other.mElements[i]->IsLoaded()) {
+				mElements[i] = other.mElements[i];
+			}
+		}
+	}
+	bool IsLoaded() const {
+		for (size_t i = 0; i < mElements.size(); ++i) {
+			if (mElements[i] && !mElements[i]->IsLoaded())
+				return false;
+		}
+		return true;
+	}
 };
 
 }

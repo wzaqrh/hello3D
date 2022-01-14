@@ -18,6 +18,12 @@ public:
 	void Clear() {
 		mElements.clear();
 	}
+	void Swap(VectorAdapter& other) {
+		mElements.swap(other.mElements);
+	}
+	void Resize(size_t size) {
+		mElements.resize(size);
+	}
 	reference& Emplace() {
 		mElements.resize(mElements.size() + 1);
 		return mElements.back();
@@ -36,6 +42,7 @@ public:
 		}
 	}
 public:
+	bool IsEmpty() const { return mElements.empty(); }
 	size_t Count() const { return mElements.size(); }
 	
 	reference At(size_t pos) { return mElements[pos]; }
@@ -64,6 +71,14 @@ public:
 			mElements.resize(other.mElements.size());
 		for (size_t i = 0; i < other.mElements.size(); ++i) {
 			if (mUnaryCheckValid(other.mElements[i]))
+				mElements[i] = other.mElements[i];
+		}
+	}
+	void MergeNoOverride(const VectorAdapterEx& other) {
+		if (mElements.size() < other.mElements.size())
+			mElements.resize(other.mElements.size());
+		for (size_t i = 0; i < other.mElements.size(); ++i) {
+			if (!mUnaryCheckValid(mElements[i]))
 				mElements[i] = other.mElements[i];
 		}
 	}

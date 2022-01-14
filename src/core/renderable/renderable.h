@@ -30,7 +30,7 @@ public:
 	IIndexBufferPtr IndexBuffer;
 	short IndexPos, IndexCount, IndexBase;
 	
-	TextureBySlot Textures;
+	TextureVector Textures;
 
 	Eigen::Matrix4f WorldTransform;
 	std::map<std::string, std::vector<char>> UBOBytesByName;

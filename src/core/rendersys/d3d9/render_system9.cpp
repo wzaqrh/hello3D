@@ -536,7 +536,7 @@ void RenderSystem9::SetProgram(IProgramPtr program)
 	mDevice9->SetPixelShader(ps->GetShader9());
 }
 
-void RenderSystem9::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program)
+void RenderSystem9::SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program)
 {
 	Program9Ptr program9 = std::static_pointer_cast<Program9>(program);
 	PixelShader9* ps = PtrRaw(program9->mPixel);
@@ -551,7 +551,7 @@ void RenderSystem9::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], si
 	}
 }
 
-void RenderSystem9::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count)
+void RenderSystem9::SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count)
 {
 	BOOST_ASSERT(count > 0);
 	for (size_t i = 0; i < count; ++i) {
@@ -589,7 +589,7 @@ void RenderSystem9::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTop
 		CalPrimCount(op.IndexBuffer->GetCount(), topo9));
 }
 
-void RenderSystem9::SetTextures(size_t slot, ITexturePtr textures[], size_t count) {
+void RenderSystem9::SetTextures(size_t slot, const ITexturePtr textures[], size_t count) {
 	for (size_t i = 0; i < count; ++i) {
 		auto iTex = std::static_pointer_cast<Texture9>(textures[i]);
 		if (iTex) {

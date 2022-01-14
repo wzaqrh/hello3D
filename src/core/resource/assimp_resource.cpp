@@ -236,9 +236,9 @@ private:
 		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0,0,1,1));
 		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
 		mesh.mFactors[kTexturePbrAo] = Eigen::Vector4f::Zero();
-		mesh.mTextures->Resize(kTexturePbrMax);
+		mesh.mTextures.Resize(kTexturePbrMax);
 		if (rawMesh->mMaterialIndex >= 0) {
-			TextureBySlot& textures = *mesh.mTextures;
+			TextureVector& textures = mesh.mTextures;
 			const aiMaterial* material = scene->mMaterials[rawMesh->mMaterialIndex];
 
 			auto loadTexture = [&](size_t pos, aiTextureType type) {

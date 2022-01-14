@@ -585,7 +585,7 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 	ret->Init(pConstantBuffer, CreateInstance<ConstBufferDecl>(cbDecl), usage);
 	return ret;
 }
-void RenderSystem11::SetConstBuffers(size_t slot, IContantBufferPtr buffers[], size_t count, IProgramPtr program)
+void RenderSystem11::SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program)
 {
 	std::vector<ID3D11Buffer*> passConstBuffers(count);
 	for (size_t i = 0; i < count; ++i)
@@ -704,7 +704,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV());
 	return texture;
 }
-static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(ITexturePtr textures[], size_t count) {
+static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(const ITexturePtr textures[], size_t count) {
 	std::vector<ID3D11ShaderResourceView*> views(count);
 	for (int i = 0; i < views.size(); ++i) {
 		auto iTex = std::static_pointer_cast<Texture11>(textures[i]);
@@ -712,7 +712,7 @@ static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(ITextureP
 	}
 	return views;
 }
-void RenderSystem11::SetTextures(size_t slot, ITexturePtr textures[], size_t count) 
+void RenderSystem11::SetTextures(size_t slot, const ITexturePtr textures[], size_t count)
 {
 	std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures, count);
 	mDeviceContext->PSSetShaderResources(slot, texViews.size(), !texViews.empty() ? &texViews[0] : nullptr);
@@ -773,7 +773,7 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc
 #endif
 	return ret;
 }
-void RenderSystem11::SetSamplers(size_t slot, ISamplerStatePtr samplers[], size_t count)
+void RenderSystem11::SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count)
 {
 	BOOST_ASSERT(count >= 0);
 	std::vector<ID3D11SamplerState*> passSamplers(count);

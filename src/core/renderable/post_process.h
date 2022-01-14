@@ -33,20 +33,4 @@ protected:
 	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 };
 
-struct cbBloom {
-	Eigen::Vector4f SampleOffsets[16];
-	Eigen::Vector4f SampleWeights[16];
-public:
-	static cbBloom CreateDownScale2x2Offsets(int dwWidth, int dwHeight);
-	static cbBloom CreateDownScale3x3Offsets(int dwWidth, int dwHeight);
-	static cbBloom CreateBloomOffsets(int dwD3DTexSize, float fDeviation, float fMultiplier);
-};
-class MIR_CORE_API Bloom : public PostProcess 
-{
-	typedef PostProcess Super;
-	friend class RenderableFactory;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(Bloom);
-	Bloom(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
-};
-
 }

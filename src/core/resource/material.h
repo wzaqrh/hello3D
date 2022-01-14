@@ -4,45 +4,10 @@
 #include "core/predeclare.h"
 #include "core/base/declare_macros.h"
 #include "core/base/base_type.h"
+#include "core/rendersys/texture.h"
 #include "core/resource/resource.h"
 
 namespace mir {
-
-struct TextureBySlot 
-{
-	void Clear() {
-		Textures.clear();
-	}
-	void Add(ITexturePtr texture) {
-		Textures.push_back(texture);
-	}
-	void Swap(TextureBySlot& other) {
-		Textures.swap(other.Textures);
-	}
-	void Resize(size_t size) {
-		Textures.resize(size);
-	}
-	void Merge(const TextureBySlot& other);
-public:
-	bool Empty() const { return Textures.empty(); }
-	size_t Count() const { return Textures.size(); }
-
-	std::vector<ITexturePtr>::const_iterator begin() const { return Textures.begin(); }
-	std::vector<ITexturePtr>::const_iterator end() const { return Textures.end(); }
-
-	ITexturePtr& At(size_t pos) {
-		if (pos >= Textures.size()) Textures.resize(pos + 1);
-		return Textures[pos];
-	}
-	ITexturePtr& operator[](size_t pos) { return At(pos); }
-
-	const ITexturePtr& At(size_t pos) const { return Textures[pos]; }
-	const ITexturePtr& operator[](size_t pos) const { return At(pos); }
-
-	bool IsLoaded() const;
-public:
-	std::vector<ITexturePtr> Textures;
-};
 
 struct CBufferEntry 
 {
@@ -69,8 +34,6 @@ public:
 	Pass(const std::string& lightMode, const std::string& name);
 	void AddConstBuffer(const CBufferEntry& cbuffer, int slot);
 	void AddSampler(ISamplerStatePtr sampler);
-	void ClearSamplers();
-	void AddIterTarget(IFrameBufferPtr target);
 	
 	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 
@@ -79,16 +42,13 @@ public:
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
 public:
 	std::string mLightMode, mName;
-
 	PrimitiveTopology mTopoLogy;
 	IInputLayoutPtr mInputLayout;
-	IProgramPtr mProgram;
-	TextureBySlot mTextures;
+	//TextureVector mTextures;
 	std::vector<ISamplerStatePtr> mSamplers;
 	std::vector<CBufferEntry> mConstantBuffers;
-
-	IFrameBufferPtr mRenderTarget;
-	std::vector<IFrameBufferPtr> mRTIterators;
+	IProgramPtr mProgram;
+	IFrameBufferPtr mFrameBuffer;
 };
 
 class Technique : public ImplementResource<IResource>
@@ -109,10 +69,6 @@ public:
 	TemplateArgs void AddSampler(T &&...args) {
 		for (auto& pass : mPasses)
 			pass->AddSampler(std::forward<T>(args)...);
-	}
-	void ClearSamplers() {
-		for (auto& pass : mPasses)
-			pass->ClearSamplers();
 	}
 
 	TemplateArgs void UpdateConstBufferByName(T &&...args) {

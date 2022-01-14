@@ -7,6 +7,7 @@
 #include "core/base/attribute_struct.h"
 #include "core/base/uniform_struct.h"
 #include "core/base/declare_macros.h"
+#include "core/rendersys/texture.h"
 
 namespace mir {
 
@@ -25,7 +26,7 @@ public:
 	const Eigen::Vector4f& GetFactor(int slot) const;
 	const Eigen::Vector4f& GetUvTransform(int slot) const;
 	const aiMesh* GetRawMesh() const { return mAiMesh; }
-	const TextureBySlotPtr& GetTextures() const { return mTextures; }
+	const TextureVector& GetTextures() const { return mTextures; }
 	const IVertexBufferPtr& GetVBOSurface() const { return mVBOSurface; }
 	const IVertexBufferPtr& GetVBOSkeleton() const { return mVBOSkeleton; }
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }
@@ -34,7 +35,7 @@ private:
 	std::vector<vbSurface, mir_allocator<vbSurface>> mSurfVertexs;
 	std::vector<vbSkeleton, mir_allocator<vbSkeleton>> mSkeletonVertexs;
 	std::vector<uint32_t> mIndices;
-	TextureBySlotPtr mTextures;
+	TextureVector mTextures;
 	bool mHasTangent;
 	std::vector<Eigen::Vector4f> mFactors;
 	std::vector<Eigen::Vector4f> mUvTransform;
