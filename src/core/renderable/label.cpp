@@ -5,6 +5,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
+namespace renderable {
 
 constexpr int CMaxStringLength = 256;
 
@@ -51,7 +52,7 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 		if (entry.texture != lastTex) {
 			if (lastTex != nullptr) {
 				RenderOperation op = {};
-				op.Material = mMaterial;
+				op.Shader = mMaterial;
 				op.AddVertexBuffer(mVertexBuffer);
 				op.IndexBuffer = mIndexBuffer;
 				op.IndexBase = 4 * (i - lastCount);
@@ -70,7 +71,7 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 
 	if (lastTex) {
 		RenderOperation op = {};
-		op.Material = mMaterial;
+		op.Shader = mMaterial;
 		op.AddVertexBuffer(mVertexBuffer);
 		op.IndexBuffer = mIndexBuffer;
 		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);
@@ -237,4 +238,5 @@ void Label::SetString(const std::string& str)
 	ForceLayout();
 }
 
+}
 }

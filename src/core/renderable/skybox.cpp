@@ -3,6 +3,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
+namespace renderable {
 
 SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, const std::string& imgName)
 	:Super(launchMode, resourceMng, matName)
@@ -113,4 +114,5 @@ void SkyBox::GenRenderOperation(RenderOperationQueue& opList)
 	opList.AddOP(op);
 }
 
+}
 }

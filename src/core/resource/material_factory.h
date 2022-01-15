@@ -5,26 +5,29 @@
 #include "core/resource/material.h"
 
 namespace mir {
+namespace res {
 
 namespace mat_asset {
 struct MaterialAsset;
 class MaterialAssetManager;
 }
-struct MaterialFactory : boost::noncopyable
+class MaterialFactory : boost::noncopyable
 {
+public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	MaterialFactory();
-	MaterialPtr CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
-		const MaterialLoadParam& matName, MaterialPtr matRes = nullptr);
-	
-	MaterialPtr CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& material);
+	ShaderPtr CreateShader(Launch launchMode, ResourceManager& resourceMng,
+		const MaterialLoadParam& matName, ShaderPtr matRes = nullptr);
+
+	ShaderPtr CloneShader(Launch launchMode, ResourceManager& resourceMng, const Shader& material);
 	TechniquePtr CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& technique);
 	PassPtr ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& pass);
 private:
-	MaterialPtr CreateMaterialByMaterialAsset(Launch launchMode, ResourceManager& resourceMng, 
-		const mat_asset::MaterialAsset& matAsset, MaterialPtr matRes = nullptr);
+	ShaderPtr CreateMaterialByMaterialAsset(Launch launchMode, ResourceManager& resourceMng,
+		const mat_asset::MaterialAsset& matAsset, ShaderPtr matRes = nullptr);
 private:
 	std::shared_ptr<mat_asset::MaterialAssetManager> mMatAssetMng;
 };
 
+}
 }

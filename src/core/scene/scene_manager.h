@@ -16,26 +16,26 @@ public:
 	void SetPixelPerUnit(float ppu) { mPixelPerUnit = ppu; }
 
 	void RemoveAllCameras();
-	CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
-	CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
-	TemplateArgs CameraPtr AddCameraByType(CameraType camType, T &&...args) {
+	scene::CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
+	scene::CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
+	TemplateArgs scene::CameraPtr AddCameraByType(CameraType camType, T &&...args) {
 		return (camType == kCameraPerspective) ? AddPerspectiveCamera(std::forward<T>(args)...) : AddOthogonalCamera(std::forward<T>(args)...);
 	}
 
 	void RemoveAllLights();
-	SpotLightPtr AddSpotLight(unsigned camMask = -1);
-	PointLightPtr AddPointLight(unsigned camMask = -1);
-	DirectLightPtr AddDirectLight(unsigned camMask = -1);
+	scene::SpotLightPtr AddSpotLight(unsigned camMask = -1);
+	scene::PointLightPtr AddPointLight(unsigned camMask = -1);
+	scene::DirectLightPtr AddDirectLight(unsigned camMask = -1);
 public:
-	const std::vector<CameraPtr>& GetCameras() const;
+	const std::vector<scene::CameraPtr>& GetCameras() const;
 	size_t GetCameraCount() const { return mCameras.size(); }
-	CameraPtr GetCamera(size_t index) const { return GetCameras()[index];  }
-	CameraPtr GetDefCamera() const { return GetCameraCount() ? GetCamera(0) : nullptr;  }
+	scene::CameraPtr GetCamera(size_t index) const { return GetCameras()[index];  }
+	scene::CameraPtr GetDefCamera() const { return GetCameraCount() ? GetCamera(0) : nullptr;  }
 
-	const std::vector<ILightPtr>& GetLights() const;
+	const std::vector<scene::ILightPtr>& GetLights() const;
 	size_t GetLightCount() const { return mLights.size(); }
-	ILightPtr GetLight(size_t index) const { return GetLights()[index]; }
-	ILightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
+	scene::ILightPtr GetLight(size_t index) const { return GetLights()[index]; }
+	scene::ILightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
 private:
 	void ResortLights() const;
 	void ResortCameras() const;
@@ -43,8 +43,8 @@ private:
 	ResourceManager& mResMng;
 	float mPixelPerUnit = 100;
 
-	mutable std::vector<CameraPtr> mCameras;
-	mutable std::vector<ILightPtr> mLights;
+	mutable std::vector<scene::CameraPtr> mCameras;
+	mutable std::vector<scene::ILightPtr> mLights;
 	mutable bool mCamerasDirty, mLightsDirty;
 };
 

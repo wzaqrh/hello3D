@@ -6,6 +6,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
 typedef std::shared_ptr<class Font> FontPtr;
 typedef std::shared_ptr<struct FontCharactor> FontCharactorPtr;
@@ -50,4 +51,5 @@ private:
 	float mScale = 1;
 };
 
+}
 }

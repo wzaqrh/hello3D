@@ -9,8 +9,9 @@
 #include "core/resource/resource.h"
 
 namespace mir {
+namespace res {
 
-class Pass : public ImplementResource<IResource> 
+class Pass : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
 	struct CBufferEntry {
@@ -48,7 +49,7 @@ class Technique : public VectorAdapter<PassPtr, ImplementResource<IResource>>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddPass(PassPtr pass) { Add(pass); }
-	
+
 	TemplateArgs void UpdateConstBufferByName(T &&...args) {
 		for (auto& pass : mElements)
 			pass->UpdateConstBufferByName(std::forward<T>(args)...);
@@ -58,7 +59,7 @@ public:
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 };
 
-class MIR_CORE_API Material : public VectorAdapter<TechniquePtr, ImplementResource<IResource>>
+class MIR_CORE_API Shader : public VectorAdapter<TechniquePtr, ImplementResource<IResource>>
 {
 	friend class MaterialFactory;
 public:
@@ -71,4 +72,5 @@ private:
 	int mCurTechIdx = 0;
 };
 
+}
 }

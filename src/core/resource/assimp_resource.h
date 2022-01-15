@@ -32,10 +32,12 @@ enum TexturePbrType {
 	kTexturePbrMax = 6
 };
 
+namespace res {
+
 struct AiNode : public std::enable_shared_from_this<AiNode>
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	AiNode(const aiNode* rawNode, const size_t serializeIndex) 
+	AiNode(const aiNode* rawNode, const size_t serializeIndex)
 		: RawNode(rawNode), SerilizeIndex(serializeIndex) {}
 	void AddChild(const AiNodePtr& child) {
 		Children.push_back(child);
@@ -61,7 +63,7 @@ public:
 	std::vector<AssimpMeshPtr> Meshes;
 };
 
-struct AiScene : public ImplementResource<IResource> 
+struct AiScene : public ImplementResource<IResource>
 {
 	friend class AiSceneLoader;
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
@@ -90,4 +92,5 @@ public:
 		const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes = nullptr);
 };
 
+}
 }

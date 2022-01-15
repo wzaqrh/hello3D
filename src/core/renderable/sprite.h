@@ -7,8 +7,9 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
-class MIR_CORE_API Sprite : public RenderableSingleRenderOp 
+class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 {
 	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
@@ -35,4 +36,5 @@ private:
 	//bool mFlipY;
 };
 
+}
 }

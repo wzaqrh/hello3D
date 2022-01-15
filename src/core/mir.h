@@ -30,8 +30,8 @@ public:
 private:
 	Launch mLaunchMode;
 	RenderSystemPtr mRenderSys;
-	MaterialFactoryPtr mMaterialFac;
-	AiResourceFactoryPtr mAiResourceFac;
+	res::MaterialFactoryPtr mMaterialFac;
+	res::AiResourceFactoryPtr mAiResourceFac;
 	ResourceManagerPtr mResourceMng;
 	RenderPipelinePtr mRenderPipe;
 	RenderableFactoryPtr mRenderableFac;

@@ -7,14 +7,17 @@ namespace mir {
 #define DECLARE_CLASS(TYPE) class TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr; typedef TYPE* TYPE##RawPtr;
 
 DECLARE_STRUCT(IResource);
-DECLARE_STRUCT(Pass);
-DECLARE_STRUCT(Technique);
-DECLARE_STRUCT(Material);
-DECLARE_STRUCT(MaterialFactory);
+DECLARE_CLASS(ResourceManager);
+namespace res {
+DECLARE_CLASS(Pass);
+DECLARE_CLASS(Technique);
+DECLARE_CLASS(Shader);
+DECLARE_CLASS(MaterialFactory);
 
+DECLARE_CLASS(AssimpMesh);
 DECLARE_CLASS(AiNode);
 DECLARE_CLASS(AiScene);
 DECLARE_CLASS(AiResourceFactory);
-DECLARE_CLASS(ResourceManager);
+}
 
 }

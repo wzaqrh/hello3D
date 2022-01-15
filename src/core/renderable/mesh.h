@@ -6,6 +6,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
 class MIR_CORE_API Mesh : public RenderableSingleRenderOp 
 {
@@ -41,4 +42,5 @@ private:
 	std::vector<SubMesh> mSubMeshs;
 };
 
+}
 }

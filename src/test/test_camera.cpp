@@ -7,6 +7,7 @@
 #include "core/scene/camera.h"
 
 using namespace mir;
+using namespace mir::renderable;
 
 class TestCamera : public App
 {

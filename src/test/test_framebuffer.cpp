@@ -6,6 +6,7 @@
 #include "core/base/transform.h"
 
 using namespace mir;
+using namespace mir::renderable;
 
 class TestRT : public App
 {

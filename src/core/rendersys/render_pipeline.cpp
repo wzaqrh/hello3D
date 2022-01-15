@@ -39,12 +39,12 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 		MakeResFormats(kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
-	mGBufferSprite = Sprite::Create(__LaunchSync__, resMng, MAT_MODEL);
+	mGBufferSprite = renderable::Sprite::Create(__LaunchSync__, resMng, MAT_MODEL);
 	mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
 	mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
 }
 
-void RenderPipeline::BindPass(const PassPtr& pass)
+void RenderPipeline::BindPass(const res::PassPtr& pass)
 {
 	mRenderSys.SetProgram(pass->mProgram);
 
@@ -57,7 +57,7 @@ void RenderPipeline::BindPass(const PassPtr& pass)
 	else mRenderSys.SetSamplers(0, nullptr, 0);
 }
 
-void RenderPipeline::RenderPass(const PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op)
+void RenderPipeline::RenderPass(const res::PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op)
 {
 	auto lock = mStatesBlock.LockFrameBuffer(IF_OR(pass->mFrameBuffer, nullptr));
 
@@ -75,8 +75,8 @@ void RenderPipeline::RenderPass(const PassPtr& pass, const TextureVector& textur
 
 void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode)
 {
-	TechniquePtr tech = op.Material->CurTech();
-	std::vector<PassPtr> passes = tech->GetPassesByLightMode(lightMode);
+	res::TechniquePtr tech = op.Shader->CurTech();
+	std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes) {
 		//SetVertexLayout(pass->mInputLayout);
 		mRenderSys.SetVertexBuffers(op.VertexBuffers);
@@ -96,8 +96,8 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 	const cbPerLight* lightParam, cbPerFrame& globalParam)
 {
 	for (const auto& op : opQueue) {
-		if ((op.CameraMask & camMask) && op.Material->IsLoaded()) {
-			auto curTech = op.Material->CurTech();
+		if ((op.CameraMask & camMask) && op.Shader->IsLoaded()) {
+			auto curTech = op.Shader->CurTech();
 
 			globalParam.World = op.WorldTransform;
 			curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(globalParam));
@@ -109,7 +109,7 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 	}
 }
 
-static cbPerLight MakePerLight(const ILight& light)
+static cbPerLight MakePerLight(const scene::ILight& light)
 {
 	return light.MakeCbLight();
 }
@@ -122,14 +122,14 @@ static cbPerFrame& MakePerFrame(cbPerFrame& perFrameParam, const Eigen::Vector3f
 	perFrameParam.FrameBufferSize = Eigen::Vector4f(fbSize.x(), fbSize.y(), 1.0f / fbSize.x(), 1.0f / fbSize.y());
 	return perFrameParam;
 }
-static cbPerFrame MakePerFrame(const Camera& camera, const Eigen::Vector2i& fbSize)
+static cbPerFrame MakePerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize)
 {
 	cbPerFrame perFrameParam;
 	perFrameParam.View = camera.GetView();
 	perFrameParam.Projection = camera.GetProjection();
 	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
 }
-static cbPerFrame MakeReceiveShadowPerFrame(const Camera& camera, const Eigen::Vector2i& fbSize, const ILight& light, IFrameBufferPtr shadowMap)
+static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::ILight& light, IFrameBufferPtr shadowMap)
 {
 	cbPerFrame perFrameParam = MakePerFrame(camera, fbSize);
 	if (shadowMap) {
@@ -140,7 +140,7 @@ static cbPerFrame MakeReceiveShadowPerFrame(const Camera& camera, const Eigen::V
 	}
 	return perFrameParam;
 }
-static cbPerFrame MakeCastShadowPerFrame(const Camera& camera, const Eigen::Vector2i& fbSize, const ILight& light)
+static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::ILight& light)
 {
 	cbPerFrame perFrameParam;
 	{
@@ -150,7 +150,7 @@ static cbPerFrame MakeCastShadowPerFrame(const Camera& camera, const Eigen::Vect
 	}
 	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
 }
-void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const Camera& camera, 
+void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera,
 	const std::vector<ILightPtr>& lights)
 {
 	if (lights.empty()) return;
@@ -233,7 +233,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 #endif
 }
 
-void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const Camera& camera, const std::vector<ILightPtr>& lights)
+void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<ILightPtr>& lights)
 {
 	if (lights.empty()) return;
 

@@ -27,6 +27,12 @@ public:
 		}
 		return name;
 	}
+	int operator[](const std::string& macroName) const {
+		int result = 0;
+		auto find_it = std::find_if(Macros.begin(), Macros.end(), [&](const ShaderCompileMacro& v) { return v.Name == macroName; });
+		if (find_it != Macros.end()) result = boost::lexical_cast<int>(find_it->Definition);
+		return result;
+	}
 public:
 	std::string ShaderName;
 	std::string VariantName;

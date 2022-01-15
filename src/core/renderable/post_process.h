@@ -5,6 +5,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
 struct PostProcessVertex {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
@@ -30,7 +31,8 @@ public:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 protected:
 	IFrameBufferPtr mMainTex;
-	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
+	std::map<std::pair<res::PassPtr, int>, IVertexBufferPtr> mVertBufferByPass;
 };
 
+}
 }

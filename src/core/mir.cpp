@@ -23,8 +23,8 @@ bool Mir::Initialize(HWND hWnd) {
 		return false;
 	}
 
-	mMaterialFac = CreateInstance<MaterialFactory>();
-	mAiResourceFac = CreateInstance<AiResourceFactory>();
+	mMaterialFac = CreateInstance<res::MaterialFactory>();
+	mAiResourceFac = CreateInstance<res::AiResourceFactory>();
 	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
 	
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng);

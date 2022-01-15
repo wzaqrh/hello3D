@@ -6,6 +6,7 @@
 #include "core/base/uniform_struct.h"
 
 namespace mir {
+namespace scene {
 
 #define interface struct
 
@@ -70,4 +71,5 @@ public:
 	LightType GetType() const override { return kLightSpot; }
 };
 
+}
 }

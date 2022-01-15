@@ -4,6 +4,7 @@
 #include "core/base/transform.h"
 
 using namespace mir;
+using namespace mir::renderable;
 
 class TestGLTF : public App
 {
@@ -27,7 +28,7 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 
 void TestGLTF::OnPostInitDevice()
 {
-	mir::CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 
 	test1::res::model model;

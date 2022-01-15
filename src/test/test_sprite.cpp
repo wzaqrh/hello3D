@@ -4,6 +4,7 @@
 #include "core/renderable/sprite.h"
 
 using namespace mir;
+using namespace mir::renderable;
 
 class TestSprite : public App
 {
@@ -44,23 +45,23 @@ void TestSprite::OnPostInitDevice()
 		mSprite = mRendFac->CreateSprite();
 		mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
-		test1::res::png::SetPos(mSprite, mCamWinHSize, mCamWinHSize, mir::math::vec::anchor::RightTop());
+		test1::res::png::SetPos(mSprite, mCamWinHSize, mCamWinHSize, math::vec::anchor::RightTop());
 	}break;
 	case 2: {
 		mSprite = mRendFac->CreateSprite(test1::res::png::Kenny());
 
-		test1::res::png::SetPos(mSprite, mWinCenter, mCamWinHSize * 2, mir::math::vec::anchor::Center());
+		test1::res::png::SetPos(mSprite, mWinCenter, mCamWinHSize * 2, math::vec::anchor::Center());
 	}break;
 	case 3: {
 		mSprite = mRendFac->CreateSprite(test1::res::hdr::Kenny());//zlib
 
-		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mCamWinHSize, mir::math::vec::anchor::LeftTop());
+		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mCamWinHSize, math::vec::anchor::LeftTop());
 	}break;
 	case 4: {
 		mSprite = mRendFac->CreateSprite(test1::res::dds::Lenna());//bc1a
 
 		mSprite->SetPosition(mWinCenter);
-		mSprite->SetAnchor(mir::math::vec::anchor::Center());
+		mSprite->SetAnchor(math::vec::anchor::Center());
 	}break;
 	case 5: {
 		mSprite = mRendFac->CreateSprite(test1::res::dds::Kenny());//bc1a + mipmap

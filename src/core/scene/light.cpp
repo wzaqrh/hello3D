@@ -3,6 +3,7 @@
 #include "core/scene/camera.h"
 
 namespace mir {
+namespace scene {
 
 /********** DirectLight **********/
 DirectLight::DirectLight()
@@ -96,4 +97,5 @@ void SpotLight::SetAngle(float radian)
 	SetCutOff(cos(radian));
 }
 
+}
 }

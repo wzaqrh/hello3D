@@ -7,6 +7,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
 class MIR_CORE_API Cube : public RenderableSingleRenderOp
 {
@@ -30,4 +31,5 @@ private:
 	Eigen::Vector4f mColor;
 };
 
+}
 }

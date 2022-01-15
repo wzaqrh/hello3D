@@ -6,13 +6,14 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
 struct SkyboxVertex {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Eigen::Vector3f Pos;
 };
 
-class MIR_CORE_API SkyBox : public RenderableSingleRenderOp 
+class MIR_CORE_API SkyBox : public RenderableSingleRenderOp
 {
 	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
@@ -28,4 +29,5 @@ private:
 	ITexturePtr mLutMap, mDiffuseEnvMap;
 };
 
+}
 }

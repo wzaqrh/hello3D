@@ -3,7 +3,8 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-	
+namespace renderable {
+
 /********** Cube **********/
 Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
 	: Super(launchMode, resourceMng, matName)
@@ -58,4 +59,5 @@ void Cube::GenRenderOperation(RenderOperationQueue& opList)
 
 
 
+}
 }

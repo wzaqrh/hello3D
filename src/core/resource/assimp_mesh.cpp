@@ -4,6 +4,7 @@
 #include "core/base/debug.h"
 
 namespace mir {
+namespace res {
 
 AssimpMesh::AssimpMesh()
 {}
@@ -35,7 +36,7 @@ void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
 
 bool AssimpMesh::HasTexture(int slot) const
 {
-	return (slot < mTextures.Count()) 
+	return (slot < mTextures.Count())
 		&& mTextures[slot]
 		&& mTextures[slot]->IsLoaded();
 }
@@ -59,4 +60,5 @@ bool AssimpMesh::IsLoaded() const
 		&& mTextures.IsLoaded());
 }
 
+}
 }

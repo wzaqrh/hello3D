@@ -3,6 +3,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
+namespace renderable {
 
 /********** TSprite **********/
 Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
@@ -73,7 +74,7 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 		}
 		else {
 			mResourceMng.AddResourceLoadedObserver(texture, [this](IResourcePtr res) {
-				SetSize(mSize);	
+				SetSize(mSize);
 			});
 		}
 	}
@@ -98,4 +99,5 @@ void Sprite::GenRenderOperation(RenderOperationQueue& opList)
 	opList.AddOP(op);
 }
 
+}
 }

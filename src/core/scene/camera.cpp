@@ -6,6 +6,7 @@
 #include "test/unit_test/unit_test.h"
 
 namespace mir {
+namespace scene {
 
 Camera::Camera(ResourceManager& resMng)
 	: mResourceMng(resMng)
@@ -25,11 +26,11 @@ Camera::Camera(ResourceManager& resMng)
 }
 
 void Camera::InitAsPerspective(float aspect,
-	const Eigen::Vector3f& eyePos, 
-	const Eigen::Vector3f& length_forward, 
+	const Eigen::Vector3f& eyePos,
+	const Eigen::Vector3f& length_forward,
 	const Eigen::Vector2f& clipPlane,
 	float fov,
-	unsigned cameraMask) 
+	unsigned cameraMask)
 {
 	mType = kCameraPerspective;
 	SetClippingPlane(clipPlane);
@@ -40,8 +41,8 @@ void Camera::InitAsPerspective(float aspect,
 	mProjectionDirty = true;
 }
 void Camera::InitAsOthogonal(float aspect,
-	const Eigen::Vector3f& eyePos, 
-	const Eigen::Vector3f& length_forward, 
+	const Eigen::Vector3f& eyePos,
+	const Eigen::Vector3f& length_forward,
 	const Eigen::Vector2f& clipPlane,
 	float othoSize,
 	unsigned cameraMask)
@@ -218,12 +219,12 @@ const TransformPtr& Camera::GetTransform() const
 	mViewDirty = true;
 	return mTransform;
 }
-void Camera::SetSkyBox(const SkyBoxPtr& skybox)
+void Camera::SetSkyBox(const renderable::SkyBoxPtr& skybox)
 {
 	mSkyBox = skybox;
 }
 
-void Camera::AddPostProcessEffect(const PostProcessPtr& postEffect)
+void Camera::AddPostProcessEffect(const renderable::PostProcessPtr& postEffect)
 {
 	mPostProcessEffects.push_back(postEffect);
 }
@@ -251,4 +252,5 @@ IFrameBufferPtr Camera::SetOutput(float scale, std::vector<ResourceFormat> forma
 	return SetOutput(mResourceMng.CreateFrameBuffer(__LaunchSync__, (mResourceMng.WinSize().cast<float>() * scale).cast<int>(), formats));
 }
 
+}
 }

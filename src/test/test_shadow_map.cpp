@@ -8,6 +8,7 @@
 #include "test/unit_test/unit_test.h"
 
 using namespace mir;
+using namespace mir::renderable;
 
 class TestShadowMap : public App
 {

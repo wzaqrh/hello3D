@@ -12,6 +12,8 @@
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/resource_manager.h"
 
+using namespace mir::renderable;
+
 namespace mir {
 
 #define NotEmptyOr(Str, DefStr) (!Str.ShaderName.empty() ? Str : DefStr)
@@ -67,7 +69,7 @@ SkyBoxPtr RenderableFactory::CreateSkybox(string_cref imgpath, const MaterialLoa
 	return SkyBox::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_SKYBOX), imgpath);
 }
 
-PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName, Camera& camera)
+PostProcessPtr RenderableFactory::CreatePostProcessEffect(string_cref effectName, scene::Camera& camera)
 {
 	PostProcessPtr process;
 	return process;

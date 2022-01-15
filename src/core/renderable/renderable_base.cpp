@@ -3,6 +3,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
+namespace renderable {
 
 /********** TSprite **********/
 RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
@@ -11,7 +12,7 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 	, mCameraMask(-1)
 {
 	mTransform = CreateInstance<Transform>();
-	mMaterial = resourceMng.CreateMaterial(launchMode, matName);
+	mMaterial = resourceMng.CreateShader(launchMode, matName);
 }
 
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
@@ -34,7 +35,7 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	if (!IsLoaded()) return false;
 
 	op = RenderOperation{};
-	op.Material = mMaterial;
+	op.Shader = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
 	if (mTexture) op.Textures.Add(mTexture);
@@ -43,4 +44,5 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	return true;
 }
 
+}
 }

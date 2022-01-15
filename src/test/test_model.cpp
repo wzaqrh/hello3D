@@ -4,6 +4,7 @@
 #include "core/base/transform.h"
 
 using namespace mir;
+using namespace mir::renderable;
 
 class TestModel : public App
 {
@@ -67,7 +68,7 @@ void TestModel::OnPostInitDevice()
 	}break;
 	}
 
-	mir::CameraPtr camera = useOtho 
+	CameraPtr camera = useOtho 
 		? mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter))
 		: mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 

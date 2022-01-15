@@ -6,10 +6,11 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
+namespace renderable {
 
 struct AiAnimeNode 
 {
-	void Init(size_t serializeIndex, const AiNodePtr& node) {
+	void Init(size_t serializeIndex, const res::AiNodePtr& node) {
 		SerilizeIndex = serializeIndex;
 		ChannelIndex = -1;
 		LocalTransform = GlobalTransform = node->RawNode->mTransformation;
@@ -22,13 +23,13 @@ public:
 };
 struct AiAnimeTree 
 {
-	void Init(const std::vector<AiNodePtr>& serializeNodes) {
+	void Init(const std::vector<res::AiNodePtr>& serializeNodes) {
 		mNodeBySerializeIndex.assign(serializeNodes.begin(), serializeNodes.end());
 		mAnimeNodes.resize(serializeNodes.size());
 		for (size_t i = 0; i < serializeNodes.size(); ++i)
 			mAnimeNodes[i].Init(i, serializeNodes[i]);
 	}
-	AiAnimeNode& GetNode(const AiNodePtr& node) const  {
+	AiAnimeNode& GetNode(const res::AiNodePtr& node) const  {
 		return mAnimeNodes[node->SerilizeIndex];
 	}
 	AiAnimeNode& GetParent(AiAnimeNode& anode) const  {
@@ -36,7 +37,7 @@ struct AiAnimeTree
 		return mAnimeNodes[parentIndex];
 	}
 	AiAnimeNode& GetChild(AiAnimeNode& anode, size_t index) const  {
-		AiNodePtr child = mNodeBySerializeIndex[anode.SerilizeIndex]->Children[index];
+		res::AiNodePtr child = mNodeBySerializeIndex[anode.SerilizeIndex]->Children[index];
 		return mAnimeNodes[child->SerilizeIndex];
 	}
 	size_t GetChildCount(AiAnimeNode& node) const {
@@ -47,7 +48,7 @@ struct AiAnimeTree
 	}
 public:
 	mutable std::vector<AiAnimeNode> mAnimeNodes;
-	std::vector<AiNodePtr> mNodeBySerializeIndex;
+	std::vector<res::AiNodePtr> mNodeBySerializeIndex;
 };
 
 class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp 
@@ -64,10 +65,10 @@ public:
 	void Update(float dt);
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
-	const std::vector<aiMatrix4x4>& GetBoneMatrices(const AiNodePtr& node, size_t meshIndexIndex);
-	void DoDraw(const AiNodePtr& node, RenderOperationQueue& opList);
+	const std::vector<aiMatrix4x4>& GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex);
+	void DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList);
 private:
-	AiScenePtr mAiScene;
+	res::AiScenePtr mAiScene;
 	AiAnimeTree mAnimeTree;
 	std::function<void()> mInitAnimeTreeTask, mPlayAnimTask;
 
@@ -76,4 +77,5 @@ private:
 	std::vector<aiMatrix4x4> mTempBoneMatrices;
 };
 
+}
 }

@@ -18,6 +18,7 @@ namespace boost_filesystem = boost::filesystem;
 namespace boost_property_tree = boost::property_tree;
 
 namespace mir {
+namespace res {
 
 /********** ConstBufferDeclBuilder **********/
 struct ConstBufferDeclBuilder
@@ -177,7 +178,7 @@ private:
 		}
 	}
 	void VisitConfig(const boost_property_tree::ptree& nodeConfig) {
-		for (auto& it : boost::make_iterator_range(nodeConfig.equal_range("Config.Material"))) {
+		for (auto& it : boost::make_iterator_range(nodeConfig.equal_range("Config.Shader"))) {
 			VisitMaterial(it.second);
 		}
 	}
@@ -197,7 +198,7 @@ public:
 		mMatNameToAsset = CreateInstance<MaterialNameToAssetMapping>();
 		mMatNameToAsset->InitFromXmlFile("shader/Config.xml");
 	}
-	bool GetMaterialAsset(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matParam, 
+	bool GetMaterialAsset(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matParam,
 		MaterialAsset& materialAsset) {
 		bool result = IF_AND_OR(matParam.IsVariant(),
 			ParseShaderVariantXml(matParam, materialAsset.Shader),
@@ -366,7 +367,7 @@ private:
 				}
 			}
 			int dataSize = uniform.Data.size();
-			if (dataSize & 15) uniform.Data.resize((dataSize + 15)/16*16);
+			if (dataSize & 15) uniform.Data.resize((dataSize + 15) / 16 * 16);
 
 			uniform.Slot = node_uniform.get<int>("<xmlattr>.Slot", -1);
 
@@ -399,13 +400,13 @@ private:
 			for (auto& it : boost::make_iterator_range(node_texture.equal_range("Element"))) {
 				auto& node_element = it.second;
 				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
-				
+
 				SamplerFilterMode filter = (cmpFunc != kCompareNever) ? kSamplerFilterCmpMinMagLinearMipPoint : kSamplerFilterMinMagMipLinear;
 				filter = static_cast<SamplerFilterMode>(node_element.get<int>("<xmlattr>.Filter", filter));
 
 				int address = (cmpFunc != kCompareNever) ? kAddressBorder : kAddressClamp;
 				address = node_element.get<int>("<xmlattr>.Address", address);
-				
+
 				int slot = node_element.get<int>("<xmlattr>.Slot", -1);
 				samplerSet.AddOrSet(SamplerDesc::Make(
 					filter,
@@ -445,7 +446,7 @@ private:
 		}
 		pixelScd.Macros = vertexScd.Macros;
 
-#define SCD_ADD_MACRO(MACRO_NAME) vertexScd.MergeMacro(ShaderCompileMacro{ #MACRO_NAME, boost::lexical_cast<std::string>(MACRO_NAME) });
+	#define SCD_ADD_MACRO(MACRO_NAME) vertexScd.MergeMacro(ShaderCompileMacro{ #MACRO_NAME, boost::lexical_cast<std::string>(MACRO_NAME) });
 	#if defined DEBUG_SHADOW_CASTER
 		SCD_ADD_MACRO(DEBUG_SHADOW_CASTER);
 	#endif
@@ -489,7 +490,7 @@ private:
 			++index;
 		}
 	}
-	
+
 	void VisitCategory(const PropertyTreePath& nodeCategory, ConstVisitorRef vis, CategoryNode& categNode) {
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeCategory->equal_range("PROGRAM"))) {
@@ -508,7 +509,7 @@ private:
 			VisitInclude(it.second.data());
 		}
 		VisitCategory(nodeShader, vis, shaderNode[0]);
-		
+
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Category"))) {
 			VisitCategory(PropertyTreePath(nodeShader, it.second, index++), vis, shaderNode.Emplace());
@@ -530,7 +531,7 @@ private:
 			ParseShaderXml(it.second.data(), shaderNode);
 		}
 
-		VisitShader(nodeVariant, Visitor{false}, shaderNode);
+		VisitShader(nodeVariant, Visitor{ false }, shaderNode);
 	}
 	void VisitShaderVariants(const PropertyTreePath& nodeShaderVariant, const std::string& shaderName, const std::string& variantName, ShaderNode& shaderNode) {
 		for (auto& it : boost::make_iterator_range(nodeShaderVariant->equal_range("Variant"))) {
@@ -593,7 +594,7 @@ private:
 				}
 			}
 			else {
-				if (result = ParseShaderXml(matParam.ShaderName, shaderNode)) { 
+				if (result = ParseShaderXml(matParam.ShaderName, shaderNode)) {
 					for (auto& categNode : shaderNode) {
 						for (auto& techniqueNode : categNode) {
 							for (auto& passNode : techniqueNode) {
@@ -622,10 +623,10 @@ MaterialFactory::MaterialFactory()
 	mMatAssetMng = CreateInstance<mat_asset::MaterialAssetManager>();
 }
 
-MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode, 
-	ResourceManager& resourceMng, const mat_asset::MaterialAsset& matAsset, MaterialPtr matRes)
+ShaderPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
+	ResourceManager& resourceMng, const mat_asset::MaterialAsset& matAsset, ShaderPtr matRes)
 {
-	auto material = IF_OR(matRes, CreateInstance<Material>());
+	auto material = IF_OR(matRes, CreateInstance<Shader>());
 	material->SetPrepared();
 
 	const auto& shaderNode = matAsset.Shader;
@@ -671,20 +672,20 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
-	
+
 	if (launchMode == LaunchSync) material->SetLoaded();
 	else resourceMng.AddResourceDependencyRecursive(material);
 	return material;
 }
 
-MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
-	const MaterialLoadParam& matParam, MaterialPtr matRes) {
+ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resourceMng,
+	const MaterialLoadParam& matParam, ShaderPtr matRes) {
 	mat_asset::MaterialAsset matAsset;
 	if (mMatAssetMng->GetMaterialAsset(launchMode, resourceMng, matParam, matAsset)) {
 		return CreateMaterialByMaterialAsset(launchMode, resourceMng, matAsset, matRes);
 	}
 	else {
-		matRes = IF_OR(matRes, CreateInstance<Material>());
+		matRes = IF_OR(matRes, CreateInstance<Shader>());
 		matRes->SetLoaded(false);
 		return matRes;
 	}
@@ -706,7 +707,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 
 	size_t slot = 0;
 	for (auto buffer : proto.mConstantBuffers) {
-		if (!buffer.IsUnique) 
+		if (!buffer.IsUnique)
 			buffer.Buffer = resourceMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), buffer.Buffer->GetUsage(), Data::MakeNull());
 		result->AddConstBuffer(buffer.Buffer, buffer.Name, buffer.IsUnique, slot);
 		++slot;
@@ -726,11 +727,11 @@ TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager&
 	return result;
 }
 
-MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& resourceMng, const Material& proto)
+ShaderPtr MaterialFactory::CloneShader(Launch launchMode, ResourceManager& resourceMng, const Shader& proto)
 {
 	BOOST_ASSERT(!(launchMode == LaunchSync && !proto.IsLoaded()));
 
-	MaterialPtr result = CreateInstance<Material>();
+	ShaderPtr result = CreateInstance<Shader>();
 	for (const auto& protoTech : proto)
 		result->AddTechnique(this->CloneTechnique(launchMode, resourceMng, *protoTech));
 	result->mCurTechIdx = proto.mCurTechIdx;
@@ -740,5 +741,6 @@ MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& r
 	}
 	result->SetCurState(proto.GetCurState());
 	return result;
+}
 }
 }

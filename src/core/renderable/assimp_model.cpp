@@ -7,6 +7,7 @@
 #include "core/base/transform.h"
 
 namespace mir {
+namespace renderable {
 
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
 
@@ -142,7 +143,7 @@ void AssimpModel::LoadModel(const std::string& assetPath, const std::string& red
 	}
 }
 
-const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const AiNodePtr& node, size_t meshIndexIndex)
+const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex)
 {
 	BOOST_ASSERT(meshIndexIndex < node->MeshCount());
 	size_t meshIndex = node->RawNode->mMeshes[meshIndexIndex];
@@ -158,7 +159,7 @@ const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const AiNodePtr& no
 
 	for (size_t a = 0; a < rawMesh->mNumBones; ++a) {
 		const aiBone* rawBone = rawMesh->mBones[a];
-		AiNodePtr boneNode = mAiScene->mBoneNodesByName[rawBone->mName.data];
+		res::AiNodePtr boneNode = mAiScene->mBoneNodesByName[rawBone->mName.data];
 		if (boneNode) {
 			auto& boneInfo = mAnimeTree.GetNode(boneNode);// mNodeInfos[boneNode];
 			aiMatrix4x4 currentGlobalTransform = boneInfo.GlobalTransform;
@@ -171,8 +172,8 @@ const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const AiNodePtr& no
 	return mTempBoneMatrices;
 }
 
-void VisitNode(const AiNodePtr& curNode, const AiAnimeTree& animeTree, 
-	std::vector<AiNodePtr>& nodeVec, EvaluateTransforms& eval) 
+void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree,
+	std::vector<res::AiNodePtr>& nodeVec, EvaluateTransforms& eval)
 {
 	nodeVec.push_back(curNode);
 
@@ -198,12 +199,12 @@ void AssimpModel::Update(float dt)
 	if (auto task = std::move(mPlayAnimTask))
 		task();
 
-	std::vector<AiNodePtr> nodeVec;
+	std::vector<res::AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
-		std::queue<AiNodePtr> nodeQue;
+		std::queue<res::AiNodePtr> nodeQue;
 		nodeQue.push(mAiScene->mRootNode);
 		while (!nodeQue.empty()) {
-			AiNodePtr curNode = nodeQue.front();
+			res::AiNodePtr curNode = nodeQue.front();
 			nodeQue.pop();
 			nodeVec.push_back(curNode);
 			for (int i = 0; i < curNode->ChildCount(); ++i)
@@ -225,11 +226,11 @@ void AssimpModel::Update(float dt)
 	}
 
 	for (int i = 0; i < nodeVec.size(); ++i) {
-		AiNodePtr curNode = nodeVec[i];
+		res::AiNodePtr curNode = nodeVec[i];
 		auto& curANode = mAnimeTree.GetNode(curNode);
 
 		curANode.GlobalTransform = curANode.LocalTransform;
-		AiNodePtr iterNode = curNode->Parent.lock();
+		res::AiNodePtr iterNode = curNode->Parent.lock();
 		while (iterNode) {
 			auto& iterANode = mAnimeTree.GetNode(iterNode);
 			curANode.GlobalTransform = iterANode.LocalTransform * curANode.GlobalTransform;
@@ -264,7 +265,7 @@ void AssimpModel::PlayAnim(int Index)
 	else mPlayAnimTask = playAnimTask;
 }
 
-void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
+void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList)
 {
 	const auto& meshArr = *node;// mNodeInfos[node];
 	if (meshArr.MeshCount() > 0) {
@@ -281,7 +282,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 			 s.a4, s.b4, s.c4, s.d4;
 	#endif
 		for (int i = 0; i < meshArr.MeshCount(); i++) {
-			AssimpMeshPtr mesh = meshArr[i];
+			res::AssimpMeshPtr mesh = meshArr[i];
 			if (mesh->GetRawMesh()->HasBones()) {
 				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
 				size_t boneSize = boneMatArr.size(); 
@@ -332,7 +333,7 @@ void AssimpModel::DoDraw(const AiNodePtr& node, RenderOperationQueue& opList)
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
-				op.Material = mMaterial;
+				op.Shader = mMaterial;
 				op.IndexBuffer = mesh->GetIndexBuffer();
 				op.AddVertexBuffer(mesh->GetVBOSurface());
 				op.AddVertexBuffer(mesh->GetVBOSkeleton());
@@ -364,4 +365,5 @@ void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 		opList[i].WorldTransform = world;
 }
 
+}
 }

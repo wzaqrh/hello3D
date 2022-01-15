@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 namespace mir {
+namespace res {
 
 /********** AiSceneLoader **********/
 class AiSceneLoader {
@@ -18,7 +19,7 @@ public:
 		: mLaunchMode(launchMode), mResourceMng(resourceMng), mAsset(*asset), mResult(asset)
 	{}
 	~AiSceneLoader() {}
-	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource) 
+	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource)
 	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
@@ -44,7 +45,7 @@ public:
 
 		try
 		{
-#define IMPORT_LEFTHAND
+		#define IMPORT_LEFTHAND
 			constexpr uint32_t ImportFlags =
 			#if defined IMPORT_LEFTHAND
 				aiProcess_ConvertToLeftHanded |
@@ -61,13 +62,13 @@ public:
 			mAsset.mImporter = new Assimp::Importer;
 			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(imgFullpath.string(), ImportFlags);
 		}
-		catch (...) 
+		catch (...)
 		{
 			DEBUG_LOG_ERROR("Assimp::Importer ReadFile error");
 		}
 		return mAsset.mScene != nullptr;
 	}
-	AiScenePtr ExecuteSetupData() 
+	AiScenePtr ExecuteSetupData()
 	{
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
 		processNode(mAsset.mRootNode, mAsset.mScene);
@@ -115,9 +116,9 @@ private:
 			processNode(child, rawScene);
 		}
 	}
-	static void ReCalculateTangents(std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts, 
+	static void ReCalculateTangents(std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts,
 		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>& skeletonVerts,
-		const std::vector<uint32_t>& indices) 
+		const std::vector<uint32_t>& indices)
 	{
 		for (int i = 0; i < indices.size(); i += 3) {
 			//vbSurface
@@ -157,7 +158,7 @@ private:
 		std::vector<ITexturePtr> textures;
 		for (UINT i = 0; i < std::max<int>(1, mat->GetTextureCount(type)); i++)
 		{
-			aiString str; 
+			aiString str;
 		#if 0
 			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
 				continue;
@@ -198,7 +199,7 @@ private:
 				boost::filesystem::path texturePath(key);
 				if (texturePath.is_relative()) texturePath = redirectPath.append(texturePath.string());
 				else texturePath = redirectPath.append(texturePath.filename().string());
-				
+
 				if (!mRedirectResourceExt.empty())
 					texturePath = texturePath.replace_extension(mRedirectResourceExt);
 
@@ -233,7 +234,7 @@ private:
 		auto& mesh = *meshPtr;
 		mesh.mAiMesh = rawMesh;
 
-		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0,0,1,1));
+		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0, 0, 1, 1));
 		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
 		mesh.mFactors[kTexturePbrAo] = Eigen::Vector4f::Zero();
 		mesh.mTextures.Resize(kTexturePbrMax);
@@ -275,8 +276,8 @@ private:
 			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_EMISSION_COLOR, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrEmissive], &channel);
 		}
 
-#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
-#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
+	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
+	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
 		std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts(mesh.mSurfVertexs); surfVerts.resize(rawMesh->mNumVertices);
 		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>& skeletonVerts(mesh.mSkeletonVertexs); skeletonVerts.resize(rawMesh->mNumVertices);
 		for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
@@ -349,7 +350,7 @@ private:
 			std::vector<int> spMap(skeletonVerts.size(), 0);
 			for (size_t boneId = 0; boneId < rawMesh->mNumBones; ++boneId) {
 				const aiBone* bone = rawMesh->mBones[boneId];
-				if (bone->mWeights == nullptr) 
+				if (bone->mWeights == nullptr)
 					continue;
 				for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
 					const aiVertexWeight& vw = bone->mWeights[weightIndex];
@@ -398,7 +399,7 @@ private:
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** AiAssetManager **********/
 
-AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng, 
+AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng,
 	const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes)
 {
 	AiScenePtr res = IF_OR(aiRes, CreateInstance<AiScene>());
@@ -406,7 +407,7 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 	if (launchMode == LaunchAsync) {
 		res->SetPrepared();
 		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") %assetPath %redirectRes).str());
+			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") % assetPath %redirectRes).str());
 			if (loader->ExecuteLoadRawData(assetPath, redirectRes) && loader->ExecuteSetupData()) {
 				return true;
 			}
@@ -414,10 +415,11 @@ AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& 
 		}, res);
 	}
 	else {
-		TIME_PROFILE((boost::format("aiResFac.CreateAiScene %1% %2%") %assetPath %redirectRes).str());
+		TIME_PROFILE((boost::format("aiResFac.CreateAiScene %1% %2%") % assetPath %redirectRes).str());
 		res->SetLoaded(nullptr != loader->Execute(assetPath, redirectRes));
 	}
 	return res;
 }
 
+}
 }

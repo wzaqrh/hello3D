@@ -36,7 +36,7 @@ void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
 }
 
 /********** ResourceManager **********/
-ResourceManager::ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac, AiResourceFactory& aiResFac)
+ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& materialFac, res::AiResourceFactory& aiResFac)
 	: mRenderSys(renderSys)
 	, mMaterialFac(materialFac)
 	, mAiResourceFac(aiResFac)
@@ -69,7 +69,7 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 		if (res->IsLoading()) {
 			ResourceLoadTaskContext ctx;
 			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, ctx = this->mLoadTaskCtxByRes[res.get()]);
-			if (ctx.Res) 
+			if (ctx.Res)
 			{
 				auto workExecute = std::move(ctx.WorkThreadJob->Execute);
 				if (workExecute) {
@@ -79,9 +79,9 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 				BOOST_ASSERT(ctx.WorkThreadJob->Execute == nullptr);
 
 				if (ctx.WorkThreadJob->Result.valid()
-					&& ctx.WorkThreadJob->Result.wait_for(std::chrono::milliseconds(0)) != std::future_status::timeout) 
+					&& ctx.WorkThreadJob->Result.wait_for(std::chrono::milliseconds(0)) != std::future_status::timeout)
 				{
-					if (ctx.WorkThreadJob->Result.get()) 
+					if (ctx.WorkThreadJob->Result.get())
 					{
 						auto mainExecute = std::move(ctx.MainThreadJob->Execute);
 						if (mainExecute) {
@@ -154,16 +154,16 @@ void ResourceManager::AddResourceDependencyRecursive(IResourcePtr to) ThreadSafe
 			size_t prev_position = position;
 			position = depends.size();
 			for (size_t i = prev_position; i < position; ++i) {
-				if (depends[i]) 
+				if (depends[i])
 					depends[i]->GetLoadDependencies(depends);
 			}
 		}
 		if (!depends.empty()) {
 			ATOMIC_STATEMENT(mResDependGraphLock,
 				this->mResDependencyGraph.AddLink(to, IF_AND_NULL(depends[0] && !depends[0]->IsLoaded(), depends[0]));
-				for (auto& from : boost::make_iterator_range(depends.begin() + 1, depends.end()))
-					if (from && !from->IsLoaded()) 
-						this->mResDependencyGraph.AddLink(to, from);
+			for (auto& from : boost::make_iterator_range(depends.begin() + 1, depends.end()))
+				if (from && !from->IsLoaded())
+					this->mResDependencyGraph.AddLink(to, from);
 			);
 		}
 		else {
@@ -176,7 +176,7 @@ void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from) 
 {
 	if (to && !to->IsLoadComplete()) {
 		to->SetLoading();
-		ATOMIC_STATEMENT(mResDependGraphLock, 
+		ATOMIC_STATEMENT(mResDependGraphLock,
 			this->mResDependencyGraph.AddLink(to, IF_AND_NULL(from && !from->IsLoaded(), from)));
 	}
 }
@@ -184,12 +184,12 @@ void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCa
 {
 	AddResourceDependency(res, dependRes);
 	DEBUG_SET_CALL(res, launchMode);
-	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, 
+	ATOMIC_STATEMENT(mLoadTaskCtxMapLock,
 		this->mLoadTaskCtxByRes[res.get()].Init(launchMode, res, loadResCb, mThreadPool));
 }
 void ResourceManager::AddResourceLoadedObserver(IResourcePtr res, const ResourceLoadedCallback& resLoadedCB)
 {
-	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, 
+	ATOMIC_STATEMENT(mLoadTaskCtxMapLock,
 		this->mLoadTaskCtxByRes[res.get()].AddResourceLoadedCallback(resLoadedCB));
 }
 
@@ -229,13 +229,13 @@ inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	std::string filepath = "shader/asm/" + platform + "/" + asmName;
 	return boost::filesystem::system_complete(filepath);
 }
-IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
+IProgramPtr ResourceManager::_LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob,
 	const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 #if defined MIR_TIME_DEBUG
-	std::string msg = (boost::format("resMng._LoadProgram %1% %2% %3%") %name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str();
+	std::string msg = (boost::format("resMng._LoadProgram %1% %2% %3%") % name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str();
 	for (auto& macro : vertexSCD.Macros)
-		msg += (boost::format(" %1%=%2%") %macro.Name %macro.Definition).str();
+		msg += (boost::format(" %1%=%2%") % macro.Name %macro.Definition).str();
 	TIME_PROFILE(msg);
 #endif
 
@@ -306,13 +306,13 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode,
 	ProgramKey key{ name, vertexSCD, pixelSCD };
 	ATOMIC_STATEMENT(mProgramMapLock,
 		program = this->mProgramByKey[key];
-		if (program == nullptr) {
-			program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
-			this->mProgramByKey[key] = program;
-			DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str());
-			DEBUG_SET_CALL(program, launchMode);
-			resNeedLoad = true;
-		}
+	if (program == nullptr) {
+		program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
+		this->mProgramByKey[key] = program;
+		DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") % name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str());
+		DEBUG_SET_CALL(program, launchMode);
+		resNeedLoad = true;
+	}
 	);
 	if (resNeedLoad) {
 		if (launchMode == LaunchAsync) {
@@ -328,12 +328,12 @@ IProgramPtr ResourceManager::CreateProgram(Launch launchMode,
 }
 
 /********** Create Texture **********/
-ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
+ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob,
 	const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
-	TIME_PROFILE((boost::format("resMng._LoadTextureByFile %1% %2% %3%") %imgFullpath %format %autoGenMipmap).str());
+	TIME_PROFILE((boost::format("resMng._LoadTextureByFile %1% %2% %3%") % imgFullpath %format %autoGenMipmap).str());
 	ITexturePtr ret = nullptr;
-	
+
 	FILE* fd = fopen(imgFullpath.c_str(), "rb"); BOOST_ASSERT(fd);
 	if (fd) {
 		//this->mTexLock.lock();
@@ -346,16 +346,16 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 		switch (ilFileType) {
 		case IL_DDS:
 		case IL_TGA:
-		case IL_HDR: 
+		case IL_HDR:
 		case IL_KTX:
-			ilSetInteger(IL_KEEP_DXTC_DATA, IL_TRUE); 
+			ilSetInteger(IL_KEEP_DXTC_DATA, IL_TRUE);
 			break;
-		default: 
+		default:
 			break;
 		}
 		BOOST_ASSERT(il_helper::CheckLastError());
-		
-		if (ilFileType != IL_TYPE_UNKNOWN && ilLoadF(ilFileType, fd)) 
+
+		if (ilFileType != IL_TYPE_UNKNOWN && ilLoadF(ilFileType, fd))
 		{
 			ILuint width = ilGetInteger(IL_IMAGE_WIDTH),
 				height = ilGetInteger(IL_IMAGE_HEIGHT),
@@ -400,8 +400,8 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 				if (convertFormat != kFormatUnknown)
 					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));
 				int faceSize = width * height * bpp;
-				 
-				auto& bytes = nextJob ? nextJob->Bytes : this->mTempBytes; 
+
+				auto& bytes = IF_AND_OR(nextJob, nextJob->Bytes, this->mTempBytes);//nextJob非空为异步 
 				bytes.resize(faceSize * faceCount * 2/*2 > 1+1/2+1/4+1/8...1/2n*/);
 				size_t bytes_position = 0;
 
@@ -415,9 +415,9 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 
 						//size_t mip_width = width >> mip, mip_height = height >> mip;
 						ILuint mip_width = ilGetInteger(IL_IMAGE_WIDTH),
-							  mip_height = ilGetInteger(IL_IMAGE_HEIGHT);
+							mip_height = ilGetInteger(IL_IMAGE_HEIGHT);
 						auto& dataFM = datas[face * mipCount + mip];
-						if (convertFormat == kFormatUnknown) 
+						if (convertFormat == kFormatUnknown)
 						{
 							//直接使用
 							size_t sub_res_size = 0;
@@ -430,15 +430,15 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 
 									BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
 									ilGetDXTCData(&bytes[bytes_position], sub_res_size, dxtFormat);
-									
+
 									dataFM.Bytes = &bytes[bytes_position];
-									
+
 									size_t rowPitch, slicePitch;
 									bool res = d3d::ComputePitch(static_cast<DXGI_FORMAT>(format), mip_width, mip_height,
 										rowPitch, slicePitch, 0);
 									BOOST_ASSERT(res);
 									dataFM.Size = rowPitch;
-									
+
 									bytes_position += sub_res_size;
 								}
 								ilGetError();
@@ -466,10 +466,10 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 							//转换格式
 							size_t sub_res_size = mip_height * mip_width * bpp;
 							BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
-							ilCopyPixels(0, 0, 0, 
-								mip_width, mip_height, 1, 
+							ilCopyPixels(0, 0, 0,
+								mip_width, mip_height, 1,
 								convertImageFormat, convertImageType, &bytes[bytes_position]);
-							
+
 							dataFM.Bytes = &bytes[bytes_position];
 							dataFM.Size = mip_width * bpp;
 							bytes_position += sub_res_size;
@@ -481,12 +481,12 @@ ITexturePtr ResourceManager::_LoadTextureByFile(ITexturePtr texture, LoadResourc
 					if (mipCount == 1 && autoGenMipmap)
 						mipCount = -1;
 					if (nextJob == nullptr) {
-						ret = mRenderSys.LoadTexture(texture, format, 
+						ret = mRenderSys.LoadTexture(texture, format,
 							Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
 					}
 					else {
 						nextJob->InitSync([=](IResourcePtr res, LoadResourceJobPtr nullJob)->bool {
-							return nullptr != mRenderSys.LoadTexture(texture, format, 
+							return nullptr != mRenderSys.LoadTexture(texture, format,
 								Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
 						});
 						ret = texture;
@@ -513,14 +513,14 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 	bool resNeedLoad = false;
 	ITexturePtr texture = nullptr;
 	ATOMIC_STATEMENT(mTextureMapLock,
-		texture = this->mTextureByPath[key];
-		if (texture == nullptr) {
-			texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
-			this->mTextureByPath[key] = texture;
-			DEBUG_SET_RES_PATH(texture, (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str());
-			DEBUG_SET_CALL(texture, launchMode);
-			resNeedLoad = true;
-		}
+		texture = this->mTextureByKey[key];
+	if (texture == nullptr) {
+		texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
+		this->mTextureByKey[key] = texture;
+		DEBUG_SET_RES_PATH(texture, (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str());
+		DEBUG_SET_CALL(texture, launchMode);
+		resNeedLoad = true;
+	}
 	);
 	if (resNeedLoad) {
 		if (launchMode == LaunchAsync) {
@@ -534,46 +534,46 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 	return texture;
 }
 
-/********** Create Material **********/
-MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe ThreadSafe
+/********** Create Shader **********/
+res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe ThreadSafe
 {
 	bool resNeedLoad = false;
-	MaterialPtr material = nullptr;
-	ATOMIC_STATEMENT(mMaterialMapLock, 
+	res::ShaderPtr material = nullptr;
+	ATOMIC_STATEMENT(mMaterialMapLock,
 		material = this->mMaterialByName[matName];
-		if (material == nullptr) {
-			material = CreateInstance<Material>();
-			this->mMaterialByName[matName] = material;
-			DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %matName.ShaderName %matName.CalcVariantName()).str());
-			DEBUG_SET_CALL(material, launchMode);
-			resNeedLoad = true;
-		}
+	if (material == nullptr) {
+		material = CreateInstance<res::Shader>();
+		this->mMaterialByName[matName] = material;
+		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") % matName.ShaderName %matName.CalcVariantName()).str());
+		DEBUG_SET_CALL(material, launchMode);
+		resNeedLoad = true;
+	}
 	);
 	if (resNeedLoad) {
-		this->mMaterialFac.CreateMaterial(launchMode, *this, matName, material);
+		this->mMaterialFac.CreateShader(launchMode, *this, matName, material);
 	}
 	return material;
 }
-MaterialPtr ResourceManager::CloneMaterial(Launch launchMode, const Material& material) ThreadSafe
+res::ShaderPtr ResourceManager::CloneShader(Launch launchMode, const res::Shader& material) ThreadSafe
 {
-	return this->mMaterialFac.CloneMaterial(launchMode, *this, material);
+	return this->mMaterialFac.CloneShader(launchMode, *this, material);
 }
 
 /********** Create AiScene **********/
-AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe 
+res::AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
 {
 	bool resNeedLoad = false;
-	AiScenePtr aiRes = nullptr;
+	res::AiScenePtr aiRes = nullptr;
 	AiResourceKey key{ assetPath, redirectRes };
-	ATOMIC_STATEMENT(mAiSceneMapLock, 
+	ATOMIC_STATEMENT(mAiSceneMapLock,
 		aiRes = this->mAiSceneByKey[key];
-		if (aiRes == nullptr) {
-			aiRes = CreateInstance<AiScene>();
-			this->mAiSceneByKey[key] = aiRes;
-			DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
-			DEBUG_SET_CALL(aiRes, launchMode);
-			resNeedLoad = true;
-		}
+	if (aiRes == nullptr) {
+		aiRes = CreateInstance<res::AiScene>();
+		this->mAiSceneByKey[key] = aiRes;
+		DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") % assetPath %redirectRes).str());
+		DEBUG_SET_CALL(aiRes, launchMode);
+		resNeedLoad = true;
+	}
 	);
 	if (resNeedLoad) {
 		this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes, aiRes);

@@ -22,10 +22,10 @@ struct RenderOperation {
 		VertexBuffers.push_back(vbo);
 	}
 public:
-	MaterialPtr Material;
+	res::ShaderPtr Shader;
 	
 	std::vector<IVertexBufferPtr> VertexBuffers;
-	std::map<std::pair<PassPtr, int>, IVertexBufferPtr> VertBufferByPass;
+	std::map<std::pair<res::PassPtr, int>, IVertexBufferPtr> VertBufferByPass;
 	
 	IIndexBufferPtr IndexBuffer;
 	short IndexPos, IndexCount, IndexBase;

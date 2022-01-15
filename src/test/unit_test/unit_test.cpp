@@ -60,7 +60,7 @@ void TestViewProjectionWithCases(const Eigen::Matrix4f& view, const Eigen::Matri
 		pos = posArr[i];
 	}
 }
-void CompareLightCameraByViewProjection(const ILight& dir_light, const Camera& camera, Eigen::Vector2i size, std::vector<Eigen::Vector4f> positions)
+void CompareLightCameraByViewProjection(const scene::ILight& dir_light, const Camera& camera, Eigen::Vector2i size, std::vector<Eigen::Vector4f> positions)
 {
 	constexpr bool castShadow = true;
 //#define ONLY_CHECK_PROJ

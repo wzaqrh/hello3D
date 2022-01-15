@@ -5,14 +5,15 @@
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
 
+using namespace mir::scene;
+
 namespace mir {
 
 SceneManager::SceneManager(ResourceManager& resMng)
 	: mResMng(resMng)
 	, mCamerasDirty(false)
 	, mLightsDirty(false)
-{
-}
+{}
 
 void SceneManager::RemoveAllCameras()
 {

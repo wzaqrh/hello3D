@@ -2,6 +2,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
+namespace renderable {
 
 /********** Mesh **********/
 Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, int vertCount, int indexCount)
@@ -39,7 +40,7 @@ void Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	for (int i = 0; i < mSubMeshs.size(); ++i) {
 		if (mSubMeshs[i].IndiceCount > 0) {
 			RenderOperation op = {};
-			op.Material = mMaterial;
+			op.Shader = mMaterial;
 			op.IndexBuffer = mIndexBuffer;
 			op.AddVertexBuffer(mVertexBuffer);
 			op.Textures = mSubMeshs[i].Textures;
@@ -135,4 +136,5 @@ void Mesh::SetTexture(int slot, ITexturePtr texture, int subMeshIndex)
 	submesh.Textures[slot] = texture;
 }
 
+}
 }

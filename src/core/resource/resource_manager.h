@@ -18,13 +18,12 @@
 #include "core/resource/material_name.h"
 
 namespace mir {
-
 DECLARE_STRUCT(ThreadPool);
 DECLARE_STRUCT(LoadResourceJob);
 
 typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
 typedef std::function<void(IResourcePtr res)> ResourceLoadedCallback;
-struct LoadResourceJob 
+struct LoadResourceJob
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Init(Launch launchMode, LoadResourceCallback loadResCb);
@@ -36,7 +35,7 @@ public:
 	std::weak_ptr<ThreadPool> Pool;
 };
 
-class MIR_CORE_API ResourceManager : boost::noncopyable 
+class MIR_CORE_API ResourceManager : boost::noncopyable
 {
 	struct ResourceLoadTaskContext {
 		ResourceLoadTaskContext() {
@@ -63,7 +62,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable
 	};
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	ResourceManager(RenderSystem& renderSys, MaterialFactory& materialFac, AiResourceFactory& aiResFac);
+	ResourceManager(RenderSystem& renderSys, res::MaterialFactory& materialFac, res::AiResourceFactory& aiResFac);
 	~ResourceManager();
 	void Dispose() ThreadSafe;
 	void UpdateForLoading() ThreadSafe;
@@ -121,7 +120,7 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler, ThreadSafe);
 
-	IProgramPtr CreateProgram(Launch launchMode, const std::string& name, 
+	IProgramPtr CreateProgram(Launch launchMode, const std::string& name,
 		ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe);
 
@@ -130,7 +129,7 @@ public:
 		res->SetLoaded(nullptr != mRenderSys.LoadTexture(res, format, std::forward<T>(args)...));
 		return std::static_pointer_cast<ITexture>(res);
 	}
-	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath, 
+	ITexturePtr CreateTextureByFile(Launch launchMode, const std::string& filepath,
 		ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(ITexturePtr, CreateTextureByFile, ThreadSafe);
 
@@ -145,20 +144,20 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	MaterialPtr CreateMaterial(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(MaterialPtr, CreateMaterial, ThreadSafe);
-	MaterialPtr CloneMaterial(Launch launchMode, const Material& material) ThreadSafe;
+	res::ShaderPtr CreateShader(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
+	res::ShaderPtr CloneShader(Launch launchMode, const res::Shader& material) ThreadSafe;
 
-	AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
+	res::AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 private:
-	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob, 
+	IProgramPtr _LoadProgram(IProgramPtr program, LoadResourceJobPtr nextJob,
 		const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
-	ITexturePtr _LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob, 
+	ITexturePtr _LoadTextureByFile(ITexturePtr texture, LoadResourceJobPtr nextJob,
 		const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
 private:
 	RenderSystem& mRenderSys;
-	MaterialFactory& mMaterialFac;
-	AiResourceFactory& mAiResourceFac;
+	res::MaterialFactory& mMaterialFac;
+	res::AiResourceFactory& mAiResourceFac;
 	class ResourceDependencyGraph {
 		typedef IResourcePtr ValueType;
 		typedef const ValueType& ConstReference;
@@ -270,9 +269,8 @@ private:
 		}
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
-	std::map<std::string, ITexturePtr> mTextureByPath;
-	std::mutex mTexLock;
-	std::map<MaterialLoadParam, MaterialPtr> mMaterialByName;
+	std::map<std::string, ITexturePtr> mTextureByKey;
+	std::map<MaterialLoadParam, res::ShaderPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;
 		bool operator<(const AiResourceKey& other) const {
@@ -280,7 +278,7 @@ private:
 			return RedirectResource < other.RedirectResource;
 		}
 	};
-	std::map<AiResourceKey, AiScenePtr> mAiSceneByKey;
+	std::map<AiResourceKey, res::AiScenePtr> mAiSceneByKey;
 	std::atomic<bool> mProgramMapLock, mTextureMapLock, mMaterialMapLock, mAiSceneMapLock;
 	std::atomic<bool> mLoadTaskCtxMapLock, mResDependGraphLock;
 };

@@ -6,6 +6,7 @@
 #include "core/renderable/renderable.h"
 
 namespace mir {
+namespace renderable {
 
 struct MIR_CORE_API RenderableSingleRenderOp : public IRenderable
 {
@@ -19,7 +20,7 @@ public:
 
 	unsigned GetCameraMask() const { return mCameraMask; }
 	const ITexturePtr& GetTexture() const { return mTexture; }
-	const MaterialPtr& GetMaterial() const { return mMaterial; }
+	const res::ShaderPtr& GetMaterial() const { return mMaterial; }
 	const TransformPtr& GetTransform() const { return mTransform; }
 protected:
 	bool IsLoaded() const;
@@ -29,10 +30,11 @@ protected:
 	const Launch mLaunchMode;
 	unsigned mCameraMask;
 	TransformPtr mTransform;
-	MaterialPtr mMaterial;
+	res::ShaderPtr mMaterial;
 	ITexturePtr mTexture;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 };
 
+}
 }

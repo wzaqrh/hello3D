@@ -7,7 +7,6 @@
 #include "core/base/declare_macros.h"
 
 namespace mir {
-
 enum RenderingPath {
 	kRenderPathForward,
 	kRenderPathDeffered
@@ -17,6 +16,8 @@ enum CameraType {
 	kCameraPerspective,
 	kCameraOthogonal
 };
+
+namespace scene {
 
 class MIR_CORE_API Camera : boost::noncopyable
 {
@@ -52,16 +53,16 @@ public:
 	void SetRenderingPath(RenderingPath path) { mRenderPath = path; }
 	RenderingPath GetRenderingPath() const { return mRenderPath; }
 
-	void SetSkyBox(const SkyBoxPtr& skybox);
-	void AddPostProcessEffect(const PostProcessPtr& postEffect);
+	void SetSkyBox(const renderable::SkyBoxPtr& skybox);
+	void AddPostProcessEffect(const renderable::PostProcessPtr& postEffect);
 	IFrameBufferPtr FetchOutput2PostProcess(ResourceFormat format = kFormatR8G8B8A8UNorm);
 	IFrameBufferPtr SetOutput(float scale = 1, 
 		std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(IFrameBufferPtr output);
 public:
 	const TransformPtr& GetTransform() const;
-	const SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
-	const std::vector<PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
+	const renderable::SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
+	const std::vector<renderable::PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
 	const IFrameBufferPtr& GetOutput2PostProcess() const { return mPostProcessInput; }
 	const IFrameBufferPtr& GetOutput() const { return mOutput; }
 	
@@ -94,8 +95,8 @@ private:
 private:
 	ResourceManager& mResourceMng;
 	TransformPtr mTransform;
-	SkyBoxPtr mSkyBox;
-	std::vector<PostProcessPtr> mPostProcessEffects;
+	renderable::SkyBoxPtr mSkyBox;
+	std::vector<renderable::PostProcessPtr> mPostProcessEffects;
 	IFrameBufferPtr mPostProcessInput, mOutput;
 	
 	RenderingPath mRenderPath;
@@ -111,4 +112,5 @@ private:
 	mutable bool mViewDirty, mProjectionDirty;
 };
 
+}
 }

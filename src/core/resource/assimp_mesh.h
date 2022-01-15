@@ -10,6 +10,7 @@
 #include "core/rendersys/texture.h"
 
 namespace mir {
+namespace res {
 
 class MIR_CORE_API AssimpMesh
 {
@@ -45,6 +46,6 @@ private:
 	Eigen::Vector3f mMaxPos, mMinPos;
 #endif
 };
-typedef std::shared_ptr<AssimpMesh> AssimpMeshPtr;
 
+}
 }
