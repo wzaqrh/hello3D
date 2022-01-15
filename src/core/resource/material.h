@@ -4,37 +4,31 @@
 #include "core/predeclare.h"
 #include "core/base/declare_macros.h"
 #include "core/base/base_type.h"
+#include "core/base/template/container_adapter.h"
 #include "core/rendersys/texture.h"
 #include "core/resource/resource.h"
 
 namespace mir {
 
-struct CBufferEntry 
-{
-	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	static CBufferEntry MakeEmpty() {
-		return CBufferEntry{nullptr, "", false};
-	}
-	static CBufferEntry Make(IContantBufferPtr buffer, const std::string& name, bool isUnique) {
-		return CBufferEntry{buffer, name, isUnique};
-	}
-	bool IsValid() const { return Buffer != nullptr; }
-public:
-	IContantBufferPtr Buffer;
-	std::string Name;
-	bool IsUnique;
-};
-#define MAKE_CBNAME(V) #V
-
 class Pass : public ImplementResource<IResource> 
 {
 	friend class MaterialFactory;
+	struct CBufferEntry {
+		MIR_MAKE_ALIGNED_OPERATOR_NEW;
+		bool IsValid() const { return Buffer != nullptr; }
+	public:
+		IContantBufferPtr Buffer;
+		std::string Name;
+		bool IsUnique;
+	};
+	struct CBufferEntryVector : public VectorAdapter<CBufferEntry> {};
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void AddConstBuffer(const CBufferEntry& cbuffer, int slot);
+	void AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot);
 	void AddSampler(ISamplerStatePtr sampler);
 	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 
+	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
@@ -43,43 +37,37 @@ public:
 	PrimitiveTopology mTopoLogy;
 	IInputLayoutPtr mInputLayout;
 	std::vector<ISamplerStatePtr> mSamplers;
-	std::vector<CBufferEntry> mConstantBuffers;
+	CBufferEntryVector mConstantBuffers;
 	IProgramPtr mProgram;
 	IFrameBufferPtr mFrameBuffer;
 };
 
-class Technique : public ImplementResource<IResource>
+class Technique : public VectorAdapter<PassPtr, ImplementResource<IResource>>
 {
 	friend class MaterialFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void AddPass(PassPtr pass) {
-		mPasses.push_back(pass);
-	}
+	void AddPass(PassPtr pass) { Add(pass); }
+	
 	TemplateArgs void UpdateConstBufferByName(T &&...args) {
-		for (auto& pass : mPasses)
+		for (auto& pass : mElements)
 			pass->UpdateConstBufferByName(std::forward<T>(args)...);
 	}
 
-	PassPtr GetPassByLightMode(const std::string& lightMode);
+	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
-public:
-	std::vector<PassPtr> mPasses;
 };
 
-class MIR_CORE_API Material : public ImplementResource<IResource> 
+class MIR_CORE_API Material : public VectorAdapter<TechniquePtr, ImplementResource<IResource>>
 {
 	friend class MaterialFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void AddTechnique(TechniquePtr technique) {
-		mTechniques.push_back(technique);
-	}
-	TechniquePtr SetCurTechByIdx(int idx);
+	void AddTechnique(TechniquePtr technique) { Add(technique); }
 
-	TechniquePtr CurTech() const { return mTechniques[mCurTechIdx]; }
+	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
+	TechniquePtr CurTech() const { return mElements[mCurTechIdx]; }
 private:
-	std::vector<TechniquePtr> mTechniques;
 	int mCurTechIdx = 0;
 };
 

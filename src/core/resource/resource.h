@@ -40,17 +40,23 @@ interface MIR_CORE_API IResource : boost::noncopyable
 	virtual ~IResource() {}
 	virtual ResourceState GetCurState() const = 0;
 	virtual void SetCurState(ResourceState state) = 0;
+	virtual void GetLoadDependencies(std::vector<std::shared_ptr<IResource>>& depends) {}
 public:
 	void SetPrepared() {
 		SetCurState(kResourceStatePrepared);
+	}
+	void SetLoading() {
+		SetCurState(kResourceStateLoading);
 	}
 	void SetLoaded(bool sucess = true) {
 		SetCurState(sucess ? kResourceStateLoadedSuccess : kResourceStateLoadedFailed);
 	}
 
+	bool IsPrepared() const { return GetCurState() >= kResourceStatePrepared; }
 	bool IsPreparedNeedLoading() const { return GetCurState() == kResourceStatePrepared; }
+	bool IsLoadingOrComplete() const{ return GetCurState() >= kResourceStateLoading; }
 	bool IsLoading() const { return GetCurState() == kResourceStateLoading; }
-	bool IsLoadComplete() const { return IsLoaded() || IsLoadedFailed(); }
+	bool IsLoadComplete() const { return GetCurState() >= kResourceStateLoadedSuccess; }
 	bool IsLoaded() const { return GetCurState() == kResourceStateLoadedSuccess; }
 	bool IsLoadedFailed() const { return GetCurState() == kResourceStateLoadedFailed; }
 

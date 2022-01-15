@@ -65,7 +65,8 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 {
 	ATOMIC_STATEMENT(mResDependGraphLock, this->mResDependencyGraph.GetTopNodes(mRDGTopNodes));
 	for (auto& res : mRDGTopNodes) {
-		if (res->IsPreparedNeedLoading()) {
+		BOOST_ASSERT(res->IsLoadingOrComplete());
+		if (res->IsLoading()) {
 			ResourceLoadTaskContext ctx;
 			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, ctx = this->mLoadTaskCtxByRes[res.get()]);
 			if (ctx.Res) 
@@ -127,17 +128,61 @@ void ResourceManager::UpdateForLoading() ThreadSafe
 	}
 }
 
+void ResourceManager::AddResourceDependencyRecursive(IResourcePtr to) ThreadSafe
+{
+	if (to && !to->IsLoadComplete()) {
+		std::vector<IResourcePtr> depends;
+	#if 1
+		to->GetLoadDependencies(depends);
+		if (!depends.empty()) {
+			to->SetLoading();
+			ATOMIC_STATEMENT(mResDependGraphLock,
+				this->mResDependencyGraph.AddLink(to, IF_AND_NULL(depends[0] && !depends[0]->IsLoaded(), depends[0]));
+			for (auto& from : boost::make_iterator_range(depends.begin() + 1, depends.end()))
+				if (from && !from->IsLoaded())
+					this->mResDependencyGraph.AddLink(to, from);
+			);
+			for (auto& iter : depends)
+				AddResourceDependencyRecursive(iter);
+		}
+		else {
+			AddResourceDependency(to, nullptr);
+		}
+	#else
+		size_t position = 0; to->GetLoadDependencies(depends);
+		while (position < depends.size()) {
+			size_t prev_position = position;
+			position = depends.size();
+			for (size_t i = prev_position; i < position; ++i) {
+				if (depends[i]) 
+					depends[i]->GetLoadDependencies(depends);
+			}
+		}
+		if (!depends.empty()) {
+			ATOMIC_STATEMENT(mResDependGraphLock,
+				this->mResDependencyGraph.AddLink(to, IF_AND_NULL(depends[0] && !depends[0]->IsLoaded(), depends[0]));
+				for (auto& from : boost::make_iterator_range(depends.begin() + 1, depends.end()))
+					if (from && !from->IsLoaded()) 
+						this->mResDependencyGraph.AddLink(to, from);
+			);
+		}
+		else {
+			AddResourceDependency(to, nullptr);
+		}
+	#endif
+	}
+}
 void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe
 {
-	if (to && !to->IsLoaded()) {
+	if (to && !to->IsLoadComplete()) {
+		to->SetLoading();
 		ATOMIC_STATEMENT(mResDependGraphLock, 
-			this->mResDependencyGraph.AddLink(to, from && !from->IsLoaded() ? from : nullptr));
+			this->mResDependencyGraph.AddLink(to, IF_AND_NULL(from && !from->IsLoaded(), from)));
 	}
 }
 void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes) ThreadSafe
 {
 	AddResourceDependency(res, dependRes);
-	res->SetPrepared();
 	DEBUG_SET_CALL(res, launchMode);
 	ATOMIC_STATEMENT(mLoadTaskCtxMapLock, 
 		this->mLoadTaskCtxByRes[res.get()].Init(launchMode, res, loadResCb, mThreadPool));

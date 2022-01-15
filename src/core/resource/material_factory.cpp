@@ -41,66 +41,6 @@ private:
 	ConstBufferDecl& mDecl;
 };
 
-/********** MaterialBuilder **********/
-struct MaterialBuilder
-{
-public:
-	MaterialBuilder(ResourceManager& resMng, Launch launchMode, MaterialPtr mat = nullptr)
-		:mResourceMng(resMng), mLaunchMode(launchMode) {
-		mMaterial = IF_OR(mat, CreateInstance<Material>());
-		mMaterial->SetPrepared();
-	}
-	MaterialBuilder& AddTechnique() {
-		mCurTech = CreateInstance<Technique>();
-		mMaterial->AddTechnique(mCurTech);
-		return *this;
-	}
-	MaterialBuilder& AddPass(const std::string& lightMode, const std::string& passName) {
-		mCurPass = CreateInstance<Pass>();
-		mCurPass->mLightMode = lightMode;
-		mCurPass->mName = passName;
-		mCurTech->AddPass(mCurPass);
-		return *this;
-	}
-
-	MaterialBuilder& SetInputLayout(IInputLayoutPtr inputLayout) {
-		mCurPass->mInputLayout = inputLayout;
-		mResourceMng.AddResourceDependency(mMaterial, inputLayout);
-		return *this;
-	}
-	MaterialBuilder& SetTopology(PrimitiveTopology topology) {
-		mCurPass->mTopoLogy = topology;
-		return *this;
-	}
-	IProgramPtr SetProgram(IProgramPtr program) {
-		mCurPass->mProgram = program;
-		mResourceMng.AddResourceDependency(mMaterial, program);
-		return program;
-	}
-	MaterialBuilder& AddSampler(ISamplerStatePtr sampler) {
-		mCurPass->AddSampler(sampler);
-		mResourceMng.AddResourceDependency(mMaterial, sampler);
-		return *this;
-	}
-	MaterialBuilder& AddConstBuffer(IContantBufferPtr buffer,
-		const std::string& name = "", bool isUnique = true, int slot = -1) {
-		mCurPass->AddConstBuffer(CBufferEntry::Make(buffer, name, isUnique), slot);
-		mResourceMng.AddResourceDependency(mMaterial, buffer);
-		return *this;
-	}
-	MaterialPtr Build() {
-		if (mLaunchMode == LaunchSync)
-			mMaterial->SetLoaded();
-		return mMaterial;
-	}
-private:
-	MaterialPtr mMaterial;
-	TechniquePtr mCurTech;
-	PassPtr mCurPass;
-	ResourceManager& mResourceMng;
-	Launch mLaunchMode;
-};
-
 /********** MaterialAssetManager **********/
 namespace mat_asset {
 struct AttributeNode {
@@ -685,24 +625,29 @@ MaterialFactory::MaterialFactory()
 MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode, 
 	ResourceManager& resourceMng, const mat_asset::MaterialAsset& matAsset, MaterialPtr matRes)
 {
-	MaterialBuilder builder(resourceMng, launchMode, matRes);
+	auto material = IF_OR(matRes, CreateInstance<Material>());
+	material->SetPrepared();
 
 	const auto& shaderNode = matAsset.Shader;
 	for (const auto& categNode : shaderNode) {
 		for (const auto& techniqueNode : categNode) {
-			builder.AddTechnique();
+			auto curTech = CreateInstance<Technique>();
+			material->AddTechnique(curTech);
 
 			for (const auto& passNode : techniqueNode) {
 				const auto& passProgram = passNode.Program;
-				builder.AddPass(passNode.LightMode, passNode.ShortName);
-				builder.SetTopology(passProgram.Topo);
+				auto curPass = CreateInstance<Pass>();
+				curTech->AddPass(curPass);
+				curPass->mLightMode = passNode.LightMode;
+				curPass->mName = passNode.ShortName;
+				curPass->mTopoLogy = passProgram.Topo;
 
-				IProgramPtr program = builder.SetProgram(resourceMng.CreateProgram(launchMode,
-					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD));
+				curPass->mProgram = resourceMng.CreateProgram(launchMode,
+					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD);
 
 				BOOST_ASSERT(passProgram.Attrs.Count() >= 0);
 				if (passProgram.Attrs.Count() == 1) {
-					builder.SetInputLayout(resourceMng.CreateLayout(launchMode, program, passProgram.Attrs[0].Layout));
+					curPass->mInputLayout = resourceMng.CreateLayout(launchMode, curPass->mProgram, passProgram.Attrs[0].Layout);
 				}
 				else if (passProgram.Attrs.Count() > 1) {
 					auto layout_compose = passProgram.Attrs[0].Layout;
@@ -712,26 +657,24 @@ MaterialPtr MaterialFactory::CreateMaterialByMaterialAsset(Launch launchMode,
 							layout_compose.push_back(element_slot);
 							layout_compose.back().InputSlot = slot;
 						}
-						builder.SetInputLayout(resourceMng.CreateLayout(launchMode, program, layout_compose));
+						curPass->mInputLayout = resourceMng.CreateLayout(launchMode, curPass->mProgram, layout_compose);
 						++slot;
 					}
 				}
 
-				for (const auto& sampler : passProgram.Samplers) {
-					builder.AddSampler(sampler.CmpFunc != kCompareUnkown
-						? resourceMng.CreateSampler(launchMode, sampler)
-						: nullptr);
-				}
+				for (const auto& sampler : passProgram.Samplers)
+					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, resourceMng.CreateSampler(launchMode, sampler)));
 
-				for (auto& uniform : passProgram.Uniforms) {
-					builder.AddConstBuffer(resourceMng.CreateConstBuffer(launchMode,
-						uniform.Decl, kHWUsageDynamic, Data::Make(uniform.Data)),
+				for (auto& uniform : passProgram.Uniforms)
+					curPass->AddConstBuffer(resourceMng.CreateConstBuffer(launchMode, uniform.Decl, kHWUsageDynamic, Data::Make(uniform.Data)),
 						uniform.ShortName, uniform.IsUnique, uniform.Slot);
-				}
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
-	return builder.Build();
+	
+	if (launchMode == LaunchSync) material->SetLoaded();
+	else resourceMng.AddResourceDependencyRecursive(material);
+	return material;
 }
 
 MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resourceMng, 
@@ -750,7 +693,9 @@ MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& 
 //Clone Functions
 PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceMng, const Pass& proto)
 {
-	PassPtr result = CreateInstance<Pass>(proto.mLightMode, proto.mName);
+	PassPtr result = CreateInstance<Pass>();
+	result->mLightMode = proto.mLightMode;
+	result->mName = proto.mName;
 	result->mTopoLogy = proto.mTopoLogy;
 	result->mInputLayout = proto.mInputLayout;
 	result->mProgram = proto.mProgram;
@@ -763,18 +708,10 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 	for (auto buffer : proto.mConstantBuffers) {
 		if (!buffer.IsUnique) 
 			buffer.Buffer = resourceMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), buffer.Buffer->GetUsage(), Data::MakeNull());
-		result->AddConstBuffer(buffer, slot);
+		result->AddConstBuffer(buffer.Buffer, buffer.Name, buffer.IsUnique, slot);
 		++slot;
 	}
 
-	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
-		resourceMng.AddResourceDependency(result, result->mInputLayout);
-		resourceMng.AddResourceDependency(result, result->mProgram);
-		for (const auto& sampler : result->mSamplers)
-			resourceMng.AddResourceDependency(result, sampler);
-		for (const auto& buffer : result->mConstantBuffers)
-			resourceMng.AddResourceDependency(result, buffer.Buffer);
-	}
 	result->SetCurState(proto.GetCurState());
 	return result;
 }
@@ -782,13 +719,9 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resourceM
 TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resourceMng, const Technique& proto)
 {
 	TechniquePtr result = CreateInstance<Technique>();
-	for (const auto& protoPass : proto.mPasses)
+	for (const auto& protoPass : proto)
 		result->AddPass(this->ClonePass(launchMode, resourceMng, *protoPass));
 
-	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
-		for (const auto& pass : result->mPasses)
-			resourceMng.AddResourceDependency(result, pass);
-	}
 	result->SetCurState(proto.GetCurState());
 	return result;
 }
@@ -798,13 +731,12 @@ MaterialPtr MaterialFactory::CloneMaterial(Launch launchMode, ResourceManager& r
 	BOOST_ASSERT(!(launchMode == LaunchSync && !proto.IsLoaded()));
 
 	MaterialPtr result = CreateInstance<Material>();
-	for (const auto& protoTech : proto.mTechniques)
+	for (const auto& protoTech : proto)
 		result->AddTechnique(this->CloneTechnique(launchMode, resourceMng, *protoTech));
 	result->mCurTechIdx = proto.mCurTechIdx;
 
 	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
-		for (const auto& tech : result->mTechniques)
-			resourceMng.AddResourceDependency(result, tech);
+		resourceMng.AddResourceDependencyRecursive(result);
 	}
 	result->SetCurState(proto.GetCurState());
 	return result;

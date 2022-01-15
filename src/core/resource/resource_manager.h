@@ -67,6 +67,7 @@ public:
 	~ResourceManager();
 	void Dispose() ThreadSafe;
 	void UpdateForLoading() ThreadSafe;
+	void AddResourceDependencyRecursive(IResourcePtr to) ThreadSafe;
 	void AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe;//to rely-on from
 	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr) ThreadSafe;
 	void AddResourceLoadedObserver(IResourcePtr res, const ResourceLoadedCallback& resLoadedCB) ThreadSafe;

@@ -1,20 +1,14 @@
+#include "core/base/macros.h"
 #include "core/resource/material.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {
 
-/********** TPass **********/
-void Pass::AddConstBuffer(const CBufferEntry& cbuffer, int slot)
+/********** Pass **********/
+void Pass::AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot)
 {
-	if (slot >= 0) {
-		if (mConstantBuffers.size() <= slot + 1)
-			mConstantBuffers.resize(slot + 1);
-		mConstantBuffers[slot] = cbuffer;
-	}
-	else {
-		mConstantBuffers.push_back(cbuffer);
-	}
+	mConstantBuffers.AddOrSet(CBufferEntry{ buffer, name, isUnique }, slot);
 }
 void Pass::AddSampler(ISamplerStatePtr sampler)
 {
@@ -23,30 +17,31 @@ void Pass::AddSampler(ISamplerStatePtr sampler)
 
 std::vector<IContantBufferPtr> Pass::GetConstBuffers() const
 {
-	std::vector<IContantBufferPtr> buffers(mConstantBuffers.size());
-	for (size_t i = 0; i < mConstantBuffers.size(); ++i)
-		buffers[i] = mConstantBuffers[i].Buffer;
-	return buffers;
+	std::vector<IContantBufferPtr> result(mConstantBuffers.Count());
+	struct CBufferEntryToCBuffer {
+		IContantBufferPtr operator()(const CBufferEntry& cbuffer) const {
+			return cbuffer.Buffer;
+		}
+	};
+	std::transform(mConstantBuffers.begin(), mConstantBuffers.end(), result.begin(), CBufferEntryToCBuffer());
+	return result;
 }
 
 IContantBufferPtr Pass::GetConstBufferByIdx(size_t idx)
 {
-	IContantBufferPtr ret = nullptr;
-	if (idx < mConstantBuffers.size())
-		ret = mConstantBuffers[idx].Buffer;
-	return ret;
+	return IF_AND_NULL(idx < mConstantBuffers.Count(), mConstantBuffers[idx].Buffer);
 }
 
 IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
 {
-	IContantBufferPtr ret = nullptr;
-	for (size_t i = 0; i < mConstantBuffers.size(); ++i) {
-		if (mConstantBuffers[i].Name == name) {
-			ret = mConstantBuffers[i].Buffer;
+	IContantBufferPtr result = nullptr;
+	for (auto& cbuffer : mConstantBuffers) {
+		if (cbuffer.Name == name) {
+			result = cbuffer.Buffer;
 			break;
 		}
 	}
-	return ret;
+	return result;
 }
 
 void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data)
@@ -55,35 +50,39 @@ void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& n
 	if (buffer) renderSys.UpdateBuffer(buffer, data);
 }
 
-/********** TTechnique **********/
-PassPtr Technique::GetPassByLightMode(const std::string& lightMode)
+void Pass::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 {
-	PassPtr pass;
-	for (int i = 0; i < mPasses.size(); ++i) {
-		if (mPasses[i]->mLightMode == lightMode) {
-			pass = mPasses[i];
-			break;
-		}
-	}
-	return pass;
+	depends.push_back(mInputLayout);
+	depends.push_back(mProgram);
+	for (const auto& sampler : mSamplers)
+		depends.push_back(sampler);
+	for (const auto& buffer : mConstantBuffers)
+		depends.push_back(buffer.Buffer);
+}
+
+/********** Technique **********/
+void Technique::GetLoadDependencies(std::vector<IResourcePtr>& depends)
+{
+	for (const auto& pass : mElements)
+		depends.push_back(pass);
 }
 
 std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMode)
 {
-	std::vector<PassPtr> passVec;
-	for (int i = 0; i < mPasses.size(); ++i) {
-		if (mPasses[i]->mLightMode == lightMode) {
-			passVec.push_back(mPasses[i]);
+	std::vector<PassPtr> result;
+	for (auto& pass : mElements) {
+		if (pass->mLightMode == lightMode) {
+			result.push_back(pass);
 		}
 	}
-	return std::move(passVec);
+	return std::move(result);
 }
 
 /********** Material **********/
-TechniquePtr Material::SetCurTechByIdx(int idx)
+void Material::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 {
-	mCurTechIdx = idx;
-	return mTechniques[mCurTechIdx];
+	for (const auto& tech : mElements)
+		depends.push_back(tech);
 }
 
 }

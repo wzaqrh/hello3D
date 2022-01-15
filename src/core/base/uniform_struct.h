@@ -3,6 +3,7 @@
 
 namespace mir {
 
+#define MAKE_CBNAME(V) #V
 #define UNIFORM_ALIGN _declspec(align(16))
 
 struct UNIFORM_ALIGN cbPerFrame
