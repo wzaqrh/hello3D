@@ -70,11 +70,10 @@ ConstantTablePtr ConstantTable::At(const std::string& name)
 	else return NULL;
 }
 
-void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBufferDecl& decl)
+void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, const ConstBufferDecl& decl)
 {
-	for (size_t j = 0; j < decl.Elements.size(); ++j) {
-		ConstBufferDeclElement& elem = decl.Elements[j];
-#if 0
+	for (auto& elem : decl) {
+	#if 0
 		auto iter = decl.subDecls.find(elem.name);
 		if (iter != decl.subDecls.end()) {
 			TConstantTablePtr subTab = At(elem.name);
@@ -83,12 +82,12 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBuffe
 			}
 		}
 		else
-#endif
-			SetValue(device, buffer9, elem);
+	#endif
+		SetValue(device, buffer9, elem);
 	}
 }
 
-void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, ConstBufferDeclElement& elem)
+void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, const ConstBufferDeclElement& elem)
 {
 	D3DXHANDLE handle = GetHandle(elem.Name);
 	if (handle) {

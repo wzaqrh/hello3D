@@ -21,36 +21,10 @@ namespace mir {
 namespace res {
 namespace mat_asset {
 
-/********** ConstBufferDeclBuilder **********/
-struct ConstBufferDeclBuilder
-{
-public:
-	ConstBufferDeclBuilder(ConstBufferDecl& decl) :mDecl(decl) {}
-	ConstBufferDeclBuilder& Add(const ConstBufferDeclElement& elem) {
-		mDecl.Add(elem).Offset = mDecl.BufferSize;
-		mDecl.BufferSize += elem.Size;
-		return *this;
-	}
-	ConstBufferDeclBuilder& Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl) {
-		mDecl.Add(elem, subDecl).Offset = mDecl.BufferSize;
-		mDecl.BufferSize += elem.Size;
-		return *this;
-	}
-	ConstBufferDecl& Build() {
-		return mDecl;
-	}
-private:
-	ConstBufferDecl& mDecl;
-};
-
 /********** ShaderNodeManager **********/
 class ShaderNodeManager
 {
-	std::map<ShaderLoadParam, ShaderNode> mShaderByParam, mShaderVariantByParam;
-	std::map<std::string, ShaderNode> mIncludeByName;
-	std::map<std::string, AttributeNode> mAttrByName;
-	std::map<std::string, UniformNode> mUniformByName;
-	std::map<std::string, SamplerNode> mSamplerSetByName;
+	friend class MaterialNodeManager;
 public:
 	ShaderNodeManager() {}
 	bool GetShaderNode(const ShaderLoadParam& loadParam, ShaderNode& shaderNode) {
@@ -87,23 +61,6 @@ private:
 		}
 	}
 
-	static ConstBufferElementType ConvertStringToConstBufferElementType(
-		const std::string& str, int count, int& size) {
-		ConstBufferElementType result = kCBElementMax;
-		if (str == "bool") result = kCBElementBool, size = sizeof(BOOL);
-		else if (str == "int") result = kCBElementInt, size = sizeof(int);
-		else if (str == "int2") result = kCBElementInt2, size = sizeof(int) * 2;
-		else if (str == "int3") result = kCBElementInt3, size = sizeof(int) * 3;
-		else if (str == "int4") result = kCBElementInt4, size = sizeof(int) * 4;
-		else if (str == "float") result = kCBElementFloat, size = sizeof(float);
-		else if (str == "float2") result = kCBElementFloat2, size = sizeof(float) * 2;
-		else if (str == "float3") result = kCBElementFloat3, size = sizeof(float) * 3;
-		else if (str == "float4") result = kCBElementFloat4, size = sizeof(float) * 4;
-		else if (str == "matrix") result = kCBElementMatrix, size = sizeof(float) * 16;
-		else if (str == "struct") result = kCBElementStruct;
-		size *= std::max<int>(1, count);
-		return result;
-	}
 	void VisitAttributes(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseAttribute"))) {
 			std::string refName = it.second.data();
@@ -146,6 +103,60 @@ private:
 			++index;
 		}
 	}
+	static ConstBufferElementType ConvertStrToCBElementType(
+		const std::string& str, int count, size_t& size) {
+		ConstBufferElementType result = kCBElementMax;
+		if (str == "bool") result = kCBElementBool, size = sizeof(BOOL);
+		else if (str == "int") result = kCBElementInt, size = sizeof(int);
+		else if (str == "int2") result = kCBElementInt2, size = sizeof(int) * 2;
+		else if (str == "int3") result = kCBElementInt3, size = sizeof(int) * 3;
+		else if (str == "int4") result = kCBElementInt4, size = sizeof(int) * 4;
+		else if (str == "float") result = kCBElementFloat, size = sizeof(float);
+		else if (str == "float2") result = kCBElementFloat2, size = sizeof(float) * 2;
+		else if (str == "float3") result = kCBElementFloat3, size = sizeof(float) * 3;
+		else if (str == "float4") result = kCBElementFloat4, size = sizeof(float) * 4;
+		else if (str == "matrix") result = kCBElementMatrix, size = sizeof(float) * 16;
+		else if (str == "struct") result = kCBElementStruct;
+		size *= std::max<int>(1, count);
+		return result;
+	}
+	static void ConvertStrToCBElementData(std::string strDefault, ConstBufferElementType uniformElementType, int channel, std::vector<float>& uniformData) {
+		int dataSize = uniformData.size();
+		uniformData.resize(dataSize + channel);
+		void* pData = &uniformData[dataSize];
+		
+		if (!strDefault.empty()) {
+			switch (uniformElementType) {
+			case kCBElementBool:
+			case kCBElementInt: {
+				*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
+			}break;
+			case kCBElementInt2:
+			case kCBElementInt3:
+			case kCBElementInt4: {
+				std::vector<boost::iterator_range<std::string::iterator>> lst;
+				boost::split(lst, strDefault, boost::is_any_of(","));
+				const int count = channel;
+				for (int i = 0; i < lst.size() && i < count; ++i)
+					static_cast<int*>(pData)[i] = boost::lexical_cast<int>(lst[i]);
+			}break;
+			case kCBElementFloat: {
+				*static_cast<float*>(pData) = boost::lexical_cast<float>(strDefault);
+			}break;
+			case kCBElementFloat2:
+			case kCBElementFloat3:
+			case kCBElementFloat4:
+			case kCBElementMatrix: {
+				std::vector<boost::iterator_range<std::string::iterator>> lst;
+				boost::split(lst, strDefault, boost::is_any_of(","));
+				const int count = channel;
+				for (int i = 0; i < lst.size() && i < count; ++i)
+					static_cast<float*>(pData)[i] = boost::lexical_cast<float>(lst[i]);
+			}break;
+			default:break;
+			}
+		}
+	}
 	void VisitUniforms(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseUniform"))) {
 			std::string refName = it.second.data();
@@ -162,57 +173,22 @@ private:
 			UniformNode uniform;
 			uniform.IsUnique = node_uniform.get<bool>("<xmlattr>.IsUnique", true);
 
-			ConstBufferDeclBuilder builder(uniform.Decl);
-
 			int byteOffset = 0;
 			for (auto& element : boost::make_iterator_range(node_uniform.equal_range("Element"))) {
-				int size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
-				int count = element.second.get<int>("<xmlattr>.Count", 0);
-				int offset = element.second.get<int>("<xmlattr>.Offset", byteOffset);
-				ConstBufferElementType uniformElementType = ConvertStringToConstBufferElementType(
+				size_t size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
+				size_t count = element.second.get<int>("<xmlattr>.Count", 0);
+				size_t offset = element.second.get<int>("<xmlattr>.Offset", byteOffset);
+				ConstBufferElementType uniformElementType = ConvertStrToCBElementType(
 					element.second.get<std::string>("<xmlattr>.Type"/*, "int"*/), count, size);
 				BOOST_ASSERT(uniformElementType != kCBElementMax);
-
 				std::string Name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
-				builder.Add(ConstBufferDeclElement(Name.c_str(), uniformElementType, size, count, offset));
+
+				uniform.Decl.Add(ConstBufferDeclElement{ Name, uniformElementType, size, count, offset });
+				uniform.Decl.Last().Offset = uniform.Decl.BufferSize;
+				uniform.Decl.BufferSize += uniform.Decl.Last().Size;
+
 				byteOffset = offset + size;
-
-				int dataSize = uniform.Data.size();
-				uniform.Data.resize(dataSize + size / 4);
-				void* pData = &uniform.Data[dataSize];
-
-				std::string strDefault = element.second.get<std::string>("<xmlattr>.Default", "");
-				if (!strDefault.empty()) {
-					switch (uniformElementType) {
-					case kCBElementBool:
-					case kCBElementInt: {
-						*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
-					}break;
-					case kCBElementInt2:
-					case kCBElementInt3:
-					case kCBElementInt4: {
-						std::vector<boost::iterator_range<std::string::iterator>> lst;
-						boost::split(lst, strDefault, boost::is_any_of(","));
-						const int count = size / sizeof(float);
-						for (int i = 0; i < lst.size() && i < count; ++i)
-							static_cast<int*>(pData)[i] = boost::lexical_cast<int>(lst[i]);
-					}break;
-					case kCBElementFloat: {
-						*static_cast<float*>(pData) = boost::lexical_cast<float>(strDefault);
-					}break;
-					case kCBElementFloat2:
-					case kCBElementFloat3:
-					case kCBElementFloat4:
-					case kCBElementMatrix: {
-						std::vector<boost::iterator_range<std::string::iterator>> lst;
-						boost::split(lst, strDefault, boost::is_any_of(","));
-						const int count = size / sizeof(float);
-						for (int i = 0; i < lst.size() && i < count; ++i)
-							static_cast<float*>(pData)[i] = boost::lexical_cast<float>(lst[i]);
-					}break;
-					default:break;
-					}
-				}
+				ConvertStrToCBElementData(element.second.get<std::string>("<xmlattr>.Default", ""), uniformElementType, size / sizeof(float), uniform.Data);
 			}
 			int dataSize = uniform.Data.size();
 			if (dataSize & 15) uniform.Data.resize((dataSize + 15) / 16 * 16);
@@ -256,12 +232,13 @@ private:
 				address = node_element.get<int>("<xmlattr>.Address", address);
 
 				int slot = node_element.get<int>("<xmlattr>.Slot", -1);
-				samplerSet.AddOrSet(SamplerDesc::Make(
+				samplerSet.AddOrSet(SamplerDescEx::Make(
 					filter,
 					cmpFunc,
 					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressU", address)),
 					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressV", address)),
-					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressW", address))
+					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressW", address)),
+					it.second.data()
 				), slot);
 			}
 
@@ -383,12 +360,12 @@ private:
 		bool result;
 		auto find_iter = mShaderByParam.find(loadParam);
 		if (find_iter == mShaderByParam.end()) {
-			std::string filename = "shader/" + loadParam.ShaderName;
-			if (!loadParam.VariantName.empty()) filename += "-" + loadParam.VariantName;
-			filename += ".Shader";
-			if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
+			std::string filepath = "shader/" + loadParam.ShaderName;
+			if (!loadParam.VariantName.empty()) filepath += "-" + loadParam.VariantName;
+			filepath += ".Shader";
+			if (boost_filesystem::exists(boost_filesystem::system_complete(filepath))) {
 				boost_property_tree::ptree pt;
-				boost_property_tree::read_xml(filename, pt);
+				boost_property_tree::read_xml(filepath, pt);
 				Visitor visitor{ false };
 				VisitShader(pt.get_child("Shader"), visitor, shaderNode);
 				BuildShaderNode(shaderNode);
@@ -428,16 +405,101 @@ private:
 		}
 		return result;
 	}
+private:
+	std::map<ShaderLoadParam, ShaderNode> mShaderByParam, mShaderVariantByParam;
+	std::map<std::string, ShaderNode> mIncludeByName;
+	std::map<std::string, AttributeNode> mAttrByName;
+	std::map<std::string, UniformNode> mUniformByName;
+	std::map<std::string, SamplerNode> mSamplerSetByName;
+};
+
+class MaterialNodeManager {
+	typedef ShaderNodeManager::Visitor Visitor;
+	typedef ShaderNodeManager::PropertyTreePath PropertyTreePath;
+public:
+	MaterialNodeManager(std::shared_ptr<ShaderNodeManager> shaderMng) :mShaderMng(shaderMng) {}
+	bool GetMaterialNode(const std::string& materialPath, MaterialNode& materialNode) {
+		bool result = ParseMaterialFile(materialPath, materialNode);
+		return result;
+	}
+private:
+	void VisitProperties(const PropertyTreePath& nodeProperties, MaterialNode& materialNode) {
+		for (auto& nodeProp : nodeProperties.Node) {
+			materialNode.Shader.ForEachProgram([&nodeProp, &materialNode](const ProgramNode& prog) {
+				const std::string& propertyName = nodeProp.first;
+				size_t index = prog.Samplers.IndexByName(propertyName);
+				if (index != prog.Samplers.IndexNotFound()) {
+					auto& texProp = materialNode.TextureProperies[propertyName];
+					texProp.ImagePath = nodeProp.second.data();
+					texProp.Slot = index;
+				}
+				else {
+					prog.Uniforms.ForEachUniform([&nodeProp, &materialNode](const UniformNode& uniform) {
+						const std::string& propertyName = nodeProp.first;
+						auto findDeclElem = uniform.Decl[propertyName];
+						if (findDeclElem) {
+							auto& uniformProp = materialNode.UniformProperies[propertyName];
+							ShaderNodeManager::ConvertStrToCBElementData(nodeProp.second.data(), findDeclElem->Type, 16, uniformProp.Data);
+							uniformProp.IsUnique = uniform.IsUnique;
+							uniformProp.Slot = uniform.Slot;
+						}
+					});
+				}
+			});
+		}
+	}
+	void VisitMaterial(const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
+		mShaderMng->VisitShader(nodeMaterial, Visitor{ false }, materialNode.Shader);
+
+		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
+			VisitProperties(it.second, materialNode);
+		}
+	}
+
+	void BuildMaterialNode(MaterialNode& materialNode) {
+		mShaderMng->BuildShaderNode(materialNode.Shader);
+	}
+	bool ParseMaterialFile(const std::string& materialPath, MaterialNode& materialNode) {
+		bool result;
+		auto find_iter = mMaterialByPath.find(materialPath);
+		if (find_iter == mMaterialByPath.end()) {
+			if (boost_filesystem::exists(boost_filesystem::system_complete(materialPath))) {
+				boost_property_tree::ptree pt;
+				boost_property_tree::read_xml(materialPath, pt);
+				Visitor visitor{ false };
+				VisitMaterial(pt.get_child("Material"), materialNode);
+				BuildMaterialNode(materialNode);
+				mMaterialByPath.insert(std::make_pair(materialPath, materialNode));
+				result = true;
+			}
+			else {
+				result = false;
+			}
+		}
+		else {
+			materialNode = find_iter->second;
+			result = true;
+		}
+		return result;
+	}
+private:
+	std::shared_ptr<ShaderNodeManager> mShaderMng;
+	std::map<std::string, MaterialNode> mMaterialByPath;
 };
 
 /********** MaterialAssetManager **********/
 MaterialAssetManager::MaterialAssetManager()
 {
 	mShaderNodeMng = CreateInstance<ShaderNodeManager>();
+	mMaterialNodeMng = CreateInstance<MaterialNodeManager>(mShaderNodeMng);
 }
 bool MaterialAssetManager::GetShaderNode(const ShaderLoadParam& loadParam, ShaderNode& shaderNode)
 {
 	return mShaderNodeMng->GetShaderNode(loadParam, shaderNode);
+}
+bool MaterialAssetManager::GetMaterialNode(const std::string& materialName, MaterialNode& materialNode)
+{
+	return mMaterialNodeMng->GetMaterialNode(materialName, materialNode);
 }
 
 }

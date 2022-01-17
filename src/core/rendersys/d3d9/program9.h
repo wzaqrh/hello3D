@@ -19,8 +19,8 @@ public:
 	D3DXHANDLE GetHandle(const std::string& name) const;
 	std::shared_ptr<ConstantTable> At(const std::string& name);
 public:
-	void SetValue(IDirect3DDevice9* device, char* buffer9, ConstBufferDeclElement& elem);
-	void SetValue(IDirect3DDevice9* device, char* buffer9, ConstBufferDecl& decl);
+	void SetValue(IDirect3DDevice9* device, char* buffer9, const ConstBufferDeclElement& elem);
+	void SetValue(IDirect3DDevice9* device, char* buffer9, const ConstBufferDecl& decl);
 public:
 	ID3DXConstantTable* mTable;
 	std::vector<D3DXHANDLE> mHandles;

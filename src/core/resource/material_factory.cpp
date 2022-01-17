@@ -36,7 +36,7 @@ ShaderPtr MaterialFactory::CreateShaderByShaderNode(Launch launchMode, ResourceM
 				curPass->mProgram = resMng.CreateProgram(launchMode,
 					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD);
 
-				BOOST_ASSERT(passProgram.Attrs.Count() >= 0);
+				BOOST_ASSERT(passProgram.Attrs.Count() >= 1);
 				if (passProgram.Attrs.Count() == 1) {
 					curPass->mInputLayout = resMng.CreateLayout(launchMode, curPass->mProgram, passProgram.Attrs[0].Layout);
 				}

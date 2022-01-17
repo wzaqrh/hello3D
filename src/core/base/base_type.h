@@ -1,6 +1,7 @@
 #pragma once
 #include "core/base/stl.h"
 #include "core/base/math.h"
+#include "core/base/template/container_adapter.h"
 
 namespace mir {
 
@@ -443,32 +444,21 @@ enum ConstBufferElementType {
 	kCBElementMax
 };
 struct ConstBufferDeclElement {
+	bool IsValid() const { return !Name.empty(); }
+	const std::string& GetName() const { return Name; }
+public:
 	std::string Name;
 	ConstBufferElementType Type;
 	size_t Size;
 	size_t Count;
 	size_t Offset;
-public:
-	ConstBufferDeclElement(const char* name, ConstBufferElementType type, size_t size, size_t count = 0, size_t offset = 0)
-		:Name(name), Type(type), Size(size), Count(count), Offset(offset) {}
 };
-struct ConstBufferDecl {
-	ConstBufferDeclElement& Add(const ConstBufferDeclElement& elem) {
-		Elements.push_back(elem);
-		return Elements.back();
-	}
-	ConstBufferDeclElement& Add(const ConstBufferDeclElement& elem, const ConstBufferDecl& subDecl) {
-		Elements.push_back(elem);
-		SubDecls.insert(std::make_pair(elem.Name, subDecl));
-		return Elements.back();
-	}
-	ConstBufferDeclElement& Last() {
-		return Elements.back();
-	}
-public:
-	std::vector<ConstBufferDeclElement> Elements;
-	std::map<std::string, ConstBufferDecl> SubDecls;
+template <> struct has_function_valid_t<ConstBufferDeclElement> : public std::true_type {};
+template <> struct has_function_name_t<ConstBufferDeclElement> : public std::true_type {};
+
+struct ConstBufferDecl : public VectorAdapter<ConstBufferDeclElement> {
 	size_t BufferSize = 0;
 };
+
 
 }
