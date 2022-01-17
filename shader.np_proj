@@ -367,9 +367,11 @@
             <File name="bin\x86\Debug\shader\Standard.Shader" />
             <File name="bin\x86\Debug\shader\Sprite.Shader" />
             <File name="bin\x86\Debug\shader\Skybox.Shader" />
+            <File name="bin\x86\Debug\shader\Skybox-Deprecate.Shader" />
             <File name="bin\x86\Debug\shader\Skeleton.Shader" />
             <File name="bin\x86\Debug\shader\Model.Shader" />
             <File name="bin\x86\Debug\shader\LayerColor.Shader" />
+            <File name="bin\x86\Debug\shader\LayerColor-Cube.Shader" />
         </Folder>
     </Project>
     <Project name="mir&#x7B14;&#x8BB0;">

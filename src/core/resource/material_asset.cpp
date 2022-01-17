@@ -46,16 +46,15 @@ private:
 /********** ShaderNodeManager **********/
 class ShaderNodeManager
 {
-	std::map<std::string, ShaderNode> mIncludeByName, mShaderByName, mShaderVariantByName;
+	std::map<ShaderLoadParam, ShaderNode> mShaderByParam, mShaderVariantByParam;
+	std::map<std::string, ShaderNode> mIncludeByName;
 	std::map<std::string, AttributeNode> mAttrByName;
 	std::map<std::string, UniformNode> mUniformByName;
 	std::map<std::string, SamplerNode> mSamplerSetByName;
 public:
 	ShaderNodeManager() {}
 	bool GetShaderNode(const ShaderLoadParam& loadParam, ShaderNode& shaderNode) {
-		bool result = IF_AND_OR(loadParam.IsVariant(),
-			ParseShaderVariantFile(loadParam, shaderNode),
-			ParseShaderFile(loadParam.ShaderName, shaderNode));
+		bool result = GetShaderVariantNode(loadParam, shaderNode);
 		BOOST_ASSERT(shaderNode[0].Program.Topo != kPrimTopologyUnkown);
 		return result;
 	}
@@ -84,7 +83,7 @@ private:
 		if (find_iter == mIncludeByName.end()) {
 			ShaderNode shaderNode;
 			ParseShaderFile(shaderName, shaderNode);
-			mIncludeByName.insert(std::make_pair(shaderName, shaderNode));
+			mIncludeByName.insert(std::make_pair(shaderName, std::move(shaderNode)));
 		}
 	}
 
@@ -354,6 +353,10 @@ private:
 		}
 	}
 	void VisitShader(const PropertyTreePath& nodeShader, ConstVisitorRef vis, ShaderNode& shaderNode) {
+		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("UseShader"))) {
+			ParseShaderFile(it.second.data(), shaderNode);
+		}
+
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Include"))) {
 			VisitInclude(it.second.data());
 		}
@@ -364,6 +367,7 @@ private:
 			VisitCategory(PropertyTreePath(nodeShader, it.second, index++), vis, shaderNode.Emplace());
 		}
 	}
+	
 	void BuildShaderNode(ShaderNode& shaderNode) {
 		for (auto& categNode : shaderNode) {
 			categNode.Program.Build();
@@ -375,46 +379,20 @@ private:
 			}
 		}
 	}
-	void VisitVariant(const PropertyTreePath& nodeVariant, ShaderNode& shaderNode) {
-		for (auto& it : boost::make_iterator_range(nodeVariant->equal_range("UseShader"))) {
-			ParseShaderFile(it.second.data(), shaderNode);
-		}
-
-		VisitShader(nodeVariant, Visitor{ false }, shaderNode);
-	}
-	void VisitShaderVariants(const PropertyTreePath& nodeShaderVariant, const std::string& shaderName, const std::string& variantName, ShaderNode& shaderNode) {
-		for (auto& it : boost::make_iterator_range(nodeShaderVariant->equal_range("Variant"))) {
-			auto& node_variant = it.second;
-			std::string useShader = node_variant.get<std::string>("UseShader");
-			if (useShader == shaderName) {
-				std::string name = node_variant.get<std::string>("<xmlattr>.Name");
-				if (name == variantName) {
-					VisitVariant(node_variant, shaderNode);
-					return;
-				}
-
-				for (auto& it : boost::make_iterator_range(node_variant.equal_range("AliasName"))) {
-					if (it.second.data() == variantName) {
-						VisitVariant(node_variant, shaderNode);
-						return;
-					}
-				}
-			}
-		}
-	}
-
-	bool ParseShaderFile(const std::string& shaderName, ShaderNode& shaderNode) {
+	bool ParseShaderFile(const ShaderLoadParam& loadParam, ShaderNode& shaderNode) {
 		bool result;
-		auto find_iter = mShaderByName.find(shaderName);
-		if (find_iter == mShaderByName.end()) {
-			std::string filename = "shader/" + shaderName + ".Shader";
+		auto find_iter = mShaderByParam.find(loadParam);
+		if (find_iter == mShaderByParam.end()) {
+			std::string filename = "shader/" + loadParam.ShaderName;
+			if (!loadParam.VariantName.empty()) filename += "-" + loadParam.VariantName;
+			filename += ".Shader";
 			if (boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filename, pt);
 				Visitor visitor{ false };
 				VisitShader(pt.get_child("Shader"), visitor, shaderNode);
 				BuildShaderNode(shaderNode);
-				mShaderByName.insert(std::make_pair(shaderName, shaderNode));
+				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
 				result = true;
 			}
 			else {
@@ -427,34 +405,21 @@ private:
 		}
 		return result;
 	}
-	bool ParseShaderVariantFile(const ShaderLoadParam& matParam, ShaderNode& shaderNode) {
+	bool GetShaderVariantNode(const ShaderLoadParam& loadParam, ShaderNode& shaderNode) {
 		bool result;
-		std::string strKey = matParam.ShaderName + "/" + matParam.CalcVariantName();
-		auto find_iter = mShaderVariantByName.find(strKey);
-		if (find_iter == mShaderVariantByName.end()) {
-			if (!matParam.VariantName.empty()) {
-				std::string filename = "shader/Variants.Shader";
-				if (result = boost_filesystem::exists(boost_filesystem::system_complete(filename))) {
-					boost_property_tree::ptree pt;
-					boost_property_tree::read_xml(filename, pt);
-					VisitShaderVariants(pt.get_child("ShaderVariants"), matParam.ShaderName, matParam.VariantName, shaderNode);
-					BuildShaderNode(shaderNode);
-					mShaderVariantByName.insert(std::make_pair(strKey, shaderNode));
-				}
-			}
-			else {
-				if (result = ParseShaderFile(matParam.ShaderName, shaderNode)) {
-					for (auto& categNode : shaderNode) {
-						for (auto& techniqueNode : categNode) {
-							for (auto& passNode : techniqueNode) {
-								passNode.Program.VertexSCD.AddOrSetMacros(matParam.Macros);
-								passNode.Program.PixelSCD.AddOrSetMacros(matParam.Macros);
-							}
+		auto find_iter = mShaderVariantByParam.find(loadParam);
+		if (find_iter == mShaderVariantByParam.end()) {
+			if (result = ParseShaderFile(loadParam, shaderNode)) {
+				for (auto& categNode : shaderNode) {
+					for (auto& techniqueNode : categNode) {
+						for (auto& passNode : techniqueNode) {
+							passNode.Program.VertexSCD.AddOrSetMacros(loadParam.Macros);
+							passNode.Program.PixelSCD.AddOrSetMacros(loadParam.Macros);
 						}
 					}
-					BuildShaderNode(shaderNode);
-					mShaderVariantByName.insert(std::make_pair(strKey, shaderNode));
 				}
+				BuildShaderNode(shaderNode);
+				mShaderVariantByParam.insert(std::make_pair(loadParam, shaderNode));
 			}
 		}
 		else {

@@ -39,7 +39,7 @@ void TestSpecSkybox::OnPostInitDevice()
 	}break;
 	case 3: {
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(), ShaderLoadParam{MAT_SKYBOX, "Skybox/Deprecate"}));//bc1a mipmap cube
+		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(), ShaderLoadParam{MAT_SKYBOX, "Deprecate"}));//bc1a mipmap cube
 	}break;
 	default:
 		break;
