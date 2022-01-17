@@ -55,7 +55,7 @@ std::string Specular() {
 
 namespace cube {
 namespace far_plane {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::ShaderLoadParam& matname) {
 	constexpr int SizeBig = 8192;
 	return rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Far()),
@@ -66,7 +66,7 @@ mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector
 }
 }
 namespace near_plane {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::ShaderLoadParam& matname) {
 	constexpr int SizeSmall = 4;
 	return rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Near()),
@@ -77,7 +77,7 @@ mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector
 }
 }
 namespace floor {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
+mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::ShaderLoadParam& matname) {
 	constexpr int Inf = 65536;
 	return rendFac->CreateCube(
 		Eigen::Vector3f(0, y, Inf / 2),

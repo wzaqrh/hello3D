@@ -5,6 +5,7 @@
 #include "core/base/declare_macros.h"
 #include "core/base/base_type.h"
 #include "core/base/template/container_adapter.h"
+#include "core/base/material_load_param.h"
 #include "core/rendersys/texture.h"
 #include "core/resource/resource.h"
 
@@ -70,6 +71,19 @@ public:
 	TechniquePtr CurTech() const { return mElements[mCurTechIdx]; }
 private:
 	int mCurTechIdx = 0;
+};
+
+class MIR_CORE_API Material : boost::noncopyable
+{
+	friend class MaterialFactory;
+public:
+	void EnableKeyword(const std::string& macroName, int value = TRUE);
+	void Build(Launch launchMode, ResourceManager& resMng);
+public:
+	const ShaderPtr& GetShader() const;
+private:
+	ShaderLoadParamBuilder mShaderVariantParam;
+	ShaderPtr mShadeVariant;
 };
 
 }

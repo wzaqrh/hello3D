@@ -40,13 +40,13 @@ std::string Specular();
 
 namespace cube {
 namespace far_plane {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
+mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::ShaderLoadParam& matname = "");
 }
 namespace near_plane {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
+mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::ShaderLoadParam& matname = "");
 }
 namespace floor {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
+mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::ShaderLoadParam& matname = "");
 }
 }
 

@@ -20,8 +20,8 @@ private:
 0: 
 */
 
-inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
-	MaterialLoadParamBuilder mlpb(MAT_MODEL);
+inline ShaderLoadParamBuilder GetMatName(int secondIndex) {
+	ShaderLoadParamBuilder mlpb(MAT_MODEL);
 	mlpb["PBR_MODE"] = 2;
 	return mlpb;
 }
@@ -63,11 +63,11 @@ void TestGLTF::OnPostInitDevice()
 		//dir_light->SetDirection(Eigen::Vector3f(-0.7399, -0.6428, -0.1983));
 		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 		
-		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
+		ShaderLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
 		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(2), skyMat));
 
-		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
+		ShaderLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 		mModel = mRendFac->CreateAssimpModel(modelMat);
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };

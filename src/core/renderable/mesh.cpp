@@ -5,7 +5,7 @@ namespace mir {
 namespace renderable {
 
 /********** Mesh **********/
-Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, int vertCount, int indexCount)
+Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName, int vertCount, int indexCount)
 	:Super(launchMode, resourceMng, matName)
 {
 	mIndices.resize(indexCount);

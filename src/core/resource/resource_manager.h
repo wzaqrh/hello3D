@@ -144,7 +144,7 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	res::ShaderPtr CreateShader(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe;
+	res::ShaderPtr CreateShader(Launch launchMode, const ShaderLoadParam& matName) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
 	res::ShaderPtr CloneShader(Launch launchMode, const res::Shader& material) ThreadSafe;
 
@@ -270,7 +270,7 @@ private:
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTextureByKey;
-	std::map<MaterialLoadParam, res::ShaderPtr> mMaterialByName;
+	std::map<ShaderLoadParam, res::ShaderPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;
 		bool operator<(const AiResourceKey& other) const {

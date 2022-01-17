@@ -5,12 +5,12 @@
 
 namespace mir {
 
-struct MaterialLoadParam {
-	MaterialLoadParam(const char* shaderName)
-		:MaterialLoadParam(shaderName, "") {}
-	MaterialLoadParam(const std::string& shaderName, const std::string& variantName = "")
-		:MaterialLoadParam(shaderName, variantName, std::vector<ShaderCompileMacro>{}) {}
-	MaterialLoadParam(const std::string& shaderName, const std::string& variantName, const std::vector<ShaderCompileMacro>& macros)
+struct ShaderLoadParam {
+	ShaderLoadParam(const char* shaderName)
+		:ShaderLoadParam(shaderName, "") {}
+	ShaderLoadParam(const std::string& shaderName, const std::string& variantName = "")
+		:ShaderLoadParam(shaderName, variantName, std::vector<ShaderCompileMacro>{}) {}
+	ShaderLoadParam(const std::string& shaderName, const std::string& variantName, const std::vector<ShaderCompileMacro>& macros)
 		:ShaderName(shaderName), VariantName(variantName), Macros(macros) {}
 public:
 	bool IsVariant() const { return !VariantName.empty() || !Macros.empty(); }
@@ -38,34 +38,40 @@ public:
 	std::string VariantName;
 	std::vector<ShaderCompileMacro> Macros;
 };
-inline bool operator==(const MaterialLoadParam& l, const MaterialLoadParam& r) {
+inline bool operator==(const ShaderLoadParam& l, const ShaderLoadParam& r) {
 	return l.ShaderName == r.ShaderName
 		&& l.VariantName == r.VariantName
 		&& l.Macros == r.Macros;
 }
-inline bool operator<(const MaterialLoadParam& l, const MaterialLoadParam& r) {
+inline bool operator<(const ShaderLoadParam& l, const ShaderLoadParam& r) {
 	if (l.ShaderName != r.ShaderName) return l.ShaderName < r.ShaderName;
 	if (l.VariantName != r.VariantName) return l.VariantName < r.VariantName;
 	return l.Macros < r.Macros;
 }
 
-struct MaterialLoadParamBuilder {
-	MaterialLoadParamBuilder(const std::string& shaderName, const std::string& variantName = "")
+struct ShaderLoadParamBuilder {
+	ShaderLoadParamBuilder(const std::string& shaderName, const std::string& variantName = "")
 		:LoadParam(shaderName, variantName) {}
 	int& operator[](const std::string& macroName) {
 		return MacroMap[macroName];
 	}
-	operator MaterialLoadParam() {
+	std::string& ShaderName() {
+		return LoadParam.ShaderName;
+	}
+	std::string& VariantName() {
+		return LoadParam.VariantName;
+	}
+	operator ShaderLoadParam() {
 		return Build();
 	}
-	const MaterialLoadParam& Build() {
+	const ShaderLoadParam& Build() {
 		LoadParam.Macros.clear();
 		for (auto& it : MacroMap)
 			LoadParam.Macros.push_back(ShaderCompileMacro{ it.first, boost::lexical_cast<std::string>(it.second) });
 		return LoadParam;
 	}
 private:
-	MaterialLoadParam LoadParam;
+	ShaderLoadParam LoadParam;
 	std::map<std::string, int> MacroMap;
 };
 

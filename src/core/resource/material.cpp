@@ -1,11 +1,12 @@
 #include "core/base/macros.h"
-#include "core/resource/material.h"
-#include "core/resource/material_factory.h"
 #include "core/rendersys/program.h"
 #include "core/rendersys/input_layout.h"
 #include "core/rendersys/hardware_buffer.h"
 #include "core/rendersys/texture.h"
 #include "core/rendersys/render_system.h"
+#include "core/resource/material.h"
+#include "core/resource/material_factory.h"
+#include "core/resource/resource_manager.h"
 
 namespace mir {
 namespace res {
@@ -88,6 +89,26 @@ void Shader::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 {
 	for (const auto& tech : mElements)
 		depends.push_back(tech);
+}
+
+/********** Material **********/
+void Material::EnableKeyword(const std::string& macroName, int value /*= TRUE*/)
+{
+	mShaderVariantParam[macroName] = value;
+	mShadeVariant = nullptr;
+}
+
+void Material::Build(Launch launchMode, ResourceManager& resMng)
+{
+	if (mShadeVariant == nullptr) {
+		mShadeVariant = resMng.CreateShader(launchMode, mShaderVariantParam);
+	}
+}
+
+const ShaderPtr& Material::GetShader() const
+{
+	BOOST_ASSERT(mShadeVariant);
+	return mShadeVariant;
 }
 
 }

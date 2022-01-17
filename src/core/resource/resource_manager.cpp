@@ -535,7 +535,7 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 }
 
 /********** Create Shader **********/
-res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const MaterialLoadParam& matName) ThreadSafe ThreadSafe
+res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const ShaderLoadParam& matName) ThreadSafe ThreadSafe
 {
 	bool resNeedLoad = false;
 	res::ShaderPtr material = nullptr;

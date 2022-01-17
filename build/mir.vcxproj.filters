@@ -220,6 +220,9 @@
     <ClInclude Include="..\src\core\base\template\container_adapter.h">
       <Filter>src\core\base\template</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\resource\material_asset.h">
+      <Filter>src\core\resource\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
@@ -356,6 +359,9 @@
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\renderable_base.cpp">
       <Filter>src\core\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\material_asset.cpp">
+      <Filter>src\core\resource\material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

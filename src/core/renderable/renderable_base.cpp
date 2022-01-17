@@ -6,7 +6,7 @@ namespace mir {
 namespace renderable {
 
 /********** TSprite **********/
-RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
+RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName)
 	: mResourceMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mCameraMask(-1)

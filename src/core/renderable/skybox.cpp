@@ -5,7 +5,7 @@
 namespace mir {
 namespace renderable {
 
-SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, const std::string& imgName)
+SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName, const std::string& imgName)
 	:Super(launchMode, resourceMng, matName)
 {
 	if (matName.VariantName == "Skybox/Deprecate") {

@@ -26,7 +26,7 @@ class MIR_CORE_API PostProcess : public RenderableSingleRenderOp
 	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 protected:
-	PostProcess(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
+	PostProcess(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName, IFrameBufferPtr mainTex);
 public:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 protected:

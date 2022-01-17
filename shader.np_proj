@@ -363,13 +363,13 @@
             <File name="bin\x86\Debug\shader\IBL.cginc" />
         </Folder>
         <Folder name="xml">
-            <File name="bin\x86\Debug\shader\Variants.xml" />
-            <File name="bin\x86\Debug\shader\Standard.xml" />
-            <File name="bin\x86\Debug\shader\Sprite.xml" />
-            <File name="bin\x86\Debug\shader\Skybox.xml" />
-            <File name="bin\x86\Debug\shader\Skeleton.xml" />
-            <File name="bin\x86\Debug\shader\Model.xml" />
-            <File name="bin\x86\Debug\shader\LayerColor.xml" />
+            <File name="bin\x86\Debug\shader\Variants.Shader" />
+            <File name="bin\x86\Debug\shader\Standard.Shader" />
+            <File name="bin\x86\Debug\shader\Sprite.Shader" />
+            <File name="bin\x86\Debug\shader\Skybox.Shader" />
+            <File name="bin\x86\Debug\shader\Skeleton.Shader" />
+            <File name="bin\x86\Debug\shader\Model.Shader" />
+            <File name="bin\x86\Debug\shader\LayerColor.Shader" />
         </Folder>
     </Project>
     <Project name="mir&#x7B14;&#x8BB0;">

@@ -124,7 +124,7 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
+AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName)
 	:Super(launchMode, resourceMng, matName)
 {}
 
