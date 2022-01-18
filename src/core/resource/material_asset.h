@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/base/tpl/binary.h"
 #include "core/base/material_load_param.h"
 #include "core/rendersys/hardware_buffer.h"
 #include "core/rendersys/sampler.h"
@@ -16,11 +17,11 @@ public:
 };
 
 struct UniformNode {
-	bool IsValid() const { return !Data.empty(); }
+	bool IsValid() const { return !Data.IsEmpty(); }
 	const std::string& GetName() const { return ShortName; }
 public:
 	ConstBufferDecl Decl;
-	std::vector<float> Data;
+	tpl::Binary<float> Data;
 	bool IsUnique;
 	int Slot;
 	std::string ShortName;
@@ -43,17 +44,17 @@ struct SamplerDescEx : public SamplerDesc {
 public:
 	std::string ShortName;
 };
-struct SamplerNode : public VectorAdapter<SamplerDescEx> {};
+struct SamplerNode : public tpl::Vector<SamplerDescEx> {};
 }
 }
 
-template <> struct has_function_valid_t<res::mat_asset::AttributeNode> : public std::true_type {};
+template <> struct tpl::has_function_valid_t<res::mat_asset::AttributeNode> : public std::true_type {};
 
-template <> struct has_function_valid_t<res::mat_asset::UniformNode> : public std::true_type {};
-template <> struct has_function_name_t<res::mat_asset::UniformNode> : public std::true_type {};
+template <> struct tpl::has_function_valid_t<res::mat_asset::UniformNode> : public std::true_type {};
+template <> struct tpl::has_function_name_t<res::mat_asset::UniformNode> : public std::true_type {};
 
-template <> struct has_function_valid_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
-template <> struct has_function_name_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
+template <> struct tpl::has_function_valid_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
+template <> struct tpl::has_function_name_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
 
 namespace res {
 namespace mat_asset {
@@ -86,8 +87,8 @@ struct ShaderCompileDescEx : public ShaderCompileDesc {
 		AddMacros(other.Macros);
 	}
 };
-struct AttributeNodeVector : public VectorAdapter<AttributeNode> {};
-struct UniformNodeVector : public VectorAdapter<UniformNode> {
+struct AttributeNodeVector : public tpl::Vector<AttributeNode> {};
+struct UniformNodeVector : public tpl::Vector<UniformNode> {
 	template<class Visitor> void ForEachUniform(Visitor vis) const {
 		for (const auto& uniform : *this)
 			vis(uniform);
@@ -118,7 +119,7 @@ struct PassNode {
 	ProgramNode Program;
 	std::string LightMode, Name, ShortName;
 };
-struct TechniqueNode : public VectorAdapter<PassNode> {
+struct TechniqueNode : public tpl::Vector<PassNode> {
 	template<class Visitor> void ForEachPass(Visitor vis) const {
 		for (const auto& pass : *this)
 			vis(pass);
@@ -128,7 +129,7 @@ struct TechniqueNode : public VectorAdapter<PassNode> {
 			vis(pass.Program);
 	}
 };
-struct CategoryNode : public VectorAdapter<TechniqueNode> {
+struct CategoryNode : public tpl::Vector<TechniqueNode> {
 	ProgramNode Program;
 	template<class Visitor> void ForEachPass(Visitor vis) const {
 		for (const auto& tech : *this)
@@ -140,7 +141,7 @@ struct CategoryNode : public VectorAdapter<TechniqueNode> {
 			tech.ForEachProgram(vis);
 	}
 };
-struct ShaderNode : public VectorAdapter<CategoryNode> {
+struct ShaderNode : public tpl::Vector<CategoryNode> {
 	ShaderNode() {
 		Add(CategoryNode());
 	}

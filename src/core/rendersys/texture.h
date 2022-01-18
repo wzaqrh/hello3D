@@ -1,7 +1,7 @@
 #pragma once
 #include "core/rendersys/predeclare.h"
 #include "core/base/base_type.h"
-#include "core/base/template/container_adapter.h"
+#include "core/base/tpl/vector.h"
 #include "core/resource/resource.h"
 
 namespace mir {
@@ -20,7 +20,7 @@ interface ITexture : public IResource
 	int GetHeight() const { return GetSize().y(); }
 };
 
-struct TextureVector : public VectorAdapter<std::shared_ptr<ITexture>>
+struct TextureVector : public tpl::Vector<std::shared_ptr<ITexture>>
 {
 	void Merge(const TextureVector& other) {
 		if (mElements.size() < other.mElements.size())

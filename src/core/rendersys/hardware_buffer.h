@@ -1,5 +1,6 @@
 #pragma once
 #include "core/base/base_type.h"
+#include "core/base/tpl/vector.h"
 #include "core/resource/resource.h"
 
 namespace mir {
@@ -34,10 +35,10 @@ public:
 	size_t Count;
 	size_t Offset;
 };
-template <> struct has_function_valid_t<ConstBufferDeclElement> : public std::true_type {};
-template <> struct has_function_name_t<ConstBufferDeclElement> : public std::true_type {};
+template <> struct tpl::has_function_valid_t<ConstBufferDeclElement> : public std::true_type {};
+template <> struct tpl::has_function_name_t<ConstBufferDeclElement> : public std::true_type {};
 
-struct ConstBufferDecl : public VectorAdapter<ConstBufferDeclElement> {
+struct ConstBufferDecl : public tpl::Vector<ConstBufferDeclElement> {
 	size_t BufferSize = 0;
 };
 
@@ -52,7 +53,6 @@ interface IVertexBuffer : public IHardwareBuffer
 {
 	virtual int GetStride() const = 0;
 	virtual int GetOffset() const = 0;
-
 	int GetCount() const { return GetBufferSize() / GetStride(); }
 };
 

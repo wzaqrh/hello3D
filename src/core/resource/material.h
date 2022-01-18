@@ -5,7 +5,7 @@
 #include "core/base/declare_macros.h"
 #include "core/base/data.h"
 #include "core/base/base_type.h"
-#include "core/base/template/container_adapter.h"
+#include "core/base/tpl/vector.h"
 #include "core/base/material_load_param.h"
 #include "core/rendersys/texture.h"
 #include "core/resource/resource.h"
@@ -24,7 +24,7 @@ class Pass : public ImplementResource<IResource>
 		std::string Name;
 		bool IsUnique;
 	};
-	struct CBufferEntryVector : public VectorAdapter<CBufferEntry> {};
+	struct CBufferEntryVector : public tpl::Vector<CBufferEntry> {};
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot);
@@ -45,7 +45,7 @@ public:
 	IFrameBufferPtr mFrameBuffer;
 };
 
-class Technique : public VectorAdapter<PassPtr, ImplementResource<IResource>>
+class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>
 {
 	friend class MaterialFactory;
 public:
@@ -61,7 +61,7 @@ public:
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 };
 
-class MIR_CORE_API Shader : public VectorAdapter<TechniquePtr, ImplementResource<IResource>>
+class MIR_CORE_API Shader : public tpl::Vector<TechniquePtr, ImplementResource<IResource>>
 {
 	friend class MaterialFactory;
 public:

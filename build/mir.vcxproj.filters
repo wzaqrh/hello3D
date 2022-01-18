@@ -217,9 +217,6 @@
     <ClInclude Include="..\src\core\rendersys\render_states_block.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\base\template\container_adapter.h">
-      <Filter>src\core\base\template</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\resource\material_asset.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>
@@ -231,6 +228,12 @@
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\sampler.h">
       <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\tpl\vector.h">
+      <Filter>src\core\base\tpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\tpl\binary.h">
+      <Filter>src\core\base\tpl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -425,8 +428,8 @@
     <Filter Include="src\shader\xml">
       <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\base\template">
-      <UniqueIdentifier>{bdf4a8b8-3612-452e-8b10-8db4ad64c50e}</UniqueIdentifier>
+    <Filter Include="src\core\base\tpl">
+      <UniqueIdentifier>{83b933a7-c99d-4e06-bf3d-d62aaa54c2ef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

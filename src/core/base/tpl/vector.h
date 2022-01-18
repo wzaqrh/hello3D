@@ -2,6 +2,7 @@
 #include "core/base/stl.h"
 
 namespace mir {
+namespace tpl {
 
 #define TemplateArgs template <typename... T>
 #define TemplateT template <typename T>
@@ -10,25 +11,25 @@ class EmptyContainer {};
 
 template <typename T> struct has_function_valid_t : public std::false_type {};
 template <typename T> struct has_function_name_t : public std::false_type {};
-template <typename T> struct VectorAdapterTraits {
+template <typename T> struct VectorTraits {
 	using has_function_valid = has_function_valid_t<T>;
 	using has_function_name = has_function_name_t<T>;
 };
 
-template <class Element, class Parent = EmptyContainer> class VectorAdapter : public Parent {
+template <class Element, class Parent = EmptyContainer> class Vector : public Parent {
 public:
 	using value_type = Element;
-	using reference = Element&;
+	using reference = Element & ;
 	using const_reference = const Element&;
-	using iterator = typename std::vector<value_type>::iterator ;
+	using iterator = typename std::vector<value_type>::iterator;
 	using const_iterator = typename std::vector<value_type>::const_iterator;
-	using pointer = Element*;
+	using pointer = Element * ;
 	using const_pointer = const Element*;
 public:
 	void Clear() {
 		mElements.clear();
 	}
-	void Swap(VectorAdapter& other) {
+	void Swap(Vector& other) {
 		mElements.swap(other.mElements);
 	}
 	void Resize(size_t size) {
@@ -65,8 +66,8 @@ public:
 			}
 		}
 	};
-	void MergeOverride(const VectorAdapter& other) {
-		MergeOverrideFunctor<typename VectorAdapterTraits<Element>::has_function_valid::type>()(mElements, other.mElements);
+	void MergeOverride(const Vector& other) {
+		MergeOverrideFunctor<typename VectorTraits<Element>::has_function_valid::type>()(mElements, other.mElements);
 	}
 
 	template<typename HasFunctionValid = std::false_type> struct MergeNoOverrideFunctor {
@@ -82,13 +83,13 @@ public:
 			}
 		}
 	};
-	void MergeNoOverride(const VectorAdapter& other) {
-		MergeNoOverrideFunctor<typename VectorAdapterTraits<Element>::has_function_valid::type>()(mElements, other.mElements);
+	void MergeNoOverride(const Vector& other) {
+		MergeNoOverrideFunctor<typename VectorTraits<Element>::has_function_valid::type>()(mElements, other.mElements);
 	}
 public:
 	bool IsEmpty() const { return mElements.empty(); }
 	size_t Count() const { return mElements.size(); }
-	
+
 	reference At(size_t pos) { return mElements[pos]; }
 	const_reference At(size_t pos) const { return mElements[pos]; }
 	reference operator[](size_t pos) { return mElements[pos]; }
@@ -120,10 +121,10 @@ public:
 		}
 	};
 	size_t IndexByName(const std::string& name) const {
-		return IndexByNameFunctor<typename VectorAdapterTraits<Element>::has_function_name::type>()(mElements, name);
+		return IndexByNameFunctor<typename VectorTraits<Element>::has_function_name::type>()(mElements, name);
 	}
 	static constexpr size_t IndexNotFound() { return (size_t)-1; }
-	const_pointer operator[](const std::string& name) const { 
+	const_pointer operator[](const std::string& name) const {
 		size_t index = IndexByName(name);
 		return index < mElements.size() ? &mElements[index] : nullptr;
 	}
@@ -131,4 +132,5 @@ protected:
 	std::vector<value_type> mElements;
 };
 
+}
 }

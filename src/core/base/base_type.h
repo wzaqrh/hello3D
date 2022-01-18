@@ -1,7 +1,6 @@
 #pragma once
 #include "core/base/stl.h"
 #include "core/base/math.h"
-#include "core/base/template/container_adapter.h"
 
 namespace mir {
 

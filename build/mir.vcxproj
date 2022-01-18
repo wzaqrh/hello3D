@@ -50,8 +50,9 @@
     <ClInclude Include="..\src\core\base\predeclare.h" />
     <ClInclude Include="..\src\core\base\rendersys_debug.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
-    <ClInclude Include="..\src\core\base\template\container_adapter.h" />
     <ClInclude Include="..\src\core\base\thread.h" />
+    <ClInclude Include="..\src\core\base\tpl\binary.h" />
+    <ClInclude Include="..\src\core\base\tpl\vector.h" />
     <ClInclude Include="..\src\core\base\transform.h" />
     <ClInclude Include="..\src\core\base\uniform_struct.h" />
     <ClInclude Include="..\src\core\mir.h" />

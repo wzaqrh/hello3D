@@ -9,7 +9,7 @@
 #include "core/base/stl.h"
 #include "core/base/base_type.h"
 #include "core/base/macros.h"
-#include "core/base/template/container_adapter.h"
+#include "core/base/tpl/vector.h"
 #include "core/base/d3d.h"
 #include "core/resource/material_name.h"
 #include "core/resource/material_asset.h"
@@ -121,41 +121,31 @@ private:
 		size *= std::max<int>(1, count);
 		return result;
 	}
-	static void ConvertStrToCBElementData(std::string strDefault, ConstBufferElementType uniformElementType, int channel, std::vector<float>& uniformData) {
-		int dataSize = uniformData.size();
-		uniformData.resize(dataSize + channel);
-		void* pData = &uniformData[dataSize];
-		
+	static void ConvertStrToCBElementData(std::string strDefault, ConstBufferElementType uniformElementType, int channel, tpl::Binary<float>& uniformData) {
+		tpl::BinaryWritter<float> binWritter(uniformData);
 		if (!strDefault.empty()) {
 			switch (uniformElementType) {
 			case kCBElementBool:
-			case kCBElementInt: {
-				*static_cast<int*>(pData) = boost::lexical_cast<int>(strDefault);
-			}break;
+			case kCBElementInt:
 			case kCBElementInt2:
 			case kCBElementInt3:
-			case kCBElementInt4: {
-				std::vector<boost::iterator_range<std::string::iterator>> lst;
-				boost::split(lst, strDefault, boost::is_any_of(","));
-				const int count = channel;
-				for (int i = 0; i < lst.size() && i < count; ++i)
-					static_cast<int*>(pData)[i] = boost::lexical_cast<int>(lst[i]);
-			}break;
-			case kCBElementFloat: {
-				*static_cast<float*>(pData) = boost::lexical_cast<float>(strDefault);
-			}break;
+			case kCBElementInt4:
+				binWritter.WriteElementsByParseString<int>(strDefault, channel);
+				break;
+			case kCBElementFloat:
 			case kCBElementFloat2:
 			case kCBElementFloat3:
 			case kCBElementFloat4:
-			case kCBElementMatrix: {
-				std::vector<boost::iterator_range<std::string::iterator>> lst;
-				boost::split(lst, strDefault, boost::is_any_of(","));
-				const int count = channel;
-				for (int i = 0; i < lst.size() && i < count; ++i)
-					static_cast<float*>(pData)[i] = boost::lexical_cast<float>(lst[i]);
-			}break;
-			default:break;
+			case kCBElementMatrix:
+				binWritter.WriteElementsByParseString<float>(strDefault, channel);
+				break;
+			default:
+				binWritter.WriteEmpties(channel);
+				break;
 			}
+		}
+		else {
+			binWritter.WriteEmpties(channel);
 		}
 	}
 	void VisitUniforms(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
@@ -191,8 +181,8 @@ private:
 				byteOffset = offset + size;
 				ConvertStrToCBElementData(element.second.get<std::string>("<xmlattr>.Default", ""), uniformElementType, size / sizeof(float), uniform.Data);
 			}
-			int dataSize = uniform.Data.size();
-			if (dataSize & 15) uniform.Data.resize((dataSize + 15) / 16 * 16);
+			int dataSize = uniform.ByteSize();
+			if (dataSize & 15) uniform.SetByteSize((dataSize + 15) / 16 * 16);
 
 			uniform.Slot = node_uniform.get<int>("<xmlattr>.Slot", -1);
 
