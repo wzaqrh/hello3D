@@ -22,7 +22,7 @@
 			<Element Name="ShadowMapSize"   Type="float4"></Element>
 			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
 			<Element Name="Exposure"        Type="float"></Element>
-    </Uniform>
+		</Uniform>
 		<Uniform Name="cbPerLight" Slot="1">
 			<Element Name="unity_LightPosition"	Type="float4"></Element>
 			<Element Name="unity_LightColor"	Type="float4"></Element> 

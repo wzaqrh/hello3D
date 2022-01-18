@@ -11,7 +11,7 @@ enum HardwareBufferType {
 	kHWBufferIndex
 };
 
-enum ConstBufferElementType {
+enum CbElementType {
 	kCBElementBool,
 	kCBElementInt,
 	kCBElementInt2,
@@ -22,23 +22,35 @@ enum ConstBufferElementType {
 	kCBElementFloat3,
 	kCBElementFloat4,
 	kCBElementMatrix,
-	kCBElementStruct,
 	kCBElementMax
 };
-struct ConstBufferDeclElement {
+template <typename T> struct DataType2CbElementType {};
+template <> struct DataType2CbElementType<bool> : public std::integral_constant<CbElementType, kCBElementBool> {};
+template <> struct DataType2CbElementType<int>  : public std::integral_constant<CbElementType, kCBElementInt> {};
+template <> struct DataType2CbElementType<Eigen::Vector2i> : public std::integral_constant<CbElementType, kCBElementInt2> {};
+template <> struct DataType2CbElementType<Eigen::Vector3i> : public std::integral_constant<CbElementType, kCBElementInt3> {};
+template <> struct DataType2CbElementType<Eigen::Vector4i> : public std::integral_constant<CbElementType, kCBElementInt4> {};
+template <> struct DataType2CbElementType<float> : public std::integral_constant<CbElementType, kCBElementFloat> {};
+template <> struct DataType2CbElementType<Eigen::Vector2f> : public std::integral_constant<CbElementType, kCBElementFloat2> {};
+template <> struct DataType2CbElementType<Eigen::Vector3f> : public std::integral_constant<CbElementType, kCBElementFloat3> {};
+template <> struct DataType2CbElementType<Eigen::Vector4f> : public std::integral_constant<CbElementType, kCBElementFloat4> {};
+template <> struct DataType2CbElementType<Eigen::Matrix4f> : public std::integral_constant<CbElementType, kCBElementMatrix> {};
+size_t GetCbElementTypeByteWidth(CbElementType type);
+
+struct CbDeclElement {
 	bool IsValid() const { return !Name.empty(); }
 	const std::string& GetName() const { return Name; }
 public:
 	std::string Name;
-	ConstBufferElementType Type;
+	CbElementType Type;
 	size_t Size;
 	size_t Count;
 	size_t Offset;
 };
-template <> struct tpl::has_function_valid_t<ConstBufferDeclElement> : public std::true_type {};
-template <> struct tpl::has_function_name_t<ConstBufferDeclElement> : public std::true_type {};
+template <> struct tpl::has_function_valid_t<CbDeclElement> : public std::true_type {};
+template <> struct tpl::has_function_name_t<CbDeclElement> : public std::true_type {};
 
-struct ConstBufferDecl : public tpl::Vector<ConstBufferDeclElement> {
+struct ConstBufferDecl : public tpl::Vector<CbDeclElement> {
 	size_t BufferSize = 0;
 };
 

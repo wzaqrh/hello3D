@@ -375,6 +375,12 @@
     <ClCompile Include="..\src\core\resource\material_asset.cpp">
       <Filter>src\core\resource\material</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\resource\material_parameter.cpp">
+      <Filter>src\core\resource\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\hardware_buffer.cpp">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

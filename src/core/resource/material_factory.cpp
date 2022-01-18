@@ -56,8 +56,8 @@ ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& re
 					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, resMng.CreateSampler(launchMode, sampler)));
 
 				for (auto& uniform : passProgram.Uniforms)
-					curPass->AddConstBuffer(resMng.CreateConstBuffer(launchMode, uniform.Decl, kHWUsageDynamic, Data::Make(uniform.Data)),
-						uniform.ShortName, uniform.IsUnique, uniform.Slot);
+					curPass->AddConstBuffer(resMng.CreateConstBuffer(launchMode, uniform.GetDecl(), kHWUsageDynamic, Data::Make(uniform.GetRawBytes())),
+						uniform.GetName(), uniform.IsUnique(), uniform.GetSlot());
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories

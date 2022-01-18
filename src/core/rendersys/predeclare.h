@@ -6,7 +6,7 @@ namespace mir {
 #define DECLARE_STRUCT(TYPE) struct TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr; typedef TYPE* TYPE##RawPtr;
 #define DECLARE_CLASS(TYPE) class TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr; typedef TYPE* TYPE##RawPtr;
 
-DECLARE_STRUCT(ConstBufferDeclElement);
+DECLARE_STRUCT(CbDeclElement);
 DECLARE_STRUCT(ConstBufferDecl);
 
 DECLARE_STRUCT(IBlobData);

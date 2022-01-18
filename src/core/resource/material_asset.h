@@ -5,6 +5,7 @@
 #include "core/rendersys/hardware_buffer.h"
 #include "core/rendersys/sampler.h"
 #include "core/rendersys/input_layout.h"
+#include "core/resource/material_parameter.h"
 
 namespace mir {
 namespace res {
@@ -16,16 +17,7 @@ public:
 	std::vector<LayoutInputElement> Layout;
 };
 
-struct UniformNode {
-	bool IsValid() const { return !Data.IsEmpty(); }
-	const std::string& GetName() const { return ShortName; }
-public:
-	ConstBufferDecl Decl;
-	tpl::Binary<float> Data;
-	bool IsUnique;
-	int Slot;
-	std::string ShortName;
-};
+using UniformNode = UniformParameters;
 
 struct SamplerDescEx : public SamplerDesc {
 	bool IsValid() const { return !ShortName.empty(); }
@@ -49,9 +41,6 @@ struct SamplerNode : public tpl::Vector<SamplerDescEx> {};
 }
 
 template <> struct tpl::has_function_valid_t<res::mat_asset::AttributeNode> : public std::true_type {};
-
-template <> struct tpl::has_function_valid_t<res::mat_asset::UniformNode> : public std::true_type {};
-template <> struct tpl::has_function_name_t<res::mat_asset::UniformNode> : public std::true_type {};
 
 template <> struct tpl::has_function_valid_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
 template <> struct tpl::has_function_name_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
@@ -88,7 +77,7 @@ struct ShaderCompileDescEx : public ShaderCompileDesc {
 	}
 };
 struct AttributeNodeVector : public tpl::Vector<AttributeNode> {};
-struct UniformNodeVector : public tpl::Vector<UniformNode> {
+struct UniformNodeVector : public GpuUniformsParameters {
 	template<class Visitor> void ForEachUniform(Visitor vis) const {
 		for (const auto& uniform : *this)
 			vis(uniform);
@@ -161,14 +150,14 @@ struct TextureProperty {
 	int Slot;
 };
 struct UniformProperty {
-	std::vector<float> Data;
+	tpl::Binary<float> Data;
 	bool IsUnique;
 	int Slot;
 };
 struct MaterialNode {
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;
-	std::map<std::string, UniformProperty> UniformProperies;
+	GpuUniformsParameters UniformProperies;
 };
 
 class ShaderNodeManager;

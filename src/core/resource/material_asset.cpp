@@ -5,7 +5,6 @@
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 #include "core/base/stl.h"
 #include "core/base/base_type.h"
 #include "core/base/macros.h"
@@ -104,56 +103,27 @@ private:
 			++index;
 		}
 	}
-	static ConstBufferElementType ConvertStrToCBElementType(
-		const std::string& str, int count, size_t& size) {
-		ConstBufferElementType result = kCBElementMax;
-		if (str == "bool") result = kCBElementBool, size = sizeof(BOOL);
-		else if (str == "int") result = kCBElementInt, size = sizeof(int);
-		else if (str == "int2") result = kCBElementInt2, size = sizeof(int) * 2;
-		else if (str == "int3") result = kCBElementInt3, size = sizeof(int) * 3;
-		else if (str == "int4") result = kCBElementInt4, size = sizeof(int) * 4;
-		else if (str == "float") result = kCBElementFloat, size = sizeof(float);
-		else if (str == "float2") result = kCBElementFloat2, size = sizeof(float) * 2;
-		else if (str == "float3") result = kCBElementFloat3, size = sizeof(float) * 3;
-		else if (str == "float4") result = kCBElementFloat4, size = sizeof(float) * 4;
-		else if (str == "matrix") result = kCBElementMatrix, size = sizeof(float) * 16;
-		else if (str == "struct") result = kCBElementStruct;
-		size *= std::max<int>(1, count);
+	static CbElementType GetCBElementTypeByString(const std::string& str) {
+		CbElementType result = kCBElementMax;
+		if (str == "bool") result = kCBElementBool;
+		else if (str == "int") result = kCBElementInt;
+		else if (str == "int2") result = kCBElementInt2;
+		else if (str == "int3") result = kCBElementInt3;
+		else if (str == "int4") result = kCBElementInt4;
+		else if (str == "float") result = kCBElementFloat;
+		else if (str == "float2") result = kCBElementFloat2;
+		else if (str == "float3") result = kCBElementFloat3;
+		else if (str == "float4") result = kCBElementFloat4;
+		else if (str == "matrix") result = kCBElementMatrix;
+		else BOOST_ASSERT(false);
 		return result;
-	}
-	static void ConvertStrToCBElementData(std::string strDefault, ConstBufferElementType uniformElementType, int channel, tpl::Binary<float>& uniformData) {
-		tpl::BinaryWritter<float> binWritter(uniformData);
-		if (!strDefault.empty()) {
-			switch (uniformElementType) {
-			case kCBElementBool:
-			case kCBElementInt:
-			case kCBElementInt2:
-			case kCBElementInt3:
-			case kCBElementInt4:
-				binWritter.WriteElementsByParseString<int>(strDefault, channel);
-				break;
-			case kCBElementFloat:
-			case kCBElementFloat2:
-			case kCBElementFloat3:
-			case kCBElementFloat4:
-			case kCBElementMatrix:
-				binWritter.WriteElementsByParseString<float>(strDefault, channel);
-				break;
-			default:
-				binWritter.WriteEmpties(channel);
-				break;
-			}
-		}
-		else {
-			binWritter.WriteEmpties(channel);
-		}
 	}
 	void VisitUniforms(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseUniform"))) {
 			std::string refName = it.second.data();
 			auto find_iter = mUniformByName.find(refName);
 			if (find_iter != mUniformByName.end()) {
-				int refSlot = it.second.get<int>("<xmlattr>.Slot", find_iter->second.Slot);
+				int refSlot = it.second.get<int>("<xmlattr>.Slot", find_iter->second.GetSlot());
 				programNode.Uniforms.AddOrSet(find_iter->second, refSlot);
 			}
 		}
@@ -162,32 +132,23 @@ private:
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Uniform"))) {
 			auto& node_uniform = it.second;
 			UniformNode uniform;
-			uniform.IsUnique = node_uniform.get<bool>("<xmlattr>.IsUnique", true);
-
-			int byteOffset = 0;
+			UniformParametersBuilder uniBuilder(uniform);
 			for (auto& element : boost::make_iterator_range(node_uniform.equal_range("Element"))) {
+				std::string name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
+				CbElementType type = GetCBElementTypeByString(element.second.get<std::string>("<xmlattr>.Type"));
 				size_t size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
 				size_t count = element.second.get<int>("<xmlattr>.Count", 0);
-				size_t offset = element.second.get<int>("<xmlattr>.Offset", byteOffset);
-				ConstBufferElementType uniformElementType = ConvertStrToCBElementType(
-					element.second.get<std::string>("<xmlattr>.Type"/*, "int"*/), count, size);
-				BOOST_ASSERT(uniformElementType != kCBElementMax);
-				std::string Name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
+				size_t offset = element.second.get<int>("<xmlattr>.Offset", -1);
+				std::string strDefault = element.second.get<std::string>("<xmlattr>.Default", "");
 
-				uniform.Decl.Add(ConstBufferDeclElement{ Name, uniformElementType, size, count, offset });
-				uniform.Decl.Last().Offset = uniform.Decl.BufferSize;
-				uniform.Decl.BufferSize += uniform.Decl.Last().Size;
-
-				byteOffset = offset + size;
-				ConvertStrToCBElementData(element.second.get<std::string>("<xmlattr>.Default", ""), uniformElementType, size / sizeof(float), uniform.Data);
+				uniBuilder.AddParameter(name, type, size, count, offset, strDefault);
 			}
-			int dataSize = uniform.ByteSize();
-			if (dataSize & 15) uniform.SetByteSize((dataSize + 15) / 16 * 16);
-
-			uniform.Slot = node_uniform.get<int>("<xmlattr>.Slot", -1);
+			uniBuilder.IsUnique() = node_uniform.get<bool>("<xmlattr>.IsUnique", true);
+			uniBuilder.Slot() = node_uniform.get<int>("<xmlattr>.Slot", -1);
 
 			std::string Name = node_uniform.get<std::string>("<xmlattr>.Name");
-			uniform.ShortName = node_uniform.get<std::string>("<xmlattr>.ShortName", Name);
+			uniBuilder.ShortName() = node_uniform.get<std::string>("<xmlattr>.ShortName", Name);
+			uniBuilder.Build();
 
 			Name = node_uniform.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
 			mUniformByName.insert(std::make_pair(Name, uniform));
@@ -195,7 +156,7 @@ private:
 			Name = PropertyTreePath(nodeProgram, node_uniform, index).Path.string();
 			mUniformByName.insert(std::make_pair(Name, uniform));
 
-			programNode.Uniforms.AddOrSet(std::move(uniform), uniform.Slot);
+			programNode.Uniforms.AddOrSet(std::move(uniform), uniform.GetSlot());
 			++index;
 		}
 	}
@@ -419,30 +380,23 @@ private:
 	void VisitProperties(const PropertyTreePath& nodeProperties, MaterialNode& materialNode) {
 		for (auto& nodeProp : nodeProperties.Node) {
 			materialNode.Shader.ForEachProgram([&nodeProp, &materialNode](const ProgramNode& prog) {
-				const std::string& propertyName = nodeProp.first;
-				size_t index = prog.Samplers.IndexByName(propertyName);
+				size_t index = prog.Samplers.IndexByName(nodeProp.first);
 				if (index != prog.Samplers.IndexNotFound()) {
-					auto& texProp = materialNode.TextureProperies[propertyName];
+					auto& texProp = materialNode.TextureProperies[nodeProp.first];
 					texProp.ImagePath = nodeProp.second.data();
 					texProp.Slot = index;
 				}
 				else {
-					prog.Uniforms.ForEachUniform([&nodeProp, &materialNode](const UniformNode& uniform) {
-						const std::string& propertyName = nodeProp.first;
-						auto findDeclElem = uniform.Decl[propertyName];
-						if (findDeclElem) {
-							auto& uniformProp = materialNode.UniformProperies[propertyName];
-							ShaderNodeManager::ConvertStrToCBElementData(nodeProp.second.data(), findDeclElem->Type, 16, uniformProp.Data);
-							uniformProp.IsUnique = uniform.IsUnique;
-							uniformProp.Slot = uniform.Slot;
-						}
-					});
+					materialNode.UniformProperies.SetPropertyByString(nodeProp.first, nodeProp.second.data());
 				}
 			});
 		}
 	}
 	void VisitMaterial(const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
 		mShaderMng->VisitShader(nodeMaterial, Visitor{ false }, materialNode.Shader);
+		materialNode.Shader.ForEachProgram([&materialNode](const ProgramNode& progNode) {
+			materialNode.UniformProperies.MergeOverride(progNode.Uniforms);
+		});
 
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
 			VisitProperties(it.second, materialNode);

@@ -88,7 +88,7 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, const Cons
 	}
 }
 
-void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, const ConstBufferDeclElement& elem)
+void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, const CbDeclElement& elem)
 {
 	D3DXHANDLE handle = GetHandle(elem.Name);
 	if (handle) {
@@ -104,7 +104,6 @@ void ConstantTable::SetValue(IDirect3DDevice9* device, char* buffer9, const Cons
 				hr = mTable->SetMatrixTransposeArray(device, handle, (CONST D3DXMATRIX*)(buffer9 + elem.Offset), elem.Count);
 			}
 		}break;
-		case kCBElementStruct:
 		case kCBElementBool:
 		case kCBElementInt:
 		case kCBElementInt2:
