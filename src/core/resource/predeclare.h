@@ -12,6 +12,7 @@ namespace res {
 DECLARE_CLASS(Pass);
 DECLARE_CLASS(Technique);
 DECLARE_CLASS(Shader);
+DECLARE_CLASS(Material);
 DECLARE_CLASS(MaterialFactory);
 
 DECLARE_CLASS(AssimpMesh);

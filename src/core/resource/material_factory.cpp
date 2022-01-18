@@ -14,10 +14,9 @@ MaterialFactory::MaterialFactory()
 	mMatAssetMng = CreateInstance<mat_asset::MaterialAssetManager>();
 }
 
-ShaderPtr MaterialFactory::CreateShaderByShaderNode(Launch launchMode, ResourceManager& resMng, 
-	const mat_asset::ShaderNode& shaderNode, ShaderPtr shaderRes)
+ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng,
+	const mat_asset::ShaderNode& shaderNode, ShaderPtr shader)
 {
-	auto shader = IF_OR(shaderRes, CreateInstance<Shader>());
 	shader->SetPrepared();
 
 	for (const auto& categNode : shaderNode) {
@@ -70,14 +69,36 @@ ShaderPtr MaterialFactory::CreateShaderByShaderNode(Launch launchMode, ResourceM
 
 ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng,
 	const ShaderLoadParam& loadParam, ShaderPtr shader) {
+	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {
-		return CreateShaderByShaderNode(launchMode, resMng, shaderNode, shader);
+		return DoCreateShader(launchMode, resMng, shaderNode, shader);
 	}
 	else {
-		shader = IF_OR(shader, CreateInstance<Shader>());
 		shader->SetLoaded(false);
 		return shader;
+	}
+}
+
+MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng,
+	const mat_asset::MaterialNode& materialNode, MaterialPtr material)
+{
+	material->mShadeVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
+	material->mShaderVariantParam.ShaderName() = materialNode.Shader.ShortName;
+	return material;
+}
+
+MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng,
+	const std::string& loadPath, MaterialPtr material)
+{
+	material = IF_OR(material, CreateInstance<Material>());
+	mat_asset::MaterialNode materialNode;
+	if (mMatAssetMng->GetMaterialNode(loadPath, materialNode)) {
+		return DoCreateMaterial(launchMode, resMng, materialNode, material);
+	}
+	else {
+		material->SetLoaded(false);
+		return material;
 	}
 }
 

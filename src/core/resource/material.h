@@ -73,7 +73,7 @@ private:
 	int mCurTechIdx = 0;
 };
 
-class MIR_CORE_API Material : boost::noncopyable
+class MIR_CORE_API Material : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
 public:
@@ -84,6 +84,7 @@ public:
 private:
 	ShaderLoadParamBuilder mShaderVariantParam;
 	ShaderPtr mShadeVariant;
+	TextureVector Textures;
 };
 
 }

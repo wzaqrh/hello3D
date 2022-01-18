@@ -35,6 +35,7 @@ public:
 private:
 	struct Visitor {
 		const bool JustInclude;
+		const std::string ShaderName;
 	};
 	using ConstVisitorRef = const Visitor&;
 	struct PropertyTreePath {
@@ -330,6 +331,8 @@ private:
 		}
 	}
 	void VisitShader(const PropertyTreePath& nodeShader, ConstVisitorRef vis, ShaderNode& shaderNode) {
+		shaderNode.ShortName = nodeShader->get<std::string>("Name", vis.ShaderName);
+
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("UseShader"))) {
 			ParseShaderFile(it.second.data(), shaderNode);
 		}
@@ -366,7 +369,7 @@ private:
 			if (boost_filesystem::exists(boost_filesystem::system_complete(filepath))) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
-				Visitor visitor{ false };
+				Visitor visitor{ false, loadParam.ShaderName };
 				VisitShader(pt.get_child("Shader"), visitor, shaderNode);
 				BuildShaderNode(shaderNode);
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));

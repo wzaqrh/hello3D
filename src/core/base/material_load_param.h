@@ -50,7 +50,7 @@ inline bool operator<(const ShaderLoadParam& l, const ShaderLoadParam& r) {
 }
 
 struct ShaderLoadParamBuilder {
-	ShaderLoadParamBuilder(const std::string& shaderName, const std::string& variantName = "")
+	ShaderLoadParamBuilder(const std::string& shaderName = "", const std::string& variantName = "")
 		:LoadParam(shaderName, variantName) {}
 	int& operator[](const std::string& macroName) {
 		return MacroMap[macroName];

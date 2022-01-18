@@ -149,6 +149,8 @@ struct ShaderNode : public VectorAdapter<CategoryNode> {
 		for (const auto& categ : *this)
 			categ.ForEachProgram(vis);
 	}
+public:
+	std::string ShortName;
 };
 struct TextureProperty {
 	std::string ImagePath;

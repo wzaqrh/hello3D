@@ -9,6 +9,7 @@ namespace res {
 
 namespace mat_asset {
 struct ShaderNode;
+struct MaterialNode;
 class MaterialAssetManager;
 }
 class MaterialFactory : boost::noncopyable
@@ -18,13 +19,17 @@ public:
 	MaterialFactory();
 	ShaderPtr CreateShader(Launch launch, ResourceManager& resMng,
 		const ShaderLoadParam& loadParam, ShaderPtr shader = nullptr);
+	MaterialPtr CreateMaterial(Launch launch, ResourceManager& resMng, 
+		const std::string& loadPath, MaterialPtr material = nullptr);
 
 	ShaderPtr CloneShader(Launch launch, ResourceManager& resMng, const Shader& material);
 	TechniquePtr CloneTechnique(Launch launch, ResourceManager& resMng, const Technique& technique);
 	PassPtr ClonePass(Launch launch, ResourceManager& resMng, const Pass& pass);
 private:
-	ShaderPtr CreateShaderByShaderNode(Launch launch, ResourceManager& resMng,
-		const mat_asset::ShaderNode& shaderNode, ShaderPtr shader = nullptr);
+	static ShaderPtr DoCreateShader(Launch launchMode, ResourceManager& resMng,
+		const mat_asset::ShaderNode& shaderNode, ShaderPtr shader);
+	static MaterialPtr DoCreateMaterial(Launch launchMode, ResourceManager& resMng,
+		const mat_asset::MaterialNode& materialNode, MaterialPtr material);
 private:
 	std::shared_ptr<mat_asset::MaterialAssetManager> mMatAssetMng;
 };
