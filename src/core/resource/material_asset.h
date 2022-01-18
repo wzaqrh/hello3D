@@ -1,6 +1,9 @@
 #pragma once
 #include <boost/noncopyable.hpp>
 #include "core/base/material_load_param.h"
+#include "core/rendersys/hardware_buffer.h"
+#include "core/rendersys/sampler.h"
+#include "core/rendersys/input_layout.h"
 
 namespace mir {
 namespace res {

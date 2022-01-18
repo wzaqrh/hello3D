@@ -223,6 +223,15 @@
     <ClInclude Include="..\src\core\resource\material_asset.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\resource\material_parameter.h">
+      <Filter>src\core\resource\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\data.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\sampler.h">
+      <Filter>src\core\rendersys\interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">

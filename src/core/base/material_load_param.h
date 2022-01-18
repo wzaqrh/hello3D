@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/lexical_cast.hpp>
 #include "core/base/stl.h"
-#include "core/base/base_type.h"
+#include "core/rendersys/program.h"
 
 namespace mir {
 

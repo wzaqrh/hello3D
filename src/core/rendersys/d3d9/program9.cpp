@@ -1,6 +1,7 @@
 #include "core/rendersys/d3d9/program9.h"
 #include "core/base/base_type.h"
 #include "core/base/debug.h"
+#include "core/rendersys/hardware_buffer.h"
 
 namespace mir {
 

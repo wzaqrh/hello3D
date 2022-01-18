@@ -38,6 +38,7 @@
     <ClInclude Include="..\src\core\base\attribute_struct.h" />
     <ClInclude Include="..\src\core\base\base_type.h" />
     <ClInclude Include="..\src\core\base\d3d.h" />
+    <ClInclude Include="..\src\core\base\data.h" />
     <ClInclude Include="..\src\core\base\debug.h" />
     <ClInclude Include="..\src\core\base\declare_macros.h" />
     <ClInclude Include="..\src\core\base\il_helper.h" />
@@ -94,6 +95,7 @@
     <ClInclude Include="..\src\core\rendersys\render_pipeline.h" />
     <ClInclude Include="..\src\core\rendersys\render_states_block.h" />
     <ClInclude Include="..\src\core\rendersys\render_system.h" />
+    <ClInclude Include="..\src\core\rendersys\sampler.h" />
     <ClInclude Include="..\src\core\rendersys\texture.h" />
     <ClInclude Include="..\src\core\resource\assimp_mesh.h" />
     <ClInclude Include="..\src\core\resource\assimp_resource.h" />
@@ -101,6 +103,7 @@
     <ClInclude Include="..\src\core\resource\material_asset.h" />
     <ClInclude Include="..\src\core\resource\material_factory.h" />
     <ClInclude Include="..\src\core\resource\material_name.h" />
+    <ClInclude Include="..\src\core\resource\material_parameter.h" />
     <ClInclude Include="..\src\core\resource\predeclare.h" />
     <ClInclude Include="..\src\core\resource\resource.h" />
     <ClInclude Include="..\src\core\resource\resource_manager.h" />

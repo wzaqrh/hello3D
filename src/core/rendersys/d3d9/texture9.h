@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <d3d9.h>
+#include "core/rendersys/sampler.h"
 #include "core/rendersys/texture.h"
 
 namespace mir {

@@ -3,6 +3,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/declare_macros.h"
+#include "core/base/data.h"
 #include "core/base/base_type.h"
 #include "core/base/template/container_adapter.h"
 #include "core/base/material_load_param.h"

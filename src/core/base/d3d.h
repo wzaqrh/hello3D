@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <d3d9.h>
 #include "core/base/base_type.h"
+#include "core/rendersys/input_layout.h"
 
 namespace mir {
 namespace d3d {

@@ -4,6 +4,34 @@
 
 namespace mir {
 
+struct ShaderCompileMacro {
+	std::string Name, Definition;
+};
+struct ShaderCompileDesc {
+	std::vector<ShaderCompileMacro> Macros;
+	std::string EntryPoint, ShaderModel, SourcePath;
+};
+inline bool operator==(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
+	return l.Name == r.Name
+		&& l.Definition == r.Definition;
+}
+inline bool operator<(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
+	if (l.Name != r.Name) return l.Name < r.Name;
+	return l.Definition < r.Definition;
+}
+inline bool operator==(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
+	return l.EntryPoint == r.EntryPoint
+		&& l.ShaderModel == r.ShaderModel
+		&& l.SourcePath == r.SourcePath
+		&& l.Macros == r.Macros;
+}
+inline bool operator<(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
+	if (l.EntryPoint != r.EntryPoint) return l.EntryPoint < r.EntryPoint;
+	if (l.ShaderModel != r.ShaderModel) return l.ShaderModel < r.ShaderModel;
+	if (l.SourcePath != r.SourcePath) return l.SourcePath < r.SourcePath;
+	return l.Macros < r.Macros;
+}
+
 enum ShaderType {
 	kShaderVertex,
 	kShaderPixel

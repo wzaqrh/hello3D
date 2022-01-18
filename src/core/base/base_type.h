@@ -5,64 +5,6 @@
 
 namespace mir {
 
-/********** data **********/
-struct Data {
-	static Data MakeNull() { return Data{ nullptr, 0 }; }
-	
-	template<class T> static Data MakeSize(const T& v) { return Data{ nullptr, sizeof(v) }; }
-	template<class T> static Data MakeSize(const std::vector<T>& v) { return Data{ nullptr, sizeof(T) * v.size() }; }
-	template<class T> static Data MakeSize(std::vector<T>&& v) { static_assert(false, ""); }
-	template<class T, size_t _ArraySize> static Data MakeSize(const std::array<T, _ArraySize>& v) {
-		return Data{ nullptr, sizeof(T) * _ArraySize };
-	}
-	template<class T, size_t _ArraySize> static Data MakeSize(std::array<T, _ArraySize>&& v) { static_assert(false, ""); }
-	static Data MakeSize(size_t size) { return Data{ nullptr, size }; }
-
-	template<class T> static Data Make(const T& v) { return Data{ (void*)&v, sizeof(v) }; }
-	template<class T> static Data Make(const std::vector<T>& v) { return Data{ (void*)&v[0], sizeof(T) * v.size() }; }
-	template<class T> static Data Make(std::vector<T>&& v) { static_assert(false, ""); }
-	template<class T, size_t _ArraySize> static Data Make(const std::array<T, _ArraySize>& v) {
-		return Data{ (void*)&v[0], sizeof(T) * _ArraySize };
-	}
-	template<class T, size_t _ArraySize> static Data Make(std::array<T, _ArraySize>&& v) { static_assert(false, ""); }
-	static Data Make(const void* data, size_t size) { return Data{ data, size }; }
-
-	bool NotNull() const { return Bytes != nullptr; }
-public:
-	const void* Bytes;
-	size_t Size;
-};
-
-/********** shader **********/
-struct ShaderCompileMacro {
-	std::string Name, Definition;
-};
-struct ShaderCompileDesc {
-	std::vector<ShaderCompileMacro> Macros;
-	std::string EntryPoint, ShaderModel, SourcePath;
-};
-inline bool operator==(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
-	return l.Name == r.Name 
-		&& l.Definition == r.Definition;
-}
-inline bool operator<(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
-	if (l.Name != r.Name) return l.Name < r.Name;
-	return l.Definition < r.Definition;
-}
-inline bool operator==(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
-	return l.EntryPoint == r.EntryPoint 
-		&& l.ShaderModel == r.ShaderModel 
-		&& l.SourcePath == r.SourcePath 
-		&& l.Macros == r.Macros;
-}
-inline bool operator<(const ShaderCompileDesc& l, const ShaderCompileDesc& r) {
-	if (l.EntryPoint != r.EntryPoint) return l.EntryPoint < r.EntryPoint;
-	if (l.ShaderModel != r.ShaderModel) return l.ShaderModel < r.ShaderModel;
-	if (l.SourcePath != r.SourcePath) return l.SourcePath < r.SourcePath;
-	return l.Macros < r.Macros;
-}
-
-/********** states **********/
 enum CompareFunc {
 	kCompareUnkown = 0,
 	kCompareNever = 1,
@@ -145,63 +87,6 @@ inline bool operator<(const DepthState& l, const DepthState& r) {
 	if (l.CmpFunc != r.CmpFunc) return l.CmpFunc < r.CmpFunc;
 	return l.WriteMask < r.WriteMask;
 }
-
-enum SamplerFilterMode {
-	kSamplerFilterMinMagMipPoint = 0,
-	kSamplerFilterMinMagPointMipLinear = 0x1,
-	kSamplerFilterMinPointMagLinearMipPoint = 0x4,
-	kSamplerFilterMinPointMagMipLinear = 0x5,
-	kSamplerFilterMinLinearMagMipPoint = 0x10,
-	kSamplerFilterMinLinearMagPointMipLinear = 0x11,
-	kSamplerFilterMinMagLinearMipPoint = 0x14,
-	kSamplerFilterMinMagMipLinear = 0x15,
-	kSamplerFilterAnisotropic = 0x55,
-	kSamplerFilterCmpMinMagMipPoint = 0x80,
-	kSamplerFilterCmpMinMagPointMipLinear = 0x81,
-	kSamplerFilterCmpMinPointMagLinearMipPoint = 0x84,
-	kSamplerFilterCmpMinPointMagMipLinear = 0x85,
-	kSamplerFilterCmpMinLinearMagMipPoint = 0x90,
-	kSamplerFilterCmpMinLinearMagPointMipLinear = 0x91,
-	kSamplerFilterCmpMinMagLinearMipPoint = 0x94,
-	kSamplerFilterCmpMinMagMipLinear = 0x95,
-	kSamplerFilterCmpAnisotropic = 0xd5,
-	kSamplerFilterMinimumMinMagMipPoint = 0x100,
-	kSamplerFilterMinimumMinMagPointMipLinear = 0x101,
-	kSamplerFilterMinimumMinPointMagLinearMipPoint = 0x104,
-	kSamplerFilterMinimumMinPointMagMipLinear = 0x105,
-	kSamplerFilterMinimumMinLinearMagMipPoint = 0x110,
-	kSamplerFilterMinimumMinLinearMagPointMipLinear = 0x111,
-	kSamplerFilterMinimumMinMagLinearMipPoint = 0x114,
-	kSamplerFilterMinimumMinMagMipLinear = 0x115,
-	kSamplerFilterMinimumAnisotropic = 0x155,
-	kSamplerFilterMaximumMinMagMipPoint = 0x180,
-	kSamplerFilterMaximumMinMagPointMipLinear = 0x181,
-	kSamplerFilterMaximumMinPointMagLinearMipPoint = 0x184,
-	kSamplerFilterMaximumMinPointMagMipLinear = 0x185,
-	kSamplerFilterMaximumMinLinearMagMipPoint = 0x190,
-	kSamplerFilterMaximumMinLinearMagPointMipLinear = 0x191,
-	kSamplerFilterMaximumMinMagLinearMipPoint = 0x194,
-	kSamplerFilterMaximumMinMagMipLinear = 0x195,
-	kSamplerFilterMaximumAnisotropic = 0x1d5
-};
-enum AddressMode {
-	kAddressUnkown = 0,
-	kAddressWrap = 1,
-	kAddressMirror = 2,
-	kAddressClamp = 3,
-	kAddressBorder = 4,
-	kAddressMirrorOnce = 5
-};
-struct SamplerDesc {
-	static SamplerDesc Make(SamplerFilterMode filter, CompareFunc cmpFunc,
-		AddressMode addrU = kAddressWrap, AddressMode addrV = kAddressWrap, AddressMode addrW = kAddressWrap) {
-		return SamplerDesc{filter, cmpFunc, addrU, addrV, addrW};
-	}
-public:
-	SamplerFilterMode Filter;
-	CompareFunc CmpFunc;
-	AddressMode AddressU, AddressV, AddressW;
-};
 
 enum ResourceFormat {
 	kFormatUnknown = 0,
@@ -323,7 +208,6 @@ enum ResourceFormat {
 };
 #define MakeResFormats(...) std::vector<ResourceFormat>{ ##__VA_ARGS__ }
 
-/********** cube && face **********/
 enum CubeFace {
 	kCubeFacePosX,
 	kCubeFaceNegX,
@@ -361,7 +245,6 @@ enum CubeConerMask {
 static_assert(MAKE_CORNER(kCubeConerFront, kCubeConerLeft, kCubeConerTop) == kCubeConerFrontLeftTop, "");
 static_assert(MAKE_CORNER(kCubeConerFront, kCubeConerRight, kCubeConerTop) == kCubeConerFrontRightTop, "");
 
-/********** input layout **********/
 enum PrimitiveTopology {
 	kPrimTopologyUnkown = 0,
 	kPrimTopologyPointList = 1,
@@ -407,58 +290,11 @@ enum PrimitiveTopology {
 	kPrimTopology32CtrlPointPatchList = 64,
 };
 
-enum LayoutInputClass {
-	kLayoutInputPerVertexData = 0,
-	kLayoutInputPerInstanceData = 1
-};
-struct LayoutInputElement {
-	std::string SemanticName;
-	unsigned SemanticIndex;
-	ResourceFormat Format;
-	unsigned InputSlot;
-	unsigned AlignedByteOffset;
-	LayoutInputClass InputSlotClass;
-	unsigned InstanceDataStepRate;
-};
-
-/********** buffer **********/
 enum HWMemoryUsage {
 	kHWUsageDefault = 0,
 	kHWUsageImmutable = 1,
 	kHWUsageDynamic = 2,
 	kHWUsageStaging = 3
 };
-
-enum ConstBufferElementType {
-	kCBElementBool,
-	kCBElementInt,
-	kCBElementInt2,
-	kCBElementInt3,
-	kCBElementInt4,
-	kCBElementFloat,
-	kCBElementFloat2,
-	kCBElementFloat3,
-	kCBElementFloat4,
-	kCBElementMatrix,
-	kCBElementStruct,
-	kCBElementMax
-};
-struct ConstBufferDeclElement {
-	bool IsValid() const { return !Name.empty(); }
-	const std::string& GetName() const { return Name; }
-public:
-	std::string Name;
-	ConstBufferElementType Type;
-	size_t Size;
-	size_t Count;
-	size_t Offset;
-};
-template <> struct has_function_valid_t<ConstBufferDeclElement> : public std::true_type {};
-template <> struct has_function_name_t<ConstBufferDeclElement> : public std::true_type {};
-
-struct ConstBufferDecl : public VectorAdapter<ConstBufferDeclElement> {
-	size_t BufferSize = 0;
-};
-
 
 }

@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include "core/mir_config.h"
+#include "core/rendersys/sampler.h"
 #include "core/rendersys/texture.h"
 
 namespace mir {

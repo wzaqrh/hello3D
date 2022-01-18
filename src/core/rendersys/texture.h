@@ -6,10 +6,6 @@
 
 namespace mir {
 
-interface ISamplerState : public IResource
-{
-};
-
 interface ITexture : public IResource
 {
 	virtual Eigen::Vector2i GetSize() const = 0;
