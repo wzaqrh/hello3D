@@ -25,16 +25,15 @@ public:
 	res::ShaderPtr Shader;
 	
 	std::vector<IVertexBufferPtr> VertexBuffers;
-	std::map<std::pair<res::PassPtr, int>, IVertexBufferPtr> VertBufferByPass;
 	
 	IIndexBufferPtr IndexBuffer;
 	short IndexPos, IndexCount, IndexBase;
 	
 	TextureVector Textures;
 
-	Eigen::Matrix4f WorldTransform;
 	std::map<std::string, std::vector<char>> UBOBytesByName;
 
+	Eigen::Matrix4f WorldTransform;
 	unsigned CameraMask;
 };
 

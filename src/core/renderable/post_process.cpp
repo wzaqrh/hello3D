@@ -63,7 +63,6 @@ void PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	if (!MakeRenderOperation(op)) return;
 
 	op.Textures[0] = mMainTex->GetAttachColorTexture(0);
-	op.VertBufferByPass = mVertBufferByPass;
 	opList.AddOP(op);
 }
 

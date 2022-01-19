@@ -157,7 +157,7 @@ struct UniformProperty {
 struct MaterialNode {
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;
-	GpuUniformsParameters UniformProperies;
+	GpuParameters UniformProperies;
 };
 
 class ShaderNodeManager;

@@ -39,10 +39,11 @@ public:
 	std::string mLightMode, mName;
 	PrimitiveTopology mTopoLogy;
 	IInputLayoutPtr mInputLayout;
-	std::vector<ISamplerStatePtr> mSamplers;
-	CBufferEntryVector mConstantBuffers;
 	IProgramPtr mProgram;
-	IFrameBufferPtr mFrameBuffer;
+	std::vector<ISamplerStatePtr> mSamplers;
+	CBufferEntryVector mConstantBuffers;//to remove
+	IFrameBufferPtr mFrameBuffer;//to remove
+	//GpuUniformsParameters mUniformsParameters;
 };
 
 class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>
@@ -72,9 +73,19 @@ public:
 	TechniquePtr CurTech() const { return mElements[mCurTechIdx]; }
 private:
 	int mCurTechIdx = 0;
+	GpuParametersPtr mGpuParameters;
 };
 
-class MIR_CORE_API Material : public ImplementResource<IResource>
+class MIR_CORE_API MaterialInstance {
+public:
+	MaterialInstance();
+	MaterialInstance(const MaterialPtr& material, const GpuParametersPtr& gpuParamters);
+public:
+	MaterialPtr Material;
+	GpuParametersPtr GpuParameters;
+};
+
+class MIR_CORE_API Material : public ImplementResource<IResource>, std::enable_shared_from_this<Material>
 {
 	friend class MaterialFactory;
 public:
@@ -82,11 +93,12 @@ public:
 	void Build(Launch launchMode, ResourceManager& resMng);
 public:
 	const ShaderPtr& GetShader() const;
+	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng);
 private:
 	ShaderLoadParamBuilder mShaderVariantParam;
-	ShaderPtr mShadeVariant;
-
-	TextureVector Textures;
+	ShaderPtr mShaderVariant;
+	TextureVector mTextures;
+	GpuParametersPtr mMaterialGpuParameters, mFrameGpuParameters;
 };
 
 }

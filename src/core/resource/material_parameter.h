@@ -6,8 +6,9 @@
 #include "core/rendersys/hardware_buffer.h"
 
 namespace mir {
+namespace res {
 
-class UniformParameters 
+class UniformParameters
 {
 	friend class UniformParametersBuilder;
 public:
@@ -46,7 +47,7 @@ public:
 		return GetProperty(name);
 	}
 	bool SetPropertyByString(const std::string& name, std::string strDefault);
-	
+
 	IContantBufferPtr CreateConstBuffer(Launch launchMode, ResourceManager& resMng, HWMemoryUsage usage) const;
 	void WriteToConstBuffer(RenderSystem& renderSys, IContantBufferPtr cbuffer) const;
 public:
@@ -61,40 +62,43 @@ private:
 	size_t mSlot;
 	bool mIsUnique;
 };
-using UniformParametersPtr = std::shared_ptr<UniformParameters>;
-template <> struct tpl::has_function_valid<UniformParameters> : public std::true_type {};
-template <> struct tpl::has_function_name<UniformParameters> : public std::true_type {};
 
-class GpuUniformsParameters : public tpl::Vector<UniformParametersPtr>
+class GpuParameters
 {
-	friend class UniformParametersBuilder;
+	friend class Material;
+	struct Element {
+		IContantBufferPtr CBuffer;
+		UniformParametersPtr Parameters;
+	};
+public:
+	void AddConstBufferWithParameters(IContantBufferPtr cbuffer, UniformParametersPtr parameter) {
+		mElements.AddOrSet(Element{ cbuffer, parameter }, parameter->GetSlot());
+	}
 public:
 	std::pair<int, int> FindProperty(const std::string& name) const {
-		std::pair<int, int> result;
-		result.first = -1;
-		result.second = -1;
-		for (const auto& iter : *this) {
-			if ((result.second = (*iter).HasProperty(name)) > 0) {
-				result.first = (*iter).GetSlot();
+		std::pair<int, int> result = std::make_pair(-1, -1);
+		for (const auto& iter : mElements) {
+			if ((result.second = (*iter.Parameters).HasProperty(name)) > 0) {
+				result.first = (*iter.Parameters).GetSlot();
 				break;
 			}
 		}
 		return std::move(result);
 	}
-	bool HasProperty(const std::string& name) { 
+	bool HasProperty(const std::string& name) {
 		return FindProperty(name).first >= 0;
 	}
 	template<typename T> T& GetProperty(const std::string& name) {
-		for (const auto& iter : *this)
-			if ((*iter).HasProperty(name))
-				return (*iter).GetProperty(name);
+		for (const auto& iter : mElements)
+			if ((*iter.Parameters).HasProperty(name))
+				return (*iter.Parameters).GetProperty(name);
 		BOOST_ASSERT(false);
 		return At(0).GetProperty(name);
 	}
 	template<typename T> const T& GetProperty(const std::string& name) const {
-		for (const auto& iter : *this)
-			if ((*iter).HasProperty(name))
-				return (*iter).GetProperty(name);
+		for (const auto& iter : mElements)
+			if ((*iter.Parameters).HasProperty(name))
+				return (*iter.Parameters).GetProperty(name);
 		BOOST_ASSERT(false);
 		return At(0).GetProperty(name);
 	}
@@ -105,14 +109,17 @@ public:
 		return GetProperty(name);
 	}
 	bool SetPropertyByString(const std::string& name, std::string strDefault) {
-		for (auto& iter : *this) {
-			if ((*iter).SetPropertyByString(name, strDefault))
+		for (auto& iter : mElements) {
+			if ((*iter.Parameters).SetPropertyByString(name, strDefault))
 				return true;
 		}
 		return false;
 	}
+
+	std::vector<IContantBufferPtr> GetConstBuffers() const;
+private:
+	tpl::Vector<Element> mElements;
 };
-using GpuUniformsParametersPtr = std::shared_ptr<GpuUniformsParameters>;
 
 class UniformParametersBuilder
 {
@@ -128,4 +135,7 @@ private:
 	UniformParameters& mResult;
 };
 
+}
+template <> struct tpl::has_function_valid<res::UniformParameters> : public std::true_type {};
+template <> struct tpl::has_function_name<res::UniformParameters> : public std::true_type {};
 }

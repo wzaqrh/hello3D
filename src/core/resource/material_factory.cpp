@@ -83,7 +83,7 @@ ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resM
 MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng,
 	const mat_asset::MaterialNode& materialNode, MaterialPtr material)
 {
-	material->mShadeVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
+	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam.ShaderName() = materialNode.Shader.ShortName;
 	return material;
 }

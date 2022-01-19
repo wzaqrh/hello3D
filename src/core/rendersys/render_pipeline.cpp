@@ -84,9 +84,7 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 
 		const TextureVector& textures = op.Textures;
 
-		auto iter = op.VertBufferByPass.find(std::make_pair(pass, -1));
-		if (iter != op.VertBufferByPass.end()) mRenderSys.SetVertexBuffer(iter->second);
-		else mRenderSys.SetVertexBuffers(op.VertexBuffers);
+		mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		
 		RenderPass(pass, textures, -1, op);
 	}

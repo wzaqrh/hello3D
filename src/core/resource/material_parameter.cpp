@@ -4,6 +4,7 @@
 #include "core/resource/material_parameter.h"
 
 namespace mir {
+namespace res {
 
 /********** UniformParameters **********/
 bool UniformParameters::SetPropertyByString(const std::string& name, std::string strDefault)
@@ -40,13 +41,13 @@ IContantBufferPtr UniformParameters::CreateConstBuffer(Launch launchMode, Resour
 
 void UniformParameters::WriteToConstBuffer(RenderSystem& renderSys, IContantBufferPtr cbuffer) const
 {
-	BOOST_ASSERT(mDecl.ByteSize() >= cbuffer->GetBufferSize());
+	BOOST_ASSERT(mDecl.BufferSize >= cbuffer->GetBufferSize());
 	renderSys.UpdateBuffer(cbuffer, Data::Make(mData.GetBytes()));
 }
 
 /********** UniformParametersBuilder **********/
-void UniformParametersBuilder::AddParameter(const std::string& name, CbElementType type, size_t size, size_t count, size_t offset, 
-	const std::string& defValue) 
+void UniformParametersBuilder::AddParameter(const std::string& name, CbElementType type, size_t size, size_t count, size_t offset,
+	const std::string& defValue)
 {
 	auto& element = mResult.mDecl.Emplace();
 	element.Name = name;
@@ -64,12 +65,26 @@ void UniformParametersBuilder::AddParameter(const std::string& name, CbElementTy
 }
 
 UniformParameters& UniformParametersBuilder::Build()
-{ 
+{
 	int dataSize = mResult.mData.ByteSize();
-	if (dataSize & 15) 
+	if (dataSize & 15)
 		mResult.mData.SetByteSize((dataSize + 15) / 16 * 16);
 
-	return mResult; 
+	return mResult;
 }
 
+/********** GpuUniformsParameters **********/
+std::vector<mir::IContantBufferPtr> GpuParameters::GetConstBuffers() const
+{
+	std::vector<IContantBufferPtr> result(mElements.Count());
+	struct ElementToCBuffer {
+		IContantBufferPtr operator()(const Element& element) const {
+			return element.CBuffer;
+		}
+	};
+	std::transform(mElements.begin(), mElements.end(), result.begin(), ElementToCBuffer());
+	return std::move(result);
+}
+
+}
 }
