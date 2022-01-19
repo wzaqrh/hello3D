@@ -40,10 +40,10 @@ struct SamplerNode : public tpl::Vector<SamplerDescEx> {};
 }
 }
 
-template <> struct tpl::has_function_valid_t<res::mat_asset::AttributeNode> : public std::true_type {};
+template <> struct tpl::has_function_valid<res::mat_asset::AttributeNode> : public std::true_type {};
 
-template <> struct tpl::has_function_valid_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
-template <> struct tpl::has_function_name_t<res::mat_asset::SamplerDescEx> : public std::true_type {};
+template <> struct tpl::has_function_valid<res::mat_asset::SamplerDescEx> : public std::true_type {};
+template <> struct tpl::has_function_name<res::mat_asset::SamplerDescEx> : public std::true_type {};
 
 namespace res {
 namespace mat_asset {
@@ -77,7 +77,7 @@ struct ShaderCompileDescEx : public ShaderCompileDesc {
 	}
 };
 struct AttributeNodeVector : public tpl::Vector<AttributeNode> {};
-struct UniformNodeVector : public GpuUniformsParameters {
+struct UniformNodeVector : public tpl::Vector<UniformNode> {
 	template<class Visitor> void ForEachUniform(Visitor vis) const {
 		for (const auto& uniform : *this)
 			vis(uniform);
@@ -86,9 +86,9 @@ struct UniformNodeVector : public GpuUniformsParameters {
 struct ProgramNode {
 	void MergeNoOverride(const ProgramNode& other) {
 		Topo = other.Topo;
-		Attrs.MergeNoOverride(other.Attrs);
-		Uniforms.MergeNoOverride(other.Uniforms);
-		Samplers.MergeNoOverride(other.Samplers);
+		Attrs.Merge<false>(other.Attrs);
+		Uniforms.Merge<false>(other.Uniforms);
+		Samplers.Merge<false>(other.Samplers);
 		VertexSCD.MergeNoOverride(other.VertexSCD);
 		PixelSCD.MergeNoOverride(other.PixelSCD);
 	}

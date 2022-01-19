@@ -47,8 +47,8 @@ public:
 	size_t Count;
 	size_t Offset;
 };
-template <> struct tpl::has_function_valid_t<CbDeclElement> : public std::true_type {};
-template <> struct tpl::has_function_name_t<CbDeclElement> : public std::true_type {};
+template <> struct tpl::has_function_valid<CbDeclElement> : public std::true_type {};
+template <> struct tpl::has_function_name<CbDeclElement> : public std::true_type {};
 
 struct ConstBufferDecl : public tpl::Vector<CbDeclElement> {
 	size_t BufferSize = 0;

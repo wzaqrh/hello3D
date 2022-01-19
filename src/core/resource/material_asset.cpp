@@ -165,7 +165,7 @@ private:
 			std::string refName = it.second.data();
 			auto find_iter = mSamplerSetByName.find(refName);
 			if (find_iter != mSamplerSetByName.end()) {
-				programNode.Samplers.MergeOverride(find_iter->second);
+				programNode.Samplers.Merge<true>(find_iter->second);
 			}
 		}
 
@@ -200,7 +200,7 @@ private:
 			Name = PropertyTreePath(nodeProgram, node_texture, index).Path.string();
 			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
 
-			programNode.Samplers.MergeOverride(std::move(samplerSet));
+			programNode.Samplers.Merge<true>(std::move(samplerSet));
 			++index;
 		}
 	}
@@ -395,7 +395,7 @@ private:
 	void VisitMaterial(const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
 		mShaderMng->VisitShader(nodeMaterial, Visitor{ false }, materialNode.Shader);
 		materialNode.Shader.ForEachProgram([&materialNode](const ProgramNode& progNode) {
-			materialNode.UniformProperies.MergeOverride(progNode.Uniforms);
+			//materialNode.UniformProperies.MergeOverride(progNode.Uniforms);
 		});
 
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {

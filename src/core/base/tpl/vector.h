@@ -1,5 +1,6 @@
 #pragma once
 #include "core/base/stl.h"
+#include "core/base/tpl/traits.h"
 
 namespace mir {
 namespace tpl {
@@ -9,14 +10,7 @@ namespace tpl {
 
 class EmptyContainer {};
 
-template <typename T> struct has_function_valid_t : public std::false_type {};
-template <typename T> struct has_function_name_t : public std::false_type {};
-template <typename T> struct VectorTraits {
-	using has_function_valid = has_function_valid_t<T>;
-	using has_function_name = has_function_name_t<T>;
-};
-
-template <class Element, class Parent = EmptyContainer> class Vector : public Parent {
+template<class Element, class Parent = EmptyContainer> class Vector : public Parent {
 public:
 	using value_type = Element;
 	using reference = Element & ;
@@ -53,38 +47,22 @@ public:
 		}
 	}
 
-	template<typename HasFunctionValid = std::false_type> struct MergeOverrideFunctor {
-		void operator()(std::vector<value_type>& mElements, const std::vector<value_type>& otherElements) {}
-	};
-	template<> struct MergeOverrideFunctor<std::true_type> {
-		void operator()(std::vector<value_type>& mElements, const std::vector<value_type>& otherElements) {
-			if (mElements.size() < otherElements.size())
-				mElements.resize(otherElements.size());
-			for (size_t i = 0; i < otherElements.size(); ++i) {
-				if (otherElements[i].IsValid())
-					mElements[i] = otherElements[i];
+	template<bool Override> void Merge(const Vector& other) {
+		if constexpr (has_function_valid<value_type>::value) {
+			if (mElements.size() < other.mElements.size())
+				mElements.resize(other.mElements.size());
+			for (size_t i = 0; i < other.mElements.size(); ++i) {
+				bool valid;
+				if constexpr (Override) {
+					call_memfun(valid = other.mElements[i], IsValid());
+					if (valid) mElements[i] = other.mElements[i];
+				}
+				else {
+					call_memfun(valid = mElements[i], IsValid());
+					if (!valid) mElements[i] = other.mElements[i];
+				}
 			}
 		}
-	};
-	void MergeOverride(const Vector& other) {
-		MergeOverrideFunctor<typename VectorTraits<Element>::has_function_valid::type>()(mElements, other.mElements);
-	}
-
-	template<typename HasFunctionValid = std::false_type> struct MergeNoOverrideFunctor {
-		void operator()(std::vector<value_type>& mElements, const std::vector<value_type>& otherElements) {}
-	};
-	template<> struct MergeNoOverrideFunctor<std::true_type> {
-		void operator()(std::vector<value_type>& mElements, const std::vector<value_type>& otherElements) {
-			if (mElements.size() < otherElements.size())
-				mElements.resize(otherElements.size());
-			for (size_t i = 0; i < otherElements.size(); ++i) {
-				if (!mElements[i].IsValid())
-					mElements[i] = otherElements[i];
-			}
-		}
-	};
-	void MergeNoOverride(const Vector& other) {
-		MergeNoOverrideFunctor<typename VectorTraits<Element>::has_function_valid::type>()(mElements, other.mElements);
 	}
 public:
 	bool IsEmpty() const { return mElements.empty(); }
@@ -106,22 +84,23 @@ public:
 	reference Last() { return mElements.back(); }
 
 	std::pair<const_iterator, const_iterator> Range(size_t first, size_t last = -1) const {
-		return std::make_pair<const_iterator, const_iterator>(mElements.begin() + first, last < mElements.size() ? mElements.begin() + last : mElements.end());
+		return std::make_pair(mElements.begin() + first, last < mElements.size() ? mElements.begin() + last : mElements.end());
 	}
 
-	template<typename HasFunctionName = std::false_type> struct IndexByNameFunctor {
-		size_t operator()(const std::vector<value_type>& mElements, const std::string& name) { return (size_t)-1; }
-	};
-	template<> struct IndexByNameFunctor<std::true_type> {
-		size_t operator()(const std::vector<value_type>& mElements, const std::string& name) {
-			for (const auto& iter : mElements)
-				if (iter.GetName() == name)
-					return &iter - &mElements[0];
-			return (size_t)-1;
-		}
-	};
 	size_t IndexByName(const std::string& name) const {
-		return IndexByNameFunctor<typename VectorTraits<Element>::has_function_name::type>()(mElements, name);
+		if constexpr (has_function_name<value_type>::value) {
+			for (const auto& iter : mElements) {
+				if constexpr (is_shared_ptr<value_type>::value) {
+					if (iter->GetName() == name)
+						return &iter - &mElements[0];
+				}
+				else {
+					if (iter.GetName() == name)
+						return &iter - &mElements[0];
+				}
+			}
+		}
+		return (size_t)-1;
 	}
 	static constexpr size_t IndexNotFound() { return (size_t)-1; }
 	const_pointer operator[](const std::string& name) const {

@@ -85,6 +85,7 @@ public:
 private:
 	ShaderLoadParamBuilder mShaderVariantParam;
 	ShaderPtr mShadeVariant;
+
 	TextureVector Textures;
 };
 

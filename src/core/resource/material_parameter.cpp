@@ -1,3 +1,6 @@
+#include "core/base/data.h"
+#include "core/rendersys/render_system.h"
+#include "core/resource/resource_manager.h"
 #include "core/resource/material_parameter.h"
 
 namespace mir {
@@ -28,6 +31,17 @@ bool UniformParameters::SetPropertyByString(const std::string& name, std::string
 		}
 	}
 	return slot >= 0;
+}
+
+IContantBufferPtr UniformParameters::CreateConstBuffer(Launch launchMode, ResourceManager& resMng, HWMemoryUsage usage) const
+{
+	return resMng.CreateConstBuffer(launchMode, mDecl, usage, Data::Make(mData.GetBytes()));
+}
+
+void UniformParameters::WriteToConstBuffer(RenderSystem& renderSys, IContantBufferPtr cbuffer) const
+{
+	BOOST_ASSERT(mDecl.ByteSize() >= cbuffer->GetBufferSize());
+	renderSys.UpdateBuffer(cbuffer, Data::Make(mData.GetBytes()));
 }
 
 /********** UniformParametersBuilder **********/

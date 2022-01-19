@@ -235,6 +235,9 @@
     <ClInclude Include="..\src\core\base\tpl\binary.h">
       <Filter>src\core\base\tpl</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\tpl\traits.h">
+      <Filter>src\core\base\tpl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
