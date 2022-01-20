@@ -3,6 +3,7 @@
 #include "core/base/launch.h"
 #include "core/base/material_load_param.h"
 #include "core/resource/material.h"
+#include "core/resource/material_parameter.h"
 
 namespace mir {
 namespace res {
@@ -26,8 +27,11 @@ public:
 private:
 	ShaderPtr DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader);
 	MaterialPtr DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material);
+	GpuParameters::Element AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters);
 private:
 	std::shared_ptr<mat_asset::MaterialAssetManager> mMatAssetMng;
+	std::map<std::string, GpuParameters::Element> mParametersCache;
+	GpuParametersPtr mFrameGpuParameters;
 };
 
 }

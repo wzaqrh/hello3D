@@ -6,7 +6,7 @@
 			<Element SemanticName="TEXCOORD" Format="16"></Element>
 		</Attribute>
 		
-		<Uniform Name="cbPerFrame" Slot="0">
+		<Uniform Name="cbPerFrame" Slot="0" ShareMode="2">
 			<Element Name="World" 		  	Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 			<Element Name="View" 	 	    Type="matrix"></Element>
 			<Element Name="Projection" 		Type="matrix"></Element>
@@ -23,7 +23,7 @@
 			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
 			<Element Name="Exposure"        Type="float"></Element>
 		</Uniform>
-		<Uniform Name="cbPerLight" Slot="1">
+		<Uniform Name="cbPerLight" Slot="1" ShareMode="2">
 			<Element Name="unity_LightPosition"	Type="float4"></Element>
 			<Element Name="unity_LightColor"	Type="float4"></Element> 
 			<Element Name="unity_SpecColor"		Type="float4"></Element>

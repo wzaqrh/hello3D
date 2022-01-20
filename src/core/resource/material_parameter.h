@@ -8,6 +8,13 @@
 namespace mir {
 namespace res {
 
+enum CBufferShareMode {
+	kCbShareNone = 0,
+	kCbSharePerMaterial = 1,
+	kCbSharePerFrame = 2,
+	kCbShareMax
+};
+
 class UniformParameters
 {
 	friend class UniformParametersBuilder;
@@ -54,26 +61,41 @@ public:
 	bool IsValid() const { return !mData.IsEmpty(); }
 	const std::string& GetName() const { return mShortName; }
 	size_t GetSlot() const { return mSlot; }
-	bool IsUnique() const { return mIsUnique; }
+	CBufferShareMode GetShareMode() const { return mShareMode; }
+	bool IsReadOnly() const { return mIsReadOnly; }
 private:
 	ConstBufferDecl mDecl;
 	tpl::Binary<float> mData;
 	std::string mShortName;
-	size_t mSlot;
-	bool mIsUnique;
+	size_t mSlot = 0;
+	CBufferShareMode mShareMode = kCbShareNone;
+	bool mIsReadOnly = false;
 };
 
 class GpuParameters
 {
-	friend class Material;
+	friend class MaterialFactory;
 	struct Element {
+		bool IsValid() const { return CBuffer != nullptr; }
+		int GetSlot() const { return Parameters->GetSlot(); }
+		bool IsShared() const { return Parameters->GetShareMode() != kCbShareNone; }
+		CBufferShareMode GetShareMode() const { return Parameters->GetShareMode(); }
+		Element() {}
+		Element(IContantBufferPtr cbuffer, UniformParametersPtr parameters) :CBuffer(cbuffer), Parameters(parameters) {}
+		Element Clone(Launch launchMode, ResourceManager& resMng) const;
+	public:
 		IContantBufferPtr CBuffer;
 		UniformParametersPtr Parameters;
 	};
+	using const_iterator = tpl::Vector<Element>::const_iterator;
 public:
-	void AddConstBufferWithParameters(IContantBufferPtr cbuffer, UniformParametersPtr parameter) {
-		mElements.AddOrSet(Element{ cbuffer, parameter }, parameter->GetSlot());
+	void AddElement(const Element& element) {
+		mElements.AddOrSet(element, element.GetSlot());
 	}
+	void AddElement(IContantBufferPtr cbuffer, UniformParametersPtr parameter) {
+		mElements.AddOrSet(Element{ cbuffer, parameter });
+	}
+	GpuParametersPtr Clone(Launch launchMode, ResourceManager& resMng) const;
 public:
 	std::pair<int, int> FindProperty(const std::string& name) const {
 		std::pair<int, int> result = std::make_pair(-1, -1);
@@ -116,6 +138,9 @@ public:
 		return false;
 	}
 
+	const_iterator begin() const { return mElements.begin(); }
+	const_iterator end() const { return mElements.end(); }
+
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 private:
 	tpl::Vector<Element> mElements;
@@ -128,7 +153,8 @@ public:
 	void AddParameter(const std::string& name, CbElementType type, size_t size, size_t count, size_t offset, const std::string& defValue);
 	std::string& ShortName() { return mResult.mShortName; }
 	size_t& Slot() { return mResult.mSlot; }
-	bool& IsUnique() { return mResult.mIsUnique; }
+	CBufferShareMode& ShareMode() { return mResult.mShareMode; }
+	bool& IsReadOnly() { return mResult.mIsReadOnly; }
 	UniformParameters& Build();
 private:
 	int mCurrentByteOffset = 0;

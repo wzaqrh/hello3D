@@ -7,7 +7,7 @@
 			<Element Format="2"  SemanticName="BLENDWEIGHT"></Element>
 			<Element Format="3"  SemanticName="BLENDINDICES"></Element>
 		</Attribute>
-		<Uniform Name="cbWeightedSkin" IsUnique="false" Slot="2">
+		<Uniform Name="cbWeightedSkin" Slot="2">
 			<Element Name="Model" Type="matrix"></Element>
 			<Element Name="Models" Type="matrix" Count="56"></Element>
 		</Uniform>

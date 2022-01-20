@@ -481,31 +481,29 @@
     <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\bin\x86\Debug\shader\Bloom.xml">
+    <None Include="..\bin\x86\Debug\shader\Standard.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\LayerColor.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Sprite.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\Model.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\Skeleton.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Skybox.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\Skybox.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Skeleton.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\Sprite.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Model.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\Standard.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
-    <Xml Include="..\bin\x86\Debug\shader\Variants.xml">
+    </None>
+    <None Include="..\bin\x86\Debug\shader\LayerColor.Shader">
       <Filter>src\shader\xml</Filter>
-    </Xml>
+    </None>
   </ItemGroup>
 </Project>

@@ -363,7 +363,6 @@
             <File name="bin\x86\Debug\shader\IBL.cginc" />
         </Folder>
         <Folder name="xml">
-            <File name="bin\x86\Debug\shader\Variants.Shader" />
             <File name="bin\x86\Debug\shader\Standard.Shader" />
             <File name="bin\x86\Debug\shader\Sprite.Shader" />
             <File name="bin\x86\Debug\shader\Skybox.Shader" />

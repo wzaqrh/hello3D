@@ -97,11 +97,14 @@ MaterialInstance::MaterialInstance()
 {}
 
 MaterialInstance::MaterialInstance(const MaterialPtr& material, const GpuParametersPtr& gpuParamters)
-	: Material(material)
-	, GpuParameters(gpuParamters)
+	: mMaterial(material)
+	, mGpuParameters(gpuParamters)
 {}
 
 /********** Material **********/
+Material::Material()
+{}
+
 void Material::EnableKeyword(const std::string& macroName, int value /*= TRUE*/)
 {
 	mShaderVariantParam[macroName] = value;
@@ -123,18 +126,8 @@ const ShaderPtr& Material::GetShader() const
 
 MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng)
 {
-	GpuParametersPtr uniqueUniformsParams = mir::CreateInstance<GpuParameters>();
-	for (const auto& params : mMaterialGpuParameters->mElements) {
-		if (params.Parameters->IsUnique()) {
-			IContantBufferPtr newCbuffer = params.Parameters->CreateConstBuffer(launchMode, resMng, params.CBuffer->GetUsage());
-			UniformParametersPtr newParameters = mir::CreateInstance<UniformParameters>(*params.Parameters);
-			uniqueUniformsParams->AddConstBufferWithParameters(newCbuffer, newParameters);
-		}
-		else {
-			uniqueUniformsParams->AddConstBufferWithParameters(params.CBuffer, params.Parameters);
-		}
-	}
-	return MaterialInstance(this->shared_from_this(), uniqueUniformsParams);
+	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbShareNone]->Clone(launchMode, resMng);
+	return MaterialInstance(this->shared_from_this(), newParametrs);
 }
 
 }

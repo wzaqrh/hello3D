@@ -74,6 +74,24 @@ UniformParameters& UniformParametersBuilder::Build()
 }
 
 /********** GpuUniformsParameters **********/
+GpuParameters::Element GpuParameters::Element::Clone(Launch launchMode, ResourceManager& resMng) const
+{
+	auto cbuffer = Parameters->CreateConstBuffer(launchMode, resMng, CBuffer->GetUsage());
+	auto parameters = mir::CreateInstance<UniformParameters>(*Parameters);
+	return Element(cbuffer, parameters);
+}
+
+GpuParametersPtr GpuParameters::Clone(Launch launchMode, ResourceManager& resMng) const
+{
+	GpuParametersPtr result = mir::CreateInstance<GpuParameters>();
+	for (const auto& element : *this) {
+		if (element.IsValid()) {
+			result->AddElement(element.Clone(launchMode, resMng));
+		}
+	}
+	return result;
+}
+
 std::vector<mir::IContantBufferPtr> GpuParameters::GetConstBuffers() const
 {
 	std::vector<IContantBufferPtr> result(mElements.Count());

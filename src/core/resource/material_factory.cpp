@@ -12,6 +12,27 @@ namespace res {
 MaterialFactory::MaterialFactory()
 {
 	mMatAssetMng = CreateInstance<mat_asset::MaterialAssetManager>();
+	mFrameGpuParameters = CreateInstance<GpuParameters>();
+}
+
+GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters)
+{
+	const std::string& uniformName = parameters.GetName();
+	auto iter = mParametersCache.find(uniformName);
+	if (iter == mParametersCache.end()) {
+		GpuParameters::Element result;
+		result.Parameters = CreateInstance<UniformParameters>(parameters);
+		result.CBuffer = result.Parameters->CreateConstBuffer(launchMode, resMng, IF_AND_OR(parameters.IsReadOnly(), kHWUsageImmutable, kHWUsageDynamic));
+		if (! uniformName.empty()) {
+			mParametersCache.insert(std::make_pair(uniformName, result));
+			if (parameters.GetShareMode() == kCbSharePerFrame)
+				mFrameGpuParameters->AddElement(result);
+		}
+		return result;
+	}
+	else {
+		return iter->second;
+	}
 }
 
 ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng,
@@ -54,10 +75,10 @@ ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& re
 
 				for (const auto& sampler : passProgram.Samplers)
 					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, resMng.CreateSampler(launchMode, sampler)));
-
+			#if USE_CBUFFER_ENTRY
 				for (auto& uniform : passProgram.Uniforms)
-					curPass->AddConstBuffer(uniform.CreateConstBuffer(launchMode, resMng, kHWUsageDynamic),
-						uniform.GetName(), uniform.IsUnique(), uniform.GetSlot());
+					curPass->AddConstBuffer(uniform.CreateConstBuffer(launchMode, resMng, kHWUsageDynamic), uniform.GetName(), uniform.GetShareMode(), uniform.GetSlot());
+			#endif
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
@@ -85,6 +106,34 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 {
 	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam.ShaderName() = materialNode.Shader.ShortName;
+
+	material->mGpuParametersByShareType[kCbShareNone] = CreateInstance<GpuParameters>();
+	material->mGpuParametersByShareType[kCbSharePerMaterial] = CreateInstance<GpuParameters>();
+	material->mGpuParametersByShareType[kCbSharePerFrame] = mFrameGpuParameters;
+	for (const auto& categNode : materialNode.Shader) {
+		const auto& categProgram = categNode.Program;
+		for (auto& uniform : categProgram.Uniforms) {
+			GpuParameters::Element element = AddToParametersCache(launchMode, resMng, uniform);
+			switch (element.GetShareMode())
+			{
+			case kCbShareNone: {
+				GpuParameters::Element newelem = element.Clone(launchMode, resMng);
+				for (auto& iter : materialNode.UniformProperies)
+					newelem.Parameters->SetPropertyByString(iter.first, iter.second);
+				material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
+			}break;
+			case kCbSharePerMaterial: {
+				GpuParameters::Element newelem = element.Clone(launchMode, resMng);
+				for (auto& iter : materialNode.UniformProperies)
+					newelem.Parameters->SetPropertyByString(iter.first, iter.second);
+				material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
+			}break;
+			case kCbSharePerFrame:
+			default:
+				break;
+			}
+		}
+	}
 	return material;
 }
 
@@ -118,9 +167,9 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 
 	size_t slot = 0;
 	for (auto buffer : proto.mConstantBuffers) {
-		if (!buffer.IsUnique)
+		if (!buffer.GetShareMode)
 			buffer.Buffer = resMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), buffer.Buffer->GetUsage(), Data::MakeNull());
-		result->AddConstBuffer(buffer.Buffer, buffer.Name, buffer.IsUnique, slot);
+		result->AddConstBuffer(buffer.Buffer, buffer.Name, buffer.GetShareMode, slot);
 		++slot;
 	}
 

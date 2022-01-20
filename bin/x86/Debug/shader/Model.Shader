@@ -9,7 +9,7 @@
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
-		<Uniform Name="cbModel" IsUnique="false" Slot="3">
+		<Uniform Name="cbModel" Slot="3" ShareMode="1">
 			<Element Name="AlbedoUV"              Type="float4"></Element>
 			<Element Name="NormalUV"              Type="float4"></Element>
 			<Element Name="OcclusionUV"           Type="float4"></Element>

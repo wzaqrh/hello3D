@@ -93,11 +93,14 @@ private:
 				++j;
 			}
 
-			std::string Name = node_attribute.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
-			mAttrByName.insert(std::make_pair(Name, attribute));
-
-			Name = PropertyTreePath(nodeProgram, node_attribute, index).Path.string();
-			mAttrByName.insert(std::make_pair(Name, attribute));
+			std::string shortName = node_attribute.get<std::string>("<xmlattr>.Name", "");
+			shortName = node_attribute.get<std::string>("<xmlattr>.ShortName", shortName);
+			if (!shortName.empty()) mAttrByName.insert(std::make_pair(shortName, attribute));
+		
+		#if ENABLE_USEXXX_FULLPATH
+			shortName = PropertyTreePath(nodeProgram, node_attribute, index).Path.string();
+			mAttrByName.insert(std::make_pair(shortName, attribute));
+		#endif
 
 			programNode.Attrs.Add(std::move(attribute));
 			++index;
@@ -143,18 +146,23 @@ private:
 
 				uniBuilder.AddParameter(name, type, size, count, offset, strDefault);
 			}
-			uniBuilder.IsUnique() = node_uniform.get<bool>("<xmlattr>.IsUnique", true);
 			uniBuilder.Slot() = node_uniform.get<int>("<xmlattr>.Slot", -1);
+			BOOST_ASSERT(uniBuilder.Slot() >= 0);
+			uniBuilder.ShareMode() = static_cast<CBufferShareMode>(node_uniform.get<int>("<xmlattr>.ShareMode", kCbShareNone)) ;
+			uniBuilder.IsReadOnly() = node_uniform.get<bool>("<xmlattr>.IsReadOnly", false);
+			BOOST_ASSERT(!uniBuilder.IsReadOnly() || uniBuilder.ShareMode() != kCbShareNone);
 
-			std::string Name = node_uniform.get<std::string>("<xmlattr>.Name");
-			uniBuilder.ShortName() = node_uniform.get<std::string>("<xmlattr>.ShortName", Name);
+			auto& shortName = uniBuilder.ShortName();
+			shortName = node_uniform.get<std::string>("<xmlattr>.Name", "");
+			shortName = node_uniform.get<std::string>("<xmlattr>.ShortName", shortName);
 			uniBuilder.Build();
 
-			Name = node_uniform.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
-			mUniformByName.insert(std::make_pair(Name, uniform));
-
-			Name = PropertyTreePath(nodeProgram, node_uniform, index).Path.string();
-			mUniformByName.insert(std::make_pair(Name, uniform));
+			if (!shortName.empty()) mUniformByName.insert(std::make_pair(shortName, uniform));
+		
+		#if ENABLE_USEXXX_FULLPATH
+			shortName = PropertyTreePath(nodeProgram, node_uniform, index).Path.string();
+			mUniformByName.insert(std::make_pair(shortName, uniform));
+		#endif
 
 			programNode.Uniforms.AddOrSet(std::move(uniform), uniform.GetSlot());
 			++index;
@@ -171,9 +179,9 @@ private:
 
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Texture"))) {
-			auto& node_texture = it.second;
+			auto& node_sampler = it.second;
 			SamplerNode samplerSet;
-			for (auto& it : boost::make_iterator_range(node_texture.equal_range("Element"))) {
+			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("Element"))) {
 				auto& node_element = it.second;
 				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
 
@@ -194,11 +202,14 @@ private:
 				), slot);
 			}
 
-			std::string Name = node_texture.get<std::string>("<xmlattr>.Name", boost::lexical_cast<std::string>(index));
-			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
+			std::string shortName = node_sampler.get<std::string>("<xmlattr>.Name", "");
+			shortName = node_sampler.get<std::string>("<xmlattr>.ShortName", shortName);
+			if (!shortName.empty()) mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
 
-			Name = PropertyTreePath(nodeProgram, node_texture, index).Path.string();
-			mSamplerSetByName.insert(std::make_pair(Name, samplerSet));
+		#if ENABLE_USEXXX_FULLPATH
+			shortName = PropertyTreePath(nodeProgram, node_sampler, index).Path.string();
+			mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
+		#endif
 
 			programNode.Samplers.Merge<true>(std::move(samplerSet));
 			++index;
@@ -387,16 +398,13 @@ private:
 					texProp.Slot = index;
 				}
 				else {
-					materialNode.UniformProperies.SetPropertyByString(nodeProp.first, nodeProp.second.data());
+					materialNode.UniformProperies.insert(std::make_pair(nodeProp.first, nodeProp.second.data()));
 				}
 			});
 		}
 	}
 	void VisitMaterial(const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
 		mShaderMng->VisitShader(nodeMaterial, Visitor{ false }, materialNode.Shader);
-		materialNode.Shader.ForEachProgram([&materialNode](const ProgramNode& progNode) {
-			//materialNode.UniformProperies.MergeOverride(progNode.Uniforms);
-		});
 
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
 			VisitProperties(it.second, materialNode);

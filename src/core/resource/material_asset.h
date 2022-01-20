@@ -151,13 +151,13 @@ struct TextureProperty {
 };
 struct UniformProperty {
 	tpl::Binary<float> Data;
-	bool IsUnique;
+	bool GetShareMode;
 	int Slot;
 };
 struct MaterialNode {
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;
-	GpuParameters UniformProperies;
+	std::map<std::string, std::string> UniformProperies; 
 };
 
 class ShaderNodeManager;
