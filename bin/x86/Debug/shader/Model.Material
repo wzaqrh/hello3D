@@ -1,8 +1,0 @@
-<Material>
-	<UseShader>Model</UseShader>
-	<Macros>
-	</Macros>
-	<Properties>
-		<EmissiveFactor>1,1,1</EmissiveFactor>
-	</Properties>
-</Material>

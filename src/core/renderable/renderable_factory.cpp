@@ -16,7 +16,7 @@ using namespace mir::renderable;
 
 namespace mir {
 
-#define NotEmptyOr(Str, DefStr) (!Str.ShaderName.empty() ? Str : DefStr)
+#define NotEmptyOr(Str, DefStr) (!Str.ShaderVariantName.empty() ? Str : DefStr)
 
 RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 	: mResourceMng(resMng)
@@ -46,7 +46,7 @@ MeshPtr RenderableFactory::CreateMesh(int vertCount, int indexCount, const Mater
 
 CubePtr RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra, const MaterialLoadParam& matName)
 {
-	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MaterialLoadParam(MAT_LAYERCOLOR, "Cube")));
+	auto cube = Cube::Create(mLaunchMode, mResourceMng, NotEmptyOr(matName, MAT_LAYERCOLOR "-Cube"));
 	cube->SetPosition(center);
 	cube->SetHalfSize(halfsize);
 	cube->SetColor(bgra);

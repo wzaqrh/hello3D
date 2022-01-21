@@ -34,7 +34,6 @@ public:
 private:
 	struct Visitor {
 		const bool JustInclude;
-		const std::string ShaderName;
 	};
 	using ConstVisitorRef = const Visitor&;
 	struct PropertyTreePath {
@@ -293,7 +292,7 @@ private:
 		}
 	}
 	void VisitShader(const PropertyTreePath& nodeShader, ConstVisitorRef vis, ShaderNode& shaderNode) {
-		shaderNode.ShortName = nodeShader->get<std::string>("Name", vis.ShaderName);
+		shaderNode.ShortName = nodeShader->get<std::string>("<xmlattr>.Name"/*, ""*/);
 
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("UseShader"))) {
 			ParseShaderFile(it.second.data(), shaderNode);
@@ -322,16 +321,9 @@ private:
 		}
 	}
 	static bool GetShaderAssetPath(const MaterialLoadParam& loadParam, std::string& filepath) {
-		boost_filesystem::path path(loadParam.ShaderName);
-		if (!path.has_extension()) {
-			filepath = "shader/" + loadParam.ShaderName;
-			if (!loadParam.VariantName.empty()) filepath += "-" + loadParam.VariantName;
-			filepath += ".Shader";
-			path = boost_filesystem::system_complete(filepath);
-		}
-		else {
-			path = boost_filesystem::system_complete(path);
-		}
+		boost_filesystem::path path(loadParam.ShaderVariantName);
+		if (path.has_extension()) path = boost_filesystem::system_complete(path); 
+		else path = boost_filesystem::system_complete("shader/" + loadParam.ShaderVariantName + ".Shader");
 		filepath = path.string();
 		return boost_filesystem::exists(path);
 	}
@@ -343,8 +335,7 @@ private:
 			if (GetShaderAssetPath(loadParam, filepath)) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
-				Visitor visitor{ false, loadParam.ShaderName };
-				VisitShader(pt.get_child("Shader"), visitor, shaderNode);
+				VisitShader(pt.get_child("Shader"), Visitor{ false }, shaderNode);
 				BuildShaderNode(shaderNode);
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
 				result = true;
@@ -395,9 +386,8 @@ class MaterialNodeManager {
 	typedef ShaderNodeManager::PropertyTreePath PropertyTreePath;
 public:
 	MaterialNodeManager(std::shared_ptr<ShaderNodeManager> shaderMng) :mShaderMng(shaderMng) {}
-	bool GetMaterialNode(const std::string& materialPath, MaterialNode& materialNode) {
-		bool result = ParseMaterialFile(materialPath, materialNode);
-		return result;
+	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) {
+		return ParseMaterialFile(loadParam, materialNode);
 	}
 private:
 	void VisitProperties(const PropertyTreePath& nodeProperties, MaterialNode& materialNode) {
@@ -415,47 +405,59 @@ private:
 			});
 		}
 	}
-	void VisitMaterial(const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
-		mShaderMng->VisitShader(nodeMaterial, Visitor{ false }, materialNode.Shader);
+	bool VisitMaterial(const MaterialLoadParam& loadParam, const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
+		MaterialLoadParamBuilder paramBuilder = MaterialLoadParamBuilder(loadParam);
+		auto find_macros = nodeMaterial->find("Macros");
+		if (find_macros != nodeMaterial->not_found()) {
+			auto& node_macros = find_macros->second;
+			for (auto& it : node_macros)
+				paramBuilder[it.first] = boost::lexical_cast<int>(it.second.data());
+		}
 
+		auto find_useShader = nodeMaterial->find("UseShader");
+		if (find_useShader == nodeMaterial->not_found()) return false;
+
+		materialNode.LoadParam = paramBuilder.Build();
+		materialNode.LoadParam.ShaderVariantName = find_useShader->second.data();
+		if (!mShaderMng->GetShaderNode(materialNode.LoadParam, materialNode.Shader)) return false;
+		
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
 			VisitProperties(it.second, materialNode);
 		}
+		return true;
 	}
 
 	void BuildMaterialNode(MaterialNode& materialNode) {
 		mShaderMng->BuildShaderNode(materialNode.Shader);
 	}
 	static bool GetMaterialAssetPath(const MaterialLoadParam& loadParam, std::string& filepath) {
-		boost_filesystem::path path(loadParam.ShaderName);
-		if (!path.has_extension()) {
-			filepath = "shader/" + loadParam.ShaderName;
-			if (!loadParam.VariantName.empty()) filepath += "-" + loadParam.VariantName;
-			filepath += ".Material";
-			path = boost_filesystem::system_complete(filepath);
-		}
-		else {
-			path = boost_filesystem::system_complete(path);
-		}
+		boost_filesystem::path path(loadParam.ShaderVariantName);
+		if (path.has_extension()) path = boost_filesystem::system_complete(path);
+		else path = boost_filesystem::system_complete("shader/" + loadParam.ShaderVariantName + ".Material");
 		filepath = path.string();
 		return boost_filesystem::exists(path);
 	}
-	bool ParseMaterialFile(const std::string& materialPath, MaterialNode& materialNode) {
+	bool ParseMaterialFile(const MaterialLoadParam& loadParam, MaterialNode& materialNode) {
 		bool result;
-		auto find_iter = mMaterialByPath.find(materialPath);
+		auto find_iter = mMaterialByPath.find(loadParam);
 		if (find_iter == mMaterialByPath.end()) {
+			boost_property_tree::ptree pt;
 			std::string filepath;
-			if (GetMaterialAssetPath(MaterialLoadParam(materialPath), filepath)) {
-				boost_property_tree::ptree pt;
+			if (GetMaterialAssetPath(loadParam, filepath)) {
 				boost_property_tree::read_xml(filepath, pt);
-				Visitor visitor{ false };
-				VisitMaterial(pt.get_child("Material"), materialNode);
-				BuildMaterialNode(materialNode);
-				mMaterialByPath.insert(std::make_pair(materialPath, materialNode));
-				result = true;
 			}
 			else {
-				result = false;
+				std::stringstream ss;
+				ss << "<Material>";
+				std::string shaderName = boost_filesystem::path(loadParam.ShaderVariantName).stem().string();
+				ss << "<UseShader>" << shaderName << "</UseShader>";
+				ss << "</Material>";
+				boost_property_tree::read_xml(ss, pt);
+			}
+
+			if (result = VisitMaterial(loadParam, pt.get_child("Material"), materialNode)) {
+				BuildMaterialNode(materialNode);
+				mMaterialByPath.insert(std::make_pair(loadParam, materialNode));
 			}
 		}
 		else {
@@ -466,7 +468,7 @@ private:
 	}
 private:
 	std::shared_ptr<ShaderNodeManager> mShaderMng;
-	std::map<std::string, MaterialNode> mMaterialByPath;
+	std::map<MaterialLoadParam, MaterialNode> mMaterialByPath;
 };
 
 /********** MaterialAssetManager **********/
@@ -479,9 +481,9 @@ bool MaterialAssetManager::GetShaderNode(const MaterialLoadParam& loadParam, Sha
 {
 	return mShaderNodeMng->GetShaderNode(loadParam, shaderNode);
 }
-bool MaterialAssetManager::GetMaterialNode(const std::string& materialName, MaterialNode& materialNode)
+bool MaterialAssetManager::GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode)
 {
-	return mMaterialNodeMng->GetMaterialNode(materialName, materialNode);
+	return mMaterialNodeMng->GetMaterialNode(loadParam, materialNode);
 }
 
 }

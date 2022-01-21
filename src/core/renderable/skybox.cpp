@@ -8,7 +8,7 @@ namespace renderable {
 SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, const std::string& imgName)
 	:Super(launchMode, resourceMng, matName)
 {
-	if (matName.VariantName == "Deprecate") {
+	if (matName.GetVariantName() == "Deprecate") {
 		SkyboxVertex Vertexs[4];
 		float fHighW = -1.0f - (1.0f / (float)mResourceMng.WinSize().x());
 		float fHighH = -1.0f - (1.0f / (float)mResourceMng.WinSize().y());

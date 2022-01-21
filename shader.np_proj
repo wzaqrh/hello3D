@@ -373,9 +373,6 @@
             <File name="bin\x86\Debug\shader\LayerColor-Cube.Shader" />
         </Folder>
         <Folder name="materialXml">
-            <File name="bin\x86\Debug\shader\Sprite.Material" />
-            <File name="bin\x86\Debug\shader\Model.Material" />
-            <File name="bin\x86\Debug\shader\LayerColor.Material" />
             <File name="bin\x86\Debug\shader\LayerColor-Cube.Material" />
         </Folder>
     </Project>
@@ -538,5 +535,22 @@
                 </Folder>
             </Folder>
         </Folder>
+    </Project>
+    <Project name="boost">
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\algorithm.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\container.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\factory.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\future.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\main.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\pool.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\property_tree.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\random.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\shared_ptr.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\signal.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\string.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\system.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\threadpool.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\timer.cpp" />
+        <File name="C:\MyDoc\&#x7B14;&#x8BB0;\c++\boost\utility.cpp" />
     </Project>
 </NotepadPlus>

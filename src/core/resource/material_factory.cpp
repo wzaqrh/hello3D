@@ -35,8 +35,7 @@ GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, 
 	}
 }
 
-ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng,
-	const mat_asset::ShaderNode& shaderNode, ShaderPtr shader)
+ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader)
 {
 	shader->SetPrepared();
 
@@ -88,8 +87,7 @@ ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& re
 	return shader;
 }
 
-ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng,
-	const MaterialLoadParam& loadParam, ShaderPtr shader) {
+ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) {
 	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {
@@ -101,11 +99,10 @@ ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resM
 	}
 }
 
-MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng,
-	const mat_asset::MaterialNode& materialNode, MaterialPtr material)
+MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material)
 {
 	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
-	material->mShaderVariantParam.ShaderName() = materialNode.Shader.ShortName;
+	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
 
 	material->mTextures.Resize(8);
 	for (const auto& iter : materialNode.TextureProperies) {
@@ -146,12 +143,11 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 	return material;
 }
 
-MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng,
-	const std::string& loadPath, MaterialPtr material)
+MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material)
 {
 	material = IF_OR(material, CreateInstance<Material>());
 	mat_asset::MaterialNode materialNode;
-	if (mMatAssetMng->GetMaterialNode(loadPath, materialNode)) {
+	if (mMatAssetMng->GetMaterialNode(loadParam, materialNode)) {
 		return DoCreateMaterial(launchMode, resMng, materialNode, material);
 	}
 	else {

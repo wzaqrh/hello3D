@@ -148,7 +148,7 @@ public:
 	res::ShaderPtr CreateShader(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
 
-	res::MaterialInstance CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe;
+	res::MaterialInstance CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(res::MaterialInstance, CreateMaterial, ThreadSafe);
 
 	res::AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
@@ -274,7 +274,7 @@ private:
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTextureByKey;
 	std::map<MaterialLoadParam, res::ShaderPtr> mShaderByName;
-	std::map<std::string, res::MaterialPtr> mMaterialByName;
+	std::map<MaterialLoadParam, res::MaterialPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;
 		bool operator<(const AiResourceKey& other) const {

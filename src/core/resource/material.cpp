@@ -131,7 +131,7 @@ void Material::EnableKeyword(const std::string& macroName, int value /*= TRUE*/)
 void Material::Build(Launch launchMode, ResourceManager& resMng)
 {
 	if (mShaderVariant == nullptr) {
-		mShaderVariant = resMng.CreateShader(launchMode, mShaderVariantParam);
+		mShaderVariant = resMng.CreateShader(launchMode, mShaderVariantParam.Build());
 	}
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include "core/base/stl.h"
 #include "core/rendersys/program.h"
 
@@ -7,9 +8,10 @@ namespace mir {
 
 struct MaterialLoadParam 
 {
-	bool IsVariant() const { return !VariantName.empty() || !Macros.empty(); }
-	std::string CalcVariantName() const {
-		std::string name = VariantName;
+	MaterialLoadParam(const char* shaderName) :ShaderVariantName(shaderName) {};
+	MaterialLoadParam(const std::string& shaderName = "") :ShaderVariantName(shaderName) {}
+	std::string GetVariantDesc() const {
+		std::string name = GetVariantName();
 		if (!Macros.empty()) {
 			name += "(";
 			int count = 0;
@@ -21,6 +23,15 @@ struct MaterialLoadParam
 		}
 		return name;
 	}
+	std::string GetVariantName() const {
+		std::vector<boost::iterator_range<std::string::iterator>> strArr;
+		boost::split(strArr, std::string(ShaderVariantName), boost::is_any_of("-"));
+		if (strArr.size() >= 2) return boost::lexical_cast<std::string>(strArr[1]);
+		else return "";
+	}
+	std::string GetShaderName() const {
+		return boost::trim_right_copy_if(ShaderVariantName, boost::is_any_of("-"));
+	}
 	int operator[](const std::string& macroName) const {
 		int result = 0;
 		auto find_it = std::find_if(Macros.begin(), Macros.end(), [&](const ShaderCompileMacro& v) { return v.Name == macroName; });
@@ -28,27 +39,28 @@ struct MaterialLoadParam
 		return result;
 	}
 public:
-	std::string ShaderName;
-	std::string VariantName;
+	std::string ShaderVariantName;
 	std::vector<ShaderCompileMacro> Macros;
 };
 inline bool operator==(const MaterialLoadParam& l, const MaterialLoadParam& r) {
-	return l.ShaderName == r.ShaderName
-		&& l.VariantName == r.VariantName
+	return l.ShaderVariantName == r.ShaderVariantName
 		&& l.Macros == r.Macros;
 }
 inline bool operator<(const MaterialLoadParam& l, const MaterialLoadParam& r) {
-	if (l.ShaderName != r.ShaderName) return l.ShaderName < r.ShaderName;
-	if (l.VariantName != r.VariantName) return l.VariantName < r.VariantName;
+	if (l.ShaderVariantName != r.ShaderVariantName) return l.ShaderVariantName < r.ShaderVariantName;
 	return l.Macros < r.Macros;
 }
 
 struct MaterialLoadParamBuilder 
 {
-	MaterialLoadParamBuilder(const std::string& shaderName = "", const std::string& variantName = "") :LoadParam(shaderName, variantName) {}
+	MaterialLoadParamBuilder(const char* shaderName = "") :LoadParam(shaderName) {}
+	explicit MaterialLoadParamBuilder(const MaterialLoadParam& other) {
+		LoadParam = other;
+		for (const auto& it : other.Macros)
+			MacroMap[it.Name] = boost::lexical_cast<int>(it.Definition);
+	}
 	int& operator[](const std::string& macroName) { return MacroMap[macroName]; }
-	std::string& ShaderName() { return LoadParam.ShaderName; }
-	std::string& VariantName() { return LoadParam.VariantName; }
+	std::string& ShaderVariantName() { return LoadParam.ShaderVariantName; }
 	const MaterialLoadParam& Build() {
 		LoadParam.Macros.clear();
 		for (auto& it : MacroMap)

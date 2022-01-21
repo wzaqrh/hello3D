@@ -13,7 +13,7 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 {
 	mTransform = CreateInstance<Transform>();
 #if USE_MATERIAL_INSTANCE
-	mMaterial = resourceMng.CreateMaterial(launchMode, matName.ShaderName);
+	mMaterial = resourceMng.CreateMaterial(launchMode, matName);
 #else
 	mMaterial = resourceMng.CreateShader(launchMode, matName);
 #endif

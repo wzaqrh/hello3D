@@ -150,9 +150,11 @@ struct TextureProperty {
 	int Slot;
 };
 struct MaterialNode {
+	MaterialLoadParam LoadParam;
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;
 	std::map<std::string, std::string> UniformProperies; 
+
 };
 
 class ShaderNodeManager;
@@ -162,7 +164,7 @@ class MaterialAssetManager : boost::noncopyable
 public:
 	MaterialAssetManager();
 	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode);
-	bool GetMaterialNode(const std::string& materialPath, MaterialNode& materialNode);
+	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode);
 private:
 	std::shared_ptr<ShaderNodeManager> mShaderNodeMng;
 	std::shared_ptr<MaterialNodeManager> mMaterialNodeMng;

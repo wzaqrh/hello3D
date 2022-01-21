@@ -28,8 +28,8 @@ private:
 6-11: 正交相机
 */
 
-inline ShaderLoadParam GetMatName(int secondIndex) {
-	ShaderLoadParamBuilder mlpb(MAT_MODEL);
+inline MaterialLoadParam GetMatName(int secondIndex) {
+	MaterialLoadParamBuilder mlpb(MAT_MODEL);
 	mlpb["PBR_MODE"] = secondIndex % 3;
 	return mlpb;
 }

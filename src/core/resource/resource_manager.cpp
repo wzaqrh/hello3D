@@ -544,7 +544,7 @@ res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const MaterialLo
 	if (shader == nullptr) {
 		shader = CreateInstance<res::Shader>();
 		this->mShaderByName[param] = shader;
-		DEBUG_SET_RES_PATH(shader, (boost::format("name:%1% variant:%2%") % param.ShaderName %param.CalcVariantName()).str());
+		DEBUG_SET_RES_PATH(shader, (boost::format("name:%1% variant:%2%") % param.GetShaderName() %param.GetVariantDesc()).str());
 		DEBUG_SET_CALL(shader, launchMode);
 		resNeedLoad = true;
 	}
@@ -555,22 +555,22 @@ res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const MaterialLo
 	return shader;
 }
 
-res::MaterialInstance ResourceManager::CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe
+res::MaterialInstance ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe
 {
 	bool resNeedLoad = false;
 	res::MaterialPtr material;
 	ATOMIC_STATEMENT(mMaterialMapLock,
-		material = this->mMaterialByName[assetPath];
+		material = this->mMaterialByName[loadParam];
 	if (material == nullptr) {
 		material = CreateInstance<res::Material>();
-		this->mMaterialByName[assetPath] = material;
-		DEBUG_SET_RES_PATH(material, (boost::format("path:%1%") % assetPath).str());
+		this->mMaterialByName[loadParam] = material;
+		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %loadParam.GetShaderName() %loadParam.GetVariantDesc()).str());
 		DEBUG_SET_CALL(material, launchMode);
 		resNeedLoad = true;
 	}
 	);
 	if (resNeedLoad) {
-		this->mMaterialFac.CreateMaterial(launchMode, *this, assetPath, material);
+		this->mMaterialFac.CreateMaterial(launchMode, *this, loadParam, material);
 	}
 	return material->CreateInstance(launchMode, *this);
 }
@@ -586,7 +586,7 @@ res::AiScenePtr ResourceManager::CreateAiScene(Launch launchMode, const std::str
 	if (aiRes == nullptr) {
 		aiRes = CreateInstance<res::AiScene>();
 		this->mAiSceneByKey[key] = aiRes;
-		DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") % assetPath %redirectRes).str());
+		DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
 		DEBUG_SET_CALL(aiRes, launchMode);
 		resNeedLoad = true;
 	}

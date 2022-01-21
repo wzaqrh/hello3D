@@ -19,7 +19,7 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	MaterialFactory();
 	ShaderPtr CreateShader(Launch launch, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader = nullptr);
-	MaterialPtr CreateMaterial(Launch launch, ResourceManager& resMng, const std::string& loadPath, MaterialPtr material = nullptr);
+	MaterialPtr CreateMaterial(Launch launch, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material = nullptr);
 
 	ShaderPtr CloneShader(Launch launch, ResourceManager& resMng, const Shader& material);
 	TechniquePtr CloneTechnique(Launch launch, ResourceManager& resMng, const Technique& technique);

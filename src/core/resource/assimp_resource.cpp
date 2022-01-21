@@ -232,7 +232,8 @@ private:
 
 	#if USE_MATERIAL_INSTANCE
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(rawMesh->mName.C_Str()));
-		mesh.mMaterial = mResourceMng.CreateMaterial(mLaunchMode, matPath.string());
+		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
+		mesh.mMaterial = mResourceMng.CreateMaterial(mLaunchMode, loadParam);
 	#else
 		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0, 0, 1, 1));
 		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
