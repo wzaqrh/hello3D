@@ -31,10 +31,10 @@ public:
 	}
 
 	template<typename T, size_t BytePerIndex = value_size> bool Overflow(size_t position) const {
-		return position * value_size + sizeof(T) > mElements.size() * value_size;
+		return position * BytePerIndex + sizeof(T) > mElements.size() * value_size;
 	}
 	template<typename T, size_t BytePerIndex = value_size> bool Overflow(size_t position, size_t count) const {
-		return position * value_size + sizeof(T) * count > mElements.size() * value_size;
+		return position * BytePerIndex + sizeof(T) * count > mElements.size() * value_size;
 	}
 
 	template<typename T, size_t BytePerIndex = value_size> T& As(size_t position) {
@@ -51,6 +51,7 @@ public:
 	template<typename T, size_t BytePerIndex = value_size> void SetByParseString(size_t position, size_t elemCount, std::string str) {
 		BOOST_ASSERT((!Overflow<T, BytePerIndex>(position, elemCount)));
 		BOOST_ASSERT(position * BytePerIndex % value_size == 0);
+		BOOST_ASSERT(value_size % BytePerIndex == 0);
 		size_t i = 0;
 		if (!str.empty()) {
 			std::vector<boost::iterator_range<std::string::iterator>> strArr;

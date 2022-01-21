@@ -350,7 +350,6 @@
             <File name="bin\x86\Debug\shader\Skybox.hlsl" />
             <File name="bin\x86\Debug\shader\Model.hlsl" />
             <File name="bin\x86\Debug\shader\LayerColor.hlsl" />
-            <File name="bin\x86\Debug\shader\Label.hlsl" />
             <File name="bin\x86\Debug\shader\Debug.cginc" />
         </Folder>
         <Folder name="cginc">
@@ -370,7 +369,6 @@
             <File name="bin\x86\Debug\shader\Skeleton.Shader" />
             <File name="bin\x86\Debug\shader\Model.Shader" />
             <File name="bin\x86\Debug\shader\LayerColor.Shader" />
-            <File name="bin\x86\Debug\shader\LayerColor-Cube.Shader" />
         </Folder>
         <Folder name="materialXml">
             <File name="bin\x86\Debug\shader\LayerColor-Cube.Material" />
