@@ -123,7 +123,7 @@ public:
 	const TextureVector& GetTextures() const { return mTextures; }
 	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 private:
-	ShaderLoadParamBuilder mShaderVariantParam;
+	MaterialLoadParamBuilder mShaderVariantParam;
 	ShaderPtr mShaderVariant;
 	TextureVector mTextures;
 	GpuParametersPtr mGpuParametersByShareType[kCbShareMax];

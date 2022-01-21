@@ -26,7 +26,7 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-Label::Label(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName, FontPtr font)
+Label::Label(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, FontPtr font)
 	:Super(launchMode, resourceMng, matName)
 {
 	mFont = font;

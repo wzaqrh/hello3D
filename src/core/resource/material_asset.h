@@ -161,7 +161,7 @@ class MaterialAssetManager : boost::noncopyable
 {
 public:
 	MaterialAssetManager();
-	bool GetShaderNode(const ShaderLoadParam& loadParam, ShaderNode& shaderNode);
+	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode);
 	bool GetMaterialNode(const std::string& materialPath, MaterialNode& materialNode);
 private:
 	std::shared_ptr<ShaderNodeManager> mShaderNodeMng;

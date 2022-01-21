@@ -89,7 +89,7 @@ ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& re
 }
 
 ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng,
-	const ShaderLoadParam& loadParam, ShaderPtr shader) {
+	const MaterialLoadParam& loadParam, ShaderPtr shader) {
 	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {

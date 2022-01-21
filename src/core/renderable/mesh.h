@@ -13,7 +13,7 @@ class MIR_CORE_API Mesh : public RenderableSingleRenderOp
 	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
-	Mesh(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName, 
+	Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, 
 		int vertCount = 1024, int indexCount = 1024);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;

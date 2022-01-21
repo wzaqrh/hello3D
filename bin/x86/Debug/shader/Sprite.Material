@@ -1,7 +1,6 @@
 <Material>
 	<UseShader>Sprite</UseShader>
 	<Macros>
+		<DEBUG_SHADOW_MAP>0</DEBUG_SHADOW_MAP>
 	</Macros>
-	<Properties>
-	</Properties>
 </Material>

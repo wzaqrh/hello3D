@@ -145,7 +145,7 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	res::ShaderPtr CreateShader(Launch launchMode, const ShaderLoadParam& loadParam) ThreadSafe;
+	res::ShaderPtr CreateShader(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
 
 	res::MaterialInstance CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe;
@@ -273,7 +273,7 @@ private:
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTextureByKey;
-	std::map<ShaderLoadParam, res::ShaderPtr> mShaderByName;
+	std::map<MaterialLoadParam, res::ShaderPtr> mShaderByName;
 	std::map<std::string, res::MaterialPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;

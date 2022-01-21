@@ -12,7 +12,7 @@ struct MIR_CORE_API RenderableSingleRenderOp : public IRenderable
 {
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(RenderableSingleRenderOp);
-	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName);
+	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }

@@ -47,7 +47,7 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName, IFrameBufferPtr mainTex)
+PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex)
 	:Super(launchMode, resourceMng, matName)
 {
 	mMainTex = mainTex;

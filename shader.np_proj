@@ -375,6 +375,8 @@
         <Folder name="materialXml">
             <File name="bin\x86\Debug\shader\Sprite.Material" />
             <File name="bin\x86\Debug\shader\Model.Material" />
+            <File name="bin\x86\Debug\shader\LayerColor.Material" />
+            <File name="bin\x86\Debug\shader\LayerColor-Cube.Material" />
         </Folder>
     </Project>
     <Project name="mir&#x7B14;&#x8BB0;">

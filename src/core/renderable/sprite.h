@@ -15,7 +15,7 @@ class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 	friend class RenderableFactory;
 	friend class RenderPipeline;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
-	Sprite(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName);
+	Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetTexture(const ITexturePtr& Texture) override;

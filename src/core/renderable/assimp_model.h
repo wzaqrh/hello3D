@@ -56,7 +56,7 @@ class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp
 	typedef RenderableSingleRenderOp Super;
 	friend class RenderableFactory;
 	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
-	AssimpModel(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matType);
+	AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matType);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void LoadModel(const std::string& assetPath, const std::string& redirectResource = "");

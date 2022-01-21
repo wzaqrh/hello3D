@@ -6,7 +6,7 @@ namespace mir {
 namespace renderable {
 
 /********** TSprite **********/
-Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const ShaderLoadParam& matName)
+Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
 	: Super(launchMode, resourceMng, matName)
 	, mQuad(Eigen::Vector2f::Zero(), Eigen::Vector2f::Zero())
 	, mQuadDirty(true)
