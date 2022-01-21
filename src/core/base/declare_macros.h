@@ -12,5 +12,6 @@
 
 #define TemplateArgs template <typename... T>
 #define TemplateT template <typename T>
+#define ConstTRef const T&
 
 #define ThreadSafe

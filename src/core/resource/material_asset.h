@@ -149,11 +149,6 @@ struct TextureProperty {
 	std::string ImagePath;
 	int Slot;
 };
-struct UniformProperty {
-	tpl::Binary<float> Data;
-	bool GetShareMode;
-	int Slot;
-};
 struct MaterialNode {
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;

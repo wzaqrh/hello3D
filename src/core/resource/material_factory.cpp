@@ -107,24 +107,29 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam.ShaderName() = materialNode.Shader.ShortName;
 
+	for (const auto& iter : materialNode.TextureProperies) {
+		auto texture = resMng.CreateTextureByFile(launchMode, iter.second.ImagePath);
+		material->mTextures.AddOrSet(texture, iter.second.Slot);
+	}
+
 	material->mGpuParametersByShareType[kCbShareNone] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerMaterial] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerFrame] = mFrameGpuParameters;
 	for (const auto& categNode : materialNode.Shader) {
 		const auto& categProgram = categNode.Program;
-		for (auto& uniform : categProgram.Uniforms) {
+		for (const auto& uniform : categProgram.Uniforms) {
 			GpuParameters::Element element = AddToParametersCache(launchMode, resMng, uniform);
 			switch (element.GetShareMode())
 			{
 			case kCbShareNone: {
 				GpuParameters::Element newelem = element.Clone(launchMode, resMng);
-				for (auto& iter : materialNode.UniformProperies)
+				for (const auto& iter : materialNode.UniformProperies)
 					newelem.Parameters->SetPropertyByString(iter.first, iter.second);
 				material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
 			}break;
 			case kCbSharePerMaterial: {
 				GpuParameters::Element newelem = element.Clone(launchMode, resMng);
-				for (auto& iter : materialNode.UniformProperies)
+				for (const auto& iter : materialNode.UniformProperies)
 					newelem.Parameters->SetPropertyByString(iter.first, iter.second);
 				material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
 			}break;

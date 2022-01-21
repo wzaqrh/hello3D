@@ -127,6 +127,7 @@ const ShaderPtr& Material::GetShader() const
 MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng)
 {
 	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbShareNone]->Clone(launchMode, resMng);
+	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerMaterial]);
 	return MaterialInstance(this->shared_from_this(), newParametrs);
 }
 

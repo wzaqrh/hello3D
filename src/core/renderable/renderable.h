@@ -22,19 +22,17 @@ struct RenderOperation {
 		VertexBuffers.push_back(vbo);
 	}
 public:
-	res::ShaderPtr Shader;
-	
-	std::vector<IVertexBufferPtr> VertexBuffers;
-	
-	IIndexBufferPtr IndexBuffer;
-	short IndexPos, IndexCount, IndexBase;
-	
-	TextureVector Textures;
-
-	std::map<std::string, std::vector<char>> UBOBytesByName;
-
 	Eigen::Matrix4f WorldTransform;
 	unsigned CameraMask;
+
+	std::vector<IVertexBufferPtr> VertexBuffers;
+	IIndexBufferPtr IndexBuffer;
+	short IndexPos, IndexCount, IndexBase;
+
+	res::ShaderPtr Shader;
+	TextureVector Textures;
+	res::GpuParametersPtr GpuParameters;
+	std::map<std::string, std::vector<char>> UBOBytesByName;
 };
 
 struct RenderOperationQueue {

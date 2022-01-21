@@ -82,6 +82,13 @@ class MIR_CORE_API MaterialInstance {
 public:
 	MaterialInstance();
 	MaterialInstance(const MaterialPtr& material, const GpuParametersPtr& gpuParamters);
+
+	TemplateArgs bool HasProperty(const std::string& propertyName) { return mGpuParameters->HasProperty(propertyName); }
+	TemplateT ConstTRef GetProperty(const std::string& propertyName) const { return mGpuParameters->GetProperty<T>(propertyName); }
+	TemplateT void SetProperty(const std::string& propertyName, ConstTRef value) {
+		if (HasProperty(propertyName)) 
+			mGpuParameters->GetProperty<T>(propertyName) = value;
+	}
 public:
 	MaterialPtr mMaterial;
 	GpuParametersPtr mGpuParameters;

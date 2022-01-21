@@ -21,39 +21,39 @@ class UniformParameters
 public:
 	const ConstBufferDecl& GetDecl() const { return mDecl; }
 
-	int FindProperty(const std::string& name) const {
-		return mDecl.IndexByName(name);
+	int FindProperty(const std::string& propertyName) const {
+		return mDecl.IndexByName(propertyName);
 	}
-	bool HasProperty(const std::string& name) const {
-		return FindProperty(name) >= 0;
+	bool HasProperty(const std::string& propertyName) const {
+		return FindProperty(propertyName) >= 0;
 	}
-	template<typename T> T& GetProperty(const std::string& name) {
-		auto element = mDecl[name];
+	template<typename T> T& GetProperty(const std::string& propertyName) {
+		auto element = mDecl[propertyName];
 		BOOST_ASSERT(element && DataType2CbElementType<T>::value == element->Type);
 		return mData.As<T, 1>(element->Offset);
 	}
-	template<> BOOL& GetProperty<BOOL>(const std::string& name) {
-		auto element = mDecl[name];
+	template<> BOOL& GetProperty<BOOL>(const std::string& propertyName) {
+		auto element = mDecl[propertyName];
 		BOOST_ASSERT(element && DataType2CbElementType<bool>::value == element->Type);
 		return mData.As<BOOL, 1>(element->Offset);
 	}
-	template<typename T> const T& GetProperty(const std::string& name) const {
-		auto element = mDecl[name];
+	template<typename T> const T& GetProperty(const std::string& propertyName) const {
+		auto element = mDecl[propertyName];
 		BOOST_ASSERT(element && DataType2CbElementType<T>::value == element->Type);
 		return mData.As<T, 1>(element->Offset);
 	}
-	template<> const BOOL& GetProperty<BOOL>(const std::string& name) const {
-		auto element = mDecl[name];
+	template<> const BOOL& GetProperty<BOOL>(const std::string& propertyName) const {
+		auto element = mDecl[propertyName];
 		BOOST_ASSERT(element && DataType2CbElementType<bool>::value == element->Type);
 		return mData.As<BOOL, 1>(element->Offset);
 	}
-	template<typename T> T& operator[](const std::string& name) {
-		return GetProperty(name);
+	template<typename T> T& operator[](const std::string& propertyName) {
+		return GetProperty(propertyName);
 	}
-	template<typename T> const T& operator[](const std::string& name) const {
-		return GetProperty(name);
+	template<typename T> const T& operator[](const std::string& propertyName) const {
+		return GetProperty(propertyName);
 	}
-	bool SetPropertyByString(const std::string& name, std::string strDefault);
+	bool SetPropertyByString(const std::string& propertyName, std::string strDefault);
 
 	IContantBufferPtr CreateConstBuffer(Launch launchMode, ResourceManager& resMng, HWMemoryUsage usage) const;
 	void WriteToConstBuffer(RenderSystem& renderSys, IContantBufferPtr cbuffer) const;
@@ -95,44 +95,53 @@ public:
 	void AddElement(IContantBufferPtr cbuffer, UniformParametersPtr parameter) {
 		mElements.AddOrSet(Element{ cbuffer, parameter });
 	}
+	void Merge(const GpuParameters& other) {
+		for (const auto& element : other) {
+			if (element.IsValid()) {
+				BOOST_ASSERT(element.GetSlot() >= mElements.Count() || !mElements[element.GetSlot()].IsValid());
+				AddElement(element);
+			}
+		}
+	}
 	GpuParametersPtr Clone(Launch launchMode, ResourceManager& resMng) const;
 public:
-	std::pair<int, int> FindProperty(const std::string& name) const {
-		std::pair<int, int> result = std::make_pair(-1, -1);
+	int FindProperty(const std::string& propertyName) const {
+		int result = -1;
 		for (const auto& iter : mElements) {
-			if ((result.second = (*iter.Parameters).HasProperty(name)) > 0) {
-				result.first = (*iter.Parameters).GetSlot();
+			if ((result = (*iter.Parameters).FindProperty(propertyName)) >= 0) {
+				BOOST_ASSERT(result < 0x10000);
+				result |= (*iter.Parameters).GetSlot() * 0x10000;
 				break;
 			}
 		}
 		return std::move(result);
 	}
-	bool HasProperty(const std::string& name) {
-		return FindProperty(name).first >= 0;
+	bool HasProperty(const std::string& propertyName) {
+		return FindProperty(propertyName) >= 0;
 	}
-	template<typename T> T& GetProperty(const std::string& name) {
+	template<typename T> T& GetProperty(const std::string& propertyName) {
 		for (const auto& iter : mElements)
-			if ((*iter.Parameters).HasProperty(name))
-				return (*iter.Parameters).GetProperty(name);
+			if ((*iter.Parameters).HasProperty(propertyName))
+				return (*iter.Parameters).GetProperty(propertyName);
 		BOOST_ASSERT(false);
-		return At(0).GetProperty(name);
+		return At(0).GetProperty(propertyName);
 	}
-	template<typename T> const T& GetProperty(const std::string& name) const {
+	template<typename T> const T& GetProperty(const std::string& propertyName) const {
 		for (const auto& iter : mElements)
-			if ((*iter.Parameters).HasProperty(name))
-				return (*iter.Parameters).GetProperty(name);
+			if ((*iter.Parameters).HasProperty(propertyName))
+				return (*iter.Parameters).GetProperty(propertyName);
 		BOOST_ASSERT(false);
-		return At(0).GetProperty(name);
+		return At(0).GetProperty(propertyName);
 	}
-	template<typename T> T& operator[](const std::string& name) {
-		return GetProperty(name);
+	template<typename T> T& operator[](const std::string& propertyName) {
+		return GetProperty(propertyName);
 	}
-	template<typename T> const T& operator[](const std::string& name) const {
-		return GetProperty(name);
+	template<typename T> const T& operator[](const std::string& propertyName) const {
+		return GetProperty(propertyName);
 	}
-	bool SetPropertyByString(const std::string& name, std::string strDefault) {
+	bool SetPropertyByString(const std::string& propertyName, std::string strDefault) {
 		for (auto& iter : mElements) {
-			if ((*iter.Parameters).SetPropertyByString(name, strDefault))
+			if ((*iter.Parameters).SetPropertyByString(propertyName, strDefault))
 				return true;
 		}
 		return false;
@@ -150,7 +159,7 @@ class UniformParametersBuilder
 {
 public:
 	UniformParametersBuilder(UniformParameters& result) :mResult(result) {}
-	void AddParameter(const std::string& name, CbElementType type, size_t size, size_t count, size_t offset, const std::string& defValue);
+	void AddParameter(const std::string& propertyName, CbElementType type, size_t size, size_t count, size_t offset, const std::string& defValue);
 	std::string& ShortName() { return mResult.mShortName; }
 	size_t& Slot() { return mResult.mSlot; }
 	CBufferShareMode& ShareMode() { return mResult.mShareMode; }
