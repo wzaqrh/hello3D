@@ -41,7 +41,7 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& 
 	, mMaterialFac(materialFac)
 	, mAiResourceFac(aiResFac)
 {
-	mProgramMapLock = mTextureMapLock = mMaterialMapLock = mAiSceneMapLock = false;
+	mProgramMapLock = mTextureMapLock = mShaderMapLock = mAiSceneMapLock = false;
 	mLoadTaskCtxMapLock = mResDependGraphLock = false;
 
 	constexpr int CThreadPoolNumber = 8;
@@ -535,28 +535,44 @@ ITexturePtr ResourceManager::CreateTextureByFile(Launch launchMode,
 }
 
 /********** Create Shader **********/
-res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const ShaderLoadParam& matName) ThreadSafe ThreadSafe
+res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const ShaderLoadParam& param) ThreadSafe ThreadSafe
 {
 	bool resNeedLoad = false;
-	res::ShaderPtr material = nullptr;
+	res::ShaderPtr shader = nullptr;
+	ATOMIC_STATEMENT(mShaderMapLock,
+		shader = this->mShaderByName[param];
+	if (shader == nullptr) {
+		shader = CreateInstance<res::Shader>();
+		this->mShaderByName[param] = shader;
+		DEBUG_SET_RES_PATH(shader, (boost::format("name:%1% variant:%2%") % param.ShaderName %param.CalcVariantName()).str());
+		DEBUG_SET_CALL(shader, launchMode);
+		resNeedLoad = true;
+	}
+	);
+	if (resNeedLoad) {
+		this->mMaterialFac.CreateShader(launchMode, *this, param, shader);
+	}
+	return shader;
+}
+
+res::MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe
+{
+	bool resNeedLoad = false;
+	res::MaterialPtr material = nullptr;
 	ATOMIC_STATEMENT(mMaterialMapLock,
-		material = this->mMaterialByName[matName];
+		material = this->mMaterialByName[assetPath];
 	if (material == nullptr) {
-		material = CreateInstance<res::Shader>();
-		this->mMaterialByName[matName] = material;
-		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") % matName.ShaderName %matName.CalcVariantName()).str());
+		material = CreateInstance<res::Material>();
+		this->mMaterialByName[assetPath] = material;
+		DEBUG_SET_RES_PATH(material, (boost::format("path:%1%") % assetPath).str());
 		DEBUG_SET_CALL(material, launchMode);
 		resNeedLoad = true;
 	}
 	);
 	if (resNeedLoad) {
-		this->mMaterialFac.CreateShader(launchMode, *this, matName, material);
+		this->mMaterialFac.CreateMaterial(launchMode, *this, assetPath, material);
 	}
 	return material;
-}
-res::ShaderPtr ResourceManager::CloneShader(Launch launchMode, const res::Shader& material) ThreadSafe
-{
-	return this->mMaterialFac.CloneShader(launchMode, *this, material);
 }
 
 /********** Create AiScene **********/

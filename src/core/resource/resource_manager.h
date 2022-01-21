@@ -144,9 +144,11 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	res::ShaderPtr CreateShader(Launch launchMode, const ShaderLoadParam& matName) ThreadSafe;
+	res::ShaderPtr CreateShader(Launch launchMode, const ShaderLoadParam& loadParam) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
-	res::ShaderPtr CloneShader(Launch launchMode, const res::Shader& material) ThreadSafe;
+
+	res::MaterialPtr CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(res::MaterialPtr, CreateMaterial, ThreadSafe);
 
 	res::AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 private:
@@ -270,7 +272,8 @@ private:
 	};
 	std::map<ProgramKey, IProgramPtr> mProgramByKey;
 	std::map<std::string, ITexturePtr> mTextureByKey;
-	std::map<ShaderLoadParam, res::ShaderPtr> mMaterialByName;
+	std::map<ShaderLoadParam, res::ShaderPtr> mShaderByName;
+	std::map<std::string, res::MaterialPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;
 		bool operator<(const AiResourceKey& other) const {
@@ -279,7 +282,7 @@ private:
 		}
 	};
 	std::map<AiResourceKey, res::AiScenePtr> mAiSceneByKey;
-	std::atomic<bool> mProgramMapLock, mTextureMapLock, mMaterialMapLock, mAiSceneMapLock;
+	std::atomic<bool> mProgramMapLock, mTextureMapLock, mShaderMapLock, mMaterialMapLock, mAiSceneMapLock;
 	std::atomic<bool> mLoadTaskCtxMapLock, mResDependGraphLock;
 };
 

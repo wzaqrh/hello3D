@@ -1,0 +1,14 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<Macros>
+	</Macros>
+	<Properties>
+		<txAlbedo>ToyCar_basecolor.png</txAlbedo>
+		<txEmissive>ToyCar_emissive.png</txEmissive>
+		<txAmbientOcclusion Chennel="0">ToyCar_occlusion_roughness_metallic.png</txAmbientOcclusion>
+		<txRoughness Chennel="1">ToyCar_occlusion_roughness_metallic.png</txRoughness>
+		<txMetalness Chennel="2">ToyCar_occlusion_roughness_metallic.png</txMetalness>
+		
+		<EmissiveFactor>1,1,1</EmissiveFactor>
+	</Properties>
+</Material>
