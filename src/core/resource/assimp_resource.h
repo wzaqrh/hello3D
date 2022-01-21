@@ -37,8 +37,7 @@ namespace res {
 struct AiNode : public std::enable_shared_from_this<AiNode>
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	AiNode(const aiNode* rawNode, const size_t serializeIndex)
-		: RawNode(rawNode), SerilizeIndex(serializeIndex) {}
+	AiNode(const aiNode* rawNode, const size_t serializeIndex): RawNode(rawNode), SerilizeIndex(serializeIndex) {}
 	void AddChild(const AiNodePtr& child) {
 		Children.push_back(child);
 		child->Parent = this->shared_from_this();
@@ -46,15 +45,10 @@ struct AiNode : public std::enable_shared_from_this<AiNode>
 	void AddMesh(const AssimpMeshPtr& mesh) {
 		Meshes.push_back(mesh);
 	}
-	size_t ChildCount() const {
-		return Children.size();
-	}
-	const AssimpMeshPtr& operator[](size_t index) const {
-		return Meshes[index];
-	}
-	size_t MeshCount() const {
-		return Meshes.size();
-	}
+
+	size_t ChildCount() const { return Children.size(); }
+	const AssimpMeshPtr& operator[](size_t index) const { return Meshes[index]; }
+	size_t MeshCount() const { return Meshes.size(); }
 public:
 	const size_t SerilizeIndex;
 	const aiNode* RawNode;

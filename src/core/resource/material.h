@@ -14,7 +14,9 @@
 namespace mir {
 namespace res {
 
+#if !USE_MATERIAL_INSTANCE
 #define USE_CBUFFER_ENTRY 1
+#endif
 class Pass : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
@@ -29,14 +31,16 @@ class Pass : public ImplementResource<IResource>
 	struct CBufferEntryVector : public tpl::Vector<CBufferEntry> {};
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot);
 	void AddSampler(ISamplerStatePtr sampler);
+#if USE_CBUFFER_ENTRY
+	void AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot);
 	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
 
-	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	IContantBufferPtr GetConstBufferByIdx(size_t idx);
 	IContantBufferPtr GetConstBufferByName(const std::string& name);
+#endif
+	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 public:
 	std::string mLightMode, mName;
 	PrimitiveTopology mTopoLogy;
@@ -56,10 +60,12 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddPass(PassPtr pass) { Add(pass); }
 
+#if USE_CBUFFER_ENTRY
 	TemplateArgs void UpdateConstBufferByName(T &&...args) {
 		for (auto& pass : mElements)
 			pass->UpdateConstBufferByName(std::forward<T>(args)...);
 	}
+#endif
 
 	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
@@ -83,18 +89,27 @@ public:
 	MaterialInstance();
 	MaterialInstance(const MaterialPtr& material, const GpuParametersPtr& gpuParamters);
 
+	//operate per-instance¡¢per-material¡¢per-frame properties
 	TemplateArgs bool HasProperty(const std::string& propertyName) { return mGpuParameters->HasProperty(propertyName); }
-	TemplateT ConstTRef GetProperty(const std::string& propertyName) const { return mGpuParameters->GetProperty<T>(propertyName); }
-	TemplateT void SetProperty(const std::string& propertyName, ConstTRef value) {
-		if (HasProperty(propertyName)) 
+	TemplateT T& GetProperty(const std::string& propertyName) { return mGpuParameters->GetProperty<T>(propertyName); }
+	TemplateT const T& GetProperty(const std::string& propertyName) const { return mGpuParameters->GetProperty<T>(propertyName); }
+	TemplateT void SetProperty(const std::string& propertyName, const T& value) {
+		if (HasProperty(propertyName))
 			mGpuParameters->GetProperty<T>(propertyName) = value;
 	}
+	std::vector<IContantBufferPtr> GetConstBuffers() const;
+	void FlushGpuParameters(RenderSystem& renderSys) const;
+	void WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data) const;
+
+	const MaterialPtr& GetMaterial() const { return mMaterial;}
+	MaterialPtr& operator->() { return mMaterial; }
+	const MaterialPtr& operator->() const { return mMaterial; };
 public:
 	MaterialPtr mMaterial;
 	GpuParametersPtr mGpuParameters;
 };
 
-class MIR_CORE_API Material : public ImplementResource<IResource>, std::enable_shared_from_this<Material>
+class MIR_CORE_API Material : public std::enable_shared_from_this<Material>, public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
 public:
@@ -102,8 +117,11 @@ public:
 	void EnableKeyword(const std::string& macroName, int value = TRUE);
 	void Build(Launch launchMode, ResourceManager& resMng);
 public:
+	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
 	const ShaderPtr& GetShader() const;
-	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng);
+	TextureVector& GetTextures() { return mTextures; }
+	const TextureVector& GetTextures() const { return mTextures; }
+	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 private:
 	ShaderLoadParamBuilder mShaderVariantParam;
 	ShaderPtr mShaderVariant;

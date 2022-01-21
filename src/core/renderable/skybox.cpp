@@ -91,11 +91,19 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const ShaderLoad
 			boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
 			mDiffuseEnvMap = mResourceMng.CreateTextureByFile(launchMode, diffuseEnvPath.string());
 
+		#if USE_MATERIAL_INSTANCE
+			SetTexture(mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string()));
+		#else
 			mTexture = mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string());
+		#endif
 		}
 	}
 	else {
+	#if USE_MATERIAL_INSTANCE
+		SetTexture(mResourceMng.CreateTextureByFile(launchMode, imgName));
+	#else
 		mTexture = mResourceMng.CreateTextureByFile(launchMode, imgName);
+	#endif
 	}
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();

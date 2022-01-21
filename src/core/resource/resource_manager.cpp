@@ -555,10 +555,10 @@ res::ShaderPtr ResourceManager::CreateShader(Launch launchMode, const ShaderLoad
 	return shader;
 }
 
-res::MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe
+res::MaterialInstance ResourceManager::CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe
 {
 	bool resNeedLoad = false;
-	res::MaterialPtr material = nullptr;
+	res::MaterialPtr material;
 	ATOMIC_STATEMENT(mMaterialMapLock,
 		material = this->mMaterialByName[assetPath];
 	if (material == nullptr) {
@@ -572,7 +572,7 @@ res::MaterialPtr ResourceManager::CreateMaterial(Launch launchMode, const std::s
 	if (resNeedLoad) {
 		this->mMaterialFac.CreateMaterial(launchMode, *this, assetPath, material);
 	}
-	return material;
+	return material->CreateInstance(launchMode, *this);
 }
 
 /********** Create AiScene **********/

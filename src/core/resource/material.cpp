@@ -13,15 +13,16 @@ namespace mir {
 namespace res {
 
 /********** Pass **********/
-void Pass::AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot)
-{
-	mConstantBuffers.AddOrSet(CBufferEntry{ buffer, name, isUnique }, slot);
-}
 void Pass::AddSampler(ISamplerStatePtr sampler)
 {
 	mSamplers.push_back(sampler);
 }
 
+#if USE_CBUFFER_ENTRY
+void Pass::AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot)
+{
+	mConstantBuffers.AddOrSet(CBufferEntry{ buffer, name, isUnique }, slot);
+}
 std::vector<IContantBufferPtr> Pass::GetConstBuffers() const
 {
 	std::vector<IContantBufferPtr> result(mConstantBuffers.Count());
@@ -56,6 +57,7 @@ void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& n
 	IContantBufferPtr buffer = GetConstBufferByName(name);
 	if (buffer) renderSys.UpdateBuffer(buffer, data);
 }
+#endif
 
 void Pass::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 {
@@ -63,8 +65,10 @@ void Pass::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 	depends.push_back(mProgram);
 	for (const auto& sampler : mSamplers)
 		depends.push_back(sampler);
+#if USE_CBUFFER_ENTRY
 	for (const auto& buffer : mConstantBuffers)
 		depends.push_back(buffer.Buffer);
+#endif
 }
 
 /********** Technique **********/
@@ -101,6 +105,19 @@ MaterialInstance::MaterialInstance(const MaterialPtr& material, const GpuParamet
 	, mGpuParameters(gpuParamters)
 {}
 
+std::vector<IContantBufferPtr> MaterialInstance::GetConstBuffers() const
+{
+	return mGpuParameters->GetConstBuffers();
+}
+void MaterialInstance::WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data) const
+{
+	mGpuParameters->WriteToElementCb(renderSys, cbName, data);
+}
+void MaterialInstance::FlushGpuParameters(RenderSystem& renderSys) const
+{
+	mGpuParameters->FlushToGpu(renderSys);
+}
+
 /********** Material **********/
 Material::Material()
 {}
@@ -118,17 +135,25 @@ void Material::Build(Launch launchMode, ResourceManager& resMng)
 	}
 }
 
+MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng) const
+{
+	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbShareNone]->Clone(launchMode, resMng);
+	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerMaterial]);
+	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerFrame]);
+	return MaterialInstance(const_cast<Material*>(this)->shared_from_this(), newParametrs);
+}
+
 const ShaderPtr& Material::GetShader() const
 {
 	BOOST_ASSERT(mShaderVariant);
 	return mShaderVariant;
 }
 
-MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng)
+void Material::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 {
-	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbShareNone]->Clone(launchMode, resMng);
-	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerMaterial]);
-	return MaterialInstance(this->shared_from_this(), newParametrs);
+	depends.push_back(mShaderVariant);
+	for (auto& texture : mTextures)
+		depends.push_back(texture);
 }
 
 }

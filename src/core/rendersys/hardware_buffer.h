@@ -26,7 +26,7 @@ enum CbElementType {
 };
 template <typename T> struct DataType2CbElementType {};
 template <> struct DataType2CbElementType<bool> : public std::integral_constant<CbElementType, kCBElementBool> {};
-template <> struct DataType2CbElementType<int>  : public std::integral_constant<CbElementType, kCBElementInt> {};
+template <> struct DataType2CbElementType<int> : public std::integral_constant<CbElementType, kCBElementInt> {};
 template <> struct DataType2CbElementType<Eigen::Vector2i> : public std::integral_constant<CbElementType, kCBElementInt2> {};
 template <> struct DataType2CbElementType<Eigen::Vector3i> : public std::integral_constant<CbElementType, kCBElementInt3> {};
 template <> struct DataType2CbElementType<Eigen::Vector4i> : public std::integral_constant<CbElementType, kCBElementInt4> {};
@@ -35,6 +35,10 @@ template <> struct DataType2CbElementType<Eigen::Vector2f> : public std::integra
 template <> struct DataType2CbElementType<Eigen::Vector3f> : public std::integral_constant<CbElementType, kCBElementFloat3> {};
 template <> struct DataType2CbElementType<Eigen::Vector4f> : public std::integral_constant<CbElementType, kCBElementFloat4> {};
 template <> struct DataType2CbElementType<Eigen::Matrix4f> : public std::integral_constant<CbElementType, kCBElementMatrix> {};
+
+TemplateT constexpr CbElementType DetectCbElementType(const T& value) { return DataType2CbElementType<T>::value; }
+TemplateTArray constexpr CbElementType DetectCbElementType(const TArray& value) { return DataType2CbElementType<T>::value; }
+
 size_t GetCbElementTypeByteWidth(CbElementType type);
 
 struct CbDeclElement {

@@ -153,6 +153,13 @@ private:
 			skin2.BiTangent = skin2.BiTangent + bitangent;
 		}
 	}
+
+	boost::filesystem::path RedirectPathOnDir(const boost::filesystem::path& path, bool forceNotRelative = false) const {
+		boost::filesystem::path result(mRedirectResourceDir);
+		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
+		else return result.append(path.string());
+	}
+#if !USE_MATERIAL_INSTANCE
 	std::vector<ITexturePtr> loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const aiScene* scene) {
 		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;
@@ -195,26 +202,14 @@ private:
 			std::string key = str.C_Str();
 
 			if (!mRedirectResourceDir.empty()) {
-				boost::filesystem::path redirectPath(redirectPathProto);
-				boost::filesystem::path texturePath(key);
-				if (texturePath.is_relative()) texturePath = redirectPath.append(texturePath.string());
-				else texturePath = redirectPath.append(texturePath.filename().string());
-
-				if (!mRedirectResourceExt.empty())
-					texturePath = texturePath.replace_extension(mRedirectResourceExt);
-
-				if (!boost::filesystem::exists(texturePath))
-					texturePath = texturePath.replace_extension("png");
+				boost::filesystem::path texturePath = RedirectPathOnDir(boost::filesystem::path(key));
+				if (!mRedirectResourceExt.empty()) texturePath = texturePath.replace_extension(mRedirectResourceExt);
+				if (!boost::filesystem::exists(texturePath)) texturePath = texturePath.replace_extension("png");
 
 				if (!boost::filesystem::exists(texturePath)) {
-					redirectPath = redirectPathProto;
-					texturePath = redirectPath.append(boost::filesystem::path(key).filename().string());
-
-					if (!mRedirectResourceExt.empty())
-						texturePath = texturePath.replace_extension(mRedirectResourceExt);
-
-					if (!boost::filesystem::exists(texturePath))
-						texturePath = texturePath.replace_extension("png");
+					texturePath = RedirectPathOnDir(boost::filesystem::path(key));
+					if (!mRedirectResourceExt.empty()) texturePath = texturePath.replace_extension(mRedirectResourceExt);
+					if (!boost::filesystem::exists(texturePath)) texturePath = texturePath.replace_extension("png");
 				}
 
 				key = texturePath.string();
@@ -229,11 +224,16 @@ private:
 		}
 		return textures;
 	}
+#endif
 	AssimpMeshPtr processMesh(const aiMesh* rawMesh, const aiScene* scene) {
 		AssimpMeshPtr meshPtr = AssimpMesh::Create();
 		auto& mesh = *meshPtr;
 		mesh.mAiMesh = rawMesh;
 
+	#if USE_MATERIAL_INSTANCE
+		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(rawMesh->mName.C_Str()));
+		mesh.mMaterial = mResourceMng.CreateMaterial(mLaunchMode, matPath.string());
+	#else
 		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0, 0, 1, 1));
 		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
 		mesh.mFactors[kTexturePbrAo] = Eigen::Vector4f::Zero();
@@ -275,6 +275,8 @@ private:
 			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_AMBIENT_OCCLUSION, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrAo], &channel);
 			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_EMISSION_COLOR, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrEmissive], &channel);
 		}
+		mesh.mHasTangent = (rawMesh->mTangents != nullptr);
+	#endif
 
 	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
 	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
@@ -328,7 +330,6 @@ private:
 			#endif
 			}
 		}
-		mesh.mHasTangent = (rawMesh->mTangents != nullptr);
 
 		if (rawMesh->mBitangents) {
 			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {

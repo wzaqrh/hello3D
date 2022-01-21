@@ -41,8 +41,12 @@ IContantBufferPtr UniformParameters::CreateConstBuffer(Launch launchMode, Resour
 
 void UniformParameters::WriteToConstBuffer(RenderSystem& renderSys, IContantBufferPtr cbuffer) const
 {
+	BOOST_ASSERT(!mIsReadOnly);
 	BOOST_ASSERT(mDecl.BufferSize >= cbuffer->GetBufferSize());
-	renderSys.UpdateBuffer(cbuffer, Data::Make(mData.GetBytes()));
+	if (mDataDirty) {
+		mDataDirty = false;
+		renderSys.UpdateBuffer(cbuffer, Data::Make(mData.GetBytes()));
+	}
 }
 
 /********** UniformParametersBuilder **********/
@@ -90,6 +94,24 @@ GpuParametersPtr GpuParameters::Clone(Launch launchMode, ResourceManager& resMng
 		}
 	}
 	return result;
+}
+
+void GpuParameters::WriteToElementCb(RenderSystem& renderSys, const std::string& cbName, Data data) const
+{
+	for (const auto& element : *this) {
+		if (element.IsValid() && element.GetName() == cbName) {
+			renderSys.UpdateBuffer(element.CBuffer, data);
+		}
+	}
+}
+
+void GpuParameters::FlushToGpu(RenderSystem& renderSys)
+{
+	for (const auto& element : *this) {
+		if (element.IsValid()) {
+			element.Parameters->WriteToConstBuffer(renderSys, element.CBuffer);
+		}
+	}
 }
 
 std::vector<mir::IContantBufferPtr> GpuParameters::GetConstBuffers() const

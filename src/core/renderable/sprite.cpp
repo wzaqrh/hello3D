@@ -37,10 +37,17 @@ void Sprite::SetAnchor(const Eigen::Vector3f& anchor)
 void Sprite::SetSize(const Eigen::Vector3f& sz)
 {
 	Eigen::Vector3f size = sz;
+#if USE_MATERIAL_INSTANCE
+	if (GetTexture() && !size.any()) {
+		size.x() = GetTexture()->GetWidth();
+		size.y() = GetTexture()->GetHeight();
+	}
+#else
 	if (mTexture && !size.any()) {
 		size.x() = mTexture->GetWidth();
 		size.y() = mTexture->GetHeight();
 	}
+#endif
 
 	if (mSize != size) {
 		mSize = size;
@@ -67,7 +74,11 @@ void Sprite::SetColor(const Eigen::Vector4f& color)
 
 void Sprite::SetTexture(const ITexturePtr& texture)
 {
+#if USE_MATERIAL_INSTANCE
+	Super::SetTexture(texture);
+#else
 	mTexture = texture;
+#endif
 	if (texture && !mSize.any()) {
 		if (texture->IsLoaded()) {
 			SetSize(mSize);

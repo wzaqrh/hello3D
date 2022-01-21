@@ -28,11 +28,14 @@ public:
 	std::vector<IVertexBufferPtr> VertexBuffers;
 	IIndexBufferPtr IndexBuffer;
 	short IndexPos, IndexCount, IndexBase;
-
+#if USE_MATERIAL_INSTANCE
+	res::MaterialInstance Material;
+#else
 	res::ShaderPtr Shader;
 	TextureVector Textures;
 	res::GpuParametersPtr GpuParameters;
 	std::map<std::string, std::vector<char>> UBOBytesByName;
+#endif
 };
 
 struct RenderOperationQueue {

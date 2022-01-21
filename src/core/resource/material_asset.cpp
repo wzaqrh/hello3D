@@ -321,14 +321,26 @@ private:
 			}
 		}
 	}
+	static bool GetShaderAssetPath(const ShaderLoadParam& loadParam, std::string& filepath) {
+		boost_filesystem::path path(loadParam.ShaderName);
+		if (!path.has_extension()) {
+			filepath = "shader/" + loadParam.ShaderName;
+			if (!loadParam.VariantName.empty()) filepath += "-" + loadParam.VariantName;
+			filepath += ".Shader";
+			path = boost_filesystem::system_complete(filepath);
+		}
+		else {
+			path = boost_filesystem::system_complete(path);
+		}
+		filepath = path.string();
+		return boost_filesystem::exists(path);
+	}
 	bool ParseShaderFile(const ShaderLoadParam& loadParam, ShaderNode& shaderNode) {
 		bool result;
 		auto find_iter = mShaderByParam.find(loadParam);
 		if (find_iter == mShaderByParam.end()) {
-			std::string filepath = "shader/" + loadParam.ShaderName;
-			if (!loadParam.VariantName.empty()) filepath += "-" + loadParam.VariantName;
-			filepath += ".Shader";
-			if (boost_filesystem::exists(boost_filesystem::system_complete(filepath))) {
+			std::string filepath;
+			if (GetShaderAssetPath(loadParam, filepath)) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
 				Visitor visitor{ false, loadParam.ShaderName };
@@ -414,13 +426,28 @@ private:
 	void BuildMaterialNode(MaterialNode& materialNode) {
 		mShaderMng->BuildShaderNode(materialNode.Shader);
 	}
+	static bool GetMaterialAssetPath(const ShaderLoadParam& loadParam, std::string& filepath) {
+		boost_filesystem::path path(loadParam.ShaderName);
+		if (!path.has_extension()) {
+			filepath = "shader/" + loadParam.ShaderName;
+			if (!loadParam.VariantName.empty()) filepath += "-" + loadParam.VariantName;
+			filepath += ".Material";
+			path = boost_filesystem::system_complete(filepath);
+		}
+		else {
+			path = boost_filesystem::system_complete(path);
+		}
+		filepath = path.string();
+		return boost_filesystem::exists(path);
+	}
 	bool ParseMaterialFile(const std::string& materialPath, MaterialNode& materialNode) {
 		bool result;
 		auto find_iter = mMaterialByPath.find(materialPath);
 		if (find_iter == mMaterialByPath.end()) {
-			if (boost_filesystem::exists(boost_filesystem::system_complete(materialPath))) {
+			std::string filepath;
+			if (GetMaterialAssetPath(ShaderLoadParam(materialPath), filepath)) {
 				boost_property_tree::ptree pt;
-				boost_property_tree::read_xml(materialPath, pt);
+				boost_property_tree::read_xml(filepath, pt);
 				Visitor visitor{ false };
 				VisitMaterial(pt.get_child("Material"), materialNode);
 				BuildMaterialNode(materialNode);

@@ -19,8 +19,13 @@ public:
 	virtual void SetTexture(const ITexturePtr& Texture);
 
 	unsigned GetCameraMask() const { return mCameraMask; }
+#if USE_MATERIAL_INSTANCE
+	const ITexturePtr& GetTexture() const;
+	const res::MaterialInstance& GetMaterial() const { return mMaterial; }
+#else
 	const ITexturePtr& GetTexture() const { return mTexture; }
 	const res::ShaderPtr& GetMaterial() const { return mMaterial; }
+#endif
 	const TransformPtr& GetTransform() const { return mTransform; }
 protected:
 	bool IsLoaded() const;
@@ -30,8 +35,12 @@ protected:
 	const Launch mLaunchMode;
 	unsigned mCameraMask;
 	TransformPtr mTransform;
+#if USE_MATERIAL_INSTANCE
+	res::MaterialInstance mMaterial;
+#else
 	res::ShaderPtr mMaterial;
 	ITexturePtr mTexture;
+#endif
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 };

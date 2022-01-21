@@ -24,6 +24,8 @@ public:
 	ShaderPtr CloneShader(Launch launch, ResourceManager& resMng, const Shader& material);
 	TechniquePtr CloneTechnique(Launch launch, ResourceManager& resMng, const Technique& technique);
 	PassPtr ClonePass(Launch launch, ResourceManager& resMng, const Pass& pass);
+public:
+	const GpuParametersPtr& GetFrameGpuParameters() const { return mFrameGpuParameters; }
 private:
 	ShaderPtr DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader);
 	MaterialPtr DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material);

@@ -5,9 +5,6 @@
 namespace mir {
 namespace tpl {
 
-#define TemplateArgs template <typename... T>
-#define TemplateT template <typename T>
-
 class EmptyContainer {};
 
 template<class Element, class Parent = EmptyContainer> class Vector : public Parent {

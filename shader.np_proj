@@ -362,7 +362,7 @@
             <File name="bin\x86\Debug\shader\HLSLSupport.cginc" />
             <File name="bin\x86\Debug\shader\IBL.cginc" />
         </Folder>
-        <Folder name="xml">
+        <Folder name="shaderXml">
             <File name="bin\x86\Debug\shader\Standard.Shader" />
             <File name="bin\x86\Debug\shader\Sprite.Shader" />
             <File name="bin\x86\Debug\shader\Skybox.Shader" />
@@ -371,6 +371,10 @@
             <File name="bin\x86\Debug\shader\Model.Shader" />
             <File name="bin\x86\Debug\shader\LayerColor.Shader" />
             <File name="bin\x86\Debug\shader\LayerColor-Cube.Shader" />
+        </Folder>
+        <Folder name="materialXml">
+            <File name="bin\x86\Debug\shader\Sprite.Material" />
+            <File name="bin\x86\Debug\shader\Model.Material" />
         </Folder>
     </Project>
     <Project name="mir&#x7B14;&#x8BB0;">

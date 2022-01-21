@@ -34,11 +34,6 @@ public:
 		for (unsigned int a = 0; a < mAnim->mNumChannels; ++a) {
 			const aiNodeAnim* channel = mAnim->mChannels[a];
 
-			/*std::string name = "IK_Auge_L";
-			if (name == channel->mNodeName.C_Str()) {
-			channel = channel;
-			}*/
-
 			// ******** Position *****
 			aiVector3D presentPosition(0, 0, 0);
 			if (channel->mNumPositionKeys > 0) {
@@ -269,23 +264,65 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 {
 	const auto& meshArr = *node;// mNodeInfos[node];
 	if (meshArr.MeshCount() > 0) {
-		cbWeightedSkin weightedSkin = {};
 		auto& anode = mAnimeTree.GetNode(node);
+#if USE_MATERIAL_INSTANCE
+		Eigen::Matrix4f globalModel;
+	#if defined EIGEN_DONT_ALIGN_STATICALLY
+		globalModel = AS_CONST_REF(Eigen::Matrix4f, anode.GlobalTransform);
+	#else
+		const auto& s = anode.GlobalTransform;
+		globalModel <<
+			s.a1, s.b1, s.c1, s.d1,
+			s.a2, s.b2, s.c2, s.d2,
+			s.a3, s.b3, s.c3, s.d3,
+			s.a4, s.b4, s.c4, s.d4;
+	#endif
+#else
+		cbWeightedSkin weightedSkin = {};
 	#if defined EIGEN_DONT_ALIGN_STATICALLY
 		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, anode.GlobalTransform);
 	#else
 		const auto& s = anode.GlobalTransform;
-		weightedSkin.Model << 
-			 s.a1, s.b1, s.c1, s.d1,
-			 s.a2, s.b2, s.c2, s.d2,
-			 s.a3, s.b3, s.c3, s.d3,
-			 s.a4, s.b4, s.c4, s.d4;
+		weightedSkin.Model <<
+			s.a1, s.b1, s.c1, s.d1,
+			s.a2, s.b2, s.c2, s.d2,
+			s.a3, s.b3, s.c3, s.d3,
+			s.a4, s.b4, s.c4, s.d4;
 	#endif
-		for (int i = 0; i < meshArr.MeshCount(); i++) {
+#endif
+		for (int i = 0; i < meshArr.MeshCount(); i++) 
+		{
 			res::AssimpMeshPtr mesh = meshArr[i];
+		#if USE_MATERIAL_INSTANCE
+			res::MaterialInstance matInst = mesh->GetMaterial();
+			matInst.GetProperty<Eigen::Matrix4f>("Model") = globalModel;
+
+			constexpr size_t ModelCount = 56;
+			typedef std::array<Eigen::Matrix4f, ModelCount> ModelArray;
+			ModelArray& models = matInst.GetProperty<ModelArray>("Models");
 			if (mesh->GetRawMesh()->HasBones()) {
 				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
 				size_t boneSize = boneMatArr.size(); 
+				for (int j = 0; j < std::min<int>(cbWeightedSkin::kModelCount, boneSize); ++j) {
+				#if defined EIGEN_DONT_ALIGN_STATICALLY
+					models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
+				#else
+					const auto& s = boneMatArr[j];
+					models[j] <<
+						s.a1, s.b1, s.c1, s.d1,
+						s.a2, s.b2, s.c2, s.d2,
+						s.a3, s.b3, s.c3, s.d3,
+						s.a4, s.b4, s.c4, s.d4;
+				#endif
+				}
+			}
+			else {
+				models[0] = Eigen::Matrix4f::Identity();
+			}
+		#else
+			if (mesh->GetRawMesh()->HasBones()) {
+				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
+				size_t boneSize = boneMatArr.size();
 				for (int j = 0; j < std::min<int>(cbWeightedSkin::kModelCount, boneSize); ++j) {
 				#if defined EIGEN_DONT_ALIGN_STATICALLY
 					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
@@ -298,12 +335,13 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 						s.a4, s.b4, s.c4, s.d4;
 				#endif
 				}
-					
 			}
 			else {
 				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();
 			}
+		#endif
 
+		#if !USE_MATERIAL_INSTANCE
 			cbModel model = {};
 			model.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
 			model.EnableNormalMap = mesh->HasTexture(kTexturePbrNormal);
@@ -330,16 +368,22 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 			model.RoughnessUV = mesh->GetUvTransform(kTexturePbrRoughness);
 			model.OcclusionUV = mesh->GetUvTransform(kTexturePbrAo);
 			model.EmissiveUV = mesh->GetUvTransform(kTexturePbrEmissive);
+		#endif
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
-				op.Shader = mMaterial;
+				
 				op.IndexBuffer = mesh->GetIndexBuffer();
 				op.AddVertexBuffer(mesh->GetVBOSurface());
 				op.AddVertexBuffer(mesh->GetVBOSkeleton());
+			#if USE_MATERIAL_INSTANCE
+				op.Material = matInst;
+			#else
+				op.Shader = mMaterial;
 				op.Textures = mesh->GetTextures();
 				op.SetUBOBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
 				op.SetUBOBytes(MAKE_CBNAME(cbModel), model);
+			#endif
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 			}
@@ -352,10 +396,17 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 
 void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded() 
-		|| !mAiScene->IsLoaded() 
+#if USE_MATERIAL_INSTANCE
+	if (!mMaterial->IsLoaded()
+		|| !mAiScene->IsLoaded()
 		|| !mAnimeTree.IsInited())
 		return;
+#else
+	if (!mMaterial->IsLoaded()
+		|| !mAiScene->IsLoaded()
+		|| !mAnimeTree.IsInited())
+		return;
+#endif
 
 	int count = opList.Count();
 	DoDraw(mAiScene->mRootNode, opList);

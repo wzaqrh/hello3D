@@ -16,6 +16,7 @@
 #include "core/rendersys/framebuffer.h"
 #include "core/rendersys/render_system.h"
 #include "core/resource/material_name.h"
+#include "core/resource/material.h"
 
 namespace mir {
 DECLARE_STRUCT(ThreadPool);
@@ -147,8 +148,8 @@ public:
 	res::ShaderPtr CreateShader(Launch launchMode, const ShaderLoadParam& loadParam) ThreadSafe;
 	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
 
-	res::MaterialPtr CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(res::MaterialPtr, CreateMaterial, ThreadSafe);
+	res::MaterialInstance CreateMaterial(Launch launchMode, const std::string& assetPath) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(res::MaterialInstance, CreateMaterial, ThreadSafe);
 
 	res::AiScenePtr CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 private:

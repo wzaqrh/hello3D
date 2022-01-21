@@ -52,12 +52,17 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 		if (entry.texture != lastTex) {
 			if (lastTex != nullptr) {
 				RenderOperation op = {};
+			#if USE_MATERIAL_INSTANCE
+				op.Material = mMaterial;
+				mMaterial->GetTextures()[0] = lastTex;
+			#else
 				op.Shader = mMaterial;
+				op.Textures.Add(lastTex);
+			#endif
 				op.AddVertexBuffer(mVertexBuffer);
 				op.IndexBuffer = mIndexBuffer;
 				op.IndexBase = 4 * (i - lastCount);
 				op.IndexCount = 6 * lastCount;
-				op.Textures.Add(lastTex);
 				op.WorldTransform = mTransform->GetSRT();
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
@@ -71,12 +76,17 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 
 	if (lastTex) {
 		RenderOperation op = {};
+	#if USE_MATERIAL_INSTANCE
+		op.Material = mMaterial;
+		mMaterial->GetTextures()[0] = lastTex;
+	#else
 		op.Shader = mMaterial;
+		op.Textures.Add(lastTex);
+	#endif
 		op.AddVertexBuffer(mVertexBuffer);
 		op.IndexBuffer = mIndexBuffer;
 		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);
 		op.IndexCount = 6 * lastCount;
-		op.Textures.Add(lastTex);
 		op.WorldTransform = mTransform->GetSRT();
 		opList.AddOP(op);
 		++count;

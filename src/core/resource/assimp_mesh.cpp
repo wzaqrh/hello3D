@@ -34,6 +34,7 @@ void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
 #endif
 }
 
+#if !USE_MATERIAL_INSTANCE
 bool AssimpMesh::HasTexture(int slot) const
 {
 	return (slot < mTextures.Count())
@@ -51,7 +52,17 @@ const Eigen::Vector4f& AssimpMesh::GetUvTransform(int slot) const
 {
 	return slot < mUvTransform.size() ? mUvTransform[slot] : sDefaultVector4;
 }
+#endif
 
+#if USE_MATERIAL_INSTANCE
+bool AssimpMesh::IsLoaded() const
+{
+	return (mVBOSurface->IsLoaded()
+		&& mVBOSkeleton->IsLoaded()
+		&& mIndexBuffer->IsLoaded()
+		&& mMaterial->IsLoaded());
+}
+#else
 bool AssimpMesh::IsLoaded() const
 {
 	return (mVBOSurface->IsLoaded()
@@ -59,6 +70,7 @@ bool AssimpMesh::IsLoaded() const
 		&& mIndexBuffer->IsLoaded()
 		&& mTextures.IsLoaded());
 }
+#endif
 
 }
 }

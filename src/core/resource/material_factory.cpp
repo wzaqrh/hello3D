@@ -107,6 +107,7 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam.ShaderName() = materialNode.Shader.ShortName;
 
+	material->mTextures.Resize(8);
 	for (const auto& iter : materialNode.TextureProperies) {
 		auto texture = resMng.CreateTextureByFile(launchMode, iter.second.ImagePath);
 		material->mTextures.AddOrSet(texture, iter.second.Slot);
@@ -139,6 +140,9 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 			}
 		}
 	}
+
+	if (launchMode == LaunchSync) material->SetLoaded();
+	else resMng.AddResourceDependencyRecursive(material);
 	return material;
 }
 
@@ -170,6 +174,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 	for (const auto& sampler : proto.mSamplers)
 		result->AddSampler(sampler);
 
+#if USE_CBUFFER_ENTRY
 	size_t slot = 0;
 	for (auto buffer : proto.mConstantBuffers) {
 		if (!buffer.GetShareMode)
@@ -177,6 +182,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 		result->AddConstBuffer(buffer.Buffer, buffer.Name, buffer.GetShareMode, slot);
 		++slot;
 	}
+#endif
 
 	result->SetCurState(proto.GetCurState());
 	return result;
