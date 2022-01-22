@@ -10,18 +10,18 @@
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
 		<Uniform Name="cbModel" Slot="3" ShareMode="1">
-			<Element Name="AlbedoUV"              Type="float4"></Element>
-			<Element Name="NormalUV"              Type="float4"></Element>
-			<Element Name="OcclusionUV"           Type="float4"></Element>
-			<Element Name="RoughnessUV"           Type="float4"></Element>
-			<Element Name="MetallicUV"            Type="float4"></Element>
-			<Element Name="EmissiveUV"            Type="float4"></Element>
+			<Element Name="AlbedoUV"              Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="NormalUV"              Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="OcclusionUV"           Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="RoughnessUV"           Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="MetallicUV"            Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="EmissiveUV"            Type="float4" Default="0,0,1,1"></Element>
 			
-			<Element Name="AlbedoFactor"            Type="float4"></Element>
-			<Element Name="NormalScale"             Type="float"></Element>
-			<Element Name="OcclusionStrength"       Type="float"></Element>
-			<Element Name="RoughnessFactor"         Type="float"></Element>
-			<Element Name="MetallicFactor"          Type="float"></Element>
+			<Element Name="AlbedoFactor"            Type="float4" Default="1,1,1,1"></Element>
+			<Element Name="NormalScale"             Type="float"  Default="1"></Element>
+			<Element Name="OcclusionStrength"       Type="float"  Default="1"></Element>
+			<Element Name="RoughnessFactor"         Type="float"  Default="1"></Element>
+			<Element Name="MetallicFactor"          Type="float"  Default="1"></Element>
 			<Element Name="EmissiveFactor"          Type="float3"></Element>
 			
 			<Element Name="EnableAlbedoMap"           Type="bool"></Element>
@@ -31,8 +31,8 @@
 			<Element Name="EnableMetalnessMap"        Type="bool"></Element>
 			<Element Name="EnableEmissiveMap"         Type="bool"></Element>
 			<Element Name="AmbientOcclusion_ChannelGRoughness_ChannelBMetalness" Type="bool"></Element>
-			<Element Name="AlbedoMapSRGB"             Type="bool"></Element>
-			<Element Name="EmissiveMapSRGB"           Type="bool"></Element>
+			<Element Name="AlbedoMapSRGB"             Type="bool"  Default="1"></Element>
+			<Element Name="EmissiveMapSRGB"           Type="bool"  Default="1"></Element>
 			<Element Name="HasTangent"                Type="bool"></Element>
 		</Uniform>   
 		<Texture>

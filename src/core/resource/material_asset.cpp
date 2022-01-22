@@ -457,6 +457,7 @@ private:
 
 			if (result = VisitMaterial(loadParam, pt.get_child("Material"), materialNode)) {
 				BuildMaterialNode(materialNode);
+				materialNode.MaterialFilePath = filepath;
 				mMaterialByPath.insert(std::make_pair(loadParam, materialNode));
 			}
 		}

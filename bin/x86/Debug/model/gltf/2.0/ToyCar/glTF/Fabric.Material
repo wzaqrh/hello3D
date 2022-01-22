@@ -1,0 +1,26 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<Macros>
+	</Macros>
+	<Properties>
+		<txAlbedo>Fabric_baseColor.png</txAlbedo>
+		<txNormal>Fabric_normal.png</txNormal>
+		<txAmbientOcclusion>Fabric_occlusion.png</txAmbientOcclusion>
+		
+		<AlbedoUV>0,0,3,3</AlbedoUV>
+		<NormalUV>0,0,3,3</NormalUV>
+		
+		<AlbedoFactor>0.15,0.15,0.15,1</AlbedoFactor>
+		<MetallicFactor>0</MetallicFactor>
+		<RoughnessFactor>1</RoughnessFactor>
+		<OcclusionStrength>1</OcclusionStrength>
+		
+		<EnableAlbedoMap>1</EnableAlbedoMap>
+		<EnableNormalMap>1</EnableNormalMap>
+		<EnableAmbientOcclusionMap>1</EnableAmbientOcclusionMap>
+
+		<AlbedoMapSRGB>1</AlbedoMapSRGB>
+		<EmissiveMapSRGB>1</EmissiveMapSRGB>
+		<HasTangent>1</HasTangent>
+	</Properties>
+</Material>

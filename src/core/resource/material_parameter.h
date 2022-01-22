@@ -48,19 +48,21 @@ public:
 
 	IContantBufferPtr CreateConstBuffer(Launch launchMode, ResourceManager& resMng, HWMemoryUsage usage) const;
 	void WriteToConstBuffer(RenderSystem& renderSys, IContantBufferPtr cbuffer) const;
+	void SetDataDirty(bool dirty) { mDataDirty = dirty; }
 public:
 	bool IsValid() const { return !mData.IsEmpty(); }
 	const std::string& GetName() const { return mShortName; }
 	size_t GetSlot() const { return mSlot; }
 	CBufferShareMode GetShareMode() const { return mShareMode; }
 	bool IsReadOnly() const { return mIsReadOnly; }
+	bool IsDataDirty() const { return mDataDirty; }
 private:
 	ConstBufferDecl mDecl;
 	std::string mShortName;
 	size_t mSlot = 0;
 	CBufferShareMode mShareMode = kCbShareNone;
-	bool mIsReadOnly = false;
 	tpl::Binary<float> mData;
+	bool mIsReadOnly = false;
 	mutable bool mDataDirty = false;
 };
 
@@ -86,7 +88,7 @@ public:
 		mElements.AddOrSet(element, element.GetSlot());
 	}
 	void AddElement(IContantBufferPtr cbuffer, UniformParametersPtr parameter) {
-		mElements.AddOrSet(Element{ cbuffer, parameter });
+		mElements.AddOrSet(Element(cbuffer, parameter));
 	}
 	void Merge(const GpuParameters& other) {
 		for (const auto& element : other) {
@@ -112,21 +114,22 @@ public:
 	bool HasProperty(const std::string& propertyName) {
 		return FindProperty(propertyName) >= 0;
 	}
-	template<typename T> T& GetProperty(const std::string& propertyName) {
+	template<typename T> const T& GetProperty(const std::string& propertyName) const {
 		for (auto& iter : mElements)
 			if ((*iter.Parameters).HasProperty(propertyName))
 				return (*iter.Parameters).GetProperty<T>(propertyName);
 		BOOST_ASSERT(false);
 	}
-	template<typename T> const T& GetProperty(const std::string& propertyName) const {
-		return const_cast<const T&>(const_cast<GpuParameters*>(this)->GetProperty<T>(propertyName));
+	template<typename T> T& GetProperty(const std::string& propertyName) {
+		return const_cast<T&>(const_cast<const GpuParameters*>(this)->GetProperty<T>(propertyName));
 	}
 	template<typename T> T& operator[](const std::string& propertyName) { return GetProperty(propertyName); }
 	template<typename T> const T& operator[](const std::string& propertyName) const { return GetProperty(propertyName); }
 	bool SetPropertyByString(const std::string& propertyName, std::string strDefault) {
 		for (auto& iter : mElements) {
-			if ((*iter.Parameters).SetPropertyByString(propertyName, strDefault))
+			if ((*iter.Parameters).SetPropertyByString(propertyName, strDefault)) {
 				return true;
+			}
 		}
 		return false;
 	}

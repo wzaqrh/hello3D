@@ -18,6 +18,7 @@ bool UniformParameters::SetPropertyByString(const std::string& name, std::string
 		case kCBElementInt2:
 		case kCBElementInt3:
 		case kCBElementInt4:
+			mDataDirty = true;
 			mData.SetByParseString<int>(decl.Offset / sizeof(int), decl.Size / sizeof(int), strDefault);
 			break;
 		case kCBElementFloat:
@@ -25,6 +26,7 @@ bool UniformParameters::SetPropertyByString(const std::string& name, std::string
 		case kCBElementFloat3:
 		case kCBElementFloat4:
 		case kCBElementMatrix:
+			mDataDirty = true;
 			mData.SetByParseString<float>(decl.Offset / sizeof(int), decl.Size / sizeof(int), strDefault);
 			break;
 		default:
@@ -43,10 +45,7 @@ void UniformParameters::WriteToConstBuffer(RenderSystem& renderSys, IContantBuff
 {
 	BOOST_ASSERT(!mIsReadOnly);
 	BOOST_ASSERT(mDecl.BufferSize >= cbuffer->GetBufferSize());
-	if (mDataDirty) {
-		mDataDirty = false;
-		renderSys.UpdateBuffer(cbuffer, Data::Make(mData.GetBytes()));
-	}
+	renderSys.UpdateBuffer(cbuffer, Data::Make(mData.GetBytes()));
 }
 
 /********** UniformParametersBuilder **********/
@@ -108,7 +107,8 @@ void GpuParameters::WriteToElementCb(RenderSystem& renderSys, const std::string&
 void GpuParameters::FlushToGpu(RenderSystem& renderSys)
 {
 	for (const auto& element : *this) {
-		if (element.IsValid()) {
+		if (element.IsValid() && element.Parameters->IsDataDirty()) {
+			element.Parameters->SetDataDirty(false);
 			element.Parameters->WriteToConstBuffer(renderSys, element.CBuffer);
 		}
 	}

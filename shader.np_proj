@@ -360,6 +360,7 @@
             <File name="bin\x86\Debug\shader\Lighting.cginc" />
             <File name="bin\x86\Debug\shader\HLSLSupport.cginc" />
             <File name="bin\x86\Debug\shader\IBL.cginc" />
+            <File name="bin\x86\Debug\shader\Debug.cginc" />
         </Folder>
         <Folder name="shaderXml">
             <File name="bin\x86\Debug\shader\Standard.Shader" />

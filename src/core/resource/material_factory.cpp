@@ -104,10 +104,17 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
 
+	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.MaterialFilePath));
+	assetPath.remove_filename();
 	material->mTextures.Resize(8);
 	for (const auto& iter : materialNode.TextureProperies) {
-		auto texture = resMng.CreateTextureByFile(launchMode, iter.second.ImagePath);
-		material->mTextures.AddOrSet(texture, iter.second.Slot);
+		assetPath /= iter.second.ImagePath;
+		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
+		if (boost::filesystem::is_regular_file(assetPath)) {
+			auto texture = resMng.CreateTextureByFile(launchMode, assetPath.string());
+			material->mTextures.AddOrSet(texture, iter.second.Slot);
+		}
+		assetPath.remove_filename();
 	}
 
 	material->mGpuParametersByShareType[kCbShareNone] = CreateInstance<GpuParameters>();

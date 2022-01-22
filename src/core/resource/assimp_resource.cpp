@@ -231,7 +231,7 @@ private:
 		mesh.mAiMesh = rawMesh;
 
 	#if USE_MATERIAL_INSTANCE
-		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(rawMesh->mName.C_Str()));
+		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
 		mesh.mMaterial = mResourceMng.CreateMaterial(mLaunchMode, loadParam);
 	#else

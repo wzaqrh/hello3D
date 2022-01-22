@@ -151,6 +151,7 @@ struct TextureProperty {
 };
 struct MaterialNode {
 	MaterialLoadParam LoadParam;
+	std::string MaterialFilePath;
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;
 	std::map<std::string, std::string> UniformProperies; 

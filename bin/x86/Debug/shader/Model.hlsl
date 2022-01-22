@@ -47,7 +47,7 @@ cbuffer cbModel : register(b3)
 }
 
 inline float2 GetUV(float2 uv, float4 uvTransform) {
-	return uv * uvTransform.zw;
+	return uvTransform.xy + uv * uvTransform.zw;
 }
 
 inline float4 GetAlbedo(float2 uv) 
