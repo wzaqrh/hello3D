@@ -22,6 +22,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GltfIblSampler", "..\glTF-I
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cli", "..\glTF-IBL-Sampler\build\cli.vcxproj", "{45BDD900-83B4-33EE-8352-5CDE6D4672B1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppcoro", "thirdparty\cppcoro\build\cppcoro.vcxproj", "{82E2BD05-5E0B-4E41-B42E-A527AF780058}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -178,6 +180,26 @@ Global
 		{45BDD900-83B4-33EE-8352-5CDE6D4672B1}.UnitTest|x64.Build.0 = MinSizeRel|x64
 		{45BDD900-83B4-33EE-8352-5CDE6D4672B1}.UnitTest|x86.ActiveCfg = MinSizeRel|x64
 		{45BDD900-83B4-33EE-8352-5CDE6D4672B1}.UnitTest|x86.Build.0 = MinSizeRel|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x64.ActiveCfg = Debug|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x64.Build.0 = Debug|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x86.ActiveCfg = Debug|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x86.Build.0 = Debug|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.MinSizeRel|x64.Build.0 = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.MinSizeRel|x86.ActiveCfg = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.MinSizeRel|x86.Build.0 = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Release|x64.ActiveCfg = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Release|x64.Build.0 = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Release|x86.ActiveCfg = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Release|x86.Build.0 = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.RelWithDebInfo|x86.Build.0 = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x64.ActiveCfg = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x64.Build.0 = Release|x64
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x86.ActiveCfg = Release|Win32
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
