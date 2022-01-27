@@ -16,26 +16,28 @@ MaterialFactory::MaterialFactory()
 	mFrameGpuParameters = CreateInstance<GpuParameters>();
 }
 
-GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters)
+GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters) ThreadSafe
 {
 	const std::string& uniformName = parameters.GetName();
-	auto iter = mParametersCache.find(uniformName);
-	if (iter == mParametersCache.end()) {
+	if (!uniformName.empty()) {
+		return mParametersCache.GetOrAdd(uniformName, [&]() {
+			GpuParameters::Element result;
+			result.Parameters = CreateInstance<UniformParameters>(parameters);
+			result.CBuffer = result.Parameters->CreateConstBuffer(launchMode, resMng, IF_AND_OR(parameters.IsReadOnly(), kHWUsageImmutable, kHWUsageDynamic));
+
+			if (parameters.GetShareMode() == kCbSharePerFrame)
+				mFrameGpuParameters->AddElement(result);
+			return result;
+		});
+	}
+	else {
 		GpuParameters::Element result;
 		result.Parameters = CreateInstance<UniformParameters>(parameters);
 		result.CBuffer = result.Parameters->CreateConstBuffer(launchMode, resMng, IF_AND_OR(parameters.IsReadOnly(), kHWUsageImmutable, kHWUsageDynamic));
-		if (! uniformName.empty()) {
-			mParametersCache.insert(std::make_pair(uniformName, result));
-			if (parameters.GetShareMode() == kCbSharePerFrame)
-				mFrameGpuParameters->AddElement(result);
-		}
 		return result;
 	}
-	else {
-		return iter->second;
-	}
 }
-cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader)
+cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, shaderNode, shader);
 	shader->SetLoading();
@@ -83,7 +85,7 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMod
 	shader->SetLoaded();
 	return shader;
 }
-cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) 
+cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) ThreadSafe 
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, shader);
 	//co_await resMng.SwitchToLaunchService(__LaunchAsync__);
@@ -99,7 +101,7 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode,
 	return shader;
 }
 
-cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material)
+cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, materialNode, material);
 	material->SetLoading();
@@ -152,7 +154,7 @@ cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launc
 	material->SetLoaded(material->mShaderVariant->IsLoaded());
 	return material;
 }
-cppcoro::shared_task<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material)
+cppcoro::shared_task<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, material);
 	//co_await resMng.SwitchToLaunchService(__LaunchAsync__);

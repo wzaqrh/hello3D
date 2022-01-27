@@ -86,7 +86,7 @@ void Log(const D3DCAPS9& caps);
 #define DEBUG_RES_ADD_DEVICE(A, DEVICE) mir::debug::ResourceAddDebugDevice(A, DEVICE)
 #define DEBUG_SET_PRIV_DATA(A, NAME)	mir::debug::SetDebugPrivData(A, NAME)
 #define DEBUG_SET_RES_PATH(A, PATH)		mir::debug::SetDebugResourcePath(A, PATH)
-#define DEBUG_SET_CALL(A, CALL)			mir::debug::SetDebugCallStack(A, CALL.CallStack)
+#define DEBUG_SET_CALL(A, CALL)
 #else
 #define DEBUG_RES_ADD_DEVICE(A, DEVICE)
 #define SET_DEBUG_NAME(A, NAME)		

@@ -363,9 +363,9 @@ private:
 	std::string mRedirectResourceDir, mRedirectResourceExt;
 };
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
-/********** AiAssetManager **********/
 
-cppcoro::shared_task<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes)
+/********** AiAssetManager **********/
+cppcoro::shared_task<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(launchMode, resMng, assetPath, redirectRes, aiRes);
 	//co_await mResourceMng.SwitchToLaunchService(launchMode)

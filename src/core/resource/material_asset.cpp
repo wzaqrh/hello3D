@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include "core/base/stl.h"
+#include "core/base/tpl/atomic_map.h"
 #include "core/base/base_type.h"
 #include "core/base/macros.h"
 #include "core/base/tpl/vector.h"
@@ -26,7 +27,7 @@ class ShaderNodeManager
 	friend class MaterialNodeManager;
 public:
 	ShaderNodeManager() {}
-	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) {
+	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe {
 		bool result = GetShaderVariantNode(loadParam, shaderNode);
 		BOOST_ASSERT(shaderNode[0].Program.Topo != kPrimTopologyUnkown);
 		return result;
@@ -350,10 +351,9 @@ private:
 		}
 		return result;
 	}
-	bool GetShaderVariantNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) {
-		bool result;
-		auto find_iter = mShaderVariantByParam.find(loadParam);
-		if (find_iter == mShaderVariantByParam.end()) {
+	bool GetShaderVariantNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe {
+		bool result = true;
+		mShaderVariantByParam.GetOrAdd(loadParam, [&]() {
 			if (result = ParseShaderFile(loadParam, shaderNode)) {
 				for (auto& categNode : shaderNode) {
 					for (auto& techniqueNode : categNode) {
@@ -364,17 +364,14 @@ private:
 					}
 				}
 				BuildShaderNode(shaderNode);
-				mShaderVariantByParam.insert(std::make_pair(loadParam, shaderNode));
 			}
-		}
-		else {
-			shaderNode = find_iter->second;
-			result = true;
-		}
+			return shaderNode;
+		}, shaderNode);
 		return result;
 	}
 private:
-	std::map<MaterialLoadParam, ShaderNode> mShaderByParam, mShaderVariantByParam;
+	tpl::AtomicMap<MaterialLoadParam, ShaderNode> mShaderVariantByParam;
+	std::map<MaterialLoadParam, ShaderNode> mShaderByParam;
 	std::map<std::string, ShaderNode> mIncludeByName;
 	std::map<std::string, AttributeNode> mAttrByName;
 	std::map<std::string, UniformNode> mUniformByName;

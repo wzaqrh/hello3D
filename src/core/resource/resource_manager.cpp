@@ -19,9 +19,6 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& 
 	, mMaterialFac(materialFac)
 	, mAiResourceFac(aiResFac)
 {
-	mProgramMapLock = mTextureMapLock = mShaderMapLock = mAiSceneMapLock = false;
-	mLoadTaskCtxMapLock = mResDependGraphLock = false;
-
 	mMainThreadId = std::this_thread::get_id();
 	constexpr int CThreadPoolNumber = 8;
 	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber, ilInit, ilShutDown);
@@ -164,27 +161,22 @@ cppcoro::shared_task<IProgramPtr> ResourceManager::CreateProgram(Launch launchMo
 	COROUTINE_VARIABLES_4(launchMode, name, vertexSCD, pixelSCD);
 	//co_await SwitchToLaunchService(launchMode);
 
-	if (vertexSCD.ShaderModel.empty()) vertexSCD.ShaderModel = "vs_4_0";
-	vertexSCD.Macros.push_back({ "SHADER_MODEL", "40000" });
-
-	if (pixelSCD.ShaderModel.empty()) pixelSCD.ShaderModel = "ps_4_0";
-	pixelSCD.Macros.push_back({ "SHADER_MODEL", "40000" });
+	ProgramKey key{ name, vertexSCD, pixelSCD };
+	if (key.vertexSCD.ShaderModel.empty()) 
+		key.vertexSCD.ShaderModel = "vs_4_0";
+	if (key.pixelSCD.ShaderModel.empty()) 
+		key.pixelSCD.ShaderModel = "ps_4_0";
 
 	bool resNeedLoad = false;
-	IProgramPtr program = nullptr;
-	ProgramKey key{ name, vertexSCD, pixelSCD };
-	ATOMIC_STATEMENT(mProgramMapLock,
-		program = this->mProgramByKey[key];
-		if (program == nullptr) {
-			program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
-			this->mProgramByKey[key] = program;
-			DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") % name % vertexSCD.EntryPoint % pixelSCD.EntryPoint).str());
-			DEBUG_SET_CALL(program, launchMode);
-			resNeedLoad = true;
-		}
-	);
+	IProgramPtr program = mProgramByKey.GetOrAdd(key, [this,&key,&resNeedLoad]() {
+		auto program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
+		DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") %key.name %key.vertexSCD.EntryPoint %key.pixelSCD.EntryPoint).str());
+		DEBUG_SET_CALL(program, launchMode);
+		resNeedLoad = true;
+		return program;
+	});
 	if (resNeedLoad) {
-		co_await _LoadProgram(program, launchMode, name, vertexSCD, pixelSCD);
+		co_await _LoadProgram(program, launchMode, key.name, key.vertexSCD, key.pixelSCD);
 	}
 	co_return program;
 }
@@ -364,17 +356,13 @@ cppcoro::shared_task<ITexturePtr> ResourceManager::CreateTextureByFile(Launch la
 	std::string key = fullpath.string();
 
 	bool resNeedLoad = false;
-	ITexturePtr texture = nullptr;
-	ATOMIC_STATEMENT(mTextureMapLock,
-		texture = this->mTextureByKey[key];
-		if (texture == nullptr) {
-			texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
-			this->mTextureByKey[key] = texture;
-			DEBUG_SET_RES_PATH(texture, (boost::format("path:%1%, fmt:%2%, autogen:%3%") % filepath %format %autoGenMipmap).str());
-			DEBUG_SET_CALL(texture, launchMode);
-			resNeedLoad = true;
-		}
-	);
+	ITexturePtr texture = mTextureByKey.GetOrAdd(key, [&]() {
+		auto texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
+		DEBUG_SET_RES_PATH(texture, (boost::format("path:%1%, fmt:%2%, autogen:%3%") %filepath %format %autoGenMipmap).str());
+		DEBUG_SET_CALL(texture, launchMode);
+		resNeedLoad = true;
+		return texture;
+	});
 	if (resNeedLoad) {
 		co_await _LoadTextureByFile(texture, launchMode, key, format, autoGenMipmap);
 	}
@@ -388,17 +376,13 @@ cppcoro::shared_task <res::ShaderPtr> ResourceManager::CreateShader(Launch launc
 	//co_await SwitchToLaunchService(launchMode);
 
 	bool resNeedLoad = false;
-	res::ShaderPtr shader = nullptr;
-	ATOMIC_STATEMENT(mShaderMapLock,
-		shader = this->mShaderByName[param];
-		if (shader == nullptr) {
-			shader = CreateInstance<res::Shader>();
-			this->mShaderByName[param] = shader;
-			DEBUG_SET_RES_PATH(shader, (boost::format("name:%1% variant:%2%") %param.GetShaderName() %param.GetVariantDesc()).str());
-			DEBUG_SET_CALL(shader, launchMode);
-			resNeedLoad = true;
-		}
-	);
+	res::ShaderPtr shader = mShaderByName.GetOrAdd(param, [&]() {
+		auto shader = CreateInstance<res::Shader>();
+		DEBUG_SET_RES_PATH(shader, (boost::format("name:%1% variant:%2%") %param.GetShaderName() %param.GetVariantDesc()).str());
+		DEBUG_SET_CALL(shader, launchMode);
+		resNeedLoad = true;
+		return shader;
+	});
 	if (resNeedLoad) {
 		co_await this->mMaterialFac.CreateShader(launchMode, *this, param, shader);
 	}
@@ -411,17 +395,13 @@ cppcoro::shared_task<res::MaterialInstance> ResourceManager::CreateMaterial(Laun
 	//co_await SwitchToLaunchService(launchMode);
 
 	bool resNeedLoad = false;
-	res::MaterialPtr material;
-	ATOMIC_STATEMENT(mMaterialMapLock,
-		material = this->mMaterialByName[loadParam];
-		if (material == nullptr) {
-			material = CreateInstance<res::Material>();
-			this->mMaterialByName[loadParam] = material;
-			DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %loadParam.GetShaderName() %loadParam.GetVariantDesc()).str());
-			DEBUG_SET_CALL(material, launchMode);
-			resNeedLoad = true;
-		}
-	);
+	res::MaterialPtr material = mMaterialByName.GetOrAdd(loadParam, [&]() {
+		auto material = CreateInstance<res::Material>();
+		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %loadParam.GetShaderName() %loadParam.GetVariantDesc()).str());
+		DEBUG_SET_CALL(material, launchMode);
+		resNeedLoad = true;
+		return material;
+	});
 	if (resNeedLoad) {
 		co_await this->mMaterialFac.CreateMaterial(launchMode, *this, loadParam, material);
 	}
@@ -434,23 +414,19 @@ cppcoro::shared_task<res::AiScenePtr> ResourceManager::CreateAiScene(Launch laun
 	COROUTINE_VARIABLES_3(launchMode, assetPath, redirectRes);
 	//co_await SwitchToLaunchService(launchMode);
 
-	bool resNeedLoad = false;
-	res::AiScenePtr aiRes = nullptr;
 	AiResourceKey key{ assetPath, redirectRes };
-	ATOMIC_STATEMENT(mAiSceneMapLock,
-		aiRes = this->mAiSceneByKey[key];
-		if (aiRes == nullptr) {
-			aiRes = CreateInstance<res::AiScene>();
-			this->mAiSceneByKey[key] = aiRes;
-			DEBUG_SET_RES_PATH(aiRes, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
-			DEBUG_SET_CALL(aiRes, launchMode);
-			resNeedLoad = true;
-		}
-	);
+	bool resNeedLoad = false;
+	res::AiScenePtr aiScene = mAiSceneByKey.GetOrAdd(key, [&]() {
+		auto aiScene = CreateInstance<res::AiScene>();
+		DEBUG_SET_RES_PATH(aiScene, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
+		DEBUG_SET_CALL(aiScene, launchMode);
+		resNeedLoad = true;
+		return aiScene;
+	});
 	if (resNeedLoad) {
-		co_await this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes, aiRes);
+		co_await this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes, aiScene);
 	}
-	return aiRes;
+	return aiScene;
 }
 
 }

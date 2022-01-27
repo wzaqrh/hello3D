@@ -52,6 +52,7 @@
     <ClInclude Include="..\src\core\base\rendersys_debug.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
     <ClInclude Include="..\src\core\base\thread.h" />
+    <ClInclude Include="..\src\core\base\tpl\atomic_map.h" />
     <ClInclude Include="..\src\core\base\tpl\binary.h" />
     <ClInclude Include="..\src\core\base\tpl\traits.h" />
     <ClInclude Include="..\src\core\base\tpl\vector.h" />

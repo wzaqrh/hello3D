@@ -3,8 +3,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/assert.hpp>
 #include "core/mir_export.h"
-#include "core/base/cppcoro.h"
+#include "core/base/tpl/atomic_map.h"
 #include "core/base/stl.h"
+#include "core/base/cppcoro.h"
 #include "core/base/launch.h"
 #include "core/base/declare_macros.h"
 #include "core/base/material_load_param.h"
@@ -132,10 +133,10 @@ private:
 			return pixelSCD < other.pixelSCD;
 		}
 	};
-	std::map<ProgramKey, IProgramPtr> mProgramByKey;
-	std::map<std::string, ITexturePtr> mTextureByKey;
-	std::map<MaterialLoadParam, res::ShaderPtr> mShaderByName;
-	std::map<MaterialLoadParam, res::MaterialPtr> mMaterialByName;
+	tpl::AtomicMap<ProgramKey, IProgramPtr> mProgramByKey;
+	tpl::AtomicMap<std::string, ITexturePtr> mTextureByKey;
+	tpl::AtomicMap<MaterialLoadParam, res::ShaderPtr> mShaderByName;
+	tpl::AtomicMap<MaterialLoadParam, res::MaterialPtr> mMaterialByName;
 	struct AiResourceKey {
 		std::string Path, RedirectResource;
 		bool operator<(const AiResourceKey& other) const {
@@ -143,9 +144,7 @@ private:
 			return RedirectResource < other.RedirectResource;
 		}
 	};
-	std::map<AiResourceKey, res::AiScenePtr> mAiSceneByKey;
-	std::atomic<bool> mProgramMapLock, mTextureMapLock, mShaderMapLock, mMaterialMapLock, mAiSceneMapLock;
-	std::atomic<bool> mLoadTaskCtxMapLock, mResDependGraphLock;
+	tpl::AtomicMap<AiResourceKey, res::AiScenePtr> mAiSceneByKey;
 };
 
 }

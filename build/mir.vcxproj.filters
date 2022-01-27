@@ -241,6 +241,9 @@
     <ClInclude Include="..\src\core\base\cppcoro.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\tpl\atomic_map.h">
+      <Filter>src\core\base\tpl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\transform.cpp">
