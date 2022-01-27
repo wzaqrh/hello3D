@@ -65,11 +65,7 @@ void PostProcess::GenRenderOperation(RenderOperationQueue& opList)
 	RenderOperation op = {};
 	if (!MakeRenderOperation(op)) return;
 
-#if USE_MATERIAL_INSTANCE
 	mMaterial->GetTextures()[0] = mMainTex->GetAttachColorTexture(0);
-#else
-	op.Textures[0] = mMainTex->GetAttachColorTexture(0);
-#endif
 	opList.AddOP(op);
 }
 

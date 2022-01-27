@@ -242,54 +242,9 @@ private:
 		auto& mesh = *meshPtr;
 		mesh.mAiMesh = rawMesh;
 
-	#if USE_MATERIAL_INSTANCE
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
 		mesh.mMaterial = co_await mResourceMng.CreateMaterial(mLaunchMode, loadParam);
-	#else
-		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0, 0, 1, 1));
-		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
-		mesh.mFactors[kTexturePbrAo] = Eigen::Vector4f::Zero();
-		mesh.mTextures.Resize(kTexturePbrMax);
-		if (rawMesh->mMaterialIndex >= 0) {
-			TextureVector& textures = mesh.mTextures;
-			const aiMaterial* material = scene->mMaterials[rawMesh->mMaterialIndex];
-
-			auto loadTexture = [&](size_t pos, aiTextureType type) {
-				std::vector<ITexturePtr> loads = loadMaterialTextures(material, type, scene);
-				if (loads.size() > 0)
-					textures[pos] = loads[0];
-			};
-			loadTexture(kTextureDiffuse, aiTextureType_DIFFUSE);
-			loadTexture(kTextureNormal, aiTextureType_NORMALS);
-			loadTexture(kTextureSpecular, aiTextureType_SPECULAR);
-
-			loadTexture(kTexturePbrAlbedo, aiTextureType_BASE_COLOR);
-			loadTexture(kTexturePbrNormal, aiTextureType_NORMAL_CAMERA);
-			loadTexture(kTexturePbrMetalness, aiTextureType_METALNESS);
-			loadTexture(kTexturePbrRoughness, aiTextureType_DIFFUSE_ROUGHNESS);
-			loadTexture(kTexturePbrAo, aiTextureType_AMBIENT_OCCLUSION);
-			loadTexture(kTexturePbrEmissive, aiTextureType_EMISSIVE);
-
-			loadTexture(kTexturePbrAo, aiTextureType_UNKNOWN);
-
-			unsigned int channel = 4;
-			material->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, (ai_real*)&mesh.mFactors[kTexturePbrAlbedo], &channel);
-			channel = 4; material->Get("$tex.scale", aiTextureType_NORMALS, 0, mesh.mFactors[kTexturePbrNormal].x());
-			channel = 4; material->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, (ai_real*)&mesh.mFactors[kTexturePbrMetalness], &channel);
-			channel = 4; material->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, (ai_real*)&mesh.mFactors[kTexturePbrRoughness], &channel);
-			channel = 4; material->Get("$tex.strength", aiTextureType_LIGHTMAP, 0, mesh.mFactors[kTexturePbrAo].x());
-			channel = 4; material->Get(AI_MATKEY_COLOR_EMISSIVE, (ai_real*)&mesh.mFactors[kTexturePbrEmissive], &channel);
-
-			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_BASE_COLOR, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrAlbedo], &channel);
-			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_NORMALS, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrNormal], &channel);
-			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_METALNESS, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrMetalness], &channel);
-			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrRoughness], &channel);
-			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_AMBIENT_OCCLUSION, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrAo], &channel);
-			channel = 4; material->Get(_AI_MATKEY_UVTRANSFORM_BASE, aiTextureType_EMISSION_COLOR, 0, (ai_real*)&mesh.mUvTransform[kTexturePbrEmissive], &channel);
-		}
-		mesh.mHasTangent = (rawMesh->mTangents != nullptr);
-	#endif
 
 	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
 	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)

@@ -249,7 +249,7 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 	const auto& meshArr = *node;// mNodeInfos[node];
 	if (meshArr.MeshCount() > 0) {
 		auto& anode = mAnimeTree.GetNode(node);
-#if USE_MATERIAL_INSTANCE
+
 		Eigen::Matrix4f globalModel;
 	#if defined EIGEN_DONT_ALIGN_STATICALLY
 		globalModel = AS_CONST_REF(Eigen::Matrix4f, anode.GlobalTransform);
@@ -261,28 +261,13 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 			s.a3, s.b3, s.c3, s.d3,
 			s.a4, s.b4, s.c4, s.d4;
 	#endif
-#else
-		cbWeightedSkin weightedSkin = {};
-	#if defined EIGEN_DONT_ALIGN_STATICALLY
-		weightedSkin.Model = AS_CONST_REF(Eigen::Matrix4f, anode.GlobalTransform);
-	#else
-		const auto& s = anode.GlobalTransform;
-		weightedSkin.Model <<
-			s.a1, s.b1, s.c1, s.d1,
-			s.a2, s.b2, s.c2, s.d2,
-			s.a3, s.b3, s.c3, s.d3,
-			s.a4, s.b4, s.c4, s.d4;
-	#endif
-#endif
 		for (int i = 0; i < meshArr.MeshCount(); i++) 
 		{
 			res::AssimpMeshPtr mesh = meshArr[i];
-		#if USE_MATERIAL_INSTANCE
 			res::MaterialInstance matInst = mesh->GetMaterial();
 			matInst.GetProperty<Eigen::Matrix4f>("Model") = globalModel;
 
-			constexpr size_t ModelCount = 56;
-			typedef std::array<Eigen::Matrix4f, ModelCount> ModelArray;
+			typedef std::array<Eigen::Matrix4f, 56> ModelArray;
 			ModelArray& models = matInst.GetProperty<ModelArray>("Models");
 			if (mesh->GetRawMesh()->HasBones()) {
 				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
@@ -303,71 +288,13 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 			else {
 				models[0] = Eigen::Matrix4f::Identity();
 			}
-		#else
-			if (mesh->GetRawMesh()->HasBones()) {
-				const std::vector<aiMatrix4x4>& boneMatArr = GetBoneMatrices(node, i);
-				size_t boneSize = boneMatArr.size();
-				for (int j = 0; j < std::min<int>(cbWeightedSkin::kModelCount, boneSize); ++j) {
-				#if defined EIGEN_DONT_ALIGN_STATICALLY
-					weightedSkin.Models[j] = AS_CONST_REF(Eigen::Matrix4f, boneMatArr[j]);
-				#else
-					const auto& s = boneMatArr[j];
-					weightedSkin.Models[j] <<
-						s.a1, s.b1, s.c1, s.d1,
-						s.a2, s.b2, s.c2, s.d2,
-						s.a3, s.b3, s.c3, s.d3,
-						s.a4, s.b4, s.c4, s.d4;
-				#endif
-				}
-			}
-			else {
-				weightedSkin.Models[0] = Eigen::Matrix4f::Identity();
-			}
-		#endif
-
-		#if !USE_MATERIAL_INSTANCE
-			cbModel model = {};
-			model.EnableAlbedoMap = mesh->HasTexture(kTexturePbrAlbedo);
-			model.EnableNormalMap = mesh->HasTexture(kTexturePbrNormal);
-			model.EnableMetalnessMap = mesh->HasTexture(kTexturePbrMetalness);
-			model.EnableRoughnessMap = mesh->HasTexture(kTexturePbrRoughness);
-			model.EnableAmbientOcclusionMap = mesh->HasTexture(kTexturePbrAo);
-			if (model.EnableEmissiveMap = mesh->HasTexture(kTexturePbrEmissive))
-				model.EmissiveFactor = Eigen::Vector3f::Ones();
-			model.AmbientOcclusion_ChannelGRoughness_ChannelBMetalness = model.EnableAmbientOcclusionMap 
-				&& !model.EnableRoughnessMap 
-				&& !model.EnableMetalnessMap;
-			model.HasTangent = mesh->HasTangent();
-
-			model.AlbedoFactor = mesh->GetFactor(kTexturePbrAlbedo);
-			model.NormalScale = mesh->GetFactor(kTexturePbrNormal).x();
-			model.MetallicFactor = mesh->GetFactor(kTexturePbrMetalness).x();
-			model.RoughnessFactor = mesh->GetFactor(kTexturePbrRoughness).x();
-			model.OcclusionStrength = mesh->GetFactor(kTexturePbrAo).x();
-			model.EmissiveFactor = mesh->GetFactor(kTexturePbrEmissive).head<3>();
-
-			model.AlbedoUV = mesh->GetUvTransform(kTexturePbrAlbedo);
-			model.NormalUV = mesh->GetUvTransform(kTexturePbrNormal);
-			model.MetallicUV = mesh->GetUvTransform(kTexturePbrMetalness);
-			model.RoughnessUV = mesh->GetUvTransform(kTexturePbrRoughness);
-			model.OcclusionUV = mesh->GetUvTransform(kTexturePbrAo);
-			model.EmissiveUV = mesh->GetUvTransform(kTexturePbrEmissive);
-		#endif
 
 			if (mesh->IsLoaded()) {
 				RenderOperation op = {};
-				
 				op.IndexBuffer = mesh->GetIndexBuffer();
 				op.AddVertexBuffer(mesh->GetVBOSurface());
 				op.AddVertexBuffer(mesh->GetVBOSkeleton());
-			#if USE_MATERIAL_INSTANCE
 				op.Material = matInst;
-			#else
-				op.Shader = mMaterial;
-				op.Textures = mesh->GetTextures();
-				op.SetUBOBytes(MAKE_CBNAME(cbWeightedSkin), weightedSkin);
-				op.SetUBOBytes(MAKE_CBNAME(cbModel), model);
-			#endif
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 			}
@@ -380,17 +307,10 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 
 void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
-#if USE_MATERIAL_INSTANCE
 	if (!mMaterial->IsLoaded()
 		|| !mAiScene->IsLoaded()
 		|| !mAnimeTree.IsInited())
 		return;
-#else
-	if (!mMaterial->IsLoaded()
-		|| !mAiScene->IsLoaded()
-		|| !mAnimeTree.IsInited())
-		return;
-#endif
 
 	int count = opList.Count();
 	DoDraw(mAiScene->mRootNode, opList);

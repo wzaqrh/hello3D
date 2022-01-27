@@ -17,24 +17,6 @@
 #include "core/resource/assimp_mesh.h"
 
 namespace mir {
-
-#if !USE_MATERIAL_INSTANCE
-enum TextureType {
-	kTextureDiffuse = 0,
-	kTextureNormal = 1,
-	kTextureSpecular = 2,
-};
-enum TexturePbrType {
-	kTexturePbrAlbedo = 0,
-	kTexturePbrNormal = 1,
-	kTexturePbrMetalness = 2,
-	kTexturePbrRoughness = 3,
-	kTexturePbrAo = 4,
-	kTexturePbrEmissive = 5,
-	kTexturePbrMax = 6
-};
-#endif
-
 namespace res {
 
 struct AiNode : public std::enable_shared_from_this<AiNode>

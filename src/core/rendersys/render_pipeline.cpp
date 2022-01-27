@@ -50,13 +50,6 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 void RenderPipeline::BindPass(const res::PassPtr& pass)
 {
 	mRenderSys.SetProgram(pass->mProgram);
-
-#if USE_MATERIAL_INSTANCE
-#else
-	auto cbuffers = pass->GetConstBuffers();
-	mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
-#endif
-
 	mRenderSys.SetVertexLayout(pass->mInputLayout);
 
 	if (!pass->mSamplers.empty()) mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
@@ -70,13 +63,6 @@ void RenderPipeline::RenderPass(const res::PassPtr& pass, const TextureVector& t
 	if (textures.Count() > 0) mRenderSys.SetTextures(kPipeTextureStart, &textures[0], textures.Count());
 	else mRenderSys.SetTextures(kPipeTextureStart, nullptr, 0);
 
-#if USE_MATERIAL_INSTANCE
-	
-#else
-	for (auto& cbBytes : op.UBOBytesByName)
-		pass->UpdateConstBufferByName(mRenderSys, cbBytes.first, Data::Make(cbBytes.second));
-#endif
-
 	BindPass(pass);
 
 	if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
@@ -85,58 +71,29 @@ void RenderPipeline::RenderPass(const res::PassPtr& pass, const TextureVector& t
 
 void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& lightMode)
 {
-#if USE_MATERIAL_INSTANCE
-	res::TechniquePtr tech = op.Material->GetShader()->CurTech();
-#else
-	res::TechniquePtr tech = op.Shader->CurTech();
-#endif
-
-#if USE_MATERIAL_INSTANCE
 	op.Material.FlushGpuParameters(mRenderSys);
-#endif
 
+	res::TechniquePtr tech = op.Material->GetShader()->CurTech();
 	std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes) {
 		//SetVertexLayout(pass->mInputLayout);
 		mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		mRenderSys.SetIndexBuffer(op.IndexBuffer);
-
-	#if USE_MATERIAL_INSTANCE
-		auto cbuffers = op.Material.GetConstBuffers();
-		if (! cbuffers.empty()) mRenderSys.SetConstBuffers(0, &cbuffers[0], cbuffers.size(), pass->mProgram);
-	#endif
-
-	#if USE_MATERIAL_INSTANCE
+		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->mProgram);
 		const TextureVector& textures = op.Material->GetTextures();
-	#else
-		const TextureVector& textures = op.Textures;
-	#endif
-		mRenderSys.SetVertexBuffers(op.VertexBuffers);
-		
 		RenderPass(pass, textures, -1, op);
 	}
 }
 
-void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, 
-	const cbPerLight* lightParam, cbPerFrame& globalParam)
+void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std::string& lightMode, unsigned camMask, const cbPerLight* lightParam, cbPerFrame& globalParam)
 {
 	for (const auto& op : opQueue) {
-	#if USE_MATERIAL_INSTANCE
 		auto shader = op.Material->GetShader();
-	#else
-		auto shader = op.Shader;
-	#endif
 		if ((op.CameraMask & camMask) && shader->IsLoaded()) {
-			auto curTech = shader->CurTech();
-
 			globalParam.World = op.WorldTransform;
-		#if USE_MATERIAL_INSTANCE
+
 			op.Material.WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(globalParam));
 			if (lightParam) op.Material.WriteToCb(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*lightParam));
-		#else
-			curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(globalParam));
-			if (lightParam) curTech->UpdateConstBufferByName(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*lightParam));
-		#endif
 
 			RenderOp(op, lightMode);
 		}

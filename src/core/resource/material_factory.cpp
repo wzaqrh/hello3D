@@ -76,10 +76,6 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMod
 
 				for (const auto& sampler : passProgram.Samplers)
 					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, resMng.CreateSampler(launchMode, sampler)));
-			#if USE_CBUFFER_ENTRY
-				for (auto& uniform : passProgram.Uniforms)
-					curPass->AddConstBuffer(uniform.CreateConstBuffer(launchMode, resMng, kHWUsageDynamic), uniform.GetName(), uniform.GetShareMode(), uniform.GetSlot());
-			#endif
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
@@ -185,16 +181,6 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 
 	for (const auto& sampler : proto.mSamplers)
 		result->AddSampler(sampler);
-
-#if USE_CBUFFER_ENTRY
-	size_t slot = 0;
-	for (auto buffer : proto.mConstantBuffers) {
-		if (!buffer.GetShareMode)
-			buffer.Buffer = resMng.CreateConstBuffer(launchMode, *buffer.Buffer->GetDecl(), buffer.Buffer->GetUsage(), Data::MakeNull());
-		result->AddConstBuffer(buffer.Buffer, buffer.Name, buffer.GetShareMode, slot);
-		++slot;
-	}
-#endif
 
 	result->SetLoaded();
 	return result;

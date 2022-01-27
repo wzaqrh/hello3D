@@ -46,12 +46,7 @@ void Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	for (int i = 0; i < mSubMeshs.size(); ++i) {
 		if (mSubMeshs[i].IndiceCount > 0) {
 			RenderOperation op = {};
-		#if USE_MATERIAL_INSTANCE
 			op.Material = mMaterial;
-		#else
-			op.Shader = mMaterial;
-			op.Textures = mSubMeshs[i].Textures;
-		#endif
 			op.IndexBuffer = mIndexBuffer;
 			op.AddVertexBuffer(mVertexBuffer);
 			op.IndexPos = mSubMeshs[i].IndicePos;

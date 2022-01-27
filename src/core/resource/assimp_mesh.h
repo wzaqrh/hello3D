@@ -23,16 +23,8 @@ public:
 	void Build(Launch launchMode, ResourceManager& resourceMng);
 public:
 	bool IsLoaded() const;
-#if USE_MATERIAL_INSTANCE
 	const MaterialInstance& GetMaterial() const { return mMaterial; }
 	const TextureVector& GetTextures() const { return mMaterial->GetTextures(); }
-#else
-	bool HasTangent() const { return mHasTangent; }
-	bool HasTexture(int slot) const;
-	const Eigen::Vector4f& GetFactor(int slot) const;
-	const Eigen::Vector4f& GetUvTransform(int slot) const;
-	const TextureVector& GetTextures() const { return mTextures; }
-#endif
 	const aiMesh* GetRawMesh() const { return mAiMesh; }
 	const IVertexBufferPtr& GetVBOSurface() const { return mVBOSurface; }
 	const IVertexBufferPtr& GetVBOSkeleton() const { return mVBOSkeleton; }
@@ -42,14 +34,7 @@ private:
 	vbSurfaceVector mSurfVertexs;
 	vbSkeletonVector mSkeletonVertexs;
 	std::vector<uint32_t> mIndices;
-#if USE_MATERIAL_INSTANCE
 	res::MaterialInstance mMaterial;
-#else
-	TextureVector mTextures;
-	bool mHasTangent;
-	std::vector<Eigen::Vector4f> mFactors;
-	std::vector<Eigen::Vector4f> mUvTransform;
-#endif
 	IVertexBufferPtr mVBOSurface, mVBOSkeleton;
 	IIndexBufferPtr mIndexBuffer;
 #if defined _DEBUG

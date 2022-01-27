@@ -15,9 +15,6 @@
 namespace mir {
 namespace res {
 
-#if !USE_MATERIAL_INSTANCE
-#define USE_CBUFFER_ENTRY 1
-#endif
 class Pass : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
@@ -33,14 +30,6 @@ class Pass : public ImplementResource<IResource>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddSampler(ISamplerStatePtr sampler);
-#if USE_CBUFFER_ENTRY
-	void AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot);
-	void UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data);
-
-	std::vector<IContantBufferPtr> GetConstBuffers() const;
-	IContantBufferPtr GetConstBufferByIdx(size_t idx);
-	IContantBufferPtr GetConstBufferByName(const std::string& name);
-#endif
 	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 public:
 	std::string mLightMode, mName;
@@ -48,9 +37,6 @@ public:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
-#if USE_CBUFFER_ENTRY
-	CBufferEntryVector mConstantBuffers;//to remove
-#endif
 	IFrameBufferPtr mFrameBuffer;//to remove
 };
 
@@ -60,13 +46,6 @@ class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddPass(PassPtr pass) { Add(pass); }
-
-#if USE_CBUFFER_ENTRY
-	TemplateArgs void UpdateConstBufferByName(T &&...args) {
-		for (auto& pass : mElements)
-			pass->UpdateConstBufferByName(std::forward<T>(args)...);
-	}
-#endif
 
 	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);

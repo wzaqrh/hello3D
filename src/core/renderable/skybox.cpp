@@ -96,19 +96,11 @@ cppcoro::shared_task<bool> SkyBox::Init(const MaterialLoadParam& loadParam, cons
 			boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
 			mDiffuseEnvMap = co_await mResourceMng.CreateTextureByFile(mLaunchMode, diffuseEnvPath.string());
 
-		#if USE_MATERIAL_INSTANCE
 			SetTexture(co_await mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string()));
-		#else
-			mTexture = mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string());
-		#endif
 		}
 	}
 	else {
-	#if USE_MATERIAL_INSTANCE
 		SetTexture(co_await mResourceMng.CreateTextureByFile(mLaunchMode, imgName));
-	#else
-		mTexture = mResourceMng.CreateTextureByFile(mLaunchMode, imgName);
-	#endif
 	}
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();

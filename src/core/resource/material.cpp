@@ -18,57 +18,12 @@ void Pass::AddSampler(ISamplerStatePtr sampler)
 	mSamplers.push_back(sampler);
 }
 
-#if USE_CBUFFER_ENTRY
-void Pass::AddConstBuffer(IContantBufferPtr buffer, const std::string& name, bool isUnique, int slot)
-{
-	mConstantBuffers.AddOrSet(CBufferEntry{ buffer, name, isUnique }, slot);
-}
-std::vector<IContantBufferPtr> Pass::GetConstBuffers() const
-{
-	std::vector<IContantBufferPtr> result(mConstantBuffers.Count());
-	struct CBufferEntryToCBuffer {
-		IContantBufferPtr operator()(const CBufferEntry& cbuffer) const {
-			return cbuffer.Buffer;
-		}
-	};
-	std::transform(mConstantBuffers.begin(), mConstantBuffers.end(), result.begin(), CBufferEntryToCBuffer());
-	return result;
-}
-
-IContantBufferPtr Pass::GetConstBufferByIdx(size_t idx)
-{
-	return IF_AND_NULL(idx < mConstantBuffers.Count(), mConstantBuffers[idx].Buffer);
-}
-
-IContantBufferPtr Pass::GetConstBufferByName(const std::string& name)
-{
-	IContantBufferPtr result = nullptr;
-	for (auto& cbuffer : mConstantBuffers) {
-		if (cbuffer.Name == name) {
-			result = cbuffer.Buffer;
-			break;
-		}
-	}
-	return result;
-}
-
-void Pass::UpdateConstBufferByName(RenderSystem& renderSys, const std::string& name, const Data& data)
-{
-	IContantBufferPtr buffer = GetConstBufferByName(name);
-	if (buffer) renderSys.UpdateBuffer(buffer, data);
-}
-#endif
-
 void Pass::GetLoadDependencies(std::vector<IResourcePtr>& depends)
 {
 	depends.push_back(mInputLayout);
 	depends.push_back(mProgram);
 	for (const auto& sampler : mSamplers)
 		depends.push_back(sampler);
-#if USE_CBUFFER_ENTRY
-	for (const auto& buffer : mConstantBuffers)
-		depends.push_back(buffer.Buffer);
-#endif
 }
 
 /********** Technique **********/
