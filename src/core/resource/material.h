@@ -83,7 +83,7 @@ class MIR_CORE_API Material : public std::enable_shared_from_this<Material>, pub
 public:
 	Material();
 	void EnableKeyword(const std::string& macroName, int value = TRUE);
-	cppcoro::shared_task<bool> Build(Launch launchMode, ResourceManager& resMng);
+	CoTask<bool> Build(Launch launchMode, ResourceManager& resMng);
 public:
 	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
 	const ShaderPtr& GetShader() const { return mShaderVariant; }

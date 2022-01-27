@@ -37,11 +37,11 @@ GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, 
 		return result;
 	}
 }
-cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader) ThreadSafe
+CoTask<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, shaderNode, shader);
 	shader->SetLoading();
-	co_await resMng.SwitchToLaunchService(__LaunchSync__);
+	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
 
 	for (const auto& categNode : shaderNode) {
 		for (const auto& techniqueNode : categNode) {
@@ -56,7 +56,7 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMod
 				curPass->mName = passNode.ShortName;
 				curPass->mTopoLogy = passProgram.Topo;
 
-				curPass->mProgram = co_await resMng.CreateProgram(launchMode,
+				curPass->mProgram = CoAwait resMng.CreateProgram(launchMode,
 					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD);
 
 				BOOST_ASSERT(passProgram.Attrs.Count() >= 1);
@@ -85,15 +85,15 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMod
 	shader->SetLoaded();
 	return shader;
 }
-cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) ThreadSafe 
+CoTask<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) ThreadSafe 
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, shader);
-	//co_await resMng.SwitchToLaunchService(__LaunchAsync__);
+	//CoAwait resMng.SwitchToLaunchService(__LaunchAsync__);
 
 	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {
-		co_await DoCreateShader(launchMode, resMng, shaderNode, shader);
+		CoAwait DoCreateShader(launchMode, resMng, shaderNode, shader);
 	}
 	else {
 		shader->SetLoaded(false);
@@ -101,13 +101,13 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode,
 	return shader;
 }
 
-cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material) ThreadSafe
+CoTask<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, materialNode, material);
 	material->SetLoading();
-	co_await resMng.SwitchToLaunchService(__LaunchSync__);
+	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
 
-	material->mShaderVariant = co_await DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
+	material->mShaderVariant = CoAwait DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
 
 	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.MaterialFilePath));
@@ -117,7 +117,7 @@ cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launc
 		assetPath /= iter.second.ImagePath;
 		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
 		if (boost::filesystem::is_regular_file(assetPath)) {
-			auto texture = co_await resMng.CreateTextureByFile(launchMode, assetPath.string());
+			auto texture = CoAwait resMng.CreateTextureByFile(launchMode, assetPath.string());
 			material->mTextures.AddOrSet(texture, iter.second.Slot);
 		}
 		assetPath.remove_filename();
@@ -154,15 +154,15 @@ cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launc
 	material->SetLoaded(material->mShaderVariant->IsLoaded());
 	return material;
 }
-cppcoro::shared_task<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material) ThreadSafe
+CoTask<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, material);
-	//co_await resMng.SwitchToLaunchService(__LaunchAsync__);
+	//CoAwait resMng.SwitchToLaunchService(__LaunchAsync__);
 
 	material = IF_OR(material, CreateInstance<Material>());
 	mat_asset::MaterialNode materialNode;
 	if (mMatAssetMng->GetMaterialNode(loadParam, materialNode)) {
-		co_await DoCreateMaterial(launchMode, resMng, materialNode, material);
+		CoAwait DoCreateMaterial(launchMode, resMng, materialNode, material);
 	}
 	else {
 		material->SetLoaded(false);

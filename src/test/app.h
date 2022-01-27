@@ -46,7 +46,7 @@ public:
 	void SetCaseSecondIndex(int secondIndex) override;
 protected:
 	virtual void OnPreInitDevice() {};
-	virtual cppcoro::shared_task<void> OnPostInitDevice() { co_return; };
+	virtual CoTask<void> OnPostInitDevice() { CoReturnVoid; };
 	virtual void OnRender() = 0;
 	virtual void OnInitLight();
 	virtual void OnInitCamera();

@@ -11,7 +11,7 @@ class TestCube : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 private:
 	CubePtr mCube;
 };
@@ -20,22 +20,23 @@ private:
 1：透视相机 观察到淡蓝平面(滚动鼠标滚轮)
 */
 
-cppcoro::shared_task<void> TestCube::OnPostInitDevice()
+CoTask<void> TestCube::OnPostInitDevice()
 {
 	switch (mCaseIndex) {
 	case 0: {
-		mCube = co_await mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(1,1,1), 0xff87CEFA);
+		mCube = CoAwait mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(1,1,1), 0xff87CEFA);
 		mTransform = mCube->GetTransform();
 		mTransform->SetEuler(Eigen::Vector3f(45*0.174, 45*0.174, 45*0.174));
 	}break;
 	case 1: {
 		const int SizeInf = 256;
-		mCube = co_await mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(SizeInf, SizeInf, 1), 0xff87CEFA);
+		mCube = CoAwait mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(SizeInf, SizeInf, 1), 0xff87CEFA);
 		mTransform = mCube->GetTransform();
 	}break;
 	default:
 		break;
 	}
+	CoReturnVoid;
 }
 
 void TestCube::OnRender()

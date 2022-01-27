@@ -40,13 +40,13 @@ std::string Specular();
 
 namespace cube {
 namespace far_plane {
-cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
+CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
 namespace near_plane {
-cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
+CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
 namespace floor {
-cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
+CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
 }
 }
 
@@ -66,7 +66,7 @@ struct model {
 	model();
 	model(const std::string& name);
 	void Init(const std::string& name);
-	cppcoro::shared_task<mir::TransformPtr> Init(const std::string& name, mir::rend::AssimpModelPtr model);
+	CoTask<mir::TransformPtr> Init(const std::string& name, mir::rend::AssimpModelPtr model);
 	std::string Path() const { return mPath; }
 	std::string Rd() const { return mRd; }
 	Eigen::Vector3f Scale() const { return mScale; }

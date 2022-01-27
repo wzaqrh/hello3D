@@ -61,10 +61,10 @@ void Material::EnableKeyword(const std::string& macroName, int value /*= TRUE*/)
 	mShaderVariant = nullptr;
 }
 
-cppcoro::shared_task<bool> Material::Build(Launch launchMode, ResourceManager& resMng)
+CoTask<bool> Material::Build(Launch launchMode, ResourceManager& resMng)
 {
 	if (mShaderVariant == nullptr) {
-		mShaderVariant = co_await resMng.CreateShader(launchMode, mShaderVariantParam.Build());
+		mShaderVariant = CoAwait resMng.CreateShader(launchMode, mShaderVariantParam.Build());
 	}
 	return mShaderVariant != nullptr;
 }

@@ -6,12 +6,12 @@ namespace mir {
 namespace rend {
 
 /********** Mesh **********/
-cppcoro::shared_task<bool> Mesh::Init(const MaterialLoadParam& loadParam, int vertCount, int indexCount)
+CoTask<bool> Mesh::Init(const MaterialLoadParam& loadParam, int vertCount, int indexCount)
 {
 	COROUTINE_VARIABLES_3(loadParam, vertCount, indexCount);
 
-	if (!co_await Super::Init(loadParam))
-		co_return false;
+	if (!CoAwait Super::Init(loadParam))
+		CoReturn false;
 
 	mIndices.resize(indexCount);
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(mIndices));
@@ -20,7 +20,7 @@ cppcoro::shared_task<bool> Mesh::Init(const MaterialLoadParam& loadParam, int ve
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
-	co_return true;
+	CoReturn true;
 }
 
 void Mesh::GenRenderOperation(RenderOperationQueue& opList)

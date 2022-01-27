@@ -15,7 +15,7 @@ struct MIR_CORE_API RenderableSingleRenderOp : public IRenderable
 #define INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(CLS) INHERIT_RENDERABLE_SINGLE_OP(CLS); CLS(Launch launchMode, ResourceManager& resourceMng) :Super(launchMode, resourceMng) {}
 	INHERIT_RENDERABLE_SINGLE_OP(RenderableSingleRenderOp);
 	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng);
-	cppcoro::shared_task<bool> Init(const MaterialLoadParam& matName);
+	CoTask<bool> Init(const MaterialLoadParam& matName);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }

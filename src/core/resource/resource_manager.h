@@ -77,17 +77,17 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler, ThreadSafe);
 
-	cppcoro::shared_task<IProgramPtr> CreateProgram(Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(cppcoro::shared_task<IProgramPtr>, CreateProgram, ThreadSafe);
+	CoTask<IProgramPtr> CreateProgram(Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(CoTask<IProgramPtr>, CreateProgram, ThreadSafe);
 
 	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		res->SetLoaded(nullptr != mRenderSys.LoadTexture(res, format, std::forward<T>(args)...));
 		return std::static_pointer_cast<ITexture>(res);
 	}
-	cppcoro::shared_task<ITexturePtr> CreateTextureByFile(Launch launchMode, const std::string& filepath, 
+	CoTask<ITexturePtr> CreateTextureByFile(Launch launchMode, const std::string& filepath, 
 		ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(cppcoro::shared_task<ITexturePtr>, CreateTextureByFile, ThreadSafe);
+	DECLARE_LAUNCH_FUNCTIONS(CoTask<ITexturePtr>, CreateTextureByFile, ThreadSafe);
 
 	TemplateArgs bool LoadRawTextureData(T &&...args) ThreadSafe {
 		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
@@ -100,21 +100,21 @@ public:
 	}
 	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	cppcoro::shared_task<res::ShaderPtr> CreateShader(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(cppcoro::shared_task<res::ShaderPtr>, CreateShader, ThreadSafe);
+	CoTask<res::ShaderPtr> CreateShader(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(CoTask<res::ShaderPtr>, CreateShader, ThreadSafe);
 
-	cppcoro::shared_task<res::MaterialInstance> CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(cppcoro::shared_task<res::MaterialInstance>, CreateMaterial, ThreadSafe);
+	CoTask<res::MaterialInstance> CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(CoTask<res::MaterialInstance>, CreateMaterial, ThreadSafe);
 
-	cppcoro::shared_task<res::AiScenePtr> CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
+	CoTask<res::AiScenePtr> CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 public:
 	cppcoro::static_thread_pool& GetAsyncService() { return *mThreadPool; }
 	cppcoro::io_service& GetSyncService() { return *mIoService; }
 	bool IsCurrentInAsyncService() const;
-	cppcoro::shared_task<void> SwitchToLaunchService(Launch launchMode);
+	CoTask<void> SwitchToLaunchService(Launch launchMode);
 private:
-	cppcoro::shared_task<bool> _LoadProgram(IProgramPtr program, Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
-	cppcoro::shared_task<bool> _LoadTextureByFile(ITexturePtr texture, Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
+	CoTask<bool> _LoadProgram(IProgramPtr program, Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
+	CoTask<bool> _LoadTextureByFile(ITexturePtr texture, Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
 private:
 	RenderSystem& mRenderSys;
 	res::MaterialFactory& mMaterialFac;

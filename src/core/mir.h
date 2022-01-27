@@ -28,7 +28,7 @@ public:
 	inline const RenderPipelinePtr& RenderPipe() const { return mRenderPipe; }
 	inline const RenderableFactoryPtr& RenderableFac() const { return mRenderableFac; }
 	inline const SceneManagerPtr& SceneMng() const { return mSceneMng; }
-	void ExecuteTaskSync(const cppcoro::shared_task<void>& task);
+	void ExecuteTaskSync(const CoTask<void>& task);
 private:
 	Launch mLaunchMode;
 	RenderSystemPtr mRenderSys;

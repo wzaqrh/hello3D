@@ -12,13 +12,13 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 	, mCameraMask(-1)
 {}
 
-cppcoro::shared_task<bool> RenderableSingleRenderOp::Init(const MaterialLoadParam& loadParam)
+CoTask<bool> RenderableSingleRenderOp::Init(const MaterialLoadParam& loadParam)
 {
 	COROUTINE_VARIABLES_1(loadParam);
 
 	mTransform = CreateInstance<Transform>();
-	mMaterial = co_await mResourceMng.CreateMaterial(mLaunchMode, loadParam);
-	co_return true;
+	mMaterial = CoAwait mResourceMng.CreateMaterial(mLaunchMode, loadParam);
+	CoReturn true;
 }
 
 const ITexturePtr& RenderableSingleRenderOp::GetTexture() const 

@@ -41,19 +41,21 @@ bool ResourceManager::IsCurrentInAsyncService() const
 {
 	return std::this_thread::get_id() != mMainThreadId;
 }
-cppcoro::shared_task<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
+CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 {
+#if !defined MIR_CPPCORO_DISABLED
 	if (launchMode == LaunchAsync) {
 		if (! IsCurrentInAsyncService())
-			co_await mThreadPool->schedule();
+			CoAwait mThreadPool->schedule();
 		BOOST_ASSERT(IsCurrentInAsyncService());
 	}
 	else {
 		if (IsCurrentInAsyncService())
-			co_await mIoService->schedule();
+			CoAwait mIoService->schedule();
 		BOOST_ASSERT(! IsCurrentInAsyncService());
 	}
-	co_return;
+#endif
+	CoReturnVoid;
 }
 
 /********** Async Support **********/
@@ -96,11 +98,11 @@ inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	std::string filepath = "shader/asm/" + platform + "/" + asmName;
 	return boost::filesystem::system_complete(filepath);
 }
-cppcoro::shared_task<bool> ResourceManager::_LoadProgram(IProgramPtr program, Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ResourceManager::_LoadProgram(IProgramPtr program, Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(program, launchMode, name, vertexSCD, pixelSCD);
 	program->SetLoading();
-	co_await SwitchToLaunchService(launchMode);
+	CoAwait SwitchToLaunchService(launchMode);
 
 #if defined MIR_TIME_DEBUG
 	std::string msg = (boost::format("resMng._LoadProgram %1% %2% %3%") % name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str();
@@ -144,7 +146,7 @@ cppcoro::shared_task<bool> ResourceManager::_LoadProgram(IProgramPtr program, La
 		}
 	}
 
-	co_await SwitchToLaunchService(__LaunchSync__);
+	CoAwait SwitchToLaunchService(__LaunchSync__);
 	auto loadProgram = [blobVS, blobPS, this](IProgramPtr program)->IProgramPtr {
 		std::vector<IShaderPtr> shaders;
 		if (blobVS) shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, blobVS));
@@ -154,12 +156,12 @@ cppcoro::shared_task<bool> ResourceManager::_LoadProgram(IProgramPtr program, La
 		return this->mRenderSys.LoadProgram(program, shaders);
 	};
 	program->SetLoaded(loadProgram(program) != nullptr);
-	co_return program->IsLoaded();
+	CoReturn program->IsLoaded();
 }
-cppcoro::shared_task<IProgramPtr> ResourceManager::CreateProgram(Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<IProgramPtr> ResourceManager::CreateProgram(Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, name, vertexSCD, pixelSCD);
-	//co_await SwitchToLaunchService(launchMode);
+	//CoAwait SwitchToLaunchService(launchMode);
 
 	ProgramKey key{ name, vertexSCD, pixelSCD };
 	if (key.vertexSCD.ShaderModel.empty()) 
@@ -176,17 +178,17 @@ cppcoro::shared_task<IProgramPtr> ResourceManager::CreateProgram(Launch launchMo
 		return program;
 	});
 	if (resNeedLoad) {
-		co_await _LoadProgram(program, launchMode, key.name, key.vertexSCD, key.pixelSCD);
+		CoAwait _LoadProgram(program, launchMode, key.name, key.vertexSCD, key.pixelSCD);
 	}
-	co_return program;
+	CoReturn program;
 }
 
 /********** Create Texture **********/
-cppcoro::shared_task<bool> ResourceManager::_LoadTextureByFile(ITexturePtr texture, Launch launchMode, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> ResourceManager::_LoadTextureByFile(ITexturePtr texture, Launch launchMode, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(texture, launchMode, imgFullpath, format, autoGenMipmap);
 	texture->SetLoading();
-	co_await SwitchToLaunchService(launchMode);
+	CoAwait SwitchToLaunchService(launchMode);
 
 	TIME_PROFILE((boost::format("resMng._LoadTextureByFile %1% %2% %3%") %imgFullpath %format %autoGenMipmap).str());
 	ITexturePtr ret = nullptr;
@@ -329,7 +331,7 @@ cppcoro::shared_task<bool> ResourceManager::_LoadTextureByFile(ITexturePtr textu
 						mipCount = -1;
 					ilDeleteImage(imageId);
 					fclose(fd);
-					co_await SwitchToLaunchService(__LaunchSync__);
+					CoAwait SwitchToLaunchService(__LaunchSync__);
 					ret = mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &datas[0]);
 				}
 			}
@@ -345,12 +347,12 @@ cppcoro::shared_task<bool> ResourceManager::_LoadTextureByFile(ITexturePtr textu
 	}//if fd
 
 	texture->SetLoaded(ret != nullptr);
-	return texture->IsLoaded();
+	CoReturn texture->IsLoaded();
 }
-cppcoro::shared_task<ITexturePtr> ResourceManager::CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<ITexturePtr> ResourceManager::CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, filepath, format, autoGenMipmap);
-	//co_await SwitchToLaunchService(launchMode);
+	//CoAwait SwitchToLaunchService(launchMode);
 
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string key = fullpath.string();
@@ -364,16 +366,16 @@ cppcoro::shared_task<ITexturePtr> ResourceManager::CreateTextureByFile(Launch la
 		return texture;
 	});
 	if (resNeedLoad) {
-		co_await _LoadTextureByFile(texture, launchMode, key, format, autoGenMipmap);
+		CoAwait _LoadTextureByFile(texture, launchMode, key, format, autoGenMipmap);
 	}
-	co_return texture;
+	CoReturn texture;
 }
 
 /********** Create Material **********/
-cppcoro::shared_task <res::ShaderPtr> ResourceManager::CreateShader(Launch launchMode, const MaterialLoadParam& param) ThreadSafe
+CoTask <res::ShaderPtr> ResourceManager::CreateShader(Launch launchMode, const MaterialLoadParam& param) ThreadSafe
 {
 	COROUTINE_VARIABLES_2(launchMode, param);
-	//co_await SwitchToLaunchService(launchMode);
+	//CoAwait SwitchToLaunchService(launchMode);
 
 	bool resNeedLoad = false;
 	res::ShaderPtr shader = mShaderByName.GetOrAdd(param, [&]() {
@@ -384,15 +386,15 @@ cppcoro::shared_task <res::ShaderPtr> ResourceManager::CreateShader(Launch launc
 		return shader;
 	});
 	if (resNeedLoad) {
-		co_await this->mMaterialFac.CreateShader(launchMode, *this, param, shader);
+		CoAwait this->mMaterialFac.CreateShader(launchMode, *this, param, shader);
 	}
-	return shader;
+	CoReturn shader;
 }
 
-cppcoro::shared_task<res::MaterialInstance> ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe
+CoTask<res::MaterialInstance> ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe
 {
 	COROUTINE_VARIABLES_2(launchMode, loadParam);
-	//co_await SwitchToLaunchService(launchMode);
+	//CoAwait SwitchToLaunchService(launchMode);
 
 	bool resNeedLoad = false;
 	res::MaterialPtr material = mMaterialByName.GetOrAdd(loadParam, [&]() {
@@ -403,16 +405,16 @@ cppcoro::shared_task<res::MaterialInstance> ResourceManager::CreateMaterial(Laun
 		return material;
 	});
 	if (resNeedLoad) {
-		co_await this->mMaterialFac.CreateMaterial(launchMode, *this, loadParam, material);
+		CoAwait this->mMaterialFac.CreateMaterial(launchMode, *this, loadParam, material);
 	}
-	return material->CreateInstance(launchMode, *this);
+	CoReturn material->CreateInstance(launchMode, *this);
 }
 
 /********** Create AiScene **********/
-cppcoro::shared_task<res::AiScenePtr> ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
+CoTask<res::AiScenePtr> ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
 {
 	COROUTINE_VARIABLES_3(launchMode, assetPath, redirectRes);
-	//co_await SwitchToLaunchService(launchMode);
+	//CoAwait SwitchToLaunchService(launchMode);
 
 	AiResourceKey key{ assetPath, redirectRes };
 	bool resNeedLoad = false;
@@ -424,9 +426,9 @@ cppcoro::shared_task<res::AiScenePtr> ResourceManager::CreateAiScene(Launch laun
 		return aiScene;
 	});
 	if (resNeedLoad) {
-		co_await this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes, aiScene);
+		CoAwait this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes, aiScene);
 	}
-	return aiScene;
+	CoReturn aiScene;
 }
 
 }

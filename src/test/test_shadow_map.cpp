@@ -14,7 +14,7 @@ class TestShadowMap : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,18 +26,18 @@ private:
 1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
 */
 
-cppcoro::shared_task<void> TestShadowMap::OnPostInitDevice()
+CoTask<void> TestShadowMap::OnPostInitDevice()
 {
 	SetPPU(1);
 
 	if (1) {
-		mModelFloor = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
-		co_await test1::res::model().Init("floor", mModelFloor);
+		mModelFloor = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		CoAwait test1::res::model().Init("floor", mModelFloor);
 	}
 
 	if (1) {
-		mModelRock = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
-		mTransform = co_await test1::res::model().Init("spaceship", mModelRock);
+		mModelRock = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = CoAwait test1::res::model().Init("spaceship", mModelRock);
 	}
 
 	switch (mCaseIndex) {
@@ -47,7 +47,7 @@ cppcoro::shared_task<void> TestShadowMap::OnPostInitDevice()
 		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -3, -1));
 		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 10, 0));
 		camera->SetForward(mir::math::vec::Down());
-		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 
 		mModelFloor->GetTransform()->SetPosition(Eigen::Vector3f(0, -100, 0));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));
@@ -65,6 +65,7 @@ cppcoro::shared_task<void> TestShadowMap::OnPostInitDevice()
 	default:
 		break;
 	}
+	CoReturnVoid;
 }
 
 void TestShadowMap::OnRender()

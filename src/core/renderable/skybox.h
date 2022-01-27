@@ -16,7 +16,7 @@ struct SkyboxVertex {
 class MIR_CORE_API SkyBox : public RenderableSingleRenderOp
 {
 	INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(SkyBox);
-	cppcoro::shared_task<bool> Init(const MaterialLoadParam& matName, const std::string& imgName);
+	CoTask<bool> Init(const MaterialLoadParam& matName, const std::string& imgName);
 public:
 	const ITexturePtr& GetDiffuseEnvMap() const { return mDiffuseEnvMap; }
 	const ITexturePtr& GetLutMap() const { return mLutMap; }

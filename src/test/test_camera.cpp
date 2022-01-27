@@ -13,7 +13,7 @@ class TestCamera : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -38,7 +38,7 @@ private:
 11->5
 */
 
-cppcoro::shared_task<void> TestCamera::OnPostInitDevice()
+CoTask<void> TestCamera::OnPostInitDevice()
 {
 	constexpr int CaseCountMod = 6;
 	int caseIndex = mCaseIndex % CaseCountMod;
@@ -47,8 +47,8 @@ cppcoro::shared_task<void> TestCamera::OnPostInitDevice()
 
 	if (1)
 	{
-		mModel = co_await mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
-		mTransform = co_await test1::res::model().Init("spaceship", mModel);
+		mModel = CoAwait mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
+		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 		if (cameraType == 0)
 			mTransform->SetScale(mTransform->GetScale() * 2);
 	}
@@ -57,7 +57,7 @@ cppcoro::shared_task<void> TestCamera::OnPostInitDevice()
 
 	mControlCamera = false;
 	CameraPtr camera = mScneMng->AddCameraByType((CameraType)cameraType, Eigen::Vector3f(0, 0, -10));
-	camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
+	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 	switch (caseIndex) {
 	case 0: {
 		camera->SetForward(mir::math::vec::Down());
@@ -83,6 +83,7 @@ cppcoro::shared_task<void> TestCamera::OnPostInitDevice()
 	default:
 		break;
 	}
+	CoReturnVoid;
 }
 
 void TestCamera::OnRender()

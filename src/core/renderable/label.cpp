@@ -26,15 +26,15 @@ struct IndicesData {
 };
 static IndicesData sIndiceData;
 
-cppcoro::shared_task<bool> Label::Init(const MaterialLoadParam& matName, FontPtr font)
+CoTask<bool> Label::Init(const MaterialLoadParam& matName, FontPtr font)
 {
-	if (!co_await Super::Init(matName))
-		co_return false;
+	if (!CoAwait Super::Init(matName))
+		CoReturn false;
 
 	mFont = font;
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
-	co_return true;
+	CoReturn true;
 }
 
 void Label::GenRenderOperation(RenderOperationQueue& opList)

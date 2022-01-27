@@ -10,7 +10,7 @@ class TestModel : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -34,7 +34,7 @@ inline MaterialLoadParam GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-cppcoro::shared_task<void> TestModel::OnPostInitDevice()
+CoTask<void> TestModel::OnPostInitDevice()
 {
 	int caseIndex = mCaseIndex % 6;
 	bool useOtho = mCaseIndex >= 6;
@@ -78,18 +78,18 @@ cppcoro::shared_task<void> TestModel::OnPostInitDevice()
 	case 1:
 	case 2: {
 		camera->SetLookAt(Eigen::Vector3f(0, 15, 0), Eigen::Vector3f::Zero());
-		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky(1)));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky(1)));
 
-		mModel = co_await mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
+		mModel = CoAwait mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
 		std::string modelNameArr[] = { "toycar", "box-space", "mir" };
-		mTransform = co_await model.Init(modelNameArr[caseIndex], mModel);
+		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);
 	}break;
 	case 3:
 	case 4: 
 	case 5: {
-		mModel = co_await mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
+		mModel = CoAwait mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
 		std::string modelNameArr[] = { "spaceship", "rock", "floor" };
-		mTransform = co_await model.Init(modelNameArr[caseIndex-3], mModel);
+		mTransform = CoAwait model.Init(modelNameArr[caseIndex-3], mModel);
 	}break;
 	default:
 		break;
@@ -99,6 +99,7 @@ cppcoro::shared_task<void> TestModel::OnPostInitDevice()
 		mTransform->SetScale(mTransform->GetScale() * 50);
 
 	mModel->PlayAnim(0);
+	CoReturnVoid;
 }
 
 void TestModel::OnRender()

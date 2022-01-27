@@ -13,7 +13,7 @@ class TestCameraOutput : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -27,7 +27,7 @@ private:
 */
 
 #define SCALE_BASE 0.01
-cppcoro::shared_task<void> TestCameraOutput::OnPostInitDevice()
+CoTask<void> TestCameraOutput::OnPostInitDevice()
 {
 	constexpr unsigned cameraMask2 = 0x01;
 	CameraPtr camera2;
@@ -48,7 +48,7 @@ cppcoro::shared_task<void> TestCameraOutput::OnPostInitDevice()
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
 			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
-			camera2->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
+			camera2->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 
 			auto light2 = mScneMng->AddPointLight();
 			light2->SetCameraMask(cameraMask2);
@@ -56,8 +56,8 @@ cppcoro::shared_task<void> TestCameraOutput::OnPostInitDevice()
 			light2->SetAttenuation(0.0001);
 		}
 
-		mModel2 = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
-		mTransform = co_await test1::res::model().Init("spaceship", mModel2);
+		mModel2 = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = CoAwait test1::res::model().Init("spaceship", mModel2);
 		mModel2->SetCameraMask(cameraMask2);
 		mModel2->PlayAnim(0);
 
@@ -67,8 +67,8 @@ cppcoro::shared_task<void> TestCameraOutput::OnPostInitDevice()
 
 	if (mCaseIndex == 1)
 	{
-		mCube0 = co_await test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
-		mCube1 = co_await test1::res::cube::near_plane::Create(mRendFac, mWinCenter);
+		mCube0 = CoAwait test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
+		mCube1 = CoAwait test1::res::cube::near_plane::Create(mRendFac, mWinCenter);
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
@@ -81,11 +81,11 @@ cppcoro::shared_task<void> TestCameraOutput::OnPostInitDevice()
 		auto light1 = mScneMng->AddPointLight();
 		light1->SetCameraMask(cameraMask1);
 
-		mSprite1 = co_await mRendFac->CreateSprite("model/lenna.dds");
+		mSprite1 = CoAwait mRendFac->CreateSprite("model/lenna.dds");
 		mSprite1->SetCameraMask(cameraMask1);
 		mSprite1->GetTransform()->SetPosition(-mHalfSize);
 
-		mSpriteCam1 = co_await mRendFac->CreateSprite();
+		mSpriteCam1 = CoAwait mRendFac->CreateSprite();
 		mSpriteCam1->SetCameraMask(cameraMask1);
 		//auto fetchTexture = mResMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
 		auto fetchTexture = camera2->SetOutput(0.5)->GetAttachColorTexture(0);
@@ -94,6 +94,7 @@ cppcoro::shared_task<void> TestCameraOutput::OnPostInitDevice()
 		mSpriteCam1->SetPosition(mWinCenter);
 		mSpriteCam1->SetSize(mHalfSize.cast<float>());
 	}
+	CoReturnVoid;
 }
 
 void TestCameraOutput::OnRender()

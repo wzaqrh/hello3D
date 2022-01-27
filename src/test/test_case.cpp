@@ -55,9 +55,9 @@ std::string Specular() {
 
 namespace cube {
 namespace far_plane {
-cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeBig = 8192;
-	return co_await rendFac->CreateCube(
+	return CoAwait rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Far()),
 		Eigen::Vector3f(SizeBig, SizeBig, 1),
 		0xffff6347,
@@ -66,9 +66,9 @@ cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFa
 }
 }
 namespace near_plane {
-cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeSmall = 4;
-	return co_await rendFac->CreateCube(
+	return CoAwait rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Near()),
 		Eigen::Vector3f(SizeSmall, SizeSmall, 1),
 		0xffff4763,
@@ -77,9 +77,9 @@ cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFa
 }
 }
 namespace floor {
-cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
+CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
 	constexpr int Inf = 65536;
-	return co_await rendFac->CreateCube(
+	return CoAwait rendFac->CreateCube(
 		Eigen::Vector3f(0, y, Inf / 2),
 		Eigen::Vector3f(Inf, 1, Inf / 2),
 		0xffff4763,
@@ -150,10 +150,10 @@ void model::Init(const std::string& name)
 		mPos = Eigen::Vector3f(0, 0, 0);
 	}
 }
-cppcoro::shared_task<mir::TransformPtr> model::Init(const std::string& name, mir::rend::AssimpModelPtr aiModel)
+CoTask<mir::TransformPtr> model::Init(const std::string& name, mir::rend::AssimpModelPtr aiModel)
 {
 	Init(name);
-	co_await aiModel->LoadModel(Path(), Rd());
+	CoAwait aiModel->LoadModel(Path(), Rd());
 	mir::TransformPtr transform = aiModel->GetTransform();
 	transform->SetScale(Scale());
 	transform->SetPosition(Pos());

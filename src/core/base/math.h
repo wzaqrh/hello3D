@@ -36,9 +36,9 @@ struct CreateInstanceFuncor {
 template <class _Instance, typename... T> inline std::shared_ptr<_Instance> CreateInstance(T &&...args) {
 	return CreateInstanceFuncor<_Instance>()(std::forward<T>(args)...);
 }
-template <class _Instance, typename... T> inline cppcoro::shared_task<std::shared_ptr<_Instance>> CreateInstanceTask(T &&...args) {
+template <class _Instance, typename... T> inline CoTask<std::shared_ptr<_Instance>> CreateInstanceTask(T &&...args) {
 	auto res = CreateInstanceFuncor<_Instance>()(std::forward<T>(args)...);
-	if (co_await res->Init()) return res;
+	if (CoAwait res->Init()) return res;
 	else return nullptr;
 }
 

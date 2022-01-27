@@ -12,7 +12,7 @@ class TestRT : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -28,7 +28,7 @@ private:
 */
 
 /********** TestRT **********/
-cppcoro::shared_task<void> TestRT::OnPostInitDevice()
+CoTask<void> TestRT::OnPostInitDevice()
 {
 	if (mCaseIndex == 0)
 	{
@@ -40,7 +40,7 @@ cppcoro::shared_task<void> TestRT::OnPostInitDevice()
 			camera2->SetDepth(1);
 			camera2->SetCullingMask(cameraMask2);
 
-			mSprite2 = co_await mRendFac->CreateSprite(test1::res::dds::Kenny());
+			mSprite2 = CoAwait mRendFac->CreateSprite(test1::res::dds::Kenny());
 			mSprite2->SetCameraMask(cameraMask2);
 			mSprite2->SetSize(mHalfSize * 2);
 			mSprite2->SetAnchor(mir::math::vec::anchor::Center());
@@ -55,7 +55,7 @@ cppcoro::shared_task<void> TestRT::OnPostInitDevice()
 			mFrameBuffer = camera2->SetOutput(0.25);
 			DEBUG_SET_PRIV_DATA(mFrameBuffer, "camera2 output");
 
-			mFBSprite = co_await mContext->RenderableFac()->CreateSprite();
+			mFBSprite = CoAwait mContext->RenderableFac()->CreateSprite();
 			mFBSprite->SetCameraMask(cameraMask1);
 			mFBSprite->SetTexture(mFrameBuffer->GetAttachColorTexture(0));
 			mFBSprite->SetPosition(Eigen::Vector3f(-mHalfSize.x(), 0, 0));
@@ -82,11 +82,11 @@ cppcoro::shared_task<void> TestRT::OnPostInitDevice()
 		{
 			camera2->SetDepth(1);
 			camera2->SetCullingMask(cameraMask2);
-			camera2->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
+			camera2->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 
-			mModel = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
+			mModel = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
 			mModel->SetCameraMask(cameraMask2);
-			mTransform = co_await test1::res::model().Init("rock", mModel);
+			mTransform = CoAwait test1::res::model().Init("rock", mModel);
 
 			if (camera2->GetType() == kCameraOthogonal)
 				mTransform->SetScale(mTransform->GetScale() * 50);
@@ -106,13 +106,14 @@ cppcoro::shared_task<void> TestRT::OnPostInitDevice()
 			camera2->SetOutput(mFrameBuffer);
 			DEBUG_SET_PRIV_DATA(mFrameBuffer, "camera2 output");
 
-			mFBSprite = co_await mRendFac->CreateSprite();
+			mFBSprite = CoAwait mRendFac->CreateSprite();
 			mFBSprite->SetCameraMask(cameraMask1);
 			mFBSprite->SetTexture(mFrameBuffer->GetAttachColorTexture(0));
 			mFBSprite->SetPosition(mWinCenter);
 			mFBSprite->SetSize(mHalfSize);
 		}
 	}
+	CoReturnVoid;
 }
 
 //#define USE_RENDER_TARGET

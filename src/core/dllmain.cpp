@@ -1,5 +1,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include <Windows.h>
+#include "core/base/cppcoro.h"
 
 #if _MSC_VER > 1800
 #endif
@@ -39,6 +40,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                        LPVOID lpReserved
 					 )
 {
+	CoTask<void> task;
+
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:

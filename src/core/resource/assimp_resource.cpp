@@ -21,15 +21,15 @@ public:
 	~AiSceneLoader() 
 	{}
 	
-	TemplateArgs cppcoro::shared_task<bool> Execute(T &&...args) {
+	TemplateArgs CoTask<bool> Execute(T &&...args) {
 		mAsset.SetLoading();
-		co_await mResourceMng.SwitchToLaunchService(__LaunchAsync__);
+		CoAwait mResourceMng.SwitchToLaunchService(__LaunchAsync__);
 
-		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && co_await ExecuteSetupData());
+		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
 		return mAsset.IsLoaded();
 	}
-	TemplateArgs cppcoro::shared_task<bool> operator()(T &&...args) {
-		return co_await Execute(std::forward<T>(args)...);
+	TemplateArgs CoTask<bool> operator()(T &&...args) {
+		return CoAwait Execute(std::forward<T>(args)...);
 	}
 private:
 	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource)
@@ -81,10 +81,10 @@ private:
 		}
 		return mAsset.mScene != nullptr;
 	}
-	cppcoro::shared_task<bool> ExecuteSetupData()
+	CoTask<bool> ExecuteSetupData()
 	{
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
-		if (!co_await ProcessNode(mAsset.mRootNode, mAsset.mScene))
+		if (!CoAwait ProcessNode(mAsset.mRootNode, mAsset.mScene))
 			return false;
 
 		BOOST_ASSERT(mAsset.mScene != nullptr);
@@ -108,13 +108,13 @@ private:
 		return true;
 	}
 private:
-	cppcoro::shared_task<bool> ProcessNode(const AiNodePtr& node, const aiScene* rawScene) {
+	CoTask<bool> ProcessNode(const AiNodePtr& node, const aiScene* rawScene) {
 		COROUTINE_VARIABLES_2(node, rawScene);
 
 		const aiNode* rawNode = node->RawNode;
 		for (int i = 0; i < rawNode->mNumMeshes; i++) {
 			aiMesh* rawMesh = rawScene->mMeshes[rawNode->mMeshes[i]];
-			AssimpMeshPtr mesh = co_await ProcessMesh(rawMesh, rawScene);
+			AssimpMeshPtr mesh = CoAwait ProcessMesh(rawMesh, rawScene);
 			if (mesh == nullptr) 
 				return false;
 			node->AddMesh(mesh);
@@ -123,7 +123,7 @@ private:
 		for (int i = 0; i < rawNode->mNumChildren; i++) {
 			AiNodePtr child = mAsset.AddNode(rawNode->mChildren[i]);
 			node->AddChild(child);
-			if (!co_await ProcessNode(child, rawScene))
+			if (!CoAwait ProcessNode(child, rawScene))
 				return false;
 		}
 		return true;
@@ -235,7 +235,7 @@ private:
 		return textures;
 	}
 #endif
-	cppcoro::shared_task<AssimpMeshPtr> ProcessMesh(const aiMesh* rawMesh, const aiScene* scene) {
+	CoTask<AssimpMeshPtr> ProcessMesh(const aiMesh* rawMesh, const aiScene* scene) {
 		COROUTINE_VARIABLES_2(rawMesh, scene);
 
 		AssimpMeshPtr meshPtr = AssimpMesh::Create();
@@ -244,7 +244,7 @@ private:
 
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
-		mesh.mMaterial = co_await mResourceMng.CreateMaterial(mLaunchMode, loadParam);
+		mesh.mMaterial = CoAwait mResourceMng.CreateMaterial(mLaunchMode, loadParam);
 
 	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
 	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
@@ -365,14 +365,14 @@ private:
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 
 /********** AiAssetManager **********/
-cppcoro::shared_task<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes) ThreadSafe
+CoTask<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(launchMode, resMng, assetPath, redirectRes, aiRes);
-	//co_await mResourceMng.SwitchToLaunchService(launchMode)
+	//CoAwait mResourceMng.SwitchToLaunchService(launchMode)
 
 	AiScenePtr scene = IF_OR(aiRes, CreateInstance<AiScene>());
 	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
-	co_await loader->Execute(assetPath, redirectRes);
+	CoAwait loader->Execute(assetPath, redirectRes);
 	return scene;
 }
 

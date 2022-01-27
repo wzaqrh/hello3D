@@ -6,12 +6,12 @@
 namespace mir {
 namespace rend {
 
-cppcoro::shared_task<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string& imgName)
+CoTask<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string& imgName)
 {
 	COROUTINE_VARIABLES_2(loadParam, imgName);
 
-	if (! co_await Super::Init(loadParam)) 
-		co_return false;
+	if (! CoAwait Super::Init(loadParam)) 
+		CoReturn false;
 
 	if (loadParam.GetVariantName() == "Deprecate") {
 		SkyboxVertex Vertexs[4];
@@ -91,16 +91,16 @@ cppcoro::shared_task<bool> SkyBox::Init(const MaterialLoadParam& loadParam, cons
 		boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
 		if (boost::filesystem::exists(specularEnvPath)) {
 			boost::filesystem::path lutPath = dir / "lut.png";
-			mLutMap = co_await mResourceMng.CreateTextureByFile(mLaunchMode, lutPath.string());
+			mLutMap = CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, lutPath.string());
 
 			boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
-			mDiffuseEnvMap = co_await mResourceMng.CreateTextureByFile(mLaunchMode, diffuseEnvPath.string());
+			mDiffuseEnvMap = CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, diffuseEnvPath.string());
 
-			SetTexture(co_await mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string()));
+			SetTexture(CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string()));
 		}
 	}
 	else {
-		SetTexture(co_await mResourceMng.CreateTextureByFile(mLaunchMode, imgName));
+		SetTexture(CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, imgName));
 	}
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
@@ -109,7 +109,7 @@ cppcoro::shared_task<bool> SkyBox::Init(const MaterialLoadParam& loadParam, cons
 	Eigen::Vector3f pos2 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fLowH, 1.0f));
 	Eigen::Vector3f pos3 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fHighH, 1.0f));
 #endif
-	co_return true;
+	CoReturn true;
 }
 
 void SkyBox::GenRenderOperation(RenderOperationQueue& opList)

@@ -39,11 +39,12 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 		MakeResFormats(kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
-	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->cppcoro::shared_task<void> {
+	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<void> {
 		MaterialLoadParam loadParam(MAT_MODEL);
-		mGBufferSprite = co_await rend::Sprite::Create(__LaunchSync__, resMng, loadParam);
+		mGBufferSprite = CoAwait rend::Sprite::Create(__LaunchSync__, resMng, loadParam);
 		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
 		mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
+		CoReturnVoid;
 	}());
 }
 

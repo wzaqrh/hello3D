@@ -24,7 +24,7 @@ public:
 class MIR_CORE_API PostProcess : public RenderableSingleRenderOp 
 {
 	INHERIT_RENDERABLE_SINGLE_OP(PostProcess);
-	cppcoro::shared_task<bool> Init(const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
+	CoTask<bool> Init(const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
 public:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 protected:

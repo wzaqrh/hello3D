@@ -10,7 +10,7 @@ class TestGLTF : public App
 {
 protected:
 	void OnRender() override;
-	cppcoro::shared_task<void> OnPostInitDevice() override;
+	CoTask<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,7 +26,7 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-cppcoro::shared_task<void> TestGLTF::OnPostInitDevice()
+CoTask<void> TestGLTF::OnPostInitDevice()
 {
 	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
@@ -64,14 +64,14 @@ cppcoro::shared_task<void> TestGLTF::OnPostInitDevice()
 		
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
-		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky(2), skyMat));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky(2), skyMat));
 
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
-		mModel = co_await mRendFac->CreateAssimpModel(modelMat);
+		mModel = CoAwait mRendFac->CreateAssimpModel(modelMat);
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };
 		int caseIndex = mCaseIndex;
-		mTransform = co_await model.Init(modelNameArr[caseIndex], mModel);
+		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);
 	}break;
 	case 10: {
 		auto pt_light = mScneMng->AddPointLight();
@@ -83,6 +83,7 @@ cppcoro::shared_task<void> TestGLTF::OnPostInitDevice()
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}
+	CoReturnVoid;
 }
 
 void TestGLTF::OnRender()
