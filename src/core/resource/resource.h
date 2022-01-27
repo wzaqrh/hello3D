@@ -40,7 +40,6 @@ interface MIR_CORE_API IResource : boost::noncopyable
 	virtual ~IResource() {}
 	virtual ResourceState GetCurState() const = 0;
 	virtual void SetCurState(ResourceState state) = 0;
-	virtual void GetLoadDependencies(std::vector<std::shared_ptr<IResource>>& depends) {}
 public:
 	void SetPrepared() {
 		SetCurState(kResourceStatePrepared);

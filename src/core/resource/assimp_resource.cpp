@@ -169,7 +169,7 @@ private:
 		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
 		else return result.append(path.string());
 	}
-#if !USE_MATERIAL_INSTANCE
+#if 0
 	std::vector<ITexturePtr> loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const aiScene* scene) {
 		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
 		std::vector<ITexturePtr> textures;

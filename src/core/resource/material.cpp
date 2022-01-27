@@ -18,21 +18,6 @@ void Pass::AddSampler(ISamplerStatePtr sampler)
 	mSamplers.push_back(sampler);
 }
 
-void Pass::GetLoadDependencies(std::vector<IResourcePtr>& depends)
-{
-	depends.push_back(mInputLayout);
-	depends.push_back(mProgram);
-	for (const auto& sampler : mSamplers)
-		depends.push_back(sampler);
-}
-
-/********** Technique **********/
-void Technique::GetLoadDependencies(std::vector<IResourcePtr>& depends)
-{
-	for (const auto& pass : mElements)
-		depends.push_back(pass);
-}
-
 std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMode)
 {
 	std::vector<PassPtr> result;
@@ -42,13 +27,6 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 		}
 	}
 	return std::move(result);
-}
-
-/********** Shader **********/
-void Shader::GetLoadDependencies(std::vector<IResourcePtr>& depends)
-{
-	for (const auto& tech : mElements)
-		depends.push_back(tech);
 }
 
 /********** MaterialInstance **********/
@@ -97,19 +75,6 @@ MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& re
 	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerMaterial]);
 	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerFrame]);
 	return MaterialInstance(const_cast<Material*>(this)->shared_from_this(), newParametrs);
-}
-
-const ShaderPtr& Material::GetShader() const
-{
-	BOOST_ASSERT(mShaderVariant);
-	return mShaderVariant;
-}
-
-void Material::GetLoadDependencies(std::vector<IResourcePtr>& depends)
-{
-	depends.push_back(mShaderVariant);
-	for (auto& texture : mTextures)
-		depends.push_back(texture);
 }
 
 }

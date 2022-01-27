@@ -141,8 +141,7 @@ static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eige
 	}
 	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
 }
-void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera,
-	const std::vector<ILightPtr>& lights)
+void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<ILightPtr>& lights)
 {
 	if (lights.empty()) return;
 

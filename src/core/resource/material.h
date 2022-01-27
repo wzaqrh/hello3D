@@ -18,19 +18,9 @@ namespace res {
 class Pass : public ImplementResource<IResource>
 {
 	friend class MaterialFactory;
-	struct CBufferEntry {
-		MIR_MAKE_ALIGNED_OPERATOR_NEW;
-		bool IsValid() const { return Buffer != nullptr; }
-	public:
-		IContantBufferPtr Buffer;
-		std::string Name;
-		bool GetShareMode;
-	};
-	struct CBufferEntryVector : public tpl::Vector<CBufferEntry> {};
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddSampler(ISamplerStatePtr sampler);
-	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 public:
 	std::string mLightMode, mName;
 	PrimitiveTopology mTopoLogy;
@@ -47,7 +37,6 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddPass(PassPtr pass) { Add(pass); }
 
-	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 };
 
@@ -58,7 +47,6 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddTechnique(TechniquePtr technique) { Add(technique); }
 
-	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 	TechniquePtr CurTech() const { return mElements[mCurTechIdx]; }
 private:
 	int mCurTechIdx = 0;
@@ -98,10 +86,9 @@ public:
 	cppcoro::shared_task<bool> Build(Launch launchMode, ResourceManager& resMng);
 public:
 	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
-	const ShaderPtr& GetShader() const;
+	const ShaderPtr& GetShader() const { return mShaderVariant; }
 	TextureVector& GetTextures() { return mTextures; }
 	const TextureVector& GetTextures() const { return mTextures; }
-	void GetLoadDependencies(std::vector<IResourcePtr>& depends) override;
 private:
 	MaterialLoadParamBuilder mShaderVariantParam;
 	ShaderPtr mShaderVariant;
