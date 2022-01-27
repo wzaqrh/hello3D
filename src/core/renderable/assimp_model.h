@@ -67,7 +67,6 @@ private:
 private:
 	res::AiScenePtr mAiScene;
 	AiAnimeTree mAnimeTree;
-	std::function<void()> mInitAnimeTreeTask, mPlayAnimTask;
 
 	int mCurrentAnimIndex = -1;
 	float mElapse = 0.0f;

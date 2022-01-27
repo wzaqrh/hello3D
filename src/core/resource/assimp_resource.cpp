@@ -417,26 +417,7 @@ cppcoro::shared_task<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchM
 
 	AiScenePtr scene = IF_OR(aiRes, CreateInstance<AiScene>());
 	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
-#if USE_COROUTINE
 	co_await loader->Execute(assetPath, redirectRes);
-#else
-	if (launchMode == LaunchAsync) {
-		scene->SetPrepared();
-		resMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") % assetPath %redirectRes).str());
-			if (loader->ExecuteLoadRawData(assetPath, redirectRes) && loader->ExecuteSetupData()) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}, scene);
-	}
-	else {
-		TIME_PROFILE((boost::format("aiResFac.CreateAiScene %1% %2%") % assetPath %redirectRes).str());
-		scene->SetLoaded(nullptr != loader->Execute(assetPath, redirectRes));
-	}
-#endif
 	return scene;
 }
 

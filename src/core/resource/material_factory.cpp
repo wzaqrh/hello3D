@@ -84,12 +84,7 @@ cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMod
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
 
-#if USE_COROUTINE
 	shader->SetLoaded();
-#else
-	if (launchMode == LaunchSync) shader->SetLoaded();
-	else resMng.AddResourceDependencyRecursive(shader);
-#endif
 	return shader;
 }
 cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) 
@@ -158,12 +153,7 @@ cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launc
 		}
 	}
 
-#if USE_COROUTINE
 	material->SetLoaded(material->mShaderVariant->IsLoaded());
-#else
-	if (launchMode == LaunchSync) material->SetLoaded();
-	else resMng.AddResourceDependencyRecursive(material);
-#endif
 	return material;
 }
 cppcoro::shared_task<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material)
@@ -206,11 +196,7 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 	}
 #endif
 
-#if USE_COROUTINE
 	result->SetLoaded();
-#else
-	result->SetCurState(proto.GetCurState());
-#endif
 	return result;
 }
 TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resMng, const Technique& proto)
@@ -219,34 +205,19 @@ TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager&
 	for (const auto& protoPass : proto)
 		result->AddPass(this->ClonePass(launchMode, resMng, *protoPass));
 
-#if USE_COROUTINE
 	result->SetLoaded();
-#else
-	result->SetCurState(proto.GetCurState());
-#endif
 	return result;
 }
 ShaderPtr MaterialFactory::CloneShader(Launch launchMode, ResourceManager& resMng, const Shader& proto)
 {
-#if USE_COROUTINE
 	BOOST_ASSERT(proto.IsLoaded());
-#else
-	BOOST_ASSERT(!(launchMode == LaunchSync && !proto.IsLoaded()));
-#endif
 
 	ShaderPtr result = CreateInstance<Shader>();
 	for (const auto& protoTech : proto)
 		result->AddTechnique(this->CloneTechnique(launchMode, resMng, *protoTech));
 	result->mCurTechIdx = proto.mCurTechIdx;
 
-#if USE_COROUTINE
 	result->SetLoaded();
-#else
-	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
-		resMng.AddResourceDependencyRecursive(result);
-	}
-	result->SetCurState(proto.GetCurState());
-#endif
 	return result;
 }
 }

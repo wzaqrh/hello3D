@@ -14,30 +14,6 @@
 
 namespace mir {
 
-#if !USE_COROUTINE
-/********** LoadResourceJob **********/
-void LoadResourceJob::Init(Launch launchMode, LoadResourceCallback loadResCb)
-{
-	if (launchMode == LaunchAsync) {
-		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			typedef std::packaged_task<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourcePkgTask;
-			std::shared_ptr<LoadResourcePkgTask> pkg_task = CreateInstance<LoadResourcePkgTask>(loadResCb);
-			this->Result = std::move(pkg_task->get_future());
-			auto pool = Pool.lock();
-			if (pool) pool->Post([=]() { (*pkg_task)(res, nextJob); });
-		};
-	}
-	else {
-		this->Execute = [loadResCb, this](IResourcePtr res, LoadResourceJobPtr nextJob) {
-			std::packaged_task<bool(IResourcePtr, LoadResourceJobPtr)> pkg_task(loadResCb);
-			this->Result = std::move(pkg_task.get_future());
-			pkg_task(res, nextJob);
-		};
-	}
-}
-#endif
-
-/********** ResourceManager **********/
 ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& materialFac, res::AiResourceFactory& aiResFac, std::shared_ptr<cppcoro::io_service> ioService)
 	: mRenderSys(renderSys)
 	, mMaterialFac(materialFac)
@@ -47,14 +23,9 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& 
 	mLoadTaskCtxMapLock = mResDependGraphLock = false;
 
 	mMainThreadId = std::this_thread::get_id();
-
 	constexpr int CThreadPoolNumber = 8;
-#if USE_COROUTINE
 	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber, ilInit, ilShutDown);
 	mIoService = ioService;
-#else
-	mThreadPool = CreateInstance<ThreadPool>(CThreadPoolNumber, ilInit, ilShutDown);
-#endif
 	ilInit();
 }
 ResourceManager::~ResourceManager()
@@ -89,142 +60,8 @@ cppcoro::shared_task<void> ResourceManager::SwitchToLaunchService(Launch launchM
 }
 
 /********** Async Support **********/
-#if USE_COROUTINE
 void ResourceManager::UpdateForLoading() ThreadSafe
-{
-}
-#else
-void ResourceManager::UpdateForLoading() ThreadSafe
-{
-	ATOMIC_STATEMENT(mResDependGraphLock, this->mResDependencyGraph.GetTopNodes(mRDGTopNodes));
-	for (auto& res : mRDGTopNodes) {
-		BOOST_ASSERT(res->IsLoadingOrComplete());
-		if (res->IsLoading()) {
-			ResourceLoadTaskContext ctx;
-			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, ctx = this->mLoadTaskCtxByRes[res.get()]);
-			if (ctx.Res)
-			{
-				auto workExecute = std::move(ctx.WorkThreadJob->Execute);
-				if (workExecute) {
-					//TIME_PROFILE("\t\t'" + res->_Debug.GetResPath() + "' Execute");
-					workExecute(ctx.Res, ctx.MainThreadJob);
-				}
-				BOOST_ASSERT(ctx.WorkThreadJob->Execute == nullptr);
-
-				if (ctx.WorkThreadJob->Result.valid()
-					&& ctx.WorkThreadJob->Result.wait_for(std::chrono::milliseconds(0)) != std::future_status::timeout)
-				{
-					if (ctx.WorkThreadJob->Result.get())
-					{
-						auto mainExecute = std::move(ctx.MainThreadJob->Execute);
-						if (mainExecute) {
-							//TIME_PROFILE("\t\t'" + res->_Debug.GetResPath() + "' mainExecute");
-							mainExecute(ctx.Res, nullptr);
-							res->SetLoaded(ctx.MainThreadJob->Result.get());
-							if (res->IsLoaded()) ctx.FireResourceLoaded();
-						}
-						else {
-							res->SetLoaded(true);
-							ctx.FireResourceLoaded();
-						}
-					#if defined MIR_RESOURCE_DEBUG
-						DEBUG_LOG_DEBUG("\t\tres '" + res->_Debug.GetResPath() + "' loaded " + IF_AND_OR(res->IsLoaded(), "success", "fail"));
-					#endif
-					}
-					else {
-						res->SetLoaded(false);
-					#if defined MIR_RESOURCE_DEBUG
-						DEBUG_LOG_DEBUG("\t\tres '" + res->_Debug.GetResPath() + "' loaded fail");
-					#endif
-					}//ctx.WorkThreadJob.Result
-				}//ctx.WorkThreadJob.Result.wait success
-			}//ctx.Res
-			else {
-				res->SetLoaded(true);
-				ctx.FireResourceLoaded();
-			}
-		}
-	}
-	for (auto res : mRDGTopNodes) {
-		if (res->IsLoaded()) {
-			ATOMIC_STATEMENT(mResDependGraphLock, this->mResDependencyGraph.RemoveTopNode(res));
-			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, this->mLoadTaskCtxByRes.erase(res.get()));
-		}
-		else if (res->IsLoadedFailed()) {
-			ATOMIC_STATEMENT(mResDependGraphLock,
-				this->mResDependencyGraph.RemoveConnectedGraphByTopNode(res, [](IResourcePtr node) {
-				node->SetLoaded(false);
-			})
-			);
-			ATOMIC_STATEMENT(mLoadTaskCtxMapLock, this->mLoadTaskCtxByRes.erase(res.get()));
-		}
-	}
-}
-void ResourceManager::AddResourceDependencyRecursive(IResourcePtr to) ThreadSafe
-{
-	if (to && !to->IsLoadComplete()) {
-		std::vector<IResourcePtr> depends;
-	#if 1
-		to->GetLoadDependencies(depends);
-		if (!depends.empty()) {
-			to->SetLoading();
-			ATOMIC_STATEMENT(mResDependGraphLock,
-				this->mResDependencyGraph.AddLink(to, IF_AND_NULL(depends[0] && !depends[0]->IsLoaded(), depends[0]));
-			for (auto& from : boost::make_iterator_range(depends.begin() + 1, depends.end()))
-				if (from && !from->IsLoaded())
-					this->mResDependencyGraph.AddLink(to, from);
-			);
-			for (auto& iter : depends)
-				AddResourceDependencyRecursive(iter);
-		}
-		else {
-			AddResourceDependency(to, nullptr);
-		}
-	#else
-		size_t position = 0; to->GetLoadDependencies(depends);
-		while (position < depends.size()) {
-			size_t prev_position = position;
-			position = depends.size();
-			for (size_t i = prev_position; i < position; ++i) {
-				if (depends[i])
-					depends[i]->GetLoadDependencies(depends);
-			}
-		}
-		if (!depends.empty()) {
-			ATOMIC_STATEMENT(mResDependGraphLock,
-				this->mResDependencyGraph.AddLink(to, IF_AND_NULL(depends[0] && !depends[0]->IsLoaded(), depends[0]));
-			for (auto& from : boost::make_iterator_range(depends.begin() + 1, depends.end()))
-				if (from && !from->IsLoaded())
-					this->mResDependencyGraph.AddLink(to, from);
-			);
-		}
-		else {
-			AddResourceDependency(to, nullptr);
-		}
-	#endif
-	}
-}
-void ResourceManager::AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe
-{
-	if (to && !to->IsLoadComplete()) {
-		to->SetLoading();
-		ATOMIC_STATEMENT(mResDependGraphLock,
-			this->mResDependencyGraph.AddLink(to, IF_AND_NULL(from && !from->IsLoaded(), from)));
-	}
-}
-void ResourceManager::AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes) ThreadSafe
-{
-	AddResourceDependency(res, dependRes);
-	DEBUG_SET_CALL(res, launchMode);
-	ATOMIC_STATEMENT(mLoadTaskCtxMapLock,
-		this->mLoadTaskCtxByRes[res.get()].Init(launchMode, res, loadResCb, mThreadPool));
-}
-void ResourceManager::AddResourceLoadedObserver(IResourcePtr res, const ResourceLoadedCallback& resLoadedCB)
-{
-	ATOMIC_STATEMENT(mLoadTaskCtxMapLock,
-		this->mLoadTaskCtxByRes[res.get()].AddResourceLoadedCallback(resLoadedCB));
-}
-#endif
+{}
 
 /********** Create Program **********/
 inline boost::filesystem::path MakeShaderSourcePath(const std::string& name) {
@@ -425,11 +262,7 @@ cppcoro::shared_task<bool> ResourceManager::_LoadTextureByFile(ITexturePtr textu
 				if (convertFormat != kFormatUnknown)
 					bpp = d3d::BytePerPixel(static_cast<DXGI_FORMAT>(convertFormat));
 				int faceSize = width * height * bpp;
-			#if !USE_COROUTINE
-				auto& bytes = IF_AND_OR(nextJob, nextJob->Bytes, this->mTempBytes);//nextJob·Ç¿ÕÎªÒì²½ 
-			#else
 				std::vector<unsigned char> bytes;
-			#endif
 				bytes.resize(faceSize * faceCount * 2/*2 > 1+1/2+1/4+1/8...1/2n*/);
 				size_t bytes_position = 0;
 
@@ -473,26 +306,15 @@ cppcoro::shared_task<bool> ResourceManager::_LoadTextureByFile(ITexturePtr textu
 							}
 
 							if (sub_res_size == 0) {
-							#if !USE_COROUTINE
-								if (nextJob) 
-							#endif
-								{
-									size_t sub_res_size = mip_height * mip_width * bpp;
-									BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
-									ilCopyPixels(0, 0, 0,
-										mip_width, mip_height, 1,
-										ilFormat0, ilFormat1, &bytes[bytes_position]);
+								size_t sub_res_size = mip_height * mip_width * bpp;
+								BOOST_ASSERT(bytes_position + sub_res_size <= bytes.size());
+								ilCopyPixels(0, 0, 0,
+									mip_width, mip_height, 1,
+									ilFormat0, ilFormat1, &bytes[bytes_position]);
 
-									dataFM.Bytes = &bytes[bytes_position];
-									dataFM.Size = mip_width * bpp;
-									bytes_position += sub_res_size;
-								}
-							#if !USE_COROUTINE
-								else {
-									dataFM.Bytes = ilGetData();
-									dataFM.Size = mip_width * bpp;
-								}
-							#endif
+								dataFM.Bytes = &bytes[bytes_position];
+								dataFM.Size = mip_width * bpp;
+								bytes_position += sub_res_size;
 							}
 						}
 						else {

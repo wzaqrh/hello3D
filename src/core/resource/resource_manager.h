@@ -24,63 +24,14 @@ DECLARE_STRUCT(ThreadPool);
 DECLARE_STRUCT(LoadResourceJob);
 DECLARE_STRUCT(LoadResourceJob2);
 
-typedef std::function<bool(IResourcePtr res, LoadResourceJobPtr nextJob)> LoadResourceCallback;
-typedef std::function<void(IResourcePtr res)> ResourceLoadedCallback;
-#if USE_COROUTINE
-#else
-struct LoadResourceJob
-{
-	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void Init(Launch launchMode, LoadResourceCallback loadResCb);
-	DECLARE_LAUNCH_FUNCTIONS(void, Init);
-public:
-	std::function<void(IResourcePtr res, LoadResourceJobPtr nextJob)> Execute;
-	std::future<bool> Result;
-	std::vector<unsigned char> Bytes;
-	std::weak_ptr<ThreadPool> Pool;
-};
-#endif
-
 class MIR_CORE_API ResourceManager : boost::noncopyable
 {
-#if !USE_COROUTINE
-	struct ResourceLoadTaskContext {
-		ResourceLoadTaskContext() {
-			WorkThreadJob = CreateInstance<LoadResourceJob>();
-			MainThreadJob = CreateInstance<LoadResourceJob>();
-		}
-		void Init(Launch launchMode, IResourcePtr res, LoadResourceCallback loadResCb, ThreadPoolPtr pool) {
-			Res = res;
-			WorkThreadJob->Pool = MainThreadJob->Pool = pool;
-			WorkThreadJob->Init(launchMode, loadResCb);
-		}
-		TemplateT void AddResourceLoadedCallback(T&& cb) {
-			ResLoadedCb.push_back(std::forward<T>(cb));
-		}
-		void FireResourceLoaded() {
-			auto callbacks = std::move(ResLoadedCb);
-			for (auto& cb : callbacks)
-				cb(Res);
-		}
-	public:
-		IResourcePtr Res;
-		LoadResourceJobPtr WorkThreadJob, MainThreadJob;
-		std::vector<ResourceLoadedCallback> ResLoadedCb;
-	};
-#endif
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	ResourceManager(RenderSystem& renderSys, res::MaterialFactory& materialFac, res::AiResourceFactory& aiResFac, std::shared_ptr<cppcoro::io_service> ioService);
 	~ResourceManager();
 	void Dispose() ThreadSafe;
 	void UpdateForLoading() ThreadSafe;
-#if !USE_COROUTINE
-	void AddResourceDependencyRecursive(IResourcePtr to) ThreadSafe;
-	void AddResourceDependency(IResourcePtr to, IResourcePtr from) ThreadSafe;//to rely-on from
-	void AddLoadResourceJob(Launch launchMode, const LoadResourceCallback& loadResCb, IResourcePtr res, IResourcePtr dependRes = nullptr) ThreadSafe;
-	void AddResourceLoadedObserver(IResourcePtr res, const ResourceLoadedCallback& resLoadedCB) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(void, AddLoadResourceJob, ThreadSafe);
-#endif
 public:
 	RenderSystem& RenderSys() { return mRenderSys; }
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
@@ -167,111 +118,9 @@ private:
 	RenderSystem& mRenderSys;
 	res::MaterialFactory& mMaterialFac;
 	res::AiResourceFactory& mAiResourceFac;
-#if USE_COROUTINE
 	std::shared_ptr<cppcoro::static_thread_pool> mThreadPool;
 	std::shared_ptr<cppcoro::io_service> mIoService;
 	std::thread::id mMainThreadId;
-#else
-	class ResourceDependencyGraph {
-		typedef IResourcePtr ValueType;
-		typedef const ValueType& ConstReference;
-		struct GraphNode {
-			void AddLinkTo(ConstReference to) {
-				auto iter = std::find(LinkTo.begin(), LinkTo.end(), to);
-				if (iter == LinkTo.end())
-					LinkTo.push_back(to);
-			}
-			void RemoveLinkTo(ConstReference to) {
-				LinkTo.erase(std::remove(LinkTo.begin(), LinkTo.end(), to), LinkTo.end());
-			}
-			void AddLinkFrom(ConstReference from) {
-				auto iter = std::find(LinkFrom.begin(), LinkFrom.end(), from);
-				if (iter == LinkFrom.end())
-					LinkFrom.push_back(from);
-			}
-			void RemoveLinkFrom(ConstReference from) {
-				LinkFrom.erase(std::remove(LinkFrom.begin(), LinkFrom.end(), from), LinkFrom.end());
-			}
-			size_t InDgree() const { return LinkFrom.size(); }
-			size_t OutDegree() const { return LinkTo.size(); }
-		public:
-			ValueType Value;
-			std::vector<ValueType> LinkFrom;
-			std::vector<ValueType> LinkTo;
-		};
-		GraphNode* GetGraphNode(ConstReference node) {
-			auto iter = mNodeMap.find(node.get());
-			return iter != mNodeMap.end() && iter->second.Value ? &iter->second : nullptr;
-		}
-		bool HasGraphNode(ConstReference node) const {
-			auto iter = mNodeMap.find(node.get());
-			return iter != mNodeMap.end() && iter->second.Value;
-		}
-		void AddNode(ConstReference node) {
-			BOOST_ASSERT(node);
-			mNodeMap[node.get()].Value = node;
-		}
-	public:
-		void AddLink(ConstReference to, ConstReference from) {
-			BOOST_ASSERT(to);
-			if (from) {
-				if (!HasGraphNode(to)) AddNode(to);
-				if (!HasGraphNode(from)) AddNode(from);
-				mNodeMap[from.get()].AddLinkTo(to);
-				mNodeMap[to.get()].AddLinkFrom(from);
-			}
-			else {
-				AddNode(to);
-			}
-		}
-		void RemoveTopNode(ConstReference node) {
-			BOOST_ASSERT(node);
-			auto gnode = GetGraphNode(node);
-			if (gnode) {
-				BOOST_ASSERT(gnode->LinkFrom.empty());
-				for (auto& to : gnode->LinkTo) {
-					auto gto = GetGraphNode(to);
-					if (gto) gto->RemoveLinkFrom(node);
-				}
-			}
-			mNodeMap.erase(node.get());
-		}
-		template<typename _CallBack>
-		void RemoveConnectedGraphByTopNode(ConstReference node, _CallBack cb) {
-			BOOST_ASSERT(node);
-			auto gnode = GetGraphNode(node);
-			if (gnode) {
-				cb(node);
-				for (auto& from : gnode->LinkFrom) {
-					auto gfrom = GetGraphNode(from);
-					if (gfrom) gfrom->RemoveLinkTo(node);
-				}
-				for (auto& to : gnode->LinkTo) {
-					auto gto = GetGraphNode(to);
-					if (gto) gto->RemoveLinkFrom(node);
-				}
-				std::vector<ValueType> linkTo = std::move(gnode->LinkTo);
-				mNodeMap.erase(node.get());
-				for (auto& to : linkTo)
-					RemoveConnectedGraphByTopNode(to, cb);
-			}
-		}
-		const std::vector<ValueType>& GetTopNodes(std::vector<ValueType>& topNodes) {//Èë¶ÈÎª0
-			topNodes.clear();
-			for (auto& iter : mNodeMap) {
-				if (iter.second.Value && iter.second.InDgree() == 0)
-					topNodes.push_back(iter.second.Value);
-			}
-			return topNodes;
-		}
-	private:
-		mutable std::map<IResourceRawPtr, GraphNode> mNodeMap;
-	};
-	std::vector<IResourcePtr> mRDGTopNodes;
-	ResourceDependencyGraph mResDependencyGraph;
-	std::shared_ptr<ThreadPool> mThreadPool;
-	std::map<IResourceRawPtr, ResourceLoadTaskContext> mLoadTaskCtxByRes;
-#endif
 private:
 	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {

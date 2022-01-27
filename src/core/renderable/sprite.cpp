@@ -79,21 +79,8 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 #else
 	mTexture = texture;
 #endif
-#if USE_COROUTINE
-	BOOST_ASSERT(texture->IsLoaded());
+	BOOST_ASSERT(texture == nullptr || texture->IsLoaded());
 	SetSize(mSize);
-#else
-	if (texture && !mSize.any()) {
-		if (texture->IsLoaded()) {
-			SetSize(mSize);
-		}
-		else {
-			mResourceMng.AddResourceLoadedObserver(texture, [this](IResourcePtr res) {
-				SetSize(mSize);
-				});
-		}
-	}
-#endif
 }
 
 void Sprite::GenRenderOperation(RenderOperationQueue& opList)

@@ -125,22 +125,11 @@ cppcoro::shared_task<bool> AssimpModel::LoadModel(const std::string& assetPath, 
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 
 	mAiScene = co_await mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
-#if USE_COROUTINE
 	if (!mAiScene->IsLoaded()) return false;
 
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
 	Update(0);
-#else
-	if (mAiScene->IsLoaded()) {
-		mAnimeTree.Init(mAiScene->GetSerializeNodes());
-		Update(0);
-	}
-	else {
-		mInitAnimeTreeTask = [this]() {
-			mAnimeTree.Init(mAiScene->GetSerializeNodes());
-		};
-	}
-#endif
+	return true;
 }
 
 const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex)
@@ -172,8 +161,7 @@ const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const res::AiNodePt
 	return mTempBoneMatrices;
 }
 
-void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree,
-	std::vector<res::AiNodePtr>& nodeVec, EvaluateTransforms& eval)
+void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree, std::vector<res::AiNodePtr>& nodeVec, EvaluateTransforms& eval)
 {
 	nodeVec.push_back(curNode);
 
@@ -192,12 +180,8 @@ void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree,
 
 void AssimpModel::Update(float dt)
 {
-	if (!mAiScene->IsLoaded())
-		return;
-	if (auto task = std::move(mInitAnimeTreeTask))
-		task();
-	if (auto task = std::move(mPlayAnimTask))
-		task();
+	BOOST_ASSERT(mAiScene->IsLoaded());
+	if (mAiScene == nullptr || !mAiScene->IsLoaded()) return;
 
 	std::vector<res::AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
@@ -241,28 +225,23 @@ void AssimpModel::Update(float dt)
 
 void AssimpModel::PlayAnim(int Index)
 {
+	BOOST_ASSERT(mAiScene->IsLoaded());
+	if (mAiScene == nullptr || !mAiScene->IsLoaded()) return;
+
 	mCurrentAnimIndex = Index;
 	mElapse = 0;
-	if (mAiScene == nullptr) 
-		return;
+	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) return;
 
-	auto playAnimTask = [this]() {
-		if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) return;
-
-		const aiAnimation* currentAnim = mAiScene->mScene->mAnimations[mCurrentAnimIndex];
-
-		for (auto& iter : *mAiScene) {
-			std::string iterName = iter->RawNode->mName.C_Str();
-			for (unsigned int a = 0; a < currentAnim->mNumChannels; a++) {
-				if (iterName == currentAnim->mChannels[a]->mNodeName.C_Str()) {
-					mAnimeTree.GetNode(iter).ChannelIndex = a;
-					break;
-				}
+	const aiAnimation* currentAnim = mAiScene->mScene->mAnimations[mCurrentAnimIndex];
+	for (auto& iter : *mAiScene) {
+		std::string iterName = iter->RawNode->mName.C_Str();
+		for (unsigned int a = 0; a < currentAnim->mNumChannels; a++) {
+			if (iterName == currentAnim->mChannels[a]->mNodeName.C_Str()) {
+				mAnimeTree.GetNode(iter).ChannelIndex = a;
+				break;
 			}
 		}
-	};
-	if (mAiScene->IsLoaded()) playAnimTask();
-	else mPlayAnimTask = playAnimTask;
+	}
 }
 
 void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList)
