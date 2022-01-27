@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_export.h"
 #include "core/predeclare.h"
+#include "core/base/cppcoro.h"
 #include "core/base/stl.h"
 #include "core/base/math.h"
 

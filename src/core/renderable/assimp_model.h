@@ -53,13 +53,10 @@ public:
 
 class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp 
 {
-	typedef RenderableSingleRenderOp Super;
-	friend class RenderableFactory;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpModel);
-	AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matType);
+	INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(AssimpModel);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void LoadModel(const std::string& assetPath, const std::string& redirectResource = "");
+	cppcoro::shared_task<bool> LoadModel(const std::string& assetPath, const std::string& redirectResource = "");
 	void PlayAnim(int Index);
 
 	void Update(float dt);

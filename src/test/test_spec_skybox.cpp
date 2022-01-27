@@ -11,13 +11,13 @@ class TestSpecSkybox : public App
 {
 protected:
 	void OnRender() override;
-	void OnPostInitDevice() override;
+	cppcoro::shared_task<void> OnPostInitDevice() override;
 	void OnInitCamera() override {}
 };
 /*mCaseIndex
 
 */
-void TestSpecSkybox::OnPostInitDevice()
+cppcoro::shared_task<void> TestSpecSkybox::OnPostInitDevice()
 {
 	switch (mCaseIndex) {
 	case 0: {
@@ -25,21 +25,21 @@ void TestSpecSkybox::OnPostInitDevice()
 		MaterialLoadParamBuilder matname = MAT_SKYBOX;
 		matname["CubeMapIsRightHandness"] = TRUE;
 		if (mCaseSecondIndex == 0)
-			camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::sky::footprint_court::Diffuse(), matname));
+			camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::sky::footprint_court::Diffuse(), matname));
 		else
-			camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::sky::footprint_court::Specular(), matname));
+			camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::sky::footprint_court::Specular(), matname));
 	}break;
 	case 1: {
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(mCaseSecondIndex % 3)));//bc1a mipmap cube
+		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky(mCaseSecondIndex % 3)));//bc1a mipmap cube
 	}break;
 	case 2: {
 		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
+		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
 	}break;
 	case 3: {
 		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky(), MAT_SKYBOX "-Deprecate"));//bc1a mipmap cube
+		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky(), MAT_SKYBOX "-Deprecate"));//bc1a mipmap cube
 	}break;
 	default:
 		break;

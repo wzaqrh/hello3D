@@ -11,11 +11,9 @@ namespace renderable {
 
 class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 {
-	typedef RenderableSingleRenderOp Super;
-	friend class RenderableFactory;
 	friend class RenderPipeline;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(Sprite);
-	Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
+	INHERIT_RENDERABLE_SINGLE_OP(Sprite);
+	Sprite(Launch launchMode, ResourceManager& resourceMng);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetTexture(const ITexturePtr& Texture) override;

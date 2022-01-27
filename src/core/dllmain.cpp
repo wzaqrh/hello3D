@@ -27,8 +27,10 @@
 #pragma comment(lib, "assimp.lib")
 #pragma comment(lib, "freetype.lib")
 #ifdef _DEBUG
+#pragma comment(lib, "cppcorod.lib")
 #pragma comment(lib, "DevILd.lib")
 #else
+#pragma comment(lib, "cppcoro.lib")
 #pragma comment(lib, "DevIL.lib")
 #endif
 

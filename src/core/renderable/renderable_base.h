@@ -1,5 +1,6 @@
 #pragma once
 #include "core/mir_export.h"
+#include "core/base/cppcoro.h"
 #include "core/base/declare_macros.h"
 #include "core/base/launch.h"
 #include "core/base/material_load_param.h"
@@ -10,9 +11,11 @@ namespace renderable {
 
 struct MIR_CORE_API RenderableSingleRenderOp : public IRenderable
 {
-	friend class RenderableFactory;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(RenderableSingleRenderOp);
-	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
+#define INHERIT_RENDERABLE_SINGLE_OP(CLS) DECLARE_STATIC_TASK_CREATE_CONSTRUCTOR(CLS, Launch, ResourceManager&); typedef RenderableSingleRenderOp Super; friend class RenderableFactory
+#define INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(CLS) INHERIT_RENDERABLE_SINGLE_OP(CLS); CLS(Launch launchMode, ResourceManager& resourceMng) :Super(launchMode, resourceMng) {}
+	INHERIT_RENDERABLE_SINGLE_OP(RenderableSingleRenderOp);
+	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng);
+	cppcoro::shared_task<bool> Init(const MaterialLoadParam& matName);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }

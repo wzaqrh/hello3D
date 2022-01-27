@@ -10,11 +10,8 @@ namespace renderable {
 
 class MIR_CORE_API Mesh : public RenderableSingleRenderOp 
 {
-	typedef RenderableSingleRenderOp Super;
-	friend class RenderableFactory;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(Mesh);
-	Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, 
-		int vertCount = 1024, int indexCount = 1024);
+	INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(Mesh);
+	cppcoro::shared_task<bool> Init(const MaterialLoadParam& matName, int vertCount = 1024, int indexCount = 1024);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Clear();
@@ -30,7 +27,7 @@ private:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	int mVertPos = 0, mVertDirty = false;
-	std::vector<vbSurface> mVertices;
+	vbSurfaceVector mVertices;
 
 	int mIndiceDirty = false;
 	std::vector<unsigned int> mIndices;

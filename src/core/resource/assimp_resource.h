@@ -11,12 +11,14 @@
 #include <assimp/IOStream.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include "core/base/cppcoro.h"
 #include "core/rendersys/predeclare.h"
 #include "core/resource/resource.h"
 #include "core/resource/assimp_mesh.h"
 
 namespace mir {
 
+#if !USE_MATERIAL_INSTANCE
 enum TextureType {
 	kTextureDiffuse = 0,
 	kTextureNormal = 1,
@@ -31,6 +33,7 @@ enum TexturePbrType {
 	kTexturePbrEmissive = 5,
 	kTexturePbrMax = 6
 };
+#endif
 
 namespace res {
 
@@ -82,8 +85,7 @@ private:
 class AiResourceFactory {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	AiScenePtr CreateAiScene(Launch launchMode, ResourceManager& resourceMng,
-		const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes = nullptr);
+	cppcoro::shared_task<AiScenePtr> CreateAiScene(Launch launchMode, ResourceManager& resourceMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes = nullptr);
 };
 
 }

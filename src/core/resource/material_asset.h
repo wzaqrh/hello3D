@@ -1,5 +1,7 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/base/cppcoro.h"
+#include "core/base/declare_macros.h"
 #include "core/base/tpl/binary.h"
 #include "core/base/material_load_param.h"
 #include "core/rendersys/hardware_buffer.h"
@@ -10,15 +12,12 @@
 namespace mir {
 namespace res {
 namespace mat_asset {
-
 struct AttributeNode {
 	bool IsValid() const { return !Layout.empty(); }
 public:
 	std::vector<LayoutInputElement> Layout;
 };
-
 using UniformNode = UniformParameters;
-
 struct SamplerDescEx : public SamplerDesc {
 	bool IsValid() const { return !ShortName.empty(); }
 	const std::string& GetName() const { return ShortName; }
@@ -41,7 +40,6 @@ struct SamplerNode : public tpl::Vector<SamplerDescEx> {};
 }
 
 template <> struct tpl::has_function_valid<res::mat_asset::AttributeNode> : public std::true_type {};
-
 template <> struct tpl::has_function_valid<res::mat_asset::SamplerDescEx> : public std::true_type {};
 template <> struct tpl::has_function_name<res::mat_asset::SamplerDescEx> : public std::true_type {};
 
@@ -83,6 +81,7 @@ struct UniformNodeVector : public tpl::Vector<UniformNode> {
 			vis(uniform);
 	}
 };
+
 struct ProgramNode {
 	void MergeNoOverride(const ProgramNode& other) {
 		Topo = other.Topo;
@@ -103,7 +102,6 @@ public:
 	SamplerNode Samplers;
 	ShaderCompileDescEx VertexSCD, PixelSCD;
 };
-
 struct PassNode {
 	ProgramNode Program;
 	std::string LightMode, Name, ShortName;
@@ -155,7 +153,6 @@ struct MaterialNode {
 	ShaderNode Shader;
 	std::map<std::string, TextureProperty> TextureProperies;
 	std::map<std::string, std::string> UniformProperies; 
-
 };
 
 class ShaderNodeManager;
@@ -164,8 +161,8 @@ class MaterialAssetManager : boost::noncopyable
 {
 public:
 	MaterialAssetManager();
-	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode);
-	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode);
+	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe;
+	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) ThreadSafe;
 private:
 	std::shared_ptr<ShaderNodeManager> mShaderNodeMng;
 	std::shared_ptr<MaterialNodeManager> mMaterialNodeMng;

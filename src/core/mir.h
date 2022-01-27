@@ -1,6 +1,7 @@
 #pragma once
 #include "core/mir_config.h"
 #include "core/mir_export.h"
+#include "core/base/cppcoro.h"
 #include "core/base/launch.h"
 #include "core/rendersys/predeclare.h"
 #include "core/renderable/predeclare.h"
@@ -27,11 +28,13 @@ public:
 	inline const RenderPipelinePtr& RenderPipe() const { return mRenderPipe; }
 	inline const RenderableFactoryPtr& RenderableFac() const { return mRenderableFac; }
 	inline const SceneManagerPtr& SceneMng() const { return mSceneMng; }
+	void ExecuteTaskSync(const cppcoro::shared_task<void>& task);
 private:
 	Launch mLaunchMode;
 	RenderSystemPtr mRenderSys;
 	res::MaterialFactoryPtr mMaterialFac;
 	res::AiResourceFactoryPtr mAiResourceFac;
+	std::shared_ptr<cppcoro::io_service> mIoService;
 	ResourceManagerPtr mResourceMng;
 	RenderPipelinePtr mRenderPipe;
 	RenderableFactoryPtr mRenderableFac;

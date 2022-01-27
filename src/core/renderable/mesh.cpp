@@ -1,3 +1,4 @@
+#include "core/base/debug.h"
 #include "core/renderable/mesh.h"
 #include "core/resource/resource_manager.h"
 
@@ -5,16 +6,21 @@ namespace mir {
 namespace renderable {
 
 /********** Mesh **********/
-Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, int vertCount, int indexCount)
-	:Super(launchMode, resourceMng, matName)
+cppcoro::shared_task<bool> Mesh::Init(const MaterialLoadParam& loadParam, int vertCount, int indexCount)
 {
+	COROUTINE_VARIABLES_3(loadParam, vertCount, indexCount);
+
+	if (!co_await Super::Init(loadParam))
+		co_return false;
+
 	mIndices.resize(indexCount);
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(mIndices));
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(mIndices));
 
 	mVertices.resize(vertCount);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
+	co_return true;
 }
 
 void Mesh::GenRenderOperation(RenderOperationQueue& opList)

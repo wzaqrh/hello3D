@@ -9,8 +9,8 @@
 
 using namespace mir;
 
-#define AppLaunchMode __LaunchSync__
-//#define AppLaunchMode __LaunchAsync__
+//#define AppLaunchMode __LaunchSync__
+#define AppLaunchMode __LaunchAsync__
 
 App::App()
 {
@@ -38,7 +38,7 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 	SetMir(mContext);
 	OnInitCamera();
 	OnInitLight();
-	OnPostInitDevice();
+	mContext->ExecuteTaskSync(OnPostInitDevice());
 
 	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
 	mTimer = new mir::debug::Timer;
@@ -48,6 +48,7 @@ void App::OnInitCamera()
 {
 	mContext->SceneMng()->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 }
+
 void App::OnInitLight()
 {
 	mContext->SceneMng()->AddPointLight();
@@ -111,10 +112,10 @@ void App::Render()
 		mTransform->SetRotation(quat);
 
 		if (mInput->IsKeyPressed(DIK_UPARROW)) {
-			mTransform->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(0,0,5));
+			mTransform->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(0, 0, 5));
 		}
 		else if (mInput->IsKeyPressed(DIK_DOWNARROW)) {
-			mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0,0,5));
+			mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0, 0, 5));
 		}
 	}
 

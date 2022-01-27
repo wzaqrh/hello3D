@@ -1,14 +1,19 @@
 #include <boost/filesystem.hpp>
+#include "core/base/debug.h"
 #include "core/renderable/skybox.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {
 namespace renderable {
 
-SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, const std::string& imgName)
-	:Super(launchMode, resourceMng, matName)
+cppcoro::shared_task<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string& imgName)
 {
-	if (matName.GetVariantName() == "Deprecate") {
+	COROUTINE_VARIABLES_2(loadParam, imgName);
+
+	if (! co_await Super::Init(loadParam)) 
+		co_return false;
+
+	if (loadParam.GetVariantName() == "Deprecate") {
 		SkyboxVertex Vertexs[4];
 		float fHighW = -1.0f - (1.0f / (float)mResourceMng.WinSize().x());
 		float fHighH = -1.0f - (1.0f / (float)mResourceMng.WinSize().y());
@@ -18,7 +23,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 		Vertexs[1].Pos = Eigen::Vector3f(fLowW, fHighH, 1.0f);
 		Vertexs[2].Pos = Eigen::Vector3f(fHighW, fLowH, 1.0f);
 		Vertexs[3].Pos = Eigen::Vector3f(fHighW, fHighH, 1.0f);
-		mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
+		mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
 	}
 	else {
 		SkyboxVertex Vertexs[36];
@@ -77,7 +82,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 
 		std::vector<SkyboxVertex> vec(Vertexs + 0, Vertexs + 36);
 		//face = 3; vec.assign(Vertexs + face * 6, Vertexs + (face + 1) * 6);
-		mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
+		mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 
 	if (!boost::filesystem::is_regular_file(imgName)) {
@@ -86,23 +91,23 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 		boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
 		if (boost::filesystem::exists(specularEnvPath)) {
 			boost::filesystem::path lutPath = dir / "lut.png";
-			mLutMap = mResourceMng.CreateTextureByFile(launchMode, lutPath.string());
+			mLutMap = co_await mResourceMng.CreateTextureByFile(mLaunchMode, lutPath.string());
 
 			boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
-			mDiffuseEnvMap = mResourceMng.CreateTextureByFile(launchMode, diffuseEnvPath.string());
+			mDiffuseEnvMap = co_await mResourceMng.CreateTextureByFile(mLaunchMode, diffuseEnvPath.string());
 
 		#if USE_MATERIAL_INSTANCE
-			SetTexture(mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string()));
+			SetTexture(co_await mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string()));
 		#else
-			mTexture = mResourceMng.CreateTextureByFile(launchMode, specularEnvPath.string());
+			mTexture = mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string());
 		#endif
 		}
 	}
 	else {
 	#if USE_MATERIAL_INSTANCE
-		SetTexture(mResourceMng.CreateTextureByFile(launchMode, imgName));
+		SetTexture(co_await mResourceMng.CreateTextureByFile(mLaunchMode, imgName));
 	#else
-		mTexture = mResourceMng.CreateTextureByFile(launchMode, imgName);
+		mTexture = mResourceMng.CreateTextureByFile(mLaunchMode, imgName);
 	#endif
 	}
 #if 0
@@ -112,6 +117,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const MaterialLo
 	Eigen::Vector3f pos2 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fLowH, 1.0f));
 	Eigen::Vector3f pos3 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fHighH, 1.0f));
 #endif
+	co_return true;
 }
 
 void SkyBox::GenRenderOperation(RenderOperationQueue& opList)

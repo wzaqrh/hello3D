@@ -6,8 +6,8 @@ namespace mir {
 namespace renderable {
 
 /********** TSprite **********/
-Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
-	: Super(launchMode, resourceMng, matName)
+Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng)
+	: Super(launchMode, resourceMng)
 	, mQuad(Eigen::Vector2f::Zero(), Eigen::Vector2f::Zero())
 	, mQuadDirty(true)
 	, mColor(Eigen::Vector4f::Ones())
@@ -79,6 +79,10 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 #else
 	mTexture = texture;
 #endif
+#if USE_COROUTINE
+	BOOST_ASSERT(texture->IsLoaded());
+	SetSize(mSize);
+#else
 	if (texture && !mSize.any()) {
 		if (texture->IsLoaded()) {
 			SetSize(mSize);
@@ -86,9 +90,10 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 		else {
 			mResourceMng.AddResourceLoadedObserver(texture, [this](IResourcePtr res) {
 				SetSize(mSize);
-			});
+				});
 		}
 	}
+#endif
 }
 
 void Sprite::GenRenderOperation(RenderOperationQueue& opList)

@@ -11,10 +11,8 @@ namespace renderable {
 
 class MIR_CORE_API Cube : public RenderableSingleRenderOp
 {
-	typedef RenderableSingleRenderOp Super;
-	friend class RenderableFactory;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(Cube);
-	Cube(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName);
+	INHERIT_RENDERABLE_SINGLE_OP(Cube);
+	Cube(Launch launchMode, ResourceManager& resourceMng);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetPosition(const Eigen::Vector3f& pos);

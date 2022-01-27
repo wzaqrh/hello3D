@@ -55,9 +55,9 @@ std::string Specular() {
 
 namespace cube {
 namespace far_plane {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeBig = 8192;
-	return rendFac->CreateCube(
+	return co_await rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Far()),
 		Eigen::Vector3f(SizeBig, SizeBig, 1),
 		0xffff6347,
@@ -66,9 +66,9 @@ mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector
 }
 }
 namespace near_plane {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeSmall = 4;
-	return rendFac->CreateCube(
+	return co_await rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Near()),
 		Eigen::Vector3f(SizeSmall, SizeSmall, 1),
 		0xffff4763,
@@ -77,9 +77,9 @@ mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector
 }
 }
 namespace floor {
-mir::renderable::CubePtr Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
+cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
 	constexpr int Inf = 65536;
-	return rendFac->CreateCube(
+	return co_await rendFac->CreateCube(
 		Eigen::Vector3f(0, y, Inf / 2),
 		Eigen::Vector3f(Inf, 1, Inf / 2),
 		0xffff4763,
@@ -150,103 +150,14 @@ void model::Init(const std::string& name)
 		mPos = Eigen::Vector3f(0, 0, 0);
 	}
 }
-mir::TransformPtr model::Init(const std::string& name, mir::renderable::AssimpModelPtr aiModel)
+cppcoro::shared_task<mir::TransformPtr> model::Init(const std::string& name, mir::renderable::AssimpModelPtr aiModel)
 {
 	Init(name);
-	aiModel->LoadModel(Path(), Rd());
+	co_await aiModel->LoadModel(Path(), Rd());
 	mir::TransformPtr transform = aiModel->GetTransform();
 	transform->SetScale(Scale());
 	transform->SetPosition(Pos());
 	return transform;
-}
-
-namespace model_nanosuit {
-std::string Path() { return "model/nanosuit/nanosuit.obj"; }
-std::string Rd() { return R"({"ext":"png","dir":"model/nanosuit/"})"; }
-constexpr float scale = 1;
-Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
-Eigen::Vector3f Pos() { return Eigen::Vector3f(0, -5, 0); }
-mir::TransformPtr Init(mir::renderable::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
-	model->LoadModel(Path(), Rd());
-	mir::TransformPtr transform = model->GetTransform();
-	transform->SetScale(Scale());
-	transform->SetPosition(mWinCenter + Pos());
-	return transform;
-}
-}
-
-namespace model_mir {
-std::string Path() { return "model/Male03/Male02.FBX"; }
-std::string Rd() { return R"({"ext":"png","dir":"model/Male03/"})"; }
-constexpr float scale = 0.05;
-Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
-Eigen::Vector3f Pos() { return Eigen::Vector3f(0, -5, 0); }
-mir::TransformPtr Init(mir::renderable::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
-	model->LoadModel(Path(), Rd());
-	mir::TransformPtr transform = model->GetTransform();
-	transform->SetScale(Scale());
-	transform->SetPosition(mWinCenter + Pos());
-	return transform;
-}
-}
-
-namespace model_sship {
-std::string Path() { return "model/Spaceship/Spaceship.fbx"; }
-std::string Rd() { return R"({"dir":"model/Spaceship/"})"; }
-constexpr float scale = 0.01;
-Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
-Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
-mir::TransformPtr Init(mir::renderable::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
-	model->LoadModel(Path(), Rd());
-	mir::TransformPtr transform = model->GetTransform();
-	transform->SetScale(Scale());
-	transform->SetPosition(mWinCenter + Pos());
-	return transform;
-}
-}
-
-namespace model_rock {
-std::string Path() { return "model/rock/rock.obj"; }
-std::string Rd() { return R"({"dir":"model/rock/"})"; }
-Eigen::Vector3f Scale() { return Eigen::Vector3f(1, 1, 1); }
-Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
-mir::TransformPtr Init(mir::renderable::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
-	model->LoadModel(Path(), Rd());
-	mir::TransformPtr transform = model->GetTransform();
-	transform->SetScale(Scale());
-	transform->SetPosition(mWinCenter + Pos());
-	return transform;
-}
-}
-
-namespace model_floor {
-std::string Path() { return "model/floor/floor.obj"; }
-std::string Rd() { return R"({"dir":"model/floor/"})"; }
-constexpr float scale = 0.3;
-Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
-Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
-mir::TransformPtr Init(mir::renderable::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
-	model->LoadModel(Path(), Rd());
-	mir::TransformPtr transform = model->GetTransform();
-	transform->SetScale(Scale());
-	transform->SetPosition(mWinCenter + Pos());
-	return transform;
-}
-}
-
-namespace model_planet {
-std::string Path() { return "model/planet/planet.obj"; }
-std::string Rd() { return R"({"dir":"model/planet/"})"; }
-constexpr float scale = 0.1;
-Eigen::Vector3f Scale() { return Eigen::Vector3f(scale, scale, scale); }
-Eigen::Vector3f Pos() { return Eigen::Vector3f(0, 0, 0); }
-mir::TransformPtr Init(mir::renderable::AssimpModelPtr model, Eigen::Vector3f mWinCenter) {
-	model->LoadModel(Path(), Rd());
-	mir::TransformPtr transform = model->GetTransform();
-	transform->SetScale(Scale());
-	transform->SetPosition(mWinCenter + Pos());
-	return transform;
-}
 }
 }
 }

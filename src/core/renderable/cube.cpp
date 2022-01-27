@@ -6,8 +6,8 @@ namespace mir {
 namespace renderable {
 
 /********** Cube **********/
-Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
-	: Super(launchMode, resourceMng, matName)
+Cube::Cube(Launch launchMode, ResourceManager& resourceMng)
+	: Super(launchMode, resourceMng)
 	, mVertexDirty(true)
 	, mHalfSize(Eigen::Vector3f::Ones())
 	, mPosition(Eigen::Vector3f::Zero())

@@ -27,9 +27,9 @@ enum PipeLineTextureSlot {
 };
 
 RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
-	:mRenderSys(renderSys)
-	,mStatesBlockPtr(CreateInstance<RenderStatesBlock>(renderSys))
-	,mStatesBlock(*mStatesBlockPtr)
+	: mRenderSys(renderSys)
+	, mStatesBlockPtr(CreateInstance<RenderStatesBlock>(renderSys))
+	, mStatesBlock(*mStatesBlockPtr)
 {
 	mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), 
 		MakeResFormats(kFormatUnknown, kFormatD24UNormS8UInt));
@@ -39,9 +39,12 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 		MakeResFormats(kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
-	mGBufferSprite = renderable::Sprite::Create(__LaunchSync__, resMng, MAT_MODEL);
-	mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
-	mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
+	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->cppcoro::shared_task<void> {
+		MaterialLoadParam loadParam(MAT_MODEL);
+		mGBufferSprite = co_await renderable::Sprite::Create(__LaunchSync__, resMng, loadParam);
+		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
+		mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
+	}());
 }
 
 void RenderPipeline::BindPass(const res::PassPtr& pass)

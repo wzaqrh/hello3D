@@ -7,6 +7,7 @@
 #include <Eigen/Geometry>
 #include <memory>
 #include <boost/math/constants/constants.hpp>
+#include "core/base/cppcoro.h"
 
 typedef int BOOL;
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform3fAffine;
@@ -27,16 +28,21 @@ struct CreateInstanceFuncor {
 	std::shared_ptr<_Instance> operator()() const {
 		return std::allocate_shared<_Instance>(mir_allocator<_Instance>());
 	}
-	template <typename... T>
-	std::shared_ptr<_Instance> operator()(T &&...args) const {
+	template <typename... T> std::shared_ptr<_Instance> operator()(T &&...args) const {
 		return std::allocate_shared<_Instance>(mir_allocator<_Instance>(), std::forward<T>(args)...);
 	}
 };
 
-template <class _Instance, typename... T>
-inline std::shared_ptr<_Instance> CreateInstance(T &&...args) {
+template <class _Instance, typename... T> inline std::shared_ptr<_Instance> CreateInstance(T &&...args) {
 	return CreateInstanceFuncor<_Instance>()(std::forward<T>(args)...);
 }
+template <class _Instance, typename... T> inline cppcoro::shared_task<std::shared_ptr<_Instance>> CreateInstanceTask(T &&...args) {
+	auto res = CreateInstanceFuncor<_Instance>()(std::forward<T>(args)...);
+	if (co_await res->Init()) return res;
+	else return nullptr;
+}
+
+
 }
 
 namespace mir {

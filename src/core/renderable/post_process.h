@@ -23,10 +23,8 @@ public:
 };
 class MIR_CORE_API PostProcess : public RenderableSingleRenderOp 
 {
-	typedef RenderableSingleRenderOp Super;
-	friend class RenderableFactory;
-protected:
-	PostProcess(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
+	INHERIT_RENDERABLE_SINGLE_OP(PostProcess);
+	cppcoro::shared_task<bool> Init(const MaterialLoadParam& matName, IFrameBufferPtr mainTex);
 public:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 protected:

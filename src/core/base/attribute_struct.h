@@ -13,6 +13,7 @@ public:
 	unsigned int Color;
 	Eigen::Vector2f Tex;
 };
+using vbSurfaceVector = std::vector<vbSurface, mir_allocator<vbSurface>>;
 
 struct vbSurfaceQuad 
 {
@@ -63,5 +64,6 @@ public:
 	Eigen::Vector4f BlendWeights;
 	Eigen::Vector4i BlendIndices;
 };
+using vbSkeletonVector = std::vector<vbSkeleton, mir_allocator<vbSkeleton>>;
 
 }

@@ -2,6 +2,7 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
+#include "core/base/cppcoro.h"
 #include "core/base/declare_macros.h"
 #include "core/base/data.h"
 #include "core/base/base_type.h"
@@ -115,7 +116,7 @@ class MIR_CORE_API Material : public std::enable_shared_from_this<Material>, pub
 public:
 	Material();
 	void EnableKeyword(const std::string& macroName, int value = TRUE);
-	void Build(Launch launchMode, ResourceManager& resMng);
+	cppcoro::shared_task<bool> Build(Launch launchMode, ResourceManager& resMng);
 public:
 	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
 	const ShaderPtr& GetShader() const;

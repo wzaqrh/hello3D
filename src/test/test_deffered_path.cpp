@@ -10,7 +10,7 @@ class TestDefferedPath : public App
 {
 protected:
 	void OnRender() override;
-	void OnPostInitDevice() override;
+	cppcoro::shared_task<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -21,10 +21,10 @@ private:
 2延迟,3正向: 透视相机 正向平行光  对比观察飞机
 */
 
-void TestDefferedPath::OnPostInitDevice()
+cppcoro::shared_task<void> TestDefferedPath::OnPostInitDevice()
 {
 	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
-	camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
+	camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
 	camera->SetRenderingPath(RenderingPath((mCaseIndex+1)&1));
 
 	switch (mCaseIndex) {
@@ -33,15 +33,15 @@ void TestDefferedPath::OnPostInitDevice()
 		mScneMng->AddDirectLight();
 		mScneMng->AddPointLight()->SetPosition(test1::vec::PosLight());
 
-		mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
-		mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+		mModel = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = co_await test1::res::model().Init("spaceship", mModel);
 	}break;
 	case 2:
 	case 3:{
 		mScneMng->AddDirectLight();
 
-		mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
-		mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+		mModel = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = co_await test1::res::model().Init("spaceship", mModel);
 	}break;
 	default:
 		break;

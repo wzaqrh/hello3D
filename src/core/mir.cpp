@@ -23,9 +23,11 @@ bool Mir::Initialize(HWND hWnd) {
 		return false;
 	}
 
+	mIoService = CreateInstance<cppcoro::io_service>(8);
+
 	mMaterialFac = CreateInstance<res::MaterialFactory>();
 	mAiResourceFac = CreateInstance<res::AiResourceFactory>();
-	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac);
+	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac, mIoService);
 	
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng);
 	mSceneMng = CreateInstance<SceneManager>(*mResourceMng);
@@ -57,6 +59,11 @@ void Mir::Update()
 Eigen::Vector2i Mir::WinSize() const
 {
 	return mRenderSys->WinSize();
+}
+
+void Mir::ExecuteTaskSync(const cppcoro::shared_task<void>& task)
+{
+	coroutine::ExecuteTaskSync(*mIoService, task);
 }
 
 }

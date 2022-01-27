@@ -10,7 +10,7 @@ class TestLight : public App
 {
 protected:
 	void OnRender() override;
-	void OnPostInitDevice() override;
+	cppcoro::shared_task<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -28,7 +28,7 @@ private:
 7: 正交相机
 */
 
-void TestLight::OnPostInitDevice()
+cppcoro::shared_task<void> TestLight::OnPostInitDevice()
 {
 	constexpr int CaseCountMod = 4;
 	int caseIndex = mCaseIndex % CaseCountMod;
@@ -57,10 +57,10 @@ void TestLight::OnPostInitDevice()
 	}
 
 	CameraPtr camera = mScneMng->AddCameraByType((CameraType)cameraType, test1::cam::Eye(mWinCenter));
-	camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
+	camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
 
-	mModel = mRendFac->CreateAssimpModel(MAT_MODEL);
-	mTransform = test1::res::model_sship::Init(mModel, mWinCenter);
+	mModel = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
+	mTransform = co_await test1::res::model().Init("spaceship", mModel);
 }
 
 void TestLight::OnRender()

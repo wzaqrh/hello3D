@@ -14,7 +14,7 @@ class TestShadowMap : public App
 {
 protected:
 	void OnRender() override;
-	void OnPostInitDevice() override;
+	cppcoro::shared_task<void> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,21 +26,18 @@ private:
 1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
 */
 
-void TestShadowMap::OnPostInitDevice()
+cppcoro::shared_task<void> TestShadowMap::OnPostInitDevice()
 {
 	SetPPU(1);
 
 	if (1) {
-		mModelFloor = mRendFac->CreateAssimpModel(MAT_MODEL);
-		mModelFloor->LoadModel(test1::res::model_floor::Path(), test1::res::model_floor::Rd());
-		mModelFloor->GetTransform()->SetScale(test1::res::model_floor::Scale() * 10);
+		mModelFloor = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
+		co_await test1::res::model().Init("floor", mModelFloor);
 	}
 
 	if (1) {
-		mModelRock = mRendFac->CreateAssimpModel(MAT_MODEL);
-		mModelRock->LoadModel(test1::res::model_sship::Path(), test1::res::model_sship::Rd());
-		mTransform = mModelRock->GetTransform();
-		mTransform->SetScale(test1::res::model_sship::Scale() * 3);
+		mModelRock = co_await mRendFac->CreateAssimpModel(MAT_MODEL);
+		mTransform = co_await test1::res::model().Init("spaceship", mModelRock);
 	}
 
 	switch (mCaseIndex) {
@@ -50,20 +47,20 @@ void TestShadowMap::OnPostInitDevice()
 		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -3, -1));
 		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 10, 0));
 		camera->SetForward(mir::math::vec::Down());
-		camera->SetSkyBox(mRendFac->CreateSkybox(test1::res::Sky()));
+		camera->SetSkyBox(co_await mRendFac->CreateSkybox(test1::res::Sky()));
 
-		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, -100, 0));
+		mModelFloor->GetTransform()->SetPosition(Eigen::Vector3f(0, -100, 0));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));
-		mModelRock->GetTransform()->SetPosition(test1::res::model_sship::Pos() + Eigen::Vector3f(0, -30, 0));
+		mModelRock->GetTransform()->SetPosition(Eigen::Vector3f(0, -30, 0));
 	}break;
 	case 1: {
 		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, 1, 3));
 		auto camera = mScneMng->AddPerspectiveCamera(Eigen::Vector3f(0, 0, -10));
 		camera->SetForward(mir::math::vec::Forward());
 
-		mModelFloor->GetTransform()->SetPosition(test1::res::model_floor::Pos() + Eigen::Vector3f(0, 0, 100));
+		mModelFloor->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 100));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14 / 2, 0, 0));
-		mTransform->SetPosition(test1::res::model_sship::Pos() + Eigen::Vector3f(0, 0, 30));
+		mTransform->SetPosition(Eigen::Vector3f(0, 0, 30));
 	}break;
 	default:
 		break;

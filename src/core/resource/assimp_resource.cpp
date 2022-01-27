@@ -15,10 +15,23 @@ namespace res {
 /********** AiSceneLoader **********/
 class AiSceneLoader {
 public:
-	AiSceneLoader(Launch launchMode, ResourceManager& resourceMng, AiScenePtr asset)
-		: mLaunchMode(launchMode), mResourceMng(resourceMng), mAsset(*asset), mResult(asset)
+	AiSceneLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
+		: mLaunchMode(launchMode), mResourceMng(resMng), mAsset(*asset), mResult(asset) 
 	{}
-	~AiSceneLoader() {}
+	~AiSceneLoader() 
+	{}
+	
+	TemplateArgs cppcoro::shared_task<bool> Execute(T &&...args) {
+		mAsset.SetLoading();
+		co_await mResourceMng.SwitchToLaunchService(__LaunchAsync__);
+
+		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && co_await ExecuteSetupData());
+		return mAsset.IsLoaded();
+	}
+	TemplateArgs cppcoro::shared_task<bool> operator()(T &&...args) {
+		return co_await Execute(std::forward<T>(args)...);
+	}
+private:
 	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource)
 	{
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
@@ -68,10 +81,11 @@ public:
 		}
 		return mAsset.mScene != nullptr;
 	}
-	AiScenePtr ExecuteSetupData()
+	cppcoro::shared_task<bool> ExecuteSetupData()
 	{
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
-		processNode(mAsset.mRootNode, mAsset.mScene);
+		if (!co_await ProcessNode(mAsset.mRootNode, mAsset.mScene))
+			return false;
 
 		BOOST_ASSERT(mAsset.mScene != nullptr);
 		for (unsigned int i = 0; i < mAsset.mScene->mNumMeshes; ++i) {
@@ -91,34 +105,31 @@ public:
 					mAsset.mBoneNodesByName[bone->mName.data] = nullptr;
 			}
 		}
-		return mResult;
-	}
-	TemplateArgs AiScenePtr Execute(T &&...args) {
-		AiScenePtr result = nullptr;
-		if (ExecuteLoadRawData(std::forward<T>(args)...))
-			result = ExecuteSetupData();
-		return result;
-	}
-	TemplateArgs AiScenePtr operator()(T &&...args) {
-		return Execute(std::forward<T>(args)...);
+		return true;
 	}
 private:
-	void processNode(const AiNodePtr& node, const aiScene* rawScene) {
+	cppcoro::shared_task<bool> ProcessNode(const AiNodePtr& node, const aiScene* rawScene) {
+		COROUTINE_VARIABLES_2(node, rawScene);
+
 		const aiNode* rawNode = node->RawNode;
 		for (int i = 0; i < rawNode->mNumMeshes; i++) {
 			aiMesh* rawMesh = rawScene->mMeshes[rawNode->mMeshes[i]];
-			node->AddMesh(processMesh(rawMesh, rawScene));
+			AssimpMeshPtr mesh = co_await ProcessMesh(rawMesh, rawScene);
+			if (mesh == nullptr) 
+				return false;
+			node->AddMesh(mesh);
 		}
 
 		for (int i = 0; i < rawNode->mNumChildren; i++) {
 			AiNodePtr child = mAsset.AddNode(rawNode->mChildren[i]);
 			node->AddChild(child);
-			processNode(child, rawScene);
+			if (!co_await ProcessNode(child, rawScene))
+				return false;
 		}
+		return true;
 	}
-	static void ReCalculateTangents(std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts,
-		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>& skeletonVerts,
-		const std::vector<uint32_t>& indices)
+	
+	static void ReCalculateTangents(vbSurfaceVector& surfVerts, vbSkeletonVector& skeletonVerts, const std::vector<uint32_t>& indices) 
 	{
 		for (int i = 0; i < indices.size(); i += 3) {
 			//vbSurface
@@ -153,7 +164,6 @@ private:
 			skin2.BiTangent = skin2.BiTangent + bitangent;
 		}
 	}
-
 	boost::filesystem::path RedirectPathOnDir(const boost::filesystem::path& path, bool forceNotRelative = false) const {
 		boost::filesystem::path result(mRedirectResourceDir);
 		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
@@ -225,7 +235,9 @@ private:
 		return textures;
 	}
 #endif
-	AssimpMeshPtr processMesh(const aiMesh* rawMesh, const aiScene* scene) {
+	cppcoro::shared_task<AssimpMeshPtr> ProcessMesh(const aiMesh* rawMesh, const aiScene* scene) {
+		COROUTINE_VARIABLES_2(rawMesh, scene);
+
 		AssimpMeshPtr meshPtr = AssimpMesh::Create();
 		auto& mesh = *meshPtr;
 		mesh.mAiMesh = rawMesh;
@@ -233,7 +245,7 @@ private:
 	#if USE_MATERIAL_INSTANCE
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
-		mesh.mMaterial = mResourceMng.CreateMaterial(mLaunchMode, loadParam);
+		mesh.mMaterial = co_await mResourceMng.CreateMaterial(mLaunchMode, loadParam);
 	#else
 		mesh.mUvTransform.assign(kTexturePbrMax, Eigen::Vector4f(0, 0, 1, 1));
 		mesh.mFactors.assign(kTexturePbrMax, Eigen::Vector4f::Ones());
@@ -384,9 +396,6 @@ private:
 		#endif
 		}
 
-		/*if (mesh->mNormals && mesh->mTangents == nullptr) {
-			ReCalculateTangents(surfVerts, skeletonVerts, indices);
-		}*/
 		mesh.Build(mLaunchMode, mResourceMng);
 		return meshPtr;
 	}
@@ -401,26 +410,34 @@ private:
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** AiAssetManager **********/
 
-AiScenePtr AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resourceMng,
-	const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes)
+cppcoro::shared_task<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes)
 {
-	AiScenePtr res = IF_OR(aiRes, CreateInstance<AiScene>());
-	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resourceMng, res);
+	COROUTINE_VARIABLES_5(launchMode, resMng, assetPath, redirectRes, aiRes);
+	//co_await mResourceMng.SwitchToLaunchService(launchMode)
+
+	AiScenePtr scene = IF_OR(aiRes, CreateInstance<AiScene>());
+	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
+#if USE_COROUTINE
+	co_await loader->Execute(assetPath, redirectRes);
+#else
 	if (launchMode == LaunchAsync) {
-		res->SetPrepared();
-		resourceMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
+		scene->SetPrepared();
+		resMng.AddLoadResourceJob(launchMode, [=](IResourcePtr res, LoadResourceJobPtr nextJob) {
 			TIME_PROFILE((boost::format("aiResFac.CreateAiScene cb %1% %2%") % assetPath %redirectRes).str());
 			if (loader->ExecuteLoadRawData(assetPath, redirectRes) && loader->ExecuteSetupData()) {
 				return true;
 			}
-			else return false;
-		}, res);
+			else {
+				return false;
+			}
+		}, scene);
 	}
 	else {
 		TIME_PROFILE((boost::format("aiResFac.CreateAiScene %1% %2%") % assetPath %redirectRes).str());
-		res->SetLoaded(nullptr != loader->Execute(assetPath, redirectRes));
+		scene->SetLoaded(nullptr != loader->Execute(assetPath, redirectRes));
 	}
-	return res;
+#endif
+	return scene;
 }
 
 }

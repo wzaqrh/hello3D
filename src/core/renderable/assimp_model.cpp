@@ -2,9 +2,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
+#include "core/base/debug.h"
+#include "core/base/transform.h"
 #include "core/renderable/assimp_model.h"
 #include "core/resource/resource_manager.h"
-#include "core/base/transform.h"
 
 namespace mir {
 namespace renderable {
@@ -119,14 +120,17 @@ public:
 };
 
 /********** AssimpModel **********/
-AssimpModel::AssimpModel(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
-	:Super(launchMode, resourceMng, matName)
-{}
-
-void AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
+cppcoro::shared_task<bool> AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
 {
-	mAiScene = mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
-	
+	COROUTINE_VARIABLES_2(assetPath, redirectResource);
+
+	mAiScene = co_await mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
+#if USE_COROUTINE
+	if (!mAiScene->IsLoaded()) return false;
+
+	mAnimeTree.Init(mAiScene->GetSerializeNodes());
+	Update(0);
+#else
 	if (mAiScene->IsLoaded()) {
 		mAnimeTree.Init(mAiScene->GetSerializeNodes());
 		Update(0);
@@ -136,6 +140,7 @@ void AssimpModel::LoadModel(const std::string& assetPath, const std::string& red
 			mAnimeTree.Init(mAiScene->GetSerializeNodes());
 		};
 	}
+#endif
 }
 
 const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex)

@@ -478,11 +478,11 @@ MaterialAssetManager::MaterialAssetManager()
 	mShaderNodeMng = CreateInstance<ShaderNodeManager>();
 	mMaterialNodeMng = CreateInstance<MaterialNodeManager>(mShaderNodeMng);
 }
-bool MaterialAssetManager::GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode)
+bool MaterialAssetManager::GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe
 {
 	return mShaderNodeMng->GetShaderNode(loadParam, shaderNode);
 }
-bool MaterialAssetManager::GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode)
+bool MaterialAssetManager::GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) ThreadSafe
 {
 	return mMaterialNodeMng->GetMaterialNode(loadParam, materialNode);
 }

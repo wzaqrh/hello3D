@@ -64,6 +64,7 @@ private:
 	bool _FetchBackFrameBufferColor(int width, int height);
 	bool _FetchBackBufferZStencil(int width, int height);
 	bool _SetRasterizerState(); 
+	bool IsCurrentInMainThread() const;
 private:
 	HWND mHWnd = NULL;
 	D3D_FEATURE_LEVEL mFeatureLevel = D3D_FEATURE_LEVEL_11_0;
@@ -75,8 +76,9 @@ private:
 	ID3D11DepthStencilState* mDepthStencilState = NULL;
 	ID3D11BlendState* mBlendState = NULL;
 
-	//typedef std::pair<ID3D11RenderTargetView*, ID3D11DepthStencilView*> FrameBufferPair;
 	FrameBuffer11Ptr mBackFrameBuffer, mCurFrameBuffer;
+
+	std::thread::id mMainThreadId;
 };
 
 }

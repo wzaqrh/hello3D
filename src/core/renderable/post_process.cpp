@@ -47,14 +47,17 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName, IFrameBufferPtr mainTex)
-	:Super(launchMode, resourceMng, matName)
+cppcoro::shared_task<bool> PostProcess::Init(const MaterialLoadParam& matName, IFrameBufferPtr mainTex)
 {
+	if (!co_await Super::Init(matName))
+		co_return false;
+
 	mMainTex = mainTex;
 
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(CIndices));
+	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(CIndices));
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
+	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
+	co_return true;
 }
 
 void PostProcess::GenRenderOperation(RenderOperationQueue& opList)

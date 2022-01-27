@@ -387,6 +387,9 @@
     <ClCompile Include="..\src\core\rendersys\hardware_buffer.cpp">
       <Filter>src\core\rendersys\interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\test\unit_test\test_cppcoro.cpp">
+      <Filter>src\unit_test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

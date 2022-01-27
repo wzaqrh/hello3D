@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include "core/base/d3d.h"
 #include "core/base/macros.h"
+#include "core/base/debug.h"
 #include "core/base/rendersys_debug.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_asset.h"
@@ -34,10 +35,11 @@ GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, 
 		return iter->second;
 	}
 }
-
-ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader)
+cppcoro::shared_task<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader)
 {
-	shader->SetPrepared();
+	COROUTINE_VARIABLES_4(launchMode, resMng, shaderNode, shader);
+	shader->SetLoading();
+	co_await resMng.SwitchToLaunchService(__LaunchSync__);
 
 	for (const auto& categNode : shaderNode) {
 		for (const auto& techniqueNode : categNode) {
@@ -52,7 +54,7 @@ ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& re
 				curPass->mName = passNode.ShortName;
 				curPass->mTopoLogy = passProgram.Topo;
 
-				curPass->mProgram = resMng.CreateProgram(launchMode,
+				curPass->mProgram = co_await resMng.CreateProgram(launchMode,
 					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD);
 
 				BOOST_ASSERT(passProgram.Attrs.Count() >= 1);
@@ -82,26 +84,37 @@ ShaderPtr MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& re
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
 
+#if USE_COROUTINE
+	shader->SetLoaded();
+#else
 	if (launchMode == LaunchSync) shader->SetLoaded();
 	else resMng.AddResourceDependencyRecursive(shader);
+#endif
 	return shader;
 }
+cppcoro::shared_task<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) 
+{
+	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, shader);
+	//co_await resMng.SwitchToLaunchService(__LaunchAsync__);
 
-ShaderPtr MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) {
 	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {
-		return DoCreateShader(launchMode, resMng, shaderNode, shader);
+		co_await DoCreateShader(launchMode, resMng, shaderNode, shader);
 	}
 	else {
 		shader->SetLoaded(false);
-		return shader;
 	}
+	return shader;
 }
 
-MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material)
+cppcoro::shared_task<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material)
 {
-	material->mShaderVariant = DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
+	COROUTINE_VARIABLES_4(launchMode, resMng, materialNode, material);
+	material->SetLoading();
+	co_await resMng.SwitchToLaunchService(__LaunchSync__);
+
+	material->mShaderVariant = co_await DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
 	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
 
 	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.MaterialFilePath));
@@ -111,7 +124,7 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 		assetPath /= iter.second.ImagePath;
 		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
 		if (boost::filesystem::is_regular_file(assetPath)) {
-			auto texture = resMng.CreateTextureByFile(launchMode, assetPath.string());
+			auto texture = co_await resMng.CreateTextureByFile(launchMode, assetPath.string());
 			material->mTextures.AddOrSet(texture, iter.second.Slot);
 		}
 		assetPath.remove_filename();
@@ -145,22 +158,28 @@ MaterialPtr MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager
 		}
 	}
 
+#if USE_COROUTINE
+	material->SetLoaded(material->mShaderVariant->IsLoaded());
+#else
 	if (launchMode == LaunchSync) material->SetLoaded();
 	else resMng.AddResourceDependencyRecursive(material);
+#endif
 	return material;
 }
-
-MaterialPtr MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material)
+cppcoro::shared_task<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material)
 {
+	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, material);
+	//co_await resMng.SwitchToLaunchService(__LaunchAsync__);
+
 	material = IF_OR(material, CreateInstance<Material>());
 	mat_asset::MaterialNode materialNode;
 	if (mMatAssetMng->GetMaterialNode(loadParam, materialNode)) {
-		return DoCreateMaterial(launchMode, resMng, materialNode, material);
+		co_await DoCreateMaterial(launchMode, resMng, materialNode, material);
 	}
 	else {
 		material->SetLoaded(false);
-		return material;
 	}
+	return material;
 }
 
 //Clone Functions
@@ -187,33 +206,47 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 	}
 #endif
 
+#if USE_COROUTINE
+	result->SetLoaded();
+#else
 	result->SetCurState(proto.GetCurState());
+#endif
 	return result;
 }
-
 TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resMng, const Technique& proto)
 {
 	TechniquePtr result = CreateInstance<Technique>();
 	for (const auto& protoPass : proto)
 		result->AddPass(this->ClonePass(launchMode, resMng, *protoPass));
 
+#if USE_COROUTINE
+	result->SetLoaded();
+#else
 	result->SetCurState(proto.GetCurState());
+#endif
 	return result;
 }
-
 ShaderPtr MaterialFactory::CloneShader(Launch launchMode, ResourceManager& resMng, const Shader& proto)
 {
+#if USE_COROUTINE
+	BOOST_ASSERT(proto.IsLoaded());
+#else
 	BOOST_ASSERT(!(launchMode == LaunchSync && !proto.IsLoaded()));
+#endif
 
 	ShaderPtr result = CreateInstance<Shader>();
 	for (const auto& protoTech : proto)
 		result->AddTechnique(this->CloneTechnique(launchMode, resMng, *protoTech));
 	result->mCurTechIdx = proto.mCurTechIdx;
 
+#if USE_COROUTINE
+	result->SetLoaded();
+#else
 	if (launchMode == LaunchAsync && !proto.IsLoaded()) {
 		resMng.AddResourceDependencyRecursive(result);
 	}
 	result->SetCurState(proto.GetCurState());
+#endif
 	return result;
 }
 }

@@ -39,8 +39,8 @@ public:
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }
 private:
 	const aiMesh* mAiMesh;
-	std::vector<vbSurface, mir_allocator<vbSurface>> mSurfVertexs;
-	std::vector<vbSkeleton, mir_allocator<vbSkeleton>> mSkeletonVertexs;
+	vbSurfaceVector mSurfVertexs;
+	vbSkeletonVector mSkeletonVertexs;
 	std::vector<uint32_t> mIndices;
 #if USE_MATERIAL_INSTANCE
 	res::MaterialInstance mMaterial;

@@ -1,22 +1,28 @@
 #include "core/renderable/renderable_base.h"
+#include "core/base/debug.h"
 #include "core/base/transform.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {
 namespace renderable {
 
-/********** TSprite **********/
-RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const MaterialLoadParam& matName)
+RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng)
 	: mResourceMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mCameraMask(-1)
+{}
+
+cppcoro::shared_task<bool> RenderableSingleRenderOp::Init(const MaterialLoadParam& loadParam)
 {
+	COROUTINE_VARIABLES_1(loadParam);
+
 	mTransform = CreateInstance<Transform>();
 #if USE_MATERIAL_INSTANCE
-	mMaterial = resourceMng.CreateMaterial(launchMode, matName);
+	mMaterial = co_await mResourceMng.CreateMaterial(mLaunchMode, loadParam);
 #else
-	mMaterial = resourceMng.CreateShader(launchMode, matName);
+	mMaterial = resourceMng.CreateShader(launchMode, loadParam);
 #endif
+	co_return true;
 }
 
 #if USE_MATERIAL_INSTANCE
