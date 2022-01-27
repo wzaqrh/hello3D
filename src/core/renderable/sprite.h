@@ -7,7 +7,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 {

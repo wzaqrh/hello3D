@@ -41,7 +41,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 
 	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->cppcoro::shared_task<void> {
 		MaterialLoadParam loadParam(MAT_MODEL);
-		mGBufferSprite = co_await renderable::Sprite::Create(__LaunchSync__, resMng, loadParam);
+		mGBufferSprite = co_await rend::Sprite::Create(__LaunchSync__, resMng, loadParam);
 		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
 		mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
 	}());
@@ -354,11 +354,11 @@ void RenderPipeline::EndFrame()
 	mRenderSys.EndScene();
 }
 
-void RenderPipeline::Draw(IRenderable& renderable, SceneManager& scene)
+void RenderPipeline::Draw(IRenderable& rend, SceneManager& scene)
 {
 	if (BeginFrame()) {
 		RenderOperationQueue opQue;
-		renderable.GenRenderOperation(opQue);
+		rend.GenRenderOperation(opQue);
 		Render(opQue, scene);
 		EndFrame();
 	}

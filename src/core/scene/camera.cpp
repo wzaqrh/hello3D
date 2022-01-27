@@ -219,12 +219,12 @@ const TransformPtr& Camera::GetTransform() const
 	mViewDirty = true;
 	return mTransform;
 }
-void Camera::SetSkyBox(const renderable::SkyBoxPtr& skybox)
+void Camera::SetSkyBox(const rend::SkyBoxPtr& skybox)
 {
 	mSkyBox = skybox;
 }
 
-void Camera::AddPostProcessEffect(const renderable::PostProcessPtr& postEffect)
+void Camera::AddPostProcessEffect(const rend::PostProcessPtr& postEffect)
 {
 	mPostProcessEffects.push_back(postEffect);
 }

@@ -3,7 +3,7 @@
 #include "core/resource/material.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 /********** POSTPROCESS_VERTEX_QUAD **********/
 PostProcessVertexQuad::PostProcessVertexQuad(float x, float y, float w, float h)

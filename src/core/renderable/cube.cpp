@@ -3,7 +3,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 /********** Cube **********/
 Cube::Cube(Launch launchMode, ResourceManager& resourceMng)

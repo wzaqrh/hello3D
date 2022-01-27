@@ -5,7 +5,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 constexpr int CMaxStringLength = 256;
 

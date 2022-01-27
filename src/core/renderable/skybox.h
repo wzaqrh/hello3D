@@ -6,7 +6,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 struct SkyboxVertex {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;

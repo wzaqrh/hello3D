@@ -9,7 +9,7 @@ namespace mir {
 DECLARE_STRUCT(Transform);
 DECLARE_STRUCT(TextureVector);
 
-namespace renderable {
+namespace rend {
 DECLARE_CLASS(SkyBox);
 DECLARE_CLASS(Sprite);
 DECLARE_CLASS(Mesh);

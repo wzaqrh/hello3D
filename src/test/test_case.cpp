@@ -55,7 +55,7 @@ std::string Specular() {
 
 namespace cube {
 namespace far_plane {
-cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeBig = 8192;
 	return co_await rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Far()),
@@ -66,7 +66,7 @@ cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr 
 }
 }
 namespace near_plane {
-cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
+cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeSmall = 4;
 	return co_await rendFac->CreateCube(
 		Eigen::Vector3f(0, 0, test1::cam::Near()),
@@ -77,7 +77,7 @@ cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr 
 }
 }
 namespace floor {
-cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
+cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
 	constexpr int Inf = 65536;
 	return co_await rendFac->CreateCube(
 		Eigen::Vector3f(0, y, Inf / 2),
@@ -91,7 +91,7 @@ cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr 
 
 namespace png {
 std::string Kenny() { return "model/theyKilledKenny.png"; }
-void SetPos(mir::renderable::SpritePtr sprite, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor) {
+void SetPos(mir::rend::SpritePtr sprite, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor) {
 	sprite->SetPosition(pos);
 	sprite->SetSize(size);
 	sprite->SetAnchor(anchor);
@@ -150,7 +150,7 @@ void model::Init(const std::string& name)
 		mPos = Eigen::Vector3f(0, 0, 0);
 	}
 }
-cppcoro::shared_task<mir::TransformPtr> model::Init(const std::string& name, mir::renderable::AssimpModelPtr aiModel)
+cppcoro::shared_task<mir::TransformPtr> model::Init(const std::string& name, mir::rend::AssimpModelPtr aiModel)
 {
 	Init(name);
 	co_await aiModel->LoadModel(Path(), Rd());

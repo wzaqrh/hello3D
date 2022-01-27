@@ -8,7 +8,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 #define AS_CONST_REF(TYPE, V) *(const TYPE*)(&V)
 

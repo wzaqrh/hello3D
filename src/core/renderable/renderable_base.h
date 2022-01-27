@@ -7,7 +7,7 @@
 #include "core/renderable/renderable.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 struct MIR_CORE_API RenderableSingleRenderOp : public IRenderable
 {

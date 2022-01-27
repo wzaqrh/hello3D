@@ -6,7 +6,7 @@
 
 using namespace mir;
 using namespace mir::scene;
-using namespace mir::renderable;
+using namespace mir::rend;
 
 namespace mir {
 namespace test {

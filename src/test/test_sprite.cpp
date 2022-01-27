@@ -4,7 +4,7 @@
 #include "core/renderable/sprite.h"
 
 using namespace mir;
-using namespace mir::renderable;
+using namespace mir::rend;
 
 class TestSprite : public App
 {

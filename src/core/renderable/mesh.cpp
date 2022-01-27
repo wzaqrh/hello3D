@@ -3,7 +3,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 /********** Mesh **********/
 cppcoro::shared_task<bool> Mesh::Init(const MaterialLoadParam& loadParam, int vertCount, int indexCount)

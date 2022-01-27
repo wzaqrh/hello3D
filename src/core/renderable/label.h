@@ -6,7 +6,7 @@
 #include "core/renderable/renderable_base.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 typedef std::shared_ptr<class Font> FontPtr;
 typedef std::shared_ptr<struct FontCharactor> FontCharactorPtr;

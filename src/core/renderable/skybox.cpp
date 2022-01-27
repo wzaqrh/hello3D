@@ -4,7 +4,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 cppcoro::shared_task<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string& imgName)
 {

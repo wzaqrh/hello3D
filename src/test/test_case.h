@@ -2,7 +2,7 @@
 #include "core/mir.h"
 
 using namespace mir;
-using namespace mir::renderable;
+using namespace mir::rend;
 using namespace mir::scene;
 
 namespace test1 {
@@ -40,19 +40,19 @@ std::string Specular();
 
 namespace cube {
 namespace far_plane {
-cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
+cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
 namespace near_plane {
-cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
+cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
 }
 namespace floor {
-cppcoro::shared_task<mir::renderable::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
+cppcoro::shared_task<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
 }
 }
 
 namespace png {
 std::string Kenny();
-void SetPos(mir::renderable::SpritePtr sp, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor = mir::math::vec::anchor::LeftBottom());
+void SetPos(mir::rend::SpritePtr sp, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor = mir::math::vec::anchor::LeftBottom());
 }
 namespace hdr {
 std::string Kenny();
@@ -66,7 +66,7 @@ struct model {
 	model();
 	model(const std::string& name);
 	void Init(const std::string& name);
-	cppcoro::shared_task<mir::TransformPtr> Init(const std::string& name, mir::renderable::AssimpModelPtr model);
+	cppcoro::shared_task<mir::TransformPtr> Init(const std::string& name, mir::rend::AssimpModelPtr model);
 	std::string Path() const { return mPath; }
 	std::string Rd() const { return mRd; }
 	Eigen::Vector3f Scale() const { return mScale; }

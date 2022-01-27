@@ -5,7 +5,7 @@
 #include "core/scene/scene_manager.h"
 
 using namespace mir;
-using namespace mir::renderable;
+using namespace mir::rend;
 
 class TestCube : public App
 {

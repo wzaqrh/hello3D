@@ -13,7 +13,7 @@
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/resource_manager.h"
 
-using namespace mir::renderable;
+using namespace mir::rend;
 
 namespace mir {
 

@@ -3,7 +3,7 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
-namespace renderable {
+namespace rend {
 
 /********** TSprite **********/
 Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng)

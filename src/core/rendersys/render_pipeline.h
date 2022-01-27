@@ -17,7 +17,7 @@ public:
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);
-	void Draw(IRenderable& renderable, SceneManager& scene);
+	void Draw(IRenderable& rend, SceneManager& scene);
 private:
 	void BindPass(const res::PassPtr& pass);
 	void RenderPass(const res::PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op);
@@ -30,7 +30,7 @@ private:
 	RenderStatesBlockPtr mStatesBlockPtr;
 	RenderStatesBlock& mStatesBlock;
 	IFrameBufferPtr mShadowMap, mGBuffer;
-	renderable::SpritePtr mGBufferSprite;
+	rend::SpritePtr mGBufferSprite;
 };
 
 }
