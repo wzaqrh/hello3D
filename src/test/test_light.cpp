@@ -10,7 +10,7 @@ class TestLight : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -28,7 +28,7 @@ private:
 7: 正交相机
 */
 
-CoTask<void> TestLight::OnPostInitDevice()
+CoTask<bool> TestLight::OnPostInitDevice()
 {
 	constexpr int CaseCountMod = 4;
 	int caseIndex = mCaseIndex % CaseCountMod;
@@ -61,7 +61,7 @@ CoTask<void> TestLight::OnPostInitDevice()
 
 	mModel = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
 	mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestLight::OnRender()

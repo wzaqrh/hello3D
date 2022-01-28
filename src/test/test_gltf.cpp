@@ -10,7 +10,7 @@ class TestGLTF : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,7 +26,7 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-CoTask<void> TestGLTF::OnPostInitDevice()
+CoTask<bool> TestGLTF::OnPostInitDevice()
 {
 	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
@@ -83,7 +83,7 @@ CoTask<void> TestGLTF::OnPostInitDevice()
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestGLTF::OnRender()

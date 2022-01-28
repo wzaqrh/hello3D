@@ -8,7 +8,6 @@ namespace mir {
 namespace rend {
 
 constexpr int CMaxStringLength = 256;
-
 struct IndicesData {
 	unsigned int Indices[CMaxStringLength * 6];
 	IndicesData() {
@@ -25,16 +24,12 @@ struct IndicesData {
 	}
 };
 static IndicesData sIndiceData;
-
-CoTask<bool> Label::Init(const MaterialLoadParam& matName, FontPtr font)
+Label::Label(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material, FontPtr font)
+	: Super(launchMode, resourceMng, material)
 {
-	if (!CoAwait Super::Init(matName))
-		CoReturn false;
-
 	mFont = font;
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
-	CoReturn true;
 }
 
 void Label::GenRenderOperation(RenderOperationQueue& opList)

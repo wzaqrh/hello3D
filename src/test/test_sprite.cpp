@@ -10,7 +10,7 @@ class TestSprite : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,7 +26,7 @@ private:
 6：观察到kenny左下角, 自然尺寸
 */
 
-CoTask<void> TestSprite::OnPostInitDevice()
+CoTask<bool> TestSprite::OnPostInitDevice()
 {
 	mScneMng->AddDirectLight();
 	mScneMng->AddOthogonalCamera(test1::cam_otho::Eye(mWinCenter));
@@ -38,12 +38,12 @@ CoTask<void> TestSprite::OnPostInitDevice()
 	case 0: {
 		mSprite = CoAwait mRendFac->CreateSprite();
 		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFile(async, test1::res::dds::Kenny()));
+		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileAsync(test1::res::dds::Kenny()));
 		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 	}break;
 	case 1: {
 		mSprite = CoAwait mRendFac->CreateSprite();
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFile(sync, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
+		mSprite->SetTexture(mResMng->CreateTextureByFileSync(test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
 		test1::res::png::SetPos(mSprite, mCamWinHSize, mCamWinHSize, math::vec::anchor::RightTop());
 	}break;
@@ -77,7 +77,7 @@ CoTask<void> TestSprite::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestSprite::OnRender()

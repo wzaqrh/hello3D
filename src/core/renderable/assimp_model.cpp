@@ -124,8 +124,8 @@ CoTask<bool> AssimpModel::LoadModel(const std::string& assetPath, const std::str
 {
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 
-	mAiScene = CoAwait mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
-	if (!mAiScene->IsLoaded()) return false;
+	if (!CoAwait mResourceMng.CreateAiScene(mLaunchMode, mAiScene, assetPath, redirectResource)) 
+		return false;
 
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
 	Update(0);
@@ -307,8 +307,7 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 
 void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded()
-		|| !mAiScene->IsLoaded()
+	if (!mAiScene->IsLoaded()
 		|| !mAnimeTree.IsInited())
 		return;
 

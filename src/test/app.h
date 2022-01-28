@@ -46,7 +46,7 @@ public:
 	void SetCaseSecondIndex(int secondIndex) override;
 protected:
 	virtual void OnPreInitDevice() {};
-	virtual CoTask<void> OnPostInitDevice() { CoReturnVoid; };
+	virtual CoTask<bool> OnPostInitDevice() { CoReturn true; };
 	virtual void OnRender() = 0;
 	virtual void OnInitLight();
 	virtual void OnInitCamera();

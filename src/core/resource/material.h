@@ -86,6 +86,7 @@ public:
 	CoTask<bool> Build(Launch launchMode, ResourceManager& resMng);
 public:
 	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
+	MaterialLoadParam GetLoadParam() const { return mShaderVariantParam; }
 	const ShaderPtr& GetShader() const { return mShaderVariant; }
 	TextureVector& GetTextures() { return mTextures; }
 	const TextureVector& GetTextures() const { return mTextures; }

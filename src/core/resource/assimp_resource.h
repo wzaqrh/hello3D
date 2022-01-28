@@ -67,7 +67,7 @@ private:
 class AiResourceFactory {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	CoTask<AiScenePtr> CreateAiScene(Launch launchMode, ResourceManager& resourceMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes = nullptr) ThreadSafe;
+	CoTask<bool> CreateAiScene(Launch launchMode, AiScenePtr& aiScene, ResourceManager& resourceMng, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
 };
 
 }

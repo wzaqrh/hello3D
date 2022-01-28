@@ -67,7 +67,7 @@ inline boost::filesystem::path MakeShaderSourcePath(const std::string& name) {
 	std::string filepath = "shader/" + name + ".hlsl";
 	return boost::filesystem::system_complete(filepath);
 }
-inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) {
+static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) {
 	std::string asmName = name;
 	asmName += "_" + desc.EntryPoint;
 	asmName += " " + desc.ShaderModel;
@@ -98,7 +98,7 @@ inline boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	std::string filepath = "shader/asm/" + platform + "/" + asmName;
 	return boost::filesystem::system_complete(filepath);
 }
-CoTask<bool> ResourceManager::_LoadProgram(IProgramPtr program, Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ResourceManager::_LoadProgram(Launch launchMode, IProgramPtr program, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(program, launchMode, name, vertexSCD, pixelSCD);
 	program->SetLoading();
@@ -158,7 +158,7 @@ CoTask<bool> ResourceManager::_LoadProgram(IProgramPtr program, Launch launchMod
 	program->SetLoaded(loadProgram(program) != nullptr);
 	CoReturn program->IsLoaded();
 }
-CoTask<IProgramPtr> ResourceManager::CreateProgram(Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ResourceManager::CreateProgram(Launch launchMode, IProgramPtr& program, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, name, vertexSCD, pixelSCD);
 	//CoAwait SwitchToLaunchService(launchMode);
@@ -170,7 +170,7 @@ CoTask<IProgramPtr> ResourceManager::CreateProgram(Launch launchMode, const std:
 		key.pixelSCD.ShaderModel = "ps_4_0";
 
 	bool resNeedLoad = false;
-	IProgramPtr program = mProgramByKey.GetOrAdd(key, [this,&key,&resNeedLoad]() {
+	program = mProgramByKey.GetOrAdd(key, [this,&key,&resNeedLoad]() {
 		auto program = std::static_pointer_cast<IProgram>(mRenderSys.CreateResource(kDeviceResourceProgram));
 		DEBUG_SET_RES_PATH(program, (boost::format("name:%1%, vs:%2%, ps:%3%") %key.name %key.vertexSCD.EntryPoint %key.pixelSCD.EntryPoint).str());
 		DEBUG_SET_CALL(program, launchMode);
@@ -178,13 +178,13 @@ CoTask<IProgramPtr> ResourceManager::CreateProgram(Launch launchMode, const std:
 		return program;
 	});
 	if (resNeedLoad) {
-		CoAwait _LoadProgram(program, launchMode, key.name, key.vertexSCD, key.pixelSCD);
+		CoAwait _LoadProgram(launchMode, program, key.name, key.vertexSCD, key.pixelSCD);
 	}
-	CoReturn program;
+	CoReturn program->IsLoaded();
 }
 
 /********** Create Texture **********/
-CoTask<bool> ResourceManager::_LoadTextureByFile(ITexturePtr texture, Launch launchMode, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr texture, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(texture, launchMode, imgFullpath, format, autoGenMipmap);
 	texture->SetLoading();
@@ -349,7 +349,7 @@ CoTask<bool> ResourceManager::_LoadTextureByFile(ITexturePtr texture, Launch lau
 	texture->SetLoaded(ret != nullptr);
 	CoReturn texture->IsLoaded();
 }
-CoTask<ITexturePtr> ResourceManager::CreateTextureByFile(Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr& texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, filepath, format, autoGenMipmap);
 	//CoAwait SwitchToLaunchService(launchMode);
@@ -358,7 +358,7 @@ CoTask<ITexturePtr> ResourceManager::CreateTextureByFile(Launch launchMode, cons
 	std::string key = fullpath.string();
 
 	bool resNeedLoad = false;
-	ITexturePtr texture = mTextureByKey.GetOrAdd(key, [&]() {
+	texture = mTextureByKey.GetOrAdd(key, [&]() {
 		auto texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
 		DEBUG_SET_RES_PATH(texture, (boost::format("path:%1%, fmt:%2%, autogen:%3%") %filepath %format %autoGenMipmap).str());
 		DEBUG_SET_CALL(texture, launchMode);
@@ -366,19 +366,19 @@ CoTask<ITexturePtr> ResourceManager::CreateTextureByFile(Launch launchMode, cons
 		return texture;
 	});
 	if (resNeedLoad) {
-		CoAwait _LoadTextureByFile(texture, launchMode, key, format, autoGenMipmap);
+		CoAwait _LoadTextureByFile(launchMode, texture, key, format, autoGenMipmap);
 	}
-	CoReturn texture;
+	CoReturn texture->IsLoaded();
 }
 
 /********** Create Material **********/
-CoTask <res::ShaderPtr> ResourceManager::CreateShader(Launch launchMode, const MaterialLoadParam& param) ThreadSafe
+CoTask <bool> ResourceManager::CreateShader(Launch launchMode, res::ShaderPtr& shader, const MaterialLoadParam& param) ThreadSafe
 {
 	COROUTINE_VARIABLES_2(launchMode, param);
 	//CoAwait SwitchToLaunchService(launchMode);
 
 	bool resNeedLoad = false;
-	res::ShaderPtr shader = mShaderByName.GetOrAdd(param, [&]() {
+	shader = mShaderByName.GetOrAdd(param, [&]() {
 		auto shader = CreateInstance<res::Shader>();
 		DEBUG_SET_RES_PATH(shader, (boost::format("name:%1% variant:%2%") %param.GetShaderName() %param.GetVariantDesc()).str());
 		DEBUG_SET_CALL(shader, launchMode);
@@ -386,12 +386,12 @@ CoTask <res::ShaderPtr> ResourceManager::CreateShader(Launch launchMode, const M
 		return shader;
 	});
 	if (resNeedLoad) {
-		CoAwait this->mMaterialFac.CreateShader(launchMode, *this, param, shader);
+		CoAwait this->mMaterialFac.CreateShader(launchMode, shader, *this, param);
 	}
-	CoReturn shader;
+	CoReturn shader->IsLoaded();
 }
 
-CoTask<res::MaterialInstance> ResourceManager::CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe
+CoTask<bool> ResourceManager::CreateMaterial(Launch launchMode, res::MaterialInstance& matInst, const MaterialLoadParam& loadParam) ThreadSafe
 {
 	COROUTINE_VARIABLES_2(launchMode, loadParam);
 	//CoAwait SwitchToLaunchService(launchMode);
@@ -405,20 +405,22 @@ CoTask<res::MaterialInstance> ResourceManager::CreateMaterial(Launch launchMode,
 		return material;
 	});
 	if (resNeedLoad) {
-		CoAwait this->mMaterialFac.CreateMaterial(launchMode, *this, loadParam, material);
+		auto param = loadParam;
+		CoAwait this->mMaterialFac.CreateMaterial(launchMode, material, *this, param);
 	}
-	CoReturn material->CreateInstance(launchMode, *this);
+	matInst = material->CreateInstance(launchMode, *this);
+	return matInst->IsLoaded();
 }
 
 /********** Create AiScene **********/
-CoTask<res::AiScenePtr> ResourceManager::CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
+CoTask<bool> ResourceManager::CreateAiScene(Launch launchMode, res::AiScenePtr& aiScene, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
 {
 	COROUTINE_VARIABLES_3(launchMode, assetPath, redirectRes);
 	//CoAwait SwitchToLaunchService(launchMode);
 
 	AiResourceKey key{ assetPath, redirectRes };
 	bool resNeedLoad = false;
-	res::AiScenePtr aiScene = mAiSceneByKey.GetOrAdd(key, [&]() {
+	aiScene = mAiSceneByKey.GetOrAdd(key, [&]() {
 		auto aiScene = CreateInstance<res::AiScene>();
 		DEBUG_SET_RES_PATH(aiScene, (boost::format("path:%1%, redirect:%2%") %assetPath %redirectRes).str());
 		DEBUG_SET_CALL(aiScene, launchMode);
@@ -426,9 +428,9 @@ CoTask<res::AiScenePtr> ResourceManager::CreateAiScene(Launch launchMode, const 
 		return aiScene;
 	});
 	if (resNeedLoad) {
-		CoAwait this->mAiResourceFac.CreateAiScene(launchMode, *this, assetPath, redirectRes, aiScene);
+		CoAwait this->mAiResourceFac.CreateAiScene(launchMode, aiScene, *this, assetPath, redirectRes);
 	}
-	CoReturn aiScene;
+	CoReturn aiScene->IsLoaded();
 }
 
 }

@@ -13,7 +13,7 @@ class TestCamera : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -38,7 +38,7 @@ private:
 11->5
 */
 
-CoTask<void> TestCamera::OnPostInitDevice()
+CoTask<bool> TestCamera::OnPostInitDevice()
 {
 	constexpr int CaseCountMod = 6;
 	int caseIndex = mCaseIndex % CaseCountMod;
@@ -83,7 +83,7 @@ CoTask<void> TestCamera::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestCamera::OnRender()

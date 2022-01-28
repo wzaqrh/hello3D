@@ -61,15 +61,15 @@ struct MaterialLoadParamBuilder
 	}
 	int& operator[](const std::string& macroName) { return MacroMap[macroName]; }
 	std::string& ShaderVariantName() { return LoadParam.ShaderVariantName; }
-	const MaterialLoadParam& Build() {
+	const MaterialLoadParam& Build() const {
 		LoadParam.Macros.clear();
 		for (auto& it : MacroMap)
 			LoadParam.Macros.push_back(ShaderCompileMacro{ it.first, boost::lexical_cast<std::string>(it.second) });
 		return LoadParam;
 	}
-	operator MaterialLoadParam() { return Build(); }
+	operator MaterialLoadParam() const { return Build(); }
 private:
-	MaterialLoadParam LoadParam;
+	mutable MaterialLoadParam LoadParam;
 	std::map<std::string, int> MacroMap;
 };
 

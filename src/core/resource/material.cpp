@@ -64,9 +64,9 @@ void Material::EnableKeyword(const std::string& macroName, int value /*= TRUE*/)
 CoTask<bool> Material::Build(Launch launchMode, ResourceManager& resMng)
 {
 	if (mShaderVariant == nullptr) {
-		mShaderVariant = CoAwait resMng.CreateShader(launchMode, mShaderVariantParam.Build());
+		CoAwait resMng.CreateShader(launchMode, mShaderVariant, mShaderVariantParam.Build());
 	}
-	return mShaderVariant != nullptr;
+	return mShaderVariant->IsLoaded();
 }
 
 MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng) const

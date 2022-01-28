@@ -6,8 +6,8 @@ namespace mir {
 namespace rend {
 
 /********** Cube **********/
-Cube::Cube(Launch launchMode, ResourceManager& resourceMng)
-	: Super(launchMode, resourceMng)
+Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
+	: Super(launchMode, resourceMng, material)
 	, mVertexDirty(true)
 	, mHalfSize(Eigen::Vector3f::Ones())
 	, mPosition(Eigen::Vector3f::Zero())

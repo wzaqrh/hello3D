@@ -119,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\attribute_struct.cpp" />
+    <ClCompile Include="..\src\core\base\cppcoro.cpp" />
     <ClCompile Include="..\src\core\base\d3d.cpp" />
     <ClCompile Include="..\src\core\base\debug.cpp" />
     <ClCompile Include="..\src\core\base\input.cpp" />

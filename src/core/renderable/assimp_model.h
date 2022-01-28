@@ -64,6 +64,7 @@ public:
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex);
 	void DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList);
+	bool IsMaterialEnabled() const override { return false; }
 private:
 	res::AiScenePtr mAiScene;
 	AiAnimeTree mAnimeTree;

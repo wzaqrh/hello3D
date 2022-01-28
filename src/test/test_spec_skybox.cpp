@@ -11,13 +11,13 @@ class TestSpecSkybox : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitCamera() override {}
 };
 /*mCaseIndex
 
 */
-CoTask<void> TestSpecSkybox::OnPostInitDevice()
+CoTask<bool> TestSpecSkybox::OnPostInitDevice()
 {
 	switch (mCaseIndex) {
 	case 0: {
@@ -44,7 +44,7 @@ CoTask<void> TestSpecSkybox::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestSpecSkybox::OnRender()

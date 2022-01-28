@@ -43,52 +43,41 @@ public:
 		res->SetLoaded();
 		return std::static_pointer_cast<IIndexBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IIndexBufferPtr, CreateIndexBuffer, ThreadSafe);
-
 	TemplateArgs IVertexBufferPtr CreateVertexBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceVertexBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadVertexBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IVertexBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IVertexBufferPtr, CreateVertexBuffer, ThreadSafe);
-
 	TemplateArgs IContantBufferPtr CreateConstBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceContantBuffer); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadConstBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IContantBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IContantBufferPtr, CreateConstBuffer, ThreadSafe);
-
 	TemplateArgs bool UpdateBuffer(T &&...args) ThreadSafe {
 		return mRenderSys.UpdateBuffer(std::forward<T>(args)...);
 	}
-
+	
 	TemplateArgs IInputLayoutPtr CreateLayout(Launch launchMode, IProgramPtr program, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceInputLayout); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadLayout(res, program, std::forward<T>(args)...));
 		return std::static_pointer_cast<IInputLayout>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IInputLayoutPtr, CreateLayout, ThreadSafe);
-
 	TemplateArgs ISamplerStatePtr CreateSampler(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceSamplerState); ResSetLaunch;
 		res->SetLoaded(nullptr != mRenderSys.LoadSampler(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<ISamplerState>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(ISamplerStatePtr, CreateSampler, ThreadSafe);
 
-	CoTask<IProgramPtr> CreateProgram(Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(CoTask<IProgramPtr>, CreateProgram, ThreadSafe);
+	CoTask<bool> CreateProgram(Launch launchMode, IProgramPtr& program, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe);
 
 	TemplateArgs ITexturePtr CreateTexture(ResourceFormat format, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceTexture);
 		res->SetLoaded(nullptr != mRenderSys.LoadTexture(res, format, std::forward<T>(args)...));
 		return std::static_pointer_cast<ITexture>(res);
 	}
-	CoTask<ITexturePtr> CreateTextureByFile(Launch launchMode, const std::string& filepath, 
-		ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(CoTask<ITexturePtr>, CreateTextureByFile, ThreadSafe);
-
+	CoTask<bool> CreateTextureByFile(Launch launchMode, ITexturePtr& texture, const std::string& filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(ITexturePtr, CreateTextureByFile, ThreadSafe);
 	TemplateArgs bool LoadRawTextureData(T &&...args) ThreadSafe {
 		return mRenderSys.LoadRawTextureData(std::forward<T>(args)...);
 	}
@@ -98,23 +87,23 @@ public:
 		res->SetLoaded(nullptr != mRenderSys.LoadFrameBuffer(res, std::forward<T>(args)...));
 		return std::static_pointer_cast<IFrameBuffer>(res);
 	}
-	DECLARE_LAUNCH_FUNCTIONS(IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-	CoTask<res::ShaderPtr> CreateShader(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(CoTask<res::ShaderPtr>, CreateShader, ThreadSafe);
+	CoTask<bool> CreateShader(Launch launchMode, res::ShaderPtr& shader, const MaterialLoadParam& loadParam) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(res::ShaderPtr, CreateShader, ThreadSafe);
 
-	CoTask<res::MaterialInstance> CreateMaterial(Launch launchMode, const MaterialLoadParam& loadParam) ThreadSafe;
-	DECLARE_LAUNCH_FUNCTIONS(CoTask<res::MaterialInstance>, CreateMaterial, ThreadSafe);
+	CoTask<bool> CreateMaterial(Launch launchMode, res::MaterialInstance& matInst, const MaterialLoadParam& loadParam) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(res::MaterialInstance, CreateMaterial, ThreadSafe);
 
-	CoTask<res::AiScenePtr> CreateAiScene(Launch launchMode, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
+	CoTask<bool> CreateAiScene(Launch launchMode, res::AiScenePtr& aiScene, const std::string& assetPath, const std::string& redirectRes) ThreadSafe;
+	DECLARE_LAUNCH_FUNCTIONS(res::AiScenePtr, CreateAiScene, ThreadSafe);
 public:
 	cppcoro::static_thread_pool& GetAsyncService() { return *mThreadPool; }
 	cppcoro::io_service& GetSyncService() { return *mIoService; }
 	bool IsCurrentInAsyncService() const;
 	CoTask<void> SwitchToLaunchService(Launch launchMode);
 private:
-	CoTask<bool> _LoadProgram(IProgramPtr program, Launch launchMode, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
-	CoTask<bool> _LoadTextureByFile(ITexturePtr texture, Launch launchMode, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
+	CoTask<bool> _LoadProgram(Launch launchMode, IProgramPtr program, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
+	CoTask<bool> _LoadTextureByFile(Launch launchMode, ITexturePtr texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;
 private:
 	RenderSystem& mRenderSys;
 	res::MaterialFactory& mMaterialFac;

@@ -6,19 +6,13 @@
 namespace mir {
 namespace rend {
 
-RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng)
+RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst)
 	: mResourceMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mCameraMask(-1)
-{}
-
-CoTask<bool> RenderableSingleRenderOp::Init(const MaterialLoadParam& loadParam)
+	, mMaterial(matInst)
 {
-	COROUTINE_VARIABLES_1(loadParam);
-
 	mTransform = CreateInstance<Transform>();
-	mMaterial = CoAwait mResourceMng.CreateMaterial(mLaunchMode, loadParam);
-	CoReturn true;
 }
 
 const ITexturePtr& RenderableSingleRenderOp::GetTexture() const 

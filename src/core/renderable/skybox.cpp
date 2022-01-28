@@ -6,14 +6,10 @@
 namespace mir {
 namespace rend {
 
-CoTask<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string& imgName)
+SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
+	: Super(launchMode, resourceMng, material)
 {
-	COROUTINE_VARIABLES_2(loadParam, imgName);
-
-	if (! CoAwait Super::Init(loadParam)) 
-		CoReturn false;
-
-	if (loadParam.GetVariantName() == "Deprecate") {
+	if (material->GetLoadParam().GetVariantName() == "Deprecate") {
 		SkyboxVertex Vertexs[4];
 		float fHighW = -1.0f - (1.0f / (float)mResourceMng.WinSize().x());
 		float fHighH = -1.0f - (1.0f / (float)mResourceMng.WinSize().y());
@@ -85,23 +81,7 @@ CoTask<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string&
 		mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 
-	if (!boost::filesystem::is_regular_file(imgName)) {
-		boost::filesystem::path dir(imgName);
-		dir.remove_filename();
-		boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
-		if (boost::filesystem::exists(specularEnvPath)) {
-			boost::filesystem::path lutPath = dir / "lut.png";
-			mLutMap = CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, lutPath.string());
 
-			boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
-			mDiffuseEnvMap = CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, diffuseEnvPath.string());
-
-			SetTexture(CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, specularEnvPath.string()));
-		}
-	}
-	else {
-		SetTexture(CoAwait mResourceMng.CreateTextureByFile(mLaunchMode, imgName));
-	}
 #if 0
 	auto pCam1 = mContext->GetSceneMng()->GetDefCamera();
 	Eigen::Vector3f pos0 = pCam->ProjectPoint(Eigen::Vector3f(fLowW, fLowH, 1.0f));
@@ -109,7 +89,16 @@ CoTask<bool> SkyBox::Init(const MaterialLoadParam& loadParam, const std::string&
 	Eigen::Vector3f pos2 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fLowH, 1.0f));
 	Eigen::Vector3f pos3 = pCam->ProjectPoint(Eigen::Vector3f(fHighW, fHighH, 1.0f));
 #endif
-	CoReturn true;
+}
+
+void SkyBox::SetDiffuseEnvMap(const ITexturePtr& texture)
+{
+	mDiffuseEnvMap = texture;
+}
+
+void SkyBox::SetLutMap(const ITexturePtr& texture)
+{
+	mLutMap = texture;
 }
 
 void SkyBox::GenRenderOperation(RenderOperationQueue& opList)

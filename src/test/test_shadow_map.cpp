@@ -14,7 +14,7 @@ class TestShadowMap : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,7 +26,7 @@ private:
 1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
 */
 
-CoTask<void> TestShadowMap::OnPostInitDevice()
+CoTask<bool> TestShadowMap::OnPostInitDevice()
 {
 	SetPPU(1);
 
@@ -65,7 +65,7 @@ CoTask<void> TestShadowMap::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestShadowMap::OnRender()

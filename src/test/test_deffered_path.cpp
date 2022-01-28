@@ -10,7 +10,7 @@ class TestDefferedPath : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -21,7 +21,7 @@ private:
 2延迟,3正向: 透视相机 正向平行光  对比观察飞机
 */
 
-CoTask<void> TestDefferedPath::OnPostInitDevice()
+CoTask<bool> TestDefferedPath::OnPostInitDevice()
 {
 	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
@@ -46,7 +46,7 @@ CoTask<void> TestDefferedPath::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestDefferedPath::OnRender()

@@ -9,12 +9,16 @@
 #include <cppcoro/when_all.hpp>
 #include <cppcoro/when_all_ready.hpp>
 #include "core/mir_config.h"
+#include "core/mir_export.h"
+#include "core/base/stl.h"
 
 #if !defined MIR_CPPCORO_DISABLED
 #define CoTask cppcoro::shared_task
 #define CoAwait co_await
 #define CoReturn co_return
 #define CoReturnVoid co_return
+#define WhenAll cppcoro::when_all
+#define WhenAllReady cppcoro::when_all_ready
 #else
 template<class T> class DummyTask {
 	T Value;
@@ -37,18 +41,20 @@ template<> class DummyTask<void> {
 #define CoAwait
 #define CoReturn return
 #define CoReturnVoid return DummyTask<void>();
+#define WhenAll()
+#define WhenAllReady()
 #endif
 
 namespace mir {
 namespace coroutine {
 #if !defined MIR_CPPCORO_DISABLED
 
-inline void ExecuteTaskSync(cppcoro::io_service& ioService, const CoTask<void>& task) {
-	auto scopedTask = [](cppcoro::io_service& ioService, const CoTask<void>& task)->CoTask<void> {
+inline void ExecuteTaskSync(cppcoro::io_service& ioService, const CoTask<bool>& task) {
+	auto scopedTask = [](cppcoro::io_service& ioService, const CoTask<bool>& task)->CoTask<void> {
 		cppcoro::io_work_scope scope(ioService);
 		co_await task;
 	};
-	auto processEvent = [](cppcoro::io_service& ioService)->CoTask<void> {
+	auto processEvent = [](cppcoro::io_service& ioService)->CoTask<bool> {
 		ioService.process_events();
 		co_return;
 	};

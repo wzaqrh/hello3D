@@ -10,7 +10,7 @@ class TestModel : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -34,7 +34,7 @@ inline MaterialLoadParam GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-CoTask<void> TestModel::OnPostInitDevice()
+CoTask<bool> TestModel::OnPostInitDevice()
 {
 	int caseIndex = mCaseIndex % 6;
 	bool useOtho = mCaseIndex >= 6;
@@ -99,7 +99,7 @@ CoTask<void> TestModel::OnPostInitDevice()
 		mTransform->SetScale(mTransform->GetScale() * 50);
 
 	mModel->PlayAnim(0);
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestModel::OnRender()

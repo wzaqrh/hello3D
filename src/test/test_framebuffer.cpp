@@ -12,7 +12,7 @@ class TestRT : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -28,7 +28,7 @@ private:
 */
 
 /********** TestRT **********/
-CoTask<void> TestRT::OnPostInitDevice()
+CoTask<bool> TestRT::OnPostInitDevice()
 {
 	if (mCaseIndex == 0)
 	{
@@ -101,7 +101,7 @@ CoTask<void> TestRT::OnPostInitDevice()
 			camera1->SetDepth(2);
 			camera1->SetCullingMask(cameraMask1);
 
-			mFrameBuffer = mResMng->CreateFrameBufferSync(mHalfSize.cast<int>().head<2>() / 2, 
+			mFrameBuffer = mResMng->CreateFrameBuffer(__LaunchSync__, mHalfSize.cast<int>().head<2>() / 2, 
 				MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 			camera2->SetOutput(mFrameBuffer);
 			DEBUG_SET_PRIV_DATA(mFrameBuffer, "camera2 output");
@@ -113,7 +113,7 @@ CoTask<void> TestRT::OnPostInitDevice()
 			mFBSprite->SetSize(mHalfSize);
 		}
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 //#define USE_RENDER_TARGET

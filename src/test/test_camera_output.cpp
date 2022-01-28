@@ -13,7 +13,7 @@ class TestCameraOutput : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -27,7 +27,7 @@ private:
 */
 
 #define SCALE_BASE 0.01
-CoTask<void> TestCameraOutput::OnPostInitDevice()
+CoTask<bool> TestCameraOutput::OnPostInitDevice()
 {
 	constexpr unsigned cameraMask2 = 0x01;
 	CameraPtr camera2;
@@ -94,7 +94,7 @@ CoTask<void> TestCameraOutput::OnPostInitDevice()
 		mSpriteCam1->SetPosition(mWinCenter);
 		mSpriteCam1->SetSize(mHalfSize.cast<float>());
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestCameraOutput::OnRender()

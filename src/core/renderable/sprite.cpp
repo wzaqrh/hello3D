@@ -6,8 +6,8 @@ namespace mir {
 namespace rend {
 
 /********** TSprite **********/
-Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng)
-	: Super(launchMode, resourceMng)
+Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
+	: Super(launchMode, resourceMng, material)
 	, mQuad(Eigen::Vector2f::Zero(), Eigen::Vector2f::Zero())
 	, mQuadDirty(true)
 	, mColor(Eigen::Vector4f::Ones())

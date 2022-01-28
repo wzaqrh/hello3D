@@ -11,7 +11,7 @@ class TestCube : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 private:
 	CubePtr mCube;
 };
@@ -20,7 +20,7 @@ private:
 1：透视相机 观察到淡蓝平面(滚动鼠标滚轮)
 */
 
-CoTask<void> TestCube::OnPostInitDevice()
+CoTask<bool> TestCube::OnPostInitDevice()
 {
 	switch (mCaseIndex) {
 	case 0: {
@@ -36,7 +36,7 @@ CoTask<void> TestCube::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestCube::OnRender()

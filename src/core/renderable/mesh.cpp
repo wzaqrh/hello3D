@@ -6,13 +6,9 @@ namespace mir {
 namespace rend {
 
 /********** Mesh **********/
-CoTask<bool> Mesh::Init(const MaterialLoadParam& loadParam, int vertCount, int indexCount)
+Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material, int vertCount, int indexCount)
+	:Super(launchMode, resourceMng, material)
 {
-	COROUTINE_VARIABLES_3(loadParam, vertCount, indexCount);
-
-	if (!CoAwait Super::Init(loadParam))
-		CoReturn false;
-
 	mIndices.resize(indexCount);
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(mIndices));
 
@@ -20,7 +16,6 @@ CoTask<bool> Mesh::Init(const MaterialLoadParam& loadParam, int vertCount, int i
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
-	CoReturn true;
 }
 
 void Mesh::GenRenderOperation(RenderOperationQueue& opList)
