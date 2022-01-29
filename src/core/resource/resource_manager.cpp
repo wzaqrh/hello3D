@@ -24,6 +24,7 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& 
 	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber, ilInit, ilShutDown);
 	mIoService = ioService;
 	ilInit();
+	TIME_PROFILE((boost::format("resMng.main_tid %1%") %mMainThreadId).str());
 }
 ResourceManager::~ResourceManager()
 {
@@ -45,8 +46,8 @@ CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 {
 #if !defined MIR_CPPCORO_DISABLED
 	if (launchMode == LaunchAsync) {
-		if (! IsCurrentInAsyncService())
-			CoAwait mThreadPool->schedule();
+		//if (! IsCurrentInAsyncService())
+		CoAwait mThreadPool->schedule();
 		BOOST_ASSERT(IsCurrentInAsyncService());
 	}
 	else {
@@ -98,16 +99,17 @@ static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	std::string filepath = "shader/asm/" + platform + "/" + asmName;
 	return boost::filesystem::system_complete(filepath);
 }
-CoTask<bool> ResourceManager::_LoadProgram(Launch launchMode, IProgramPtr program, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ResourceManager::_LoadProgram(Launch launchMode, IProgramPtr program, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
-	COROUTINE_VARIABLES_5(program, launchMode, name, vertexSCD, pixelSCD);
 	program->SetLoading();
 	CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_5(program, launchMode, name, vertexSCD, pixelSCD);
 
 #if defined MIR_TIME_DEBUG
-	std::string msg = (boost::format("resMng._LoadProgram %1% %2% %3%") % name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str();
+	std::string msg = (boost::format("\t\tresMng._LoadProgram (%1% %2% %3%") %name %vertexSCD.EntryPoint %pixelSCD.EntryPoint).str();
 	for (auto& macro : vertexSCD.Macros)
-		msg += (boost::format(" %1%=%2%") % macro.Name %macro.Definition).str();
+		msg += (boost::format(" %1%=%2%") %macro.Name %macro.Definition).str();
+	msg += ")";
 	TIME_PROFILE(msg);
 #endif
 
@@ -158,12 +160,12 @@ CoTask<bool> ResourceManager::_LoadProgram(Launch launchMode, IProgramPtr progra
 	program->SetLoaded(loadProgram(program) != nullptr);
 	CoReturn program->IsLoaded();
 }
-CoTask<bool> ResourceManager::CreateProgram(Launch launchMode, IProgramPtr& program, const std::string& name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ResourceManager::CreateProgram(Launch launchMode, IProgramPtr& program, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
-	COROUTINE_VARIABLES_4(launchMode, name, vertexSCD, pixelSCD);
 	//CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_4(launchMode, name, vertexSCD, pixelSCD);
 
-	ProgramKey key{ name, vertexSCD, pixelSCD };
+	ProgramKey key{ std::move(name), std::move(vertexSCD), std::move(pixelSCD) };
 	if (key.vertexSCD.ShaderModel.empty()) 
 		key.vertexSCD.ShaderModel = "vs_4_0";
 	if (key.pixelSCD.ShaderModel.empty()) 
@@ -178,19 +180,19 @@ CoTask<bool> ResourceManager::CreateProgram(Launch launchMode, IProgramPtr& prog
 		return program;
 	});
 	if (resNeedLoad) {
-		CoAwait _LoadProgram(launchMode, program, key.name, key.vertexSCD, key.pixelSCD);
+		CoAwait _LoadProgram(launchMode, program, std::move(key.name), std::move(key.vertexSCD), std::move(key.pixelSCD));
 	}
 	CoReturn program->IsLoaded();
 }
 
 /********** Create Texture **********/
-CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr texture, const std::string& imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr texture, std::string imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
-	COROUTINE_VARIABLES_5(texture, launchMode, imgFullpath, format, autoGenMipmap);
 	texture->SetLoading();
 	CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_5(texture, launchMode, imgFullpath, format, autoGenMipmap);
 
-	TIME_PROFILE((boost::format("resMng._LoadTextureByFile %1% %2% %3%") %imgFullpath %format %autoGenMipmap).str());
+	TIME_PROFILE((boost::format("\t\tresMng._LoadTextureByFile (%1% %2% %3%)") %imgFullpath %format %autoGenMipmap).str());
 	ITexturePtr ret = nullptr;
 
 	FILE* fd = fopen(imgFullpath.c_str(), "rb"); BOOST_ASSERT(fd);
@@ -349,10 +351,10 @@ CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr 
 	texture->SetLoaded(ret != nullptr);
 	CoReturn texture->IsLoaded();
 }
-CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr& texture, const std::string& filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr& texture, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
-	COROUTINE_VARIABLES_4(launchMode, filepath, format, autoGenMipmap);
 	//CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_4(launchMode, filepath, format, autoGenMipmap);
 
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);
 	std::string key = fullpath.string();
@@ -366,7 +368,7 @@ CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr
 		return texture;
 	});
 	if (resNeedLoad) {
-		CoAwait _LoadTextureByFile(launchMode, texture, key, format, autoGenMipmap);
+		CoAwait _LoadTextureByFile(launchMode, texture, std::move(key), format, autoGenMipmap);
 	}
 	CoReturn texture->IsLoaded();
 }
@@ -374,8 +376,8 @@ CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr
 /********** Create Material **********/
 CoTask <bool> ResourceManager::CreateShader(Launch launchMode, res::ShaderPtr& shader, const MaterialLoadParam& param) ThreadSafe
 {
-	COROUTINE_VARIABLES_2(launchMode, param);
 	//CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_2(launchMode, param);
 
 	bool resNeedLoad = false;
 	shader = mShaderByName.GetOrAdd(param, [&]() {
@@ -391,10 +393,10 @@ CoTask <bool> ResourceManager::CreateShader(Launch launchMode, res::ShaderPtr& s
 	CoReturn shader->IsLoaded();
 }
 
-CoTask<bool> ResourceManager::CreateMaterial(Launch launchMode, res::MaterialInstance& matInst, const MaterialLoadParam& loadParam) ThreadSafe
+CoTask<bool> ResourceManager::CreateMaterial(Launch launchMode, res::MaterialInstance& matInst, MaterialLoadParam loadParam) ThreadSafe
 {
-	COROUTINE_VARIABLES_2(launchMode, loadParam);
 	//CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_2(launchMode, loadParam);
 
 	bool resNeedLoad = false;
 	res::MaterialPtr material = mMaterialByName.GetOrAdd(loadParam, [&]() {
@@ -405,18 +407,17 @@ CoTask<bool> ResourceManager::CreateMaterial(Launch launchMode, res::MaterialIns
 		return material;
 	});
 	if (resNeedLoad) {
-		auto param = loadParam;
-		CoAwait this->mMaterialFac.CreateMaterial(launchMode, material, *this, param);
+		CoAwait this->mMaterialFac.CreateMaterial(launchMode, material, *this, std::move(loadParam));
 	}
 	matInst = material->CreateInstance(launchMode, *this);
 	return matInst->IsLoaded();
 }
 
 /********** Create AiScene **********/
-CoTask<bool> ResourceManager::CreateAiScene(Launch launchMode, res::AiScenePtr& aiScene, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
+CoTask<bool> ResourceManager::CreateAiScene(Launch launchMode, res::AiScenePtr& aiScene, std::string assetPath, std::string redirectRes) ThreadSafe
 {
-	COROUTINE_VARIABLES_3(launchMode, assetPath, redirectRes);
 	//CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_3(launchMode, assetPath, redirectRes);
 
 	AiResourceKey key{ assetPath, redirectRes };
 	bool resNeedLoad = false;
@@ -428,7 +429,7 @@ CoTask<bool> ResourceManager::CreateAiScene(Launch launchMode, res::AiScenePtr& 
 		return aiScene;
 	});
 	if (resNeedLoad) {
-		CoAwait this->mAiResourceFac.CreateAiScene(launchMode, aiScene, *this, assetPath, redirectRes);
+		CoAwait this->mAiResourceFac.CreateAiScene(launchMode, aiScene, *this, std::move(assetPath), std::move(redirectRes));
 	}
 	CoReturn aiScene->IsLoaded();
 }

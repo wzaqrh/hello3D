@@ -1,4 +1,5 @@
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
@@ -34,6 +35,8 @@ public:
 private:
 	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource)
 	{
+		TIME_PROFILE((boost::format("\t\taiScene.LoadRawData (%1% %2%)") %imgPath %redirectResource).str());
+
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
 		if (!redirectResource.empty()) {
@@ -85,7 +88,7 @@ private:
 	{
 		COROUTINE_VARIABLES;
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
-		std::vector<cppcoro::shared_task<bool>> tasks;
+		std::vector<CoTask<bool>> tasks;
 		ProcessNode(mAsset.mRootNode, mAsset.mScene, tasks);
 		CoAwait WhenAllReady(std::move(tasks));
 
@@ -110,7 +113,7 @@ private:
 		return true;
 	}
 private:
-	void ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<cppcoro::shared_task<bool>>& tasks) {
+	void ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
 		COROUTINE_VARIABLES_2(node, rawScene);
 
 		const aiNode* rawNode = node->RawNode;
@@ -166,7 +169,7 @@ private:
 		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
 		else return result.append(path.string());
 	}
-	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, const aiScene* scene, std::vector<cppcoro::shared_task<bool>>& tasks) const {
+	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, const aiScene* scene, std::vector<CoTask<bool>>& tasks) const {
 		COROUTINE_VARIABLES_2(rawMesh, scene);
 
 		AssimpMeshPtr meshPtr = AssimpMesh::Create();
@@ -296,10 +299,11 @@ private:
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 
 /********** AiAssetManager **********/
-CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& scene, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes) ThreadSafe
+CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& scene, ResourceManager& resMng, std::string assetPath, std::string redirectRes) ThreadSafe
 {
 	COROUTINE_VARIABLES_5(launchMode, scene, resMng, assetPath, redirectRes);
 	//CoAwait mResourceMng.SwitchToLaunchService(launchMode)
+	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") %assetPath %redirectRes).str());
 
 	scene = IF_OR(scene, CreateInstance<AiScene>());
 	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);

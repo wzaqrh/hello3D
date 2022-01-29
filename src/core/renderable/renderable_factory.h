@@ -13,14 +13,14 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	typedef const std::string& string_cref;
 	RenderableFactory(ResourceManager& resMng, Launch launchMode);
-	CoTask<rend::SkyBoxPtr> CreateSkybox(string_cref imgpath, const MaterialLoadParam& matName = "");
-	CoTask<rend::SpritePtr> CreateColorLayer(const MaterialLoadParam& matName = "");
-	CoTask<rend::SpritePtr> CreateSprite(string_cref imgpath = "", const MaterialLoadParam& matName = "");
-	CoTask<rend::MeshPtr> CreateMesh(int vertCount = 1024, int indexCount = 1024, const MaterialLoadParam& matName = "");
-	CoTask<rend::CubePtr> CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra = -1, const MaterialLoadParam& matName = "");
-	CoTask<rend::AssimpModelPtr> CreateAssimpModel(const MaterialLoadParam& matName = "");
-	CoTask<rend::LabelPtr> CreateLabel(string_cref fontPath, int fontSize);
-	CoTask<rend::PostProcessPtr> CreatePostProcessEffect(string_cref effectName, scene::Camera& camera);
+	CoTask<rend::SkyBoxPtr> CreateSkybox(std::string imagePath, MaterialLoadParam loadParam = "");
+	CoTask<rend::SpritePtr> CreateColorLayer(MaterialLoadParam loadParam = "");
+	CoTask<rend::SpritePtr> CreateSprite(std::string imagePath = "", MaterialLoadParam loadParam = "");
+	CoTask<rend::MeshPtr> CreateMesh(int vertCount = 1024, int indexCount = 1024, MaterialLoadParam loadParam = "");
+	CoTask<rend::CubePtr> CreateCube(Eigen::Vector3f center, Eigen::Vector3f halfsize, unsigned bgra = -1, MaterialLoadParam loadParam = "");
+	CoTask<rend::AssimpModelPtr> CreateAssimpModel(MaterialLoadParam loadParam = "");
+	CoTask<rend::LabelPtr> CreateLabel(std::string fontPath, int fontSize);
+	CoTask<rend::PostProcessPtr> CreatePostProcessEffect(std::string effectName, scene::Camera& camera);
 private:
 	Launch mLaunchMode;
 	ResourceManager& mResourceMng;

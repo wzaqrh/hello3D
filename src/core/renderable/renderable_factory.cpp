@@ -26,7 +26,7 @@ RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 	mLaunchMode = launchMode;
 }
 
-CoTask<SpritePtr> RenderableFactory::CreateSprite(string_cref imgpath, const MaterialLoadParam& loadParam)
+CoTask<SpritePtr> RenderableFactory::CreateSprite(std::string imgpath, MaterialLoadParam loadParam)
 {
 	COROUTINE_VARIABLES_2(imgpath, loadParam);
 	SpritePtr sprite;
@@ -48,33 +48,32 @@ CoTask<SpritePtr> RenderableFactory::CreateSprite(string_cref imgpath, const Mat
 	return sprite;
 }
 
-CoTask<SpritePtr> RenderableFactory::CreateColorLayer(const MaterialLoadParam& loadParam)
+CoTask<SpritePtr> RenderableFactory::CreateColorLayer(MaterialLoadParam loadParam)
 {
 	COROUTINE_VARIABLES_1(loadParam);
 
 	return CoAwait CreateSprite("", NotEmptyOr(loadParam, MAT_LAYERCOLOR));
 }
 
-//#include <cppcoro/fmap.hpp>
-CoTask<MeshPtr> RenderableFactory::CreateMesh(int vertCount, int indexCount, const MaterialLoadParam& param)
+CoTask<MeshPtr> RenderableFactory::CreateMesh(int vertCount, int indexCount, MaterialLoadParam param)
 {
 	COROUTINE_VARIABLES_3(vertCount, indexCount, param);
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SPRITE);
-	if (!co_await mResourceMng.CreateMaterial(mLaunchMode, material, loadParam))
+	if (!CoAwait mResourceMng.CreateMaterial(mLaunchMode, material, loadParam))
 		return nullptr;
 
 	return Mesh::Create(mLaunchMode, mResourceMng, material, vertCount, indexCount);
 }
 
-CoTask<CubePtr> RenderableFactory::CreateCube(const Eigen::Vector3f& center, const Eigen::Vector3f& halfsize, unsigned bgra, const MaterialLoadParam& param)
+CoTask<CubePtr> RenderableFactory::CreateCube(Eigen::Vector3f center, Eigen::Vector3f halfsize, unsigned bgra, MaterialLoadParam param)
 {
 	COROUTINE_VARIABLES_4(center, halfsize, bgra, param);
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_LAYERCOLOR "-Cube");
-	if (!co_await mResourceMng.CreateMaterial(mLaunchMode, material, loadParam))
+	if (!CoAwait mResourceMng.CreateMaterial(mLaunchMode, material, loadParam))
 		return nullptr;
 
 	auto cube = Cube::Create(mLaunchMode, mResourceMng, material);
@@ -84,33 +83,33 @@ CoTask<CubePtr> RenderableFactory::CreateCube(const Eigen::Vector3f& center, con
 	return cube;
 }
 
-CoTask<AssimpModelPtr> RenderableFactory::CreateAssimpModel(const MaterialLoadParam& param)
+CoTask<AssimpModelPtr> RenderableFactory::CreateAssimpModel(MaterialLoadParam param)
 {
 	COROUTINE_VARIABLES_1(param);
 
-	co_return AssimpModel::Create(mLaunchMode, mResourceMng, res::MaterialInstance());
+	CoReturn AssimpModel::Create(mLaunchMode, mResourceMng, res::MaterialInstance());
 }
 
-CoTask<LabelPtr> RenderableFactory::CreateLabel(string_cref fontPath, int fontSize)
+CoTask<LabelPtr> RenderableFactory::CreateLabel(std::string fontPath, int fontSize)
 {
 	COROUTINE_VARIABLES_2(fontPath, fontSize);
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = MAT_LABEL;
-	if (!co_await mResourceMng.CreateMaterial(mLaunchMode, material, loadParam))
+	if (!CoAwait mResourceMng.CreateMaterial(mLaunchMode, material, loadParam))
 		return nullptr;
 
 	FontPtr font = mFontCache->GetFont(fontPath, fontSize);
 	return Label::Create(mLaunchMode, mResourceMng, material, font);
 }
 
-CoTask<SkyBoxPtr> RenderableFactory::CreateSkybox(string_cref imgpath, const MaterialLoadParam& param)
+CoTask<SkyBoxPtr> RenderableFactory::CreateSkybox(std::string imgpath, MaterialLoadParam param)
 {
 	COROUTINE_VARIABLES_2(imgpath, param);
 	std::vector<CoTask<bool>> tasks;
 
 	res::MaterialInstance material;
-	MaterialLoadParam loadParam = NotEmptyOr(loadParam, MAT_SKYBOX);
+	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SKYBOX);
 	tasks.push_back(mResourceMng.CreateMaterial(mLaunchMode, material, loadParam));
 
 	ITexturePtr mainTexture, lutMap, diffuseEnvMap;
@@ -142,7 +141,7 @@ CoTask<SkyBoxPtr> RenderableFactory::CreateSkybox(string_cref imgpath, const Mat
 	return skybox;
 }
 
-CoTask<PostProcessPtr> RenderableFactory::CreatePostProcessEffect(string_cref effectName, scene::Camera& camera)
+CoTask<PostProcessPtr> RenderableFactory::CreatePostProcessEffect(std::string effectName, scene::Camera& camera)
 {
 	PostProcessPtr process;
 	CoReturn process;

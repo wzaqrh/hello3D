@@ -28,6 +28,8 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 
 CoTask<bool> TestGLTF::OnPostInitDevice()
 {
+	TIME_PROFILE("testGLTF.OnPostInitDevice");
+
 	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 

@@ -120,11 +120,11 @@ public:
 };
 
 /********** AssimpModel **********/
-CoTask<bool> AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
+CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectResource)
 {
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 
-	if (!CoAwait mResourceMng.CreateAiScene(mLaunchMode, mAiScene, assetPath, redirectResource)) 
+	if (!CoAwait mResourceMng.CreateAiScene(mLaunchMode, mAiScene, std::move(assetPath), std::move(redirectResource))) 
 		return false;
 
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
