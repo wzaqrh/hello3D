@@ -72,10 +72,6 @@ public:
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 
 	CameraType GetType() const { return mType; }
-	Eigen::Vector3f GetLookAt() const;
-	Eigen::Vector3f GetForward() const;
-	float GetForwardLength() const { return mForwardLength; }
-	Eigen::Vector3f GetUp() const;
 	Eigen::Vector2f GetOthoWinSize() const;
 private:
 	void InitAsPerspective(float aspect = 1.0,
@@ -106,7 +102,7 @@ private:
 	CameraType mType;
 	Eigen::Vector2f mClipPlane;
 	float mFov, mOrthoSize;
-	float mAspect, mForwardLength;
+	float mAspect;
 
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 	mutable bool mViewDirty, mProjectionDirty;

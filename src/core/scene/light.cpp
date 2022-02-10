@@ -36,12 +36,13 @@ void DirectLight::SetSpecular(const Eigen::Vector3f& color, float shiness, float
 void DirectLight::CalculateLightingViewProjection(const Camera& camera, Eigen::Vector2i size, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const 
 {
 	float width = std::max<int>(size.x(), size.y());
-	float depth = camera.GetForwardLength();
+	auto camTransform = camera.GetTransform();
+	float depth = camTransform->GetForwardLength();
 	float distance = sqrtf(width * width + depth * depth);
 
-	Eigen::Vector3f lookat = camera.GetLookAt();
+	Eigen::Vector3f lookat = camTransform->GetLookAt();
 	Eigen::Vector3f forward = -mCbLight.unity_LightPosition.head<3>();
-	view = math::cam::MakeLookForwardLH(lookat - forward * distance, forward, camera.GetUp());
+	view = math::cam::MakeLookForwardLH(lookat - forward * distance, forward, camTransform->GetUp());
 
 	proj = math::cam::MakeOrthographicOffCenterLH(-size.x()/2, size.x()/2, -size.y()/2, size.y()/2, 0.3, distance * 1.5);
 	if (!castShadow) {

@@ -47,7 +47,7 @@ CoTask<bool> TestCamera::OnPostInitDevice()
 		mModel = CoAwait mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 		if (cameraType == 0)
-			mTransform->SetScale(mTransform->GetScale() * 2);
+			mTransform->SetScale(mTransform->GetLossyScale() * 2);
 	}
 
 	mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -1, 1));

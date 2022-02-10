@@ -19,7 +19,7 @@ Camera::Camera(ResourceManager& resMng)
 	mType = kCameraPerspective;
 	mClipPlane = Eigen::Vector2f::Zero();
 	mFov = mOrthoSize = 0;
-	mAspect = mForwardLength = 1.0;
+	mAspect = 1.0;
 
 	mViewDirty = true;
 	mProjectionDirty = true;
@@ -78,31 +78,17 @@ void Camera::SetOrthographicSize(float size)
 }
 void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 {
-	auto forward = at - eye;
-	mForwardLength = forward.norm();
-	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mTransform->SetPosition(eye);
+	mTransform->LookAt(at);
 	mViewDirty = true;
 }
 void Camera::SetForward(const Eigen::Vector3f& forward)
 {
-	mTransform->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
+	mTransform->LookForward(forward);
 	mViewDirty = true;
 }
 
 /********** query **********/
-Eigen::Vector3f Camera::GetLookAt() const
-{
-	return mTransform->GetPosition() + mTransform->GetForward() * mForwardLength;
-}
-Eigen::Vector3f Camera::GetForward() const
-{
-	return mTransform->GetForward();
-}
-Eigen::Vector3f Camera::GetUp() const
-{
-	return mTransform->GetUp();
-}
 Eigen::Vector2f Camera::GetOthoWinSize() const
 {
 	BOOST_ASSERT(mType == kCameraOthogonal);
@@ -163,14 +149,14 @@ const Eigen::Matrix4f& Camera::GetProjection() const
 
 void Camera::RecalculateView() const
 {
-	auto eyePos = mTransform->GetPosition();
+	auto eyePos = mTransform->GetLocalPosition();
 	auto forward = mTransform->GetForward();
 	auto up = mTransform->GetUp();
 	mView = math::cam::MakeLookForwardLH(eyePos, forward, up);
 
 	Transform3fAffine t(Transform3fAffine::Identity());
 	{
-		auto s = mTransform->GetScale();
+		auto s = mTransform->GetLocalScale();
 		t.prescale(Eigen::Vector3f(1 / s.x(), 1 / s.y(), 1 / s.z()));
 
 	#if defined OTHO_PROJ_CENTER_NOT_ZERO

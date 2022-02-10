@@ -62,7 +62,7 @@ CoTask<bool> TestCameraOutput::OnPostInitDevice()
 		mModel2->PlayAnim(0);
 
 		if (camera2->GetType() == kCameraOthogonal)
-			mTransform->SetScale(mTransform->GetScale() * 50);
+			mTransform->SetScale(mTransform->GetLossyScale() * 50);
 	}
 
 	if (mCaseIndex == 1)

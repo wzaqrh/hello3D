@@ -41,7 +41,7 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
-	op.WorldTransform = mTransform->GetSRT();
+	op.WorldTransform = mTransform->GetWorldMatrix();
 	op.CameraMask = mCameraMask;
 	return true;
 }

@@ -86,9 +86,9 @@ CoTask<bool> TestRT::OnPostInitDevice()
 			mTransform = CoAwait test1::res::model().Init("rock", mModel);
 
 			if (camera2->GetType() == kCameraOthogonal)
-				mTransform->SetScale(mTransform->GetScale() * 50);
+				mTransform->SetScale(mTransform->GetLossyScale() * 50);
 			else
-				mTransform->SetScale(mTransform->GetScale() * 5);
+				mTransform->SetScale(mTransform->GetLossyScale() * 5);
 		}
 
 		constexpr unsigned cameraMask1 = 0x02;

@@ -24,7 +24,7 @@ CoTask<bool> TestCube::OnPostInitDevice()
 	case 0: {
 		mCube = CoAwait mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(1,1,1), 0xff87CEFA);
 		mTransform = mCube->GetTransform();
-		mTransform->SetEuler(Eigen::Vector3f(45*0.174, 45*0.174, 45*0.174));
+		mTransform->SetEulerAngles(Eigen::Vector3f(45*0.174, 45*0.174, 45*0.174));
 	}break;
 	case 1: {
 		const int SizeInf = 256;

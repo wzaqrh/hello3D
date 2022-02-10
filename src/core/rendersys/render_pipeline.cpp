@@ -122,7 +122,7 @@ static cbPerFrame MakePerFrame(const scene::Camera& camera, const Eigen::Vector2
 	cbPerFrame perFrameParam;
 	perFrameParam.View = camera.GetView();
 	perFrameParam.Projection = camera.GetProjection();
-	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
+	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
 static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::ILight& light, IFrameBufferPtr shadowMap)
 {
@@ -143,7 +143,7 @@ static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eige
 		light.CalculateLightingViewProjection(camera, fbSize, castShadow, perFrameParam.View, perFrameParam.Projection);
 		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, fbSize, {}));
 	}
-	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
+	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<ILightPtr>& lights)
 {

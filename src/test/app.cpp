@@ -71,17 +71,17 @@ void App::Render()
 	auto camera0 = mScneMng->GetDefCamera();
 	if (camera0 && mControlCamera)
 	{
-		auto camTranform = camera0->GetTransform();
+		auto camera0Tranform = camera0->GetTransform();
 		if (!mCameraInitInvLengthForward.any()) {
-			mCameraInitInvLengthForward = -camera0->GetForward() * camera0->GetForwardLength();
-			mCameraInitLookAt = camera0->GetLookAt();
+			mCameraInitInvLengthForward = -camera0Tranform->GetForward() * camera0Tranform->GetForwardLength();
+			mCameraInitLookAt = camera0Tranform->GetLookAt();
 		}
 		
-		float forwardLength = camera0->GetForwardLength();
+		float forwardLength = camera0Tranform->GetForwardLength();
 		if (mInput->GetMouseWheelChange() != 0)
 			forwardLength -= mInput->GetMouseWheelChange() * 0.8 * forwardLength;
 
-		Eigen::Vector3f curInvForward = -camera0->GetForward();
+		Eigen::Vector3f curInvForward = -camera0Tranform->GetForward();
 		{
 			Eigen::Vector2f m = mInput->GetMouseRightLocation();
 			float mx = -3.14 * m.x();
@@ -139,7 +139,7 @@ void App::SetCaseSecondIndex(int secondIndex)
 
 Eigen::Matrix4f App::GetWorldTransform()
 {
-	return mTransform->GetSRT();
+	return mTransform->GetWorldMatrix();
 }
 
 std::string& GetCurrentAppName() {

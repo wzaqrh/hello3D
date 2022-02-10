@@ -94,7 +94,7 @@ CoTask<bool> TestModel::OnPostInitDevice()
 	}
 
 	if (camera->GetType() == kCameraOthogonal)
-		mTransform->SetScale(mTransform->GetScale() * 50);
+		mTransform->SetScale(mTransform->GetLossyScale() * 50);
 
 	mModel->PlayAnim(0);
 	CoReturn true;
