@@ -32,10 +32,10 @@ public:
 	scene::CameraPtr GetCamera(size_t index) const { return GetCameras()[index];  }
 	scene::CameraPtr GetDefCamera() const { return GetCameraCount() ? GetCamera(0) : nullptr;  }
 
-	const std::vector<scene::ILightPtr>& GetLights() const;
+	const std::vector<scene::LightPtr>& GetLights() const;
 	size_t GetLightCount() const { return mLights.size(); }
-	scene::ILightPtr GetLight(size_t index) const { return GetLights()[index]; }
-	scene::ILightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
+	scene::LightPtr GetLight(size_t index) const { return GetLights()[index]; }
+	scene::LightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
 private:
 	void ResortLights() const;
 	void ResortCameras() const;
@@ -44,7 +44,7 @@ private:
 	float mPixelPerUnit = 100;
 
 	mutable std::vector<scene::CameraPtr> mCameras;
-	mutable std::vector<scene::ILightPtr> mLights;
+	mutable std::vector<scene::LightPtr> mLights;
 	mutable bool mCamerasDirty, mLightsDirty;
 };
 

@@ -244,6 +244,12 @@
     <ClInclude Include="..\src\core\scene\transform.h">
       <Filter>src\core\scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\scene\scene_node.h">
+      <Filter>src\core\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\scene\component.h">
+      <Filter>src\core\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -394,6 +400,9 @@
       <Filter>src\core\base</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\scene\transform.cpp">
+      <Filter>src\core\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\scene\scene_node.cpp">
       <Filter>src\core\scene</Filter>
     </ClCompile>
   </ItemGroup>

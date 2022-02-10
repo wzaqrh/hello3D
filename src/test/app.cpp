@@ -71,7 +71,7 @@ void App::Render()
 	auto camera0 = mScneMng->GetDefCamera();
 	if (camera0 && mControlCamera)
 	{
-		auto camera0Tranform = camera0->GetTransform();
+		TransformPtr camera0Tranform = camera0->GetTransform();
 		if (!mCameraInitInvLengthForward.any()) {
 			mCameraInitInvLengthForward = -camera0Tranform->GetForward() * camera0Tranform->GetForwardLength();
 			mCameraInitLookAt = camera0Tranform->GetLookAt();

@@ -3,8 +3,9 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/base_type.h"
-#include "core/scene/transform.h"
 #include "core/base/declare_macros.h"
+#include "core/scene/transform.h"
+#include "core/scene/component.h"
 
 namespace mir {
 enum RenderingPath {
@@ -19,7 +20,7 @@ enum CameraType {
 
 namespace scene {
 
-class MIR_CORE_API Camera : boost::noncopyable
+class MIR_CORE_API Camera : public Component
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;

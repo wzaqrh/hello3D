@@ -89,12 +89,12 @@ void SceneManager::ResortLights() const
 	if (mLightsDirty) {
 		mLightsDirty = false;
 
-		std::sort(mLights.begin(), mLights.end(), [](const ILightPtr& l, const ILightPtr& r)->bool {
+		std::sort(mLights.begin(), mLights.end(), [](const LightPtr& l, const LightPtr& r)->bool {
 			return l->GetType() < r->GetType();
 		});
 	}
 }
-const std::vector<ILightPtr>& SceneManager::GetLights() const 
+const std::vector<LightPtr>& SceneManager::GetLights() const 
 { 
 	ResortLights();
 	return mLights; 

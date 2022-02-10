@@ -4,6 +4,7 @@
 #include "core/predeclare.h"
 #include "core/base/math.h"
 #include "core/base/uniform_struct.h"
+#include "core/scene/component.h"
 
 namespace mir {
 namespace scene {
@@ -17,18 +18,22 @@ enum LightType
 	kLightSpot
 };
 
-interface MIR_CORE_API ILight : boost::noncopyable 
+class MIR_CORE_API Light : public Component
 {
-	virtual ~ILight() {}
+public:
+	virtual ~Light() {}
 	virtual LightType GetType() const = 0;
-	virtual cbPerLight MakeCbLight() const = 0;
 	virtual void CalculateLightingViewProjection(const Camera& camera, Eigen::Vector2i size, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const = 0;
-	
-	virtual void SetCameraMask(unsigned mask) = 0;
-	virtual unsigned GetCameraMask() const = 0;
+	cbPerLight MakeCbLight() const { return mCbLight; }
+
+	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
+	unsigned GetCameraMask() const { return mCameraMask; }
+protected:
+	cbPerLight mCbLight;
+	unsigned mCameraMask = -1;
 };
 
-class MIR_CORE_API DirectLight : public ILight 
+class MIR_CORE_API DirectLight : public Light 
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
@@ -37,15 +42,8 @@ public:
 	void SetDiffuse(const Eigen::Vector3f& color);
 	void SetSpecular(const Eigen::Vector3f& color, float shiness, float luminance);
 
-	void SetCameraMask(unsigned mask) override final { mCameraMask = mask; }
-	unsigned GetCameraMask() const override final { return mCameraMask; }
-
-	void CalculateLightingViewProjection(const Camera& camera, Eigen::Vector2i size, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const override;
 	LightType GetType() const override { return kLightDirectional; }
-	cbPerLight MakeCbLight() const override { return mCbLight; }
-protected:
-	cbPerLight mCbLight;
-	unsigned mCameraMask = -1;
+	void CalculateLightingViewProjection(const Camera& camera, Eigen::Vector2i size, bool castShadow, Eigen::Matrix4f& view, Eigen::Matrix4f& proj) const override;
 };
 
 class MIR_CORE_API PointLight : public DirectLight

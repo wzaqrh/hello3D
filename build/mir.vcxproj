@@ -111,9 +111,11 @@
     <ClInclude Include="..\src\core\resource\resource.h" />
     <ClInclude Include="..\src\core\resource\resource_manager.h" />
     <ClInclude Include="..\src\core\scene\camera.h" />
+    <ClInclude Include="..\src\core\scene\component.h" />
     <ClInclude Include="..\src\core\scene\light.h" />
     <ClInclude Include="..\src\core\scene\predeclare.h" />
     <ClInclude Include="..\src\core\scene\scene_manager.h" />
+    <ClInclude Include="..\src\core\scene\scene_node.h" />
     <ClInclude Include="..\src\core\scene\transform.h" />
     <ClInclude Include="..\src\test\unit_test\unit_test.h" />
   </ItemGroup>
@@ -161,6 +163,7 @@
     <ClCompile Include="..\src\core\scene\camera.cpp" />
     <ClCompile Include="..\src\core\scene\light.cpp" />
     <ClCompile Include="..\src\core\scene\scene_manager.cpp" />
+    <ClCompile Include="..\src\core\scene\scene_node.cpp" />
     <ClCompile Include="..\src\core\scene\transform.cpp" />
     <ClCompile Include="..\src\test\unit_test\main.cpp" />
     <ClCompile Include="..\src\test\unit_test\test_atomic.cpp">

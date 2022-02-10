@@ -1,7 +1,9 @@
 #pragma once
+#include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
-#include "core/base/predeclare.h"
-#include "core/base/base_type.h"
+#include "core/base/math.h"
+#include "core/scene/predeclare.h"
+#include "core/scene/component.h"
 
 namespace mir {
 
@@ -28,7 +30,7 @@ enum RelativeSpace {
 	kSpaceSelf
 };
 
-class MIR_CORE_API BaseTransform {
+class MIR_CORE_API BaseTransform : public Component {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	BaseTransform();

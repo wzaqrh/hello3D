@@ -9,7 +9,6 @@ namespace rend {
 RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst)
 	: mResourceMng(resourceMng)
 	, mLaunchMode(launchMode)
-	, mCameraMask(-1)
 	, mMaterial(matInst)
 {
 	mTransform = CreateInstance<Transform>();

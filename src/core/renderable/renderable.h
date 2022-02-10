@@ -6,10 +6,10 @@
 #include "core/renderable/predeclare.h"
 #include "core/rendersys/predeclare.h"
 #include "core/resource/material.h"
+#include "core/scene/component.h"
 
 namespace mir {
 
-/********** RenderOperation **********/
 struct RenderOperation {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderOperation() 
@@ -54,12 +54,16 @@ private:
 	std::vector<RenderOperation, mir_allocator<RenderOperation>> mOps;
 };
 
-interface MIR_CORE_API IRenderable : boost::noncopyable 
+interface MIR_CORE_API Renderable : public Component
 {
-	virtual ~IRenderable() {}
 	virtual void GenRenderOperation(RenderOperationQueue& opList) = 0;
-	virtual void SetCameraMask(unsigned mask) = 0;
-	virtual unsigned GetCameraMask() const = 0;
+
+	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
+	unsigned GetCameraMask() const { return mCameraMask; }
+protected:
+	unsigned mCameraMask = -1;
 };
+
+
 
 }

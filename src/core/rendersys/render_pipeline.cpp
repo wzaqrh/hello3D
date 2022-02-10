@@ -104,7 +104,7 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 	}
 }
 
-static cbPerLight MakePerLight(const scene::ILight& light)
+static cbPerLight MakePerLight(const scene::Light& light)
 {
 	return light.MakeCbLight();
 }
@@ -124,7 +124,7 @@ static cbPerFrame MakePerFrame(const scene::Camera& camera, const Eigen::Vector2
 	perFrameParam.Projection = camera.GetProjection();
 	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
-static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::ILight& light, IFrameBufferPtr shadowMap)
+static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::Light& light, IFrameBufferPtr shadowMap)
 {
 	cbPerFrame perFrameParam = MakePerFrame(camera, fbSize);
 	if (shadowMap) {
@@ -135,7 +135,7 @@ static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const E
 	}
 	return perFrameParam;
 }
-static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::ILight& light)
+static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::Light& light)
 {
 	cbPerFrame perFrameParam;
 	{
@@ -145,7 +145,7 @@ static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eige
 	}
 	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
-void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<ILightPtr>& lights)
+void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
 
@@ -159,7 +159,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		auto depth_state = mStatesBlock.LockDepth(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeDisable());
 		for (auto& light : lights) {
-			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == kLightDirectional)) {
+			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == scene::kLightDirectional)) {
 				genSM = true;
 				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, mRenderSys.WinSize(), *light);
 				RenderLight(opQueue, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
@@ -180,7 +180,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
 		auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(camera.GetSkyBox(), GetLutMap()));
 
-		ILightPtr firstLight = nullptr;
+		scene::LightPtr firstLight = nullptr;
 		cbPerFrame perFrame;
 		for (auto& light : lights) 
 		{
@@ -227,7 +227,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 #endif
 }
 
-void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<ILightPtr>& lights)
+void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
 
@@ -236,7 +236,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		ILightPtr firstLight = nullptr;
+		scene::LightPtr firstLight = nullptr;
 		cbPerFrame perFrame;
 		for (auto& light : lights) 
 		{
@@ -314,7 +314,7 @@ void RenderPipeline::EndFrame()
 	mRenderSys.EndScene();
 }
 
-void RenderPipeline::Draw(IRenderable& rend, SceneManager& scene)
+void RenderPipeline::Draw(Renderable& rend, SceneManager& scene)
 {
 	if (BeginFrame()) {
 		RenderOperationQueue opQue;

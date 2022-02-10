@@ -17,14 +17,14 @@ public:
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);
-	void Draw(IRenderable& rend, SceneManager& scene);
+	void Draw(Renderable& rend, SceneManager& scene);
 private:
 	void BindPass(const res::PassPtr& pass);
 	void RenderPass(const res::PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op);
 	void RenderOp(const RenderOperation& op, const std::string& lightMode);
 	void RenderLight(const RenderOperationQueue& opQue, const std::string& lightMode, unsigned camMask, const cbPerLight* perLight, cbPerFrame& perFrame);
-	void RenderCameraForward(const RenderOperationQueue& opQue, const scene::Camera& camera, const std::vector<scene::ILightPtr>& lights);
-	void RenderCameraDeffered(const RenderOperationQueue& opQue, const scene::Camera& camera, const std::vector<scene::ILightPtr>& lights);
+	void RenderCameraForward(const RenderOperationQueue& opQue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights);
+	void RenderCameraDeffered(const RenderOperationQueue& opQue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights);
 private:
 	RenderSystem& mRenderSys;
 	RenderStatesBlockPtr mStatesBlockPtr;

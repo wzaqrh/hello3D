@@ -6,7 +6,6 @@ namespace mir {
 #define DECLARE_STRUCT(TYPE) struct TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr; typedef TYPE* TYPE##RawPtr; typedef std::weak_ptr<TYPE> TYPE##WeakPtr;  
 #define DECLARE_CLASS(TYPE) class TYPE; typedef std::shared_ptr<TYPE> TYPE##Ptr; typedef TYPE* TYPE##RawPtr; typedef std::weak_ptr<TYPE> TYPE##WeakPtr;
 
-DECLARE_STRUCT(Transform);
 DECLARE_STRUCT(TextureVector);
 
 namespace rend {
@@ -23,7 +22,7 @@ DECLARE_CLASS(FontCache);
 
 DECLARE_STRUCT(RenderOperation);
 DECLARE_STRUCT(RenderOperationQueue);
-DECLARE_STRUCT(IRenderable);
+DECLARE_STRUCT(Renderable);
 DECLARE_CLASS(RenderableFactory);
 
 }
