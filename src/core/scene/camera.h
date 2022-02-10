@@ -3,7 +3,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/base_type.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/base/declare_macros.h"
 
 namespace mir {

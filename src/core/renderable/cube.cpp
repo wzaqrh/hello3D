@@ -1,5 +1,5 @@
 #include "core/renderable/cube.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {

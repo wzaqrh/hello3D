@@ -1,6 +1,5 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/scene/scene_manager.h"
 #include "core/renderable/sprite.h"
 
 using namespace mir;

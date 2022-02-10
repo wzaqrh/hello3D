@@ -1,8 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/base/transform.h"
 #include "core/renderable/cube.h"
-#include "core/scene/scene_manager.h"
 
 using namespace mir;
 using namespace mir::rend;

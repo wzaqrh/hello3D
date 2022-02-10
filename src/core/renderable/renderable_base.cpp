@@ -1,6 +1,6 @@
 #include "core/renderable/renderable_base.h"
 #include "core/base/debug.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {

@@ -56,7 +56,6 @@
     <ClInclude Include="..\src\core\base\tpl\binary.h" />
     <ClInclude Include="..\src\core\base\tpl\traits.h" />
     <ClInclude Include="..\src\core\base\tpl\vector.h" />
-    <ClInclude Include="..\src\core\base\transform.h" />
     <ClInclude Include="..\src\core\base\uniform_struct.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
@@ -115,6 +114,7 @@
     <ClInclude Include="..\src\core\scene\light.h" />
     <ClInclude Include="..\src\core\scene\predeclare.h" />
     <ClInclude Include="..\src\core\scene\scene_manager.h" />
+    <ClInclude Include="..\src\core\scene\transform.h" />
     <ClInclude Include="..\src\test\unit_test\unit_test.h" />
   </ItemGroup>
   <ItemGroup>
@@ -123,7 +123,6 @@
     <ClCompile Include="..\src\core\base\d3d.cpp" />
     <ClCompile Include="..\src\core\base\debug.cpp" />
     <ClCompile Include="..\src\core\base\input.cpp" />
-    <ClCompile Include="..\src\core\base\transform.cpp" />
     <ClCompile Include="..\src\core\dllmain.cpp" />
     <ClCompile Include="..\src\core\mir.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp" />
@@ -162,6 +161,7 @@
     <ClCompile Include="..\src\core\scene\camera.cpp" />
     <ClCompile Include="..\src\core\scene\light.cpp" />
     <ClCompile Include="..\src\core\scene\scene_manager.cpp" />
+    <ClCompile Include="..\src\core\scene\transform.cpp" />
     <ClCompile Include="..\src\test\unit_test\main.cpp" />
     <ClCompile Include="..\src\test\unit_test\test_atomic.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

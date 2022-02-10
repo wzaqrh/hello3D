@@ -3,7 +3,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
 #include "core/base/debug.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/renderable/assimp_model.h"
 #include "core/resource/resource_manager.h"
 

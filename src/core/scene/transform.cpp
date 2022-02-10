@@ -1,6 +1,6 @@
 #include <boost/assert.hpp>
 #include <boost/math/constants/constants.hpp>
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 
 namespace mir {
 

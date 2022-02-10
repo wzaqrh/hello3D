@@ -1,9 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/scene/scene_manager.h"
-#include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
-#include "core/base/transform.h"
 
 using namespace mir;
 using namespace mir::rend;
