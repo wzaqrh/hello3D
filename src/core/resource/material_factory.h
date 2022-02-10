@@ -20,8 +20,8 @@ class MaterialFactory : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	MaterialFactory();
-	CoTask<ShaderPtr> CreateShader(Launch launch, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader = nullptr) ThreadSafe;
-	CoTask<MaterialPtr> CreateMaterial(Launch launch, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material = nullptr) ThreadSafe;
+	CoTask<bool> CreateShader(Launch launch, ShaderPtr& shader, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe;
+	CoTask<bool> CreateMaterial(Launch launch, MaterialPtr& material, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe;
 
 	ShaderPtr CloneShader(Launch launch, ResourceManager& resMng, const Shader& material);
 	TechniquePtr CloneTechnique(Launch launch, ResourceManager& resMng, const Technique& technique);
@@ -29,8 +29,8 @@ public:
 public:
 	const GpuParametersPtr& GetFrameGpuParameters() const { return mFrameGpuParameters; }
 private:
-	CoTask<ShaderPtr> DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader) ThreadSafe;
-	CoTask<MaterialPtr> DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material) ThreadSafe;
+	CoTask<bool> DoCreateShader(Launch launchMode, ShaderPtr shader, ResourceManager& resMng, mat_asset::ShaderNode shaderNode) ThreadSafe;
+	CoTask<bool> DoCreateMaterial(Launch launchMode, MaterialPtr material, ResourceManager& resMng, mat_asset::MaterialNode materialNode) ThreadSafe;
 	GpuParameters::Element AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters) ThreadSafe;
 private:
 	std::shared_ptr<mat_asset::MaterialAssetManager> mMatAssetMng;

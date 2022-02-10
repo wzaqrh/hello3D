@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <boost/format.hpp>
 #include "core/base/d3d.h"
 #include "core/base/macros.h"
 #include "core/base/debug.h"
@@ -37,11 +38,12 @@ GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, 
 		return result;
 	}
 }
-CoTask<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceManager& resMng, const mat_asset::ShaderNode& shaderNode, ShaderPtr shader) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader, ResourceManager& resMng, mat_asset::ShaderNode shaderNode) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, shaderNode, shader);
 	shader->SetLoading();
-	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+	//CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+	std::vector<CoTask<bool>> tasks;
 
 	for (const auto& categNode : shaderNode) {
 		for (const auto& techniqueNode : categNode) {
@@ -49,43 +51,47 @@ CoTask<ShaderPtr> MaterialFactory::DoCreateShader(Launch launchMode, ResourceMan
 			shader->AddTechnique(curTech);
 
 			for (const auto& passNode : techniqueNode) {
-				const auto& passProgram = passNode.Program;
-				auto curPass = CreateInstance<Pass>();
+				const mat_asset::ProgramNode& passProgram = passNode.Program;
+				PassPtr curPass = CreateInstance<Pass>();
 				curTech->AddPass(curPass);
 				curPass->mLightMode = passNode.LightMode;
 				curPass->mName = passNode.ShortName;
 				curPass->mTopoLogy = passProgram.Topo;
 
-				curPass->mProgram = CoAwait resMng.CreateProgram(launchMode,
-					passProgram.VertexSCD.SourcePath, passProgram.VertexSCD, passProgram.PixelSCD);
+				tasks.push_back([&resMng,launchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
+					if (!CoAwait resMng.CreateProgram(launchMode, pass->mProgram, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
+						return false;
 
-				BOOST_ASSERT(passProgram.Attrs.Count() >= 1);
-				if (passProgram.Attrs.Count() == 1) {
-					curPass->mInputLayout = resMng.CreateLayout(launchMode, curPass->mProgram, passProgram.Attrs[0].Layout);
-				}
-				else if (passProgram.Attrs.Count() > 1) {
-					auto layout_compose = passProgram.Attrs[0].Layout;
-					int slot = 1;
-					for (const auto& attrNode : boost::make_iterator_range(passProgram.Attrs.Range(1))) {
-						for (const auto& element_slot : attrNode.Layout) {
-							layout_compose.push_back(element_slot);
-							layout_compose.back().InputSlot = slot;
-						}
-						curPass->mInputLayout = resMng.CreateLayout(launchMode, curPass->mProgram, layout_compose);
-						++slot;
+					BOOST_ASSERT(programNode.Attrs.Count() >= 1);
+					if (programNode.Attrs.Count() == 1) {
+						pass->mInputLayout = resMng.CreateLayout(launchMode, pass->mProgram, programNode.Attrs[0].Layout);
 					}
-				}
+					else if (programNode.Attrs.Count() > 1) {
+						auto layout_compose = programNode.Attrs[0].Layout;
+						int slot = 1;
+						for (const auto& attrNode : boost::make_iterator_range(programNode.Attrs.Range(1))) {
+							for (const auto& element_slot : attrNode.Layout) {
+								layout_compose.push_back(element_slot);
+								layout_compose.back().InputSlot = slot;
+							}
+							pass->mInputLayout = resMng.CreateLayout(launchMode, pass->mProgram, layout_compose);
+							++slot;
+						}
+					}
+					return true;
+				}(curPass, passProgram));
 
 				for (const auto& sampler : passProgram.Samplers)
 					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, resMng.CreateSampler(launchMode, sampler)));
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
+	CoAwait WhenAll(std::move(tasks));
 
 	shader->SetLoaded();
-	return shader;
+	return shader->IsLoaded();
 }
-CoTask<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, ShaderPtr shader) ThreadSafe 
+CoTask<bool> MaterialFactory::CreateShader(Launch launchMode, ShaderPtr& shader, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe 
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, shader);
 	//CoAwait resMng.SwitchToLaunchService(__LaunchAsync__);
@@ -93,21 +99,23 @@ CoTask<ShaderPtr> MaterialFactory::CreateShader(Launch launchMode, ResourceManag
 	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {
-		CoAwait DoCreateShader(launchMode, resMng, shaderNode, shader);
+		CoAwait DoCreateShader(launchMode, shader, resMng, std::move(shaderNode));
 	}
 	else {
 		shader->SetLoaded(false);
 	}
-	return shader;
+	return shader->IsLoaded();
 }
 
-CoTask<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, ResourceManager& resMng, const mat_asset::MaterialNode& materialNode, MaterialPtr material) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr material, ResourceManager& resMng, mat_asset::MaterialNode materialNode) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, materialNode, material);
 	material->SetLoading();
-	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+	//CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+	std::vector<CoTask<bool>> tasks;
 
-	material->mShaderVariant = CoAwait DoCreateShader(launchMode, resMng, materialNode.Shader, CreateInstance<Shader>());
+	material->mShaderVariant = CreateInstance<Shader>();
+	tasks.push_back(DoCreateShader(launchMode, material->mShaderVariant, resMng, materialNode.Shader));
 	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
 
 	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.MaterialFilePath));
@@ -117,11 +125,11 @@ CoTask<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, Resourc
 		assetPath /= iter.second.ImagePath;
 		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
 		if (boost::filesystem::is_regular_file(assetPath)) {
-			auto texture = CoAwait resMng.CreateTextureByFile(launchMode, assetPath.string());
-			material->mTextures.AddOrSet(texture, iter.second.Slot);
+			tasks.push_back(resMng.CreateTextureByFile(launchMode, material->mTextures[iter.second.Slot], assetPath.string()));
 		}
 		assetPath.remove_filename();
 	}
+	CoAwait WhenAll(std::move(tasks));
 
 	material->mGpuParametersByShareType[kCbShareNone] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerMaterial] = CreateInstance<GpuParameters>();
@@ -152,9 +160,9 @@ CoTask<MaterialPtr> MaterialFactory::DoCreateMaterial(Launch launchMode, Resourc
 	}
 
 	material->SetLoaded(material->mShaderVariant->IsLoaded());
-	return material;
+	return material->IsLoaded();
 }
-CoTask<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceManager& resMng, const MaterialLoadParam& loadParam, MaterialPtr material) ThreadSafe
+CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& material, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe
 {
 	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, material);
 	//CoAwait resMng.SwitchToLaunchService(__LaunchAsync__);
@@ -162,12 +170,13 @@ CoTask<MaterialPtr> MaterialFactory::CreateMaterial(Launch launchMode, ResourceM
 	material = IF_OR(material, CreateInstance<Material>());
 	mat_asset::MaterialNode materialNode;
 	if (mMatAssetMng->GetMaterialNode(loadParam, materialNode)) {
-		CoAwait DoCreateMaterial(launchMode, resMng, materialNode, material);
+		TIME_PROFILE((boost::format("\tmatFac.CreateMaterial (name:%1% variant:%2%)") %loadParam.GetShaderName() %loadParam.GetVariantDesc()).str());
+		CoAwait DoCreateMaterial(launchMode, material, resMng, std::move(materialNode));
 	}
 	else {
 		material->SetLoaded(false);
 	}
-	return material;
+	return material->IsLoaded();
 }
 
 //Clone Functions

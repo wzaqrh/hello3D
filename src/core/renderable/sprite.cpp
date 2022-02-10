@@ -1,13 +1,13 @@
 #include "core/renderable/sprite.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {
 namespace rend {
 
 /********** TSprite **********/
-Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng)
-	: Super(launchMode, resourceMng)
+Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
+	: Super(launchMode, resourceMng, material)
 	, mQuad(Eigen::Vector2f::Zero(), Eigen::Vector2f::Zero())
 	, mQuadDirty(true)
 	, mColor(Eigen::Vector4f::Ones())
@@ -88,7 +88,7 @@ void Sprite::GenRenderOperation(RenderOperationQueue& opList)
 
 		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
 	}
-	op.WorldTransform = mTransform->GetSRT();
+	op.WorldTransform = mTransform->GetWorldMatrix();
 	opList.AddOP(op);
 }
 

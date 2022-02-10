@@ -1,24 +1,18 @@
 #include "core/renderable/renderable_base.h"
 #include "core/base/debug.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
 
 namespace mir {
 namespace rend {
 
-RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng)
+RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst)
 	: mResourceMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mCameraMask(-1)
-{}
-
-CoTask<bool> RenderableSingleRenderOp::Init(const MaterialLoadParam& loadParam)
+	, mMaterial(matInst)
 {
-	COROUTINE_VARIABLES_1(loadParam);
-
 	mTransform = CreateInstance<Transform>();
-	mMaterial = CoAwait mResourceMng.CreateMaterial(mLaunchMode, loadParam);
-	CoReturn true;
 }
 
 const ITexturePtr& RenderableSingleRenderOp::GetTexture() const 
@@ -47,7 +41,7 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
-	op.WorldTransform = mTransform->GetSRT();
+	op.WorldTransform = mTransform->GetWorldMatrix();
 	op.CameraMask = mCameraMask;
 	return true;
 }

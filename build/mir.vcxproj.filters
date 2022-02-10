@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\src\core\base\transform.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\renderable\mesh.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
@@ -244,11 +241,11 @@
     <ClInclude Include="..\src\core\base\tpl\atomic_map.h">
       <Filter>src\core\base\tpl</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\scene\transform.h">
+      <Filter>src\core\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\core\base\transform.cpp">
-      <Filter>src\core\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
       <Filter>src\core\renderable</Filter>
     </ClCompile>
@@ -392,6 +389,12 @@
     </ClCompile>
     <ClCompile Include="..\src\test\unit_test\test_cppcoro.cpp">
       <Filter>src\unit_test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\base\cppcoro.cpp">
+      <Filter>src\core\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\scene\transform.cpp">
+      <Filter>src\core\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

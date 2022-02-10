@@ -1,4 +1,5 @@
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
@@ -34,6 +35,8 @@ public:
 private:
 	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource)
 	{
+		TIME_PROFILE((boost::format("\t\taiScene.LoadRawData (%1% %2%)") %imgPath %redirectResource).str());
+
 		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
 
 		if (!redirectResource.empty()) {
@@ -83,9 +86,11 @@ private:
 	}
 	CoTask<bool> ExecuteSetupData()
 	{
+		COROUTINE_VARIABLES;
 		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
-		if (!CoAwait ProcessNode(mAsset.mRootNode, mAsset.mScene))
-			return false;
+		std::vector<CoTask<bool>> tasks;
+		ProcessNode(mAsset.mRootNode, mAsset.mScene, tasks);
+		CoAwait WhenAllReady(std::move(tasks));
 
 		BOOST_ASSERT(mAsset.mScene != nullptr);
 		for (unsigned int i = 0; i < mAsset.mScene->mNumMeshes; ++i) {
@@ -108,25 +113,20 @@ private:
 		return true;
 	}
 private:
-	CoTask<bool> ProcessNode(const AiNodePtr& node, const aiScene* rawScene) {
+	void ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
 		COROUTINE_VARIABLES_2(node, rawScene);
 
 		const aiNode* rawNode = node->RawNode;
 		for (int i = 0; i < rawNode->mNumMeshes; i++) {
 			aiMesh* rawMesh = rawScene->mMeshes[rawNode->mMeshes[i]];
-			AssimpMeshPtr mesh = CoAwait ProcessMesh(rawMesh, rawScene);
-			if (mesh == nullptr) 
-				return false;
-			node->AddMesh(mesh);
+			node->AddMesh(ProcessMesh(rawMesh, rawScene, tasks));
 		}
 
 		for (int i = 0; i < rawNode->mNumChildren; i++) {
 			AiNodePtr child = mAsset.AddNode(rawNode->mChildren[i]);
 			node->AddChild(child);
-			if (!CoAwait ProcessNode(child, rawScene))
-				return false;
+			ProcessNode(child, rawScene, tasks);
 		}
-		return true;
 	}
 	
 	static void ReCalculateTangents(vbSurfaceVector& surfVerts, vbSkeletonVector& skeletonVerts, const std::vector<uint32_t>& indices) 
@@ -169,73 +169,7 @@ private:
 		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
 		else return result.append(path.string());
 	}
-#if 0
-	std::vector<ITexturePtr> loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const aiScene* scene) {
-		boost::filesystem::path redirectPathProto(mRedirectResourceDir);
-		std::vector<ITexturePtr> textures;
-		for (UINT i = 0; i < std::max<int>(1, mat->GetTextureCount(type)); i++)
-		{
-			aiString str;
-		#if 0
-			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str))
-				continue;
-		#else
-			if (aiReturn_FAILURE == mat->GetTexture(type, i, &str)) {
-				switch (type)
-				{
-				case aiTextureType_DIFFUSE:
-				case aiTextureType_BASE_COLOR:
-					str.Set("Default_AO");
-					break;
-				case aiTextureType_NORMALS:
-				case aiTextureType_NORMAL_CAMERA:
-					str.Set("Default_normal");
-					break;
-				case aiTextureType_SPECULAR:
-					str.Set("Default_specular");
-					break;
-				case aiTextureType_METALNESS:
-					str.Set("Default_matalness");
-					break;
-				case aiTextureType_EMISSIVE:
-				case aiTextureType_EMISSION_COLOR:
-					str.Set("Default_emissive");
-					break;
-				case aiTextureType_DIFFUSE_ROUGHNESS:
-					str.Set("Default_diffuse_roughness");
-					break;
-				default:
-					break;
-				}
-			}
-		#endif
-			std::string key = str.C_Str();
-
-			if (!mRedirectResourceDir.empty()) {
-				boost::filesystem::path texturePath = RedirectPathOnDir(boost::filesystem::path(key));
-				if (!mRedirectResourceExt.empty()) texturePath = texturePath.replace_extension(mRedirectResourceExt);
-				if (!boost::filesystem::exists(texturePath)) texturePath = texturePath.replace_extension("png");
-
-				if (!boost::filesystem::exists(texturePath)) {
-					texturePath = RedirectPathOnDir(boost::filesystem::path(key));
-					if (!mRedirectResourceExt.empty()) texturePath = texturePath.replace_extension(mRedirectResourceExt);
-					if (!boost::filesystem::exists(texturePath)) texturePath = texturePath.replace_extension("png");
-				}
-
-				key = texturePath.string();
-			}
-
-			if (!boost::filesystem::is_regular_file(key))
-				continue;
-
-			ITexturePtr texInfo = mResourceMng.CreateTextureByFile(mLaunchMode, key);
-			textures.push_back(texInfo);
-			mAsset.mLoadedTexture[key] = texInfo;
-		}
-		return textures;
-	}
-#endif
-	CoTask<AssimpMeshPtr> ProcessMesh(const aiMesh* rawMesh, const aiScene* scene) {
+	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, const aiScene* scene, std::vector<CoTask<bool>>& tasks) const {
 		COROUTINE_VARIABLES_2(rawMesh, scene);
 
 		AssimpMeshPtr meshPtr = AssimpMesh::Create();
@@ -244,7 +178,7 @@ private:
 
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
-		mesh.mMaterial = CoAwait mResourceMng.CreateMaterial(mLaunchMode, loadParam);
+		tasks.push_back(mResourceMng.CreateMaterial(mLaunchMode, mesh.mMaterial, loadParam));
 
 	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
 	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
@@ -365,15 +299,16 @@ private:
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 
 /********** AiAssetManager **********/
-CoTask<AiScenePtr> AiResourceFactory::CreateAiScene(Launch launchMode, ResourceManager& resMng, const std::string& assetPath, const std::string& redirectRes, AiScenePtr aiRes) ThreadSafe
+CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& scene, ResourceManager& resMng, std::string assetPath, std::string redirectRes) ThreadSafe
 {
-	COROUTINE_VARIABLES_5(launchMode, resMng, assetPath, redirectRes, aiRes);
+	COROUTINE_VARIABLES_5(launchMode, scene, resMng, assetPath, redirectRes);
 	//CoAwait mResourceMng.SwitchToLaunchService(launchMode)
+	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") %assetPath %redirectRes).str());
 
-	AiScenePtr scene = IF_OR(aiRes, CreateInstance<AiScene>());
+	scene = IF_OR(scene, CreateInstance<AiScene>());
 	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
 	CoAwait loader->Execute(assetPath, redirectRes);
-	return scene;
+	return scene->IsLoaded();
 }
 
 }

@@ -20,13 +20,13 @@ TimeProfile::TimeProfile(const std::string& name)
 
 	int t2 = mCurTime % 1000;
 	int t1 = mCurTime / 1000 % 1000;
-	int t0 = mCurTime / 1000 / 1000;
+	int t0 = mCurTime / 1000 / 1000;	
 	debug::Log((boost::format("%1% timestamp %2%,%3%,%4%") %mName %t0 %t1 %t2).str());
 }
 
 TimeProfile::~TimeProfile()
 {
-	debug::Log((boost::format("%1% takes %2% ms") %mName.c_str() %(timeGetTime()-mCurTime)).str());
+	debug::Log((boost::format("%1% takes %2%ms") %mName.c_str() %(timeGetTime()-mCurTime)).str());
 }
 
 /********** Timer **********/

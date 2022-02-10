@@ -1,8 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/base/transform.h"
 #include "core/renderable/cube.h"
-#include "core/scene/scene_manager.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -11,7 +9,7 @@ class TestCube : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 private:
 	CubePtr mCube;
 };
@@ -20,13 +18,13 @@ private:
 1：透视相机 观察到淡蓝平面(滚动鼠标滚轮)
 */
 
-CoTask<void> TestCube::OnPostInitDevice()
+CoTask<bool> TestCube::OnPostInitDevice()
 {
 	switch (mCaseIndex) {
 	case 0: {
 		mCube = CoAwait mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(1,1,1), 0xff87CEFA);
 		mTransform = mCube->GetTransform();
-		mTransform->SetEuler(Eigen::Vector3f(45*0.174, 45*0.174, 45*0.174));
+		mTransform->SetEulerAngles(Eigen::Vector3f(45*0.174, 45*0.174, 45*0.174));
 	}break;
 	case 1: {
 		const int SizeInf = 256;
@@ -36,7 +34,7 @@ CoTask<void> TestCube::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestCube::OnRender()

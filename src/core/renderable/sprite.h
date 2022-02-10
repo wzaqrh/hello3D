@@ -13,8 +13,8 @@ class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 {
 	friend class RenderPipeline;
 	INHERIT_RENDERABLE_SINGLE_OP(Sprite);
-	Sprite(Launch launchMode, ResourceManager& resourceMng);
 public:
+	Sprite(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetTexture(const ITexturePtr& Texture) override;
 	void SetPosition(const Eigen::Vector3f& pos);

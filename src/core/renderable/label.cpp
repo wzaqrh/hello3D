@@ -1,5 +1,5 @@
 #include "freetype2/freetype/ftglyph.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/renderable/font.h"
 #include "core/renderable/label.h"
 #include "core/resource/resource_manager.h"
@@ -8,7 +8,6 @@ namespace mir {
 namespace rend {
 
 constexpr int CMaxStringLength = 256;
-
 struct IndicesData {
 	unsigned int Indices[CMaxStringLength * 6];
 	IndicesData() {
@@ -25,16 +24,12 @@ struct IndicesData {
 	}
 };
 static IndicesData sIndiceData;
-
-CoTask<bool> Label::Init(const MaterialLoadParam& matName, FontPtr font)
+Label::Label(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material, FontPtr font)
+	: Super(launchMode, resourceMng, material)
 {
-	if (!CoAwait Super::Init(matName))
-		CoReturn false;
-
 	mFont = font;
 	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
 	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
-	CoReturn true;
 }
 
 void Label::GenRenderOperation(RenderOperationQueue& opList)
@@ -61,7 +56,7 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 				op.IndexBuffer = mIndexBuffer;
 				op.IndexBase = 4 * (i - lastCount);
 				op.IndexCount = 6 * lastCount;
-				op.WorldTransform = mTransform->GetSRT();
+				op.WorldTransform = mTransform->GetWorldMatrix();
 				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 				++count;
@@ -80,7 +75,7 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 		op.IndexBuffer = mIndexBuffer;
 		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);
 		op.IndexCount = 6 * lastCount;
-		op.WorldTransform = mTransform->GetSRT();
+		op.WorldTransform = mTransform->GetWorldMatrix();
 		opList.AddOP(op);
 		++count;
 	}

@@ -12,7 +12,7 @@ namespace rend {
 class MIR_CORE_API Cube : public RenderableSingleRenderOp
 {
 	INHERIT_RENDERABLE_SINGLE_OP(Cube);
-	Cube(Launch launchMode, ResourceManager& resourceMng);
+	Cube(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetPosition(const Eigen::Vector3f& pos);

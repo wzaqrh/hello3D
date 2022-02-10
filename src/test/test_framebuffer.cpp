@@ -1,9 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/scene/scene_manager.h"
-#include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
-#include "core/base/transform.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -12,7 +9,7 @@ class TestRT : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -28,7 +25,7 @@ private:
 */
 
 /********** TestRT **********/
-CoTask<void> TestRT::OnPostInitDevice()
+CoTask<bool> TestRT::OnPostInitDevice()
 {
 	if (mCaseIndex == 0)
 	{
@@ -89,9 +86,9 @@ CoTask<void> TestRT::OnPostInitDevice()
 			mTransform = CoAwait test1::res::model().Init("rock", mModel);
 
 			if (camera2->GetType() == kCameraOthogonal)
-				mTransform->SetScale(mTransform->GetScale() * 50);
+				mTransform->SetScale(mTransform->GetLossyScale() * 50);
 			else
-				mTransform->SetScale(mTransform->GetScale() * 5);
+				mTransform->SetScale(mTransform->GetLossyScale() * 5);
 		}
 
 		constexpr unsigned cameraMask1 = 0x02;
@@ -101,7 +98,7 @@ CoTask<void> TestRT::OnPostInitDevice()
 			camera1->SetDepth(2);
 			camera1->SetCullingMask(cameraMask1);
 
-			mFrameBuffer = mResMng->CreateFrameBufferSync(mHalfSize.cast<int>().head<2>() / 2, 
+			mFrameBuffer = mResMng->CreateFrameBuffer(__LaunchSync__, mHalfSize.cast<int>().head<2>() / 2, 
 				MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 			camera2->SetOutput(mFrameBuffer);
 			DEBUG_SET_PRIV_DATA(mFrameBuffer, "camera2 output");
@@ -113,7 +110,7 @@ CoTask<void> TestRT::OnPostInitDevice()
 			mFBSprite->SetSize(mHalfSize);
 		}
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 //#define USE_RENDER_TARGET

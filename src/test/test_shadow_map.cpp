@@ -1,10 +1,7 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/scene/scene_manager.h"
-#include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/cube.h"
-#include "core/base/transform.h"
 #include "test/unit_test/unit_test.h"
 
 using namespace mir;
@@ -14,7 +11,7 @@ class TestShadowMap : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -26,7 +23,7 @@ private:
 1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
 */
 
-CoTask<void> TestShadowMap::OnPostInitDevice()
+CoTask<bool> TestShadowMap::OnPostInitDevice()
 {
 	SetPPU(1);
 
@@ -65,7 +62,7 @@ CoTask<void> TestShadowMap::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestShadowMap::OnRender()

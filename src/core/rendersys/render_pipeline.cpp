@@ -39,12 +39,15 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 		MakeResFormats(kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
-	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<void> {
+	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<bool> {
 		MaterialLoadParam loadParam(MAT_MODEL);
-		mGBufferSprite = CoAwait rend::Sprite::Create(__LaunchSync__, resMng, loadParam);
+		res::MaterialInstance material;
+		CoAwait resMng.CreateMaterial(__LaunchAsync__, material, loadParam);
+
+		mGBufferSprite = rend::Sprite::Create(__LaunchAsync__, resMng, material);
 		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
 		mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
-		CoReturnVoid;
+		CoReturn true;
 	}());
 }
 
@@ -119,7 +122,7 @@ static cbPerFrame MakePerFrame(const scene::Camera& camera, const Eigen::Vector2
 	cbPerFrame perFrameParam;
 	perFrameParam.View = camera.GetView();
 	perFrameParam.Projection = camera.GetProjection();
-	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
+	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
 static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::ILight& light, IFrameBufferPtr shadowMap)
 {
@@ -140,7 +143,7 @@ static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eige
 		light.CalculateLightingViewProjection(camera, fbSize, castShadow, perFrameParam.View, perFrameParam.Projection);
 		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, fbSize, {}));
 	}
-	return MakePerFrame(perFrameParam, camera.GetTransform()->GetPosition(), fbSize);
+	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<ILightPtr>& lights)
 {

@@ -1,6 +1,6 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"

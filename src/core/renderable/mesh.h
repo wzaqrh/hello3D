@@ -10,8 +10,8 @@ namespace rend {
 
 class MIR_CORE_API Mesh : public RenderableSingleRenderOp 
 {
-	INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(Mesh);
-	CoTask<bool> Init(const MaterialLoadParam& matName, int vertCount = 1024, int indexCount = 1024);
+	INHERIT_RENDERABLE_SINGLE_OP(Mesh);
+	Mesh(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material, int vertCount = 1024, int indexCount = 1024);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void Clear();

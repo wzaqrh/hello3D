@@ -1,7 +1,5 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/renderable/assimp_model.h"
-#include "core/base/transform.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -10,7 +8,7 @@ class TestModel : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -34,7 +32,7 @@ inline MaterialLoadParam GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-CoTask<void> TestModel::OnPostInitDevice()
+CoTask<bool> TestModel::OnPostInitDevice()
 {
 	int caseIndex = mCaseIndex % 6;
 	bool useOtho = mCaseIndex >= 6;
@@ -96,10 +94,10 @@ CoTask<void> TestModel::OnPostInitDevice()
 	}
 
 	if (camera->GetType() == kCameraOthogonal)
-		mTransform->SetScale(mTransform->GetScale() * 50);
+		mTransform->SetScale(mTransform->GetLossyScale() * 50);
 
 	mModel->PlayAnim(0);
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestModel::OnRender()

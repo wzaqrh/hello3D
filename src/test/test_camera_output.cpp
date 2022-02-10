@@ -1,6 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/cube.h"
@@ -13,7 +13,7 @@ class TestCameraOutput : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -27,7 +27,7 @@ private:
 */
 
 #define SCALE_BASE 0.01
-CoTask<void> TestCameraOutput::OnPostInitDevice()
+CoTask<bool> TestCameraOutput::OnPostInitDevice()
 {
 	constexpr unsigned cameraMask2 = 0x01;
 	CameraPtr camera2;
@@ -62,7 +62,7 @@ CoTask<void> TestCameraOutput::OnPostInitDevice()
 		mModel2->PlayAnim(0);
 
 		if (camera2->GetType() == kCameraOthogonal)
-			mTransform->SetScale(mTransform->GetScale() * 50);
+			mTransform->SetScale(mTransform->GetLossyScale() * 50);
 	}
 
 	if (mCaseIndex == 1)
@@ -94,7 +94,7 @@ CoTask<void> TestCameraOutput::OnPostInitDevice()
 		mSpriteCam1->SetPosition(mWinCenter);
 		mSpriteCam1->SetSize(mHalfSize.cast<float>());
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestCameraOutput::OnRender()

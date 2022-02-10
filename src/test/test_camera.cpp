@@ -1,10 +1,7 @@
 #include "test/test_case.h"
 #include "test/app.h"
-#include "core/base/transform.h"
-#include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/cube.h"
-#include "core/scene/camera.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -13,7 +10,7 @@ class TestCamera : public App
 {
 protected:
 	void OnRender() override;
-	CoTask<void> OnPostInitDevice() override;
+	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -38,7 +35,7 @@ private:
 11->5
 */
 
-CoTask<void> TestCamera::OnPostInitDevice()
+CoTask<bool> TestCamera::OnPostInitDevice()
 {
 	constexpr int CaseCountMod = 6;
 	int caseIndex = mCaseIndex % CaseCountMod;
@@ -50,7 +47,7 @@ CoTask<void> TestCamera::OnPostInitDevice()
 		mModel = CoAwait mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 		if (cameraType == 0)
-			mTransform->SetScale(mTransform->GetScale() * 2);
+			mTransform->SetScale(mTransform->GetLossyScale() * 2);
 	}
 
 	mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -1, 1));
@@ -83,7 +80,7 @@ CoTask<void> TestCamera::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturnVoid;
+	CoReturn true;
 }
 
 void TestCamera::OnRender()

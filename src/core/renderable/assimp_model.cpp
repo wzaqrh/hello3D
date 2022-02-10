@@ -3,7 +3,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
 #include "core/base/debug.h"
-#include "core/base/transform.h"
+#include "core/scene/transform.h"
 #include "core/renderable/assimp_model.h"
 #include "core/resource/resource_manager.h"
 
@@ -120,12 +120,12 @@ public:
 };
 
 /********** AssimpModel **********/
-CoTask<bool> AssimpModel::LoadModel(const std::string& assetPath, const std::string& redirectResource)
+CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectResource)
 {
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 
-	mAiScene = CoAwait mResourceMng.CreateAiScene(mLaunchMode, assetPath, redirectResource);
-	if (!mAiScene->IsLoaded()) return false;
+	if (!CoAwait mResourceMng.CreateAiScene(mLaunchMode, mAiScene, std::move(assetPath), std::move(redirectResource))) 
+		return false;
 
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
 	Update(0);
@@ -307,15 +307,14 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 
 void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 {
-	if (!mMaterial->IsLoaded()
-		|| !mAiScene->IsLoaded()
+	if (!mAiScene->IsLoaded()
 		|| !mAnimeTree.IsInited())
 		return;
 
 	int count = opList.Count();
 	DoDraw(mAiScene->mRootNode, opList);
 
-	Eigen::Matrix4f world = mTransform->GetSRT();
+	Eigen::Matrix4f world = mTransform->GetWorldMatrix();
 	for (int i = count; i < opList.Count(); ++i)
 		opList[i].WorldTransform = world;
 }

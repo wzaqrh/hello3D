@@ -13,8 +13,8 @@ typedef std::shared_ptr<struct FontCharactor> FontCharactorPtr;
 
 class MIR_CORE_API Label : public RenderableSingleRenderOp 
 {
-	INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(Label);
-	CoTask<bool> Init(const MaterialLoadParam& matName, FontPtr font);
+	INHERIT_RENDERABLE_SINGLE_OP(Label);
+	Label(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst, FontPtr font);
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void SetString(const std::string& str);

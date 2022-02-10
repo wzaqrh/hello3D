@@ -61,7 +61,7 @@ Eigen::Vector2i Mir::WinSize() const
 	return mRenderSys->WinSize();
 }
 
-void Mir::ExecuteTaskSync(const CoTask<void>& task)
+void Mir::ExecuteTaskSync(const CoTask<bool>& task)
 {
 	coroutine::ExecuteTaskSync(*mIoService, task);
 }
