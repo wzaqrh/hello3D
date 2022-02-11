@@ -13,14 +13,19 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	typedef const std::string& string_cref;
 	RenderableFactory(ResourceManager& resMng, Launch launchMode);
-	CoTask<rend::SkyBoxPtr> CreateSkybox(std::string imagePath, MaterialLoadParam loadParam = "");
-	CoTask<rend::SpritePtr> CreateColorLayer(MaterialLoadParam loadParam = "");
-	CoTask<rend::SpritePtr> CreateSprite(std::string imagePath = "", MaterialLoadParam loadParam = "");
-	CoTask<rend::MeshPtr> CreateMesh(int vertCount = 1024, int indexCount = 1024, MaterialLoadParam loadParam = "");
-	CoTask<rend::CubePtr> CreateCube(Eigen::Vector3f center, Eigen::Vector3f halfsize, unsigned bgra = -1, MaterialLoadParam loadParam = "");
-	CoTask<rend::AssimpModelPtr> CreateAssimpModel(MaterialLoadParam loadParam = "");
-	CoTask<rend::LabelPtr> CreateLabel(std::string fontPath, int fontSize);
-	CoTask<rend::PostProcessPtr> CreatePostProcessEffect(std::string effectName, scene::Camera& camera);
+	CoTask<bool> CreateSkybox(rend::SkyBoxPtr& rend, std::string imagePath, MaterialLoadParam loadParam = "");
+	CoTask<bool> CreateSprite(rend::SpritePtr& rend, std::string imagePath = "", MaterialLoadParam loadParam = "");
+	CoTask<bool> CreateMesh(rend::MeshPtr& rend, int vertCount = 1024, int indexCount = 1024, MaterialLoadParam loadParam = "");
+	CoTask<bool> CreateCube(rend::CubePtr& rend, Eigen::Vector3f center, Eigen::Vector3f halfsize, unsigned bgra = -1, MaterialLoadParam loadParam = "");
+	CoTask<bool> CreateAssimpModel(rend::AssimpModelPtr& rend, MaterialLoadParam loadParam = "");
+	CoTask<bool> CreateLabel(rend::LabelPtr& rend, std::string fontPath, int fontSize);
+
+	DECLARE_COTASK_FUNCTIONS(rend::SkyBoxPtr, CreateSkybox, ThreadSafe);
+	DECLARE_COTASK_FUNCTIONS(rend::SpritePtr, CreateSprite, ThreadSafe);
+	DECLARE_COTASK_FUNCTIONS(rend::MeshPtr, CreateMesh, ThreadSafe);
+	DECLARE_COTASK_FUNCTIONS(rend::CubePtr, CreateCube, ThreadSafe);
+	DECLARE_COTASK_FUNCTIONS(rend::AssimpModelPtr, CreateAssimpModel, ThreadSafe);
+	DECLARE_COTASK_FUNCTIONS(rend::LabelPtr, CreateLabel, ThreadSafe);
 
 	template<typename RendClass, typename... T> std::shared_ptr<RendClass> CreateRend(T &&...args) {
 		return CreateRendFunctor<RendClass>()(*this, std::forward<T>(args)...);
@@ -49,8 +54,8 @@ private:
 		TemplateArgs rend::PostProcessPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreatePostProcessEffect(std::forward<T>(args)...); }
 	};
 private:
-	Launch mLaunchMode;
 	ResourceManager& mResourceMng;
+	Launch mLaunchMode;
 	FontCachePtr mFontCache;
 };
 

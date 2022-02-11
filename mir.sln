@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cli", "..\glTF-IBL-Sampler\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppcoro", "thirdparty\cppcoro\build\cppcoro.vcxproj", "{82E2BD05-5E0B-4E41-B42E-A527AF780058}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "template_test", "build\template_test\template_test.vcxproj", "{D40B0EAE-733B-41F1-BC03-8C173E3B547A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -200,6 +202,26 @@ Global
 		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x64.Build.0 = Release|x64
 		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x86.ActiveCfg = Release|Win32
 		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.UnitTest|x86.Build.0 = Release|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Debug|x64.ActiveCfg = Debug|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Debug|x64.Build.0 = Debug|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Debug|x86.ActiveCfg = Debug|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Debug|x86.Build.0 = Debug|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.MinSizeRel|x64.ActiveCfg = Debug|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.MinSizeRel|x64.Build.0 = Debug|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.MinSizeRel|x86.ActiveCfg = Debug|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.MinSizeRel|x86.Build.0 = Debug|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Release|x64.ActiveCfg = Release|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Release|x64.Build.0 = Release|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Release|x86.ActiveCfg = Release|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.Release|x86.Build.0 = Release|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.RelWithDebInfo|x86.Build.0 = Release|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.UnitTest|x64.ActiveCfg = Debug|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.UnitTest|x64.Build.0 = Debug|x64
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.UnitTest|x86.ActiveCfg = Debug|Win32
+		{D40B0EAE-733B-41F1-BC03-8C173E3B547A}.UnitTest|x86.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -19,7 +19,7 @@ protected:
 CoTask<bool> TestDefferedPath::OnInitScene()
 {
 	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
-	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
+	camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
 	camera->SetRenderingPath(RenderingPath((mCaseIndex+1)&1));
 
 	switch (mCaseIndex) {
@@ -28,7 +28,7 @@ CoTask<bool> TestDefferedPath::OnInitScene()
 		mScneMng->CreateAddLightNode<DirectLight>();
 		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(test1::vec::PosLight());
 
-		auto mModel = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		auto mModel = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
 		mScneMng->AddRendNode(mModel);
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 	}break;
@@ -36,7 +36,7 @@ CoTask<bool> TestDefferedPath::OnInitScene()
 	case 3:{
 		mScneMng->CreateAddLightNode<DirectLight>();
 
-		auto mModel = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		auto mModel = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
 		mScneMng->AddRendNode(mModel);
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 	}break;

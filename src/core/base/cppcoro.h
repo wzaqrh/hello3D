@@ -14,6 +14,7 @@
 
 #if !defined MIR_CPPCORO_DISABLED
 #define CoTask cppcoro::shared_task
+using CoTaskVector = std::vector<CoTask<bool>>;
 #define CoAwait co_await
 #define CoReturn co_return
 #define CoReturnVoid co_return
@@ -38,6 +39,7 @@ template<> class DummyTask<void> {
 	const DummyTask<void>& operator()() const { return *this; }
 };
 #define CoTask DummyTask
+using CoTaskVector = std::vector<CoTask<bool>>;
 #define CoAwait
 #define CoReturn return
 #define CoReturnVoid return DummyTask<void>();

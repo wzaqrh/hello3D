@@ -38,9 +38,11 @@ CoTask<bool> TestCamera::OnInitScene()
 	int cameraType = mCaseIndex / CaseCountMod;
 	SetPPU(1);
 
+	CoTaskVector tasks;
 	if (1)
 	{
-		auto mModel = mScneMng->AddRendNode(CoAwait mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL));
+		auto mModel = mScneMng->AddRendNode(mContext->RenderableFac()->CreateAssimpModelITV(tasks, MAT_MODEL));
+		CoAwait WhenAll(std::move(tasks));
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 		if (cameraType == 0)
 			mTransform->SetScale(mTransform->GetLossyScale() * 2);
@@ -50,7 +52,7 @@ CoTask<bool> TestCamera::OnInitScene()
 
 	mControlCamera = false;
 	CameraPtr camera = mScneMng->CreateAddCameraNode((CameraType)cameraType, Eigen::Vector3f(0, 0, -10));
-	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
+	camera->SetSkyBox(mRendFac->CreateSkyboxITV(tasks, test1::res::Sky()));
 	switch (caseIndex) {
 	case 0: {
 		camera->SetForward(mir::math::vec::Down());
@@ -76,6 +78,7 @@ CoTask<bool> TestCamera::OnInitScene()
 	default:
 		break;
 	}
+	CoAwait WhenAll(std::move(tasks));
 	CoReturn true;
 }
 

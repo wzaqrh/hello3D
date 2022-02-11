@@ -36,6 +36,7 @@ SceneNodePtr SceneManager::AddNode()
 
 scene::CameraPtr SceneManager::CreateAddCameraNode(scene::CameraPtr camera)
 {
+	BOOST_ASSERT(camera);
 	auto node = AddNode();
 	node->SetCamera(camera);
 
@@ -63,6 +64,7 @@ void SceneManager::ResortCameras()
 
 scene::LightPtr SceneManager::AddLightNode(scene::LightPtr light)
 {
+	BOOST_ASSERT(light);
 	auto node = AddNode();
 	node->SetLight(light);
 
@@ -90,6 +92,7 @@ void SceneManager::ResortLights()
 
 RenderablePtr SceneManager::AddRendNode(RenderablePtr rend)
 {
+	BOOST_ASSERT(rend);
 	auto node = AddNode();
 	node->SetRenderable(rend);
 

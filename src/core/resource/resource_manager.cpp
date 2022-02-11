@@ -160,7 +160,7 @@ CoTask<bool> ResourceManager::_LoadProgram(Launch launchMode, IProgramPtr progra
 	program->SetLoaded(loadProgram(program) != nullptr);
 	CoReturn program->IsLoaded();
 }
-CoTask<bool> ResourceManager::CreateProgram(Launch launchMode, IProgramPtr& program, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ResourceManager::CreateProgram(IProgramPtr& program, Launch launchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(launchMode);
 	COROUTINE_VARIABLES_4(launchMode, name, vertexSCD, pixelSCD);
@@ -351,7 +351,7 @@ CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr 
 	texture->SetLoaded(ret != nullptr);
 	CoReturn texture->IsLoaded();
 }
-CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr& texture, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> ResourceManager::CreateTextureByFile(ITexturePtr& texture, Launch launchMode, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(launchMode);
 	COROUTINE_VARIABLES_4(launchMode, filepath, format, autoGenMipmap);
@@ -374,7 +374,7 @@ CoTask<bool> ResourceManager::CreateTextureByFile(Launch launchMode, ITexturePtr
 }
 
 /********** Create Material **********/
-CoTask <bool> ResourceManager::CreateShader(Launch launchMode, res::ShaderPtr& shader, const MaterialLoadParam& param) ThreadSafe
+CoTask <bool> ResourceManager::CreateShader(res::ShaderPtr& shader, Launch launchMode, const MaterialLoadParam& param) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(launchMode);
 	COROUTINE_VARIABLES_2(launchMode, param);
@@ -393,7 +393,7 @@ CoTask <bool> ResourceManager::CreateShader(Launch launchMode, res::ShaderPtr& s
 	CoReturn shader->IsLoaded();
 }
 
-CoTask<bool> ResourceManager::CreateMaterial(Launch launchMode, res::MaterialInstance& matInst, MaterialLoadParam loadParam) ThreadSafe
+CoTask<bool> ResourceManager::CreateMaterial(res::MaterialInstance& matInst, Launch launchMode, MaterialLoadParam loadParam) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(launchMode);
 	COROUTINE_VARIABLES_2(launchMode, loadParam);
@@ -414,7 +414,7 @@ CoTask<bool> ResourceManager::CreateMaterial(Launch launchMode, res::MaterialIns
 }
 
 /********** Create AiScene **********/
-CoTask<bool> ResourceManager::CreateAiScene(Launch launchMode, res::AiScenePtr& aiScene, std::string assetPath, std::string redirectRes) ThreadSafe
+CoTask<bool> ResourceManager::CreateAiScene(res::AiScenePtr& aiScene, Launch launchMode, std::string assetPath, std::string redirectRes) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(launchMode);
 	COROUTINE_VARIABLES_3(launchMode, assetPath, redirectRes);

@@ -61,14 +61,17 @@ CoTask<bool> TestGLTF::OnInitScene()
 		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 		
+		CoTaskVector tasks;
+
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
-		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky(2), skyMat));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
 
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
-		mModel = CoAwait mRendFac->CreateAssimpModel(modelMat);
-		mScneMng->AddRendNode(mModel);
+		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		CoAwait WhenAll(std::move(tasks));
+
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };
 		int caseIndex = mCaseIndex;
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);

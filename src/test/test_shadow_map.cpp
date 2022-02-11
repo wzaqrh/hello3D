@@ -25,14 +25,14 @@ CoTask<bool> TestShadowMap::OnInitScene()
 
 	AssimpModelPtr mModelFloor;
 	if (1) {
-		mModelFloor = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		mModelFloor = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
 		mScneMng->AddRendNode(mModelFloor);
 		CoAwait test1::res::model().Init("floor", mModelFloor);
 	}
 
 	AssimpModelPtr mModelRock;
 	if (1) {
-		mModelRock = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		mModelRock = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
 		mScneMng->AddRendNode(mModelRock);
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModelRock);
 	}
@@ -44,7 +44,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, -3, -1));
 		auto camera = mScneMng->CreateAddCameraNode(kCameraPerspective, Eigen::Vector3f(0, 10, 0));
 		camera->SetForward(mir::math::vec::Down());
-		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
 
 		mModelFloor->GetTransform()->SetPosition(Eigen::Vector3f(0, -100, 0));
 		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));

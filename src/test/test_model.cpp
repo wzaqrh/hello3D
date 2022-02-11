@@ -73,9 +73,9 @@ CoTask<bool> TestModel::OnInitScene()
 	case 1:
 	case 2: {
 		camera->SetLookAt(Eigen::Vector3f(0, 15, 0), Eigen::Vector3f::Zero());
-		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky(1)));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(1)));
 
-		auto mModel = CoAwait mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
+		auto mModel = CoAwait mRendFac->CreateAssimpModelT(GetMatName(mCaseSecondIndex));
 		mScneMng->AddRendNode(mModel);
 		std::string modelNameArr[] = { "toycar", "box-space", "mir" };
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);
@@ -85,7 +85,7 @@ CoTask<bool> TestModel::OnInitScene()
 	case 3:
 	case 4: 
 	case 5: {
-		auto mModel = CoAwait mRendFac->CreateAssimpModel(GetMatName(mCaseSecondIndex));
+		auto mModel = CoAwait mRendFac->CreateAssimpModelT(GetMatName(mCaseSecondIndex));
 		mScneMng->AddRendNode(mModel);
 		std::string modelNameArr[] = { "spaceship", "rock", "floor" };
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex-3], mModel);

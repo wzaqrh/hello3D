@@ -11,6 +11,7 @@ SceneNode::SceneNode()
 
 void SceneNode::SetTransform(const TransformPtr& transform)
 {
+	BOOST_ASSERT(transform);
 	mTransform = CreateInstance<Transform>();
 	mTransform->AttachSceneNode(shared_from_this());
 }
@@ -18,17 +19,20 @@ void SceneNode::SetTransform(const TransformPtr& transform)
 void SceneNode::SetRenderable(const RenderablePtr& rend)
 {
 	mRenderable = rend;
-	mRenderable->AttachSceneNode(shared_from_this());
+	if (mRenderable) 
+		mRenderable->AttachSceneNode(shared_from_this());
 }
 void SceneNode::SetLight(const scene::LightPtr& light)
 {
 	mLight = light;
-	mLight->AttachSceneNode(shared_from_this());
+	if (mLight) 
+		mLight->AttachSceneNode(shared_from_this());
 }
 void SceneNode::SetCamera(const scene::CameraPtr& camera)
 {
 	mCamera = camera;
-	mCamera->AttachSceneNode(shared_from_this());
+	if (mCamera) 
+		mCamera->AttachSceneNode(shared_from_this());
 }
 
 SceneNodePtr SceneNodeFactory::CreateNode()

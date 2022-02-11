@@ -10,22 +10,23 @@
 	template <typename... T> static std::shared_ptr<CLASS> \
 	Create(T &&...args) { return std::shared_ptr<CLASS>(new CLASS(std::forward<T>(args)...)); }
 
-#define DECLARE_LAUNCH_FUNCTIONS(RETURN_TYPE, CREATE_FUNC, ...) \
-	TemplateArgs RETURN_TYPE CREATE_FUNC##Sync(T &&...args) ##__VA_ARGS__  { \
+#define DECLARE_STATIC_TASK_CREATE_CONSTRUCTOR(CLASS, P1, P2, P3) DECLARE_STATIC_CREATE_CONSTRUCTOR(CLASS);
+
+#define DECLARE_COTASK_FUNCTIONS(RETURN_TYPE, CREATE_FUNC, ...) \
+	TemplateArgs RETURN_TYPE CREATE_FUNC##ITV/*InTaskVector*/(CoTaskVector& tasks, T &&...args) ##__VA_ARGS__ { \
 		RETURN_TYPE result; \
-		mir::coroutine::ExecuteTaskSync(*mIoService, CREATE_FUNC(__LaunchSync__, result, std::forward<T>(args)...)); \
+		auto task = CREATE_FUNC(result, std::forward<T>(args)...); \
+		tasks.push_back(task); \
 		return result; \
-	}\
-	TemplateArgs CoTask<RETURN_TYPE> CREATE_FUNC##Async(T &&...args) ##__VA_ARGS__  { \
+	} \
+	TemplateArgs CoTask<RETURN_TYPE> CREATE_FUNC##T/*Task*/(T &&...args) ##__VA_ARGS__  { \
 		RETURN_TYPE result; \
-		CoAwait CREATE_FUNC(__LaunchAsync__, result, std::forward<T>(args)...); \
+		CoAwait CREATE_FUNC(result, std::forward<T>(args)...); \
+		return result; \
+	} \
+	TemplateArgs RETURN_TYPE CREATE_FUNC##S/*Sync*/(T &&...args) ##__VA_ARGS__  { \
+		RETURN_TYPE result; \
+		auto task = CREATE_FUNC(result, std::forward<T>(args)...); \
+		mir::coroutine::ExecuteTaskSync(*mIoService, task); \
 		return result; \
 	}
-
-#define DECLARE_STATIC_TASK_CREATE_CONSTRUCTOR(CLASS, P1, P2, P3) \
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(CLASS);/*\
-	TemplateArgs static CoTask<std::shared_ptr<CLASS>> CreateAsync(P1 p1, P2 p2, P3 p3, T &&...args) { \
-		std::shared_ptr<CLASS> ret = std::shared_ptr<CLASS>(new CLASS(p1, p2, p3)); \
-		if (CoAwait ret->Init(std::forward<T>(args)...)) { CoReturn ret; } \
-		else { CoReturn nullptr; } \
-	}*/

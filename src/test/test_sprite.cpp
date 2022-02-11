@@ -33,41 +33,41 @@ CoTask<bool> TestSprite::OnInitScene()
 	SpritePtr mSprite;
 	switch (mCaseIndex) {
 	case 0: {
-		mSprite = CoAwait mRendFac->CreateSprite();
+		mSprite = CoAwait mRendFac->CreateSpriteT();
 		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileAsync(test1::res::dds::Kenny()));
+		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::dds::Kenny()));
 		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 	}break;
 	case 1: {
-		mSprite = CoAwait mRendFac->CreateSprite();
-		mSprite->SetTexture(mResMng->CreateTextureByFileSync(test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
+		mSprite = CoAwait mRendFac->CreateSpriteT();
+		mSprite->SetTexture(mResMng->CreateTextureByFileS(async, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
 		test1::res::png::SetPos(mSprite, mCamWinHSize, mCamWinHSize, math::vec::anchor::RightTop());
 	}break;
 	case 2: {
-		mSprite = CoAwait mRendFac->CreateSprite(test1::res::png::Kenny());
+		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::png::Kenny());
 
 		test1::res::png::SetPos(mSprite, mWinCenter, mCamWinHSize * 2, math::vec::anchor::Center());
 	}break;
 	case 3: {
-		mSprite = CoAwait mRendFac->CreateSprite(test1::res::hdr::Kenny());//zlib
+		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::hdr::Kenny());//zlib
 
 		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mCamWinHSize, math::vec::anchor::LeftTop());
 	}break;
 	case 4: {
-		mSprite = CoAwait mRendFac->CreateSprite(test1::res::dds::Lenna());//bc1a
+		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::dds::Lenna());//bc1a
 
 		mSprite->SetPosition(mWinCenter);
 		mSprite->SetAnchor(math::vec::anchor::Center());
 	}break;
 	case 5: {
-		mSprite = CoAwait mRendFac->CreateSprite(test1::res::dds::Kenny());//bc1a + mipmap
+		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::dds::Kenny());//bc1a + mipmap
 
 		test1::res::png::SetPos(mSprite, -mCamWinHSize / 2, mCamWinHSize);
 	}break;
 	case 6: {
-		mSprite = CoAwait mRendFac->CreateSprite();
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileAsync(test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
+		mSprite = CoAwait mRendFac->CreateSpriteT();
+		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
 	
 		mSprite->SetPosition(-mCamWinHSize);
 	}break;

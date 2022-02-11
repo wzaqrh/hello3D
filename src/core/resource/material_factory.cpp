@@ -59,8 +59,8 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 				curPass->mTopoLogy = passProgram.Topo;
 
 				tasks.push_back([&resMng,launchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
-					if (!CoAwait resMng.CreateProgram(launchMode, pass->mProgram, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
-						return false;
+					if (!CoAwait resMng.CreateProgram(pass->mProgram, launchMode, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
+						CoReturn false;
 
 					BOOST_ASSERT(programNode.Attrs.Count() >= 1);
 					if (programNode.Attrs.Count() == 1) {
@@ -78,7 +78,7 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 							++slot;
 						}
 					}
-					return true;
+					CoReturn true;
 				}(curPass, passProgram));
 
 				for (const auto& sampler : passProgram.Samplers)
@@ -89,7 +89,7 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 	CoAwait WhenAll(std::move(tasks));
 
 	shader->SetLoaded();
-	return shader->IsLoaded();
+	CoReturn shader->IsLoaded();
 }
 CoTask<bool> MaterialFactory::CreateShader(Launch launchMode, ShaderPtr& shader, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe 
 {
@@ -104,7 +104,7 @@ CoTask<bool> MaterialFactory::CreateShader(Launch launchMode, ShaderPtr& shader,
 	else {
 		shader->SetLoaded(false);
 	}
-	return shader->IsLoaded();
+	CoReturn shader->IsLoaded();
 }
 
 CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr material, ResourceManager& resMng, mat_asset::MaterialNode materialNode) ThreadSafe
@@ -125,7 +125,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 		assetPath /= iter.second.ImagePath;
 		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
 		if (boost::filesystem::is_regular_file(assetPath)) {
-			tasks.push_back(resMng.CreateTextureByFile(launchMode, material->mTextures[iter.second.Slot], assetPath.string()));
+			tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, assetPath.string()));
 		}
 		assetPath.remove_filename();
 	}
@@ -160,7 +160,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	}
 
 	material->SetLoaded(material->mShaderVariant->IsLoaded());
-	return material->IsLoaded();
+	CoReturn material->IsLoaded();
 }
 CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& material, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe
 {
@@ -176,7 +176,7 @@ CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& mat
 	else {
 		material->SetLoaded(false);
 	}
-	return material->IsLoaded();
+	CoReturn material->IsLoaded();
 }
 
 //Clone Functions

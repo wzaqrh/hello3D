@@ -178,7 +178,7 @@ private:
 
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
-		tasks.push_back(mResourceMng.CreateMaterial(mLaunchMode, mesh.mMaterial, loadParam));
+		tasks.push_back(mResourceMng.CreateMaterial(mesh.mMaterial, mLaunchMode, loadParam));
 
 	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
 	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)

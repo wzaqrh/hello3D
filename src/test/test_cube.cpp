@@ -19,14 +19,14 @@ CoTask<bool> TestCube::OnInitScene()
 {
 	switch (mCaseIndex) {
 	case 0: {
-		auto mCube = CoAwait mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(1,1,1), 0xff87CEFA);
+		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(1,1,1), 0xff87CEFA);
 		mScneMng->AddRendNode(mCube);
 		mTransform = mCube->GetTransform();
 		mTransform->SetEulerAngles(Eigen::Vector3f(45*0.174, 45*0.174, 45*0.174));
 	}break;
 	case 1: {
 		const int SizeInf = 256;
-		auto mCube = CoAwait mRendFac->CreateCube(mWinCenter, Eigen::Vector3f(SizeInf, SizeInf, 1), 0xff87CEFA);
+		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(SizeInf, SizeInf, 1), 0xff87CEFA);
 		mScneMng->AddRendNode(mCube);
 		mTransform = mCube->GetTransform();
 	}break;

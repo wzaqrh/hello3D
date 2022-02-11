@@ -43,7 +43,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<bool> {
 		MaterialLoadParam loadParam(MAT_MODEL);
 		res::MaterialInstance material;
-		CoAwait resMng.CreateMaterial(__LaunchAsync__, material, loadParam);
+		CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
 
 		mGBufferSprite = rend::Sprite::Create(__LaunchAsync__, resMng, material);
 		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));

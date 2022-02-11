@@ -57,7 +57,7 @@ namespace cube {
 namespace far_plane {
 CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeBig = 8192;
-	return CoAwait rendFac->CreateCube(
+	return rendFac->CreateCubeT( 
 		Eigen::Vector3f(0, 0, test1::cam::Far()),
 		Eigen::Vector3f(SizeBig, SizeBig, 1),
 		0xffff6347,
@@ -68,7 +68,7 @@ CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vect
 namespace near_plane {
 CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname) {
 	constexpr int SizeSmall = 4;
-	return CoAwait rendFac->CreateCube(
+	return rendFac->CreateCubeT( 
 		Eigen::Vector3f(0, 0, test1::cam::Near()),
 		Eigen::Vector3f(SizeSmall, SizeSmall, 1),
 		0xffff4763,
@@ -79,7 +79,7 @@ CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vect
 namespace floor {
 CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname) {
 	constexpr int Inf = 65536;
-	return CoAwait rendFac->CreateCube(
+	return rendFac->CreateCubeT( 
 		Eigen::Vector3f(0, y, Inf / 2),
 		Eigen::Vector3f(Inf, 1, Inf / 2),
 		0xffff4763,
@@ -157,7 +157,7 @@ CoTask<mir::TransformPtr> model::Init(const std::string& name, mir::rend::Assimp
 	mir::TransformPtr transform = aiModel->GetTransform();
 	transform->SetScale(Scale());
 	transform->SetPosition(Pos());
-	return transform;
+	CoReturn transform;
 }
 }
 }

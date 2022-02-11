@@ -54,9 +54,9 @@ CoTask<bool> TestLight::OnInitScene()
 	}
 
 	CameraPtr camera = mScneMng->CreateAddCameraNode((CameraType)cameraType, test1::cam::Eye(mWinCenter));
-	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
+	camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
 
-	mModel = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+	mModel = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
 	mScneMng->AddRendNode(mModel);
 	mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 	CoReturn true;

@@ -43,7 +43,7 @@ CoTask<bool> TestCameraOutput::OnInitScene()
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
 			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
-			camera2->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
+			camera2->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
 
 			auto light2 = mScneMng->CreateAddLightNode<PointLight>();
 			light2->SetCameraMask(cameraMask2);
@@ -51,7 +51,7 @@ CoTask<bool> TestCameraOutput::OnInitScene()
 			light2->SetAttenuation(0.0001);
 		}
 
-		auto mModel2 = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModel(MAT_MODEL));
+		auto mModel2 = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL));
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel2);
 		mModel2->SetCameraMask(cameraMask2);
 		mModel2->PlayAnim(0);
@@ -76,11 +76,11 @@ CoTask<bool> TestCameraOutput::OnInitScene()
 		auto light1 = mScneMng->CreateAddLightNode<PointLight>();
 		light1->SetCameraMask(cameraMask1);
 
-		auto mSprite1 = mScneMng->AddRendNode(CoAwait mRendFac->CreateSprite("model/lenna.dds"));
+		auto mSprite1 = mScneMng->AddRendNode(CoAwait mRendFac->CreateSpriteT("model/lenna.dds"));
 		mSprite1->SetCameraMask(cameraMask1);
 		mSprite1->GetTransform()->SetPosition(-mHalfSize);
 
-		auto mSpriteCam1 = CoAwait mRendFac->CreateSprite();
+		auto mSpriteCam1 = CoAwait mRendFac->CreateSpriteT();
 		mSpriteCam1->SetCameraMask(cameraMask1);
 		//auto fetchTexture = mResMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
 		auto fetchTexture = camera2->SetOutput(0.5)->GetAttachColorTexture(0);
