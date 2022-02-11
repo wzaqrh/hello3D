@@ -12,7 +12,7 @@ using namespace mir::rend;
 class TestCameraOutput : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 };
@@ -22,7 +22,7 @@ protected:
 */
 
 #define SCALE_BASE 0.01
-CoTask<bool> TestCameraOutput::OnPostInitDevice()
+CoTask<bool> TestCameraOutput::OnInitScene()
 {
 	constexpr unsigned cameraMask2 = 0x01;
 	CameraPtr camera2;

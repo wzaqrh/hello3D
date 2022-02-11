@@ -8,7 +8,7 @@ using namespace mir::rend;
 class TestSprite : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 };
@@ -22,7 +22,7 @@ protected:
 6：观察到kenny左下角, 自然尺寸
 */
 
-CoTask<bool> TestSprite::OnPostInitDevice()
+CoTask<bool> TestSprite::OnInitScene()
 {
 	mScneMng->CreateAddLightNode<DirectLight>();
 	mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam_otho::Eye(mWinCenter));

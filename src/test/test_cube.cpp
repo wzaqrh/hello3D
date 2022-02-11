@@ -8,14 +8,14 @@ using namespace mir::rend;
 class TestCube : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 };
 /*mCaseIndex
 0：透视相机 观察到淡蓝盒子
 1：透视相机 观察到淡蓝平面(滚动鼠标滚轮)
 */
 
-CoTask<bool> TestCube::OnPostInitDevice()
+CoTask<bool> TestCube::OnInitScene()
 {
 	switch (mCaseIndex) {
 	case 0: {

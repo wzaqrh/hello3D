@@ -7,7 +7,7 @@ using namespace mir::rend;
 class TestLight : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -25,7 +25,7 @@ private:
 7: 正交相机
 */
 
-CoTask<bool> TestLight::OnPostInitDevice()
+CoTask<bool> TestLight::OnInitScene()
 {
 	constexpr int CaseCountMod = 4;
 	int caseIndex = mCaseIndex % CaseCountMod;

@@ -7,7 +7,7 @@ using namespace mir::rend;
 class TestDefferedPath : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 };
@@ -16,7 +16,7 @@ protected:
 2延迟,3正向: 透视相机 正向平行光  对比观察飞机
 */
 
-CoTask<bool> TestDefferedPath::OnPostInitDevice()
+CoTask<bool> TestDefferedPath::OnInitScene()
 {
 	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));

@@ -33,6 +33,7 @@ public:
 	inline const scene::CameraFactoryPtr& CameraFac() const;
 	inline const SceneNodeFactoryPtr& NodeFac() const;
 	void ExecuteTaskSync(const CoTask<bool>& task);
+	void ProcessPendingEvent();
 private:
 	Launch mLaunchMode;
 	RenderSystemPtr mRenderSys;

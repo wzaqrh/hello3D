@@ -9,39 +9,42 @@
 
 using namespace mir;
 
+/************************************************************************/
+/* App */
+/************************************************************************/
+
 //#define AppLaunchMode __LaunchSync__
 #define AppLaunchMode __LaunchAsync__
 
 App::App()
 {
-	mCameraInitInvLengthForward = Eigen::Vector3f::Zero();
-	mTransform = mir::CreateInstance<mir::Transform>();
-	mContext = new mir::Mir(AppLaunchMode);
 }
 App::~App()
 {
 	delete mContext;
 }
-
 void App::Create()
-{}
-bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
+{
+	mCameraInitInvLengthForward = Eigen::Vector3f::Zero();
+	mContext = new mir::Mir(AppLaunchMode);
+}
+bool App::InitContext(HINSTANCE hInstance, HWND hWnd)
 {
 	mHnd = hWnd;
-
-	OnPreInitDevice();
 	if (!mContext->Initialize(mHnd)) {
 		mContext->Dispose();
 		return false;
 	}
 	SetMir(mContext);
-	OnInitCamera();
-	OnInitLight();
-	mContext->ExecuteTaskSync(OnPostInitDevice());
-
 	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
 	mTimer = new mir::debug::Timer;
 	return true;
+}
+CoTask<bool> App::InitScene()
+{
+	OnInitCamera();
+	OnInitLight();
+	return OnInitScene();
 }
 void App::OnInitCamera()
 {
@@ -50,10 +53,6 @@ void App::OnInitCamera()
 void App::OnInitLight()
 {
 	mContext->SceneMng()->CreateAddLightNode<PointLight>();
-}
-void App::CleanUp()
-{
-	mContext->Dispose();
 }
 
 void App::Render()
@@ -124,11 +123,50 @@ void App::OnRender()
 	mContext->Render();
 }
 
+void App::CleanUp()
+{
+	mContext->Dispose();
+}
+
+int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
+{
+	if (!this->InitContext(hInstance, hWnd))
+		return 0;
+
+	auto mainLoop = [this]()->CoTask<bool> {
+		auto initScene = this->InitScene();
+
+		auto procMsg = [this,&initScene]()->CoTask<bool> {
+			MSG msg = { 0 };
+			while (WM_QUIT != msg.message) {
+				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+				else {
+					if (initScene.is_ready())
+						this->Render();
+					else
+						mContext->ProcessPendingEvent();
+				}
+			}
+			CoReturn msg.wParam == 0;
+		}();
+
+		CoAwait WhenAllReady(initScene, procMsg);
+
+		this->CleanUp();
+		CoReturn true;
+	};
+	mContext->ExecuteTaskSync(mainLoop());
+
+	return 0;
+}
+
 std::string App::GetName()
 {
 	return mName;
 }
-
 void App::SetCaseIndex(int caseIndex)
 {
 	mCaseIndex = caseIndex;
@@ -138,11 +176,9 @@ void App::SetCaseSecondIndex(int secondIndex)
 	mCaseSecondIndex = secondIndex;
 }
 
-Eigen::Matrix4f App::GetWorldTransform()
-{
-	return mTransform->GetWorldMatrix();
-}
-
+/************************************************************************/
+/* RegAppClasses */
+/************************************************************************/
 std::string& GetCurrentAppName() {
 	static std::string gCurrentAppName;
 	return gCurrentAppName;

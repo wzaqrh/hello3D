@@ -10,6 +10,7 @@ Mir::Mir(Launch launchMode)
 	:mLaunchMode(launchMode)
 {
 	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
+	mIoService = CreateInstance<cppcoro::io_service>(8);
 }
 Mir::~Mir()
 {}
@@ -24,8 +25,6 @@ bool Mir::Initialize(HWND hWnd) {
 		mRenderSys->Dispose();
 		return false;
 	}
-
-	mIoService = CreateInstance<cppcoro::io_service>(8);
 
 	mMaterialFac = CreateInstance<res::MaterialFactory>();
 	mAiResourceFac = CreateInstance<res::AiResourceFactory>();
@@ -92,6 +91,11 @@ const mir::SceneNodeFactoryPtr& Mir::NodeFac() const
 void Mir::ExecuteTaskSync(const CoTask<bool>& task)
 {
 	coroutine::ExecuteTaskSync(*mIoService, task);
+}
+
+void Mir::ProcessPendingEvent()
+{
+	mIoService->process_pending_events();
 }
 
 }

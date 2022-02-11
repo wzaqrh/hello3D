@@ -7,7 +7,7 @@ using namespace mir::rend;
 class TestGLTF : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 private:
@@ -23,9 +23,9 @@ inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-CoTask<bool> TestGLTF::OnPostInitDevice()
+CoTask<bool> TestGLTF::OnInitScene()
 {
-	TIME_PROFILE("testGLTF.OnPostInitDevice");
+	TIME_PROFILE("testGLTF.OnInitScene");
 
 	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());

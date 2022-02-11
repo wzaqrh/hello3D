@@ -9,6 +9,13 @@
 #include "core/rendersys/render_system.h"
 #include "test/app.h"
 
+#pragma comment(lib, "mir.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "cppcorod.lib")
+#else
+#pragma comment(lib, "cppcoro.lib")
+#endif
+
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char* ConvertLPWSTRToLPSTR(LPWSTR lpwszStrIn);
@@ -72,23 +79,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	BOOST_ASSERT(rect.bottom - rect.top == C_WINDOW_HEIGHT);
 	BOOST_ASSERT(rect.right - rect.left == C_WINDOW_WIDTH);
 #endif
-
-	if (!AppDraw->Initialize(hInstance, handle))
-		return 0;
-
-	MSG msg = { 0 };
-	while (WM_QUIT != msg.message) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else {
-			AppDraw->Render();
-		}
-	}
-
-	AppDraw->CleanUp();
-	return (int)msg.wParam;
+	return AppDraw->MainLoop(hInstance, handle);
 }
 
 char* ConvertLPWSTRToLPSTR(LPWSTR lpwszStrIn)

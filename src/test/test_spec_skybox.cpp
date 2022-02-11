@@ -7,13 +7,13 @@ using namespace mir::rend;
 class TestSpecSkybox : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitCamera() override {}
 };
 /*mCaseIndex
 
 */
-CoTask<bool> TestSpecSkybox::OnPostInitDevice()
+CoTask<bool> TestSpecSkybox::OnInitScene()
 {
 	switch (mCaseIndex) {
 	case 0: {

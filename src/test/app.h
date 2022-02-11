@@ -10,12 +10,10 @@
 struct IApp
 {
 	virtual void Create() = 0;
-	virtual bool Initialize(HINSTANCE hInstance, HWND hWnd) = 0;
-	virtual void Render() = 0;
-	virtual void CleanUp() = 0;
-	virtual std::string GetName() = 0;
 	virtual void SetCaseIndex(int caseIndex) = 0;
 	virtual void SetCaseSecondIndex(int secondIndex) = 0;
+	virtual std::string GetName() = 0;
+	virtual int MainLoop(HINSTANCE hInstance, HWND hWnd) = 0;
 };
 
 class MirManager
@@ -37,28 +35,28 @@ public:
 	App();
 	~App();
 public:
-	void Create() override;
-	bool Initialize(HINSTANCE hInstance, HWND hWnd) override;
-	void Render() override;
-	void CleanUp() override;
-	std::string GetName() override;
-	void SetCaseIndex(int caseIndex) override;
-	void SetCaseSecondIndex(int secondIndex) override;
+	void Create() override final;
+	void SetCaseIndex(int caseIndex) override final;
+	void SetCaseSecondIndex(int secondIndex) override final;
+	std::string GetName() override final;
+	int MainLoop(HINSTANCE hInstance, HWND hWnd) override final;
+private:
+	bool InitContext(HINSTANCE hInstance, HWND hWnd);
+	CoTask<bool> InitScene();
+	void Render();
+	void CleanUp();
 protected:
-	virtual void OnPreInitDevice() {};
-	virtual CoTask<bool> OnPostInitDevice() { CoReturn true; };
+	virtual CoTask<bool> OnInitScene() { CoReturn true; };
 	virtual void OnRender();
 	virtual void OnInitLight();
 	virtual void OnInitCamera();
 protected:
-	Eigen::Matrix4f GetWorldTransform();
-protected:
 	int mCaseIndex = 0, mCaseSecondIndex = 0;
+	bool mControlCamera = true;
 	mir::Mir* mContext = nullptr;
 	mir::TransformPtr mTransform;
-	bool mControlCamera = true;
-	mir::debug::Timer* mTimer = nullptr;
 private:
+	mir::debug::Timer* mTimer = nullptr;
 	mir::input::D3DInput* mInput = nullptr;
 	Eigen::Vector3f mCameraInitInvLengthForward, mCameraInitLookAt;
 public:

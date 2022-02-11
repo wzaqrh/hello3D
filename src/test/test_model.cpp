@@ -7,7 +7,7 @@ using namespace mir::rend;
 class TestModel : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 };
@@ -29,7 +29,7 @@ inline MaterialLoadParam GetMatName(int secondIndex) {
 	return mlpb;
 }
 
-CoTask<bool> TestModel::OnPostInitDevice()
+CoTask<bool> TestModel::OnInitScene()
 {
 	int caseIndex = mCaseIndex % 6;
 	bool useOtho = mCaseIndex >= 6;

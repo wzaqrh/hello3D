@@ -9,7 +9,7 @@ using namespace mir::rend;
 class TestCamera : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 };
@@ -31,7 +31,7 @@ protected:
 11->5
 */
 
-CoTask<bool> TestCamera::OnPostInitDevice()
+CoTask<bool> TestCamera::OnInitScene()
 {
 	constexpr int CaseCountMod = 6;
 	int caseIndex = mCaseIndex % CaseCountMod;

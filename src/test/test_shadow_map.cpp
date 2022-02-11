@@ -10,7 +10,7 @@ using namespace mir::rend;
 class TestShadowMap : public App
 {
 protected:
-	CoTask<bool> OnPostInitDevice() override;
+	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
 };
@@ -19,7 +19,7 @@ protected:
 1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
 */
 
-CoTask<bool> TestShadowMap::OnPostInitDevice()
+CoTask<bool> TestShadowMap::OnInitScene()
 {
 	SetPPU(1);
 
