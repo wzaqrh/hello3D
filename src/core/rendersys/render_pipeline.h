@@ -16,8 +16,7 @@ public:
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng);
 	bool BeginFrame();
 	void EndFrame();
-	void Render(const RenderOperationQueue& opQueue, SceneManager& scene);
-	void Draw(Renderable& rend, SceneManager& scene);
+	void Render(const RenderOperationQueue& opQueue, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights);
 private:
 	void BindPass(const res::PassPtr& pass);
 	void RenderPass(const res::PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op);

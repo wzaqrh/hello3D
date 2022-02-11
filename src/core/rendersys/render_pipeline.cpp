@@ -5,6 +5,7 @@
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
 #include "core/scene/scene_manager.h"
+#include "core/scene/light.h"
 #include "core/scene/camera.h"
 #include "core/base/macros.h"
 #include "core/base/debug.h"
@@ -159,7 +160,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		auto depth_state = mStatesBlock.LockDepth(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeDisable());
 		for (auto& light : lights) {
-			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == scene::kLightDirectional)) {
+			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == kLightDirectional)) {
 				genSM = true;
 				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, mRenderSys.WinSize(), *light);
 				RenderLight(opQueue, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
@@ -289,9 +290,9 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 	}
 }
 
-void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& scene)
+void RenderPipeline::Render(const RenderOperationQueue& opQueue, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights)
 {
-	for (auto& camera : scene.GetCameras()) 
+	for (auto& camera : cameras) 
 	{
 		auto outLock = mStatesBlock.LockFrameBuffer(IF_OR(camera->GetOutput(), nullptr));
 		if (camera->GetOutput()) {
@@ -299,9 +300,9 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, SceneManager& s
 		}
 
 		if (camera->GetRenderingPath() == kRenderPathForward)
-			RenderCameraForward(opQueue, *camera, scene.GetLights());
+			RenderCameraForward(opQueue, *camera, lights);
 		else
-			RenderCameraDeffered(opQueue, *camera, scene.GetLights());
+			RenderCameraDeffered(opQueue, *camera, lights);
 	}
 }
 
@@ -312,16 +313,6 @@ bool RenderPipeline::BeginFrame()
 void RenderPipeline::EndFrame()
 {
 	mRenderSys.EndScene();
-}
-
-void RenderPipeline::Draw(Renderable& rend, SceneManager& scene)
-{
-	if (BeginFrame()) {
-		RenderOperationQueue opQue;
-		rend.GenRenderOperation(opQue);
-		Render(opQue, scene);
-		EndFrame();
-	}
 }
 
 }

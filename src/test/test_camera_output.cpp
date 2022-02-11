@@ -12,14 +12,9 @@ using namespace mir::rend;
 class TestCameraOutput : public App
 {
 protected:
-	void OnRender() override;
 	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
-private:
-	AssimpModelPtr mModel2;
-	SpritePtr mSprite1, mSpriteCam1;
-	CubePtr mCube0, mCube1;
 };
 /*mCaseIndex
 0：透视相机 点光 带天空盒 观察到左下角lenna，右上角天空+飞机
@@ -34,29 +29,29 @@ CoTask<bool> TestCameraOutput::OnPostInitDevice()
 	{
 		if (mCaseIndex == 1) 
 		{
-			camera2 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
+			camera2 = mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter));
 			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
 
-			auto light2 = mScneMng->AddDirectLight();
+			auto light2 = mScneMng->CreateAddLightNode<DirectLight>();
 			light2->SetCameraMask(cameraMask2);
 			light2->SetDirection(test1::vec::DirLight());
 		}
 		else 
 		{
-			camera2 = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+			camera2 = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
 			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
 			camera2->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 
-			auto light2 = mScneMng->AddPointLight();
+			auto light2 = mScneMng->CreateAddLightNode<PointLight>();
 			light2->SetCameraMask(cameraMask2);
 			light2->SetPosition(mWinCenter + Eigen::Vector3f(10, 10, -10));
 			light2->SetAttenuation(0.0001);
 		}
 
-		mModel2 = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+		auto mModel2 = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModel(MAT_MODEL));
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel2);
 		mModel2->SetCameraMask(cameraMask2);
 		mModel2->PlayAnim(0);
@@ -67,25 +62,25 @@ CoTask<bool> TestCameraOutput::OnPostInitDevice()
 
 	if (mCaseIndex == 1)
 	{
-		mCube0 = CoAwait test1::res::cube::far_plane::Create(mRendFac, mWinCenter);
-		mCube1 = CoAwait test1::res::cube::near_plane::Create(mRendFac, mWinCenter);
+		mScneMng->AddRendNode(CoAwait test1::res::cube::far_plane::Create(mRendFac, mWinCenter));
+		mScneMng->AddRendNode(CoAwait test1::res::cube::near_plane::Create(mRendFac, mWinCenter));
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
 	if (mCaseIndex == 0)
 	{
-		auto camera1 = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
+		auto camera1 = mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter));
 		camera1->SetDepth(2);
 		camera1->SetCullingMask(cameraMask1);
 
-		auto light1 = mScneMng->AddPointLight();
+		auto light1 = mScneMng->CreateAddLightNode<PointLight>();
 		light1->SetCameraMask(cameraMask1);
 
-		mSprite1 = CoAwait mRendFac->CreateSprite("model/lenna.dds");
+		auto mSprite1 = mScneMng->AddRendNode(CoAwait mRendFac->CreateSprite("model/lenna.dds"));
 		mSprite1->SetCameraMask(cameraMask1);
 		mSprite1->GetTransform()->SetPosition(-mHalfSize);
 
-		mSpriteCam1 = CoAwait mRendFac->CreateSprite();
+		auto mSpriteCam1 = CoAwait mRendFac->CreateSprite();
 		mSpriteCam1->SetCameraMask(cameraMask1);
 		//auto fetchTexture = mResMng->CreateTextureByFile(__LaunchAsync__, "model/theyKilledKenny.dds");
 		auto fetchTexture = camera2->SetOutput(0.5)->GetAttachColorTexture(0);
@@ -95,23 +90,6 @@ CoTask<bool> TestCameraOutput::OnPostInitDevice()
 		mSpriteCam1->SetSize(mHalfSize.cast<float>());
 	}
 	CoReturn true;
-}
-
-void TestCameraOutput::OnRender()
-{
-	if (mContext->RenderPipe()->BeginFrame()) {
-		if (mModel2) mModel2->Update(mTimer->mDeltaTime);
-
-		RenderOperationQueue opQueue;
-		if (mModel2) mModel2->GenRenderOperation(opQueue);
-		if (mSprite1) mSprite1->GenRenderOperation(opQueue);
-		if (mSpriteCam1) mSpriteCam1->GenRenderOperation(opQueue);
-		if (mCube0) mCube0->GenRenderOperation(opQueue);
-		if (mCube1) mCube1->GenRenderOperation(opQueue);
-
-		mContext->RenderPipe()->Render(opQueue, *mContext->SceneMng());
-		mContext->RenderPipe()->EndFrame();
-	}
 }
 
 auto reg = AppRegister<TestCameraOutput>("test_camera_output");

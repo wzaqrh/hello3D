@@ -56,6 +56,7 @@ private:
 
 interface MIR_CORE_API Renderable : public Component
 {
+	virtual void UpdateFrame(float dt) {}
 	virtual void GenRenderOperation(RenderOperationQueue& opList) = 0;
 
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }

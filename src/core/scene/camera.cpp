@@ -9,7 +9,7 @@ namespace mir {
 namespace scene {
 
 Camera::Camera(ResourceManager& resMng)
-	: mResourceMng(resMng)
+: mResourceMng(resMng)
 {
 	mTransform = CreateInstance<Transform>();
 	mRenderPath = kRenderPathForward;
@@ -25,34 +25,9 @@ Camera::Camera(ResourceManager& resMng)
 	mProjectionDirty = true;
 }
 
-void Camera::InitAsPerspective(float aspect,
-	const Eigen::Vector3f& eyePos,
-	const Eigen::Vector3f& length_forward,
-	const Eigen::Vector2f& clipPlane,
-	float fov,
-	unsigned cameraMask)
+void Camera::SetType(CameraType type)
 {
-	mType = kCameraPerspective;
-	SetClippingPlane(clipPlane);
-	SetFov(fov);
-	SetAspect(aspect);
-	SetLookAt(eyePos, eyePos + length_forward);
-	SetCullingMask(cameraMask);
-	mProjectionDirty = true;
-}
-void Camera::InitAsOthogonal(float aspect,
-	const Eigen::Vector3f& eyePos,
-	const Eigen::Vector3f& length_forward,
-	const Eigen::Vector2f& clipPlane,
-	float othoSize,
-	unsigned cameraMask)
-{
-	mType = kCameraOthogonal;
-	SetClippingPlane(clipPlane);
-	SetOrthographicSize(othoSize);
-	SetAspect(aspect);
-	SetLookAt(eyePos, eyePos + length_forward);
-	SetCullingMask(cameraMask);
+	mType = type;
 	mProjectionDirty = true;
 }
 
@@ -236,6 +211,62 @@ IFrameBufferPtr Camera::SetOutput(IFrameBufferPtr output)
 IFrameBufferPtr Camera::SetOutput(float scale, std::vector<ResourceFormat> formats)
 {
 	return SetOutput(mResourceMng.CreateFrameBuffer(__LaunchSync__, (mResourceMng.WinSize().cast<float>() * scale).cast<int>(), formats));
+}
+
+void Camera::UpdateFrame(float dt)
+{}
+
+/********** CameraFactory **********/
+CameraPtr CameraFactory::CreatePerspective(float aspect, 
+	const Eigen::Vector3f& eyePos, 
+	const Eigen::Vector3f& length_forward, 
+	const Eigen::Vector2f& clipPlane, 
+	float fov, 
+	unsigned cameraMask)
+{
+	CameraPtr camera = CreateInstance<Camera>(mResMng);
+
+	camera->SetType(kCameraPerspective);
+	camera->SetClippingPlane(clipPlane);
+	camera->SetFov(fov);
+	camera->SetAspect(aspect);
+	camera->SetLookAt(eyePos, eyePos + length_forward);
+	camera->SetCullingMask(cameraMask);
+
+	return camera;
+}
+
+CameraPtr CameraFactory::CreateDefPerspective(const Eigen::Vector3f& eyePos)
+{
+	auto size = mResMng.WinSize();
+	return CreatePerspective(1.0f * size.x() / size.y(), eyePos, math::vec::Forward() * fabs(eyePos.z()),
+		math::cam::DefClippingPlane(), math::cam::DefFov());
+}
+
+CameraPtr CameraFactory::CreateOthogonal(float aspect, 
+	const Eigen::Vector3f& eyePos, 
+	const Eigen::Vector3f& length_forward, 
+	const Eigen::Vector2f& clipPlane,
+	float othoSize, 
+	unsigned cameraMask)
+{
+	CameraPtr camera = CreateInstance<Camera>(mResMng);
+
+	camera->SetType(kCameraOthogonal);
+	camera->SetClippingPlane(clipPlane);
+	camera->SetOrthographicSize(othoSize);
+	camera->SetAspect(aspect);
+	camera->SetLookAt(eyePos, eyePos + length_forward);
+	camera->SetCullingMask(cameraMask);
+	
+	return camera;
+}
+
+CameraPtr CameraFactory::CreateDefOthogonal(const Eigen::Vector3f& eyePos)
+{
+	auto size = mResMng.WinSize();
+	return CreateOthogonal(1.0f * size.x() / size.y(), eyePos, math::vec::Forward() * fabs(eyePos.z()),
+		math::cam::DefClippingPlane(), math::cam::DefOthoSize() * mPixelPerUnit);
 }
 
 }

@@ -7,7 +7,6 @@ using namespace mir::rend;
 class TestSpecSkybox : public App
 {
 protected:
-	void OnRender() override;
 	CoTask<bool> OnPostInitDevice() override;
 	void OnInitCamera() override {}
 };
@@ -18,7 +17,7 @@ CoTask<bool> TestSpecSkybox::OnPostInitDevice()
 {
 	switch (mCaseIndex) {
 	case 0: {
-		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 		MaterialLoadParamBuilder matname = MAT_SKYBOX;
 		matname["CubeMapIsRightHandness"] = TRUE;
 		if (mCaseSecondIndex == 0)
@@ -27,30 +26,21 @@ CoTask<bool> TestSpecSkybox::OnPostInitDevice()
 			camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::sky::footprint_court::Specular(), matname));
 	}break;
 	case 1: {
-		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky(mCaseSecondIndex % 3)));//bc1a mipmap cube
 	}break;
 	case 2: {
-		CameraPtr camera = mScneMng->AddOthogonalCamera(test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));//bc1a mipmap cube
 	}break;
 	case 3: {
-		CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky(), MAT_SKYBOX "-Deprecate"));//bc1a mipmap cube
 	}break;
 	default:
 		break;
 	}
 	CoReturn true;
-}
-
-void TestSpecSkybox::OnRender()
-{
-	if (mContext->RenderPipe()->BeginFrame()) {
-		RenderOperationQueue opQue;
-		mContext->RenderPipe()->Render(opQue, *mContext->SceneMng());
-		mContext->RenderPipe()->EndFrame();
-	}
 }
 
 auto reg = AppRegister<TestSpecSkybox>("test_spec_skybox");

@@ -14,6 +14,11 @@ public:
 		auto node = mNode.lock();
 		return node ? node->GetComponent<T>() : nullptr; 
 	}
+	template<typename T> void SetComponent(const std::shared_ptr<T>& component) {
+		if (auto node = mNode.lock()) 
+			node->SetComponent<T>(component);
+	}
+	SceneNodePtr GetNode() { return mNode.lock(); }
 private:
 	void AttachSceneNode(const SceneNodePtr& node) {
 		mNode = node;

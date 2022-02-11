@@ -9,13 +9,9 @@ using namespace mir::rend;
 class TestCamera : public App
 {
 protected:
-	void OnRender() override;
 	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
-private:
-	AssimpModelPtr mModel;
-	SpritePtr mSprite;
 };
 /*mCaseIndex
 0-5: Õ∏ ”œ‡ª˙
@@ -44,16 +40,16 @@ CoTask<bool> TestCamera::OnPostInitDevice()
 
 	if (1)
 	{
-		mModel = CoAwait mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL);
+		auto mModel = mScneMng->AddRendNode(CoAwait mContext->RenderableFac()->CreateAssimpModel(MAT_MODEL));
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 		if (cameraType == 0)
 			mTransform->SetScale(mTransform->GetLossyScale() * 2);
 	}
 
-	mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, -1, 1));
+	mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, -1, 1));
 
 	mControlCamera = false;
-	CameraPtr camera = mScneMng->AddCameraByType((CameraType)cameraType, Eigen::Vector3f(0, 0, -10));
+	CameraPtr camera = mScneMng->CreateAddCameraNode((CameraType)cameraType, Eigen::Vector3f(0, 0, -10));
 	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 	switch (caseIndex) {
 	case 0: {
@@ -81,20 +77,6 @@ CoTask<bool> TestCamera::OnPostInitDevice()
 		break;
 	}
 	CoReturn true;
-}
-
-void TestCamera::OnRender()
-{
-	if (mContext->RenderPipe()->BeginFrame()) {
-		if (mModel) mModel->Update(mTimer->mDeltaTime);
-
-		RenderOperationQueue opQueue;
-		if (mModel) mModel->GenRenderOperation(opQueue);
-		if (mSprite) mSprite->GenRenderOperation(opQueue);
-
-		mContext->RenderPipe()->Render(opQueue, *mContext->SceneMng());
-		mContext->RenderPipe()->EndFrame();
-	}
 }
 
 auto reg = AppRegister<TestCamera>("test_camera");

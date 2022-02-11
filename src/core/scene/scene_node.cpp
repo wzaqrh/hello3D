@@ -7,6 +7,9 @@
 namespace mir {
 
 SceneNode::SceneNode()
+{}
+
+void SceneNode::SetTransform(const TransformPtr& transform)
 {
 	mTransform = CreateInstance<Transform>();
 	mTransform->AttachSceneNode(shared_from_this());
@@ -26,6 +29,13 @@ void SceneNode::SetCamera(const scene::CameraPtr& camera)
 {
 	mCamera = camera;
 	mCamera->AttachSceneNode(shared_from_this());
+}
+
+SceneNodePtr SceneNodeFactory::CreateNode()
+{
+	SceneNodePtr node = CreateInstance<SceneNode>();
+	node->SetTransform(CreateInstance<Transform>());
+	return node;
 }
 
 }

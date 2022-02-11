@@ -8,7 +8,9 @@ namespace mir {
 
 Mir::Mir(Launch launchMode)
 	:mLaunchMode(launchMode)
-{}
+{
+	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
+}
 Mir::~Mir()
 {}
 
@@ -30,9 +32,9 @@ bool Mir::Initialize(HWND hWnd) {
 	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac, mIoService);
 	
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng);
-	mSceneMng = CreateInstance<SceneManager>(*mResourceMng);
-
 	mRenderableFac = CreateInstance<RenderableFactory>(*mResourceMng, mLaunchMode);
+
+	mSceneMng = CreateInstance<SceneManager>(*mResourceMng, mRenderableFac);
 	return true;
 }
 
@@ -50,15 +52,41 @@ void Mir::Dispose() {
 	}
 }
 
-void Mir::Update()
+void Mir::Update(float dt)
 {
-	mRenderSys->Update(0);
+	mRenderSys->Update(dt);
 	mResourceMng->UpdateForLoading();
+	mSceneMng->UpdateFrame(dt);
+}
+
+void Mir::Render()
+{
+	if (mRenderPipe->BeginFrame()) {
+		mRenderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
+
+		RenderOperationQueue opQue;
+		mSceneMng->GenRenderOperation(opQue);
+		mRenderPipe->Render(opQue, mSceneMng->GetCameras(), mSceneMng->GetLights());
+		mRenderPipe->EndFrame();
+	}
 }
 
 Eigen::Vector2i Mir::WinSize() const
 {
 	return mRenderSys->WinSize();
+}
+
+const mir::scene::LightFactoryPtr& Mir::LightFac() const
+{
+	return mSceneMng->GetLightFac();
+}
+const mir::scene::CameraFactoryPtr& Mir::CameraFac() const
+{
+	return mSceneMng->GetCameraFac();
+}
+const mir::SceneNodeFactoryPtr& Mir::NodeFac() const
+{
+	return mSceneMng->GetNodeFac();
 }
 
 void Mir::ExecuteTaskSync(const CoTask<bool>& task)

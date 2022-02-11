@@ -5,6 +5,7 @@
 #include "core/base/base_type.h"
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
+#include "core/renderable/renderable_factory.h"
 
 namespace mir {
 
@@ -12,40 +13,73 @@ class MIR_CORE_API SceneManager : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	SceneManager(ResourceManager& resMng);
-	void SetPixelPerUnit(float ppu) { mPixelPerUnit = ppu; }
+	SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac);
+	void SetPixelPerUnit(float ppu);
 
-	void RemoveAllCameras();
-	scene::CameraPtr AddPerspectiveCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
-	scene::CameraPtr AddOthogonalCamera(const Eigen::Vector3f& eyePos = math::cam::DefEye(), unsigned camMask = -1);
-	TemplateArgs scene::CameraPtr AddCameraByType(CameraType camType, T &&...args) {
-		return (camType == kCameraPerspective) ? AddPerspectiveCamera(std::forward<T>(args)...) : AddOthogonalCamera(std::forward<T>(args)...);
+	SceneNodePtr AddNode();
+
+	template<typename... T> scene::CameraPtr CreateCamera(CameraType CamType, T &&...args) {
+		return mCameraFac->CreateDefCamera(CamType, std::forward<T>(args)...);
 	}
+	template<typename... T> scene::CameraPtr CreateAddCameraNode(CameraType CamType, T &&...args) {
+		scene::CameraPtr camera = CreateCamera(CamType, std::forward<T>(args)...);
+		CreateAddCameraNode(camera);
+		return camera;
+	}
+	scene::CameraPtr CreateAddCameraNode(scene::CameraPtr camera);
+	void RemoveAllCameras();
 
+	template<typename LightClass, typename... T> std::shared_ptr<LightClass> CreateLight(T &&...args) {
+		return mLightFac->CreateLight<LightClass>(std::forward<T>(args)...);
+	}
+	template<typename LightClass, typename... T> std::shared_ptr<LightClass> CreateAddLightNode(T &&...args) {
+		std::shared_ptr<LightClass> light = CreateLight<LightClass>(std::forward<T>(args)...);
+		AddLightNode(light);
+		return light;
+	}
+	template<typename LightClass> const std::shared_ptr<LightClass>& AddLightNode(const std::shared_ptr<LightClass>& light) { AddLightNode((scene::LightPtr)light); return light; }
+	scene::LightPtr AddLightNode(scene::LightPtr light);
 	void RemoveAllLights();
-	scene::SpotLightPtr AddSpotLight(unsigned camMask = -1);
-	scene::PointLightPtr AddPointLight(unsigned camMask = -1);
-	scene::DirectLightPtr AddDirectLight(unsigned camMask = -1);
-public:
-	const std::vector<scene::CameraPtr>& GetCameras() const;
-	size_t GetCameraCount() const { return mCameras.size(); }
-	scene::CameraPtr GetCamera(size_t index) const { return GetCameras()[index];  }
-	scene::CameraPtr GetDefCamera() const { return GetCameraCount() ? GetCamera(0) : nullptr;  }
 
-	const std::vector<scene::LightPtr>& GetLights() const;
-	size_t GetLightCount() const { return mLights.size(); }
-	scene::LightPtr GetLight(size_t index) const { return GetLights()[index]; }
-	scene::LightPtr GetDefLight() const { return GetLightCount() ? GetLight(0) : nullptr; }
+	template<typename RendClass, typename... T> std::shared_ptr<RendClass> CreateRend(T &&...args) {
+		return mRendFac->CreateRend<RendClass>(std::forward<T>(args)...);
+	}
+	template<typename RendClass, typename... T> std::shared_ptr<RendClass> CreateAddRendNode(T &&...args) {
+		std::shared_ptr<RendClass> rend = CreateRend<RendClass>(std::forward<T>(args)...);
+		AddRendNode(rend);
+		return rend;
+	}
+	template<typename RendClass> const std::shared_ptr<RendClass>& AddRendNode(const std::shared_ptr<RendClass>& rend) { AddRendNode((RenderablePtr)rend); return rend; }
+	RenderablePtr AddRendNode(RenderablePtr rend);
+public:
+	const std::vector<scene::CameraPtr>& GetCameras() const { return mCameras; }
+	scene::CameraPtr GetDefCamera() const { return GetCameras().size() ? GetCameras()[0] : nullptr;  }
+
+	const std::vector<scene::LightPtr>& GetLights() const { return mLights; }
+	scene::LightPtr GetDefLight() const { return GetLights().size() ? GetLights()[0] : nullptr;  } 
+
+	const scene::LightFactoryPtr& GetLightFac() const { return mLightFac; }
+	const scene::CameraFactoryPtr& GetCameraFac() const { return mCameraFac; }
+	const SceneNodeFactoryPtr& GetNodeFac() const { return mNodeFac; }
 private:
-	void ResortLights() const;
-	void ResortCameras() const;
+	void ResortLights();
+	void ResortCameras();
+public:
+	void UpdateFrame(float dt);
+	void GenRenderOperation(RenderOperationQueue& opQue);
 private:
 	ResourceManager& mResMng;
-	float mPixelPerUnit = 100;
+	
+	scene::LightFactoryPtr mLightFac;
+	scene::CameraFactoryPtr mCameraFac;
+	SceneNodeFactoryPtr mNodeFac;
+	RenderableFactoryPtr mRendFac;
 
-	mutable std::vector<scene::CameraPtr> mCameras;
-	mutable std::vector<scene::LightPtr> mLights;
-	mutable bool mCamerasDirty, mLightsDirty;
+	std::vector<SceneNodePtr> mNodes;
+	std::vector<RenderablePtr> mRends;
+	std::vector<scene::CameraPtr> mCameras;
+	std::vector<scene::LightPtr> mLights;
+	bool mRendsDirty, mCamerasDirty, mLightsDirty;
 };
 
 };

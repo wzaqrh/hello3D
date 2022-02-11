@@ -7,7 +7,6 @@ using namespace mir::rend;
 class TestLight : public App
 {
 protected:
-	void OnRender() override;
 	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
@@ -35,37 +34,32 @@ CoTask<bool> TestLight::OnPostInitDevice()
 
 	switch (caseIndex) {
 	case 0: {
-		mScneMng->AddPointLight()->SetPosition(Eigen::Vector3f(0, 10, -5));
+		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(Eigen::Vector3f(0, 10, -5));
 	}break;
 	case 1: {
-		mScneMng->AddPointLight()->SetPosition(Eigen::Vector3f(-10, 0, -5));
+		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(Eigen::Vector3f(-10, 0, -5));
 	}break;
 	case 2: {
-		mScneMng->AddPointLight()->SetPosition(Eigen::Vector3f(10, 0, 0));
+		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(Eigen::Vector3f(10, 0, 0));
 	}break;
 	case 3: {
-		auto pt_light = mScneMng->AddPointLight();
+		auto pt_light = mScneMng->CreateAddLightNode<PointLight>();
 		pt_light->SetPosition(Eigen::Vector3f(15, -15, -10));
 		pt_light->SetAttenuation(0.01);
 	}break;
 	default: {
-		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(25, 0, 5));
-		mScneMng->AddDirectLight()->SetDirection(Eigen::Vector3f(0, 0, 1));
+		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(25, 0, 5));
+		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}
 
-	CameraPtr camera = mScneMng->AddCameraByType((CameraType)cameraType, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateAddCameraNode((CameraType)cameraType, test1::cam::Eye(mWinCenter));
 	camera->SetSkyBox(CoAwait mRendFac->CreateSkybox(test1::res::Sky()));
 
 	mModel = CoAwait mRendFac->CreateAssimpModel(MAT_MODEL);
+	mScneMng->AddRendNode(mModel);
 	mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 	CoReturn true;
-}
-
-void TestLight::OnRender()
-{
-	mModel->Update(mTimer->mDeltaTime);
-	mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
 }
 
 auto reg = AppRegister<TestLight>("test_light");

@@ -17,25 +17,13 @@ enum CameraType {
 	kCameraPerspective,
 	kCameraOthogonal
 };
-
 namespace scene {
 
 class MIR_CORE_API Camera : public Component
 {
+	friend class CameraFactory;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	TemplateArgs static CameraPtr CreatePerspective(ResourceManager& resMng, T &&...args) {
-		CameraPtr camera = CreateInstance<Camera>(resMng);
-		auto size = resMng.WinSize();
-		camera->InitAsPerspective(1.0f*size.x()/size.y(), std::forward<T>(args)...);
-		return camera;
-	}
-	TemplateArgs static CameraPtr CreateOthogonal(ResourceManager& resMng, T &&...args) {
-		CameraPtr camera = CreateInstance<Camera>(resMng);
-		auto size = resMng.WinSize();
-		camera->InitAsOthogonal(1.0f*size.x()/size.y(), std::forward<T>(args)...);
-		return camera;
-	}
 	Camera(ResourceManager& resMng);
 
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
@@ -60,6 +48,10 @@ public:
 	IFrameBufferPtr SetOutput(float scale = 1, 
 		std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(IFrameBufferPtr output);
+private:
+	void SetType(CameraType type);
+	void RecalculateProjection() const;
+	void RecalculateView() const;
 public:
 	const TransformPtr& GetTransform() const;
 	const rend::SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
@@ -74,21 +66,8 @@ public:
 
 	CameraType GetType() const { return mType; }
 	Eigen::Vector2f GetOthoWinSize() const;
-private:
-	void InitAsPerspective(float aspect = 1.0,
-		const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
-		const Eigen::Vector3f& length_forward = math::vec::Forward(), 
-		const Eigen::Vector2f& clipPlane = math::cam::DefClippingPlane(),
-		float fov = math::cam::DefFov(),
-		unsigned cameraMask = -1);
-	void InitAsOthogonal(float aspect = 1.0,
-		const Eigen::Vector3f& eyePos = math::cam::DefEye(), 
-		const Eigen::Vector3f& length_forward = math::vec::Forward(), 
-		const Eigen::Vector2f& clipPlane = math::cam::DefClippingPlane(),
-		float othoSize = math::cam::DefOthoSize(),
-		unsigned cameraMask = -1);
-	void RecalculateProjection() const;
-	void RecalculateView() const;
+public:
+	void UpdateFrame(float dt);
 private:
 	ResourceManager& mResourceMng;
 	TransformPtr mTransform;
@@ -107,6 +86,45 @@ private:
 
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 	mutable bool mViewDirty, mProjectionDirty;
+};
+
+class MIR_CORE_API CameraFactory : boost::noncopyable {
+public:
+	CameraFactory(ResourceManager& resMng) :mResMng(resMng) {}
+	void SetPixelPerUnit(float ppu) { mPixelPerUnit = ppu; }
+
+	CameraPtr CreatePerspective(float aspect = 1.0,
+		const Eigen::Vector3f& eyePos = math::cam::DefEye(),
+		const Eigen::Vector3f& length_forward = math::vec::Forward(),
+		const Eigen::Vector2f& clipPlane = math::cam::DefClippingPlane(),
+		float fov = math::cam::DefFov(),
+		unsigned cameraMask = -1);
+	CameraPtr CreateOthogonal(float aspect = 1.0,
+		const Eigen::Vector3f& eyePos = math::cam::DefEye(),
+		const Eigen::Vector3f& length_forward = math::vec::Forward(),
+		const Eigen::Vector2f& clipPlane = math::cam::DefClippingPlane(),
+		float othoSize = math::cam::DefOthoSize(),
+		unsigned cameraMask = -1);
+	template <CameraType CamType, typename... T> CameraPtr CreateCamera(T &&...args) {
+		return CreateCameraFunctor<CamType>()(std::forward<T>(args)...);
+	}
+
+	CameraPtr CreateDefPerspective(const Eigen::Vector3f& eyePos = math::cam::DefEye());
+	CameraPtr CreateDefOthogonal(const Eigen::Vector3f& eyePos = math::cam::DefEye());
+	TemplateArgs CameraPtr CreateDefCamera(CameraType camType, T &&...args) {
+		return (camType == kCameraPerspective) ? CreateDefPerspective(std::forward<T>(args)...) : CreateDefOthogonal(std::forward<T>(args)...);
+	}
+private:
+	template<CameraType CamType> struct CreateCameraFunctor {};
+	template<> struct CreateCameraFunctor<kCameraPerspective> {
+		TemplateArgs CameraPtr operator()(CameraFactory& __this, T &&...args) const { return __this.CreatePerspective(std::forward<T>(args)...); }
+	};
+	template<> struct CreateCameraFunctor<kCameraOthogonal> {
+		TemplateArgs CameraPtr operator()(CameraFactory& __this, T &&...args) const { return __this.CreateOthogonal(std::forward<T>(args)...); }
+	};
+private:
+	float mPixelPerUnit = 100;
+	ResourceManager& mResMng;
 };
 
 }

@@ -15,7 +15,6 @@ using namespace mir;
 App::App()
 {
 	mCameraInitInvLengthForward = Eigen::Vector3f::Zero();
-	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
 	mTransform = mir::CreateInstance<mir::Transform>();
 	mContext = new mir::Mir(AppLaunchMode);
 }
@@ -46,12 +45,11 @@ bool App::Initialize(HINSTANCE hInstance, HWND hWnd)
 }
 void App::OnInitCamera()
 {
-	mContext->SceneMng()->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+	mContext->SceneMng()->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 }
-
 void App::OnInitLight()
 {
-	mContext->SceneMng()->AddPointLight();
+	mContext->SceneMng()->CreateAddLightNode<PointLight>();
 }
 void App::CleanUp()
 {
@@ -65,7 +63,6 @@ void App::Render()
 
 	mTimer->Update();
 	mInput->Frame();
-	mContext->Update();
 
 	//rotate camera
 	auto camera0 = mScneMng->GetDefCamera();
@@ -118,9 +115,13 @@ void App::Render()
 			mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0, 0, 5));
 		}
 	}
+	mContext->Update(mTimer->mDeltaTime);
 
-	renderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
 	OnRender();
+}
+void App::OnRender()
+{
+	mContext->Render();
 }
 
 std::string App::GetName()

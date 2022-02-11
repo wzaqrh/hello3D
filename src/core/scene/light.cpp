@@ -98,5 +98,27 @@ void SpotLight::SetAngle(float radian)
 	SetCutOff(cos(radian));
 }
 
+/********** LightFactory **********/
+DirectLightPtr LightFactory::CreateDirectLight()
+{
+	DirectLightPtr light = CreateInstance<DirectLight>();
+	light->SetCameraMask(mDefCameraMask);
+	return light;
+}
+
+PointLightPtr LightFactory::CreatePointLight()
+{
+	PointLightPtr light = CreateInstance<PointLight>();
+	light->SetCameraMask(mDefCameraMask);
+	return light;
+}
+
+SpotLightPtr LightFactory::CreateSpotLight()
+{
+	SpotLightPtr light = CreateInstance<SpotLight>();
+	light->SetCameraMask(mDefCameraMask);
+	return light;
+}
+
 }
 }

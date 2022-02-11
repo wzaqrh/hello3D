@@ -103,9 +103,6 @@
     <ClInclude Include="..\src\core\scene\scene_manager.h">
       <Filter>src\core\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\scene\light.h">
-      <Filter>src\core\scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\resource\predeclare.h">
       <Filter>src\core\resource</Filter>
     </ClInclude>
@@ -250,6 +247,9 @@
     <ClInclude Include="..\src\core\scene\component.h">
       <Filter>src\core\scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\scene\light.h">
+      <Filter>src\core\scene\light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -319,9 +319,6 @@
       <Filter>src\core\scene</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\scene\scene_manager.cpp">
-      <Filter>src\core\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\scene\light.cpp">
       <Filter>src\core\scene</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\blob11.cpp">
@@ -405,6 +402,9 @@
     <ClCompile Include="..\src\core\scene\scene_node.cpp">
       <Filter>src\core\scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\scene\light.cpp">
+      <Filter>src\core\scene\light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -460,6 +460,9 @@
     </Filter>
     <Filter Include="src\core\base\tpl">
       <UniqueIdentifier>{83b933a7-c99d-4e06-bf3d-d62aaa54c2ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\scene\light">
+      <UniqueIdentifier>{3d2381da-6294-4919-aeba-f20ecd2e4f53}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

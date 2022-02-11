@@ -47,13 +47,12 @@ public:
 protected:
 	virtual void OnPreInitDevice() {};
 	virtual CoTask<bool> OnPostInitDevice() { CoReturn true; };
-	virtual void OnRender() = 0;
+	virtual void OnRender();
 	virtual void OnInitLight();
 	virtual void OnInitCamera();
 protected:
 	Eigen::Matrix4f GetWorldTransform();
 protected:
-	Eigen::Vector4f mBackgndColor;
 	int mCaseIndex = 0, mCaseSecondIndex = 0;
 	mir::Mir* mContext = nullptr;
 	mir::TransformPtr mTransform;

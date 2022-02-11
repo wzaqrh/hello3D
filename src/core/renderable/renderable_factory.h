@@ -21,6 +21,33 @@ public:
 	CoTask<rend::AssimpModelPtr> CreateAssimpModel(MaterialLoadParam loadParam = "");
 	CoTask<rend::LabelPtr> CreateLabel(std::string fontPath, int fontSize);
 	CoTask<rend::PostProcessPtr> CreatePostProcessEffect(std::string effectName, scene::Camera& camera);
+
+	template<typename RendClass, typename... T> std::shared_ptr<RendClass> CreateRend(T &&...args) {
+		return CreateRendFunctor<RendClass>()(*this, std::forward<T>(args)...);
+	}
+private:
+	template<typename RendClass> struct CreateRendFunctor {};
+	template<> struct CreateRendFunctor<rend::SkyBox> {
+		TemplateArgs rend::SkyBoxPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreateSkybox(std::forward<T>(args)...); }
+	};
+	template<> struct CreateRendFunctor<rend::Sprite> {
+		TemplateArgs rend::SpritePtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreateSprite(std::forward<T>(args)...); }
+	};
+	template<> struct CreateRendFunctor<rend::Mesh> {
+		TemplateArgs rend::MeshPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreateMesh(std::forward<T>(args)...); }
+	};
+	template<> struct CreateRendFunctor<rend::Cube> {
+		TemplateArgs rend::CubePtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreateCube(std::forward<T>(args)...); }
+	};
+	template<> struct CreateRendFunctor<rend::AssimpModel> {
+		TemplateArgs rend::AssimpModelPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreateAssimpModel(std::forward<T>(args)...); }
+	};
+	template<> struct CreateRendFunctor<rend::Label> {
+		TemplateArgs rend::LabelPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreateLabel(std::forward<T>(args)...); }
+	};
+	template<> struct CreateRendFunctor<rend::PostProcess> {
+		TemplateArgs rend::PostProcessPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreatePostProcessEffect(std::forward<T>(args)...); }
+	};
 private:
 	Launch mLaunchMode;
 	ResourceManager& mResourceMng;

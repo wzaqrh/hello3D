@@ -1,42 +1,53 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
+#include "core/scene/light.h"
 #include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
+#include "core/rendersys/render_pipeline.h"
 
 using namespace mir::scene;
 
 namespace mir {
 
-SceneManager::SceneManager(ResourceManager& resMng)
+SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac)
 	: mResMng(resMng)
+	, mRendFac(rendFac)
 	, mCamerasDirty(false)
 	, mLightsDirty(false)
-{}
+{
+	mLightFac = CreateInstance<LightFactory>();
+	mCameraFac = CreateInstance<CameraFactory>(resMng);
+	mNodeFac = CreateInstance<SceneNodeFactory>();
+}
 
+void SceneManager::SetPixelPerUnit(float ppu)
+{
+	mCameraFac->SetPixelPerUnit(ppu);
+}
+
+SceneNodePtr SceneManager::AddNode()
+{
+	SceneNodePtr node = mNodeFac->CreateNode();
+	mNodes.push_back(node);
+	return node;
+}
+
+scene::CameraPtr SceneManager::CreateAddCameraNode(scene::CameraPtr camera)
+{
+	auto node = AddNode();
+	node->SetCamera(camera);
+
+	mCameras.push_back(camera);
+	mCamerasDirty = true;
+	return camera;
+}
 void SceneManager::RemoveAllCameras()
 {
 	mCameras.clear();
 }
-CameraPtr SceneManager::AddPerspectiveCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
-{
-	CameraPtr camera = Camera::CreatePerspective(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()),
-		math::cam::DefClippingPlane(), math::cam::DefFov(), camMask);
-	mCameras.push_back(camera);
-	mCamerasDirty = true;
-	return camera;
-}
-CameraPtr SceneManager::AddOthogonalCamera(const Eigen::Vector3f& eyePos, unsigned camMask)
-{
-	CameraPtr camera = Camera::CreateOthogonal(mResMng, eyePos, math::vec::Forward() * fabs(eyePos.z()), 
-		math::cam::DefClippingPlane(), math::cam::DefOthoSize() * mPixelPerUnit, camMask);
-	mCameras.push_back(camera);
-	mCamerasDirty = true;
-	return camera;
-}
-
-void SceneManager::ResortCameras() const 
+void SceneManager::ResortCameras() 
 {
 	if (mCamerasDirty) {
 		mCamerasDirty = false;
@@ -49,55 +60,60 @@ void SceneManager::ResortCameras() const
 		std::stable_sort(mCameras.begin(), mCameras.end(), CompCameraByDepth());
 	}
 }
-const std::vector<CameraPtr>& SceneManager::GetCameras() const 
-{
-	ResortCameras();
-	return mCameras; 
-}
 
+scene::LightPtr SceneManager::AddLightNode(scene::LightPtr light)
+{
+	auto node = AddNode();
+	node->SetLight(light);
+
+	mLights.push_back(light);
+	mLightsDirty = true;
+	return light;
+}
 void SceneManager::RemoveAllLights()
 {
 	mLights.clear();
 }
-SpotLightPtr SceneManager::AddSpotLight(unsigned camMask)
-{
-	SpotLightPtr light = CreateInstance<SpotLight>();
-	light->SetCameraMask(camMask);
-	mLights.push_back(light);
-	mLightsDirty = true;
-	return light;
-}
-PointLightPtr SceneManager::AddPointLight(unsigned camMask)
-{
-	PointLightPtr light = CreateInstance<PointLight>();
-	light->SetCameraMask(camMask);
-	mLights.push_back(light);
-	mLightsDirty = true;
-	return light;
-}
-DirectLightPtr SceneManager::AddDirectLight(unsigned camMask)
-{
-	DirectLightPtr light = CreateInstance<DirectLight>();
-	light->SetCameraMask(camMask);
-	mLights.push_back(light);
-	mLightsDirty = true;
-	return light;
-}
-
-void SceneManager::ResortLights() const 
+void SceneManager::ResortLights() 
 {
 	if (mLightsDirty) {
 		mLightsDirty = false;
 
-		std::sort(mLights.begin(), mLights.end(), [](const LightPtr& l, const LightPtr& r)->bool {
-			return l->GetType() < r->GetType();
-		});
+		struct CompLightByType {
+			bool operator()(const LightPtr& l, const LightPtr& r) const {
+				return l->GetType() < r->GetType();
+			}
+		};
+		std::sort(mLights.begin(), mLights.end(), CompLightByType());
 	}
 }
-const std::vector<LightPtr>& SceneManager::GetLights() const 
-{ 
-	ResortLights();
-	return mLights; 
+
+RenderablePtr SceneManager::AddRendNode(RenderablePtr rend)
+{
+	auto node = AddNode();
+	node->SetRenderable(rend);
+
+	mRends.push_back(rend);
+	mRendsDirty = true;
+	return rend;
+}
+
+void SceneManager::UpdateFrame(float dt)
+{
+	for (auto& node : mNodes) {
+		if (RenderablePtr rend = node->GetComponent<Renderable>()) 
+			rend->UpdateFrame(dt);
+		if (CameraPtr camera = node->GetComponent<Camera>())
+			camera->UpdateFrame(dt);
+	}
+}
+
+void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
+{
+	for (auto& node : mNodes) {
+		if (RenderablePtr rend = node->GetComponent<Renderable>())
+			rend->GenRenderOperation(opQue);
+	}
 }
 
 }

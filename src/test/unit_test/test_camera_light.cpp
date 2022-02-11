@@ -62,7 +62,7 @@ TEST_CASE("mir_camera ProjectPoint", "mir_camera_ProjectPoint")
 	dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 
 	sceneMng->RemoveAllCameras();
-	auto camera = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -1500), 3000); 	
+	auto camera = sceneMng->AddCameraNode(kCameraOthogonal, Eigen::Vector3f(0, 0, -1500), 3000); 	
 	camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
 
 	auto ndc = camera->ProjectPoint(Eigen::Vector3f(100, 100, 10));
@@ -81,7 +81,7 @@ TEST_CASE("mir_camera ProjectPoint 2", "mir_camera_ProjectPoint2")
 	dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 
 	sceneMng->RemoveAllCameras();
-	auto camera = sceneMng->AddOthogonalCamera(Eigen::Vector3f(0, 0, -1500), 3000); 
+	auto camera = sceneMng->AddCameraNode(kCameraOthogonal, Eigen::Vector3f(0, 0, -1500), 3000); 
 	camera->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 0));
 
 	test::CompareLightCameraByViewProjection(*dir_light, *camera, {});

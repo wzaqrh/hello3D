@@ -87,7 +87,7 @@ public:
 	shared_task<std::string> get_desc_one__()
 	{
 		std::string result = "my name";
-		CoReturn result;
+		co_return result;
 	}
 //#define USE_RESUME_ON 1
 	shared_task<std::string> get_first_()
@@ -101,7 +101,7 @@ public:
 	#if !USE_RESUME_ON
 		co_await mIoService.schedule();
 	#endif
-		return result;
+		co_return result;
 	}
 	shared_task<std::string> get_first() {
 	#if USE_RESUME_ON 
@@ -121,7 +121,7 @@ public:
 		std::string result = "my name";
 
 		co_await mIoService.schedule();
-		return result;
+		co_return result;
 	}
 
 	shared_task<std::string> get_desc_two() {
@@ -129,18 +129,18 @@ public:
 		result += co_await get_second();
 		REQUIRE(std::this_thread::get_id() == mMainThreadId);
 
-		return result + " is zelda";
+		co_return result + " is zelda";
 	}
 
 #define IOSEVICE_BLOCK
 #if defined IOSEVICE_BLOCK
-	CoTask<void> Execute(std::string& result) {
+	shared_task<void> Execute(std::string& result) {
 		cppcoro::io_work_scope ioScope(mIoService);
 		result = co_await get_desc_two();
 	}
-	CoTask<void> ProcessEvents() {
+	shared_task<void> ProcessEvents() {
 		mIoService.process_events();
-		CoReturn;
+		co_return;
 	}
 
 	std::string operator()() {

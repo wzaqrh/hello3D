@@ -11,10 +11,13 @@ DECLARE_CLASS(Light);
 DECLARE_CLASS(DirectLight);
 DECLARE_CLASS(PointLight);
 DECLARE_CLASS(SpotLight);
+DECLARE_CLASS(LightFactory);
 DECLARE_CLASS(Camera);
+DECLARE_CLASS(CameraFactory);
 }
 DECLARE_CLASS(Transform);
 DECLARE_CLASS(SceneNode);
+DECLARE_CLASS(SceneNodeFactory);
 DECLARE_CLASS(SceneManager);
 
 }

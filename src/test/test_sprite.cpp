@@ -8,12 +8,9 @@ using namespace mir::rend;
 class TestSprite : public App
 {
 protected:
-	void OnRender() override;
 	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
-private:
-	SpritePtr mSprite;
 };
 /*mCaseIndex
 0：观察到kenny占整个屏幕
@@ -27,12 +24,13 @@ private:
 
 CoTask<bool> TestSprite::OnPostInitDevice()
 {
-	mScneMng->AddDirectLight();
-	mScneMng->AddOthogonalCamera(test1::cam_otho::Eye(mWinCenter));
+	mScneMng->CreateAddLightNode<DirectLight>();
+	mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam_otho::Eye(mWinCenter));
 	SetPPU(C_WINDOW_HEIGHT / 10.0);
 
 	Launch sync = __LaunchSync__;
 	Launch async = __LaunchAsync__;
+	SpritePtr mSprite;
 	switch (mCaseIndex) {
 	case 0: {
 		mSprite = CoAwait mRendFac->CreateSprite();
@@ -76,12 +74,9 @@ CoTask<bool> TestSprite::OnPostInitDevice()
 	default:
 		break;
 	}
-	CoReturn true;
-}
+	mScneMng->AddRendNode(mSprite);
 
-void TestSprite::OnRender()
-{
-	mContext->RenderPipe()->Draw(*mSprite, *mContext->SceneMng());
+	CoReturn true;
 }
 
 auto reg = AppRegister<TestSprite>("test_sprite");

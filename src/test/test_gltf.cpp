@@ -7,7 +7,6 @@ using namespace mir::rend;
 class TestGLTF : public App
 {
 protected:
-	void OnRender() override;
 	CoTask<bool> OnPostInitDevice() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
@@ -28,7 +27,7 @@ CoTask<bool> TestGLTF::OnPostInitDevice()
 {
 	TIME_PROFILE("testGLTF.OnPostInitDevice");
 
-	CameraPtr camera = mScneMng->AddPerspectiveCamera(test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 
 	test1::res::model model;
@@ -59,7 +58,7 @@ CoTask<bool> TestGLTF::OnPostInitDevice()
 			camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
 		}
 
-		auto dir_light = mScneMng->AddDirectLight();
+		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 		
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
@@ -69,27 +68,22 @@ CoTask<bool> TestGLTF::OnPostInitDevice()
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 		mModel = CoAwait mRendFac->CreateAssimpModel(modelMat);
+		mScneMng->AddRendNode(mModel);
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };
 		int caseIndex = mCaseIndex;
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);
 	}break;
 	case 10: {
-		auto pt_light = mScneMng->AddPointLight();
+		auto pt_light = mScneMng->CreateAddLightNode<PointLight>();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);
 	}break;
 	default: {
-		auto dir_light = mScneMng->AddDirectLight();
+		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}
 	CoReturn true;
-}
-
-void TestGLTF::OnRender()
-{
-	mModel->Update(mTimer->mDeltaTime);
-	mContext->RenderPipe()->Draw(*mModel, *mContext->SceneMng());
 }
 
 auto reg = AppRegister<TestGLTF>("test_gltf");

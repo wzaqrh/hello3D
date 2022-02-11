@@ -125,11 +125,11 @@ CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectR
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 
 	if (!CoAwait mResourceMng.CreateAiScene(mLaunchMode, mAiScene, std::move(assetPath), std::move(redirectResource))) 
-		return false;
+		CoReturn false;
 
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
-	Update(0);
-	return true;
+	UpdateFrame(0);
+	CoReturn true;
 }
 
 const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex)
@@ -178,7 +178,7 @@ void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree, std:
 	}
 }
 
-void AssimpModel::Update(float dt)
+void AssimpModel::UpdateFrame(float dt)
 {
 	BOOST_ASSERT(mAiScene->IsLoaded());
 	if (mAiScene == nullptr || !mAiScene->IsLoaded()) return;
