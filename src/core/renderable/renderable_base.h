@@ -21,7 +21,7 @@ public:
 	
 	const ITexturePtr& GetTexture() const;
 	const res::MaterialInstance& GetMaterial() const { return mMaterial; }
-	const TransformPtr& GetTransform() const { return mTransform; }
+	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }
 	bool IsLoaded() const;
@@ -29,7 +29,6 @@ protected:
 protected:
 	ResourceManager& mResourceMng;
 	const Launch mLaunchMode;
-	TransformPtr mTransform;
 	res::MaterialInstance mMaterial;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;

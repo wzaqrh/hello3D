@@ -10,9 +10,7 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 	: mResourceMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mMaterial(matInst)
-{
-	mTransform = CreateInstance<Transform>();
-}
+{}
 
 const ITexturePtr& RenderableSingleRenderOp::GetTexture() const 
 {
@@ -40,7 +38,8 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
-	op.WorldTransform = mTransform->GetWorldMatrix();
+	if (GetTransform())
+		op.WorldTransform = GetTransform()->GetWorldMatrix();
 	op.CameraMask = mCameraMask;
 	return true;
 }
