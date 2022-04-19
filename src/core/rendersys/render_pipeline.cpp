@@ -22,9 +22,10 @@ enum PipeLineTextureSlot {
 	kPipeTextureDiffuseEnv = 9,
 	kPipeTextureSpecEnv = 10,
 	kPipeTextureLUT = 11,
-	kPipeTextureGBufferPos = 13,
-	kPipeTextureGBufferNormal = 14,
-	kPipeTextureGBufferAlbedo = 15
+	kPipeTextureGBufferPos = 12,
+	kPipeTextureGBufferNormal = 13,
+	kPipeTextureGBufferAlbedo = 14,
+	kPipeTextureGBufferEmissive = 15
 };
 
 RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
@@ -37,7 +38,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 
 	mGBuffer = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), 
-		MakeResFormats(kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt));
+		MakeResFormats(kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+	//mGBuffer->SetAttachZStencil(renderSys.GetBackFrameBuffer()->GetAttachZStencil());
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
 	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<bool> {
@@ -176,7 +178,9 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			Eigen::Vector4f::Zero(), 1.0, 0);
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
+		
 		auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, IF_AND_OR(genSM, mShadowMap->GetAttachZStencilTexture(), nullptr));
+		
 		auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
 		auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
 		auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(camera.GetSkyBox(), GetLutMap()));
@@ -236,6 +240,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 	{
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
+		mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 
 		scene::LightPtr firstLight = nullptr;
 		cbPerFrame perFrame;
@@ -247,46 +252,46 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 				{
 					firstLight = light;
 					
-					{
-					#if !defined DEBUG_PREPASS_BASE
-						auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer);
-					#endif
-						mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
-
-						depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
-						blend_state(BlendState::MakeAlphaNonPremultiplied());
-						perFrame = MakeReceiveShadowPerFrame(camera, mRenderSys.WinSize(), *firstLight, mGBuffer);
-						RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
-						
-						if (auto skybox = camera.GetSkyBox()) {
-							depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll));
-							blend_state(BlendState::MakeAlphaNonPremultiplied());
-							RenderOperationQueue opQue;
-							skybox->GenRenderOperation(opQue);
-							RenderLight(opQue, LIGHTMODE_PREPASS_BASE, camera.GetCullingMask(), nullptr, perFrame);
-						}
-					}
-				#if !defined DEBUG_PREPASS_BASE
+					auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer);
 					mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
-				#endif
-				}//firstLight == nullptr
+					blend_state(BlendState::MakeDisable());
+					depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+
+					perFrame = MakeReceiveShadowPerFrame(camera, mRenderSys.WinSize(), *firstLight, mGBuffer);
+					RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
+					
+					blend_state(BlendState::MakeAlphaNonPremultiplied());
+				}
 				else {
 					blend_state(BlendState::MakeAdditive());
 				}
+				depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 
-			#if !defined DEBUG_PREPASS_BASE
-				depth_state(DepthState::MakeFor3D(false));
 				auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mGBuffer->GetAttachZStencilTexture());
-				auto tex_env	= mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
+				
+				auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
+				auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
+				auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(camera.GetSkyBox(), GetLutMap()));
+
 				auto tex_gpos	= mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
 				auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
 				auto tex_galbedo = mStatesBlock.LockTexture(kPipeTextureGBufferAlbedo, mGBuffer->GetAttachColorTexture(2));
+				auto tex_gemissive = mStatesBlock.LockTexture(kPipeTextureGBufferEmissive, mGBuffer->GetAttachColorTexture(3));
 				RenderOperationQueue opQue;
 				mGBufferSprite->GenRenderOperation(opQue);
 				RenderLight(opQue, LIGHTMODE_PREPASS_FINAL, -1, &MakePerLight(*light), perFrame);
-			#endif
 			}//if light.GetCameraMask & camera.GetCameraMask
 		}//for lights
+
+		if (auto skybox = camera.GetSkyBox()) {
+			blend_state(BlendState::MakeDisable());
+			depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskZero));
+
+			RenderOperationQueue opQue;
+			skybox->GenRenderOperation(opQue);
+			cbPerFrame perFrame = MakePerFrame(camera, mRenderSys.WinSize());
+			RenderLight(opQue, LIGHTMODE_FORWARD_BASE, camera.GetCullingMask(), nullptr, perFrame);
+		}
 	}
 }
 

@@ -3,13 +3,15 @@
 #include "HLSLSupport.cginc"
 
 MIR_DECLARE_SHADOWMAP(_ShadowMapTexture, 8);
+MIR_DECLARE_SAMPLER2D(_GDepth, 8);
 MIR_DECLARE_TEXCUBE(_DiffuseCube, 9);
 MIR_DECLARE_TEXCUBE(_SpecCube, 10);
 MIR_DECLARE_TEX2D(_LUT, 11);
 
-MIR_DECLARE_TEX2D(_GBufferPos, 13);
-MIR_DECLARE_TEX2D(_GBufferNormal, 14);
-MIR_DECLARE_TEX2D(_GBufferAlbedo, 15);
+MIR_DECLARE_TEX2D(_GBufferPos, 12);
+MIR_DECLARE_TEX2D(_GBufferNormal, 13);
+MIR_DECLARE_TEX2D(_GBufferAlbedo, 14);
+MIR_DECLARE_TEX2D(_GBufferEmissive, 15);
 
 struct vbSurface
 {

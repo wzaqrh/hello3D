@@ -51,9 +51,9 @@ class FrameBuffer11 : public ImplementResource<IFrameBuffer>
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void SetAttachColor(size_t slot, FrameBufferAttach11Ptr attach);
-	void SetAttachZStencil(FrameBufferAttach11Ptr attach) {
-		mAttachZStencil = attach;
+	void SetAttachColor(size_t slot, IFrameBufferAttachmentPtr attach) override;
+	void SetAttachZStencil(IFrameBufferAttachmentPtr attach) override {
+		mAttachZStencil = std::static_pointer_cast<FrameBufferAttach11>(attach);
 	}
 
 	void SetSize(Eigen::Vector2i size) { 

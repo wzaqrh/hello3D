@@ -4,9 +4,9 @@
 #include "Debug.cginc"
 
 //world normal coordinate system
-inline float3x3 GetTBN(float3 normal, float3 tangent, float3 bitangent)
+inline float3x3 GetTBN(float3 normal, float3 tangent)
 {
-	bitangent = cross(tangent, normal);//normal陳俋, tangent陳衵
+	float3 bitangent = cross(tangent, normal); //normal陳俋, tangent陳衵
     return float3x3(tangent, bitangent, normal);
 }
 inline float3x3 GetTBN(float2 uv, float3 worldPos, float3 worldNormal)

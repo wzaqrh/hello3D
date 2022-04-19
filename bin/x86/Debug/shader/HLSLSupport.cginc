@@ -186,6 +186,7 @@
 
     // 2D textures
 	#define MIR_DECLARE_TEX2D(tex,slot) Texture2D tex :register(t##slot); SamplerState sampler##tex :register(s##slot)
+    #define MIR_DECLARE_SAMPLER2D(tex,slot) SamplerState sampler##tex :register(s##slot)
     #define MIR_ARGS_TEX2D(tex) Texture2D tex, SamplerState sampler##tex
 	#define MIR_PASS_TEX2D(tex) tex, sampler##tex
 	#define MIR_DECLARE_TEX2D_NOSAMPLER(tex) Texture2D tex
@@ -193,6 +194,7 @@
     #define MIR_DECLARE_TEX2D_NOSAMPLER_UINT(tex) Texture2D<uint4> tex
     #define MIR_SAMPLE_TEX2D(tex,coord) tex.Sample (sampler##tex,coord)
     #define MIR_SAMPLE_TEX2D_SAMPLER(tex,samplertex,coord) tex.Sample (sampler##samplertex,coord)
+    #define MIR_SAMPLE_LEVEL_TEX2D_SAMPLER(tex,samplertex,coord,level) tex.SampleLevel (sampler##samplertex, coord, level)
 #if defined(UNITY_COMPILER_HLSLCC) && !defined(SHADER_API_GLCORE) // GL Core doesn't have the _half mangling, the rest of them do.
 	#error
 #else

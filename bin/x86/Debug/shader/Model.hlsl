@@ -91,10 +91,10 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
     return value;
 }
 
-inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent, float3 biTangent)
+inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent)
 {
     float3x3 tbn;
-    if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent), normalize(biTangent));
+    if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent));
 	else tbn = GetTBN(uv, worldPos, worldNormal);
 	
     float3 normal;
@@ -159,7 +159,6 @@ struct PixelInput
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL0;//world space
     float3 Tangent : NORMAL1;
-    float3 BiTangent : NORMAL2; 
 	float3 ToEye  : TEXCOORD1;//world space
 	float3 ToLight : TEXCOORD2;//world space
 #if ENABLE_SHADOW_MAP
@@ -177,20 +176,17 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	PixelInput output;
 	matrix MW = mul(World, transpose(Model));
 	
-	//Normal
+	//Normal && Tangent
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
 	output.Normal = normalize(mul(MW, skinNormal).xyz);
 	
     float4 skinTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Tangent.xyz, 0.0));
 	output.Tangent = normalize(mul(MW, skinTangent).xyz);
     
-    float4 skinBiTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.BiTangent.xyz, 0.0));
-	output.BiTangent = normalize(mul(MW, skinBiTangent).xyz);
-    
+	//ToEye
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
-    
-    //ToEye
+	
 	output.ToEye = CameraPosition.xyz - output.Pos.xyz;
     
 	//PosInLight
@@ -204,13 +200,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     
 	//SurfPos	
 #if DEBUG_TBN != 2 
-#if 0	
-	float4 SurfPos = mul(View, output.Pos);
-	SurfPos = mul(Projection, SurfPos);
-	output.SurfPos = SurfPos.xyz / SurfPos.w;
-#else
 	output.SurfPos = output.Pos.xyz / output.Pos.w;
-#endif	
 #else    
     float3x3 TBN = float3x3(skin.Tangent, skin.BiTangent, skin.Normal);
     output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));    
@@ -233,7 +223,7 @@ float4 PS(PixelInput input) : SV_Target
 	float4 finalColor;
     
 #if DEBUG_TBN != 2
-    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent, input.BiTangent);
+    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent);
 #else        
     float3 normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);
     float3 basis_tangent = normalize(input.TangentBasis[0]);
@@ -244,18 +234,29 @@ float4 PS(PixelInput input) : SV_Target
 #endif     
     
 	float4 albedo = GetAlbedo(input.Tex);
+	float3 toLight = normalize(input.ToLight);
+	float3 toEye = normalize(input.ToEye);
 #if !PBR_MODE
-    finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), albedo.rgb, IsSpotLight);
+    finalColor.rgb = BlinnPhongLight(toLight, normal, toEye, albedo.rgb, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	finalColor.rgb = UnityPbrLight(input.ToLight, normal, normalize(input.ToEye), albedo.rgb, GetAmbientOcclusionRoughnessMetalness(input.Tex));
+	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
+	finalColor.rgb = UnityPbrLight(toLight, normal, toEye, albedo.rgb, aorm);
 #elif PBR_MODE == PBR_GLTF
-    finalColor.rgb = gltfPbrLight(normalize(input.ToLight), normal, normalize(input.ToEye), albedo.rgb, GetAmbientOcclusionRoughnessMetalness(input.Tex), GetEmissive(input.Tex));
+	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
+	float3 emissive = GetEmissive(input.Tex);
+	finalColor.rgb = gltfPbrLight(toLight, normal, toEye, albedo.rgb, aorm, emissive);
 #endif
     finalColor.a = 1.0;
 
 #if ENABLE_SHADOW_MAP
 	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
 #endif
+	
+	//finalColor.xyz = input.Normal;
+	//finalColor.xyz = normal;
+	//finalColor.xyz = toEye;
+	//finalColor.xyz = toLight;
+	finalColor.xyz = aorm;
     
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
@@ -294,7 +295,7 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent, input.BiTangent);
+	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent);
 	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex).rgb, IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
@@ -303,26 +304,37 @@ float4 PSAdd(PixelInput input) : SV_Target
 /************ PrepassBase ************/
 struct PSPrepassBaseInput
 {
-	float4 Pos  : SV_POSITION;
-    float4 Pos0 : POSITION0;//world space
+	float4 SVPos : SV_POSITION;
+    float4 Pos : POSITION0;//world space
 	float2 Tex : TEXCOORD0;
 	float3 Normal : NORMAL0;
+	float3 Tangent : NORMAL1;
+#if DEBUG_TBN != 2
+	float3 SurfPos : POSITION1; //world space
+#else
+    float3x3 TangentBasis : TEXCOORD3;
+#endif
 };
 PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 {
 	PSPrepassBaseInput output;
 	matrix MW = mul(World, transpose(Model));
 	
-	//Normal
+	//Normal && Tangent
 	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
-	output.Normal = mul(MW, skinNormal).xyz;
+	output.Normal = normalize(mul(MW, skinNormal).xyz);
 	
-	//Pos
+	float4 skinTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Tangent.xyz, 0.0));
+	output.Tangent = normalize(mul(MW, skinTangent).xyz);
+	
+	//Pos && SurfPos
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, skinPos);
+	output.SurfPos = output.Pos.xyz / output.Pos.w;
+	
 	output.Pos = mul(View, output.Pos);
     output.Pos = mul(Projection, output.Pos);
-	output.Pos0 = output.Pos;
+	output.SVPos = output.Pos;
 	
 	//Tex
 	output.Tex = surf.Tex;
@@ -335,25 +347,21 @@ struct PSPrepassBaseOutput
 #if !DEBUG_PREPASS_BASE
     float4 Normal : SV_Target1;
     float4 Albedo : SV_Target2;
+	float4 Emissive : SV_Target3;
 #endif
 };
 PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
 	PSPrepassBaseOutput output;
 #if !DEBUG_PREPASS_BASE
-	output.Pos = input.Pos0 / input.Pos0.w;
-	output.Pos.xyz = output.Pos.xyz * 0.5 + 0.5;
+	output.Pos = float4(input.Pos.xyz / input.Pos.w * 0.5 + 0.5, 1.0);
 
-	output.Normal.xyz = normalize(input.Normal);
-	output.Normal.xyz = output.Normal.xyz * 0.5 + 0.5;
-	output.Normal.w = 1.0;
-	
-	output.Albedo.rgb = GetAlbedo(input.Tex);
-	output.Albedo.w = 1.0;
+	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
+	output.Normal = float4(GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent) * 0.5 + 0.5, aorm.x);
+	output.Albedo = float4(GetAlbedo(input.Tex).xyz, aorm.y);
+	output.Emissive = float4(GetEmissive(input.Tex).xyz, aorm.z);
 #else
-	output.Pos.xyz = normalize(input.Normal);
-	output.Pos.xyz = output.Pos.xyz * 0.5 + 0.5;
-	output.Pos.w = 1.0;
+	output.Pos.xyz = float4(normalize(input.Normal) * 0.5 + 0.5, 1.0);
 #endif
 	return output;
 }
@@ -364,7 +372,6 @@ struct PSPrepassFinalInput
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
 };
-
 PSPrepassFinalInput VSPrepassFinal(vbSurface input)
 {
 	PSPrepassFinalInput output;
@@ -373,41 +380,54 @@ PSPrepassFinalInput VSPrepassFinal(vbSurface input)
     return output;
 }
 
-float4 PSPrepassFinal(PSPrepassFinalInput input) : SV_Target
+struct PSPrepassFinalOutput
 {
-	float4 finalColor;
+	float4 Color : SV_Target0;
+	float Depth : SV_Depth;
+};
+
+PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
+{
+	PSPrepassFinalOutput output;
+	output.Depth = MIR_SAMPLE_LEVEL_TEX2D_SAMPLER(_ShadowMapTexture, _GDepth, input.Tex, 0).r;
 	
-	float4 position;
-	position.xyz = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz*2.0-1.0;
-	position.w = 1.0;
+	float4 position = float4(MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz * 2.0 - 1.0, 1.0);
 	position = mul(mul(ViewInv, ProjectionInv), position);
 	position /= position.w;
 	
-	float3 normal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex).rgb*2.0-1.0;
-	float3 albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex).rgb;
+	float4 normal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex);
+	normal.xyz = normal.xyz * 2.0 - 1.0;
+	float4 albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);
+	float4 emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);
+	float3 aorm = float3(normal.w, albedo.w, emissive.w);
 	
-	float3 toLight_ = unity_LightPosition.xyz - position.xyz * unity_LightPosition.w;
-	
-	float4 toEye = mul(View, position);
-	finalColor.rgb = BlinnPhongLight(toLight_, normal, normalize(-toEye.xyz / toEye.w), albedo, IsSpotLight);
-	finalColor.a = 1.0;
-	
-#if ENABLE_SHADOW_MAP
-	//PosInLight
-	float4 posInLight = mul(LightView, position);
-	posInLight = mul(LightProjection, posInLight);
-	float bias = max(0.05 * (1.0 - dot(normal, normalize(toLight_))), 0.005);
-	posInLight.z -= bias * posInLight.w;
-	
-	finalColor.rgb *= CalcShadowFactor(posInLight);
+	float3 toLight = normalize(unity_LightPosition.xyz - position.xyz * unity_LightPosition.w);
+	float3 toEye = normalize(CameraPosition.xyz - position.xyz);
+
+#if !PBR_MODE
+    output.Color.rgb = BlinnPhongLight(toLight, normal.xyz, toEye, albedo.xyz, IsSpotLight);
+#elif PBR_MODE == PBR_UNITY
+	output.Color.rgb = UnityPbrLight(toLight, normal.xyz, toEye, albedo.xyz, aorm);
+#elif PBR_MODE == PBR_GLTF
+	output.Color.rgb = gltfPbrLight(toLight, normal.xyz, toEye, albedo.rgb, aorm, emissive.xyz);
 #endif
-#if DEBUG_PREPASS_FINAL
-	//finalColor.rgb = float3(input.Tex, 0);
-	//finalColor.rgb = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);
-	//finalColor.rgb = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex).rgb;
-	//finalColor.rgb = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex).rgb;
-	//finalColor.rgb = normalize(toLight_) + 0.5;
-	//finalColor.rgb = toEye;
+	output.Color.a = 1.0;
+	
+#if ENABLE_SHADOW_MAP1
+	float4 PosInLight = mul(LightView, position);
+	PosInLight = mul(LightProjection, PosInLight);
+	
+	float bias = max(0.05 * (1.0 - dot(normal.xyz, toLight)), 0.005);
+	PosInLight.z -= bias * PosInLight.w;
+	
+	finalColor.rgb *= CalcShadowFactor(PosInLight);
 #endif
-	return finalColor;
+	
+	//finalColor.xyz = aorm;
+	//finalColor.xyz = toLight;
+	//finalColor.xyz = toEye;
+	//finalColor.xyz = albedo.xyz;
+	//finalColor.xyz = emissive.xyz;
+	//finalColor.xyz = normal.xyz;
+	return output;
 }

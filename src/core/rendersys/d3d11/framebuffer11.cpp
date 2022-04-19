@@ -3,11 +3,11 @@
 
 namespace mir {
 
-void FrameBuffer11::SetAttachColor(size_t slot, FrameBufferAttach11Ptr attach) {
+void FrameBuffer11::SetAttachColor(size_t slot, IFrameBufferAttachmentPtr attach) {
 	if (attach) {
 		if (mAttachColors.size() < slot + 1)
 			mAttachColors.resize(slot + 1);
-		mAttachColors[slot] = attach;
+		mAttachColors[slot] = std::static_pointer_cast<FrameBufferAttach11>(attach);
 	}
 	else {
 		if (slot == mAttachColors.size() - 1) {

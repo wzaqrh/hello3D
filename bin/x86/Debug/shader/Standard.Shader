@@ -40,9 +40,10 @@
 			<Element Slot="10" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_SpecCube</Element>
 			<Element Slot="11" Filter="0x15">_LUT</Element>
 			
-			<Element Slot="13" Filter="0x15">_GBufferPos</Element>
-			<Element Slot="14" Filter="0x15">_GBufferNormal</Element>
-			<Element Slot="15" Filter="0x15">_GBufferAlbedo</Element>
+			<Element Slot="12" Filter="0">_GBufferPos</Element>
+			<Element Slot="13" Filter="0">_GBufferNormal</Element>
+			<Element Slot="14" Filter="0">_GBufferAlbedo</Element>
+		    <Element Slot="15" Filter="0">_GBufferEmissive</Element>
 		</Texture>
 	</PROGRAM>
 </Shader>

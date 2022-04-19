@@ -15,6 +15,8 @@ interface IFrameBuffer : public IResource
 	virtual size_t GetAttachColorCount() const = 0;
 	virtual IFrameBufferAttachmentPtr GetAttachColor(size_t index) const = 0;
 	virtual IFrameBufferAttachmentPtr GetAttachZStencil() const = 0;
+	virtual void SetAttachColor(size_t index, IFrameBufferAttachmentPtr attachColor) = 0;
+	virtual void SetAttachZStencil(IFrameBufferAttachmentPtr attachZStencil) = 0;
 public:
 	ITexturePtr GetAttachColorTexture(size_t index) const { 
 		auto texture = GetAttachColor(index);

@@ -29,6 +29,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 
 	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
+	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
 	test1::res::model model;
 	switch (mCaseIndex) {

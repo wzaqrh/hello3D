@@ -88,7 +88,7 @@ void Sprite::GenRenderOperation(RenderOperationQueue& opList)
 
 		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
 	}
-	op.WorldTransform = GetTransform()->GetWorldMatrix();
+	if (GetTransform()) op.WorldTransform = GetTransform()->GetWorldMatrix();
 	opList.AddOP(op);
 }
 
