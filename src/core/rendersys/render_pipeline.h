@@ -4,8 +4,22 @@
 #include "core/base/cppcoro.h"
 #include "core/base/stl.h"
 #include "core/base/math.h"
+#include "core/base/base_type.h"
 
 namespace mir {
+
+class TempFrameBufferManager {
+public:
+	TempFrameBufferManager(ResourceManager& resMng, Eigen::Vector2i fbSize, std::vector<ResourceFormat> fmts) :mResMng(resMng), mFbSize(fbSize) ,mFbFormats(fmts) {}
+	void ReturnAll();
+	IFrameBufferPtr Borrow();
+private:
+	ResourceManager& mResMng;
+	Eigen::Vector2i mFbSize;
+	std::vector<ResourceFormat> mFbFormats;
+	std::vector<IFrameBufferPtr> mFbs;
+	size_t mBorrowCount = 0;
+};
 
 struct cbPerFrame;
 struct cbPerLight;
@@ -28,6 +42,7 @@ private:
 	RenderSystem& mRenderSys;
 	RenderStatesBlockPtr mStatesBlockPtr;
 	RenderStatesBlock& mStatesBlock;
+	TempFrameBufferManagerPtr mTempFbMng;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
 };

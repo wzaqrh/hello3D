@@ -45,8 +45,7 @@ public:
 	void SetSkyBox(const rend::SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const rend::PostProcessPtr& postEffect);
 	IFrameBufferPtr FetchOutput2PostProcess(ResourceFormat format = kFormatR8G8B8A8UNorm);
-	IFrameBufferPtr SetOutput(float scale = 1, 
-		std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
+	IFrameBufferPtr SetOutput(float scale = 1, std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(IFrameBufferPtr output);
 private:
 	void SetType(CameraType type);
@@ -56,7 +55,7 @@ public:
 	const TransformPtr& GetTransform() const;
 	const rend::SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
 	const std::vector<rend::PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
-	const IFrameBufferPtr& GetOutput2PostProcess() const { return mPostProcessInput; }
+	const IFrameBufferPtr& GetPostProcessInput() const { return mPostProcessInput; }
 	const IFrameBufferPtr& GetOutput() const { return mOutput; }
 	
 	const Eigen::Matrix4f& GetView() const;

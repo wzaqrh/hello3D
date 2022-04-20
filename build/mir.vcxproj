@@ -212,6 +212,7 @@
     <ClCompile Include="..\src\test\unit_test\unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\Debug.cginc" />
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\IBL.cginc" />
@@ -241,6 +242,14 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\bin\x86\Debug\shader\Sprite.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\x86\Debug\shader\BoxBlur.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

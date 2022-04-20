@@ -1,6 +1,7 @@
 #include "test/test_case.h"
 #include "test/app.h"
 #include "core/renderable/sprite.h"
+#include "core/renderable/post_process.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -37,6 +38,18 @@ CoTask<bool> TestSprite::OnInitScene()
 		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
 		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::dds::Kenny()));
 		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
+
+		MaterialLoadParamBuilder param = MAT_BOX_BLUR;
+		constexpr int kernelSize = 5;
+		param["BOX_KERNEL_SIZE"] = kernelSize;
+		auto effect = CoAwait mRendFac->CreatePostProcessEffectT(param);
+		std::array<float, kernelSize * kernelSize> weights;
+		for (size_t i = 0; i < weights.size(); ++i)
+			weights[i] = 1.0 / weights.size();
+		effect->GetMaterial().SetProperty("BoxKernelWeights", weights);
+
+		mScneMng->GetDefCamera()->AddPostProcessEffect(effect);
+		mScneMng->GetDefCamera()->SetRenderingPath(kRenderPathDeffered);
 	}break;
 	case 1: {
 		mSprite = CoAwait mRendFac->CreateSpriteT();

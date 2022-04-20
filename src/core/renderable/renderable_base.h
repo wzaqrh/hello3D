@@ -20,7 +20,7 @@ public:
 	virtual void SetTexture(const ITexturePtr& Texture);
 	
 	const ITexturePtr& GetTexture() const;
-	const res::MaterialInstance& GetMaterial() const { return mMaterial; }
+	res::MaterialInstance GetMaterial() const { return mMaterial; }
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }

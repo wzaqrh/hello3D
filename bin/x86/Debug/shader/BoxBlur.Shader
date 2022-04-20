@@ -1,4 +1,4 @@
-<Shader Name="Sprite">
+<Shader Name="BoxBlur">
 	<Include>Standard</Include>
 	
 	<PROGRAM>
@@ -6,20 +6,20 @@
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
-		<Texture>
-			<Element Slot="0">_MainTex</Element>
-		</Texture>
-		
-		<FileName>Sprite</FileName>
+		<Uniform Name="cbBoxFilter" Slot="3" ShareMode="1">
+			<Element Name="BoxKernelWeights" Type="float" Count="28" Default="0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111"></Element>
+		</Uniform>  
+
+		<FileName>BoxBlur</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>
 	
 	<SubShader>
 		<Pass>
-			<Tags> <LightMode>Overlay</LightMode> </Tags>
+			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM> 
 				<Macros>
-					<DEBUG_SHADOW_MAP>0</DEBUG_SHADOW_MAP>
+					<BOX_KERNEL_SIZE>3</BOX_KERNEL_SIZE>
 				</Macros>
 				<PixelEntry>PS</PixelEntry> 
 			</PROGRAM>

@@ -7,6 +7,7 @@
 #define MAT_MODEL "Model"
 #define MAT_MODEL_SHADOW "ModelShadow"
 #define MAT_BLOOM "Bloom"
+#define MAT_BOX_BLUR "BoxBlur"
 
 #define LIGHTMODE_SHADOW_CASTER "ShadowCaster"
 #define LIGHTMODE_FORWARD_BASE "ForwardBase"
@@ -14,3 +15,4 @@
 #define LIGHTMODE_POSTPROCESS "PostProcess"
 #define LIGHTMODE_PREPASS_BASE "PrepassBase"
 #define LIGHTMODE_PREPASS_FINAL "PrepassFinal"
+#define LIGHTMODE_OVERLAY "Overlay"

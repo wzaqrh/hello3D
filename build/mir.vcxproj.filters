@@ -529,5 +529,14 @@
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader">
       <Filter>src\shader\xml</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader">
+      <Filter>src\shader\xml</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\BoxBlur.hlsl">
+      <Filter>src\shader</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
+      <Filter>src\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -38,5 +38,9 @@ private:
 	GpuParametersPtr mFrameGpuParameters;
 };
 
+#define kTextureUserSlotFirst 0
+#define kTextureUserSlotLast 5
+#define kTextureUserSlotCount 6
+
 }
 }

@@ -120,7 +120,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 
 	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.MaterialFilePath));
 	assetPath.remove_filename();
-	material->mTextures.Resize(8);
+	material->mTextures.Resize(kTextureUserSlotCount);
 	for (const auto& iter : materialNode.TextureProperies) {
 		assetPath /= iter.second.ImagePath;
 		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
@@ -137,24 +137,26 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	for (const auto& categNode : materialNode.Shader) {
 		const auto& categProgram = categNode.Program;
 		for (const auto& uniform : categProgram.Uniforms) {
-			GpuParameters::Element element = AddToParametersCache(launchMode, resMng, uniform);
-			switch (element.GetShareMode())
-			{
-			case kCbShareNone: {
-				GpuParameters::Element newelem = element.Clone(launchMode, resMng);
-				for (const auto& iter : materialNode.UniformProperies)
-					newelem.Parameters->SetPropertyByString(iter.first, iter.second);
-				material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
-			}break;
-			case kCbSharePerMaterial: {
-				GpuParameters::Element newelem = element.Clone(launchMode, resMng);
-				for (const auto& iter : materialNode.UniformProperies)
-					newelem.Parameters->SetPropertyByString(iter.first, iter.second);
-				material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
-			}break;
-			case kCbSharePerFrame:
-			default:
-				break;
+			if (uniform.IsValid()) {
+				GpuParameters::Element element = AddToParametersCache(launchMode, resMng, uniform);
+				switch (element.GetShareMode())
+				{
+				case kCbShareNone: {
+					GpuParameters::Element newelem = element.Clone(launchMode, resMng);
+					for (const auto& iter : materialNode.UniformProperies)
+						newelem.Parameters->SetPropertyByString(iter.first, iter.second);
+					material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
+				}break;
+				case kCbSharePerMaterial: {
+					GpuParameters::Element newelem = element.Clone(launchMode, resMng);
+					for (const auto& iter : materialNode.UniformProperies)
+						newelem.Parameters->SetPropertyByString(iter.first, iter.second);
+					material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
+				}break;
+				case kCbSharePerFrame:
+				default:
+					break;
+				}
 			}
 		}
 	}

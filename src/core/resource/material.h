@@ -72,6 +72,7 @@ public:
 	const MaterialPtr& GetMaterial() const { return mMaterial;}
 	MaterialPtr& operator->() { return mMaterial; }
 	const MaterialPtr& operator->() const { return mMaterial; };
+	operator bool() const { return mMaterial != nullptr; }
 public:
 	MaterialPtr mMaterial;
 	GpuParametersPtr mGpuParameters;

@@ -34,6 +34,7 @@
 		</Uniform>
 		
 		<Texture Name="txGlobal">
+			<Element Slot="7" Filter="0">_GDepth</Element>
 			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
 
 			<Element Slot="9" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_DiffuseCube</Element>

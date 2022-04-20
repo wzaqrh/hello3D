@@ -48,6 +48,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 						int tempIndex;
 						if (scanf_eof = fscanf(fd, "%s %d", szAppName, &tempIndex) == EOF)
 							break;
+						if (szAppName[0] >= '0' && szAppName[0] <= '9')
+							appNameIndex++;
 					}
 				}
 				appName = szAppName;

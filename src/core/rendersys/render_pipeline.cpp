@@ -1,6 +1,7 @@
 #include "core/rendersys/render_pipeline.h"
 #include "core/rendersys/render_states_block.h"
 #include "core/resource/resource_manager.h"
+#include "core/resource/material_factory.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
@@ -15,9 +16,26 @@
 
 namespace mir {
 
+void TempFrameBufferManager::ReturnAll()
+{
+	mBorrowCount = 0;
+}
+
+IFrameBufferPtr TempFrameBufferManager::Borrow()
+{
+	IFrameBufferPtr res = nullptr;
+	if (mBorrowCount >= mFbs.size()) {
+		for (size_t i = 0; i < 4; ++i) {
+			mFbs.push_back(mResMng.CreateFrameBuffer(__LaunchSync__, mFbSize, mFbFormats));
+		}
+	}
+	res = mFbs[mBorrowCount];
+	mBorrowCount++;
+	return res;
+}
+
 enum PipeLineTextureSlot {
-	kPipeTextureStart = 0,
-	kPipeTextureMain = 0,
+	kPipeTextureSceneImage = 7,
 	kPipeTextureShadowMap = 8,
 	kPipeTextureDiffuseEnv = 9,
 	kPipeTextureSpecEnv = 10,
@@ -41,6 +59,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 		MakeResFormats(kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 	//mGBuffer->SetAttachZStencil(renderSys.GetBackFrameBuffer()->GetAttachZStencil());
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
+
+	mTempFbMng = CreateInstance<TempFrameBufferManager>(resMng, renderSys.WinSize(), MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 
 	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<bool> {
 		MaterialLoadParam loadParam(MAT_MODEL);
@@ -67,8 +87,8 @@ void RenderPipeline::RenderPass(const res::PassPtr& pass, const TextureVector& t
 {
 	auto lock = mStatesBlock.LockFrameBuffer(IF_OR(pass->mFrameBuffer, nullptr));
 
-	if (textures.Count() > 0) mRenderSys.SetTextures(kPipeTextureStart, &textures[0], textures.Count());
-	else mRenderSys.SetTextures(kPipeTextureStart, nullptr, 0);
+	if (textures.Count() > 0) mRenderSys.SetTextures(kTextureUserSlotFirst, &textures[0], textures.Count());
+	else mRenderSys.SetTextures(kTextureUserSlotFirst, nullptr, 0);
 
 	BindPass(pass);
 
@@ -174,7 +194,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 #if !defined DEBUG_SHADOW_CASTER
 	//LIGHTMODE_FORWARD_BASE
 	{
-		auto fb_2post_process = mStatesBlock.LockFrameBuffer(IF_OR(camera.GetOutput2PostProcess(), nullptr), 
+		auto fb_2post_process = mStatesBlock.LockFrameBuffer(IF_OR(camera.GetPostProcessInput(), nullptr), 
 			Eigen::Vector4f::Zero(), 1.0, 0);
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
@@ -216,25 +236,15 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 			}//if light.GetCameraMask & camera.GetCameraMask
 		}//for lights
 	}
-	
-	//LIGHTMODE_POSTPROCESS
-	if (camera.GetOutput2PostProcess())
-	{
-		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
-		mStatesBlock.Textures(kPipeTextureMain, camera.GetOutput2PostProcess()->GetAttachColorTexture(0));
-
-		RenderOperationQueue opQue;
-		auto& postProcessEffects = camera.GetPostProcessEffects();
-		for (size_t i = 0; i < postProcessEffects.size(); ++i)
-			postProcessEffects[i]->GenRenderOperation(opQue);
-		RenderLight(opQue, LIGHTMODE_POSTPROCESS, camera.GetCullingMask(), nullptr, MakePerFrame(camera, mRenderSys.WinSize()));
-	}
 #endif
 }
 
 void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
+
+	if (camera.GetPostProcessInput())
+		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
 	//LIGHTMODE_PREPASS_BASE
 	{
@@ -293,6 +303,42 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 			RenderLight(opQue, LIGHTMODE_FORWARD_BASE, camera.GetCullingMask(), nullptr, perFrame);
 		}
 	}
+
+	//LIGHTMODE_OVERLAY
+	{
+		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeAlphaNonPremultiplied());
+		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
+
+		cbPerFrame perFrame = MakePerFrame(camera, mRenderSys.WinSize());
+		RenderLight(opQueue, LIGHTMODE_OVERLAY, camera.GetCullingMask(), nullptr, perFrame);
+	}
+
+	//LIGHTMODE_POSTPROCESS
+	if (camera.GetPostProcessInput())
+	{
+		mStatesBlock.FrameBuffer.Pop();
+
+		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeDisable());
+		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
+
+		auto postProcessInput = camera.GetPostProcessInput();
+		auto& postProcessEffects = camera.GetPostProcessEffects();
+		std::vector<IFrameBufferPtr> tempOutputs(postProcessEffects.size());
+		for (size_t i = 0; i < tempOutputs.size() - 1; ++i)
+			tempOutputs[i] = mTempFbMng->Borrow();
+		tempOutputs.back() = camera.GetOutput();
+
+		for (size_t i = 0; i < postProcessEffects.size(); ++i) {
+			auto curfb = mStatesBlock.LockFrameBuffer(tempOutputs[i]);
+			auto tex_input = mStatesBlock.LockTexture(kPipeTextureSceneImage, IF_AND_OR(i == 0, postProcessInput->GetAttachColorTexture(0), tempOutputs[i-1]->GetAttachColorTexture(0)));
+			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
+			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
+
+			RenderOperationQueue opQue;
+			postProcessEffects[i]->GenRenderOperation(opQue);
+			RenderLight(opQue, LIGHTMODE_POSTPROCESS, camera.GetCullingMask(), nullptr, MakePerFrame(camera, mRenderSys.WinSize()));
+		}
+	}
 }
 
 void RenderPipeline::Render(const RenderOperationQueue& opQueue, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights)
@@ -300,9 +346,7 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, const std::vect
 	for (auto& camera : cameras) 
 	{
 		auto outLock = mStatesBlock.LockFrameBuffer(IF_OR(camera->GetOutput(), nullptr));
-		if (camera->GetOutput()) {
-			mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
-		}
+		//if (camera->GetOutput()) mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
 
 		if (camera->GetRenderingPath() == kRenderPathForward)
 			RenderCameraForward(opQueue, *camera, lights);

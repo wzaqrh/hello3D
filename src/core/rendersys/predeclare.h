@@ -26,6 +26,7 @@ DECLARE_STRUCT(ISamplerState);
 
 DECLARE_STRUCT(IRenderSystem);
 DECLARE_STRUCT(RenderSystem);
+DECLARE_CLASS(TempFrameBufferManager);
 DECLARE_STRUCT(RenderPipeline);
 DECLARE_STRUCT(RenderStatesBlock);
 }

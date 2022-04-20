@@ -72,6 +72,7 @@ class GpuParameters
 	struct Element {
 		const std::string& GetName() const { return Parameters->GetName(); }
 		bool IsValid() const { return CBuffer != nullptr; }
+		operator bool() const { return IsValid(); }
 		int GetSlot() const { return Parameters->GetSlot(); }
 		bool IsShared() const { return Parameters->GetShareMode() != kCbShareNone; }
 		CBufferShareMode GetShareMode() const { return Parameters->GetShareMode(); }
@@ -103,7 +104,7 @@ public:
 	int FindProperty(const std::string& propertyName) const {
 		int result = -1;
 		for (const auto& iter : mElements) {
-			if ((result = (*iter.Parameters).FindProperty(propertyName)) >= 0) {
+			if (iter && (result = (*iter.Parameters).FindProperty(propertyName)) >= 0) {
 				BOOST_ASSERT(result < 0x10000);
 				result |= (*iter.Parameters).GetSlot() * 0x10000;
 				break;
@@ -116,7 +117,7 @@ public:
 	}
 	template<typename T> const T& GetProperty(const std::string& propertyName) const {
 		for (auto& iter : mElements)
-			if ((*iter.Parameters).HasProperty(propertyName))
+			if (iter && (*iter.Parameters).HasProperty(propertyName))
 				return (*iter.Parameters).GetProperty<T>(propertyName);
 		BOOST_ASSERT(false);
 	}
@@ -127,7 +128,7 @@ public:
 	template<typename T> const T& operator[](const std::string& propertyName) const { return GetProperty(propertyName); }
 	bool SetPropertyByString(const std::string& propertyName, std::string strDefault) {
 		for (auto& iter : mElements) {
-			if ((*iter.Parameters).SetPropertyByString(propertyName, strDefault)) {
+			if (iter && (*iter.Parameters).SetPropertyByString(propertyName, strDefault)) {
 				return true;
 			}
 		}

@@ -26,12 +26,25 @@ RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 	mFontCache = CreateInstance<FontCache>(mResourceMng);
 }
 
-CoTask<bool> RenderableFactory::CreateSprite(rend::SpritePtr& sprite, std::string imgpath, MaterialLoadParam loadParam)
+CoTask<bool> RenderableFactory::CreatePostProcessEffect(rend::PostProcessPtr& effect, MaterialLoadParam loadParam)
 {
-	COROUTINE_VARIABLES_2(imgpath, loadParam);
+	COROUTINE_VARIABLES_1(loadParam);
+
+	res::MaterialInstance material;
+	if (!CoAwait mResourceMng.CreateMaterial(material, mLaunchMode, loadParam))
+		CoReturn false;
+
+	effect = PostProcess::Create(mLaunchMode, mResourceMng, material);
+	CoReturn true;
+}
+
+CoTask<bool> RenderableFactory::CreateSprite(rend::SpritePtr& sprite, std::string imgpath, MaterialLoadParam param)
+{
+	COROUTINE_VARIABLES_2(imgpath, param);
 	ITexturePtr texture;
 
 	res::MaterialInstance material;
+	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SPRITE);
 	auto t0 = mResourceMng.CreateMaterial(material, mLaunchMode, loadParam);
 
 	if (!imgpath.empty()) {

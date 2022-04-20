@@ -1,6 +1,7 @@
 #include "core/renderable/post_process.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material.h"
+#include "core/base/macros.h"
 
 namespace mir {
 namespace rend {
@@ -50,20 +51,17 @@ constexpr uint32_t CIndices[] = {
 PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
 	: Super(launchMode, resourceMng, material)
 {
-	mMainTex = nullptr;
-
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(CIndices));
+	mIndexBuffer = resourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(CIndices));
+	
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
+	mVertexBuffer = resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
-void PostProcess::GenRenderOperation(RenderOperationQueue& opList)
+void PostProcess::GenRenderOperation(RenderOperationQueue& ops)
 {
 	RenderOperation op = {};
-	if (!MakeRenderOperation(op)) return;
-
-	mMaterial->GetTextures()[0] = mMainTex->GetAttachColorTexture(0);
-	opList.AddOP(op);
+	if (MakeRenderOperation(op))
+		ops.AddOP(op);
 }
 
 }

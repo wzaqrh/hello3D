@@ -187,6 +187,9 @@ void Camera::SetSkyBox(const rend::SkyBoxPtr& skybox)
 
 void Camera::AddPostProcessEffect(const rend::PostProcessPtr& postEffect)
 {
+	if (mPostProcessEffects.empty() && mPostProcessInput == NULL)
+		FetchOutput2PostProcess();
+
 	mPostProcessEffects.push_back(postEffect);
 }
 IFrameBufferPtr Camera::FetchOutput2PostProcess(ResourceFormat format)

@@ -23,6 +23,7 @@ void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
 
 bool RenderableSingleRenderOp::IsLoaded() const
 {
+	BOOST_ASSERT(mMaterial);
 	if (!mMaterial->IsLoaded()
 		|| (mVertexBuffer && !mVertexBuffer->IsLoaded())
 		|| (mIndexBuffer && !mIndexBuffer->IsLoaded()))

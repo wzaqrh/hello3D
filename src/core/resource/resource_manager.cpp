@@ -410,7 +410,7 @@ CoTask<bool> ResourceManager::CreateMaterial(res::MaterialInstance& matInst, Lau
 		CoAwait this->mMaterialFac.CreateMaterial(launchMode, material, *this, std::move(loadParam));
 	}
 	matInst = material->CreateInstance(launchMode, *this);
-	return matInst->IsLoaded();
+	CoReturn matInst->IsLoaded();
 }
 
 /********** Create AiScene **********/
