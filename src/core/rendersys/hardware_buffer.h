@@ -38,6 +38,7 @@ template <> struct DataType2CbElementType<Eigen::Matrix4f> : public std::integra
 
 TemplateT constexpr CbElementType DetectCbElementType(const T& value) { return DataType2CbElementType<T>::value; }
 TemplateTArray constexpr CbElementType DetectCbElementType(const TArray& value) { return DataType2CbElementType<T>::value; }
+//TemplateT constexpr CbElementType DetectCbElementType(const std::vector<T>& value) { return DataType2CbElementType<T>::value; }
 
 size_t GetCbElementTypeByteWidth(CbElementType type);
 

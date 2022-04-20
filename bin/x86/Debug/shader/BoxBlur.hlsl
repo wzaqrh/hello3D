@@ -9,8 +9,8 @@
 #if !defined BOX_KERNEL_SIZE
 #define BOX_KERNEL_SIZE 5
 #endif
-#define KERNEL_LOOP_FIRST (-2)
-#define KERNEL_LOOP_LAST  (2)
+#define KERNEL_LOOP_FIRST (-BOX_KERNEL_SIZE/2)
+#define KERNEL_LOOP_LAST  (BOX_KERNEL_SIZE/2)
 
 #define BOX_KERNEL_ALIGN4_COUNT ((BOX_KERNEL_SIZE * BOX_KERNEL_SIZE + 3) / 4)
 cbuffer cbBoxFilter : register(b3)
@@ -42,9 +42,10 @@ float4 PS(PixelInput input) : SV_Target
 	{
 		for (int col = KERNEL_LOOP_FIRST; col <= KERNEL_LOOP_LAST; col++)
 		{
-			finalColor += MIR_SAMPLE_TEX2D(_SceneImage, input.Tex + float2(float(col), float(row)) * FrameBufferSize.zw)
+			finalColor += MIR_SAMPLE_TEX2D(_SceneImage, input.Tex + float2(float(col), float(row)) * 4.0 * FrameBufferSize.zw)
 						* BoxKernelWeights[(row - KERNEL_LOOP_FIRST) * BOX_KERNEL_SIZE + (col - KERNEL_LOOP_FIRST)];
 		}
 	}
+	//if (input.Pos.x < 512) return MIR_SAMPLE_TEX2D(_SceneImage, input.Tex);
 	return finalColor;
 }

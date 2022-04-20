@@ -61,6 +61,9 @@ public:
 	TemplateArgs bool HasProperty(const std::string& propertyName) { return mGpuParameters->HasProperty(propertyName); }
 	TemplateT T& GetProperty(const std::string& propertyName) { return mGpuParameters->GetProperty<T>(propertyName); }
 	TemplateT const T& GetProperty(const std::string& propertyName) const { return mGpuParameters->GetProperty<T>(propertyName); }
+	void SetProperty(const std::string& propertyName, const Data& data) {
+		mGpuParameters->SetProperty(propertyName, data);
+	}
 	TemplateT void SetProperty(const std::string& propertyName, const T& value) {
 		if (HasProperty(propertyName))
 			mGpuParameters->GetProperty<T>(propertyName) = value;

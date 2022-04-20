@@ -29,5 +29,14 @@ public:
 	void GenRenderOperation(RenderOperationQueue& ops) override;
 };
 
+class MIR_CORE_API PostProcessFactory {
+public:
+	PostProcessFactory(RenderableFactoryPtr rendFac) :mRendFac(rendFac) {}
+	CoTask<PostProcessPtr> CreateGaussianBlur(int radius, std::string matName = "");
+	CoTask<PostProcessPtr> CreateAverageBlur(int radius, std::string matName = "");
+private:
+	RenderableFactoryPtr mRendFac;
+};
+
 }
 }

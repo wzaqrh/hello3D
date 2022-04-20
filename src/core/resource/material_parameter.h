@@ -44,6 +44,11 @@ public:
 	}
 	TemplateT T& operator[](const std::string& propertyName) { return GetProperty<T>(propertyName); }
 	TemplateT const T& operator[](const std::string& propertyName) const { return GetProperty<T>(propertyName); }
+	void SetProperty(const std::string& propertyName, const Data& data) {
+		auto element = mDecl[propertyName];
+		BOOST_ASSERT((element && !mData.Overflow<char, 1>(element->Offset)));
+		memcpy(&mData.As<char, 1>(element->Offset), data.Bytes, data.Size);
+	}
 	bool SetPropertyByString(const std::string& propertyName, std::string strDefault);
 
 	IContantBufferPtr CreateConstBuffer(Launch launchMode, ResourceManager& resMng, HWMemoryUsage usage) const;
@@ -126,6 +131,14 @@ public:
 	}
 	template<typename T> T& operator[](const std::string& propertyName) { return GetProperty(propertyName); }
 	template<typename T> const T& operator[](const std::string& propertyName) const { return GetProperty(propertyName); }
+	void SetProperty(const std::string& propertyName, const Data& data) {
+		for (auto& iter : mElements) {
+			if (iter && (*iter.Parameters).HasProperty(propertyName)) {
+				(*iter.Parameters).SetProperty(propertyName, data);
+				break;
+			}
+		}
+	}
 	bool SetPropertyByString(const std::string& propertyName, std::string strDefault) {
 		for (auto& iter : mElements) {
 			if (iter && (*iter.Parameters).SetPropertyByString(propertyName, strDefault)) {

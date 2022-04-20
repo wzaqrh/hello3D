@@ -1,4 +1,6 @@
+#include <boost/math/constants/constants.hpp>
 #include "core/renderable/post_process.h"
+#include "core/renderable/renderable_factory.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material.h"
 #include "core/base/macros.h"
@@ -62,6 +64,63 @@ void PostProcess::GenRenderOperation(RenderOperationQueue& ops)
 	RenderOperation op = {};
 	if (MakeRenderOperation(op))
 		ops.AddOP(op);
+}
+
+/********** GaussianBlurBuilder **********/
+//https://medium.com/@aryamansharda/image-filters-gaussian-blur-eb36db6781b1
+CoTask<PostProcessPtr> PostProcessFactory::CreateGaussianBlur(int radius, std::string matName)
+{
+	radius = __max(radius, 1);
+	int kernelSize = 0;
+	std::vector<float> weights;
+	{
+		float sigma = __max(radius / 2, 1);
+		kernelSize = (radius * 2) + 1;
+		weights.resize(kernelSize * kernelSize);
+
+		float sum = 0.0f;
+		for (int x = -radius; x <= radius; ++x) {
+			for (int y = -radius; y <= radius; ++y) {
+				float expNum = -(x * x + y * y);
+				float expDenom = 2 * sigma * sigma;
+				float eExpression = exp(expNum / expDenom);
+				float kernelValue = (eExpression / (2 * boost::math::constants::pi<float>() * sigma * sigma));
+				weights[x + radius + (y + radius) * kernelSize] = kernelValue;
+				sum += kernelValue;
+			}
+		}
+		for (size_t i = 0; i < weights.size(); ++i)
+			weights[i] /= sum;
+	}
+	MaterialLoadParamBuilder param = IF_AND_OR(matName.empty(), MAT_BOX_BLUR, matName.c_str());
+	param["BOX_KERNEL_SIZE"] = kernelSize;
+	auto filter = CoAwait mRendFac->CreatePostProcessEffectT(param);
+	filter->GetMaterial().SetProperty("BoxKernelWeights", Data::Make(weights));
+
+	CoReturn filter;
+}
+
+CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateAverageBlur(int radius, std::string matName /*= ""*/)
+{
+	radius = __max(radius, 1);
+	int kernelSize = 0;
+	std::vector<float> weights;
+	{
+		kernelSize = (radius * 2) + 1;
+		weights.resize(kernelSize * kernelSize);
+
+		for (int x = -radius; x <= radius; ++x) {
+			for (int y = -radius; y <= radius; ++y) {
+				weights[x + radius + (y + radius) * kernelSize] = 1.0f / weights.size();
+			}
+		}
+	}
+	MaterialLoadParamBuilder param = IF_AND_OR(matName.empty(), MAT_BOX_BLUR, matName.c_str());
+	param["BOX_KERNEL_SIZE"] = kernelSize;
+	auto filter = CoAwait mRendFac->CreatePostProcessEffectT(param);
+	filter->GetMaterial().SetProperty("BoxKernelWeights", Data::Make(weights));
+
+	CoReturn filter;
 }
 
 }
