@@ -21,6 +21,7 @@ class Pass : public ImplementResource<IResource>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddSampler(ISamplerStatePtr sampler);
+	bool Validate() const;
 public:
 	std::string mLightMode, mName;
 	PrimitiveTopology mTopoLogy;
@@ -36,6 +37,7 @@ class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddPass(PassPtr pass) { Add(pass); }
+	bool Validate() const;
 
 	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
 };
@@ -46,6 +48,7 @@ class MIR_CORE_API Shader : public tpl::Vector<TechniquePtr, ImplementResource<I
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddTechnique(TechniquePtr technique) { Add(technique); }
+	bool Validate() const;
 
 	TechniquePtr CurTech() const { return mElements[mCurTechIdx]; }
 private:

@@ -250,6 +250,7 @@ private:
 		VisitAttributes(nodeProgram, programNode);
 		VisitUniforms(nodeProgram, programNode);
 		VisitSamplers(nodeProgram, programNode);
+		BOOST_ASSERT(programNode.Validate());
 	}
 
 	void VisitSubShader(const PropertyTreePath& nodeTechnique, TechniqueNode& techniqueNode) {
@@ -272,6 +273,17 @@ private:
 			if (find_program != node_pass.not_found()) {
 				auto& node_program = find_program->second;
 				ParseProgram(node_program, pass.Program);
+			}
+
+			pass.GrabTo = node_pass.get<std::string>("GrabPass", "");
+			pass.UseGrab.TextureSlot = 0;
+			pass.UseGrab.Name = node_pass.get<std::string>("UseGrab", "");
+			if (!pass.UseGrab.Name.empty()) {
+				size_t pos = pass.UseGrab.Name.find_first_of(":");
+				if (pos != std::string::npos) {
+					pass.UseGrab.TextureSlot = boost::lexical_cast<int>(pass.UseGrab.Name.substr(pos + 1));
+					pass.UseGrab.Name = pass.UseGrab.Name.substr(0, pos);
+				}
 			}
 
 			techniqueNode.Add(std::move(pass));
@@ -338,6 +350,7 @@ private:
 				boost_property_tree::read_xml(filepath, pt);
 				VisitShader(pt.get_child("Shader"), Visitor{ false }, shaderNode);
 				BuildShaderNode(shaderNode);
+				BOOST_ASSERT(shaderNode.Validate());
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
 				result = true;
 			}

@@ -88,6 +88,7 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 	}//for shaderNode.Categories
 	CoAwait WhenAll(std::move(tasks));
 
+	BOOST_ASSERT(shader->Validate());
 	shader->SetLoaded();
 	CoReturn shader->IsLoaded();
 }

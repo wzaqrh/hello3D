@@ -12,6 +12,17 @@
 namespace mir {
 namespace res {
 namespace mat_asset {
+
+#if defined _DEBUG
+inline bool ValidateResult(bool res) {
+	BOOST_ASSERT(res);
+	return res;
+}
+#define VR(V) ValidateResult(V)
+#else
+#define VR(V) V
+#endif
+
 struct AttributeNode {
 	bool IsValid() const { return !Layout.empty(); }
 public:
@@ -73,6 +84,11 @@ struct ShaderCompileDescEx : public ShaderCompileDesc {
 		if (SourcePath.empty()) SourcePath = other.SourcePath;
 		AddMacros(other.Macros);
 	}
+	bool Validate() const {
+		return VR(!EntryPoint.empty() 
+			//&& !ShaderModel.empty() 
+			&& !SourcePath.empty());
+	}
 };
 struct AttributeNodeVector : public tpl::Vector<AttributeNode> {};
 struct UniformNodeVector : public tpl::Vector<UniformNode> {
@@ -95,6 +111,19 @@ struct ProgramNode {
 		if (Topo == kPrimTopologyUnkown)
 			Topo = kPrimTopologyTriangleList;
 	}
+	bool Validate() const {
+		for (auto& attr : Attrs)
+			if (!VR(attr.IsValid()))
+				return false;
+	#if 0
+		return VR((Topo != kPrimTopologyUnkown) && 
+			(Attrs.Count() > 0) &&
+			VertexSCD.Validate() &&
+			PixelSCD.Validate());
+	#else
+		return VR(Attrs.Count() > 0);
+	#endif
+	}
 public:
 	PrimitiveTopology Topo = kPrimTopologyUnkown;
 	AttributeNodeVector Attrs;
@@ -103,8 +132,20 @@ public:
 	ShaderCompileDescEx VertexSCD, PixelSCD;
 };
 struct PassNode {
+	bool Validate() const {
+		return VR(Program.Validate()
+			&& !LightMode.empty()
+			&& !Name.empty()
+		/* && !ShortName.empty() */);
+	}
+public:
 	ProgramNode Program;
-	std::string LightMode, Name, ShortName;
+	std::string LightMode, Name, ShortName, GrabTo;
+	struct UseGrabNode {
+		std::string Name;
+		int TextureSlot = 0;
+	};
+	UseGrabNode UseGrab;
 };
 struct TechniqueNode : public tpl::Vector<PassNode> {
 	template<class Visitor> void ForEachPass(Visitor vis) const {
@@ -114,6 +155,12 @@ struct TechniqueNode : public tpl::Vector<PassNode> {
 	template<class Visitor> void ForEachProgram(Visitor vis) const {
 		for (const auto& pass : *this)
 			vis(pass.Program);
+	}
+	bool Validate() const {
+		for (const auto& pass : *this)
+			if (!VR(pass.Validate()))
+				return false;
+		return true;
 	}
 };
 struct CategoryNode : public tpl::Vector<TechniqueNode> {
@@ -127,6 +174,14 @@ struct CategoryNode : public tpl::Vector<TechniqueNode> {
 		for (const auto& tech : *this)
 			tech.ForEachProgram(vis);
 	}
+	bool Validate() const {
+		if (!VR(Program.Validate())) 
+			return false;
+		for (const auto& tech : *this)
+			if (!VR(tech.Validate()))
+				return false;
+		return true;
+	}
 };
 struct ShaderNode : public tpl::Vector<CategoryNode> {
 	ShaderNode() {
@@ -139,6 +194,12 @@ struct ShaderNode : public tpl::Vector<CategoryNode> {
 	template<class Visitor> void ForEachProgram(Visitor vis) const {
 		for (const auto& categ : *this)
 			categ.ForEachProgram(vis);
+	}
+	bool Validate() const {
+		for (const auto& categ : *this)
+			if (!VR(categ.Validate()))
+				return false;
+		return VR(!ShortName.empty());
 	}
 public:
 	std::string ShortName;

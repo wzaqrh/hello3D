@@ -12,10 +12,38 @@
 namespace mir {
 namespace res {
 
+#if defined _DEBUG
+inline bool ValidateResult(bool res) {
+	BOOST_ASSERT(res);
+	return res;
+}
+#define VR(V) ValidateResult(V)
+#else
+#define VR(V) V
+#endif
+
 /********** Pass **********/
 void Pass::AddSampler(ISamplerStatePtr sampler)
 {
 	mSamplers.push_back(sampler);
+}
+
+bool Pass::Validate() const
+{
+	return VR(!mLightMode.empty()
+		/*&& !mName.empty()*/
+		&& mTopoLogy != kPrimTopologyUnkown
+		&& mInputLayout
+		&& mProgram);
+}
+
+/********** Technique **********/
+bool Technique::Validate() const
+{
+	for (auto& pass : mElements)
+		if (!VR(pass->Validate()))
+			return false;
+	return true;
 }
 
 std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMode)
@@ -27,6 +55,15 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMod
 		}
 	}
 	return std::move(result);
+}
+
+/********** Material **********/
+bool Shader::Validate() const
+{
+	for (auto& tech : mElements)
+		if (!VR(tech->Validate()))
+			return false;
+	return true;
 }
 
 /********** MaterialInstance **********/

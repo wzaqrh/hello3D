@@ -102,6 +102,7 @@ public:
 	cppcoro::io_service& GetSyncService() { return *mIoService; }
 	bool IsCurrentInAsyncService() const;
 	CoTask<void> SwitchToLaunchService(Launch launchMode);
+	CoTask<void> WaitResComplete(IResourcePtr res, int interval = 50);
 private:
 	RenderSystem& mRenderSys;
 	res::MaterialFactory& mMaterialFac;

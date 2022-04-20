@@ -58,6 +58,21 @@ CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 #endif
 	CoReturnVoid;
 }
+CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, int interval)
+{
+#if !defined MIR_CPPCORO_DISABLED
+	bool asyncMode = IsCurrentInAsyncService();
+	while (!res->IsLoadComplete()) {
+		using namespace std::literals::chrono_literals;
+		CoAwait mIoService->schedule_after(50ms);
+	}
+	if (asyncMode) {
+		CoAwait mThreadPool->schedule();
+		BOOST_ASSERT(IsCurrentInAsyncService());
+	}
+#endif
+	CoReturnVoid;
+}
 
 /********** Async Support **********/
 void ResourceManager::UpdateForLoading() ThreadSafe
@@ -181,6 +196,9 @@ CoTask<bool> ResourceManager::CreateProgram(IProgramPtr& program, Launch launchM
 	});
 	if (resNeedLoad) {
 		CoAwait _LoadProgram(launchMode, program, std::move(key.name), std::move(key.vertexSCD), std::move(key.pixelSCD));
+	}
+	else {
+		CoAwait WaitResComplete(program);
 	}
 	CoReturn program->IsLoaded();
 }
@@ -370,6 +388,9 @@ CoTask<bool> ResourceManager::CreateTextureByFile(ITexturePtr& texture, Launch l
 	if (resNeedLoad) {
 		CoAwait _LoadTextureByFile(launchMode, texture, std::move(key), format, autoGenMipmap);
 	}
+	else {
+		CoAwait WaitResComplete(texture);
+	}
 	CoReturn texture->IsLoaded();
 }
 
@@ -390,6 +411,9 @@ CoTask <bool> ResourceManager::CreateShader(res::ShaderPtr& shader, Launch launc
 	if (resNeedLoad) {
 		CoAwait this->mMaterialFac.CreateShader(launchMode, shader, *this, param);
 	}
+	else {
+		CoAwait WaitResComplete(shader);
+	}
 	CoReturn shader->IsLoaded();
 }
 
@@ -408,6 +432,9 @@ CoTask<bool> ResourceManager::CreateMaterial(res::MaterialInstance& matInst, Lau
 	});
 	if (resNeedLoad) {
 		CoAwait this->mMaterialFac.CreateMaterial(launchMode, material, *this, std::move(loadParam));
+	}
+	else {
+		CoAwait WaitResComplete(material);
 	}
 	matInst = material->CreateInstance(launchMode, *this);
 	CoReturn matInst->IsLoaded();
@@ -430,6 +457,9 @@ CoTask<bool> ResourceManager::CreateAiScene(res::AiScenePtr& aiScene, Launch lau
 	});
 	if (resNeedLoad) {
 		CoAwait this->mAiResourceFac.CreateAiScene(launchMode, aiScene, *this, std::move(assetPath), std::move(redirectRes));
+	}
+	else {
+		CoAwait WaitResComplete(aiScene);
 	}
 	CoReturn aiScene->IsLoaded();
 }
