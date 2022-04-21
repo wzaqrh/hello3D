@@ -94,6 +94,7 @@ CoTask<PostProcessPtr> PostProcessFactory::CreateGaussianBlur(int radius, std::s
 	}
 	MaterialLoadParamBuilder param = IF_AND_OR(matName.empty(), MAT_BOX_BLUR, matName.c_str());
 	param["BOX_KERNEL_SIZE"] = kernelSize;
+	param["PASS_ITERATOR_COUNT"] = 32;
 	auto filter = CoAwait mRendFac->CreatePostProcessEffectT(param);
 	filter->GetMaterial().SetProperty("BoxKernelWeights", Data::Make(weights));
 

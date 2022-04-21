@@ -133,6 +133,16 @@ model::model(const std::string& name) : model()
 {
 	Init(name);
 }
+static bool IsFileExits(const std::string& path) {
+	FILE* fd = fopen(path.c_str(), "rb");
+	if (fd) {
+		fclose(fd);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 void model::Init(const std::string& name)
 {
 	mName = name;
@@ -145,6 +155,16 @@ void model::Init(const std::string& name)
 	}
 	else {
 		mPath = "model/gltf/2.0/" + name + "/glTF/" + name + ".gltf";
+		FILE* fd = fopen(mPath.c_str(), "rb");
+		if (! IsFileExits(mPath)) {
+			std::string exts[] = { ".obj", ".gltf", ".fbx" };
+			for (auto ext : exts) {
+				mPath = "model/" + name + "/" + name + ext;
+				if (IsFileExits(mPath))
+					break;
+			}
+		}
+
 		float s = 1;
 		mScale = Eigen::Vector3f(s, s, s);
 		mPos = Eigen::Vector3f(0, 0, 0);

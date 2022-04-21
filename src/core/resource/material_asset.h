@@ -89,6 +89,14 @@ struct ShaderCompileDescEx : public ShaderCompileDesc {
 			//&& !ShaderModel.empty() 
 			&& !SourcePath.empty());
 	}
+	int operator[](const std::string& key) const {
+		int value = 0;
+		auto find_it = std::find_if(this->Macros.begin(), this->Macros.end(), [&key](const ShaderCompileMacro& elem)->bool {
+			return elem.Name == key;
+		});
+		if (find_it != this->Macros.end()) return atoi(find_it->Definition.c_str());
+		else return 0;
+	}
 };
 struct AttributeNodeVector : public tpl::Vector<AttributeNode> {};
 struct UniformNodeVector : public tpl::Vector<UniformNode> {
@@ -140,12 +148,12 @@ struct PassNode {
 	}
 public:
 	ProgramNode Program;
-	std::string LightMode, Name, ShortName, GrabTo;
+	std::string LightMode, Name, ShortName, GrabOutput;
 	struct UseGrabNode {
 		std::string Name;
 		int TextureSlot = 0;
 	};
-	UseGrabNode UseGrab;
+	UseGrabNode GrabInput;
 };
 struct TechniqueNode : public tpl::Vector<PassNode> {
 	template<class Visitor> void ForEachPass(Visitor vis) const {
@@ -181,6 +189,15 @@ struct CategoryNode : public tpl::Vector<TechniqueNode> {
 			if (!VR(tech.Validate()))
 				return false;
 		return true;
+	}
+	int GetMacrosDefinition(const MaterialLoadParam& loadParam, const std::string& key) const {
+		int value = loadParam[key];
+		if (value == 0) {
+			ForEachProgram([&key, &value](const ProgramNode& prog) {
+				value = __max(value, prog.VertexSCD[key]);
+			});
+		}
+		return value;
 	}
 };
 struct ShaderNode : public tpl::Vector<CategoryNode> {

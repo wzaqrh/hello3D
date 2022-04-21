@@ -192,10 +192,10 @@ void Camera::AddPostProcessEffect(const rend::PostProcessPtr& postEffect)
 
 	mPostProcessEffects.push_back(postEffect);
 }
-IFrameBufferPtr Camera::FetchOutput2PostProcess(ResourceFormat format)
+IFrameBufferPtr Camera::FetchOutput2PostProcess(std::vector<ResourceFormat> formats)
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mResourceMng.WinSize(), format);
+		mPostProcessInput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mResourceMng.WinSize(), formats);
 		DEBUG_SET_PRIV_DATA(mPostProcessInput, "camera.output_to_post_process");
 	}
 	return mPostProcessInput;

@@ -1,3 +1,4 @@
+#include <boost/format.hpp>
 #include "core/rendersys/render_pipeline.h"
 #include "core/rendersys/render_states_block.h"
 #include "core/resource/resource_manager.h"
@@ -26,7 +27,9 @@ IFrameBufferPtr TempFrameBufferManager::Borrow()
 	IFrameBufferPtr res = nullptr;
 	if (mBorrowCount >= mFbs.size()) {
 		for (size_t i = 0; i < 4; ++i) {
-			mFbs.push_back(mResMng.CreateFrameBuffer(__LaunchSync__, mFbSize, mFbFormats));
+			auto tmpfb = mResMng.CreateFrameBuffer(__LaunchSync__, mFbSize, mFbFormats);
+			DEBUG_SET_PRIV_DATA(tmpfb, (boost::format("TempFrameBufferManager.temp%d") % mFbs.size()).str().c_str());
+			mFbs.push_back(tmpfb);
 		}
 	}
 	res = mFbs[mBorrowCount];
@@ -85,7 +88,7 @@ void RenderPipeline::BindPass(const res::PassPtr& pass)
 
 void RenderPipeline::RenderPass(const res::PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op)
 {
-	auto lock = mStatesBlock.LockFrameBuffer(IF_OR(pass->mFrameBuffer, nullptr));
+	//auto lock = mStatesBlock.LockFrameBuffer(IF_OR(pass->mFrameBuffer, nullptr));
 
 	if (textures.Count() > 0) mRenderSys.SetTextures(kTextureUserSlotFirst, &textures[0], textures.Count());
 	else mRenderSys.SetTextures(kTextureUserSlotFirst, nullptr, 0);
@@ -100,15 +103,31 @@ void RenderPipeline::RenderOp(const RenderOperation& op, const std::string& ligh
 {
 	op.Material.FlushGpuParameters(mRenderSys);
 
+	std::map<std::string, IFrameBufferPtr> mGrabDic;
+
 	res::TechniquePtr tech = op.Material->GetShader()->CurTech();
 	std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 	for (auto& pass : passes) {
+		if (pass->mGrabOutput) {
+			IFrameBufferPtr passFb = mTempFbMng->Borrow();
+			mGrabDic[pass->mGrabOutput.Name] = passFb;
+			mStatesBlock.FrameBuffer.Push(passFb);
+		}
+		if (pass->mGrabInput) {
+			IFrameBufferPtr passFb = mGrabDic[pass->mGrabInput.Name];
+			if (passFb) mRenderSys.SetTexture(pass->mGrabInput.TextureSlot, passFb->GetAttachColorTexture(0));
+		}
+		
 		//SetVertexLayout(pass->mInputLayout);
 		mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		mRenderSys.SetIndexBuffer(op.IndexBuffer);
 		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->mProgram);
 		const TextureVector& textures = op.Material->GetTextures();
 		RenderPass(pass, textures, -1, op);
+
+		if (pass->mGrabOutput) {
+			mStatesBlock.FrameBuffer.Pop();
+		}
 	}
 }
 
@@ -318,8 +337,10 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 	{
 		mStatesBlock.FrameBuffer.Pop();
 
-		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeDisable());
-		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
+		auto blend_state = mStatesBlock.LockBlend();
+		auto depth_state = mStatesBlock.LockDepth();
+		blend_state(BlendState::MakeDisable());
+		depth_state(DepthState::MakeFor3D(false));
 
 		auto postProcessInput = camera.GetPostProcessInput();
 		auto& postProcessEffects = camera.GetPostProcessEffects();
@@ -362,6 +383,7 @@ bool RenderPipeline::BeginFrame()
 void RenderPipeline::EndFrame()
 {
 	mRenderSys.EndScene();
+	mTempFbMng->ReturnAll();
 }
 
 }

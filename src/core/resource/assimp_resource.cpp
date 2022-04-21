@@ -110,7 +110,7 @@ private:
 					mAsset.mBoneNodesByName[bone->mName.data] = nullptr;
 			}
 		}
-		return true;
+		CoReturn true;
 	}
 private:
 	void ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
@@ -308,7 +308,7 @@ CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& sce
 	scene = IF_OR(scene, CreateInstance<AiScene>());
 	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
 	CoAwait loader->Execute(assetPath, redirectRes);
-	return scene->IsLoaded();
+	CoReturn scene->IsLoaded();
 }
 
 }

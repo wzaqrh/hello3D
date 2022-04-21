@@ -256,8 +256,7 @@ float4 PS(PixelInput input) : SV_Target
 	//finalColor.xyz = normal;
 	//finalColor.xyz = toEye;
 	//finalColor.xyz = toLight;
-	finalColor.xyz = aorm;
-    
+	//finalColor.xyz = aorm;
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1

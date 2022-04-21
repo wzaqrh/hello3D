@@ -28,7 +28,15 @@ public:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
-	IFrameBufferPtr mFrameBuffer;//to remove
+	struct GrabSource {
+		operator bool() const { return !Name.empty(); }
+		std::string Name;
+	} mGrabOutput;
+	struct GrabDestination {
+		operator bool() const { return !Name.empty(); }
+		std::string Name;
+		int TextureSlot;
+	} mGrabInput;
 };
 
 class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>

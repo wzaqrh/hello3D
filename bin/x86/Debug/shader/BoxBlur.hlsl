@@ -42,7 +42,7 @@ float4 PS(PixelInput input) : SV_Target
 	{
 		for (int col = KERNEL_LOOP_FIRST; col <= KERNEL_LOOP_LAST; col++)
 		{
-			finalColor += MIR_SAMPLE_TEX2D(_SceneImage, input.Tex + float2(float(col), float(row)) * 4.0 * FrameBufferSize.zw)
+			finalColor += MIR_SAMPLE_TEX2D(_SceneImage, input.Tex + float2(float(col), float(row)) * FrameBufferSize.zw)
 						* BoxKernelWeights[(row - KERNEL_LOOP_FIRST) * BOX_KERNEL_SIZE + (col - KERNEL_LOOP_FIRST)];
 		}
 	}

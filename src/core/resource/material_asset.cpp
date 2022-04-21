@@ -35,6 +35,7 @@ public:
 private:
 	struct Visitor {
 		const bool JustInclude;
+		const MaterialLoadParam& LoadParam;
 	};
 	using ConstVisitorRef = const Visitor&;
 	struct PropertyTreePath {
@@ -253,40 +254,75 @@ private:
 		BOOST_ASSERT(programNode.Validate());
 	}
 
-	void VisitSubShader(const PropertyTreePath& nodeTechnique, TechniqueNode& techniqueNode) {
-		int index = 0;
-		for (auto& it : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
-			auto& node_pass = it.second;
-			PassNode pass;
-
-			pass.LightMode = LIGHTMODE_FORWARD_BASE;
-			auto find_tags = node_pass.find("Tags");
-			if (find_tags != node_pass.not_found()) {
-				auto& node_tag = find_tags->second;
-				pass.LightMode = node_tag.get<std::string>("LightMode", pass.LightMode);
-			}
-
-			pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
-			pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
-
-			auto find_program = node_pass.find("PROGRAM");
-			if (find_program != node_pass.not_found()) {
-				auto& node_program = find_program->second;
-				ParseProgram(node_program, pass.Program);
-			}
-
-			pass.GrabTo = node_pass.get<std::string>("GrabPass", "");
-			pass.UseGrab.TextureSlot = 0;
-			pass.UseGrab.Name = node_pass.get<std::string>("UseGrab", "");
-			if (!pass.UseGrab.Name.empty()) {
-				size_t pos = pass.UseGrab.Name.find_first_of(":");
-				if (pos != std::string::npos) {
-					pass.UseGrab.TextureSlot = boost::lexical_cast<int>(pass.UseGrab.Name.substr(pos + 1));
-					pass.UseGrab.Name = pass.UseGrab.Name.substr(0, pos);
+	static std::string makeLoopVarName(std::string name, int i, int maxI) {
+		size_t pos = name.find("%");
+		if (pos != std::string::npos) {
+			std::string postfix = name.substr(pos + 1);
+			int pfIdx = 0;
+			if (pfIdx < postfix.size()) {
+				if (postfix[pfIdx] == '^') {
+					if (i == 0) return "";
+					pfIdx++;
+				}
+				else if (postfix[pfIdx] == '$') {
+					if (i == maxI - 1) return "";
+					pfIdx++;
 				}
 			}
 
-			techniqueNode.Add(std::move(pass));
+			int index = i;
+			if (pfIdx < postfix.size()) {
+				if (postfix[pfIdx] == '+')
+					index += std::stoi(postfix.substr(pfIdx + 1));
+				else if (postfix[pfIdx] == '-')
+					index -= std::stoi(postfix.substr(pfIdx + 1));
+			}
+				
+			name = name.substr(0, pos) + boost::lexical_cast<std::string>(index);
+		}
+		return name;
+	};
+	void VisitSubShader(const PropertyTreePath& nodeTechnique, ConstVisitorRef vis, CategoryNode& categNode) {
+		TechniqueNode& techniqueNode = categNode.Emplace();
+		int index = 0;
+		for (auto& it : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
+			auto& node_pass = it.second;
+
+			std::string strRepeat = node_pass.get<std::string>("<xmlattr>.Repeat", "1");
+			int repeat = __max(categNode.GetMacrosDefinition(vis.LoadParam, strRepeat), atoi(strRepeat.c_str()));
+			for (int i = 0; i < repeat; ++i) {
+				PassNode pass;
+
+				pass.LightMode = LIGHTMODE_FORWARD_BASE;
+				auto find_tags = node_pass.find("Tags");
+				if (find_tags != node_pass.not_found()) {
+					auto& node_tag = find_tags->second;
+					pass.LightMode = node_tag.get<std::string>("LightMode", pass.LightMode);
+				}
+
+				pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
+				pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
+
+				auto find_program = node_pass.find("PROGRAM");
+				if (find_program != node_pass.not_found()) {
+					auto& node_program = find_program->second;
+					ParseProgram(node_program, pass.Program);
+				}
+
+				pass.GrabOutput = makeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
+				pass.GrabInput.TextureSlot = 0;
+				pass.GrabInput.Name = node_pass.get<std::string>("UseGrab", "");
+				if (!pass.GrabInput.Name.empty()) {
+					size_t pos = pass.GrabInput.Name.find_first_of(":");
+					if (pos != std::string::npos) {
+						pass.GrabInput.TextureSlot = std::stoi(pass.GrabInput.Name.substr(pos + 1));
+						pass.GrabInput.Name = pass.GrabInput.Name.substr(0, pos);
+					}
+					pass.GrabInput.Name = makeLoopVarName(pass.GrabInput.Name, i, repeat);
+				}
+
+				techniqueNode.Add(std::move(pass));
+			}
 			++index;
 		}
 	}
@@ -300,7 +336,7 @@ private:
 		if (!vis.JustInclude) {
 			index = 0;
 			for (auto& it : boost::make_iterator_range(nodeCategory->equal_range("SubShader"))) {
-				VisitSubShader(PropertyTreePath(nodeCategory, it.second, index++), categNode.Emplace());
+				VisitSubShader(PropertyTreePath(nodeCategory, it.second, index++), vis, categNode);
 			}
 		}
 	}
@@ -348,7 +384,7 @@ private:
 			if (GetShaderAssetPath(loadParam, filepath)) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
-				VisitShader(pt.get_child("Shader"), Visitor{ false }, shaderNode);
+				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam }, shaderNode);
 				BuildShaderNode(shaderNode);
 				BOOST_ASSERT(shaderNode.Validate());
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));

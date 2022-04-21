@@ -44,7 +44,7 @@ public:
 
 	void SetSkyBox(const rend::SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const rend::PostProcessPtr& postEffect);
-	IFrameBufferPtr FetchOutput2PostProcess(ResourceFormat format = kFormatR8G8B8A8UNorm);
+	IFrameBufferPtr FetchOutput2PostProcess(std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(float scale = 1, std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(IFrameBufferPtr output);
 private:

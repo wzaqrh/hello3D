@@ -35,7 +35,7 @@ struct MaterialLoadParam
 	int operator[](const std::string& macroName) const {
 		int result = 0;
 		auto find_it = std::find_if(Macros.begin(), Macros.end(), [&](const ShaderCompileMacro& v) { return v.Name == macroName; });
-		if (find_it != Macros.end()) result = boost::lexical_cast<int>(find_it->Definition);
+		if (find_it != Macros.end()) result = std::stoi(find_it->Definition);
 		return result;
 	}
 public:
@@ -57,7 +57,7 @@ struct MaterialLoadParamBuilder
 	explicit MaterialLoadParamBuilder(const MaterialLoadParam& other) {
 		LoadParam = other;
 		for (const auto& it : other.Macros)
-			MacroMap[it.Name] = boost::lexical_cast<int>(it.Definition);
+			MacroMap[it.Name] = std::stoi(it.Definition);
 	}
 	int& operator[](const std::string& macroName) { return MacroMap[macroName]; }
 	std::string& ShaderVariantName() { return LoadParam.ShaderVariantName; }

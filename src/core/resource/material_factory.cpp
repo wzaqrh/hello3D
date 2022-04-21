@@ -57,6 +57,8 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 				curPass->mLightMode = passNode.LightMode;
 				curPass->mName = passNode.ShortName;
 				curPass->mTopoLogy = passProgram.Topo;
+				curPass->mGrabOutput = { passNode.GrabOutput };
+				curPass->mGrabInput = { passNode.GrabInput.Name, passNode.GrabInput.TextureSlot };
 
 				tasks.push_back([&resMng,launchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
 					if (!CoAwait resMng.CreateProgram(pass->mProgram, launchMode, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
@@ -123,15 +125,15 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	assetPath.remove_filename();
 	material->mTextures.Resize(kTextureUserSlotCount);
 	for (const auto& iter : materialNode.TextureProperies) {
-		assetPath /= iter.second.ImagePath;
-		BOOST_ASSERT(boost::filesystem::is_regular_file(assetPath));
-		if (boost::filesystem::is_regular_file(assetPath)) {
-			tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, assetPath.string()));
+		boost::filesystem::path imagePath = assetPath / iter.second.ImagePath;
+		BOOST_ASSERT(boost::filesystem::is_regular_file(imagePath));
+		if (boost::filesystem::is_regular_file(imagePath)) {
+			tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, imagePath.string()));
 		}
-		assetPath.remove_filename();
 	}
 	CoAwait WhenAll(std::move(tasks));
 
+	std::map<std::string, GpuParameters::Element> matParamCache;
 	material->mGpuParametersByShareType[kCbShareNone] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerMaterial] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerFrame] = mFrameGpuParameters;
@@ -149,10 +151,18 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 					material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
 				}break;
 				case kCbSharePerMaterial: {
-					GpuParameters::Element newelem = element.Clone(launchMode, resMng);
-					for (const auto& iter : materialNode.UniformProperies)
-						newelem.Parameters->SetPropertyByString(iter.first, iter.second);
-					material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
+					GpuParameters::Element newelem;
+					auto find_share = matParamCache.find(uniform.GetName());
+					if (find_share != matParamCache.end()) {
+						newelem = find_share->second;
+					}
+					else {
+						newelem = element.Clone(launchMode, resMng);
+
+						for (const auto& iter : materialNode.UniformProperies)
+							newelem.Parameters->SetPropertyByString(iter.first, iter.second);
+						material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
+					}
 				}break;
 				case kCbSharePerFrame:
 				default:
@@ -191,7 +201,8 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 	result->mTopoLogy = proto.mTopoLogy;
 	result->mInputLayout = proto.mInputLayout;
 	result->mProgram = proto.mProgram;
-	result->mFrameBuffer = proto.mFrameBuffer;
+	result->mGrabOutput = proto.mGrabOutput;
+	result->mGrabInput = proto.mGrabInput;
 
 	for (const auto& sampler : proto.mSamplers)
 		result->AddSampler(sampler);
