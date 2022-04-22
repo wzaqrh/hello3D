@@ -66,11 +66,22 @@
 #define PBR_UNITY 1
 #define PBR_GLTF 2
 #if !defined PBR_MODE
-#define PBR_MODE PBR_GLTF
+#define PBR_MODE 2
 #endif
 
 #if !defined CubeMapIsRightHandness
 #define CubeMapIsRightHandness 1
+#endif
+
+#define LIGHTMODE_SHADOW_CASTER 0
+#define LIGHTMODE_FORWARD_BASE 1
+#define LIGHTMODE_FORWARD_ADD 2
+#define LIGHTMODE_PREPASS_BASE 3
+#define LIGHTMODE_PREPASS_FINAL 4
+#define LIGHTMODE_OVERLAY 5
+#define LIGHTMODE_POSTPROCESS 6
+#if !defined CubeMapIsRightHandness
+#define LIGHTMODE LIGHTMODE_POSTPROCESS
 #endif
 
 #endif

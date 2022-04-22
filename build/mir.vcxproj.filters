@@ -544,5 +544,11 @@
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\BilateralBlurEngine.fx">
+      <Filter>src\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@
 			<Element Name="Radius" Type="float4" Default="0.35,0.1225,2.857"></Element>
 			<Element Name="NumStepDirContrast" Type="float4" Default="8,16,1.25"></Element>
 			<Element Name="AttenTanBias" Type="float4" Default="1.0,30"></Element>
+			<Element Name="BlurRadiusFallOffSharp" Type="float4" Default="7,0.03125,2089.796"></Element>
 		</Uniform>
 		<FileName>HorizonBasedAO</FileName>
 		<VertexEntry>VS</VertexEntry>
@@ -21,17 +22,23 @@
 		<Pass>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM> 
-				<Macros>
-				</Macros>
-				<PixelEntry>PS</PixelEntry>
+				<PixelEntry>PSAO</PixelEntry>
 			</PROGRAM>
+			<GrabPass>PassOutAo</GrabPass>
 		</Pass>
 		<Pass>
+			<UseGrab>PassOutAo:14</UseGrab>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM>
-				<Macros>
-				</Macros>
-				<PixelEntry>PS</PixelEntry>
+				<PixelEntry>PSBlurX</PixelEntry>
+			</PROGRAM>
+			<GrabPass>PassOutBlurX</GrabPass>
+		</Pass>
+		<Pass>
+			<UseGrab>PassOutBlurX:14</UseGrab>
+			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<PROGRAM>
+				<PixelEntry>PSBlurY</PixelEntry>
 			</PROGRAM>
 		</Pass>
 	</SubShader>

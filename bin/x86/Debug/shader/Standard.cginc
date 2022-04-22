@@ -1,9 +1,10 @@
 #ifndef STANDARD_H
 #define STANDARD_H
 #include "HLSLSupport.cginc"
+#include "Debug.cginc"
 
-MIR_DECLARE_TEX2D(_SceneImage, 7);
-MIR_DECLARE_SAMPLER2D(_GDepth, 7);
+MIR_DECLARE_TEX2D(_SceneImage, 6);
+MIR_DECLARE_TEX2D(_GDepth, 7);
 MIR_DECLARE_SHADOWMAP(_ShadowMapTexture, 8);
 MIR_DECLARE_TEXCUBE(_DiffuseCube, 9);
 MIR_DECLARE_TEXCUBE(_SpecCube, 10);

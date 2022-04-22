@@ -1,4 +1,3 @@
-/********** Sprite **********/
 #include "Standard.cginc"
 #include "Lighting.cginc"
 

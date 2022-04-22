@@ -48,6 +48,8 @@ public:
 	SSAOBuilder& SetStepNum(int stepNum);
 	SSAOBuilder& SetDirNum(int dirNum);
 	SSAOBuilder& SetContrast(float contrast);
+	SSAOBuilder& SetBlurRadius(float blurRadius);
+	SSAOBuilder& SetSharpness (float sharpness);
 	PostProcessPtr Build();
 private:
 	res::MaterialInstance mMat;

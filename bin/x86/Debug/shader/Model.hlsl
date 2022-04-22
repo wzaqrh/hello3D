@@ -388,7 +388,7 @@ struct PSPrepassFinalOutput
 PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 {
 	PSPrepassFinalOutput output;
-	output.Depth = MIR_SAMPLE_LEVEL_TEX2D_SAMPLER(_ShadowMapTexture, _GDepth, input.Tex, 0).r;
+	output.Depth = MIR_SAMPLE_TEX2D_LEVEL(_GDepth, input.Tex, 0).r;
 	
 	float4 position = float4(MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz * 2.0 - 1.0, 1.0);
 	position = mul(mul(ViewInv, ProjectionInv), position);
@@ -419,14 +419,14 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	float bias = max(0.05 * (1.0 - dot(normal.xyz, toLight)), 0.005);
 	PosInLight.z -= bias * PosInLight.w;
 	
-	finalColor.rgb *= CalcShadowFactor(PosInLight);
+	output.Color.rgb *= CalcShadowFactor(PosInLight);
 #endif
 	
-	//finalColor.xyz = aorm;
-	//finalColor.xyz = toLight;
-	//finalColor.xyz = toEye;
-	//finalColor.xyz = albedo.xyz;
-	//finalColor.xyz = emissive.xyz;
-	//finalColor.xyz = normal.xyz;
+	//output.Color.xyz = aorm;
+	//output.Color.xyz = toLight;
+	//output.Color.xyz = toEye;
+	//output.Color.xyz = albedo.xyz;
+	//output.Color.xyz = emissive.xyz;
+	//output.Color.xyz = normal.xyz;
 	return output;
 }

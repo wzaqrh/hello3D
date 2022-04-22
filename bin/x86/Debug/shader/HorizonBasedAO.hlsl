@@ -5,6 +5,7 @@
 #include "LightingPbr.cginc"
 #include "ToneMapping.cginc"
 #include "WhiteNoise.cginc"
+#include "BilateralBlur.cginc"
 #include "Debug.cginc"
 	
 #if !defined USE_GNORMAL
@@ -18,6 +19,7 @@ cbuffer cbHBAo : register(b3)
 	float4 Radius; //g_R, g_sqr_R, g_inv_R
 	float4 NumStepDirContrast; //g_NumSteps, g_NumDir, g_Contrast
 	float4 AttenTanBias; //m_Attenuation, g_TanAngleBias
+	float4 BlurRadiusFallOffSharp; //g_BlurRadius, g_BlurFalloff, g_Sharpness
 };
 
 struct PixelInput
@@ -26,7 +28,6 @@ struct PixelInput
 	float4 Color : COLOR;
 	float2 texUV : TEXCOORD0;
 };
-
 PixelInput VS(vbSurface input)
 {
 	PixelInput output;
@@ -36,31 +37,10 @@ PixelInput VS(vbSurface input)
 	return output;
 }
 
-//获取uv对应的, '相机空间'上的, 离相机最近的表面位置
-float3 fetch_eye_pos(float2 uv)
-{
-	float d = MIR_SAMPLE_LEVEL_TEX2D_SAMPLER(_ShadowMapTexture, _GDepth, uv, 0).r;
-	return uv_to_eye(uv, LinearEyeDepth(d, DepthParam.xy), FocalLen.zw);
-}
-//获取fetch_eye_pos, 并确保其与'法线'同向
-float3 tangent_eye_pos(float2 uv, float4 tangentPlane)
-{
-    //view vector going through the surface point at uv
-	float3 V = fetch_eye_pos(uv);
-	//intersect with tangent plane except for silhouette edges
-	float NdotV = dot(tangentPlane.xyz, V);
-	if (NdotV < 0.0) V *= (tangentPlane.w / NdotV);
-	return V;
-}
-
 //探索半径 <- deltaUV * numSteps
-float AccumulatedHorizonOcclusion_Quality(float2 deltaUV,
-                                          float2 uv0,
-                                          float3 P,
-                                          float numSteps,
-                                          float randstep,
-                                          float3 dPdu,
-                                          float3 dPdv)
+inline float AccumulatedHorizonOcclusion_Quality(float2 deltaUV, float2 uv0, float3 P,
+												 float numSteps, float randstep, float3 dPdu, float3 dPdv, 
+												 float4 depthParam, float4 focalLen, MIR_ARGS_TEX2D(tDepth))
 {
 	float2 uv = (uv0 + deltaUV) + randstep * deltaUV;//Jitter starting point within the first sample distance
     
@@ -73,7 +53,7 @@ float AccumulatedHorizonOcclusion_Quality(float2 deltaUV,
 	for (float j = 0; j < numSteps; ++j)
 	{
 		float2 snapped_uv = snap_uv_coord(uv, FrameBufferSize);
-		float3 S = fetch_eye_pos(snapped_uv);
+		float3 S = fetch_eye_pos(snapped_uv, depthParam, focalLen, MIR_PASS_TEX2D(tDepth));
 		uv += deltaUV;
 
         // Ignore any samples outside the radius of influence
@@ -106,9 +86,9 @@ float AccumulatedHorizonOcclusion_Quality(float2 deltaUV,
 	return ao;
 }
 
-float4 PS(PixelInput IN) : SV_Target
+float4 PSAO(PixelInput IN) : SV_Target
 {
-	float3 P = fetch_eye_pos(IN.texUV);
+	float3 P = fetch_eye_pos(IN.texUV, DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
     
     // Radius从'相机空间'投影到'切线空间'
     // 乘以0.5是为了改变范围[-1,1]到[0,1] #1/h = g_FocalLen / P.z
@@ -125,15 +105,15 @@ float4 PS(PixelInput IN) : SV_Target
 	
 	float4 tangentPlane = float4(N, dot(P, N));
 	//'tangent plane切平面'上最近点
-	float3 Pr = tangent_eye_pos(IN.texUV + float2(FrameBufferSize.z, 0), tangentPlane);
-	float3 Pl = tangent_eye_pos(IN.texUV + float2(-FrameBufferSize.z, 0), tangentPlane);
-	float3 Pt = tangent_eye_pos(IN.texUV + float2(0, FrameBufferSize.w), tangentPlane);
-	float3 Pb = tangent_eye_pos(IN.texUV + float2(0, -FrameBufferSize.w), tangentPlane);
+	float3 Pr = tangent_eye_pos(IN.texUV + float2(FrameBufferSize.z, 0), tangentPlane, DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
+	float3 Pl = tangent_eye_pos(IN.texUV + float2(-FrameBufferSize.z, 0), tangentPlane, DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
+	float3 Pt = tangent_eye_pos(IN.texUV + float2(0, FrameBufferSize.w), tangentPlane, DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
+	float3 Pb = tangent_eye_pos(IN.texUV + float2(0, -FrameBufferSize.w), tangentPlane, DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
 #else
-	float3 Pr = fetch_eye_pos(IN.texUV + float2(g_InvResolution.x, 0));
-	float3 Pl = fetch_eye_pos(IN.texUV + float2(-g_InvResolution.x, 0));
-	float3 Pt = fetch_eye_pos(IN.texUV + float2(0, g_InvResolution.y));
-	float3 Pb = fetch_eye_pos(IN.texUV + float2(0, -g_InvResolution.y));
+	float3 Pr = fetch_eye_pos(IN.texUV + float2(g_InvResolution.x, 0), DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
+	float3 Pl = fetch_eye_pos(IN.texUV + float2(-g_InvResolution.x, 0), DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
+	float3 Pt = fetch_eye_pos(IN.texUV + float2(0, g_InvResolution.y), DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
+	float3 Pb = fetch_eye_pos(IN.texUV + float2(0, -g_InvResolution.y), DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
 	float3 N = normalize(cross(Pr - Pl, Pt - Pb));
 	float4 tangentPlane = float4(N, dot(P, N));
 #endif
@@ -153,7 +133,8 @@ float4 PS(PixelInput IN) : SV_Target
 		float angle = alpha * d;
 		float2 dir = float2(cos(angle), sin(angle));
 		float2 deltaUV = rotate_direction(dir, rand.xy) * step_size.xy;
-		ao += AccumulatedHorizonOcclusion_Quality(deltaUV, IN.texUV, P, numSteps, rand.z, dPdu, dPdv);
+		ao += AccumulatedHorizonOcclusion_Quality(deltaUV, IN.texUV, P, numSteps, rand.z, dPdu, dPdv, 
+												  DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
 	}
 
 	//return float4(IN.texUV, 0.0, 1.0);
@@ -162,4 +143,23 @@ float4 PS(PixelInput IN) : SV_Target
 	//return float4(P, 1.0);
 	//return float4(dPdu, 1.0);
 	return 1.0 - ao / NumStepDirContrast.y * NumStepDirContrast.z;
+}
+
+float4 PSBlurX(PixelInput input) : SV_Target
+{
+	BilateralBlurInput blurIn;
+	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
+	blurIn.resolution = FrameBufferSize;
+	blurIn.depthParam = DepthParam;
+	return BilateralBlurX(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(_GBufferAlbedo));
+}
+
+float4 PSBlurY(PixelInput input) : SV_Target
+{
+	BilateralBlurInput blurIn;
+	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
+	blurIn.resolution = FrameBufferSize;
+	blurIn.depthParam = DepthParam;
+	float4 finalColor = BilateralBlurX(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(_GBufferAlbedo));
+	return finalColor * MIR_SAMPLE_TEX2D(_SceneImage, input.texUV);
 }

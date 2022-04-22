@@ -43,7 +43,7 @@ CoTask<bool> TestSSAO::OnInitScene()
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
-		//camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
 
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
@@ -63,6 +63,8 @@ CoTask<bool> TestSSAO::OnInitScene()
 			.SetStepNum(8)
 			.SetDirNum(16)
 			.SetContrast(1.25)
+			.SetBlurRadius(7)
+			.SetSharpness(16)
 			.Build();
 		camera->AddPostProcessEffect(effect);
 		camera->SetRenderingPath(mir::kRenderPathDeffered);

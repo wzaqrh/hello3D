@@ -1,4 +1,3 @@
-/********** Skybox **********/
 #include "Standard.cginc"
 #include "ToneMapping.cginc"
 #include "Debug.cginc"

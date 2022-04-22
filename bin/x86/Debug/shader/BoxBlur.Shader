@@ -24,8 +24,8 @@
 				</Macros>
 				<PixelEntry>PS</PixelEntry>
 			</PROGRAM>
-			<UseGrab>Pass%^-1:7</UseGrab>
-			<GrabPass>Pass%$+0</GrabPass>
+			<UseGrab>PassOut%^-1:7</UseGrab>
+			<GrabPass>PassOut%$+0</GrabPass>
 		</Pass>
 	</SubShader>
 </Shader>

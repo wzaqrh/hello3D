@@ -20,3 +20,24 @@ test_ssao 11 0 0
 sprite  0 0 0 
 skybox 	1 0 0
 gltf	10 1 2
+
+		<Pass>
+			<Tags> <LightMode>PostProcess1</LightMode> </Tags>
+			<PROGRAM> 
+				<PixelEntry>PSAO</PixelEntry>
+			</PROGRAM>
+			<GrabPass>PassOutAo</GrabPass>
+		</Pass>
+		<Pass>
+			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<PROGRAM>
+				<PixelEntry>PSBlurX</PixelEntry>
+			</PROGRAM>
+		</Pass>
+		<Pass>
+			<Tags> <LightMode>PostProcess1</LightMode> </Tags>
+			<PROGRAM>
+				<PixelEntry>PSBlurY</PixelEntry>
+			</PROGRAM>
+			<UseGrab>PassOutAo:14</UseGrab>
+		</Pass>

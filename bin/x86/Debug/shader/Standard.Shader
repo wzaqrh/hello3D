@@ -33,14 +33,31 @@
 			<Element Name="IsSpotLight" 	 	Type="bool"></Element>
 		</Uniform>
 		
-		<Texture Name="txGlobal">
+		<Texture Name="txDepth">
 			<Element Slot="7" Filter="0x15">_GDepth</Element>
+		</Texture>
+		<Texture Name="txShadowMap">
 			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
-
+		</Texture>
+		<Texture Name="txEnv">
 			<Element Slot="9" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_DiffuseCube</Element>
 			<Element Slot="10" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_SpecCube</Element>
-			<Element Slot="11" Filter="0x15">_LUT</Element>
-			
+			<Element Slot="11" Filter="0x15">_LUT</Element>			
+		</Texture>
+		<Texture Name="txGBuffer">
+			<Element Slot="12" Filter="0x15">_GBufferPos</Element>
+			<Element Slot="13" Filter="0x15">_GBufferNormal</Element>
+			<Element Slot="14" Filter="0x15">_GBufferAlbedo</Element>
+		    <Element Slot="15" Filter="0x15">_GBufferEmissive</Element>
+		</Texture>
+		
+		<Texture Name="txGlobal">
+			<Element Slot="6" Filter="0x15">_SceneImage</Element>
+			<Element Slot="7" Filter="0x15">_GDepth</Element>
+			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
+			<Element Slot="9" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_DiffuseCube</Element>
+			<Element Slot="10" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_SpecCube</Element>
+			<Element Slot="11" Filter="0x15">_LUT</Element>			
 			<Element Slot="12" Filter="0x15">_GBufferPos</Element>
 			<Element Slot="13" Filter="0x15">_GBufferNormal</Element>
 			<Element Slot="14" Filter="0x15">_GBufferAlbedo</Element>

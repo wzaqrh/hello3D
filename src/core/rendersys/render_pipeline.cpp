@@ -38,7 +38,8 @@ IFrameBufferPtr TempFrameBufferManager::Borrow()
 }
 
 enum PipeLineTextureSlot {
-	kPipeTextureSceneImage = 7,
+	kPipeTextureSceneImage = 6,
+	kPipeTextureGDepth = 7,
 	kPipeTextureShadowMap = 8,
 	kPipeTextureDiffuseEnv = 9,
 	kPipeTextureSpecEnv = 10,
@@ -296,8 +297,9 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 				}
 				depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 
+				auto tex_gdepth	= mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 				auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mGBuffer->GetAttachZStencilTexture());
-				
+
 				auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
 				auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
 				auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(camera.GetSkyBox(), GetLutMap()));
@@ -351,8 +353,8 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 
 		for (size_t i = 0; i < postProcessEffects.size(); ++i) {
 			auto curfb = mStatesBlock.LockFrameBuffer(tempOutputs[i]);
-			auto tex_input = mStatesBlock.LockTexture(kPipeTextureSceneImage, IF_AND_OR(i == 0, postProcessInput->GetAttachColorTexture(0), tempOutputs[i-1]->GetAttachColorTexture(0)));
-			auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mGBuffer->GetAttachZStencilTexture());
+			auto tex_sceneimg = mStatesBlock.LockTexture(kPipeTextureSceneImage, IF_AND_OR(i == 0, postProcessInput->GetAttachColorTexture(0), tempOutputs[i-1]->GetAttachColorTexture(0)));
+			auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
 			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
 

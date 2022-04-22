@@ -1,5 +1,5 @@
-#ifndef MATH_H
-#define MATH_H
+#ifndef COMMON_FUNCTION_H
+#define COMMON_FUNCTION_H
 #include "HLSLSupport.cginc"
 #include "Debug.cginc"
 
@@ -92,6 +92,12 @@ inline float2 snap_uv_coord(float2 uv, float4 resolution)
 	return uv - (frac(uv * resolution.xy) - 0.5f) * resolution.zw;
 }
 
+float3 uv_to_eye(float2 uv, float eye_z, float2 invFocalLen)
+{
+	uv = (uv * float2(2.0, -2.0) - float2(1.0, -1.0));
+	return float3(uv * invFocalLen * eye_z, eye_z);
+}
+
 inline float LinearEyeDepth(float d, float2 depthParam)
 {
 #if 0
@@ -103,9 +109,27 @@ inline float LinearEyeDepth(float d, float2 depthParam)
 #endif
 }
 
-float3 uv_to_eye(float2 uv, float eye_z, float2 invFocalLen)
+inline float fetch_eye_z(float2 uv, float2 depthParam, MIR_ARGS_TEX2D(tDepth))
 {
-	uv = (uv * float2(2.0, -2.0) - float2(1.0, -1.0));
-	return float3(uv * invFocalLen * eye_z, eye_z);
+	float d = MIR_SAMPLE_TEX2D(tDepth, uv);
+	return LinearEyeDepth(d, depthParam);
 }
+//获取uv对应的, '相机空间'上的, 离相机最近的表面位置
+inline float3 fetch_eye_pos(float2 uv, float4 depthParam, float4 focalLen, MIR_ARGS_TEX2D(tDepth))
+{
+	float d = MIR_SAMPLE_TEX2D_LEVEL(tDepth, uv, 0);
+	return uv_to_eye(uv, LinearEyeDepth(d, depthParam.xy), focalLen.zw);
+}
+//获取fetch_eye_pos, 并确保其与'法线'同向
+inline float3 tangent_eye_pos(float2 uv, float4 tangentPlane, float4 depthParam, float4 focalLen, MIR_ARGS_TEX2D(tDepth))
+{
+    //view vector going through the surface point at uv
+	float3 V = fetch_eye_pos(uv, depthParam, focalLen, MIR_PASS_TEX2D(tDepth));
+	//intersect with tangent plane except for silhouette edges
+	float NdotV = dot(tangentPlane.xyz, V);
+	if (NdotV < 0.0)
+		V *= (tangentPlane.w / NdotV);
+	return V;
+}
+
 #endif

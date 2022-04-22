@@ -166,6 +166,10 @@ SSAOBuilder& SSAOBuilder::SetRadius(float radius)
 {
 	float rSq = radius * radius;
 	mMat.SetProperty("Radius", Eigen::Vector4f(radius, rSq, 1.0f / radius, 1.0f / rSq));
+
+	float sharpness = mMat.GetProperty<Eigen::Vector4f>("BlurRadiusFallOffSharp")[3];
+	float sds = sharpness / radius;
+	mMat.SetPropertyVec4At("BlurRadiusFallOffSharp", 2, sds * sds);
 	return *this;
 }
 SSAOBuilder& SSAOBuilder::SetStepNum(int stepNum)
@@ -181,6 +185,21 @@ SSAOBuilder& SSAOBuilder::SetDirNum(int dirNum)
 SSAOBuilder& SSAOBuilder::SetContrast(float contrast)
 {
 	mMat.SetPropertyVec4At("NumStepDirContrast", 2, contrast);
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetBlurRadius(float blurRadius)
+{
+	float sigma = (blurRadius + 1) / 2;
+	float blurFalloff = 1.0f / (2 * sigma * sigma);
+	mMat.SetPropertyVec4At("BlurRadiusFallOffSharp", 0, blurRadius);
+	mMat.SetPropertyVec4At("BlurRadiusFallOffSharp", 1, blurFalloff);
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetSharpness(float sharpness)
+{
+	float sds = sharpness * mMat.GetProperty<Eigen::Vector4f>("Radius")[2];
+	mMat.SetPropertyVec4At("BlurRadiusFallOffSharp", 2, sds * sds);
+	mMat.SetPropertyVec4At("BlurRadiusFallOffSharp", 3, sharpness);
 	return *this;
 }
 PostProcessPtr SSAOBuilder::Build()

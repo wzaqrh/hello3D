@@ -1,4 +1,3 @@
-/********** Multi Light(Direct Point Spot) (eye space) (SpecularMap NormalMapping) **********/
 #include "Standard.cginc"
 #include "Lighting.cginc"
 

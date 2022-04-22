@@ -212,6 +212,7 @@
     <ClCompile Include="..\src\test\unit_test\unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />
     <None Include="..\bin\x86\Debug\shader\Debug.cginc" />
@@ -252,6 +253,11 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\x86\Debug\shader\BilateralBlurEngine.fx">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
