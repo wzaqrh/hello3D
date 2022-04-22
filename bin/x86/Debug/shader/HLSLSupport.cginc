@@ -193,6 +193,8 @@
 	#define MIR_DECLARE_TEX2D_NOSAMPLER_INT(tex) Texture2D<int4> tex
     #define MIR_DECLARE_TEX2D_NOSAMPLER_UINT(tex) Texture2D<uint4> tex
     #define MIR_SAMPLE_TEX2D(tex,coord) tex.Sample (sampler##tex,coord)
+    #define MIR_LOAD_TEX2D(tex,coord) tex.Load (coord)
+    #define MIR_SAMPLE_TEX2D_LEVEL(tex,coord,level) tex.SampleLevel (sampler##tex,coord,level)
     #define MIR_SAMPLE_TEX2D_SAMPLER(tex,samplertex,coord) tex.Sample (sampler##samplertex,coord)
     #define MIR_SAMPLE_LEVEL_TEX2D_SAMPLER(tex,samplertex,coord,level) tex.SampleLevel (sampler##samplertex, coord, level)
 #if defined(UNITY_COMPILER_HLSLCC) && !defined(SHADER_API_GLCORE) // GL Core doesn't have the _half mangling, the rest of them do.

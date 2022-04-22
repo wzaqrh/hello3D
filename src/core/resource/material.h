@@ -79,6 +79,14 @@ public:
 		if (HasProperty(propertyName))
 			mGpuParameters->GetProperty<T>(propertyName) = value;
 	}
+	TemplateT void SetPropertyAt(const std::string& propertyName, size_t pos, float value) {
+		T varProp = this->GetProperty<T>(propertyName);
+		varProp[pos] = value;
+		this->SetProperty(propertyName, varProp);
+	}
+	void SetPropertyVec4At(const std::string& propertyName, size_t pos, float value) {
+		SetPropertyAt<Eigen::Vector4f>(propertyName, pos, value);
+	}
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
 	void FlushGpuParameters(RenderSystem& renderSys) const;
 	void WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data) const;

@@ -538,5 +538,11 @@
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
       <Filter>src\shader</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader">
+      <Filter>src\shader\xml</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -352,6 +352,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 		for (size_t i = 0; i < postProcessEffects.size(); ++i) {
 			auto curfb = mStatesBlock.LockFrameBuffer(tempOutputs[i]);
 			auto tex_input = mStatesBlock.LockTexture(kPipeTextureSceneImage, IF_AND_OR(i == 0, postProcessInput->GetAttachColorTexture(0), tempOutputs[i-1]->GetAttachColorTexture(0)));
+			auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mGBuffer->GetAttachZStencilTexture());
 			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
 			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
 

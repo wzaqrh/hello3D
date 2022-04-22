@@ -215,6 +215,7 @@
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\Debug.cginc" />
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
+    <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />
     <None Include="..\bin\x86\Debug\shader\IBL.cginc" />
     <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader" />
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
@@ -230,6 +231,7 @@
     <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
     <None Include="..\bin\x86\Debug\shader\Standard.Shader" />
     <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc" />
+    <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">

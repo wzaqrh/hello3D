@@ -56,8 +56,13 @@ public:
 		if (!str.empty()) {
 			std::vector<boost::iterator_range<std::string::iterator>> strArr;
 			boost::split(strArr, str, boost::is_any_of(","));
-			for (; i < strArr.size() && i < elemCount; ++i)
-				As<T, BytePerIndex>(position + i * value_size / BytePerIndex) = boost::lexical_cast<T>(strArr[i]);
+			for (; i < strArr.size() && i < elemCount; ++i) {
+				try {
+					As<T, BytePerIndex>(position + i * value_size / BytePerIndex) = boost::lexical_cast<T>(strArr[i]);
+				} catch (...) {
+					As<T, BytePerIndex>(position + i * value_size / BytePerIndex) = T();
+				}
+			}
 		}
 		for (; i < elemCount; ++i)
 			As<T, BytePerIndex>(position + i * value_size / BytePerIndex) = T();

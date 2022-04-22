@@ -34,8 +34,24 @@ public:
 	PostProcessFactory(RenderableFactoryPtr rendFac) :mRendFac(rendFac) {}
 	CoTask<PostProcessPtr> CreateGaussianBlur(int radius, std::string matName = "");
 	CoTask<PostProcessPtr> CreateAverageBlur(int radius, std::string matName = "");
+	CoTask<PostProcessPtr> CreateSSAO(const scene::Camera& camera);
 private:
 	RenderableFactoryPtr mRendFac;
+};
+
+class MIR_CORE_API SSAOBuilder {
+public:
+	SSAOBuilder(PostProcessPtr effect) :mEffect(effect) { mMat = effect->GetMaterial(); }
+	SSAOBuilder& SetAttenuation(float atten);
+	SSAOBuilder& SetAngleBias(float biasAngle);
+	SSAOBuilder& SetRadius(float radius);
+	SSAOBuilder& SetStepNum(int stepNum);
+	SSAOBuilder& SetDirNum(int dirNum);
+	SSAOBuilder& SetContrast(float contrast);
+	PostProcessPtr Build();
+private:
+	res::MaterialInstance mMat;
+	PostProcessPtr mEffect;
 };
 
 }

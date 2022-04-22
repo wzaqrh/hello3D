@@ -29,9 +29,12 @@ public:
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
 	void SetForward(const Eigen::Vector3f& forward);
 	void SetClippingPlane(const Eigen::Vector2f& zRange);
+	const Eigen::Vector2f& GetClippingPlane() const { return mClipPlane; }
 	void SetAspect(float aspect);
+	float GetAspect() const { return mAspect; }
 	void SetOrthographicSize(float size);
 	void SetFov(float fov);
+	float GetFov() const { return mFov; }
 
 	void SetCullingMask(unsigned mask) { mCameraMask = mask; }
 	unsigned GetCullingMask() const { return mCameraMask; }
@@ -79,7 +82,7 @@ private:
 	unsigned mDepth;
 private:
 	CameraType mType;
-	Eigen::Vector2f mClipPlane;
+	Eigen::Vector2f mClipPlane;//near, far
 	float mFov, mOrthoSize;
 	float mAspect;
 

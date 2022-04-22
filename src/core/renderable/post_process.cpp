@@ -4,11 +4,13 @@
 #include "core/resource/resource_manager.h"
 #include "core/resource/material.h"
 #include "core/base/macros.h"
+#include "core/base/debug.h"
+#include "core/scene/camera.h"
 
 namespace mir {
 namespace rend {
 
-/********** POSTPROCESS_VERTEX_QUAD **********/
+/********** PostProcessVertexQuad **********/
 PostProcessVertexQuad::PostProcessVertexQuad(float x, float y, float w, float h)
 {
 	SetRect(x, y, w, h);
@@ -66,10 +68,12 @@ void PostProcess::GenRenderOperation(RenderOperationQueue& ops)
 		ops.AddOP(op);
 }
 
-/********** GaussianBlurBuilder **********/
+/********** PostProcessFactory **********/
 //https://medium.com/@aryamansharda/image-filters-gaussian-blur-eb36db6781b1
 CoTask<PostProcessPtr> PostProcessFactory::CreateGaussianBlur(int radius, std::string matName)
 {
+	COROUTINE_VARIABLES_2(radius, matName);
+
 	radius = __max(radius, 1);
 	int kernelSize = 0;
 	std::vector<float> weights;
@@ -103,6 +107,8 @@ CoTask<PostProcessPtr> PostProcessFactory::CreateGaussianBlur(int radius, std::s
 
 CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateAverageBlur(int radius, std::string matName /*= ""*/)
 {
+	COROUTINE_VARIABLES_2(radius, matName);
+
 	radius = __max(radius, 1);
 	int kernelSize = 0;
 	std::vector<float> weights;
@@ -122,6 +128,64 @@ CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateAverageBlur(int radi
 	filter->GetMaterial().SetProperty("BoxKernelWeights", Data::Make(weights));
 
 	CoReturn filter;
+}
+
+CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateSSAO(const scene::Camera& camera)
+{
+	float fov = camera.GetFov();
+	float aspect = camera.GetAspect();
+	const Eigen::Vector2f& nf = camera.GetClippingPlane(); float n = nf.x(), f = nf.y();
+	MaterialLoadParamBuilder param = MAT_SSAO;
+	auto filter = CoAwait mRendFac->CreatePostProcessEffectT(param);
+
+	float invFocalLenY = tan(fov * 0.5f);
+	float invFocalLenX = invFocalLenY / aspect;
+	filter->GetMaterial().SetProperty("DepthParam", Eigen::Vector4f(1/n, (n-f)/(f*n), 0, 0));
+	filter->GetMaterial().SetProperty("FocalLen", Eigen::Vector4f(1.0f / invFocalLenX, 1.0f / invFocalLenY, invFocalLenX, invFocalLenY));
+	filter->GetMaterial().SetProperty("AttenTanBias", Eigen::Vector4f(1.0, tanf(30.0f / 180 * boost::math::constants::pi<float>()), 0.0, 0.0));
+	CoReturn filter;
+}
+
+/********** SSAOBuilder **********/
+static void SetPropVectorAt(res::MaterialInstance& mat, const char* propName, int pos, float value) {
+	Eigen::Vector4f varProp = mat.GetProperty<Eigen::Vector4f>(propName);
+	varProp[pos] = value;
+	mat.SetProperty(propName, varProp);
+}
+SSAOBuilder& SSAOBuilder::SetAttenuation(float atten)
+{
+	mMat.SetPropertyVec4At("AttenTanBias", 0, atten);
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetAngleBias(float biasAngle)
+{
+	mMat.SetPropertyVec4At("AttenTanBias", 1, tanf(biasAngle / 180 * boost::math::constants::pi<float>()));
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetRadius(float radius)
+{
+	float rSq = radius * radius;
+	mMat.SetProperty("Radius", Eigen::Vector4f(radius, rSq, 1.0f / radius, 1.0f / rSq));
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetStepNum(int stepNum)
+{
+	mMat.SetPropertyVec4At("NumStepDirContrast", 0, stepNum);
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetDirNum(int dirNum)
+{
+	mMat.SetPropertyVec4At("NumStepDirContrast", 1, dirNum);
+	return *this;
+}
+SSAOBuilder& SSAOBuilder::SetContrast(float contrast)
+{
+	mMat.SetPropertyVec4At("NumStepDirContrast", 2, contrast);
+	return *this;
+}
+PostProcessPtr SSAOBuilder::Build()
+{
+	return mEffect;
 }
 
 }

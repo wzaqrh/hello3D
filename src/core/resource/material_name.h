@@ -8,6 +8,7 @@
 #define MAT_MODEL_SHADOW "ModelShadow"
 #define MAT_BLOOM "Bloom"
 #define MAT_BOX_BLUR "BoxBlur"
+#define MAT_SSAO "HorizonBasedAO"
 
 #define LIGHTMODE_SHADOW_CASTER "ShadowCaster"
 #define LIGHTMODE_FORWARD_BASE "ForwardBase"
