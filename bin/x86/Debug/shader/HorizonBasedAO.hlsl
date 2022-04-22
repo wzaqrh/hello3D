@@ -1,6 +1,6 @@
 #include "Standard.cginc"
 #include "Skeleton.cginc"
-#include "Math.cginc"
+#include "CommonFunction.cginc"
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
 #include "ToneMapping.cginc"
@@ -36,26 +36,13 @@ PixelInput VS(vbSurface input)
 	return output;
 }
 
-inline float LinearEyeDepth(float d)
-{
-#if 0
-	#define FARZ 1000.0
-	#define NEARZ 0.3
-	return FARZ * NEARZ / (FARZ - d * (FARZ - NEARZ));
-#else
-	return 1.0 / (DepthParam.x + DepthParam.y * d);
-#endif
-}
-float3 uv_to_eye(float2 uv, float eye_z)
-{
-	uv = (uv * float2(2.0, -2.0) - float2(1.0, -1.0));
-	return float3(uv * FocalLen.zw * eye_z, eye_z);
-}
+//获取uv对应的, '相机空间'上的, 离相机最近的表面位置
 float3 fetch_eye_pos(float2 uv)
 {
 	float d = MIR_SAMPLE_LEVEL_TEX2D_SAMPLER(_ShadowMapTexture, _GDepth, uv, 0).r;
-	return uv_to_eye(uv, LinearEyeDepth(d));
+	return uv_to_eye(uv, LinearEyeDepth(d, DepthParam.xy), FocalLen.zw);
 }
+//获取fetch_eye_pos, 并确保其与'法线'同向
 float3 tangent_eye_pos(float2 uv, float4 tangentPlane)
 {
     //view vector going through the surface point at uv
@@ -65,51 +52,8 @@ float3 tangent_eye_pos(float2 uv, float4 tangentPlane)
 	if (NdotV < 0.0) V *= (tangentPlane.w / NdotV);
 	return V;
 }
-float length2(float3 v) { return dot(v, v); }
-float3 min_diff(float3 P, float3 Pr, float3 Pl)
-{
-	float3 V1 = Pr - P;
-	float3 V2 = P - Pl;
-	return (length2(V1) < length2(V2)) ? V1 : V2;
-}
-float2 rotate_direction(float2 Dir, float2 CosSin)
-{
-	return float2(Dir.x * CosSin.x - Dir.y * CosSin.y,
-                  Dir.x * CosSin.y + Dir.y * CosSin.x);
-}
 
-float2 snap_uv_offset(float2 uv)
-{
-	return round(uv * FrameBufferSize.xy) * FrameBufferSize.zw;
-}
-float2 snap_uv_coord(float2 uv)
-{
-	return uv - (frac(uv * FrameBufferSize.xy) - 0.5f) * FrameBufferSize.zw;
-}
-float3 tangent_vector(float2 deltaUV, float3 dPdu, float3 dPdv)
-{
-	return deltaUV.x * dPdu + deltaUV.y * dPdv;
-}
-float invlength(float2 v)
-{
-	return rsqrt(dot(v, v));
-}
-float tangent(float3 T)
-{
-	return -T.z * invlength(T.xy);
-}
-float tangent(float3 P, float3 S)
-{
-	return (P.z - S.z) / length(S.xy - P.xy);
-}
-float tan_to_sin(float x)
-{
-	return x * rsqrt(x * x + 1.0f);
-}
-float falloff(float r)
-{
-	return 1.0f - AttenTanBias.x * r * r;
-}
+//探索半径 <- deltaUV * numSteps
 float AccumulatedHorizonOcclusion_Quality(float2 deltaUV,
                                           float2 uv0,
                                           float3 P,
@@ -118,19 +62,17 @@ float AccumulatedHorizonOcclusion_Quality(float2 deltaUV,
                                           float3 dPdu,
                                           float3 dPdv)
 {
-    // Jitter starting point within the first sample distance
-	float2 uv = (uv0 + deltaUV) + randstep * deltaUV;
+	float2 uv = (uv0 + deltaUV) + randstep * deltaUV;//Jitter starting point within the first sample distance
     
-    // Snap first sample uv and initialize horizon tangent
-	float2 snapped_duv = snap_uv_offset(uv - uv0);
-	float3 T = tangent_vector(snapped_duv, dPdu, dPdv);
+	float2 snapped_duv = snap_uv_offset(uv - uv0, FrameBufferSize);
+	float3 T = tangent_vector(snapped_duv, dPdu, dPdv);//snapped_duv投影到'相机空间'作为'horizon tangent水平切线'
 	float tanH = tangent(T) + AttenTanBias.y;
 
 	float ao = 0;
 	float h0 = 0;
 	for (float j = 0; j < numSteps; ++j)
 	{
-		float2 snapped_uv = snap_uv_coord(uv);
+		float2 snapped_uv = snap_uv_coord(uv, FrameBufferSize);
 		float3 S = fetch_eye_pos(snapped_uv);
 		uv += deltaUV;
 
@@ -153,7 +95,7 @@ float AccumulatedHorizonOcclusion_Quality(float2 deltaUV,
 				float sinT = tan_to_sin(tanT);
 				float r = sqrt(d2) * Radius.z;
 				float h = sinS - sinT;
-				ao += falloff(r) * (h - h0);
+				ao += falloff(r, AttenTanBias.x) * (h - h0);
 				h0 = h;
 
                 // Update the current horizon angle
@@ -168,21 +110,21 @@ float4 PS(PixelInput IN) : SV_Target
 {
 	float3 P = fetch_eye_pos(IN.texUV);
     
-    // Project the radius of influence g_R from eye space to texture space.
-    // The scaling by 0.5 is to go from [-1,1] to [0,1].
-	float2 step_size = 0.5 * Radius.x * FocalLen.xy / P.z; //1/h = g_FocalLen / P.z
+    // Radius从'相机空间'投影到'切线空间'
+    // 乘以0.5是为了改变范围[-1,1]到[0,1] #1/h = g_FocalLen / P.z
+	// step_size表示探索半径
+	float2 step_size = 0.5 * Radius.x * FocalLen.xy / P.z; 
 
-    // Early out if the projected radius is smaller than 1 pixel.
 	float numSteps = min(NumStepDirContrast.x, min(step_size.x * FrameBufferSize.x, step_size.y * FrameBufferSize.y));
-	if (numSteps < 1.0) return 1.0;
+	if (numSteps < 1.0) return 1.0; //当projected radius小于1像素, 马上结束
 	step_size = step_size / (numSteps + 1);
 
-    // Nearest neighbor pixels on the tangent plane
 #if USE_GNORMAL
 	float3 N = normalize(MIR_SAMPLE_TEX2D_LEVEL(_GBufferNormal, IN.texUV, 0).xyz * 2.0 - 1.0);
 	N = mul((float3x3)View, N);
 	
 	float4 tangentPlane = float4(N, dot(P, N));
+	//'tangent plane切平面'上最近点
 	float3 Pr = tangent_eye_pos(IN.texUV + float2(FrameBufferSize.z, 0), tangentPlane);
 	float3 Pl = tangent_eye_pos(IN.texUV + float2(-FrameBufferSize.z, 0), tangentPlane);
 	float3 Pt = tangent_eye_pos(IN.texUV + float2(0, FrameBufferSize.w), tangentPlane);
@@ -196,15 +138,13 @@ float4 PS(PixelInput IN) : SV_Target
 	float4 tangentPlane = float4(N, dot(P, N));
 #endif
     
-	// Screen-aligned basis for the tangent plane
+	//切平面的'Screen-aligned basis屏幕坐标系'
 	float3 dPdu = min_diff(P, Pr, Pl);
 	float3 dPdv = min_diff(P, Pt, Pb) * (FrameBufferSize.y * FrameBufferSize.z);
 
-    //(cos(alpha),sin(alpha),jitter)
-	//float3 rand = noise(int3((int) IN.pos.x & 63, (int) IN.pos.y & 63, 0)).xyz;
 	float2 noise2 = rand2dTo2d(IN.texUV);
-	float angle = 2.0 * MIR_PI / NumStepDirContrast.y * noise2.x;
-	float3 rand = float3(cos(angle), sin(angle), noise2.y);
+	float dangle = 2.0 * MIR_PI / NumStepDirContrast.y * noise2.x;
+	float3 rand = float3(cos(dangle), sin(dangle), noise2.y);//(cos(alpha),sin(alpha),jitter)
 	
 	float ao = 0;
 	float alpha = 2.0 * MIR_PI / NumStepDirContrast.y;
@@ -217,12 +157,9 @@ float4 PS(PixelInput IN) : SV_Target
 	}
 
 	//return float4(IN.texUV, 0.0, 1.0);
-	//return float4(rand, 1.0);
-	//return float4(n2, 0.0, 1.0);
-	//float3 N = normalize(MIR_SAMPLE_TEX2D_LEVEL(_GBufferNormal, IN.texUV, 0).xyz * 2.0 - 1.0);
+	//return float4(noise2, 0.0, 1.0);
 	//return float4(N, 1.0);
 	//return float4(P, 1.0);
-	//return float4(P.z / 10.0, 0.0, 0.0, 1.0);
 	//return float4(dPdu, 1.0);
 	return 1.0 - ao / NumStepDirContrast.y * NumStepDirContrast.z;
 }

@@ -213,6 +213,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
+    <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />
     <None Include="..\bin\x86\Debug\shader\Debug.cginc" />
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />
@@ -221,7 +222,6 @@
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Math.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.cginc" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.Shader" />

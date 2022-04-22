@@ -1,6 +1,6 @@
 #include "Standard.cginc"
 #include "Skeleton.cginc"
-#include "Math.cginc"
+#include "CommonFunction.cginc"
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
 #include "ToneMapping.cginc"

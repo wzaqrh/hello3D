@@ -26,5 +26,13 @@
 				<PixelEntry>PS</PixelEntry>
 			</PROGRAM>
 		</Pass>
+		<Pass>
+			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<PROGRAM>
+				<Macros>
+				</Macros>
+				<PixelEntry>PS</PixelEntry>
+			</PROGRAM>
+		</Pass>
 	</SubShader>
 </Shader>
