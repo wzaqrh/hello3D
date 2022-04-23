@@ -8,7 +8,7 @@
 			<Element Format="3"  SemanticName="BLENDINDICES"></Element>
 		</Attribute>
 		<Uniform Name="cbWeightedSkin" Slot="2">
-			<Element Name="Model" Type="matrix"></Element>
+			<Element Name="Model" Type="matrix" Default="1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1"></Element>
 			<Element Name="Models" Type="matrix" Count="56"></Element>
 		</Uniform>
 	</PROGRAM>

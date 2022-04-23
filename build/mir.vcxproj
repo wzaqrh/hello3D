@@ -224,6 +224,9 @@
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
+    <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fxh" />
+    <None Include="..\bin\x86\Debug\shader\pcss\Poisson.fxh" />
+    <None Include="..\bin\x86\Debug\shader\pcss\Shading.fxh" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.cginc" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.Shader" />
     <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader" />
@@ -257,7 +260,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\BilateralBlurEngine.fx">
+    <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fx">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

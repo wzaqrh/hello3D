@@ -29,6 +29,22 @@ inline float3x3 GetTBN(float2 uv, float3 worldPos, float3 worldNormal)
     return float3x3(T, B, N);
 }
 
+inline float3x3 GetTBN(float2 uv, float3 worldPos)
+{
+	float3 dpdx = ddx(worldPos);
+	float3 dpdy = ddy(worldPos);
+	float2 duvdx = ddx(uv);
+	float2 duvdy = ddy(uv);
+
+    float3 N = normalize(cross(dpdx, dpdy)); 
+    
+	float3 T = -dpdx * duvdy.y + dpdy * duvdx.y;
+	T = normalize(T - dot(T, N) * N);
+	float3 B = normalize(cross(T, N));
+    
+	return float3x3(T, B, N);
+}
+
 float length2(float3 v)
 {
 	return dot(v, v);

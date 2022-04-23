@@ -26,9 +26,28 @@ CoTask<bool> TestCube::OnInitScene()
 	}break;
 	case 1: {
 		const int SizeInf = 256;
-		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(SizeInf, SizeInf, 1), 0xff87CEFA);
+		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(SizeInf, 1, SizeInf), 0xff87CEFA);
 		mScneMng->AddRendNode(mCube);
 		mTransform = mCube->GetTransform();
+	}break;
+	case 2: {
+		MaterialLoadParamBuilder param = MAT_MODEL;
+		param["USE_NORMAL"] = FALSE;
+		param["PBR_MODE"] = 0;
+		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(1, 1, 1), 0xff87CEFA, param);
+		mCube->SetTexture(CoAwait mResMng->CreateTextureByFileT(__LaunchAsync__, test1::res::dds::Kenny()));
+		mCube->GetMaterial().SetProperty<BOOL>("EnableAlbedoMap", TRUE);
+		mScneMng->AddRendNode(mCube);
+		mTransform = mCube->GetTransform();
+		mTransform->SetEulerAngles(Eigen::Vector3f(45 * 0.174, 45 * 0.174, 45 * 0.174));
+	}break;
+	case 3: {
+		const int SizeInf = 256;
+		MaterialLoadParamBuilder param = MAT_MODEL;
+		param["USE_NORMAL"] = FALSE;
+		param["PBR_MODE"] = 0;
+		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(SizeInf, 1, SizeInf), 0xff87CEFA, param);
+		mScneMng->AddRendNode(mCube);
 	}break;
 	default:
 		break;

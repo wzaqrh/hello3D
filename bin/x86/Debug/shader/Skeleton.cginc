@@ -19,11 +19,12 @@ cbuffer cbWeightedSkin : register(b2)
 
 float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
 {
-    float4 Pos = float4(0.0,0.0,0.0,iPos.w); 	
+    float4 Pos = float4(0.0,0.0,0.0,1.0); 	
 	Pos.xyz += mul(iPos, Models[iBlendIndices.x]).xyz * iBlendWeights.x;
 	Pos.xyz += mul(iPos, Models[iBlendIndices.y]).xyz * iBlendWeights.y;
 	Pos.xyz += mul(iPos, Models[iBlendIndices.z]).xyz * iBlendWeights.z;
-	Pos.xyz += mul(iPos, Models[iBlendIndices.w]).xyz * (1.0 - iBlendWeights.x - iBlendWeights.y - iBlendWeights.z);
+	Pos.xyz += mul(iPos, Models[iBlendIndices.w]).xyz * iBlendWeights.w;
+	Pos.xyz += iPos * max(0.0, 1.0 - dot(iBlendWeights, float4(1.0, 1.0, 1.0, 1.0)));
 	return Pos;
 }
 #endif

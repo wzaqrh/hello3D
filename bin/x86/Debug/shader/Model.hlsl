@@ -10,6 +10,10 @@
 #define ENABLE_SHADOW_MAP 1
 #endif
 
+#if !defined USE_NORMAL
+#define USE_NORMAL 1
+#endif
+
 MIR_DECLARE_TEX2D(txAlbedo, 0);
 MIR_DECLARE_TEX2D(txNormal, 1);
 MIR_DECLARE_TEX2D(txMetalness, 2);
@@ -93,19 +97,24 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 
 inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent)
 {
-    float3x3 tbn;
-    if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent));
+	float3 normal;
+#if USE_NORMAL  
+	float3x3 tbn;
+	if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent));
 	else tbn = GetTBN(uv, worldPos, worldNormal);
 	
-    float3 normal;
     if (EnableNormalMap) {
 		float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)).xyz * 2.0 - 1.0;
 		tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0));
         normal = normalize(mul(tangentNormal, tbn));
     }
-	else {
-		normal = tbn[2];		  
-	}
+	else normal = tbn[2];
+#else
+	float3 dpdx = ddx(worldPos);
+	float3 dpdy = ddy(worldPos);
+    normal = normalize(cross(dpdy, dpdx)); 
+#endif
+	
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
     normal = tangentNormal;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL
@@ -157,6 +166,7 @@ struct PixelInput
 {
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
+	float4 Color : COLOR;
 	float3 Normal : NORMAL0;//world space
     float3 Tangent : NORMAL1;
 	float3 ToEye  : TEXCOORD1;//world space
@@ -185,7 +195,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     
 	//ToEye
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
-	output.Pos = mul(MW, skinPos);
+	output.Pos = mul(MW, float4(surf.Pos.xyz, 1.0));
 	
 	output.ToEye = CameraPosition.xyz - output.Pos.xyz;
     
@@ -215,6 +225,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     output.Pos = mul(View, output.Pos);
     output.Pos = mul(Projection, output.Pos);
 	output.Tex = surf.Tex;
+	output.Color = surf.Color;
     return output;
 }
 
@@ -252,8 +263,9 @@ float4 PS(PixelInput input) : SV_Target
 	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
 #endif
 	
+	//finalColor.xyz = float4(1.0,1.0,1.0,1.0);
 	//finalColor.xyz = input.Normal;
-	//finalColor.xyz = normal;
+	//finalColor.xyz = normal * 0.5 + 0.5;
 	//finalColor.xyz = toEye;
 	//finalColor.xyz = toLight;
 	//finalColor.xyz = aorm;
@@ -287,7 +299,7 @@ float4 PS(PixelInput input) : SV_Target
 	finalColor.z = -finalColor.z;
 	finalColor.xyz = (finalColor.xyz * 32 + 1.0) / 2.0;
 #endif
-	return finalColor;
+	return finalColor * input.Color;
 }
 
 /************ ForwardAdd ************/
