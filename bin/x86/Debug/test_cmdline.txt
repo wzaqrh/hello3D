@@ -1,7 +1,9 @@
+5	0	0
+10 	1 	1
 2   3   0
 11 	0 	1
 0 	7 	0
-10 	1 	1
+
 
 test_sprite 5
 test_spec_skybox 2

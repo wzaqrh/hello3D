@@ -67,7 +67,8 @@ private:
 				aiProcess_ConvertToLeftHanded |
 			#endif
 				aiProcess_Triangulate |
-				aiProcess_CalcTangentSpace;/* |
+				aiProcess_CalcTangentSpace |
+				aiProcess_GenBoundingBoxes;/* |
 				aiProcess_SortByPType |
 				aiProcess_PreTransformVertices |
 				aiProcess_GenNormals |
@@ -113,7 +114,7 @@ private:
 		CoReturn true;
 	}
 private:
-	void ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
+	AiNodePtr ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
 		COROUTINE_VARIABLES_2(node, rawScene);
 
 		const aiNode* rawNode = node->RawNode;
@@ -124,9 +125,9 @@ private:
 
 		for (int i = 0; i < rawNode->mNumChildren; i++) {
 			AiNodePtr child = mAsset.AddNode(rawNode->mChildren[i]);
-			node->AddChild(child);
-			ProcessNode(child, rawScene, tasks);
+			node->AddChild(ProcessNode(child, rawScene, tasks));
 		}
+		return node;
 	}
 	
 	static void ReCalculateTangents(vbSurfaceVector& surfVerts, vbSkeletonVector& skeletonVerts, const std::vector<uint32_t>& indices) 

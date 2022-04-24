@@ -13,51 +13,50 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
+private:
+	AssimpModelPtr mModel;
 };
-/*mCaseIndex
-0：透视相机, 相机朝下 方向光朝下偏前 飞机投影到地板
-1: 透视相机, 相机朝前 方向光朝前偏上 飞机投影到地板
-*/
+
+inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
+	MaterialLoadParamBuilder mlpb(MAT_MODEL);
+	mlpb["PBR_MODE"] = 2;
+	return mlpb;
+}
 
 CoTask<bool> TestShadowMap::OnInitScene()
 {
-	SetPPU(1);
+	//SetPPU(1);
+	TIME_PROFILE("testSSAO.OnInitScene");
 
-	AssimpModelPtr mModelFloor;
-	if (1) {
-		mModelFloor = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
-		mScneMng->AddRendNode(mModelFloor);
-		CoAwait test1::res::model().Init("floor", mModelFloor);
-	}
+	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	camera->SetFov(40.0);
+	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
-	AssimpModelPtr mModelRock;
-	if (1) {
-		mModelRock = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
-		mScneMng->AddRendNode(mModelRock);
-		mTransform = CoAwait test1::res::model().Init("spaceship", mModelRock);
-	}
-
+	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0: {
-		mControlCamera = false;
+		camera->SetLookAt(Eigen::Vector3f(0, 0.5, -1) * 2.5, Eigen::Vector3f::Zero());
 
-		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, -3, -1));
-		auto camera = mScneMng->CreateAddCameraNode(kCameraPerspective, Eigen::Vector3f(0, 10, 0));
-		camera->SetForward(mir::math::vec::Down());
-		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
+		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 
-		mModelFloor->GetTransform()->SetPosition(Eigen::Vector3f(0, -100, 0));
-		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14, 0, 0));
-		mModelRock->GetTransform()->SetPosition(Eigen::Vector3f(0, -30, 0));
-	}break;
-	case 1: {
-		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, 1, 3));
-		auto camera = mScneMng->CreateAddCameraNode(kCameraPerspective, Eigen::Vector3f(0, 0, -10));
-		camera->SetForward(mir::math::vec::Forward());
+		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
+		skyMat["CubeMapIsRightHandness"] = TRUE;
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
 
-		mModelFloor->GetTransform()->SetPosition(Eigen::Vector3f(0, 0, 100));
-		mModelFloor->GetTransform()->Rotate(Eigen::Vector3f(3.14 / 2, 0, 0));
-		mTransform->SetPosition(Eigen::Vector3f(0, 0, 30));
+		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
+		modelMat["CubeMapIsRightHandness"] = TRUE;
+		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mTransform = CoAwait model.Init("buddha", mModel);
+		mTransform->SetPosition(Eigen::Vector3f(0, 0.4, 0));
+		mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
+
+		auto floor = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		auto floorModel = CoAwait model.Init("floor", floor);
+		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
+		floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));
+
+		camera->SetRenderingPath(mir::kRenderPathDeffered);
 	}break;
 	default:
 		break;

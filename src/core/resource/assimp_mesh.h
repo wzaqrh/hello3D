@@ -29,6 +29,7 @@ public:
 	const IVertexBufferPtr& GetVBOSurface() const { return mVBOSurface; }
 	const IVertexBufferPtr& GetVBOSkeleton() const { return mVBOSkeleton; }
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }
+	const Eigen::AlignedBox3f& GetAABB() const { return mAABB; }
 private:
 	const aiMesh* mAiMesh;
 	vbSurfaceVector mSurfVertexs;
@@ -37,9 +38,7 @@ private:
 	res::MaterialInstance mMaterial;
 	IVertexBufferPtr mVBOSurface, mVBOSkeleton;
 	IIndexBufferPtr mIndexBuffer;
-#if defined _DEBUG
-	Eigen::Vector3f mMaxPos, mMinPos;
-#endif
+	Eigen::AlignedBox3f mAABB;
 };
 
 }

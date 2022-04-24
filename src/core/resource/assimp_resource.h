@@ -26,20 +26,24 @@ struct AiNode : public std::enable_shared_from_this<AiNode>
 	void AddChild(const AiNodePtr& child) {
 		Children.push_back(child);
 		child->Parent = this->shared_from_this();
+		mAABB.extend(child->mAABB);
 	}
 	void AddMesh(const AssimpMeshPtr& mesh) {
+		mAABB.extend(mesh->GetAABB());
 		Meshes.push_back(mesh);
 	}
 
 	size_t ChildCount() const { return Children.size(); }
 	const AssimpMeshPtr& operator[](size_t index) const { return Meshes[index]; }
 	size_t MeshCount() const { return Meshes.size(); }
+	const Eigen::AlignedBox3f& GetAABB() const { return mAABB; }
 public:
 	const size_t SerilizeIndex;
 	const aiNode* RawNode;
 	std::weak_ptr<AiNode> Parent;
 	std::vector<AiNodePtr> Children;
 	std::vector<AssimpMeshPtr> Meshes;
+	Eigen::AlignedBox3f mAABB;
 };
 
 struct AiScene : public ImplementResource<IResource>
@@ -54,6 +58,7 @@ struct AiScene : public ImplementResource<IResource>
 	const std::vector<AiNodePtr>& GetSerializeNodes() const { return mNodeBySerializeIndex; }
 	std::vector<AiNodePtr>::const_iterator begin() const { return mNodeBySerializeIndex.begin(); }
 	std::vector<AiNodePtr>::const_iterator end() const { return mNodeBySerializeIndex.end(); }
+	const Eigen::AlignedBox3f& GetAABB() const { return mRootNode->GetAABB(); }
 public:
 	const aiScene* mScene = nullptr;
 	AiNodePtr mRootNode;

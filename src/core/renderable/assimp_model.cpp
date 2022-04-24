@@ -127,6 +127,7 @@ CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectR
 	if (!CoAwait mResourceMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource))) 
 		CoReturn false;
 
+	mAABB = mAiScene->GetAABB();
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
 	UpdateFrame(0);
 	CoReturn true;

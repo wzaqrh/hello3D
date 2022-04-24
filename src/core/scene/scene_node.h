@@ -2,6 +2,7 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
+#include "core/base/math.h"
 
 namespace mir {
 
@@ -23,7 +24,8 @@ public:
 	const RenderablePtr& GetRenderable() const { return mRenderable; }
 	const scene::LightPtr& GetLight() const { return mLight; }
 	const scene::CameraPtr& GetCamera() const { return mCamera; }
-	
+	const Eigen::AlignedBox3f GetAABB() const;
+
 	template<typename T> const std::shared_ptr<T>& GetComponent() const {}
 	template<> const TransformPtr& GetComponent<Transform>() const { return mTransform; }
 	template<> const RenderablePtr& GetComponent<Renderable>() const { return mRenderable; }

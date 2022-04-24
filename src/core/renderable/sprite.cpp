@@ -49,17 +49,6 @@ void Sprite::SetSize(const Eigen::Vector3f& sz)
 	}
 }
 
-#if 0
-void Sprite::SetFlipY(bool flipY)
-{
-	if (mFlipY != flipY) {
-		mFlipY = flipY;
-		mQuad.FlipY();
-		mQuadDirty = true;
-	}
-}
-#endif
-
 void Sprite::SetColor(const Eigen::Vector4f& color)
 {
 	mColor = color;

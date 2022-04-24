@@ -22,6 +22,8 @@ public:
 	const ITexturePtr& GetTexture() const;
 	res::MaterialInstance GetMaterial() const { return mMaterial; }
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
+
+	virtual Eigen::AlignedBox3f GetWorldAABB() const override;
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }
 	bool IsLoaded() const;
@@ -32,6 +34,7 @@ protected:
 	res::MaterialInstance mMaterial;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
+	Eigen::AlignedBox3f mAABB;
 };
 
 }

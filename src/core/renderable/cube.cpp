@@ -1,6 +1,7 @@
 #include "core/renderable/cube.h"
 #include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
+#include "core/base/macros.h"
 
 namespace mir {
 namespace rend {
@@ -17,15 +18,25 @@ Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const res::MaterialI
 	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(mVertexData)));
 }
 
-void Cube::SetPosition(const Eigen::Vector3f& pos)
+void Cube::SetPosition(const Eigen::Vector3f& center)
 {
-	mPosition = pos;
+	Eigen::Vector3f size = IF_AND_OR(! mAABB.isEmpty(), Eigen::Vector3f(mAABB.sizes()), Eigen::Vector3f::Zero());
+	mAABB = Eigen::AlignedBox3f();
+	mAABB.extend(center - size / 2);
+	mAABB.extend(center + size / 2);
+
+	mPosition = center;
 	mVertexDirty = true;
 }
 
-void Cube::SetHalfSize(const Eigen::Vector3f& size)
+void Cube::SetHalfSize(const Eigen::Vector3f& hsize)
 {
-	mHalfSize = size;
+	Eigen::Vector3f center = IF_AND_OR(! mAABB.isEmpty(), Eigen::Vector3f(mAABB.center()), Eigen::Vector3f::Zero());
+	mAABB = Eigen::AlignedBox3f();
+	mAABB.extend(center - hsize);
+	mAABB.extend(center + hsize);
+
+	mHalfSize = hsize;
 	mVertexDirty = true;
 }
 

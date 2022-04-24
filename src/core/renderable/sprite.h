@@ -31,7 +31,6 @@ private:
 	Eigen::Vector3f mPosition;
 	Eigen::Vector3f mSize;
 	Eigen::Vector4f mColor;
-	//bool mFlipY;
 };
 
 }

@@ -35,6 +35,11 @@ void SceneNode::SetCamera(const scene::CameraPtr& camera)
 		mCamera->AttachSceneNode(shared_from_this());
 }
 
+const Eigen::AlignedBox3f SceneNode::GetAABB() const
+{
+	return mRenderable->GetWorldAABB();
+}
+
 SceneNodePtr SceneNodeFactory::CreateNode()
 {
 	SceneNodePtr node = CreateInstance<SceneNode>();

@@ -16,6 +16,14 @@ const ITexturePtr& RenderableSingleRenderOp::GetTexture() const
 {
 	return mMaterial->GetTextures()[0];
 }
+
+Eigen::AlignedBox3f RenderableSingleRenderOp::GetWorldAABB() const
+{
+	Transform3fAffine t(GetTransform()->GetWorldMatrix());
+	Eigen::AlignedBox3f worldAABB = mAABB.transformed(t);
+	return worldAABB;
+}
+
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
 {
 	mMaterial->GetTextures()[0] = texture;

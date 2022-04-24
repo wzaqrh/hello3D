@@ -70,6 +70,10 @@ void Mesh::SetVertexs(const vbSurface* vertData, int vertCount)
 	mVertDirty = true;
 	mVertPos = vertCount;
 	mVertices.assign(vertData, vertData + vertCount);
+
+	mAABB = Eigen::AlignedBox3f();
+	for (int i = 0; i < vertCount; ++i)
+		mAABB.extend(vertData[i].Pos);
 }
 
 void Mesh::SetVertexs(const vbSurface* vertData, int vertCount, int vertPos)
@@ -78,6 +82,10 @@ void Mesh::SetVertexs(const vbSurface* vertData, int vertCount, int vertPos)
 	mVertPos = max(mVertPos, vertPos + vertCount);
 	for (int i = 0; i < vertCount; ++i)
 		mVertices[i + vertPos] = vertData[i];
+
+	mAABB = Eigen::AlignedBox3f();
+	for (int i = 0; i < mVertPos; ++i)
+		mAABB.extend(mVertices[i].Pos);
 }
 
 void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
@@ -86,6 +94,10 @@ void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
 	mVertPos = max(mVertPos, count);
 	for (int i = 0; i < mVertPos; ++i)
 		mVertices[i].Pos = posData[i];
+
+	mAABB = Eigen::AlignedBox3f();
+	for (int i = 0; i < mVertPos; ++i)
+		mAABB.extend(mVertices[i].Pos);
 }
 
 void Mesh::SetColors(const Eigen::Vector4f* colorData, int count)

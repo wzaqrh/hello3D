@@ -119,4 +119,12 @@ void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
 	}
 }
 
+Eigen::AlignedBox3f SceneManager::GetAABB() const
+{
+	Eigen::AlignedBox3f aabb;
+	for (auto& node : mNodes)
+		aabb.extend(node->GetAABB());
+	return aabb;
+}
+
 }

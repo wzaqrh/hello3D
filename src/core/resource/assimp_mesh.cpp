@@ -20,18 +20,10 @@ void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
 	mVBOSkeleton = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.skeleton");
 
-#if defined _DEBUG && 0
-	mMinPos = mMaxPos = Eigen::Vector3f::Zero();
-	for (auto& it : mSurfVertexs) {
-		mMinPos.x() = std::min<float>(mMinPos.x(), it.Pos.x());
-		mMinPos.y() = std::min<float>(mMinPos.y(), it.Pos.y());
-		mMinPos.z() = std::min<float>(mMinPos.z(), it.Pos.z());
-
-		mMaxPos.x() = std::max<float>(mMaxPos.x(), it.Pos.x());
-		mMaxPos.y() = std::max<float>(mMaxPos.y(), it.Pos.y());
-		mMaxPos.z() = std::max<float>(mMaxPos.z(), it.Pos.z());
-	}
-#endif
+	const aiVector3D &min = mAiMesh->mAABB.mMin, &max = mAiMesh->mAABB.mMax;
+	mAABB = Eigen::AlignedBox3f();
+	mAABB.extend(Eigen::Vector3f(min.x, min.y, min.z));
+	mAABB.extend(Eigen::Vector3f(max.x, max.y, max.z));
 }
 
 bool AssimpMesh::IsLoaded() const
