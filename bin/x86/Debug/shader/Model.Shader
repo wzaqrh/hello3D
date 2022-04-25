@@ -44,7 +44,7 @@
 			<Element Slot="5" Address="1">txEmissive</Element>
 		</Texture>
 		<Macros>
-			<ENABLE_SHADOW_MAP>0</ENABLE_SHADOW_MAP>
+			<ENABLE_SHADOW_MAP>1</ENABLE_SHADOW_MAP>
 			<ENABLE_ENVIRONMENT_MAP>0</ENABLE_ENVIRONMENT_MAP>
 			<OCCLUSION_ROUGHNESS_METALLIC>1</OCCLUSION_ROUGHNESS_METALLIC>
 			<PBR_MODE>2</PBR_MODE>
@@ -59,7 +59,7 @@
 			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
 			<PROGRAM> 
 				<VertexEntry>VSShadowCaster</VertexEntry> 
-				<PixelEntry></PixelEntry>
+				<PixelEntry>PSShadowCasterDebug</PixelEntry>
 			</PROGRAM>
 		</Pass>
 		

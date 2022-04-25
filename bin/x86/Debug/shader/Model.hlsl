@@ -1,6 +1,7 @@
 #include "Standard.cginc"
 #include "Skeleton.cginc"
 #include "CommonFunction.cginc"
+#include "Shadow.cginc"
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
 #include "ToneMapping.cginc"
@@ -137,6 +138,7 @@ struct PSShadowCasterInput
 {
 	float4 Pos  : SV_POSITION;
 	float4 Pos0 : POSITION0;
+	float2 Tex : TEXCOORD0;
 };
 
 PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
@@ -148,6 +150,7 @@ PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 	matrix MWVP = mul(Projection, MWV);
 	output.Pos = mul(MWVP, skinPos);
 	output.Pos0 = output.Pos;
+	output.Tex = surf.Tex;
 	return output;
 }
 
@@ -157,7 +160,8 @@ float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 	//finalColor.xy = input.Pos0.xy / input.Pos0.w;
 	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
 	//finalColor.y = 0;
-	finalColor.z = input.Pos0.z / input.Pos0.w;
+	//finalColor.z = input.Pos0.z / input.Pos0.w;
+	finalColor = GetAlbedo(input.Tex);
 	return finalColor;
 }
 
@@ -172,10 +176,11 @@ struct PixelInput
 	float3 ToEye  : TEXCOORD1;//world space
 	float3 ToLight : TEXCOORD2;//world space
 #if ENABLE_SHADOW_MAP
-	float4 PosInLight : POSITION0;//light's ndc space
+	float4 ViewPosLight : POSITION0; //light's ndc space
+	float4 PosLight : POSITION1;
 #endif    
 #if DEBUG_TBN != 2
-    float3 SurfPos : POSITION1;//world space
+    float3 SurfPos : POSITION2;//world space
 #else
     float3x3 TangentBasis : TEXCOORD3;
 #endif
@@ -199,10 +204,10 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 	
 	output.ToEye = CameraPosition.xyz - output.Pos.xyz;
     
-	//PosInLight
+	//PosLight
 #if ENABLE_SHADOW_MAP
-	output.PosInLight = mul(LightView, output.Pos);
-	output.PosInLight = mul(LightProjection, output.PosInLight);
+	output.ViewPosLight = mul(LightView, output.Pos);
+	output.PosLight = mul(LightProjection, output.ViewPosLight);
 #endif
 	
     //ToLight
@@ -216,9 +221,9 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     output.TangentBasis = mul((float3x3)mul(View, MW), transpose(TBN));    
 #endif
     
-#if ENABLE_SHADOW_MAP
+#if ENABLE_SHADOW_MAP_BIAS
 	float bias = max(0.05 * (1.0 - dot(output.Normal, output.ToLight)), 0.005);
-	output.PosInLight.z -= bias * output.PosInLight.w;	
+	output.PosLight.z -= bias * output.PosLight.w;	
 #endif
 	
 	//Pos
@@ -260,9 +265,10 @@ float4 PS(PixelInput input) : SV_Target
     finalColor.a = 1.0;
 
 #if ENABLE_SHADOW_MAP
-	finalColor.rgb *= CalcShadowFactor(input.PosInLight);
+	finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.z / input.ViewPosLight.w);
 #endif
 	
+	//finalColor.xyz = albedo.xyz;
 	//finalColor.xyz = float4(1.0,1.0,1.0,1.0);
 	//finalColor.xyz = input.Normal;
 	//finalColor.xyz = normal * 0.5 + 0.5;
@@ -299,7 +305,7 @@ float4 PS(PixelInput input) : SV_Target
 	finalColor.z = -finalColor.z;
 	finalColor.xyz = (finalColor.xyz * 32 + 1.0) / 2.0;
 #endif
-	return finalColor * input.Color;
+	return finalColor/* * input.Color*/;
 }
 
 /************ ForwardAdd ************/
@@ -403,8 +409,8 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	output.Depth = MIR_SAMPLE_TEX2D_LEVEL(_GDepth, input.Tex, 0).r;
 	
 	float4 position = float4(MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz * 2.0 - 1.0, 1.0);
-	position = mul(mul(ViewInv, ProjectionInv), position);
-	position /= position.w;
+	float4 worldPosition = mul(mul(ViewInv, ProjectionInv), position);
+	worldPosition /= worldPosition.w;
 	
 	float4 normal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex);
 	normal.xyz = normal.xyz * 2.0 - 1.0;
@@ -412,8 +418,8 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	float4 emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);
 	float3 aorm = float3(normal.w, albedo.w, emissive.w);
 	
-	float3 toLight = normalize(unity_LightPosition.xyz - position.xyz * unity_LightPosition.w);
-	float3 toEye = normalize(CameraPosition.xyz - position.xyz);
+	float3 toLight = normalize(unity_LightPosition.xyz - worldPosition.xyz * unity_LightPosition.w);
+	float3 toEye = normalize(CameraPosition.xyz - worldPosition.xyz);
 
 #if !PBR_MODE
     output.Color.rgb = BlinnPhongLight(toLight, normal.xyz, toEye, albedo.xyz, IsSpotLight);
@@ -424,14 +430,18 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 #endif
 	output.Color.a = 1.0;
 	
-#if ENABLE_SHADOW_MAP1
-	float4 PosInLight = mul(LightView, position);
-	PosInLight = mul(LightProjection, PosInLight);
+#if ENABLE_SHADOW_MAP
+	float4 PosLight = mul(LightView, worldPosition);
+	PosLight = mul(LightProjection, PosLight);
 	
-	float bias = max(0.05 * (1.0 - dot(normal.xyz, toLight)), 0.005);
-	PosInLight.z -= bias * PosInLight.w;
+#if ENABLE_SHADOW_MAP_BIAS
+	float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1.e5);
+	PosLight.z -= bias * PosLight.w;
+#endif
 	
-	output.Color.rgb *= CalcShadowFactor(PosInLight);
+	//output.Color.rgb *= CalcShadowFactor(PosLight);
+	//output.Color.rgb *= MIR_SAMPLE_SHADOW(_ShadowMapTexture, PosLight.xyz / PosLight.w);
+	//output.Color.rgb = MIR_SAMPLE_TEX2D(_GBufferAlbedo, PosLight.xy).rgb;
 #endif
 	
 	//output.Color.xyz = aorm;

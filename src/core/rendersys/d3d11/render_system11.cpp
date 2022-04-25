@@ -127,6 +127,8 @@ bool RenderSystem11::_SetRasterizerState()
 	D3D11_RASTERIZER_DESC wfdesc = {};
 	wfdesc.FillMode = D3D11_FILL_SOLID;
 	wfdesc.CullMode = D3D11_CULL_NONE;
+	wfdesc.SlopeScaledDepthBias = 8;
+	wfdesc.DepthBias = 1e5;
 	ID3D11RasterizerState* pRasterizerState = nullptr;
 	if (CheckHR(mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState))) return false;
 
@@ -803,7 +805,8 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc
 	sampDesc.MipLODBias = 0.0f;
 	sampDesc.MaxAnisotropy = (desc.Filter == D3D11_FILTER_ANISOTROPIC) ? D3D11_REQ_MAXANISOTROPY : 1;
 	sampDesc.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(desc.CmpFunc);
-	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 1.0;
+	sampDesc.BorderColor[0] = 1.e30f;
+	sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 1.0;
 	sampDesc.MinLOD = FLT_MIN;
 	sampDesc.MaxLOD = FLT_MAX;
 

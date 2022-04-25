@@ -73,7 +73,7 @@ void CompareLightCameraByViewProjection(const scene::Light& dir_light, const sce
 	for (size_t i = 0; i < positions.size(); ++i) {
 		auto cube_position = positions[i];
 		Eigen::Matrix4f light_view, light_proj;
-		dir_light.CalculateLightingViewProjection(camera, size, castShadow, light_view, light_proj);
+		//dir_light.CalculateLightingViewProjection(camera, size, castShadow, light_view, light_proj);
 		light_ndc = Transform3Projective(light_view) * cube_position;
 		light_ndc = Transform3Projective(light_proj) * cube_position;
 	#if !defined ONLY_CHECK_PROJ

@@ -50,6 +50,7 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 	if (GetTransform())
 		op.WorldTransform = GetTransform()->GetWorldMatrix();
 	op.CameraMask = mCameraMask;
+	op.CastShadow = mCastShadow;
 	return true;
 }
 

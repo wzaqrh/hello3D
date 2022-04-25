@@ -45,6 +45,30 @@ inline float3x3 GetTBN(float2 uv, float3 worldPos)
 	return float3x3(T, B, N);
 }
 
+float2 DepthGradient(float2 uv, float z)
+{
+	float2 dz_duv = 0;
+
+	float3 duvdist_dx = ddx(float3(uv, z));
+	float3 duvdist_dy = ddy(float3(uv, z));
+
+	dz_duv.x = duvdist_dy.y * duvdist_dx.z;
+	dz_duv.x -= duvdist_dx.y * duvdist_dy.z;
+    
+	dz_duv.y = duvdist_dx.x * duvdist_dy.z;
+	dz_duv.y -= duvdist_dy.x * duvdist_dx.z;
+
+	float det = (duvdist_dx.x * duvdist_dy.y) - (duvdist_dx.y * duvdist_dy.x);
+	dz_duv /= det;
+
+	return dz_duv;
+}
+
+float BiasedZ(float z0, float2 dz_duv, float2 offset)
+{
+	return z0 + dot(dz_duv, offset);
+}
+
 float length2(float3 v)
 {
 	return dot(v, v);
@@ -124,6 +148,7 @@ inline float LinearEyeDepth(float d, float2 depthParam)
 	return 1.0 / (depthParam.x + depthParam.y * d);
 #endif
 }
+#define ZClipToZEye LinearEyeDepth
 
 inline float fetch_eye_z(float2 uv, float2 depthParam, MIR_ARGS_TEX2D(tDepth))
 {

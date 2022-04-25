@@ -29,7 +29,8 @@ cbuffer cbPerLight : register(b1)
 	float4 unity_SpecColor;		//w(shiness)
 	float4 unity_LightAtten;	//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	float4 unity_SpotDirection;
-
+	float4 LightRadiusUVNearFar;
+	float4 LightDepthParam;
 	bool IsSpotLight;
 }
 
@@ -47,7 +48,7 @@ cbuffer cbPerFrame : register(b0)
 	
     float4 CameraPosition;
 	float4 FrameBufferSize;
-	float4 ShadowMapSize;
+	float4 ShadowMapSize; 
 	float4 glstate_lightmodel_ambient;
 	float Exposure;
 }

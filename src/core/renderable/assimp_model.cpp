@@ -122,11 +122,10 @@ public:
 /********** AssimpModel **********/
 CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectResource)
 {
-	COROUTINE_VARIABLES_2(assetPath, redirectResource);
-
 	if (!CoAwait mResourceMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource))) 
 		CoReturn false;
 
+	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 	mAABB = mAiScene->GetAABB();
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
 	UpdateFrame(0);
@@ -316,8 +315,11 @@ void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 	DoDraw(mAiScene->mRootNode, opList);
 
 	Eigen::Matrix4f world = GetTransform()->GetWorldMatrix();
-	for (int i = count; i < opList.Count(); ++i)
+	for (int i = count; i < opList.Count(); ++i) {
+		opList[i].CastShadow = mCastShadow;
+		opList[i].CameraMask = mCameraMask;
 		opList[i].WorldTransform = world;
+	}
 }
 
 }

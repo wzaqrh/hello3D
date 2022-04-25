@@ -29,16 +29,18 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	TIME_PROFILE("testSSAO.OnInitScene");
 
 	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
-	camera->SetFov(40.0);
+	camera->SetFov(45.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
 	test1::res::model model;
 	switch (mCaseIndex) {
-	case 0: {
-		camera->SetLookAt(Eigen::Vector3f(0, 0.5, -1) * 2.5, Eigen::Vector3f::Zero());
+	case 0:
+	case 1:{
+		camera->SetLookAt(Eigen::Vector3f(-0.644995f, 0.614183f, -0.660632f), Eigen::Vector3f::Zero());
 
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
-		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
+		auto dir_light = mScneMng->CreateAddLightNode<SpotLight>();
+		dir_light->SetLookAt(Eigen::Vector3f(3.57088f, 6.989f, -9.19698f), Eigen::Vector3f::Zero());
+		dir_light->SetLightRadius(1.0);
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
@@ -46,17 +48,31 @@ CoTask<bool> TestShadowMap::OnInitScene()
 
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
-		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
-		mTransform = CoAwait model.Init("buddha", mModel);
-		mTransform->SetPosition(Eigen::Vector3f(0, 0.4, 0));
-		mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
 
-		auto floor = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
-		auto floorModel = CoAwait model.Init("floor", floor);
-		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
-		floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));
+		{
+			auto floor = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+			auto floorModel = CoAwait model.Init("floor", floor);
+			floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
+			floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));
+			if (mCaseIndex == 1) {
+				floorModel->SetPosition(Eigen::Vector3f(0, -0.4, 0));
+			}
+			floor->SetCastShadow(false);
+		}
 
-		camera->SetRenderingPath(mir::kRenderPathDeffered);
+		{
+			mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+			if (mCaseIndex == 1) {
+				mTransform = CoAwait model.Init("buddha", mModel);
+				mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
+			}
+			else {
+				mTransform = CoAwait model.Init("armadillo", mModel);
+				mTransform->SetScale(Eigen::Vector3f(0.005, 0.005, 0.005));
+			}
+		}
+
+		//camera->SetRenderingPath(mir::kRenderPathDeffered);
 	}break;
 	default:
 		break;

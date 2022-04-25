@@ -160,6 +160,6 @@ float4 PSBlurY(PixelInput input) : SV_Target
 	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
 	blurIn.resolution = FrameBufferSize;
 	blurIn.depthParam = DepthParam;
-	float4 finalColor = BilateralBlurX(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(_GBufferAlbedo));
+	float4 finalColor = BilateralBlurY(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(_GBufferAlbedo));
 	return finalColor * MIR_SAMPLE_TEX2D(_SceneImage, input.texUV);
 }

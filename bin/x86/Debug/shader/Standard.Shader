@@ -29,7 +29,8 @@
 			<Element Name="unity_SpecColor"		Type="float4"></Element>
 			<Element Name="unity_LightAtten"	Type="float4"></Element>
 			<Element Name="unity_SpotDirection"	Type="float4"></Element>
-			
+			<Element Name="LightRadiusUVNearFar" Type="float4"></Element>
+			<Element Name="LightDepthParam"		Type="float4"></Element>
 			<Element Name="IsSpotLight" 	 	Type="bool"></Element>
 		</Uniform>
 		
@@ -53,8 +54,8 @@
 		
 		<Texture Name="txGlobal">
 			<Element Slot="6" Filter="0x15">_SceneImage</Element>
-			<Element Slot="7" Filter="0x15">_GDepth</Element>
-			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
+			<Element Slot="7" Filter="0x0">_GDepth</Element>
+			<Element Slot="8" CompFunc="2" AddressU="4" AddressV="4" AddressW="1">_ShadowMapTexture</Element>
 			<Element Slot="9" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_DiffuseCube</Element>
 			<Element Slot="10" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_SpecCube</Element>
 			<Element Slot="11" Filter="0x15">_LUT</Element>			

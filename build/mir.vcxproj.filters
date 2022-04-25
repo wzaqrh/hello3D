@@ -244,11 +244,11 @@
     <ClInclude Include="..\src\core\scene\component.h">
       <Filter>src\core\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\scene\light.h">
-      <Filter>src\core\scene\light</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\material_load_param.h">
       <Filter>src\core\resource\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\scene\light.h">
+      <Filter>src\core\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -403,7 +403,7 @@
       <Filter>src\core\scene</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\scene\light.cpp">
-      <Filter>src\core\scene\light</Filter>
+      <Filter>src\core\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -460,9 +460,6 @@
     </Filter>
     <Filter Include="src\core\base\tpl">
       <UniqueIdentifier>{83b933a7-c99d-4e06-bf3d-d62aaa54c2ef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\core\scene\light">
-      <UniqueIdentifier>{3d2381da-6294-4919-aeba-f20ecd2e4f53}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\shader\pcss">
       <UniqueIdentifier>{b9edd590-f7d1-489a-abe4-6f0dbb391554}</UniqueIdentifier>
@@ -561,6 +558,15 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fx">
       <Filter>src\shader\pcss</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Shadow.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Poisson.cginc">
+      <Filter>src\shader\inc</Filter>
     </None>
   </ItemGroup>
 </Project>

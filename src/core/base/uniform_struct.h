@@ -42,10 +42,12 @@ struct UNIFORM_ALIGN cbPerLight
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbPerLight() {
 		unity_LightPosition = Eigen::Vector4f::Zero();
-		unity_LightColor = Eigen::Vector4f::Zero();
-		unity_SpecColor = Eigen::Vector4f::Zero();
+		unity_LightColor = Eigen::Vector4f::Ones();
+		unity_SpecColor = Eigen::Vector4f::Ones();
 		unity_LightAtten = Eigen::Vector4f::Zero();
 		unity_SpotDirection = Eigen::Vector4f::Zero();
+		LightRadiusUVNearFar = Eigen::Vector4f(0.0001f, 0.0001f, 0.3f, 1000.0f);
+		LightDepthParam = Eigen::Vector4f(3.33333f, 3.33233f, 0.0f, 0.0f);
 		IsSpotLight = false;
 	}
 public:
@@ -54,6 +56,8 @@ public:
 	Eigen::Vector4f unity_SpecColor;//w(shiness)
 	Eigen::Vector4f unity_LightAtten;//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	Eigen::Vector4f unity_SpotDirection;
+	Eigen::Vector4f LightRadiusUVNearFar;
+	Eigen::Vector4f LightDepthParam;
 	BOOL IsSpotLight;
 };
 

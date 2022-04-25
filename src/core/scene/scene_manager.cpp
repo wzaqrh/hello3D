@@ -109,6 +109,10 @@ void SceneManager::UpdateFrame(float dt)
 		if (CameraPtr camera = node->GetComponent<Camera>())
 			camera->UpdateFrame(dt);
 	}
+
+	Eigen::AlignedBox3f aabb = this->GetWorldAABB();
+	for (auto& light : mLights)
+		light->UpdateLightCamera(aabb);
 }
 
 void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
@@ -119,11 +123,15 @@ void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
 	}
 }
 
-Eigen::AlignedBox3f SceneManager::GetAABB() const
+Eigen::AlignedBox3f SceneManager::GetWorldAABB() const
 {
 	Eigen::AlignedBox3f aabb;
-	for (auto& node : mNodes)
+	//for (auto& node : mNodes)
+	//	aabb.extend(node->GetAABB());
+	for (int i = 3; i < mNodes.size(); ++i) {
+		auto node = mNodes[i];
 		aabb.extend(node->GetAABB());
+	}
 	return aabb;
 }
 

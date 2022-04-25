@@ -1,9 +1,7 @@
 #ifndef LIGHTING_H
 #define LIGHTING_H
 #include "Standard.cginc"
-
-#define SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
-#define PCF_SHADOW
+#include "CommonFunction.cginc"
 
 inline float3 MirLambertLight(float3 toLight, float3 normal, float3 albedo, bool spotLight)
 {
@@ -71,51 +69,6 @@ inline float3 BlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, floa
 
 	//point lighting, spot lighting
     return luminance * CalcLightAtten(lengthSq, toLight_, spotLight);
-}
-
-inline float3 UnityCombineShadowcoordComponents(float2 baseUV, float2 deltaUV, float depth, float3 receiverPlaneDepthBias)
-{
-    float3 uv = float3(baseUV + deltaUV, depth + receiverPlaneDepthBias.z);
-    uv.z += dot(deltaUV, receiverPlaneDepthBias.xy);
-    return uv;
-}
-inline half UnitySampleShadowmap_PCF3x3NoHardwareSupport(float4 coord, float3 receiverPlaneDepthBias)
-{
-    half shadow = 1;
-#ifdef SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
-    // when we don't have hardware PCF sampling, then the above 5x5 optimized PCF really does not work.
-    // Fallback to a simple 3x3 sampling with averaged results.
-    float2 base_uv = coord.xy;
-    float2 ts = ShadowMapSize.zw;
-    shadow = 0;
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, -ts.y), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, 0), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, 0), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(ts.x, 0), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(-ts.x, ts.y), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(0, ts.y), coord.z, receiverPlaneDepthBias));
-    shadow += MIR_SAMPLE_SHADOW(_ShadowMapTexture, UnityCombineShadowcoordComponents(base_uv, float2(ts.x, ts.y), coord.z, receiverPlaneDepthBias));
-    shadow /= 9.0;
-#endif
-    return shadow;
-}
-
-float CalcShadowFactor(float4 shadowPosH)
-{
-	if (ShadowMapSize.z == 0) return 1.0;
-	
-    shadowPosH.xyz /= shadowPosH.w;
-#if DEBUG_SHADOW_MAP
-	return shadowPosH.y;
-#endif
-
-#if defined PCF_SHADOW
-	return UnitySampleShadowmap_PCF3x3NoHardwareSupport(shadowPosH, float3(0,0,0));
-#else
-	return MIR_SAMPLE_SHADOW(_ShadowMapTexture, shadowPosH).r;
-#endif
 }
 
 #endif

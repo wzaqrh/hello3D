@@ -227,6 +227,9 @@
     <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fxh" />
     <None Include="..\bin\x86\Debug\shader\pcss\Poisson.fxh" />
     <None Include="..\bin\x86\Debug\shader\pcss\Shading.fxh" />
+    <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Shadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.cginc" />
     <None Include="..\bin\x86\Debug\shader\Skeleton.Shader" />
     <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader" />

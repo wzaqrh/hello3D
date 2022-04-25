@@ -24,6 +24,7 @@ struct RenderOperation {
 public:
 	Eigen::Matrix4f WorldTransform;
 	unsigned CameraMask;
+	bool CastShadow = true;
 
 	std::vector<IVertexBufferPtr> VertexBuffers;
 	IIndexBufferPtr IndexBuffer;
@@ -60,9 +61,13 @@ interface MIR_CORE_API Renderable : public Component
 	virtual void GenRenderOperation(RenderOperationQueue& opList) = 0;
 	virtual Eigen::AlignedBox3f GetWorldAABB() const = 0;
 
+	void SetCastShadow(bool castShadow) { mCastShadow = castShadow; }
+	bool IsCastShadow() const { return mCastShadow; }
+
 	void SetCameraMask(unsigned mask) { mCameraMask = mask; }
 	unsigned GetCameraMask() const { return mCameraMask; }
 protected:
+	bool mCastShadow = true;
 	unsigned mCameraMask = -1;
 };
 

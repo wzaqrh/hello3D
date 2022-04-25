@@ -37,7 +37,7 @@ void SceneNode::SetCamera(const scene::CameraPtr& camera)
 
 const Eigen::AlignedBox3f SceneNode::GetAABB() const
 {
-	return mRenderable->GetWorldAABB();
+	return mRenderable ? mRenderable->GetWorldAABB() : Eigen::AlignedBox3f();
 }
 
 SceneNodePtr SceneNodeFactory::CreateNode()

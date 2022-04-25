@@ -56,11 +56,11 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	, mStatesBlock(*mStatesBlockPtr)
 {
 	mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), 
-		MakeResFormats(kFormatUnknown, kFormatD24UNormS8UInt));
+		MakeResFormats(kFormatR8G8B8A8UNorm/*kFormatUnknown*/, kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 
 	mGBuffer = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), 
-		MakeResFormats(kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+		MakeResFormats(kFormatR16G16B16A16UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 	//mGBuffer->SetAttachZStencil(renderSys.GetBackFrameBuffer()->GetAttachZStencil());
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
 
@@ -89,8 +89,6 @@ void RenderPipeline::BindPass(const res::PassPtr& pass)
 
 void RenderPipeline::RenderPass(const res::PassPtr& pass, const TextureVector& textures, int iterCnt, const RenderOperation& op)
 {
-	//auto lock = mStatesBlock.LockFrameBuffer(IF_OR(pass->mFrameBuffer, nullptr));
-
 	if (textures.Count() > 0) mRenderSys.SetTextures(kTextureUserSlotFirst, &textures[0], textures.Count());
 	else mRenderSys.SetTextures(kTextureUserSlotFirst, nullptr, 0);
 
@@ -136,6 +134,8 @@ void RenderPipeline::RenderLight(const RenderOperationQueue& opQueue, const std:
 {
 	for (const auto& op : opQueue) {
 		auto shader = op.Material->GetShader();
+		if ((! op.CastShadow) && (lightMode == LIGHTMODE_SHADOW_CASTER))
+			continue;
 		if ((op.CameraMask & camMask) && shader->IsLoaded()) {
 			globalParam.World = op.WorldTransform;
 
@@ -171,9 +171,8 @@ static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const E
 {
 	cbPerFrame perFrameParam = MakePerFrame(camera, fbSize);
 	if (shadowMap) {
-		constexpr bool castShadow = false;
-		light.CalculateLightingViewProjection(camera, fbSize, castShadow, perFrameParam.LightView, perFrameParam.LightProjection);
-		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, fbSize, {}));
+		perFrameParam.LightView = light.GetView();
+		perFrameParam.LightProjection = light.GetRecvShadowProj();
 		perFrameParam.ShadowMapSize = Eigen::Vector4f(shadowMap->GetWidth(), shadowMap->GetHeight(), 1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight());
 	}
 	return perFrameParam;
@@ -181,31 +180,26 @@ static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const E
 static cbPerFrame MakeCastShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::Light& light)
 {
 	cbPerFrame perFrameParam;
-	{
-		constexpr bool castShadow = true;
-		light.CalculateLightingViewProjection(camera, fbSize, castShadow, perFrameParam.View, perFrameParam.Projection);
-		MIR_TEST_CASE(CompareLightCameraByViewProjection(light, camera, fbSize, {}));
-	}
+	perFrameParam.View = light.GetView();
+	perFrameParam.Projection = light.GetCastShadowProj();
 	return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 }
-void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
+void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
 
 	//LIGHTMODE_SHADOW_CASTER
 	bool genSM = false;
-	if (!opQueue.IsEmpty())
+	if (!ops.IsEmpty())
 	{
-	#if !defined DEBUG_SHADOW_CASTER
 		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, Eigen::Vector4f::Zero(), 1.0, 0);
-	#endif
 		auto depth_state = mStatesBlock.LockDepth(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeDisable());
 		for (auto& light : lights) {
-			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == kLightDirectional)) {
+			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->DidCastShadow())) {
 				genSM = true;
 				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, mRenderSys.WinSize(), *light);
-				RenderLight(opQueue, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
+				RenderLight(ops, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 				break;
 			}
 		}
@@ -220,9 +214,8 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 		auto blend_state = mStatesBlock.LockBlend();
 		
 		auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, IF_AND_OR(genSM, mShadowMap->GetAttachZStencilTexture(), nullptr));
-		
-		auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
 		auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
+		auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
 		auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(camera.GetSkyBox(), GetLutMap()));
 
 		scene::LightPtr firstLight = nullptr;
@@ -238,7 +231,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 					depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 					blend_state(BlendState::MakeAlphaNonPremultiplied());
 					perFrame = MakeReceiveShadowPerFrame(camera, mRenderSys.WinSize(), *firstLight, IF_AND_OR(genSM, mShadowMap, nullptr));
-					RenderLight(opQueue, LIGHTMODE_FORWARD_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
+					RenderLight(ops, LIGHTMODE_FORWARD_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 					
 					if (auto skybox = camera.GetSkyBox()) {
 						depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll));
@@ -251,7 +244,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 				else {
 					depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskZero));
 					blend_state(BlendState::MakeAdditive());
-					RenderLight(opQueue, LIGHTMODE_FORWARD_ADD, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
+					RenderLight(ops, LIGHTMODE_FORWARD_ADD, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 				}
 			}//if light.GetCameraMask & camera.GetCameraMask
 		}//for lights
@@ -259,12 +252,31 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& opQueue, co
 #endif
 }
 
-void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
+void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
 
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
+
+	//LIGHTMODE_SHADOW_CASTER
+	if (!ops.IsEmpty())
+	{
+		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, Eigen::Vector4f::Zero(), 1.0, 0);
+		auto depth_state = mStatesBlock.LockDepth();
+		auto blend_state = mStatesBlock.LockBlend();
+
+		//depth_state(DepthState::MakeFor3D(false));
+		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+		blend_state(BlendState::MakeDisable());
+		for (auto& light : lights) {
+			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == kLightDirectional)) {
+				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, mRenderSys.WinSize(), *light);
+				RenderLight(ops, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
+				break;
+			}
+		}
+	}
 
 	//LIGHTMODE_PREPASS_BASE
 	{
@@ -288,7 +300,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 					depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 
 					perFrame = MakeReceiveShadowPerFrame(camera, mRenderSys.WinSize(), *firstLight, mGBuffer);
-					RenderLight(opQueue, LIGHTMODE_PREPASS_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
+					RenderLight(ops, LIGHTMODE_PREPASS_BASE, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 					
 					blend_state(BlendState::MakeAlphaNonPremultiplied());
 				}
@@ -297,8 +309,9 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 				}
 				depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 
+				//LIGHTMODE_PREPASS_FINAL
 				auto tex_gdepth	= mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
-				auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mGBuffer->GetAttachZStencilTexture());
+				auto tex_shadow	= mStatesBlock.LockTexture(kPipeTextureShadowMap, mShadowMap->GetAttachZStencilTexture());
 
 				auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(camera.GetSkyBox(), GetTexture()));
 				auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -331,7 +344,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& opQueue, c
 		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
 
 		cbPerFrame perFrame = MakePerFrame(camera, mRenderSys.WinSize());
-		RenderLight(opQueue, LIGHTMODE_OVERLAY, camera.GetCullingMask(), nullptr, perFrame);
+		RenderLight(ops, LIGHTMODE_OVERLAY, camera.GetCullingMask(), nullptr, perFrame);
 	}
 
 	//LIGHTMODE_POSTPROCESS

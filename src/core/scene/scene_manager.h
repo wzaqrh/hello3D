@@ -52,7 +52,7 @@ public:
 	template<typename RendClass> const std::shared_ptr<RendClass>& AddRendNode(const std::shared_ptr<RendClass>& rend) { AddRendNode((RenderablePtr)rend); return rend; }
 	RenderablePtr AddRendNode(RenderablePtr rend);
 public:
-	Eigen::AlignedBox3f GetAABB() const;
+	Eigen::AlignedBox3f GetWorldAABB() const;
 
 	const std::vector<scene::CameraPtr>& GetCameras() const { return mCameras; }
 	scene::CameraPtr GetDefCamera() const { return GetCameras().size() ? GetCameras()[0] : nullptr;  }
