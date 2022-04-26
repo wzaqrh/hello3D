@@ -461,9 +461,6 @@
     <Filter Include="src\core\base\tpl">
       <UniqueIdentifier>{83b933a7-c99d-4e06-bf3d-d62aaa54c2ef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\shader\pcss">
-      <UniqueIdentifier>{b9edd590-f7d1-489a-abe4-6f0dbb391554}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">
@@ -546,18 +543,6 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc">
       <Filter>src\shader\inc</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fxh">
-      <Filter>src\shader\pcss</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\pcss\Poisson.fxh">
-      <Filter>src\shader\pcss</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\pcss\Shading.fxh">
-      <Filter>src\shader\pcss</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fx">
-      <Filter>src\shader\pcss</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc">
       <Filter>src\shader\inc</Filter>

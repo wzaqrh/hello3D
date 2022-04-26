@@ -60,9 +60,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng)
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 
 	mGBuffer = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), 
-		MakeResFormats(kFormatR16G16B16A16UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
-	//mGBuffer->SetAttachZStencil(renderSys.GetBackFrameBuffer()->GetAttachZStencil());
-	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");
+		MakeResFormats(kFormatR16G16B16A16UNorm, kFormatR16G16B16A16UNorm, kFormatR8G8B8A8UNorm, kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 
 	mTempFbMng = CreateInstance<TempFrameBufferManager>(resMng, renderSys.WinSize(), MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 
@@ -205,7 +204,6 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const 
 		}
 	}
 	
-#if !defined DEBUG_SHADOW_CASTER
 	//LIGHTMODE_FORWARD_BASE
 	{
 		auto fb_2post_process = mStatesBlock.LockFrameBuffer(IF_OR(camera.GetPostProcessInput(), nullptr), 
@@ -249,7 +247,6 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const 
 			}//if light.GetCameraMask & camera.GetCameraMask
 		}//for lights
 	}
-#endif
 }
 
 void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
@@ -266,11 +263,10 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		//depth_state(DepthState::MakeFor3D(false));
 		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		blend_state(BlendState::MakeDisable());
 		for (auto& light : lights) {
-			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->GetType() == kLightDirectional)) {
+			if ((light->GetCameraMask() & camera.GetCullingMask()) && (light->DidCastShadow())) {
 				cbPerFrame perFrame = MakeCastShadowPerFrame(camera, mRenderSys.WinSize(), *light);
 				RenderLight(ops, LIGHTMODE_SHADOW_CASTER, camera.GetCullingMask(), &MakePerLight(*light), perFrame);
 				break;
@@ -382,13 +378,9 @@ void RenderPipeline::Render(const RenderOperationQueue& opQueue, const std::vect
 {
 	for (auto& camera : cameras) 
 	{
-		auto outLock = mStatesBlock.LockFrameBuffer(IF_OR(camera->GetOutput(), nullptr));
-		//if (camera->GetOutput()) mRenderSys.ClearFrameBuffer(nullptr, Eigen::Vector4f::Zero(), 1.0, 0);
-
-		if (camera->GetRenderingPath() == kRenderPathForward)
-			RenderCameraForward(opQueue, *camera, lights);
-		else
-			RenderCameraDeffered(opQueue, *camera, lights);
+		auto fb_camera_output = mStatesBlock.LockFrameBuffer(IF_OR(camera->GetOutput(), nullptr));
+		if (camera->GetRenderingPath() == kRenderPathForward) RenderCameraForward(opQueue, *camera, lights);
+		else RenderCameraDeffered(opQueue, *camera, lights);
 	}
 }
 

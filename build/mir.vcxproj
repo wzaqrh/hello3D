@@ -224,9 +224,6 @@
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
-    <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fxh" />
-    <None Include="..\bin\x86\Debug\shader\pcss\Poisson.fxh" />
-    <None Include="..\bin\x86\Debug\shader\pcss\Shading.fxh" />
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
     <None Include="..\bin\x86\Debug\shader\Shadow.cginc" />
@@ -259,11 +256,6 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\pcss\PercentageCloserSoftShadows.fx">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

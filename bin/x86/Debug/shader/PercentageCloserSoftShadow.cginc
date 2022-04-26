@@ -4,7 +4,7 @@
 #include "Debug.cginc"
 
 #if !defined PCSS_QUALITY
-#define PCSS_QUALITY PCSS_QUALITY_HIGH
+#define PCSS_QUALITY PCSS_QUALITY_MEDIUM
 #endif
 
 #if PCSS_QUALITY == PCSS_QUALITY_LOW
@@ -170,6 +170,29 @@ float PCSSShadow(float2 uv, float z, float2 dz_duv, float zEye,
     // STEP 3: filtering
     // ------------------------
 	return PCF_Filter(uv, z, dz_duv, filterRadiusUV, MIR_PASS_SHADOWMAP(tDepthMap));
+}
+
+inline float3 CombineShadowcoordComponents(float2 baseUV, float2 deltaUV, float depth, float3 receiverPlaneDepthBias)
+{
+	float3 uv = float3(baseUV + deltaUV, depth + receiverPlaneDepthBias.z);
+	uv.z += dot(deltaUV, receiverPlaneDepthBias.xy);
+	return uv;
+}
+inline float FastPCFShadow(float3 coord, float3 receiverPlaneDepthBias, float2 ts, MIR_ARGS_SHADOWMAP(tDepthMap))
+{
+	float2 base_uv = coord.xy;
+	float shadow = 0;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, -ts.y), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, 0), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, 0), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, 0), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, ts.y), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, ts.y), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, ts.y), coord.z, receiverPlaneDepthBias));
+	shadow /= 9.0;
+	return shadow;
 }
 
 #endif

@@ -72,7 +72,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 			}
 		}
 
-		//camera->SetRenderingPath(mir::kRenderPathDeffered);
+		camera->SetRenderingPath((mir::RenderingPath)mCaseSecondIndex);
 	}break;
 	default:
 		break;

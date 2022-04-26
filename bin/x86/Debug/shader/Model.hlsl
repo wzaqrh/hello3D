@@ -431,17 +431,15 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	output.Color.a = 1.0;
 	
 #if ENABLE_SHADOW_MAP
-	float4 PosLight = mul(LightView, worldPosition);
-	PosLight = mul(LightProjection, PosLight);
+	float4 ViewPosLight = mul(LightView, worldPosition);
+	float4 PosLight = mul(LightProjection, ViewPosLight);
 	
 #if ENABLE_SHADOW_MAP_BIAS
 	float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1.e5);
 	PosLight.z -= bias * PosLight.w;
 #endif
 	
-	//output.Color.rgb *= CalcShadowFactor(PosLight);
-	//output.Color.rgb *= MIR_SAMPLE_SHADOW(_ShadowMapTexture, PosLight.xyz / PosLight.w);
-	//output.Color.rgb = MIR_SAMPLE_TEX2D(_GBufferAlbedo, PosLight.xy).rgb;
+	output.Color.rgb *= CalcShadowFactor(PosLight.xyz / PosLight.w, ViewPosLight.z / ViewPosLight.w);
 #endif
 	
 	//output.Color.xyz = aorm;
