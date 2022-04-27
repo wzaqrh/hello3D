@@ -137,23 +137,18 @@ inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 t
 struct PSShadowCasterInput 
 {
 	float4 Pos  : SV_POSITION;
-	float4 Pos0 : POSITION0;
-	float2 Tex : TEXCOORD0;
+	//float4 Pos0 : POSITION0;
+	//float2 Tex : TEXCOORD0;
 };
-
 PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 {
 	PSShadowCasterInput output;
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
-	matrix MW = mul(World, transpose(Model));
-	matrix MWV = mul(View, MW);
-	matrix MWVP = mul(Projection, MWV);
-	output.Pos = mul(MWVP, skinPos);
-	output.Pos0 = output.Pos;
-	output.Tex = surf.Tex;
+	output.Pos = mul(mul(Projection, mul(View, mul(World, transpose(Model)))), skinPos);
+	//output.Pos0 = output.Pos;
+	//output.Tex = surf.Tex;
 	return output;
 }
-
 float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 {
 	float4 finalColor = float4(0,0,0,1);
@@ -161,8 +156,27 @@ float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
 	//finalColor.y = 0;
 	//finalColor.z = input.Pos0.z / input.Pos0.w;
-	finalColor = GetAlbedo(input.Tex);
+	//finalColor = GetAlbedo(input.Tex);
 	return finalColor;
+}
+
+struct PSGenerateVSMInput
+{
+	float4 Pos : SV_POSITION;
+	float4 ViewPos : POSITION0;
+};
+PSGenerateVSMInput VSGenerateVSM(vbSurface surf, vbWeightedSkin skin)
+{
+	PSGenerateVSMInput output;
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
+	output.ViewPos = mul(mul(View, mul(World, transpose(Model))), skinPos);
+	output.Pos = mul(Projection, output.ViewPos);
+	return output;
+}
+float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target
+{
+	float depth = length(input.ViewPos);
+	return float4(depth, depth * depth, 0.0f, 1.0f);
 }
 
 /************ ForwardBase ************/
@@ -176,8 +190,8 @@ struct PixelInput
 	float3 ToEye  : TEXCOORD1;//world space
 	float3 ToLight : TEXCOORD2;//world space
 #if ENABLE_SHADOW_MAP
-	float4 ViewPosLight : POSITION0; //light's ndc space
-	float4 PosLight : POSITION1;
+	float4 ViewPosLight : POSITION0;
+	float4 PosLight : POSITION1; //light's ndc space
 #endif    
 #if DEBUG_TBN != 2
     float3 SurfPos : POSITION2;//world space
@@ -265,7 +279,7 @@ float4 PS(PixelInput input) : SV_Target
     finalColor.a = 1.0;
 
 #if ENABLE_SHADOW_MAP
-	finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.z / input.ViewPosLight.w);
+	finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz / input.ViewPosLight.w);
 #endif
 	
 	//finalColor.xyz = albedo.xyz;
@@ -439,7 +453,7 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	PosLight.z -= bias * PosLight.w;
 #endif
 	
-	output.Color.rgb *= CalcShadowFactor(PosLight.xyz / PosLight.w, ViewPosLight.z / ViewPosLight.w);
+	output.Color.rgb *= CalcShadowFactor(PosLight.xyz / PosLight.w, ViewPosLight.xyz / ViewPosLight.w);
 #endif
 	
 	//output.Color.xyz = aorm;

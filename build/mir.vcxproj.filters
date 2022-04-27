@@ -553,5 +553,8 @@
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\VarianceShadow.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
   </ItemGroup>
 </Project>

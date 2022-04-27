@@ -36,6 +36,7 @@ public:
 	void ProcessPendingEvent();
 private:
 	Launch mLaunchMode;
+	Configure mConfigure;
 	RenderSystemPtr mRenderSys;
 	res::MaterialFactoryPtr mMaterialFac;
 	res::AiResourceFactoryPtr mAiResourceFac;

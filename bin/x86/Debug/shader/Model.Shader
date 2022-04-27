@@ -58,8 +58,8 @@
 		<Pass>
 			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
 			<PROGRAM> 
-				<VertexEntry>VSShadowCaster</VertexEntry> 
-				<PixelEntry>PSShadowCasterDebug</PixelEntry>
+				<VertexEntry>VSGenerateVSM</VertexEntry> 
+				<PixelEntry>PSGenerateVSM</PixelEntry>
 			</PROGRAM>
 		</Pass>
 		

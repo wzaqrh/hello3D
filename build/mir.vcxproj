@@ -235,6 +235,7 @@
     <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
     <None Include="..\bin\x86\Debug\shader\Standard.Shader" />
     <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc" />
+    <None Include="..\bin\x86\Debug\shader\VarianceShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc" />
   </ItemGroup>
   <ItemGroup>

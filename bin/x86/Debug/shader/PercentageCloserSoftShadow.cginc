@@ -1,11 +1,17 @@
 #ifndef PERCENTAGE_CLOSER_SOFT_SHADOW_H
 #define PERCENTAGE_CLOSER_SOFT_SHADOW_H
-#include "CommonFunction.cginc"
 #include "Debug.cginc"
+#include "CommonFunction.cginc"
 
-#if !defined PCSS_QUALITY
-#define PCSS_QUALITY PCSS_QUALITY_MEDIUM
-#endif
+#define BLOCKER_SAMPLE_ALL 0
+#define BLOCKER_SAMPLE_POISSON25 1
+#define BLOCKER_SAMPLE_POISSON32 2
+#define BLOCKER_SAMPLE_POISSON64 3
+
+#define PCF_SAMPLE_ALL 0
+#define PCF_SAMPLE_POISSON25 1
+#define PCF_SAMPLE_POISSON32 2
+#define PCF_SAMPLE_POISSON64 3
 
 #if PCSS_QUALITY == PCSS_QUALITY_LOW
 #include "Poisson.cginc"
@@ -66,16 +72,16 @@ void FindBlocker(out float avgBlockerDepth, out float numBlockers,
 
 #if BLOCKER_SAMPLE_MODE != 0
 	for (int i = 0; i < BLOCKER_POISSON_COUNT; ++i)
-    {
+	{
 		float2 offset = BLOCKER_POISSON_KERNEL[i] * searchRegionRadiusUV;
 		float shadowMapDepth = MIR_SAMPLE_TEX2D_LEVEL(tDepth, uv + offset, 0);
-        float z = BiasedZ(z0, dz_duv, offset);
-        if (shadowMapDepth < z)
-        {
-            blockerSum += shadowMapDepth;
-            numBlockers++;
-        }
-    }
+		float z = BiasedZ(z0, dz_duv, offset);
+		if (shadowMapDepth < z)
+		{
+			blockerSum += shadowMapDepth;
+			numBlockers++;
+		}
+	}
 #else
 	float2 stepUV = searchRegionRadiusUV / BLOCKER_SEARCH_STEP_COUNT;
 	for (float x = -BLOCKER_SEARCH_STEP_COUNT; x <= BLOCKER_SEARCH_STEP_COUNT; ++x)

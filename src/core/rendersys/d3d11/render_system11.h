@@ -54,6 +54,7 @@ public:
 		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) override;
+	void GenerateMips(ITexturePtr texture) override;
 
 	void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
 	void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;

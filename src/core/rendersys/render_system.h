@@ -83,6 +83,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) = 0;
 	void SetTexture(size_t slot, ITexturePtr texture) { SetTextures(slot, &texture, 1); }
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
+	virtual void GenerateMips(ITexturePtr texture) {}
 
 	/***** about state *****/
 	virtual void SetViewPort(int x, int y, int w, int h) = 0;

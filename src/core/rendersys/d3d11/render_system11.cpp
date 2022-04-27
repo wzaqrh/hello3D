@@ -222,22 +222,25 @@ static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen
 	D3D11_TEXTURE2D_DESC texDesc = {};
 	texDesc.Width = size.x();
 	texDesc.Height = size.y();
-	texDesc.MipLevels = 1;
+	texDesc.MipLevels = 0;
+	texDesc.MiscFlags = D3D10_RESOURCE_MISC_GENERATE_MIPS;
 	texDesc.ArraySize = 1;
 	texDesc.Format = static_cast<DXGI_FORMAT>(format);
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	texDesc.CPUAccessFlags = 0;
-	texDesc.MiscFlags = 0;
 	ID3D11Texture2D* pTexture = nullptr;
 	if (CheckHR(pDevice->CreateTexture2D(&texDesc, NULL, &pTexture))) return nullptr;
+
+	pTexture->GetDesc(&texDesc);
+	int iMipLevels = texDesc.MipLevels;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = static_cast<DXGI_FORMAT>(format);
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MipLevels = iMipLevels;
 	if (CheckHR(pDevice->CreateShaderResourceView(pTexture, &srvDesc, &texture->AsSRV()))) return nullptr;
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -746,6 +749,12 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 
 	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV());
 	return texture;
+}
+void RenderSystem11::GenerateMips(ITexturePtr res)
+{
+	BOOST_ASSERT(res);
+	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
+	mDeviceContext->GenerateMips(texture->AsSRV());
 }
 static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(const ITexturePtr textures[], size_t count) {
 	std::vector<ID3D11ShaderResourceView*> views(count);

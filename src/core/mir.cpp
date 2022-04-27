@@ -30,7 +30,7 @@ bool Mir::Initialize(HWND hWnd) {
 	mAiResourceFac = CreateInstance<res::AiResourceFactory>();
 	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac, mIoService);
 	
-	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng);
+	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng, mConfigure);
 	mRenderableFac = CreateInstance<RenderableFactory>(*mResourceMng, mLaunchMode);
 
 	mSceneMng = CreateInstance<SceneManager>(*mResourceMng, mRenderableFac);

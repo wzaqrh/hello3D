@@ -47,7 +47,7 @@
 #endif
 
 #if !defined USE_PUNCTUAL
-#define USE_PUNCTUAL 0
+#define USE_PUNCTUAL 1
 #endif
 
 #if !defined DEBUG_TBN
@@ -87,15 +87,17 @@
 #define PCSS_QUALITY_LOW 1
 #define PCSS_QUALITY_MEDIUM 2 
 #define PCSS_QUALITY_HIGH 3
+#if !defined PCSS_QUALITY
+#define PCSS_QUALITY PCSS_QUALITY_MEDIUM
+#endif
 
-#define BLOCKER_SAMPLE_ALL 0
-#define BLOCKER_SAMPLE_POISSON25 1
-#define BLOCKER_SAMPLE_POISSON32 2
-#define BLOCKER_SAMPLE_POISSON64 3
-
-#define PCF_SAMPLE_ALL 0
-#define PCF_SAMPLE_POISSON25 1
-#define PCF_SAMPLE_POISSON32 2
-#define PCF_SAMPLE_POISSON64 3
+#define SHADOW_RAW 1 
+#define SHADOW_PCF_FAST 2
+#define SHADOW_PCF 3
+#define SHADOW_PCSS 4
+#define SHADOW_VSM 5
+#if !defined SHADOW_MODE
+#define SHADOW_MODE 5/*SHADOW_VSM*/
+#endif
 
 #endif
