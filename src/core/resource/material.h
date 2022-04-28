@@ -28,15 +28,17 @@ public:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
-	struct GrabSource {
+	struct GrabOutput {
 		operator bool() const { return !Name.empty(); }
 		std::string Name;
-	} mGrabOutput;
-	struct GrabDestination {
+		std::vector<ResourceFormat> Format;
+	} mGrabOut;
+	struct GrabInput {
 		operator bool() const { return !Name.empty(); }
 		std::string Name;
+		int AttachIndex;
 		int TextureSlot;
-	} mGrabInput;
+	} mGrabIn;
 };
 
 class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>

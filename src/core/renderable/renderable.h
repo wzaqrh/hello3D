@@ -43,6 +43,8 @@ struct RenderOperationQueue {
 public:
 	std::vector<RenderOperation>::const_iterator begin() const { return mOps.begin(); }
 	std::vector<RenderOperation>::const_iterator end() const { return mOps.end(); }
+	std::vector<RenderOperation>::iterator begin() { return mOps.begin(); }
+	std::vector<RenderOperation>::iterator end() { return mOps.end(); }
 
 	bool IsEmpty() const { return mOps.empty(); }
 	size_t Count() const { return mOps.size(); }

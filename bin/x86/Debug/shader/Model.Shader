@@ -62,6 +62,24 @@
 				<PixelEntry>PSGenerateVSM</PixelEntry>
 			</PROGRAM>
 		</Pass>
+		<Pass>
+			<UseGrab>__shadowmap{14=0}</UseGrab>
+			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
+			<PROGRAM>
+				<VertexEntry>VSBlurVSM</VertexEntry>
+				<PixelEntry>PSBlurVSMX</PixelEntry>
+			</PROGRAM>
+			<GrabPass>VSM_BlurX{16,45}</GrabPass>
+		</Pass>
+		<Pass>
+			<UseGrab>VSM_BlurX{14=0}</UseGrab>
+			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
+			<PROGRAM>
+				<VertexEntry>VSBlurVSM</VertexEntry>
+				<PixelEntry>PSBlurVSMY</PixelEntry>
+			</PROGRAM>
+			<GrabPass>__shadowmap</GrabPass>
+		</Pass>
 		
 		<Pass>
 			<Tags> <LightMode>ForwardBase</LightMode> </Tags>

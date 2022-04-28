@@ -52,6 +52,9 @@ void LightCamera::Update(const Eigen::AlignedBox3f& sceneAABB)
 	}
 #endif
 
+#if 1
+	ShadowRecvProj = ShadowCasterProj;
+#else
 	ShadowRecvProj = Transform3Projective(ShadowCasterProj)
 		.prescale(Eigen::Vector3f(1, -1, 1))
 		.matrix();
@@ -59,6 +62,7 @@ void LightCamera::Update(const Eigen::AlignedBox3f& sceneAABB)
 		.prescale(Eigen::Vector3f(0.5, 0.5, 1))
 		.pretranslate(Eigen::Vector3f(0.5, 0.5, 0))
 		.matrix();
+#endif
 }
 
 /********** DirectLight **********/
@@ -67,7 +71,7 @@ DirectLight::DirectLight()
 
 void DirectLight::SetDirection(const Eigen::Vector3f& dir)
 {
-	mCamera.Direction = dir;
+	mCamera.Direction = dir.normalized();
 }
 
 void DirectLight::SetPosition(const Eigen::Vector3f& pos)

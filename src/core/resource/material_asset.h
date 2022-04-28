@@ -148,12 +148,16 @@ struct PassNode {
 	}
 public:
 	ProgramNode Program;
-	std::string LightMode, Name, ShortName, GrabOutput;
-	struct UseGrabNode {
+	std::string LightMode, Name, ShortName;
+	struct GrabOutputNode {
 		std::string Name;
+		std::vector<ResourceFormat> Format;
+	} GrabOut;
+	struct GrabInputNode {
+		std::string Name;
+		int AttachIndex = 0;
 		int TextureSlot = 0;
-	};
-	UseGrabNode GrabInput;
+	} GrabIn;
 };
 struct TechniqueNode : public tpl::Vector<PassNode> {
 	template<class Visitor> void ForEachPass(Visitor vis) const {

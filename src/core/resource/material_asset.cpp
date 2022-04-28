@@ -179,9 +179,18 @@ private:
 		}
 
 		int index = 0;
-		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("Texture"))) {
-			auto& node_sampler = it.second;
+		for (auto& tit : boost::make_iterator_range(nodeProgram->equal_range("Texture"))) {
+			auto& node_sampler = tit.second;
 			SamplerNode samplerSet;
+
+			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("UseTexture"))) {
+				std::string refName = it.second.data();
+				auto find_iter = mSamplerSetByName.find(refName);
+				if (find_iter != mSamplerSetByName.end()) {
+					samplerSet.Merge<true>(find_iter->second);
+				}
+			}
+
 			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("Element"))) {
 				auto& node_element = it.second;
 				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
@@ -309,16 +318,28 @@ private:
 					ParseProgram(node_program, pass.Program);
 				}
 
-				pass.GrabOutput = makeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
-				pass.GrabInput.TextureSlot = 0;
-				pass.GrabInput.Name = node_pass.get<std::string>("UseGrab", "");
-				if (!pass.GrabInput.Name.empty()) {
-					size_t pos = pass.GrabInput.Name.find_first_of(":");
-					if (pos != std::string::npos) {
-						pass.GrabInput.TextureSlot = std::stoi(pass.GrabInput.Name.substr(pos + 1));
-						pass.GrabInput.Name = pass.GrabInput.Name.substr(0, pos);
-					}
-					pass.GrabInput.Name = makeLoopVarName(pass.GrabInput.Name, i, repeat);
+				pass.GrabOut.Name = makeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
+				if (!pass.GrabOut.Name.empty()) {
+					std::vector<std::string> strArr;
+					boost::split(strArr, pass.GrabOut.Name, boost::is_any_of("{,}"), boost::token_compress_on); 
+					if (strArr.back().empty()) strArr.pop_back();
+
+					pass.GrabOut.Name = strArr[0];
+					pass.GrabOut.Format.resize(strArr.size() - 1);
+					for (size_t i = 1; i < strArr.size(); ++i)
+						pass.GrabOut.Format[i-1] = (ResourceFormat)std::stoi(strArr[i]);
+				}
+				
+				pass.GrabIn.TextureSlot = 0;
+				pass.GrabIn.Name = node_pass.get<std::string>("UseGrab", "");
+				if (!pass.GrabIn.Name.empty()) {
+					std::vector<std::string> strArr;
+					boost::split(strArr, pass.GrabIn.Name, boost::is_any_of("{=}"), boost::token_compress_on);
+					if (strArr.back().empty()) strArr.pop_back();
+
+					pass.GrabIn.Name = strArr[0];
+					if (strArr.size() > 1) pass.GrabIn.TextureSlot = std::stoi(strArr[1]);
+					if (strArr.size() > 2) pass.GrabIn.AttachIndex = std::stoi(strArr[2]);
 				}
 
 				techniqueNode.Add(std::move(pass));

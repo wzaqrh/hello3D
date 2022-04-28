@@ -107,6 +107,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\framebuffer.h" />
+    <ClInclude Include="..\src\core\rendersys\frame_buffer_bank.h" />
     <ClInclude Include="..\src\core\rendersys\hardware_buffer.h" />
     <ClInclude Include="..\src\core\rendersys\input_layout.h" />
     <ClInclude Include="..\src\core\rendersys\predeclare.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="..\src\core\rendersys\d3d9\texture9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\frame_buffer_bank.cpp" />
     <ClCompile Include="..\src\core\rendersys\hardware_buffer.cpp" />
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp" />
     <ClCompile Include="..\src\core\resource\assimp_mesh.cpp" />

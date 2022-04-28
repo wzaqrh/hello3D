@@ -1,6 +1,7 @@
 #include <boost/format.hpp>
 #include "core/rendersys/render_pipeline.h"
 #include "core/rendersys/render_states_block.h"
+#include "core/rendersys/frame_buffer_bank.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
 #include "core/renderable/sprite.h"
@@ -31,34 +32,6 @@ enum PipeLineTextureSlot
 	kPipeTextureGBufferEmissive = 15
 };
 
-class TempFrameBufferManager 
-{
-public:
-	TempFrameBufferManager(ResourceManager& resMng, Eigen::Vector2i fbSize, std::vector<ResourceFormat> fmts) :mResMng(resMng), mFbSize(fbSize), mFbFormats(fmts) {}
-	void ReturnAll() {
-		mBorrowCount = 0;
-	}
-	IFrameBufferPtr Borrow() {
-		IFrameBufferPtr res = nullptr;
-		if (mBorrowCount >= mFbs.size()) {
-			for (size_t i = 0; i < 4; ++i) {
-				auto tmpfb = mResMng.CreateFrameBuffer(__LaunchSync__, mFbSize, mFbFormats);
-				DEBUG_SET_PRIV_DATA(tmpfb, (boost::format("TempFrameBufferManager.temp%d") % mFbs.size()).str().c_str());
-				mFbs.push_back(tmpfb);
-			}
-		}
-		res = mFbs[mBorrowCount];
-		mBorrowCount++;
-		return res;
-	}
-private:
-	ResourceManager& mResMng;
-	Eigen::Vector2i mFbSize;
-	std::vector<ResourceFormat> mFbFormats;
-	std::vector<IFrameBufferPtr> mFbs;
-	size_t mBorrowCount = 0;
-};
-
 class CameraRender 
 {
 public:
@@ -73,7 +46,7 @@ public:
 		, mCfg(Pipe.mCfg)
 		, mRenderSys(Pipe.mRenderSys)
 		, mStatesBlock(Pipe.mStatesBlock)
-		, mTempFbMng(Pipe.mTempFbMng)
+		, mTempFbs(Pipe.mTempFbs)
 		, mShadowMap(Pipe.mShadowMap)
 		, mGBuffer(Pipe.mGBuffer)
 		, mGBufferSprite(Pipe.mGBufferSprite)
@@ -85,18 +58,46 @@ public:
 	//LIGHTMODE_SHADOW_CASTER
 	void RenderCastShadow()
 	{
-		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, IF_AND_OR(mCfg.IsShadowVSM(), Eigen::Vector4f(1e4,1e8,0,0), Eigen::Vector4f::Zero()), 1.0, 0);
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
-
-		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
-		blend_state(BlendState::MakeDisable());
-		for (auto& light : Lights) {
-			if ((light->GetCameraMask() & CameraMask) && (light->DidCastShadow())) {
-				cbPerFrame perFrame = MakeCastShadowPerFrame(Camera, mRenderSys.WinSize(), *light);
-				RenderLight(perFrame, &MakePerLight(*light), LIGHTMODE_SHADOW_CASTER, true);
-				break;
+		scene::LightPtr firstLight = nullptr;
+		{
+			depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+			blend_state(BlendState::MakeDisable());
+			auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, 
+				IF_AND_OR(mCfg.IsShadowVSM(), Eigen::Vector4f(1e4, 1e8, 0, 0), Eigen::Vector4f::Zero()), 1.0, 0);
+			for (auto& light : Lights) {
+				if ((light->GetCameraMask() & CameraMask) && (light->DidCastShadow())) {
+					cbPerFrame perFrame = MakeCastShadowPerFrame(Camera, mRenderSys.WinSize(), *light);
+					RenderLight(perFrame, &MakePerLight(*light), LIGHTMODE_SHADOW_CASTER, true);
+					firstLight = light;
+					break;
+				}
 			}
+		}
+		if (mCfg.IsShadowVSM() && firstLight)
+		{
+			mGrabDic["__shadowmap"] = mShadowMap;
+			depth_state(DepthState::MakeFor3D(false));
+			cbPerFrame perFrame = MakeReceiveShadowPerFrame(Camera, mRenderSys.WinSize(), *firstLight, mShadowMap);
+
+			res::MaterialInstance mat;
+			for (auto& op : Ops) {
+				if (op.CastShadow) {
+					mat = op.Material;
+					break;
+				}
+			}
+			BOOST_ASSERT(mat);
+
+			RenderOperationQueue ops;
+			mGBufferSprite->GenRenderOperation(ops);
+			for (auto& op : ops)
+				op.Material = mat;
+
+			RenderLight(perFrame, &MakePerLight(*firstLight), LIGHTMODE_SHADOW_CASTER "+1", true, &ops);
+
+			mRenderSys.GenerateMips(mShadowMap->GetAttachColorTexture(0));
 		}
 	}
 	void RenderSkybox(const rend::SkyBoxPtr& skybox, BlendStateBlock::Lock& blend_state, DepthStateBlock::Lock& depth_state)
@@ -128,8 +129,8 @@ public:
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		mRenderSys.GenerateMips(IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture()));
-		auto tex_shadow = mStatesBlock.LockTexture(kPipeTextureShadowMap, mShadowMap->GetAttachColorTexture(0));
+		auto tex_shadow = mStatesBlock.LockTexture(kPipeTextureShadowMap, 
+			IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mGBuffer->GetAttachZStencilTexture()));
 		auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
 		auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 		auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
@@ -194,7 +195,8 @@ public:
 
 				//LIGHTMODE_PREPASS_FINAL
 				auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
-				auto tex_shadow = mStatesBlock.LockTexture(kPipeTextureShadowMap, mShadowMap->GetAttachZStencilTexture());
+				auto tex_shadow = mStatesBlock.LockTexture(kPipeTextureShadowMap, 
+					IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mGBuffer->GetAttachZStencilTexture()));
 
 				auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 				auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -234,7 +236,7 @@ public:
 		auto& postProcessEffects = Camera.GetPostProcessEffects();
 		std::vector<IFrameBufferPtr> tempOutputs(postProcessEffects.size());
 		for (size_t i = 0; i < tempOutputs.size() - 1; ++i)
-			tempOutputs[i] = mTempFbMng->Borrow();
+			tempOutputs[i] = mTempFbs->Borrow();
 		tempOutputs.back() = Camera.GetOutput();
 
 		for (size_t i = 0; i < postProcessEffects.size(); ++i) {
@@ -264,11 +266,12 @@ public:
 		perFrameParam.FrameBufferSize = Eigen::Vector4f(fbSize.x(), fbSize.y(), 1.0f / fbSize.x(), 1.0f / fbSize.y());
 		return perFrameParam;
 	}
-	static cbPerFrame MakePerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize)
+	static cbPerFrame MakePerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, IFrameBufferPtr shadowMap = nullptr)
 	{
 		cbPerFrame perFrameParam;
 		perFrameParam.View = camera.GetView();
 		perFrameParam.Projection = camera.GetProjection();
+		if (shadowMap) perFrameParam.ShadowMapSize = Eigen::Vector4f(shadowMap->GetWidth(), shadowMap->GetHeight(), 1.0 / shadowMap->GetWidth(), 1.0 / shadowMap->GetHeight());
 		return MakePerFrame(perFrameParam, camera.GetTransform()->GetLocalPosition(), fbSize);
 	}
 	static cbPerFrame MakeReceiveShadowPerFrame(const scene::Camera& camera, const Eigen::Vector2i& fbSize, const scene::Light& light, IFrameBufferPtr shadowMap)
@@ -310,24 +313,31 @@ private:
 	}
 	void RenderOp(const RenderOperation& op, const std::string& lightMode)
 	{
-		mTempGrabDic.clear();
+		mTempGrabDic = mGrabDic;
 		res::TechniquePtr tech = op.Material->GetShader()->CurTech();
 		std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 		for (auto& pass : passes) {
-			if (pass->mGrabOutput) {
-				IFrameBufferPtr passFb = mTempFbMng->Borrow();
-				mTempGrabDic[pass->mGrabOutput.Name] = passFb;
+			if (pass->mGrabOut) {
+				IFrameBufferPtr passFb = mTempGrabDic[pass->mGrabOut.Name];
+				if (passFb == nullptr) {
+					passFb = mTempFbs->Borrow(pass->mGrabOut.Format);
+					mTempGrabDic[pass->mGrabOut.Name] = passFb;
+				}
 				mStatesBlock.FrameBuffer.Push(passFb);
 			}
-			if (pass->mGrabInput) {
-				IFrameBufferPtr passFb = mTempGrabDic[pass->mGrabInput.Name];
-				if (passFb) mRenderSys.SetTexture(pass->mGrabInput.TextureSlot, passFb->GetAttachColorTexture(0));
+			if (pass->mGrabIn) {
+				IFrameBufferPtr passFb = mTempGrabDic[pass->mGrabIn.Name];
+				if (passFb) mStatesBlock.Textures(pass->mGrabIn.TextureSlot, 
+					IF_AND_OR(pass->mGrabIn.AttachIndex >= 0, passFb->GetAttachColorTexture(pass->mGrabIn.AttachIndex), passFb->GetAttachZStencilTexture()));
 			}
 
 			RenderPass(pass, op);
 
-			if (pass->mGrabOutput) {
+			if (pass->mGrabOut) {
 				mStatesBlock.FrameBuffer.Pop();
+			}
+			if (pass->mGrabIn) {
+				mStatesBlock.Textures(pass->mGrabIn.TextureSlot, nullptr);
 			}
 		}
 	}
@@ -339,8 +349,8 @@ private:
 		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->mProgram);
 
 		const TextureVector& textures = op.Material->GetTextures();
-		if (textures.Count() > 0) mRenderSys.SetTextures(kTextureUserSlotFirst, &textures[0], textures.Count());
-		else mRenderSys.SetTextures(kTextureUserSlotFirst, nullptr, 0);
+		if (textures.Count() > 0) mStatesBlock.Textures(kTextureUserSlotFirst, &textures[0], textures.Count());
+		else mStatesBlock.Textures(kTextureUserSlotFirst, nullptr, 0);
 
 		mRenderSys.SetProgram(pass->mProgram);
 		mRenderSys.SetVertexLayout(pass->mInputLayout);
@@ -356,7 +366,7 @@ private:
 	const Configure& mCfg;
 	RenderSystem& mRenderSys;
 	RenderStatesBlock& mStatesBlock;
-	TempFrameBufferManagerPtr mTempFbMng;
+	FrameBufferBankPtr mTempFbs;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
 private:
@@ -365,7 +375,7 @@ private:
 	unsigned CameraMask;
 	const std::vector<scene::LightPtr>& Lights;
 private:
-	std::map<std::string, IFrameBufferPtr> mTempGrabDic;
+	std::map<std::string, IFrameBufferPtr> mTempGrabDic, mGrabDic;
 };
 
 RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Configure& cfg)
@@ -390,7 +400,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 			kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 
-	mTempFbMng = CreateInstance<TempFrameBufferManager>(resMng, renderSys.WinSize(), MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+	mTempFbs = CreateInstance<FrameBufferBank>(resMng, renderSys.WinSize(), MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 
 	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<bool> {
 		MaterialLoadParam loadParam(MAT_MODEL);
@@ -449,7 +459,7 @@ bool RenderPipeline::BeginFrame()
 void RenderPipeline::EndFrame()
 {
 	mRenderSys.EndScene();
-	mTempFbMng->ReturnAll();
+	mTempFbs->ReturnAll();
 }
 
 }

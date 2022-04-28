@@ -57,8 +57,9 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 				curPass->mLightMode = passNode.LightMode;
 				curPass->mName = passNode.ShortName;
 				curPass->mTopoLogy = passProgram.Topo;
-				curPass->mGrabOutput = { passNode.GrabOutput };
-				curPass->mGrabInput = { passNode.GrabInput.Name, passNode.GrabInput.TextureSlot };
+				
+				curPass->mGrabOut = { passNode.GrabOut.Name, passNode.GrabOut.Format  };
+				curPass->mGrabIn = { passNode.GrabIn.Name, passNode.GrabIn.AttachIndex, passNode.GrabIn.TextureSlot };
 
 				tasks.push_back([&resMng,launchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
 					if (!CoAwait resMng.CreateProgram(pass->mProgram, launchMode, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
@@ -201,8 +202,8 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 	result->mTopoLogy = proto.mTopoLogy;
 	result->mInputLayout = proto.mInputLayout;
 	result->mProgram = proto.mProgram;
-	result->mGrabOutput = proto.mGrabOutput;
-	result->mGrabInput = proto.mGrabInput;
+	result->mGrabOut = proto.mGrabOut;
+	result->mGrabIn = proto.mGrabIn;
 
 	for (const auto& sampler : proto.mSamplers)
 		result->AddSampler(sampler);

@@ -164,19 +164,66 @@ struct PSGenerateVSMInput
 {
 	float4 Pos : SV_POSITION;
 	float4 ViewPos : POSITION0;
+	float4 WorldPos : POSITION1;
 };
 PSGenerateVSMInput VSGenerateVSM(vbSurface surf, vbWeightedSkin skin)
 {
 	PSGenerateVSMInput output;
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
-	output.ViewPos = mul(mul(View, mul(World, transpose(Model))), skinPos);
+	output.WorldPos = mul(mul(World, transpose(Model)), skinPos);
+	output.ViewPos = mul(View, output.WorldPos);
 	output.Pos = mul(Projection, output.ViewPos);
 	return output;
 }
 float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target
 {
 	float depth = length(input.ViewPos);
+	//float worldPos = input.WorldPos.xyz / input.WorldPos.w;
+	//float depth = length(unity_LightPosition.xyz - worldPos * unity_LightPosition.w);
 	return float4(depth, depth * depth, 0.0f, 1.0f);
+}
+
+struct VSMBlurInput
+{
+	float4 Pos : SV_POSITION;
+	float4 Color : COLOR;
+	float2 texUV : TEXCOORD0;
+};
+VSMBlurInput VSBlurVSM(vbSurface input)
+{
+	VSMBlurInput output;
+	output.Pos = float4(input.Pos, 1.0);
+	output.Color = input.Color;
+	output.texUV = input.Tex;
+	return output;
+}
+inline float BoxFilterStart(float fWidth)  //Assumes filter is odd
+{
+	return ((fWidth - 1.0f) / 2.0f);
+}
+inline float4 BlurVSMFunction(VSMBlurInput input, bool bVertical)
+{
+	const float fFilterWidth = 9.0f;
+	const float fStepSize = 1.0f;
+	
+	float fStartOffset = BoxFilterStart(fFilterWidth);
+	float2 fTexelOffset = float2(bVertical * (fStepSize / ShadowMapSize.x), !bVertical * (fStepSize / ShadowMapSize.y));
+    
+	float2 fTexStart = input.texUV - (fStartOffset * fTexelOffset);
+	float4 output = (float4) 0.0f;
+    
+	for (int i = 0; i < fFilterWidth; ++i)
+		output += MIR_SAMPLE_TEX2D(_GBufferAlbedo, float2(fTexStart + fTexelOffset * i));
+    
+	return output / fFilterWidth;
+}
+float4 PSBlurVSMX(VSMBlurInput input) : SV_Target
+{
+	return BlurVSMFunction(input, false);
+}
+float4 PSBlurVSMY(VSMBlurInput input) : SV_Target
+{
+	return BlurVSMFunction(input, true);
 }
 
 /************ ForwardBase ************/
@@ -279,11 +326,11 @@ float4 PS(PixelInput input) : SV_Target
     finalColor.a = 1.0;
 
 #if ENABLE_SHADOW_MAP
-	finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz / input.ViewPosLight.w);
+	//float depth = length(unity_LightPosition.xyz - input.SurfPos.xyz * unity_LightPosition.w);
+	finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
 #endif
 	
 	//finalColor.xyz = albedo.xyz;
-	//finalColor.xyz = float4(1.0,1.0,1.0,1.0);
 	//finalColor.xyz = input.Normal;
 	//finalColor.xyz = normal * 0.5 + 0.5;
 	//finalColor.xyz = toEye;
@@ -375,25 +422,18 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 struct PSPrepassBaseOutput
 {
 	float4 Pos : SV_Target0;
-#if !DEBUG_PREPASS_BASE
     float4 Normal : SV_Target1;
     float4 Albedo : SV_Target2;
 	float4 Emissive : SV_Target3;
-#endif
 };
 PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
 	PSPrepassBaseOutput output;
-#if !DEBUG_PREPASS_BASE
 	output.Pos = float4(input.Pos.xyz / input.Pos.w * 0.5 + 0.5, 1.0);
-
 	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
 	output.Normal = float4(GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent) * 0.5 + 0.5, aorm.x);
 	output.Albedo = float4(GetAlbedo(input.Tex).xyz, aorm.y);
 	output.Emissive = float4(GetEmissive(input.Tex).xyz, aorm.z);
-#else
-	output.Pos.xyz = float4(normalize(input.Normal) * 0.5 + 0.5, 1.0);
-#endif
 	return output;
 }
 
@@ -445,15 +485,13 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	output.Color.a = 1.0;
 	
 #if ENABLE_SHADOW_MAP
-	float4 ViewPosLight = mul(LightView, worldPosition);
-	float4 PosLight = mul(LightProjection, ViewPosLight);
-	
+	float4 viewPosLight = mul(LightView, worldPosition);
+	float4 posLight = mul(LightProjection, viewPosLight);
 #if ENABLE_SHADOW_MAP_BIAS
-	float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1.e5);
-	PosLight.z -= bias * PosLight.w;
+	float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
+	posLight.z -= bias * posLight.w;
 #endif
-	
-	output.Color.rgb *= CalcShadowFactor(PosLight.xyz / PosLight.w, ViewPosLight.xyz / ViewPosLight.w);
+	output.Color.rgb *= CalcShadowFactor(posLight.xyz / posLight.w, viewPosLight.xyz);
 #endif
 	
 	//output.Color.xyz = aorm;

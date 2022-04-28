@@ -98,7 +98,13 @@ struct TexturesBlock {
 			mRenderSys.SetTexture(slot, state);
 		}
 	}
+	void Sets(size_t slot, const ITexturePtr states[], size_t count) {
+		for (size_t i = 0; i < count; ++i)
+			mTextures[slot + i] = states[i];
+		mRenderSys.SetTextures(slot, states, count);
+	}
 	void operator()(size_t slot, ITexturePtr state) { Set(slot, state); }
+	void operator()(size_t slot, const ITexturePtr states[], size_t count) { Sets(slot, states, count); }
 	const ITexturePtr& Get(size_t slot) const { BOOST_ASSERT(slot < 16); return mTextures[slot]; }
 	struct Lock : boost::noncopyable {
 		Lock(TexturesBlock& block, size_t slot, const ITexturePtr& state) :mBlock(block), mSlot(slot), mState(block.Get(slot)) { block.Set(slot, state); }

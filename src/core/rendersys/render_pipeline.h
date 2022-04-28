@@ -8,8 +8,6 @@
 
 namespace mir {
 
-
-
 struct cbPerFrame;
 struct cbPerLight;
 class MIR_CORE_API RenderPipeline : boost::noncopyable
@@ -29,7 +27,7 @@ private:
 	RenderSystem& mRenderSys;
 	RenderStatesBlockPtr mStatesBlockPtr;
 	RenderStatesBlock& mStatesBlock;
-	TempFrameBufferManagerPtr mTempFbMng;
+	FrameBufferBankPtr mTempFbs;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
 };

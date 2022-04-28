@@ -3,21 +3,25 @@
 #include "CommonFunction.cginc"
 #include "Debug.cginc"
 
+#define VSM_DEPTH_BIAS 1e-3
+
 inline float VSMShadow(float2 tex, float fragDepth, MIR_ARGS_TEX2D(tVSM))
 {
-	float2 moments = MIR_SAMPLE_TEX2D(tVSM, tex).xy;   
+	//float2 moments = MIR_SAMPLE_TEX2D_LEVEL(tVSM, tex, 0).xy;
+	float2 moments = MIR_SAMPLE_TEX2D(tVSM, tex).xy;
 	float E_x2 = moments.y;
 	float Ex_2 = moments.x * moments.x;
-	float variance = E_x2 - Ex_2;
+	float variance = max(0.0, E_x2 - Ex_2);
 	
 	float mD = (moments.x - fragDepth);
 	float mD_2 = mD * mD;
 	
 	float p = variance / (variance + mD_2);
-	//float lit = fragDepth <= moments.x;
-	//float lit = min(p, 1.0);
+	//float lit = mD_2;
+	//float lit = variance;
 	//float lit = p;
-	float lit = max(p, fragDepth <= moments.x);
+	//float lit = fragDepth <= moments.x;
+	float lit = max(p, fragDepth - VSM_DEPTH_BIAS <= moments.x);
 	return lit;
 }
 

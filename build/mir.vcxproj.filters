@@ -250,6 +250,9 @@
     <ClInclude Include="..\src\core\scene\light.h">
       <Filter>src\core\scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\frame_buffer_bank.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -404,6 +407,9 @@
     </ClCompile>
     <ClCompile Include="..\src\core\scene\light.cpp">
       <Filter>src\core\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\frame_buffer_bank.cpp">
+      <Filter>src\core\rendersys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

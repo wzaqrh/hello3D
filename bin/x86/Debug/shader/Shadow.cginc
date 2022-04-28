@@ -35,7 +35,7 @@ float CalcShadowFactor(float3 posLight, float3 viewPosLight)
 	//float2 dz_duv = float2(0.0, 0.0);
 	return PCSSShadow(posLight.xy, posLight.z, dz_duv, viewPosLight.z, pcfIn, MIR_PASS_SHADOWMAP(_ShadowMapTexture), sampler_GDepth);
 #elif SHADOW_MODE == SHADOW_VSM
-	return VSMShadow(posLight.xy, length(viewPosLight), MIR_PASS_TEX2D(_ShadowMapTexture));
+	return VSMShadow(posLight.xy * float2(0.5,-0.5) + 0.5, length(viewPosLight), MIR_PASS_TEX2D(_ShadowMapTexture));
 #else
 	return 1.0;
 #endif
