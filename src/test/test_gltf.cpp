@@ -60,7 +60,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 		}
 
 		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
-		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
+		dir_light->SetLookAt(Eigen::Vector3f(0.498, -0.71, 0.498), Eigen::Vector3f::Zero());
 		
 		CoTaskVector tasks;
 

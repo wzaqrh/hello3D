@@ -34,8 +34,13 @@ public:
 	}
 private:
 	struct Visitor {
+		int GetMacroValue(const std::string& key) const {
+			return 0;
+		}
+	public:
 		const bool JustInclude;
 		const MaterialLoadParam& LoadParam;
+		ShaderNode& shaderNode;
 	};
 	using ConstVisitorRef = const Visitor&;
 	struct PropertyTreePath {
@@ -169,6 +174,22 @@ private:
 			++index;
 		}
 	}
+	static bool CheckCondition(boost_property_tree::ptree& node) {
+		std::string condition = node.get<std::string>("<xmlattr>.Condition", "");
+		if (!condition.empty()) {
+			std::vector<std::string> strArr;
+			boost::split(strArr, condition, boost::is_any_of("<>="), boost::token_compress_on);
+			if (strArr.size() >= 3) {
+				const std::string& macro_name = strArr[0];
+				std::string compare = strArr[1];
+				for (size_t i = 2; i < strArr.size() - 1; ++i)
+					compare += strArr[i];
+				const std::string& macro_value = strArr.back();
+
+			}
+		}
+		return true;
+	}
 	void VisitSamplers(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseTexture"))) {
 			std::string refName = it.second.data();
@@ -225,7 +246,7 @@ private:
 			++index;
 		}
 	}
-	static void ParseProgram(const boost_property_tree::ptree& nodeProgram, ProgramNode& programNode) {
+	static void ParseProgramMacrosTopo(const boost_property_tree::ptree& nodeProgram, ProgramNode& programNode) {//no_override
 		programNode.Topo = static_cast<PrimitiveTopology>(nodeProgram.get<int>("Topology", programNode.Topo));
 
 		auto& vertexScd = programNode.VertexSCD;
@@ -239,31 +260,21 @@ private:
 		auto find_macros = nodeProgram.find("Macros");
 		if (find_macros != nodeProgram.not_found()) {
 			auto& node_macros = find_macros->second;
-			for (auto& it : node_macros)
-				vertexScd.AddOrSetMacro(ShaderCompileMacro{ it.first, it.second.data() });
+			for (auto& it : node_macros) {
+				vertexScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
+				pixelScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
+			}
 		}
-		pixelScd.Macros = vertexScd.Macros;
-
-	#define SCD_ADD_MACRO(MACRO_NAME) vertexScd.MergeMacro(ShaderCompileMacro{ #MACRO_NAME, boost::lexical_cast<std::string>(MACRO_NAME) });
-	#if defined DEBUG_SHADOW_CASTER
-		SCD_ADD_MACRO(DEBUG_SHADOW_CASTER);
-	#endif
-	#if defined DEBUG_PREPASS_BASE
-		SCD_ADD_MACRO(DEBUG_PREPASS_BASE);
-	#endif
-	#if defined DEBUG_PREPASS_FINAL
-		SCD_ADD_MACRO(DEBUG_PREPASS_FINAL);
-	#endif
 	}
 	void VisitProgram(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
-		ParseProgram(nodeProgram.Node, programNode);
+		ParseProgramMacrosTopo(nodeProgram.Node, programNode);
 		VisitAttributes(nodeProgram, programNode);
 		VisitUniforms(nodeProgram, programNode);
 		VisitSamplers(nodeProgram, programNode);
 		BOOST_ASSERT(programNode.Validate());
 	}
 
-	static std::string makeLoopVarName(std::string name, int i, int maxI) {
+	static std::string MakeLoopVarName(std::string name, int i, int maxI) {
 		size_t pos = name.find("%");
 		if (pos != std::string::npos) {
 			std::string postfix = name.substr(pos + 1);
@@ -312,13 +323,14 @@ private:
 				pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 				pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
+				pass.Program = categNode.Program;
 				auto find_program = node_pass.find("PROGRAM");
 				if (find_program != node_pass.not_found()) {
 					auto& node_program = find_program->second;
-					ParseProgram(node_program, pass.Program);
+					ParseProgramMacrosTopo(node_program, pass.Program);
 				}
 
-				pass.GrabOut.Name = makeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
+				pass.GrabOut.Name = MakeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
 				if (!pass.GrabOut.Name.empty()) {
 					std::vector<std::string> strArr;
 					boost::split(strArr, pass.GrabOut.Name, boost::is_any_of("{,}"), boost::token_compress_on); 
@@ -384,8 +396,8 @@ private:
 			categNode.Program.Build();
 			for (auto& techNode : categNode) {
 				for (auto& passNode : techNode) {
-					passNode.Program.MergeNoOverride(categNode.Program);
-					passNode.Program.Build();
+					//passNode.Program.Merge<false>(categNode.Program);
+					//passNode.Program.Build();
 				}
 			}
 		}
@@ -405,7 +417,7 @@ private:
 			if (GetShaderAssetPath(loadParam, filepath)) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
-				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam }, shaderNode);
+				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam, shaderNode }, shaderNode);
 				BuildShaderNode(shaderNode);
 				BOOST_ASSERT(shaderNode.Validate());
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
@@ -428,8 +440,8 @@ private:
 				for (auto& categNode : shaderNode) {
 					for (auto& techniqueNode : categNode) {
 						for (auto& passNode : techniqueNode) {
-							passNode.Program.VertexSCD.AddOrSetMacros(loadParam.Macros);
-							passNode.Program.PixelSCD.AddOrSetMacros(loadParam.Macros);
+							passNode.Program.VertexSCD.AddMacros<true>(loadParam.Macros);
+							passNode.Program.PixelSCD.AddMacros<true>(loadParam.Macros);
 						}
 					}
 				}

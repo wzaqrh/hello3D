@@ -57,33 +57,36 @@ template <> struct tpl::has_function_name<res::mat_asset::SamplerDescEx> : publi
 namespace res {
 namespace mat_asset {
 struct ShaderCompileDescEx : public ShaderCompileDesc {
-	void AddOrSetMacro(const ShaderCompileMacro& macro) {
+	template<bool Override> void AddMacro(const ShaderCompileMacro& macro) {
 		auto find_it = std::find_if(this->Macros.begin(), this->Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
 			return elem.Name == macro.Name;
 		});
-		if (find_it == this->Macros.end()) this->Macros.push_back(macro);
-		else find_it->Definition = macro.Definition;
+		if (find_it == this->Macros.end()) {
+			this->Macros.push_back(macro);
+		}
+		else {
+			if constexpr (Override) find_it->Definition = macro.Definition;
+		}
 	}
-	void AddOrSetMacros(const std::vector<ShaderCompileMacro>& macros) {
+
+	template<bool Override> void AddMacros(const std::vector<ShaderCompileMacro>& macros) {
 		for (const auto& it : macros)
-			AddOrSetMacro(it);
+			AddMacro<Override>(it);
 	}
-	void AddMacro(const ShaderCompileMacro& macro) {
-		auto find_it = std::find_if(this->Macros.begin(), this->Macros.end(), [&macro](const ShaderCompileMacro& elem)->bool {
-			return elem.Name == macro.Name;
-		});
-		if (find_it == this->Macros.end()) this->Macros.push_back(macro);
+
+	template<bool Override> void Merge(const ShaderCompileDesc& other) { 
+		EntryPoint = other.EntryPoint;
+		ShaderModel = other.ShaderModel;
+		SourcePath = other.SourcePath;
+		AddMacros<true>(other.Macros);
 	}
-	void AddMacros(const std::vector<ShaderCompileMacro>& macros) {
-		for (const auto& it : macros)
-			AddMacro(it);
-	}
-	void MergeNoOverride(const ShaderCompileDesc& other) {
+	template<> void Merge<false>(const ShaderCompileDesc& other) {
 		if (EntryPoint.empty()) EntryPoint = other.EntryPoint;
 		if (ShaderModel.empty()) ShaderModel = other.ShaderModel;
 		if (SourcePath.empty()) SourcePath = other.SourcePath;
-		AddMacros(other.Macros);
+		AddMacros<false>(other.Macros);
 	}
+
 	bool Validate() const {
 		return VR(!EntryPoint.empty() 
 			//&& !ShaderModel.empty() 
@@ -107,13 +110,14 @@ struct UniformNodeVector : public tpl::Vector<UniformNode> {
 };
 
 struct ProgramNode {
-	void MergeNoOverride(const ProgramNode& other) {
+	template<bool Override> void Merge(const ProgramNode& other) { static_assert(false, ""); }
+	template<> void Merge<false>(const ProgramNode& other) {
 		Topo = other.Topo;
 		Attrs.Merge<false>(other.Attrs);
 		Uniforms.Merge<false>(other.Uniforms);
 		Samplers.Merge<false>(other.Samplers);
-		VertexSCD.MergeNoOverride(other.VertexSCD);
-		PixelSCD.MergeNoOverride(other.PixelSCD);
+		VertexSCD.Merge<false>(other.VertexSCD);
+		PixelSCD.Merge<false>(other.PixelSCD);
 	}
 	void Build() {
 		if (Topo == kPrimTopologyUnkown)
@@ -133,7 +137,7 @@ struct ProgramNode {
 	#endif
 	}
 public:
-	PrimitiveTopology Topo = kPrimTopologyUnkown;
+	PrimitiveTopology Topo = kPrimTopologyTriangleList;
 	AttributeNodeVector Attrs;
 	UniformNodeVector Uniforms;
 	SamplerNode Samplers;
@@ -195,7 +199,7 @@ struct CategoryNode : public tpl::Vector<TechniqueNode> {
 		return true;
 	}
 	int GetMacrosDefinition(const MaterialLoadParam& loadParam, const std::string& key) const {
-		int value = loadParam[key];
+		int value = 0; loadParam[key];
 		if (value == 0) {
 			ForEachProgram([&key, &value](const ProgramNode& prog) {
 				value = __max(value, prog.VertexSCD[key]);
