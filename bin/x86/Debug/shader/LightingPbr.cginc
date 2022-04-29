@@ -2,7 +2,7 @@
 #define LIGHTING_PBR_H
 #include "IBL.cginc"
 #include "ToneMapping.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 #define MIR_EPS 1e-7f
 #define MIR_PI  3.141592f

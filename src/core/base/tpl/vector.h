@@ -26,6 +26,7 @@ public:
 	void Resize(size_t size) {
 		mElements.resize(size);
 	}
+
 	reference& Emplace() {
 		mElements.resize(mElements.size() + 1);
 		return mElements.back();
@@ -33,6 +34,7 @@ public:
 	TemplateT void Add(T&& value) {
 		mElements.push_back(std::forward<T>(value));
 	}
+
 	TemplateT void AddOrSet(T&& value, int slot = -1) {
 		if (slot >= 0) {
 			if (mElements.size() < slot + 1)
@@ -60,6 +62,10 @@ public:
 				}
 			}
 		}
+	}
+	void Adds(const Vector& other) {
+		for (size_t i = 0; i < other.mElements.size(); ++i)
+			Add(other.mElements[i]);
 	}
 public:
 	bool IsEmpty() const { return mElements.empty(); }

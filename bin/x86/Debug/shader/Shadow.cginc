@@ -1,13 +1,9 @@
 #ifndef SHADOW_H
 #define SHADOW_H
-#include "Debug.cginc"
+#include "Macros.cginc"
 #include "Standard.cginc"
 #include "PercentageCloserSoftShadow.cginc"
 #include "VarianceShadow.cginc"
-
-#if !defined SHADOW_MODE
-#define SHADOW_MODE 5/*SHADOW_VSM*/
-#endif
 
 float CalcShadowFactor(float3 posLight, float3 viewPosLight)
 {
@@ -15,6 +11,7 @@ float CalcShadowFactor(float3 posLight, float3 viewPosLight)
 	return posLight.y;
 #endif
 
+	posLight.xy = posLight.xy * float2(0.5, -0.5) + 0.5;
 #if SHADOW_MODE == SHADOW_RAW
 	return MIR_SAMPLE_SHADOW(_ShadowMapTexture, posLight).r;
 #elif SHADOW_MODE == SHADOW_PCF_FAST
@@ -35,7 +32,7 @@ float CalcShadowFactor(float3 posLight, float3 viewPosLight)
 	//float2 dz_duv = float2(0.0, 0.0);
 	return PCSSShadow(posLight.xy, posLight.z, dz_duv, viewPosLight.z, pcfIn, MIR_PASS_SHADOWMAP(_ShadowMapTexture), sampler_GDepth);
 #elif SHADOW_MODE == SHADOW_VSM
-	return VSMShadow(posLight.xy * float2(0.5,-0.5) + 0.5, length(viewPosLight), MIR_PASS_TEX2D(_ShadowMapTexture));
+	return VSMShadow(posLight.xy, length(viewPosLight), MIR_PASS_TEX2D(_ShadowMapTexture));
 #else
 	return 1.0;
 #endif

@@ -60,13 +60,13 @@
 #define TONEMAP_ACES_HILL 3
 #define TONEMAP_ACES_HILL_EXPOSURE_BOOST 4
 #if !defined TONEMAP_MODE
-#define TONEMAP_MODE 1
+#define TONEMAP_MODE 1/*TONEMAP_TO_SRGB*/
 #endif
 
 #define PBR_UNITY 1
 #define PBR_GLTF 2
 #if !defined PBR_MODE
-#define PBR_MODE 2
+#define PBR_MODE 2/*PBR_GLTF*/
 #endif
 
 #if !defined CubeMapIsRightHandness
@@ -88,7 +88,7 @@
 #define PCSS_QUALITY_MEDIUM 2 
 #define PCSS_QUALITY_HIGH 3
 #if !defined PCSS_QUALITY
-#define PCSS_QUALITY PCSS_QUALITY_MEDIUM
+#define PCSS_QUALITY 3/*PCSS_QUALITY_MEDIUM*/
 #endif
 
 #define SHADOW_RAW 1 
@@ -97,7 +97,7 @@
 #define SHADOW_PCSS 4
 #define SHADOW_VSM 5
 #if !defined SHADOW_MODE
-#define SHADOW_MODE 5/*SHADOW_VSM*/
+#define SHADOW_MODE 3/*SHADOW_PCF*/
 #endif
 
 #endif

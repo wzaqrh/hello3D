@@ -126,7 +126,7 @@ void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
 Eigen::AlignedBox3f SceneManager::GetWorldAABB() const
 {
 	Eigen::AlignedBox3f aabb;
-	for (size_t i = 0; i < mNodes.size(); ++i) {
+	for (size_t i = 3; i < mNodes.size(); ++i) {
 		auto node = mNodes[i];
 		aabb.extend(node->GetAABB());
 	}

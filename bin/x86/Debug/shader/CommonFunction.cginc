@@ -1,7 +1,7 @@
 #ifndef COMMON_FUNCTION_H
 #define COMMON_FUNCTION_H
 #include "HLSLSupport.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 //world normal coordinate system
 inline float3x3 GetTBN(float3 normal, float3 tangent)

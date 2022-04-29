@@ -24,6 +24,7 @@ public:
 	void Render();
 public:
 	Eigen::Vector2i WinSize() const;
+	inline const Configure& Config() const { return mConfigure; }
 	inline const RenderSystemPtr& RenderSys() const { return mRenderSys; }
 	inline const ResourceManagerPtr& ResourceMng() const { return mResourceMng; }
 	inline const RenderPipelinePtr& RenderPipe() const { return mRenderPipe; }

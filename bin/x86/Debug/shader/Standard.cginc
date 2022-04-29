@@ -1,7 +1,7 @@
 #ifndef STANDARD_H
 #define STANDARD_H
 #include "HLSLSupport.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 MIR_DECLARE_TEX2D(_SceneImage, 6);
 MIR_DECLARE_TEX2D(_GDepth, 7);

@@ -5,6 +5,7 @@
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#include <regex>
 #include "core/base/stl.h"
 #include "core/base/tpl/atomic_map.h"
 #include "core/base/base_type.h"
@@ -34,15 +35,41 @@ public:
 	}
 private:
 	struct Visitor {
-		int GetMacroValue(const std::string& key) const {
-			return 0;
+		int GetMacroValue(const ProgramNode& progNode, const std::string& key) const {
+			int value = LoadParam[key];
+			value = IF_AND_OR(value, value, progNode.VertexSCD[key]);
+			return value;
+		}
+		bool CheckCondition(const ProgramNode& progNode, const boost_property_tree::ptree& node) const {
+			bool result = true;
+			std::string condition = node.get<std::string>("<xmlattr>.Condition", "");
+			if (!condition.empty()) {
+				const std::regex exp_regex("([a-zA-Z0-9_]+)([<>=]+)([0-9]+)");
+				std::smatch exp_match;
+				if (std::regex_match(condition, exp_match, exp_regex) && exp_match.size() == 4) {
+					std::string macro_name = exp_match[1];
+					int left_value = GetMacroValue(progNode, macro_name);
+
+					std::string compare = exp_match[2];
+
+					std::string str_right_value = exp_match[3];
+					int right_value = atoi(str_right_value.c_str());
+
+					if (compare == "==") result = (left_value == right_value);
+					else if (compare == "<=") result = (left_value <= right_value);
+					else if (compare == ">=") result = (left_value >= right_value);
+					else if (compare == "<") result = (left_value < right_value);
+					else if (compare == ">") result = (left_value > right_value);
+				}
+			}
+			return result;
 		}
 	public:
 		const bool JustInclude;
 		const MaterialLoadParam& LoadParam;
-		ShaderNode& shaderNode;
 	};
 	using ConstVisitorRef = const Visitor&;
+	
 	struct PropertyTreePath {
 		boost_property_tree::ptree Node;
 		boost_filesystem::path Path;
@@ -58,6 +85,7 @@ private:
 			return &Node;
 		}
 	};
+private:
 	void VisitInclude(const std::string& shaderName) {
 		auto find_iter = mIncludeByName.find(shaderName);
 		if (find_iter == mIncludeByName.end()) {
@@ -67,12 +95,64 @@ private:
 		}
 	}
 
-	void VisitAttributes(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
+	static bool ParseMacrosFile(const std::string& macroName, ProgramNode& progNode) {
+		bool result = false;
+		boost_filesystem::path path = boost_filesystem::system_complete("shader/" + macroName + ".cginc");
+		if (boost::filesystem::is_regular_file(path)) {
+			std::ifstream fs;
+			fs.open(path.string(), std::ios::in);
+			std::string line;
+			const std::regex exp_regex("#define\\s+([a-zA-Z0-9_]+)\\s+([0-9]+).*");
+			while (fs.peek() != EOF) {
+				std::getline(fs, line);
+				std::smatch exp_match;
+				if (std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 3) {
+					progNode.VertexSCD.AddMacro<true>(ShaderCompileMacro{exp_match[1].str(), exp_match[2].str()});
+					progNode.PixelSCD.AddMacro<true>(ShaderCompileMacro{exp_match[1].str(), exp_match[2].str()});
+				}
+			}
+			fs.close();
+			result = true;
+		}
+		return result;
+	}
+
+	static void ParseProgramMacrosTopo(const boost_property_tree::ptree& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {//no_override
+		if (!vis.CheckCondition(progNode, nodeProgram))
+			return;
+
+		for (auto& it : boost::make_iterator_range(nodeProgram.equal_range("Macros"))) {
+			std::string refName = it.second.data();
+			if (!refName.empty()) {
+				ParseMacrosFile(refName, progNode);
+			}
+		}
+
+		progNode.Topo = static_cast<PrimitiveTopology>(nodeProgram.get<int>("Topology", progNode.Topo));
+
+		auto& vertexScd = progNode.VertexSCD;
+		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
+		vertexScd.EntryPoint = nodeProgram.get<std::string>("VertexEntry", vertexScd.EntryPoint);
+
+		auto& pixelScd = progNode.PixelSCD;
+		pixelScd.SourcePath = vertexScd.SourcePath;
+		pixelScd.EntryPoint = nodeProgram.get<std::string>("PixelEntry", pixelScd.EntryPoint);
+
+		auto find_macros = nodeProgram.find("Macros");
+		if (find_macros != nodeProgram.not_found()) {
+			auto& node_macros = find_macros->second;
+			for (auto& it : node_macros) {
+				vertexScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
+				pixelScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
+			}
+		}
+	}
+	void VisitAttributes(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseAttribute"))) {
 			std::string refName = it.second.data();
 			auto find_iter = mAttrByName.find(refName);
 			if (find_iter != mAttrByName.end()) {
-				programNode.Attrs.Add(find_iter->second);
+				progNode.Attrs.Add(find_iter->second);
 			}
 		}
 
@@ -108,7 +188,7 @@ private:
 			mAttrByName.insert(std::make_pair(shortName, attribute));
 		#endif
 
-			programNode.Attrs.Add(std::move(attribute));
+			progNode.Attrs.Add(std::move(attribute));
 			++index;
 		}
 	}
@@ -127,13 +207,13 @@ private:
 		else BOOST_ASSERT(false);
 		return result;
 	}
-	void VisitUniforms(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
+	void VisitUniforms(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseUniform"))) {
 			std::string refName = it.second.data();
 			auto find_iter = mUniformByName.find(refName);
 			if (find_iter != mUniformByName.end()) {
 				int refSlot = it.second.get<int>("<xmlattr>.Slot", find_iter->second.GetSlot());
-				programNode.Uniforms.AddOrSet(find_iter->second, refSlot);
+				progNode.Uniforms.AddOrSet(find_iter->second, refSlot);
 			}
 		}
 
@@ -170,32 +250,16 @@ private:
 			mUniformByName.insert(std::make_pair(shortName, uniform));
 		#endif
 
-			programNode.Uniforms.AddOrSet(std::move(uniform), uniform.GetSlot());
+			progNode.Uniforms.AddOrSet(std::move(uniform), uniform.GetSlot());
 			++index;
 		}
 	}
-	static bool CheckCondition(boost_property_tree::ptree& node) {
-		std::string condition = node.get<std::string>("<xmlattr>.Condition", "");
-		if (!condition.empty()) {
-			std::vector<std::string> strArr;
-			boost::split(strArr, condition, boost::is_any_of("<>="), boost::token_compress_on);
-			if (strArr.size() >= 3) {
-				const std::string& macro_name = strArr[0];
-				std::string compare = strArr[1];
-				for (size_t i = 2; i < strArr.size() - 1; ++i)
-					compare += strArr[i];
-				const std::string& macro_value = strArr.back();
-
-			}
-		}
-		return true;
-	}
-	void VisitSamplers(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
+	void VisitSamplers(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseTexture"))) {
 			std::string refName = it.second.data();
 			auto find_iter = mSamplerSetByName.find(refName);
 			if (find_iter != mSamplerSetByName.end()) {
-				programNode.Samplers.Merge<true>(find_iter->second);
+				progNode.Samplers.Merge<true>(find_iter->second);
 			}
 		}
 
@@ -203,6 +267,8 @@ private:
 		for (auto& tit : boost::make_iterator_range(nodeProgram->equal_range("Texture"))) {
 			auto& node_sampler = tit.second;
 			SamplerNode samplerSet;
+			if (! vis.CheckCondition(progNode, node_sampler))
+				continue;
 
 			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("UseTexture"))) {
 				std::string refName = it.second.data();
@@ -214,6 +280,9 @@ private:
 
 			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("Element"))) {
 				auto& node_element = it.second;
+				if (!vis.CheckCondition(progNode, node_element))
+					continue;
+
 				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
 
 				SamplerFilterMode filter = (cmpFunc != kCompareNever) ? kSamplerFilterCmpMinMagLinearMipPoint : kSamplerFilterMinMagMipLinear;
@@ -242,36 +311,16 @@ private:
 			mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
 		#endif
 
-			programNode.Samplers.Merge<true>(std::move(samplerSet));
+			progNode.Samplers.Merge<true>(std::move(samplerSet));
 			++index;
 		}
 	}
-	static void ParseProgramMacrosTopo(const boost_property_tree::ptree& nodeProgram, ProgramNode& programNode) {//no_override
-		programNode.Topo = static_cast<PrimitiveTopology>(nodeProgram.get<int>("Topology", programNode.Topo));
-
-		auto& vertexScd = programNode.VertexSCD;
-		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
-		vertexScd.EntryPoint = nodeProgram.get<std::string>("VertexEntry", vertexScd.EntryPoint);
-
-		auto& pixelScd = programNode.PixelSCD;
-		pixelScd.SourcePath = vertexScd.SourcePath;
-		pixelScd.EntryPoint = nodeProgram.get<std::string>("PixelEntry", pixelScd.EntryPoint);
-
-		auto find_macros = nodeProgram.find("Macros");
-		if (find_macros != nodeProgram.not_found()) {
-			auto& node_macros = find_macros->second;
-			for (auto& it : node_macros) {
-				vertexScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
-				pixelScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
-			}
-		}
-	}
-	void VisitProgram(const PropertyTreePath& nodeProgram, ProgramNode& programNode) {
-		ParseProgramMacrosTopo(nodeProgram.Node, programNode);
-		VisitAttributes(nodeProgram, programNode);
-		VisitUniforms(nodeProgram, programNode);
-		VisitSamplers(nodeProgram, programNode);
-		BOOST_ASSERT(programNode.Validate());
+	void VisitProgram(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
+		ParseProgramMacrosTopo(nodeProgram.Node, vis, progNode);
+		VisitAttributes(nodeProgram, vis, progNode);
+		VisitUniforms(nodeProgram, vis, progNode);
+		VisitSamplers(nodeProgram, vis, progNode);
+		BOOST_ASSERT(progNode.Validate());
 	}
 
 	static std::string MakeLoopVarName(std::string name, int i, int maxI) {
@@ -309,7 +358,7 @@ private:
 			auto& node_pass = it.second;
 
 			std::string strRepeat = node_pass.get<std::string>("<xmlattr>.Repeat", "1");
-			int repeat = __max(categNode.GetMacrosDefinition(vis.LoadParam, strRepeat), atoi(strRepeat.c_str()));
+			int repeat = __max(vis.GetMacroValue(categNode.Program, strRepeat), atoi(strRepeat.c_str()));
 			for (int i = 0; i < repeat; ++i) {
 				PassNode pass;
 
@@ -324,10 +373,8 @@ private:
 				pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
 				pass.Program = categNode.Program;
-				auto find_program = node_pass.find("PROGRAM");
-				if (find_program != node_pass.not_found()) {
-					auto& node_program = find_program->second;
-					ParseProgramMacrosTopo(node_program, pass.Program);
+				for (auto& it : boost::make_iterator_range(node_pass.equal_range("PROGRAM"))) {
+					ParseProgramMacrosTopo(it.second, vis, pass.Program);
 				}
 
 				pass.GrabOut.Name = MakeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
@@ -363,7 +410,9 @@ private:
 	void VisitCategory(const PropertyTreePath& nodeCategory, ConstVisitorRef vis, CategoryNode& categNode) {
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeCategory->equal_range("PROGRAM"))) {
-			VisitProgram(PropertyTreePath(nodeCategory, it.second, index++), categNode.Program);
+			if (index == 1)
+				index = index;
+			VisitProgram(PropertyTreePath(nodeCategory, it.second, index++), vis, categNode.Program);
 		}
 
 		if (!vis.JustInclude) {
@@ -391,17 +440,6 @@ private:
 		}
 	}
 	
-	void BuildShaderNode(ShaderNode& shaderNode) {
-		for (auto& categNode : shaderNode) {
-			categNode.Program.Build();
-			for (auto& techNode : categNode) {
-				for (auto& passNode : techNode) {
-					//passNode.Program.Merge<false>(categNode.Program);
-					//passNode.Program.Build();
-				}
-			}
-		}
-	}
 	static bool GetShaderAssetPath(const MaterialLoadParam& loadParam, std::string& filepath) {
 		boost_filesystem::path path(loadParam.ShaderVariantName);
 		if (path.has_extension()) path = boost_filesystem::system_complete(path); 
@@ -417,8 +455,7 @@ private:
 			if (GetShaderAssetPath(loadParam, filepath)) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
-				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam, shaderNode }, shaderNode);
-				BuildShaderNode(shaderNode);
+				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam }, shaderNode);
 				BOOST_ASSERT(shaderNode.Validate());
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
 				result = true;
@@ -445,7 +482,6 @@ private:
 						}
 					}
 				}
-				BuildShaderNode(shaderNode);
 			}
 			return shaderNode;
 		}, shaderNode);
@@ -506,9 +542,7 @@ private:
 		return true;
 	}
 
-	void BuildMaterialNode(MaterialNode& materialNode) {
-		mShaderMng->BuildShaderNode(materialNode.Shader);
-	}
+	void BuildMaterialNode(MaterialNode& materialNode) {}
 	static bool GetMaterialAssetPath(const MaterialLoadParam& loadParam, std::string& filepath) {
 		boost_filesystem::path path(loadParam.ShaderVariantName);
 		if (path.has_extension()) path = boost_filesystem::system_complete(path);

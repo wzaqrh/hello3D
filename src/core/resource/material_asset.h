@@ -111,13 +111,13 @@ struct UniformNodeVector : public tpl::Vector<UniformNode> {
 
 struct ProgramNode {
 	template<bool Override> void Merge(const ProgramNode& other) { static_assert(false, ""); }
-	template<> void Merge<false>(const ProgramNode& other) {
+	template<> void Merge<true>(const ProgramNode& other) {
 		Topo = other.Topo;
-		Attrs.Merge<false>(other.Attrs);
-		Uniforms.Merge<false>(other.Uniforms);
-		Samplers.Merge<false>(other.Samplers);
-		VertexSCD.Merge<false>(other.VertexSCD);
-		PixelSCD.Merge<false>(other.PixelSCD);
+		Attrs.Adds(other.Attrs);
+		Uniforms.Merge<true>(other.Uniforms);
+		Samplers.Merge<true>(other.Samplers);
+		VertexSCD.Merge<true>(other.VertexSCD);
+		PixelSCD.Merge<true>(other.PixelSCD);
 	}
 	void Build() {
 		if (Topo == kPrimTopologyUnkown)

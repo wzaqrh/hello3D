@@ -32,17 +32,19 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	camera->SetFov(45.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
+	bool isShadowVSM = mContext->Config().IsShadowVSM();
+
 	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0:
 	case 1:{
-		//camera->SetLookAt(Eigen::Vector3f(-0.644995f, 0.614183f, -0.660632f), Eigen::Vector3f::Zero());
-		camera->SetLookAt(Eigen::Vector3f(-5, 10, -10), Eigen::Vector3f::Zero());
-
+		if (isShadowVSM) camera->SetLookAt(Eigen::Vector3f(-5, 10, -10), Eigen::Vector3f::Zero());
+		else camera->SetLookAt(Eigen::Vector3f(-0.644995f, 0.614183f, -0.660632f), Eigen::Vector3f::Zero());
+		
 		auto dir_light = mScneMng->CreateAddLightNode<SpotLight>();
-		//dir_light->SetLookAt(Eigen::Vector3f(3.57088f, 6.989f, -5.19698f), Eigen::Vector3f::Zero());
-		dir_light->SetLookAt(Eigen::Vector3f(0.5f, 1.0f, -1.0f) * 20, Eigen::Vector3f::Zero());
 		dir_light->SetLightRadius(1.0);
+		if (isShadowVSM) dir_light->SetLookAt(Eigen::Vector3f(0.5f, 1.0f, -1.0f) * 20, Eigen::Vector3f::Zero());
+		else dir_light->SetLookAt(Eigen::Vector3f(3.57088f, 6.989f, -9.19698f), Eigen::Vector3f::Zero());
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
@@ -55,11 +57,15 @@ CoTask<bool> TestShadowMap::OnInitScene()
 		auto floor = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
-		floorModel->SetScale(Eigen::Vector3f(0.8, 0.8, 0.8));
+
+		if (isShadowVSM) floorModel->SetScale(Eigen::Vector3f(0.8, 0.8, 0.8));
+		else {
+			floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));
+			floor->SetCastShadow(false);
+		}
 		if (mCaseIndex == 1) {
 			floorModel->SetPosition(Eigen::Vector3f(0, -0.4, 0));
 		}
-		//floor->SetCastShadow(false);
 	#endif
 
 	#if 1
@@ -70,7 +76,8 @@ CoTask<bool> TestShadowMap::OnInitScene()
 		}
 		else {
 			mTransform = CoAwait model.Init("armadillo", mModel);
-			mTransform->SetScale(Eigen::Vector3f(0.05, 0.05, 0.05));
+			if (isShadowVSM) mTransform->SetScale(Eigen::Vector3f(0.05, 0.05, 0.05));
+			else mTransform->SetScale(Eigen::Vector3f(0.005, 0.005, 0.005));
 		}
 	#endif
 

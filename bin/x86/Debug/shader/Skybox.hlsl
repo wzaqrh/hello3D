@@ -1,6 +1,6 @@
 #include "Standard.cginc"
 #include "ToneMapping.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 MIR_DECLARE_TEXCUBE(_MainTex, 0);
 

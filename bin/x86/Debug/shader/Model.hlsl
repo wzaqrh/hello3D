@@ -5,7 +5,7 @@
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
 #include "ToneMapping.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 #if !defined ENABLE_SHADOW_MAP
 #define ENABLE_SHADOW_MAP 1
@@ -138,7 +138,7 @@ struct PSShadowCasterInput
 {
 	float4 Pos  : SV_POSITION;
 	//float4 Pos0 : POSITION0;
-	//float2 Tex : TEXCOORD0;
+	float2 Tex : TEXCOORD0;
 };
 PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 {
@@ -146,7 +146,7 @@ PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
 	output.Pos = mul(mul(Projection, mul(View, mul(World, transpose(Model)))), skinPos);
 	//output.Pos0 = output.Pos;
-	//output.Tex = surf.Tex;
+	output.Tex = surf.Tex;
 	return output;
 }
 float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
@@ -156,7 +156,7 @@ float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
 	//finalColor.y = 0;
 	//finalColor.z = input.Pos0.z / input.Pos0.w;
-	//finalColor = GetAlbedo(input.Tex);
+	finalColor = GetAlbedo(input.Tex);
 	return finalColor;
 }
 

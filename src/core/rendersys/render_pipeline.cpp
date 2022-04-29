@@ -130,7 +130,7 @@ public:
 		auto blend_state = mStatesBlock.LockBlend();
 
 		auto tex_shadow = mStatesBlock.LockTexture(kPipeTextureShadowMap, 
-			IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mGBuffer->GetAttachZStencilTexture()));
+			IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture()));
 		auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
 		auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 		auto tex_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
@@ -196,7 +196,7 @@ public:
 				//LIGHTMODE_PREPASS_FINAL
 				auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 				auto tex_shadow = mStatesBlock.LockTexture(kPipeTextureShadowMap, 
-					IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mGBuffer->GetAttachZStencilTexture()));
+					IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture()));
 
 				auto tex_spec_env = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 				auto tex_diffuse_env = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -384,12 +384,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	, mStatesBlockPtr(CreateInstance<RenderStatesBlock>(renderSys))
 	, mStatesBlock(*mStatesBlockPtr)
 {
-	if (mCfg.IsShadowVSM()) {
-		mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), MakeResFormats(kFormatR32G32Float, kFormatD24UNormS8UInt));
-	}
-	else {
-		mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), MakeResFormats(kFormatUnknown, kFormatD24UNormS8UInt));
-	}
+	if (mCfg.IsShadowVSM()) mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), MakeResFormats(kFormatR32G32Float, kFormatD24UNormS8UInt));
+	else mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 
 	mGBuffer = resMng.CreateFrameBuffer(__LaunchSync__, renderSys.WinSize(), 

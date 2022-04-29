@@ -59,6 +59,7 @@
     <ClInclude Include="..\src\core\base\uniform_struct.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
+    <ClInclude Include="..\src\core\mir_config_macros.h" />
     <ClInclude Include="..\src\core\mir_export.h" />
     <ClInclude Include="..\src\core\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\assimp_model.h" />
@@ -144,6 +145,7 @@
     <ClCompile Include="..\src\core\base\input.cpp" />
     <ClCompile Include="..\src\core\dllmain.cpp" />
     <ClCompile Include="..\src\core\mir.cpp" />
+    <ClCompile Include="..\src\core\mir_config.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp" />
     <ClCompile Include="..\src\core\renderable\cube.cpp" />
     <ClCompile Include="..\src\core\renderable\font.cpp" />
@@ -217,7 +219,6 @@
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Debug.cginc" />
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />
     <None Include="..\bin\x86\Debug\shader\IBL.cginc" />
@@ -225,6 +226,7 @@
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Macros.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
@@ -444,8 +446,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -486,8 +487,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -526,8 +526,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -566,8 +565,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -609,8 +607,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -651,8 +648,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -693,8 +689,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -735,8 +730,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

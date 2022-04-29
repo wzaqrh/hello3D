@@ -1,5 +1,7 @@
 <Shader Name="Standard">
 	<PROGRAM>		
+		<Macros>Macros</Macros>
+		
 		<Attribute Name="vbSurface">
 			<Element SemanticName="POSITION" Format="6" SemanticIndex="0"></Element>
 			<Element SemanticName="COLOR" 	 Format="28"></Element>
@@ -38,7 +40,7 @@
 			<Element Slot="7" Filter="0x15">_GDepth</Element>
 		</Texture>
 		<Texture Name="txShadowMap">
-			<Element Slot="8" CompFunc="2">_ShadowMapTexture</Element>
+			<Element Slot="8" CompFunc="2" AddressU="4" AddressV="4" AddressW="1" >_ShadowMapTexture</Element>
 			<Element Slot="8" Filter="0x15" AddressU="3" AddressV="3" AddressW="1" Condition="SHADOW_MODE==5">_ShadowMapTexture</Element>
 		</Texture>
 		<Texture Name="txEnv">

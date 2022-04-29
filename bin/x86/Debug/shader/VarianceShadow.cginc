@@ -1,7 +1,7 @@
 #ifndef VARIANCE_SHADOW_H
 #define VARIANCE_SHADOW_H
 #include "CommonFunction.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 #define VSM_DEPTH_BIAS 1e-3
 

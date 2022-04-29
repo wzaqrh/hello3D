@@ -1,6 +1,6 @@
 #ifndef PERCENTAGE_CLOSER_SOFT_SHADOW_H
 #define PERCENTAGE_CLOSER_SOFT_SHADOW_H
-#include "Debug.cginc"
+#include "Macros.cginc"
 #include "CommonFunction.cginc"
 
 #define BLOCKER_SAMPLE_ALL 0
@@ -130,7 +130,7 @@ float PCF_Filter(float2 uv, float z0, float2 dz_duv, float2 filterRadiusUV,
 float PCFShadow(float2 uv, float z, float2 dz_duv, float zEye, 
 				PCFShadowInput input, MIR_ARGS_SHADOWMAP(tDepthMap), SamplerState samplertDepth)
 {
-#if 1
+#if 0
     // Do a blocker search to enable early out
 	float avgBlockerDepth = 0;
 	float numBlockers = 0;

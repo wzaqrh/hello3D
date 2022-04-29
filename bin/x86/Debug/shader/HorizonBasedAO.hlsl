@@ -6,7 +6,7 @@
 #include "ToneMapping.cginc"
 #include "WhiteNoise.cginc"
 #include "BilateralBlur.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 	
 #if !defined USE_GNORMAL
 #define USE_GNORMAL 1

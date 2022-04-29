@@ -4,7 +4,7 @@
 #include "Lighting.cginc"
 #include "LightingPbr.cginc"
 #include "ToneMapping.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 #if !defined BOX_KERNEL_SIZE
 #define BOX_KERNEL_SIZE 5

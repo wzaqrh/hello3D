@@ -2,7 +2,7 @@
 #define IBL_H
 #include "Standard.cginc"
 #include "ToneMapping.cginc"
-#include "Debug.cginc"
+#include "Macros.cginc"
 
 float clampedDot(float3 x, float3 y)
 {
