@@ -33,13 +33,12 @@ void LightCamera::Update(const Eigen::AlignedBox3f& sceneAABB)
 	Transform3fAffine t(View);
 	Eigen::AlignedBox3f frustum = sceneAABB.transformed(t);
 
-	float frustumWidth = (std::max(fabs(frustum.min().x()), fabs(frustum.max().x()))) * 2;
-	float frustumHeight = (std::max(fabs(frustum.min().y()), fabs(frustum.max().y()))) * 2;
-	float zNear = frustum.min().z();
-	float zFar = __max(frustum.max().z(), 32);
-	if (IsSpotLight) ShadowCasterProj = math::cam::MakePerspectiveLH(frustumWidth, frustumHeight, zNear, zFar);
-	else ShadowCasterProj = math::cam::MakeOrthographicOffCenterLH(-frustumWidth * 0.5f, frustumWidth * 0.5f, -frustumHeight * 0.5f, frustumHeight * 0.5f, zNear, zFar);
-
+	FrustumWidth = (std::max(fabs(frustum.min().x()), fabs(frustum.max().x()))) * 2;
+	FrustumHeight = (std::max(fabs(frustum.min().y()), fabs(frustum.max().y()))) * 2;
+	FrustumZNear = frustum.min().z();
+	FrustumZFar = __max(frustum.max().z(), 32);
+	if (IsSpotLight) ShadowCasterProj = math::cam::MakePerspectiveLH(FrustumWidth, FrustumHeight, FrustumZNear, FrustumZFar);
+	else ShadowCasterProj = math::cam::MakeOrthographicOffCenterLH(-FrustumWidth * 0.5f, FrustumWidth * 0.5f, -FrustumHeight * 0.5f, FrustumHeight * 0.5f, FrustumZNear, FrustumZFar);
 #if 0
 	Eigen::Vector4f pos[2] = {
 		Eigen::Vector4f(0,0,0,1),
