@@ -159,7 +159,7 @@ IResourcePtr RenderSystem9::CreateResource(DeviceResourceType deviceResType)
 	return nullptr;
 }
 
-IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats)
+IFrameBufferPtr RenderSystem9::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats)
 {
 	BOOST_ASSERT(formats.size() >= 2);
 

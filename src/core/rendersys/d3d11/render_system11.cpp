@@ -214,7 +214,7 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 }
 
 /********** LoadFrameBuffer **********/
-static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen::Vector3i& size, ResourceFormat format)
 {
 	Texture11Ptr texture = CreateInstance<Texture11>();
 	texture->Init(format, kHWUsageDefault, size.x(), size.y(), 1, 1);
@@ -222,22 +222,25 @@ static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen
 	D3D11_TEXTURE2D_DESC texDesc = {};
 	texDesc.Width = size.x();
 	texDesc.Height = size.y();
-	texDesc.MipLevels = 1;
+	texDesc.MipLevels = size.z();
+	texDesc.MiscFlags = IF_AND_OR(size.z() != 1, D3D10_RESOURCE_MISC_GENERATE_MIPS, 0);
 	texDesc.ArraySize = 1;
 	texDesc.Format = static_cast<DXGI_FORMAT>(format);
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	texDesc.CPUAccessFlags = 0;
-	texDesc.MiscFlags = 0;
 	ID3D11Texture2D* pTexture = nullptr;
 	if (CheckHR(pDevice->CreateTexture2D(&texDesc, NULL, &pTexture))) return nullptr;
+
+	pTexture->GetDesc(&texDesc);
+	int iMipLevels = texDesc.MipLevels;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = static_cast<DXGI_FORMAT>(format);
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MipLevels = iMipLevels;
 	if (CheckHR(pDevice->CreateShaderResourceView(pTexture, &srvDesc, &texture->AsSRV()))) return nullptr;
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -298,7 +301,7 @@ static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Ei
 	return texture;
 }
 static FrameBufferAttachByTexture11Ptr _CreateFrameBufferAttachColor(ID3D11Device* pDevice, 
-	const Eigen::Vector2i& size, ResourceFormat format)
+	const Eigen::Vector3i& size, ResourceFormat format)
 {
 	return format == kFormatUnknown ? nullptr : CreateInstance<FrameBufferAttachByTexture11>(
 		_CreateColorAttachTexture(pDevice, size, format));
@@ -312,7 +315,7 @@ static FrameBufferAttachByTexture11Ptr _CreateFrameBufferAttachZStencil(ID3D11De
 IFrameBufferPtr RenderSystem11::GetBackFrameBuffer() {
 	return mBackFrameBuffer;
 }
-IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats)
+IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats)
 {
 	//BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
@@ -320,12 +323,12 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 	//BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(formats.back())) || formats.back() == kFormatUnknown);
 
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
-	framebuffer->SetSize(size);
+	framebuffer->SetSize(size.head<2>());
 	int colorCount = IF_AND_OR(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(formats.back())) || formats.back() == kFormatUnknown, formats.size() - 1, formats.size());
 	for (size_t i = 0; i < colorCount; ++i)
 		framebuffer->SetAttachColor(i, _CreateFrameBufferAttachColor(mDevice, size, formats[i]));
 	if (colorCount != formats.size())
-		framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size, formats.back()));
+		framebuffer->SetAttachZStencil(_CreateFrameBufferAttachZStencil(mDevice, size.head<2>(), formats.back()));
 
 #if defined MIR_RESOURCE_DEBUG
 	for (auto rtv : framebuffer->AsRTVs())

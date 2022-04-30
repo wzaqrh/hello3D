@@ -1,6 +1,6 @@
 <Shader Name="Standard">
 	<PROGRAM>		
-		<Macros>Macros</Macros>
+		<PredMacros>Macros</PredMacros>
 		
 		<Attribute Name="vbSurface">
 			<Element SemanticName="POSITION" Format="6" SemanticIndex="0"></Element>

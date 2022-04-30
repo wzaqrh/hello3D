@@ -60,7 +60,11 @@ struct MaterialLoadParamBuilder
 			MacroMap[it.Name] = std::stoi(it.Definition);
 	}
 	int& operator[](const std::string& macroName) { return MacroMap[macroName]; }
-	std::string& ShaderVariantName() { return LoadParam.ShaderVariantName; }
+	void Merge(const MaterialLoadParamBuilder& other) {
+		for (auto& it : other.MacroMap)
+			MacroMap[it.first] = it.second;
+	}
+
 	const MaterialLoadParam& Build() const {
 		LoadParam.Macros.clear();
 		for (auto& it : MacroMap)
@@ -68,6 +72,7 @@ struct MaterialLoadParamBuilder
 		return LoadParam;
 	}
 	operator MaterialLoadParam() const { return Build(); }
+	std::string& ShaderVariantName() { return LoadParam.ShaderVariantName; }
 private:
 	mutable MaterialLoadParam LoadParam;
 	std::map<std::string, int> MacroMap;

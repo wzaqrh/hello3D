@@ -228,6 +228,7 @@ struct ShaderNode : public tpl::Vector<CategoryNode> {
 	}
 public:
 	std::string ShortName;
+	MaterialLoadParamBuilder PredMacros;
 };
 struct TextureProperty {
 	std::string ImagePath;

@@ -9,7 +9,7 @@ namespace mir {
 namespace scene {
 
 Camera::Camera(ResourceManager& resMng)
-: mResourceMng(resMng)
+: mResMng(resMng)
 {
 	mTransform = CreateInstance<Transform>();
 	mRenderPath = kRenderPathForward;
@@ -195,7 +195,7 @@ void Camera::AddPostProcessEffect(const rend::PostProcessPtr& postEffect)
 IFrameBufferPtr Camera::FetchOutput2PostProcess(std::vector<ResourceFormat> formats)
 {
 	if (mPostProcessInput == nullptr) {
-		mPostProcessInput = mResourceMng.CreateFrameBuffer(__LaunchSync__, mResourceMng.WinSize(), formats);
+		mPostProcessInput = mResMng.CreateFrameBuffer(__LaunchSync__, Eigen::Vector3i(mResMng.WinWidth(), mResMng.WinHeight(), 1), formats);
 		DEBUG_SET_PRIV_DATA(mPostProcessInput, "camera.output_to_post_process");
 	}
 	return mPostProcessInput;
@@ -213,7 +213,8 @@ IFrameBufferPtr Camera::SetOutput(IFrameBufferPtr output)
 }
 IFrameBufferPtr Camera::SetOutput(float scale, std::vector<ResourceFormat> formats)
 {
-	return SetOutput(mResourceMng.CreateFrameBuffer(__LaunchSync__, (mResourceMng.WinSize().cast<float>() * scale).cast<int>(), formats));
+	return SetOutput(mResMng.CreateFrameBuffer(__LaunchSync__, 
+		Eigen::Vector3i(mResMng.WinWidth() * scale, mResMng.WinHeight() * scale, 1), formats));
 }
 
 void Camera::UpdateFrame(float dt)

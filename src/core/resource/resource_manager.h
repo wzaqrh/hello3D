@@ -36,6 +36,8 @@ public:
 public:
 	RenderSystem& RenderSys() { return mRenderSys; }
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
+	int WinWidth() const { return WinSize().x(); }
+	int WinHeight() const { return WinSize().y(); }
 
 	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer); ResSetLaunch;

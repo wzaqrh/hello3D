@@ -130,7 +130,7 @@ float PCF_Filter(float2 uv, float z0, float2 dz_duv, float2 filterRadiusUV,
 float PCFShadow(float2 uv, float z, float2 dz_duv, float zEye, 
 				PCFShadowInput input, MIR_ARGS_SHADOWMAP(tDepthMap), SamplerState samplertDepth)
 {
-#if 0
+#if 1
     // Do a blocker search to enable early out
 	float avgBlockerDepth = 0;
 	float numBlockers = 0;

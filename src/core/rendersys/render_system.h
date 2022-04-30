@@ -39,8 +39,8 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 
 	//last formats is zstencil attachment
 	virtual IFrameBufferPtr GetBackFrameBuffer() = 0;
-	virtual IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, const std::vector<ResourceFormat>& formats) = 0;
-	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector2i& size, ResourceFormat attach0Format) {
+	virtual IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats) = 0;
+	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, ResourceFormat attach0Format) {
 		return LoadFrameBuffer(res, size, std::vector<ResourceFormat>{attach0Format});
 	}
 	virtual void SetFrameBuffer(IFrameBufferPtr rendTarget) = 0;

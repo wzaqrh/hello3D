@@ -71,7 +71,7 @@ public:
 public:
 	void UpdateFrame(float dt);
 private:
-	ResourceManager& mResourceMng;
+	ResourceManager& mResMng;
 	TransformPtr mTransform;
 	rend::SkyBoxPtr mSkyBox;
 	std::vector<rend::PostProcessPtr> mPostProcessEffects;

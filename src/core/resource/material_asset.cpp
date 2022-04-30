@@ -37,6 +37,7 @@ private:
 	struct Visitor {
 		int GetMacroValue(const ProgramNode& progNode, const std::string& key) const {
 			int value = LoadParam[key];
+			value = IF_AND_OR(value, value, PredMacros[key]);
 			value = IF_AND_OR(value, value, progNode.VertexSCD[key]);
 			return value;
 		}
@@ -67,6 +68,7 @@ private:
 	public:
 		const bool JustInclude;
 		const MaterialLoadParam& LoadParam;
+		MaterialLoadParamBuilder& PredMacros;
 	};
 	using ConstVisitorRef = const Visitor&;
 	
@@ -86,16 +88,18 @@ private:
 		}
 	};
 private:
-	void VisitInclude(const std::string& shaderName) {
+	ShaderNode& VisitInclude(const std::string& shaderName) {
 		auto find_iter = mIncludeByName.find(shaderName);
 		if (find_iter == mIncludeByName.end()) {
 			ShaderNode shaderNode;
-			ParseShaderFile(shaderName, shaderNode);
+			MaterialLoadParam loadParam(shaderName);
+			ParseShaderFile(loadParam, shaderNode);
 			mIncludeByName.insert(std::make_pair(shaderName, std::move(shaderNode)));
 		}
+		return mIncludeByName[shaderName];
 	}
 
-	static bool ParseMacrosFile(const std::string& macroName, ProgramNode& progNode) {
+	static bool ParseMacrosFile(const std::string& macroName, ConstVisitorRef vis) {
 		bool result = false;
 		boost_filesystem::path path = boost_filesystem::system_complete("shader/" + macroName + ".cginc");
 		if (boost::filesystem::is_regular_file(path)) {
@@ -107,8 +111,8 @@ private:
 				std::getline(fs, line);
 				std::smatch exp_match;
 				if (std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 3) {
-					progNode.VertexSCD.AddMacro<true>(ShaderCompileMacro{exp_match[1].str(), exp_match[2].str()});
-					progNode.PixelSCD.AddMacro<true>(ShaderCompileMacro{exp_match[1].str(), exp_match[2].str()});
+					std::string key = exp_match[1].str(), value = exp_match[2].str();
+					vis.PredMacros[key] = std::stoi(value);
 				}
 			}
 			fs.close();
@@ -121,10 +125,10 @@ private:
 		if (!vis.CheckCondition(progNode, nodeProgram))
 			return;
 
-		for (auto& it : boost::make_iterator_range(nodeProgram.equal_range("Macros"))) {
+		for (auto& it : boost::make_iterator_range(nodeProgram.equal_range("PredMacros"))) {
 			std::string refName = it.second.data();
 			if (!refName.empty()) {
-				ParseMacrosFile(refName, progNode);
+				ParseMacrosFile(refName, vis);
 			}
 		}
 
@@ -354,8 +358,8 @@ private:
 	void VisitSubShader(const PropertyTreePath& nodeTechnique, ConstVisitorRef vis, CategoryNode& categNode) {
 		TechniqueNode& techniqueNode = categNode.Emplace();
 		int index = 0;
-		for (auto& it : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
-			auto& node_pass = it.second;
+		for (auto& pit : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
+			auto& node_pass = pit.second;
 
 			std::string strRepeat = node_pass.get<std::string>("<xmlattr>.Repeat", "1");
 			int repeat = __max(vis.GetMacroValue(categNode.Program, strRepeat), atoi(strRepeat.c_str()));
@@ -363,9 +367,8 @@ private:
 				PassNode pass;
 
 				pass.LightMode = LIGHTMODE_FORWARD_BASE;
-				auto find_tags = node_pass.find("Tags");
-				if (find_tags != node_pass.not_found()) {
-					auto& node_tag = find_tags->second;
+				for (auto& it : boost::make_iterator_range(node_pass.equal_range("Tags"))) {
+					auto& node_tag = it.second;
 					pass.LightMode = node_tag.get<std::string>("LightMode", pass.LightMode);
 				}
 
@@ -410,8 +413,6 @@ private:
 	void VisitCategory(const PropertyTreePath& nodeCategory, ConstVisitorRef vis, CategoryNode& categNode) {
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeCategory->equal_range("PROGRAM"))) {
-			if (index == 1)
-				index = index;
 			VisitProgram(PropertyTreePath(nodeCategory, it.second, index++), vis, categNode.Program);
 		}
 
@@ -430,7 +431,8 @@ private:
 		}
 
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Include"))) {
-			VisitInclude(it.second.data());
+			auto& incShader = VisitInclude(it.second.data());
+			vis.PredMacros.Merge(incShader.PredMacros);
 		}
 		VisitCategory(nodeShader, vis, shaderNode[0]);
 
@@ -455,7 +457,7 @@ private:
 			if (GetShaderAssetPath(loadParam, filepath)) {
 				boost_property_tree::ptree pt;
 				boost_property_tree::read_xml(filepath, pt);
-				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam }, shaderNode);
+				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam, shaderNode.PredMacros }, shaderNode);
 				BOOST_ASSERT(shaderNode.Validate());
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
 				result = true;
@@ -522,9 +524,8 @@ private:
 	}
 	bool VisitMaterial(const MaterialLoadParam& loadParam, const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
 		MaterialLoadParamBuilder paramBuilder = MaterialLoadParamBuilder(loadParam);
-		auto find_macros = nodeMaterial->find("Macros");
-		if (find_macros != nodeMaterial->not_found()) {
-			auto& node_macros = find_macros->second;
+		for (auto& mit : boost::make_iterator_range(nodeMaterial->equal_range("Macros"))) {
+			auto& node_macros = mit.second;
 			for (auto& it : node_macros)
 				paramBuilder[it.first] = boost::lexical_cast<int>(it.second.data());
 		}

@@ -97,7 +97,7 @@
 #define SHADOW_PCSS 4
 #define SHADOW_VSM 5
 #if !defined SHADOW_MODE
-#define SHADOW_MODE 3/*SHADOW_PCF*/
+#define SHADOW_MODE 5/*SHADOW_VSM*/
 #endif
 
 #endif

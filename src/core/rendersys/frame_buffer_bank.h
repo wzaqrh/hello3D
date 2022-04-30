@@ -10,7 +10,7 @@ namespace mir {
 class FrameBufferBank
 {
 	struct Element {
-		Element(const Eigen::Vector2i& fbSize, const std::vector<ResourceFormat>& fmts)
+		Element(const Eigen::Vector3i& fbSize, const std::vector<ResourceFormat>& fmts)
 			:mFbSize(fbSize), mFbFormats(fmts)
 		{}
 		void ReturnAll() {
@@ -19,13 +19,13 @@ class FrameBufferBank
 		IFrameBufferPtr Borrow(ResourceManager& resMng);
 		const std::vector<ResourceFormat>& GetFmts() const { return mFbFormats; }
 	private:
-		Eigen::Vector2i mFbSize;
+		Eigen::Vector3i mFbSize;
 		std::vector<ResourceFormat> mFbFormats;
 		std::vector<IFrameBufferPtr> mFbs;
 		size_t mBorrowCount = 0;
 	};
 public:
-	FrameBufferBank(ResourceManager& resMng, const Eigen::Vector2i& fbSize, const std::vector<ResourceFormat>& fmts)
+	FrameBufferBank(ResourceManager& resMng, const Eigen::Vector3i& fbSize, const std::vector<ResourceFormat>& fmts)
 		:mResMng(resMng), mFbSize(fbSize) {
 		mElements.push_back(CreateInstance<Element>(mFbSize, fmts));
 	}
@@ -37,7 +37,7 @@ public:
 	IFrameBufferPtr Borrow(const std::vector<ResourceFormat>& fmts);
 private:
 	ResourceManager& mResMng;
-	Eigen::Vector2i mFbSize;
+	Eigen::Vector3i mFbSize;
 	std::vector<std::shared_ptr<Element>> mElements;
 };
 
