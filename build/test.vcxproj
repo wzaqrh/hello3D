@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\test\app.cpp" />
     <ClCompile Include="..\src\test\main.cpp" />
+    <ClCompile Include="..\src\test\test_bloom.cpp" />
     <ClCompile Include="..\src\test\test_camera.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>

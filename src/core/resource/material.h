@@ -10,6 +10,7 @@
 #include "core/base/material_load_param.h"
 #include "core/rendersys/texture.h"
 #include "core/resource/resource.h"
+#include "core/resource/material_property.h"
 #include "core/resource/material_parameter.h"
 
 namespace mir {
@@ -22,23 +23,20 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void AddSampler(ISamplerStatePtr sampler);
 	bool Validate() const;
-public:
-	std::string mLightMode, mName;
-	PrimitiveTopology mTopoLogy;
+
+	IInputLayoutPtr GetInputLayout() const { return mInputLayout; }
+	IProgramPtr GetProgram() const { return mProgram; }
+	std::vector<ISamplerStatePtr> GetSamplers() const { return mSamplers; }
+
+	PrimitiveTopology GetTopoLogy() const { return mProperty->TopoLogy; }
+	const std::string& GetLightMode() const { return mProperty->LightMode; }
+	const PassProperty::GrabInput& GetGrabIn() const { return mProperty->GrabIn; }
+	const PassProperty::GrabOutput& GetGrabOut() const { return mProperty->GrabOut; }
+private:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;
 	std::vector<ISamplerStatePtr> mSamplers;
-	struct GrabOutput {
-		operator bool() const { return !Name.empty(); }
-		std::string Name;
-		std::vector<ResourceFormat> Format;
-	} mGrabOut;
-	struct GrabInput {
-		operator bool() const { return !Name.empty(); }
-		std::string Name;
-		int AttachIndex;
-		int TextureSlot;
-	} mGrabIn;
+	PassPropertyPtr mProperty;
 };
 
 class Technique : public tpl::Vector<PassPtr, ImplementResource<IResource>>

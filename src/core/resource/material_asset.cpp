@@ -120,7 +120,6 @@ private:
 		}
 		return result;
 	}
-
 	static void ParseProgramMacrosTopo(const boost_property_tree::ptree& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {//no_override
 		if (!vis.CheckCondition(progNode, nodeProgram))
 			return;
@@ -355,6 +354,60 @@ private:
 		}
 		return name;
 	};
+	struct GrabString {
+		bool Parse(const std::string& grabstr) {
+			Dic.clear();
+			Name.clear();
+
+			if (grabstr.empty()) return false;
+			SplitString(TmpStrKeyValues, grabstr, "{}");
+
+			Name = TmpStrKeyValues[0];
+			if (TmpStrKeyValues.size() > 1) {
+				std::string strDic = TmpStrKeyValues[1];
+				SplitString(TmpStrKeyValues, strDic, ";");
+				for (auto& kv : TmpStrKeyValues) {
+					SplitString(TmpStrTokens, kv, ":[,]");
+					if (TmpStrTokens.size() >= 2) {
+						const std::string& key = TmpStrTokens[0];
+						auto& values = Dic[key];
+						values.resize(TmpStrTokens.size() - 1);
+						for (size_t i = 1; i < TmpStrTokens.size(); ++i)
+							values[i - 1] = std::stof(TmpStrTokens[i]);
+					}
+				}
+			}
+			return ! Name.empty();
+		}
+	public:
+		static void SplitString(std::vector<std::string>& strArr, const std::string& str, const std::string& strAny) {
+			strArr.clear();
+			boost::split(strArr, str, boost::is_any_of(strAny), boost::token_compress_on);
+			if (strArr.back().empty()) strArr.pop_back();
+		}
+		template<class T> T Get(const std::string& key, T defValue) {}
+		template<> float Get<float>(const std::string& key, float defValue) {
+			auto& values = Dic[key];
+			return values.empty() ? defValue : values[0];
+		}
+		template<> int Get<int>(const std::string& key, int defValue) {
+			auto& values = Dic[key];
+			return values.empty() ? defValue : values[0];
+		}
+		bool Get(const std::string& key, std::vector<ResourceFormat>& fmts) {
+			auto& values = Dic[key];
+			fmts.clear();
+			for (auto& v : values) {
+				int iv = v;
+				fmts.push_back(static_cast<ResourceFormat>(iv));
+			}
+			return ! fmts.empty();
+		}
+	public:
+		std::string Name;
+		std::map<std::string, std::vector<float>> Dic;
+		std::vector<std::string> TmpStrKeyValues, TmpStrTokens;
+	};
 	void VisitSubShader(const PropertyTreePath& nodeTechnique, ConstVisitorRef vis, CategoryNode& categNode) {
 		TechniqueNode& techniqueNode = categNode.Emplace();
 		int index = 0;
@@ -365,43 +418,33 @@ private:
 			int repeat = __max(vis.GetMacroValue(categNode.Program, strRepeat), atoi(strRepeat.c_str()));
 			for (int i = 0; i < repeat; ++i) {
 				PassNode pass;
+				auto& pprop = *pass.Property;
 
-				pass.LightMode = LIGHTMODE_FORWARD_BASE;
+				pprop.LightMode = LIGHTMODE_FORWARD_BASE;
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("Tags"))) {
 					auto& node_tag = it.second;
-					pass.LightMode = node_tag.get<std::string>("LightMode", pass.LightMode);
+					pprop.LightMode = node_tag.get<std::string>("LightMode", pprop.LightMode);
 				}
 
-				pass.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
-				pass.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
+				pprop.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
+				pprop.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
 				pass.Program = categNode.Program;
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("PROGRAM"))) {
 					ParseProgramMacrosTopo(it.second, vis, pass.Program);
 				}
+				pprop.TopoLogy = pass.Program.Topo;
 
-				pass.GrabOut.Name = MakeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat);
-				if (!pass.GrabOut.Name.empty()) {
-					std::vector<std::string> strArr;
-					boost::split(strArr, pass.GrabOut.Name, boost::is_any_of("{,}"), boost::token_compress_on); 
-					if (strArr.back().empty()) strArr.pop_back();
-
-					pass.GrabOut.Name = strArr[0];
-					pass.GrabOut.Format.resize(strArr.size() - 1);
-					for (size_t i = 1; i < strArr.size(); ++i)
-						pass.GrabOut.Format[i-1] = (ResourceFormat)std::stoi(strArr[i]);
+				GrabString grabStr;
+				if (grabStr.Parse(MakeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat))) {
+					pprop.GrabOut.Name = grabStr.Name;
+					pprop.GrabOut.Size = grabStr.Get<float>("size", 1.0f);
+					grabStr.Get("fmts", pprop.GrabOut.Formats);
 				}
-				
-				pass.GrabIn.TextureSlot = 0;
-				pass.GrabIn.Name = node_pass.get<std::string>("UseGrab", "");
-				if (!pass.GrabIn.Name.empty()) {
-					std::vector<std::string> strArr;
-					boost::split(strArr, pass.GrabIn.Name, boost::is_any_of("{=}"), boost::token_compress_on);
-					if (strArr.back().empty()) strArr.pop_back();
-
-					pass.GrabIn.Name = strArr[0];
-					if (strArr.size() > 1) pass.GrabIn.TextureSlot = std::stoi(strArr[1]);
-					if (strArr.size() > 2) pass.GrabIn.AttachIndex = std::stoi(strArr[2]);
+				if (grabStr.Parse(node_pass.get<std::string>("UseGrab", ""))) {
+					pprop.GrabIn.Name = grabStr.Name;
+					pprop.GrabIn.TextureSlot = grabStr.Get<int>("bind_slot", 0);
+					pprop.GrabIn.AttachIndex = grabStr.Get<int>("attach_index", 0);
 				}
 
 				techniqueNode.Add(std::move(pass));

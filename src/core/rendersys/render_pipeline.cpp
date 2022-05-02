@@ -317,27 +317,29 @@ private:
 		res::TechniquePtr tech = op.Material->GetShader()->CurTech();
 		std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 		for (auto& pass : passes) {
-			if (pass->mGrabOut) {
-				IFrameBufferPtr passFb = mTempGrabDic[pass->mGrabOut.Name];
+			const auto& passOut = pass->GetGrabOut();
+			if (passOut) {
+				IFrameBufferPtr passFb = mTempGrabDic[passOut.Name];
 				if (passFb == nullptr) {
-					passFb = mTempFbs->Borrow(pass->mGrabOut.Format);
-					mTempGrabDic[pass->mGrabOut.Name] = passFb;
+					passFb = mTempFbs->Borrow(passOut.Formats);
+					mTempGrabDic[passOut.Name] = passFb;
 				}
 				mStatesBlock.FrameBuffer.Push(passFb);
 			}
-			if (pass->mGrabIn) {
-				IFrameBufferPtr passFb = mTempGrabDic[pass->mGrabIn.Name];
-				if (passFb) mStatesBlock.Textures(pass->mGrabIn.TextureSlot, 
-					IF_AND_OR(pass->mGrabIn.AttachIndex >= 0, passFb->GetAttachColorTexture(pass->mGrabIn.AttachIndex), passFb->GetAttachZStencilTexture()));
+			const auto& passIn = pass->GetGrabIn();
+			if (passIn) {
+				IFrameBufferPtr passFb = mTempGrabDic[passIn.Name];
+				if (passFb) mStatesBlock.Textures(passIn.TextureSlot, 
+					IF_AND_OR(passIn.AttachIndex >= 0, passFb->GetAttachColorTexture(passIn.AttachIndex), passFb->GetAttachZStencilTexture()));
 			}
 
 			RenderPass(pass, op);
 
-			if (pass->mGrabOut) {
+			if (passOut) {
 				mStatesBlock.FrameBuffer.Pop();
 			}
-			if (pass->mGrabIn) {
-				mStatesBlock.Textures(pass->mGrabIn.TextureSlot, nullptr);
+			if (passIn) {
+				mStatesBlock.Textures(passIn.TextureSlot, nullptr);
 			}
 		}
 	}
@@ -346,20 +348,21 @@ private:
 		//SetVertexLayout(pass->mInputLayout);
 		mRenderSys.SetVertexBuffers(op.VertexBuffers);
 		mRenderSys.SetIndexBuffer(op.IndexBuffer);
-		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->mProgram);
+		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->GetProgram());
 
 		const TextureVector& textures = op.Material->GetTextures();
 		if (textures.Count() > 0) mStatesBlock.Textures(kTextureUserSlotFirst, &textures[0], textures.Count());
 		else mStatesBlock.Textures(kTextureUserSlotFirst, nullptr, 0);
 
-		mRenderSys.SetProgram(pass->mProgram);
-		mRenderSys.SetVertexLayout(pass->mInputLayout);
+		mRenderSys.SetProgram(pass->GetProgram());
+		mRenderSys.SetVertexLayout(pass->GetInputLayout());
 
-		if (!pass->mSamplers.empty()) mRenderSys.SetSamplers(0, &pass->mSamplers[0], pass->mSamplers.size());
+		const auto& samplers = pass->GetSamplers();
+		if (!samplers.empty()) mRenderSys.SetSamplers(0, &samplers[0], samplers.size());
 		else mRenderSys.SetSamplers(0, nullptr, 0);
 
-		if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->mTopoLogy);
-		else mRenderSys.DrawPrimitive(op, pass->mTopoLogy);
+		if (op.IndexBuffer) mRenderSys.DrawIndexedPrimitive(op, pass->GetTopoLogy());
+		else mRenderSys.DrawPrimitive(op, pass->GetTopoLogy());
 	}
 private:
 	RenderPipeline& Pipe;

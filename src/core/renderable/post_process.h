@@ -35,6 +35,7 @@ public:
 	CoTask<PostProcessPtr> CreateGaussianBlur(int radius, std::string matName = "");
 	CoTask<PostProcessPtr> CreateAverageBlur(int radius, std::string matName = "");
 	CoTask<PostProcessPtr> CreateSSAO(const scene::Camera& camera);
+	CoTask<PostProcessPtr> CreateBloom();
 private:
 	RenderableFactoryPtr mRendFac;
 };

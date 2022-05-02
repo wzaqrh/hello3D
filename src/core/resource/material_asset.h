@@ -7,6 +7,7 @@
 #include "core/rendersys/hardware_buffer.h"
 #include "core/rendersys/sampler.h"
 #include "core/rendersys/input_layout.h"
+#include "core/resource/material_property.h"
 #include "core/resource/material_parameter.h"
 
 namespace mir {
@@ -143,25 +144,12 @@ public:
 	SamplerNode Samplers;
 	ShaderCompileDescEx VertexSCD, PixelSCD;
 };
-struct PassNode {
-	bool Validate() const {
-		return VR(Program.Validate()
-			&& !LightMode.empty()
-			&& !Name.empty()
-		/* && !ShortName.empty() */);
-	}
+struct PassNode : public PassProperty {
+	PassNode() { Property = CreateInstance<PassProperty>(); }
+	bool Validate() const { return VR(Program.Validate() && *Property); }
 public:
 	ProgramNode Program;
-	std::string LightMode, Name, ShortName;
-	struct GrabOutputNode {
-		std::string Name;
-		std::vector<ResourceFormat> Format;
-	} GrabOut;
-	struct GrabInputNode {
-		std::string Name;
-		int AttachIndex = 0;
-		int TextureSlot = 0;
-	} GrabIn;
+	PassPropertyPtr Property;
 };
 struct TechniqueNode : public tpl::Vector<PassNode> {
 	template<class Visitor> void ForEachPass(Visitor vis) const {

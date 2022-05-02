@@ -130,6 +130,13 @@ CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateAverageBlur(int radi
 	CoReturn filter;
 }
 
+CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateBloom()
+{
+	MaterialLoadParamBuilder param = MAT_BLOOM;
+	auto filter = CoAwait mRendFac->CreatePostProcessEffectT(param);
+	CoReturn filter;
+}
+
 CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateSSAO(const scene::Camera& camera)
 {
 	float fov = camera.GetFov();

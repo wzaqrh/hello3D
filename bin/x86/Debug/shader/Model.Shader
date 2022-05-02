@@ -67,16 +67,16 @@
 			</PROGRAM>
 		</Pass>
 		<Pass>
-			<UseGrab>__shadowmap{14=0}</UseGrab>
+			<UseGrab>__shadowmap{bind_slot:14}</UseGrab>
 			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>
 				<PixelEntry>PSBlurVSMX</PixelEntry>
 			</PROGRAM>
-			<GrabPass>VSM_BlurX{16,45}</GrabPass>
+			<GrabPass>VSM_BlurX{fmts:[16,45]}</GrabPass>
 		</Pass>
 		<Pass>
-			<UseGrab>VSM_BlurX{14=0}</UseGrab>
+			<UseGrab>VSM_BlurX{bind_slot:14}</UseGrab>
 			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>

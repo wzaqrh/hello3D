@@ -125,6 +125,7 @@
     <ClInclude Include="..\src\core\resource\material_factory.h" />
     <ClInclude Include="..\src\core\resource\material_name.h" />
     <ClInclude Include="..\src\core\resource\material_parameter.h" />
+    <ClInclude Include="..\src\core\resource\material_property.h" />
     <ClInclude Include="..\src\core\resource\predeclare.h" />
     <ClInclude Include="..\src\core\resource\resource.h" />
     <ClInclude Include="..\src\core\resource\resource_manager.h" />

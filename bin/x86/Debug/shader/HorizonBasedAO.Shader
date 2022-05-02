@@ -27,7 +27,7 @@
 			<GrabPass>PassOutAo</GrabPass>
 		</Pass>
 		<Pass>
-			<UseGrab>PassOutAo:14</UseGrab>
+			<UseGrab>PassOutAo{bind_slot:14}</UseGrab>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM>
 				<PixelEntry>PSBlurX</PixelEntry>
@@ -35,7 +35,7 @@
 			<GrabPass>PassOutBlurX</GrabPass>
 		</Pass>
 		<Pass>
-			<UseGrab>PassOutBlurX:14</UseGrab>
+			<UseGrab>PassOutBlurX{bind_slot:14}</UseGrab>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM>
 				<PixelEntry>PSBlurY</PixelEntry>

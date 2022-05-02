@@ -54,12 +54,7 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 				const mat_asset::ProgramNode& passProgram = passNode.Program;
 				PassPtr curPass = CreateInstance<Pass>();
 				curTech->AddPass(curPass);
-				curPass->mLightMode = passNode.LightMode;
-				curPass->mName = passNode.ShortName;
-				curPass->mTopoLogy = passProgram.Topo;
-				
-				curPass->mGrabOut = { passNode.GrabOut.Name, passNode.GrabOut.Format  };
-				curPass->mGrabIn = { passNode.GrabIn.Name, passNode.GrabIn.AttachIndex, passNode.GrabIn.TextureSlot };
+				curPass->mProperty = passNode.Property;
 
 				tasks.push_back([&resMng,launchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
 					if (!CoAwait resMng.CreateProgram(pass->mProgram, launchMode, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
@@ -197,13 +192,9 @@ CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& mat
 PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, const Pass& proto)
 {
 	PassPtr result = CreateInstance<Pass>();
-	result->mLightMode = proto.mLightMode;
-	result->mName = proto.mName;
-	result->mTopoLogy = proto.mTopoLogy;
+	result->mProperty = proto.mProperty;
 	result->mInputLayout = proto.mInputLayout;
 	result->mProgram = proto.mProgram;
-	result->mGrabOut = proto.mGrabOut;
-	result->mGrabIn = proto.mGrabIn;
 
 	for (const auto& sampler : proto.mSamplers)
 		result->AddSampler(sampler);
