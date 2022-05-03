@@ -1,4 +1,4 @@
-<Shader Name="BoxBlur">
+<Shader Name="Bloom">
 	<Include>Standard</Include>
 	
 	<PROGRAM>
@@ -10,8 +10,7 @@
 			<Element Name="BoxKernelWeights" Type="float" Count="28" Default="0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111"></Element>
 		</Uniform>  
 
-		<Macros> <PASS_ITERATOR_COUNT>3</PASS_ITERATOR_COUNT> </Macros>
-		<FileName>BoxBlur</FileName>
+		<FileName>Bloom</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>
 	

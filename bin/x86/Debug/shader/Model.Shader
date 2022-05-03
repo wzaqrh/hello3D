@@ -67,7 +67,7 @@
 			</PROGRAM>
 		</Pass>
 		<Pass>
-			<UseGrab>__shadowmap{bind_slot:14}</UseGrab>
+			<UseGrab>_ShadowMap{bind_slot:14}</UseGrab>
 			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>
@@ -82,7 +82,7 @@
 				<VertexEntry>VSBlurVSM</VertexEntry>
 				<PixelEntry>PSBlurVSMY</PixelEntry>
 			</PROGRAM>
-			<GrabPass>__shadowmap</GrabPass>
+			<GrabPass>_ShadowMap</GrabPass>
 		</Pass>
 		
 		<Pass>

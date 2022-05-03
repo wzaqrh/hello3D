@@ -6,9 +6,9 @@
 MIR_DECLARE_TEX2D(_SceneImage, 6);
 MIR_DECLARE_TEX2D(_GDepth, 7);
 #if SHADOW_MODE == SHADOW_VSM
-MIR_DECLARE_TEX2D(_ShadowMapTexture, 8);
+MIR_DECLARE_TEX2D(_ShadowMap, 8);
 #else
-MIR_DECLARE_SHADOWMAP(_ShadowMapTexture, 8);
+MIR_DECLARE_SHADOWMAP(_ShadowMap, 8);
 #endif
 MIR_DECLARE_TEXCUBE(_DiffuseCube, 9);
 MIR_DECLARE_TEXCUBE(_SpecCube, 10);

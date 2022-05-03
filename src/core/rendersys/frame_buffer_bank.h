@@ -18,6 +18,7 @@ class FrameBufferBank
 		}
 		IFrameBufferPtr Borrow(ResourceManager& resMng);
 		const std::vector<ResourceFormat>& GetFmts() const { return mFbFormats; }
+		const Eigen::Vector3i& GetSize() const { return mFbSize; }
 	private:
 		Eigen::Vector3i mFbSize;
 		std::vector<ResourceFormat> mFbFormats;
@@ -34,7 +35,7 @@ public:
 			iter->ReturnAll();
 	}
 	IFrameBufferPtr Borrow() { return mElements[0]->Borrow(mResMng); }
-	IFrameBufferPtr Borrow(const std::vector<ResourceFormat>& fmts);
+	IFrameBufferPtr Borrow(const std::vector<ResourceFormat>& fmts, float size = 1.0f);
 private:
 	ResourceManager& mResMng;
 	Eigen::Vector3i mFbSize;

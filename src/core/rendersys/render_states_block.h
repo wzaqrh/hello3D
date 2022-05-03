@@ -5,10 +5,23 @@
 namespace mir {
 	
 struct FrameBufferBlock {
+	struct Lock : boost::noncopyable {
+		TemplateArgs Lock(FrameBufferBlock& block, T &&...args) :mBlock(block) { mBlock.Push(std::forward<T>(args)...); }
+		Lock(Lock&& other) :mBlock(other.mBlock), mCurrentCb(other.mCurrentCb) { other.mOwn = false; }
+		~Lock() { if (mOwn) { mBlock.Pop(); if (mCurrentCb) mCurrentCb(mBlock.GetCurrent()); } }
+		void SetCallback(std::function<void(IFrameBufferPtr)> cb) { mCurrentCb = cb; if (mCurrentCb) mCurrentCb(mBlock.GetCurrent()); }
+	private:
+		FrameBufferBlock& mBlock;
+		bool mOwn = true;
+		std::function<void(IFrameBufferPtr)> mCurrentCb;
+	};
+public:
 	FrameBufferBlock(RenderSystem& renderSys) :mRenderSys(renderSys) {}
 	void Push(IFrameBufferPtr fb) {
 		mStack.push_back(mCurrent);
 		if (fb) mRenderSys.SetFrameBuffer(mCurrent = fb);
+
+		if (mCurrentCb) mCurrentCb(mCurrent);
 	}
 	void Push(IFrameBufferPtr fb, const Eigen::Vector4f& color, float depth, uint8_t stencil) {
 		Push(fb);
@@ -18,19 +31,20 @@ struct FrameBufferBlock {
 		BOOST_ASSERT(!mStack.empty());
 		mRenderSys.SetFrameBuffer(mCurrent = mStack.back());
 		mStack.pop_back();
+
+		if (mCurrentCb) mCurrentCb(mCurrent);
 	}
-	struct Lock : boost::noncopyable {
-		TemplateArgs Lock(FrameBufferBlock& block, T &&...args) :mBlock(block) { mBlock.Push(std::forward<T>(args)...); }
-		Lock(Lock&& other) :mBlock(other.mBlock) { other.mOwn = false; }
-		~Lock() { if (mOwn) mBlock.Pop(); }
-	private:
-		FrameBufferBlock& mBlock;
-		bool mOwn = true;
-	};
+	void SetCallback(std::function<void(IFrameBufferPtr)> cb) {
+		mCurrentCb = cb;
+
+		if (mCurrentCb) mCurrentCb(mCurrent);
+	}
+	const IFrameBufferPtr& GetCurrent() const { return mCurrent; }
 private:
 	RenderSystem& mRenderSys;
 	IFrameBufferPtr mCurrent;
 	std::vector<IFrameBufferPtr> mStack;
+	std::function<void(IFrameBufferPtr)> mCurrentCb;
 };
 
 struct BlendStateBlock {
@@ -138,6 +152,7 @@ struct RenderStatesBlock {
 	TemplateArgs DepthStateBlock::Lock LockDepth(T &&...args) {
 		return std::move(DepthStateBlock::Lock(Depth, std::forward<T>(args)...));
 	}
+	const IFrameBufferPtr& CurrentFrameBuffer() const { return FrameBuffer.GetCurrent(); }
 public:
 	FrameBufferBlock FrameBuffer;
 	TexturesBlock Textures;

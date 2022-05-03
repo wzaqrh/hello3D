@@ -138,15 +138,15 @@ struct PSShadowCasterInput
 {
 	float4 Pos  : SV_POSITION;
 	//float4 Pos0 : POSITION0;
-	float2 Tex : TEXCOORD0;
+	//_//float2 Tex : TEXCOORD0;
 };
 PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 {
 	PSShadowCasterInput output;
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
-	output.Pos = mul(mul(Projection, mul(View, mul(World, transpose(Model)))), skinPos);
+	output.Pos = mul(mul(LightProjection, mul(LightView, mul(World, transpose(Model)))), skinPos);
 	//output.Pos0 = output.Pos;
-	output.Tex = surf.Tex;
+	//_//output.Tex = surf.Tex;
 	return output;
 }
 float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
@@ -154,9 +154,7 @@ float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 	float4 finalColor = float4(0,0,0,1);
 	//finalColor.xy = input.Pos0.xy / input.Pos0.w;
 	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
-	//finalColor.y = 0;
-	//finalColor.z = input.Pos0.z / input.Pos0.w;
-	finalColor = GetAlbedo(input.Tex);
+	//_//finalColor = GetAlbedo(input.Tex);
 	return finalColor;
 }
 
@@ -171,8 +169,8 @@ PSGenerateVSMInput VSGenerateVSM(vbSurface surf, vbWeightedSkin skin)
 	PSGenerateVSMInput output;
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
 	output.WorldPos = mul(mul(World, transpose(Model)), skinPos);
-	output.ViewPos = mul(View, output.WorldPos);
-	output.Pos = mul(Projection, output.ViewPos);
+	output.ViewPos = mul(LightView, output.WorldPos);
+	output.Pos = mul(LightProjection, output.ViewPos);
 	return output;
 }
 float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target

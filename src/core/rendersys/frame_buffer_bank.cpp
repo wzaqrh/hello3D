@@ -19,15 +19,16 @@ IFrameBufferPtr FrameBufferBank::Element::Borrow(ResourceManager& resMng) {
 	return res;
 }
 
-IFrameBufferPtr FrameBufferBank::Borrow(const std::vector<ResourceFormat>& fmts) {
-	if (fmts.empty())
-		return mElements[0]->Borrow(mResMng);
+IFrameBufferPtr FrameBufferBank::Borrow(const std::vector<ResourceFormat>& fmts, float size) {
+	if (fmts.empty()) return mElements[0]->Borrow(mResMng);
+
+	Eigen::Vector3i fbSize(mFbSize.x() * size, mFbSize.y() * size, mFbSize.z());
 
 	for (auto& iter : mElements)
-		if (iter->GetFmts() == fmts)
+		if (iter->GetFmts() == fmts && iter->GetSize() == fbSize)
 			return iter->Borrow(mResMng);
 
-	mElements.push_back(CreateInstance<Element>(mFbSize, fmts));
+	mElements.push_back(CreateInstance<Element>(fbSize, fmts));
 	return mElements.back()->Borrow(mResMng);
 }
 
