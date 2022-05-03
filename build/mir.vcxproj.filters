@@ -574,5 +574,8 @@
     <None Include="..\bin\x86\Debug\shader\Macros.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\Bloom.hlsl">
+      <Filter>src\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

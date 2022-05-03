@@ -78,11 +78,11 @@ std::vector<IContantBufferPtr> MaterialInstance::GetConstBuffers() const
 {
 	return mGpuParameters->GetConstBuffers();
 }
-void MaterialInstance::WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data) const
+void MaterialInstance::WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data)
 {
 	mGpuParameters->WriteToElementCb(renderSys, cbName, data);
 }
-void MaterialInstance::FlushGpuParameters(RenderSystem& renderSys) const
+void MaterialInstance::FlushGpuParameters(RenderSystem& renderSys)
 {
 	mGpuParameters->FlushToGpu(renderSys);
 }

@@ -95,7 +95,7 @@ GpuParametersPtr GpuParameters::Clone(Launch launchMode, ResourceManager& resMng
 	return result;
 }
 
-void GpuParameters::WriteToElementCb(RenderSystem& renderSys, const std::string& cbName, Data data) const
+void GpuParameters::WriteToElementCb(RenderSystem& renderSys, const std::string& cbName, Data data)
 {
 	for (const auto& element : *this) {
 		if (element.IsValid() && element.GetName() == cbName) {

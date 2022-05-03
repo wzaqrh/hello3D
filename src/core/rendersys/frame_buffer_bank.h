@@ -27,7 +27,7 @@ class FrameBufferBank
 	};
 public:
 	FrameBufferBank(ResourceManager& resMng, const Eigen::Vector3i& fbSize, const std::vector<ResourceFormat>& fmts)
-		:mResMng(resMng), mFbSize(fbSize) {
+		:mResMng(resMng), mFbSize(fbSize), mFbFormats(fmts) {
 		mElements.push_back(CreateInstance<Element>(mFbSize, fmts));
 	}
 	void ReturnAll() {
@@ -39,6 +39,7 @@ public:
 private:
 	ResourceManager& mResMng;
 	Eigen::Vector3i mFbSize;
+	std::vector<ResourceFormat> mFbFormats;
 	std::vector<std::shared_ptr<Element>> mElements;
 };
 

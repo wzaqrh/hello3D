@@ -33,8 +33,7 @@ using UniformNode = UniformParameters;
 struct SamplerDescEx : public SamplerDesc {
 	bool IsValid() const { return !ShortName.empty(); }
 	const std::string& GetName() const { return ShortName; }
-	static SamplerDescEx Make(SamplerFilterMode filter, CompareFunc cmpFunc,
-		AddressMode addrU, AddressMode addrV, AddressMode addrW, const std::string& shortName) {
+	static SamplerDescEx Make(SamplerFilterMode filter, CompareFunc cmpFunc, AddressMode addrU, AddressMode addrV, AddressMode addrW, const std::string& shortName) {
 		SamplerDescEx sd;
 		sd.Filter = filter;
 		sd.CmpFunc = cmpFunc;
@@ -47,7 +46,8 @@ struct SamplerDescEx : public SamplerDesc {
 public:
 	std::string ShortName;
 };
-struct SamplerNode : public tpl::Vector<SamplerDescEx> {};
+struct SamplerNode : public tpl::Vector<SamplerDescEx> 
+{};
 }
 }
 
@@ -120,22 +120,18 @@ struct ProgramNode {
 		VertexSCD.Merge<true>(other.VertexSCD);
 		PixelSCD.Merge<true>(other.PixelSCD);
 	}
-	void Build() {
-		if (Topo == kPrimTopologyUnkown)
-			Topo = kPrimTopologyTriangleList;
-	}
 	bool Validate() const {
 		for (auto& attr : Attrs)
 			if (!VR(attr.IsValid()))
 				return false;
-	#if 0
+		#if 0
 		return VR((Topo != kPrimTopologyUnkown) && 
 			(Attrs.Count() > 0) &&
 			VertexSCD.Validate() &&
 			PixelSCD.Validate());
-	#else
+		#else
 		return VR(Attrs.Count() > 0);
-	#endif
+		#endif
 	}
 public:
 	PrimitiveTopology Topo = kPrimTopologyTriangleList;
@@ -143,6 +139,7 @@ public:
 	UniformNodeVector Uniforms;
 	SamplerNode Samplers;
 	ShaderCompileDescEx VertexSCD, PixelSCD;
+	PassProperty::ParameterRelation Relate2Parameter;
 };
 struct PassNode : public PassProperty {
 	PassNode() { Property = CreateInstance<PassProperty>(); }
@@ -242,7 +239,6 @@ private:
 	std::shared_ptr<ShaderNodeManager> mShaderNodeMng;
 	std::shared_ptr<MaterialNodeManager> mMaterialNodeMng;
 };
-
 }
 }
 }

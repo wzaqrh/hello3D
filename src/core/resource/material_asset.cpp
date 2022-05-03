@@ -234,6 +234,18 @@ private:
 				std::string strDefault = element.second.get<std::string>("<xmlattr>.Default", "");
 
 				uniBuilder.AddParameter(name, type, size, count, offset, strDefault);
+
+				if (!name.empty() && name[0] == '_') {
+					for (size_t slot = 0; slot < progNode.Samplers.Count(); ++slot) {
+						const auto& sampler = progNode.Samplers[slot];
+						std::string texSize = sampler.GetName() + "_TexelSize";
+						if (texSize == name) {
+							progNode.Relate2Parameter.TextureSizes[slot] = texSize;
+							progNode.Relate2Parameter.HasTextureSize = true;
+							break;
+						}
+					}
+				}
 			}
 			uniBuilder.Slot() = node_uniform.get<int>("<xmlattr>.Slot", -1);
 			BOOST_ASSERT(uniBuilder.Slot() >= 0);
@@ -321,8 +333,8 @@ private:
 	void VisitProgram(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		ParseProgramMacrosTopo(nodeProgram.Node, vis, progNode);
 		VisitAttributes(nodeProgram, vis, progNode);
-		VisitUniforms(nodeProgram, vis, progNode);
 		VisitSamplers(nodeProgram, vis, progNode);
+		VisitUniforms(nodeProgram, vis, progNode);
 		BOOST_ASSERT(progNode.Validate());
 	}
 
@@ -434,6 +446,7 @@ private:
 					ParseProgramMacrosTopo(it.second, vis, pass.Program);
 				}
 				pprop.TopoLogy = pass.Program.Topo;
+				pprop.Relate2Parameter = pass.Program.Relate2Parameter;
 
 				GrabString grabStr;
 				if (grabStr.Parse(MakeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat))) {
@@ -441,10 +454,14 @@ private:
 					pprop.GrabOut.Size = grabStr.Get<float>("size", 1.0f);
 					grabStr.Get("fmts", pprop.GrabOut.Formats);
 				}
-				if (grabStr.Parse(node_pass.get<std::string>("UseGrab", ""))) {
-					pprop.GrabIn.Name = grabStr.Name;
-					pprop.GrabIn.TextureSlot = grabStr.Get<int>("bind_slot", 0);
-					pprop.GrabIn.AttachIndex = grabStr.Get<int>("attach_index", 0);
+				for (auto& it : boost::make_iterator_range(node_pass.equal_range("UseGrab"))) {
+					if (grabStr.Parse(it.second.data())) {
+						pprop.GrabIn.emplace_back();
+						auto& unit = pprop.GrabIn.back();
+						unit.Name = grabStr.Name;
+						unit.TextureSlot = grabStr.Get<int>("bind_slot", 0);
+						unit.AttachIndex = grabStr.Get<int>("attach_index", 0);
+					}
 				}
 
 				techniqueNode.Add(std::move(pass));

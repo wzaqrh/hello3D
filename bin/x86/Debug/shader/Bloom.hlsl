@@ -9,7 +9,7 @@
 
 cbuffer cbBloom : register(b3)
 {
-	float4 SceneResolution;
+	float4 _SceneImage_TexelSize;
 	float4 BloomThresholdIntensity;
 	float4 LensFlareThesholdIntensity;
 	float4 BlurIterationSpread;
@@ -48,7 +48,7 @@ UVQuad MakeUVQuad(float2 tex, float4 resolution)
 }
 inline float4 MultiTapMax(UVQuad i, MIR_ARGS_TEX2D(tMainTex))
 {
-	half4 outColor = MIR_SAMPLE_TEX2D(tMainTex, i.uv[4].xy);
+	float4 outColor = MIR_SAMPLE_TEX2D(tMainTex, i.uv[4].xy);
 	outColor = max(outColor, MIR_SAMPLE_TEX2D(tMainTex, i.uv[0].xy));
 	outColor = max(outColor, MIR_SAMPLE_TEX2D(tMainTex, i.uv[1].xy));
 	outColor = max(outColor, MIR_SAMPLE_TEX2D(tMainTex, i.uv[2].xy));
@@ -67,13 +67,13 @@ inline float4 MultiTapBlur(UVQuad i, MIR_ARGS_TEX2D(tMainTex))
 
 float4 PSDownSample(PixelInput input) : SV_Target
 {
-	UVQuad quv = MakeUVQuad(input.Tex, SceneResolution);
+	UVQuad quv = MakeUVQuad(input.Tex, _SceneImage_TexelSize);
 	return MultiTapMax(quv, MIR_PASS_TEX2D(_SceneImage));
 }
 
 float4 PSAvgBlur(PixelInput input) : SV_Target
 {
-	UVQuad quv = MakeUVQuad(input.Tex, SceneResolution);
+	UVQuad quv = MakeUVQuad(input.Tex, _SceneImage_TexelSize);
 	return MultiTapBlur(quv, MIR_PASS_TEX2D(_SceneImage));
 }
 
@@ -104,14 +104,14 @@ inline float4 BlurFunction(float2 uv, float2 texelStep, float4 resolution, MIR_A
 
 float4 PSBlurX(PixelInput input) : SV_Target
 {
-	float spreadForPass = (1.0f + (BlurIterationSpread.x * 0.25f)) * BlurIterationSpread.y;
-	return BlurFunction(input.Tex, float2(1.0, 0.0) * spreadForPass, SceneResolution, MIR_PASS_TEX2D(_SceneImage));
+	float spreadForPass = (1.0f + (BlurIterationSpread.y * 0.25f)) * BlurIterationSpread.x;
+	return BlurFunction(input.Tex, float2(1.0, 0.0) * spreadForPass, _SceneImage_TexelSize, MIR_PASS_TEX2D(_SceneImage));
 }
 
 float4 PSBlurY(PixelInput input) : SV_Target
 {
-	float spreadForPass = (1.0f + (BlurIterationSpread.x * 0.25f)) * BlurIterationSpread.y;
-	return BlurFunction(input.Tex, float2(0.0, 1.0) * spreadForPass, SceneResolution, MIR_PASS_TEX2D(_SceneImage));
+	float spreadForPass = (1.0f + (BlurIterationSpread.y * 0.25f)) * BlurIterationSpread.x;
+	return BlurFunction(input.Tex, float2(0.0, 1.0) * spreadForPass, _SceneImage_TexelSize, MIR_PASS_TEX2D(_SceneImage));
 }
 
 float4 PSLensThreshold(PixelInput input) : SV_Target

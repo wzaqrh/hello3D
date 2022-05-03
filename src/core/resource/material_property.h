@@ -19,12 +19,19 @@ public:
 		std::vector<ResourceFormat> Formats;
 		float Size = 1.0f;
 	} GrabOut;
-	struct GrabInput {
+	struct GrabInputUnit {
 		operator bool() const { return !Name.empty(); }
 		std::string Name;
 		int AttachIndex = 0;
 		int TextureSlot = 0;
-	} GrabIn;
+	};
+	typedef std::vector<GrabInputUnit> GrabInput;
+	GrabInput GrabIn;
+	struct ParameterRelation {
+		ParameterRelation() :TextureSizes(16), HasTextureSize(false) {}
+		std::vector<std::string> TextureSizes;
+		bool HasTextureSize;
+	} Relate2Parameter;
 };
 
 }

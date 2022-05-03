@@ -32,6 +32,7 @@ public:
 	const std::string& GetLightMode() const { return mProperty->LightMode; }
 	const PassProperty::GrabInput& GetGrabIn() const { return mProperty->GrabIn; }
 	const PassProperty::GrabOutput& GetGrabOut() const { return mProperty->GrabOut; }
+	const PassProperty::ParameterRelation& GetRelateToParam() const { return mProperty->Relate2Parameter; }
 private:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;
@@ -88,8 +89,8 @@ public:
 		SetPropertyAt<Eigen::Vector4f>(propertyName, pos, value);
 	}
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
-	void FlushGpuParameters(RenderSystem& renderSys) const;
-	void WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data) const;
+	void FlushGpuParameters(RenderSystem& renderSys);
+	void WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data);
 
 	const MaterialPtr& GetMaterial() const { return mMaterial;}
 	MaterialPtr& operator->() { return mMaterial; }

@@ -6,15 +6,20 @@
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
-		<Uniform Name="cbBoxFilter" Slot="3" ShareMode="1">
-			<Element Name="BoxKernelWeights" Type="float" Count="28" Default="0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111"></Element>
-		</Uniform>  
+		<Uniform Name="cbBloom" Slot="3" ShareMode="1">
+			<Element Name="_SceneImage_TexelSize" Type="float4"></Element>
+			<Element Name="BloomThresholdIntensity" Type="float4" Default="0.25,0.25,0.25,0.8"></Element>
+			<Element Name="LensFlareThesholdIntensity" Type="float4" Default="0.1,0.1,0.1,0.2"></Element>
+			<Element Name="BlurIterationSpread" Type="float4" Default="2.5,0,0,0"></Element>
+			<Element Name="LensColors" Type="float4" Count="4" Default="0.4,0.4,0.8,0.75, 0.4,0.8,0.8,0.75, 0.8,0.4,0.8,0.75, 0.8,0.4,0.0,0.75"></Element>
+		</Uniform>
 
 		<FileName>Bloom</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>
 	
 	<SubShader>
+		<!-- sampling down : 3 pass -->
 		<Pass>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM> 
@@ -38,6 +43,7 @@
 			<UseGrab>DownSample4{bind_slot:6}</UseGrab>
 			<GrabPass>ABlur4{size:0.25}</GrabPass>
 		</Pass>
+		<!-- threshold : 1 pass -->
 		<Pass>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM> 
@@ -46,6 +52,7 @@
 			<UseGrab>ABlur4{bind_slot:6}</UseGrab>
 			<GrabPass>Threshold4{size:0.25}</GrabPass>
 		</Pass>
+		<!-- blur : 3 pass -->
 		<Pass>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM> 
@@ -62,16 +69,18 @@
 			<UseGrab>GBlurX4{bind_slot:6}</UseGrab>
 			<GrabPass>GBlurY4{size:0.25}</GrabPass>
 		</Pass>
+		<!-- sampling up : 3 pass -->
 		<Pass>
 			<Tags> <LightMode>PostProcess</LightMode> </Tags>
 			<PROGRAM> 
 				<PixelEntry>PSAvgBlur</PixelEntry>
 			</PROGRAM>
 			<UseGrab>GBlurY4{bind_slot:6}</UseGrab>
-			<GrabPass>ABlurY4_1{size:0.25}</GrabPass>
+			<GrabPass>ABlurY4_1{size:0.5}</GrabPass>
 		</Pass>
+		<!-- blend : 1 pass -->
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<Tags> <LightMode>PostProcess1</LightMode> </Tags>
 			<PROGRAM> 
 				<PixelEntry>PSLensThreshold</PixelEntry>
 			</PROGRAM>
@@ -83,8 +92,8 @@
 			<PROGRAM> 
 				<PixelEntry>PSBlendAdd</PixelEntry>
 			</PROGRAM>
-			<UseGrab>__process_input{bind_slot:14}</UseGrab>
-			<UseGrab>LensThreshold4{bind_slot:6}</UseGrab>
+			<UseGrab>_SceneImage{bind_slot:14}</UseGrab>
+			<UseGrab>ABlurY4_1{bind_slot:6}</UseGrab>
 		</Pass>
 	</SubShader>
 </Shader>

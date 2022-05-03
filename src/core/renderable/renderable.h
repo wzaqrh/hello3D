@@ -15,12 +15,10 @@ struct RenderOperation {
 	RenderOperation() 
 		: IndexPos(0), IndexCount(0), IndexBase(0), WorldTransform(Eigen::Matrix4f::Identity()), CameraMask(-1) 
 	{}
-	template<class T> void SetUBOBytes(const std::string& cbName, const T& value) {
-		UBOBytesByName[cbName].assign((char*)&value, (char*)&value + sizeof(value));
-	}
 	void AddVertexBuffer(IVertexBufferPtr vbo) {
 		VertexBuffers.push_back(vbo);
 	}
+	res::MaterialInstance& WrMaterial() const { return const_cast<res::MaterialInstance&>(Material); }
 public:
 	Eigen::Matrix4f WorldTransform;
 	unsigned CameraMask;

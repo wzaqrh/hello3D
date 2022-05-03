@@ -57,17 +57,18 @@ public:
 public:
 	bool IsValid() const { return !mData.IsEmpty(); }
 	const std::string& GetName() const { return mShortName; }
-	size_t GetSlot() const { return mSlot; }
 	CBufferShareMode GetShareMode() const { return mShareMode; }
+	size_t GetSlot() const { return mSlot; }
 	bool IsReadOnly() const { return mIsReadOnly; }
 	bool IsDataDirty() const { return mDataDirty; }
 private:
 	ConstBufferDecl mDecl;
 	std::string mShortName;
-	size_t mSlot = 0;
 	CBufferShareMode mShareMode = kCbShareNone;
-	tpl::Binary<float> mData;
+	size_t mSlot = 0;
 	bool mIsReadOnly = false;
+private:
+	tpl::Binary<float> mData;
 	mutable bool mDataDirty = false;
 };
 
@@ -148,7 +149,7 @@ public:
 		return false;
 	}
 	
-	void WriteToElementCb(RenderSystem& renderSys, const std::string& cbName, Data data) const;
+	void WriteToElementCb(RenderSystem& renderSys, const std::string& cbName, Data data);
 	void FlushToGpu(RenderSystem& renderSys);
 public:
 	std::vector<IContantBufferPtr> GetConstBuffers() const;

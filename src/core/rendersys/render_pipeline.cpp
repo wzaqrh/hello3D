@@ -94,7 +94,6 @@ public:
 		, Ops(ops)
 		, Camera(camera)
 		, CameraMask(camera.GetCullingMask())
-		, Lights(lights)
 	{
 		mPerFrame.SetCamera(camera);
 		mPerFrame.SetBackFrameBufferSize(Pipe.mRenderSys.WinSize());
@@ -160,7 +159,8 @@ public:
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture()));
+		auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
+		auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
 		
 		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
 		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
@@ -207,7 +207,8 @@ public:
 			depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 
 			auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
-			auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture()));
+			auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
+			auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
 
 			auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 			auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -239,10 +240,9 @@ public:
 			auto shader = op.Material->GetShader();
 			if ((op.CameraMask & CameraMask) && shader->IsLoaded()) {
 				(*mPerFrame).World = op.WorldTransform;
+				op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(*mPerFrame));
+				op.WrMaterial().FlushGpuParameters(mRenderSys);
 
-				op.Material.WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(*mPerFrame));
-
-				op.Material.FlushGpuParameters(mRenderSys);
 				RenderOp(op, LIGHTMODE_FORWARD_BASE);
 			}
 		}
@@ -271,6 +271,8 @@ public:
 			tempOutputs[i] = mFbBank->Borrow();
 		tempOutputs.back() = Camera.GetOutput();
 
+		mGrabDic["_SceneImage"] = scene_image;
+
 		for (size_t i = 0; i < effects.size(); ++i) {
 			auto fb_temp_output = mStatesBlock.LockFrameBuffer(tempOutputs[i]);
 			fb_temp_output.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
@@ -281,13 +283,13 @@ public:
 			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
 			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
 
-			RenderOperationQueue opQue;
-			effects[i]->GenRenderOperation(opQue);
-			RenderLight(*mPerFrame, nullptr, LIGHTMODE_POSTPROCESS);
+			RenderOperationQueue ops;
+			effects[i]->GenRenderOperation(ops);
+			RenderLight(*mPerFrame, nullptr, LIGHTMODE_POSTPROCESS, false, &ops);
 		}
 	}
 private:
-	void RenderLight(cbPerFrame& globalParam, const cbPerLight* lightParam, const std::string& lightMode, bool castShadow = false, const RenderOperationQueue* ops = nullptr)
+	void RenderLight(cbPerFrame& perFrame, const cbPerLight* perLight, const std::string& lightMode, bool castShadow = false, const RenderOperationQueue* ops = nullptr)
 	{
 		if (ops == nullptr) ops = &Ops;
 
@@ -297,12 +299,11 @@ private:
 				continue;
 
 			if ((op.CameraMask & CameraMask) && shader->IsLoaded()) {
-				globalParam.World = op.WorldTransform;
+				perFrame.World = op.WorldTransform;
+				op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(perFrame));
+				if (perLight) op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*perLight));
+				op.WrMaterial().FlushGpuParameters(mRenderSys);
 
-				op.Material.WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(globalParam));
-				if (lightParam) op.Material.WriteToCb(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*lightParam));
-
-				op.Material.FlushGpuParameters(mRenderSys);
 				RenderOp(op, lightMode);
 			}
 		}
@@ -324,16 +325,19 @@ private:
 				mPerFrame.SetFrameBuffer(mStatesBlock.CurrentFrameBuffer());
 			}
 			const auto& passIn = pass->GetGrabIn();
-			if (passIn) {
-				IFrameBufferPtr passFb = mTempGrabDic[passIn.Name];
+			for (auto& unit : passIn) {
+				IFrameBufferPtr passFb = mTempGrabDic[unit.Name];
 				BOOST_ASSERT(passFb);
-				if (passFb) mStatesBlock.Textures(passIn.TextureSlot, IF_AND_OR(passIn.AttachIndex >= 0, passFb->GetAttachColorTexture(passIn.AttachIndex), passFb->GetAttachZStencilTexture()));
+				if (passFb) {
+					auto attach = IF_AND_OR(unit.AttachIndex >= 0, passFb->GetAttachColorTexture(unit.AttachIndex), passFb->GetAttachZStencilTexture());
+					mStatesBlock.Textures(unit.TextureSlot, attach);
+				}
 			}
 
 			RenderPass(pass, op);
 
-			if (passIn) {
-				mStatesBlock.Textures(passIn.TextureSlot, nullptr);
+			for (auto& unit : passIn) {
+				mStatesBlock.Textures(unit.TextureSlot, nullptr);
 			}
 			if (passOut) {
 				mStatesBlock.FrameBuffer.Pop();
@@ -351,6 +355,18 @@ private:
 		const TextureVector& textures = op.Material->GetTextures();
 		if (textures.Count() > 0) mStatesBlock.Textures(kTextureUserSlotFirst, &textures[0], textures.Count());
 		else mStatesBlock.Textures(kTextureUserSlotFirst, nullptr, 0);
+
+		const auto& relParam = pass->GetRelateToParam();
+		if (relParam.HasTextureSize) {
+			for (size_t slot = 0; slot < relParam.TextureSizes.size(); ++slot) {
+				auto texture = mStatesBlock.Textures[slot];
+				const std::string& propTexSize = relParam.TextureSizes[slot];
+				if (texture && !propTexSize.empty()) {
+					auto tsize = texture->GetSize();
+					op.WrMaterial().SetProperty(propTexSize, Eigen::Vector4f(tsize.x(), tsize.y(), 1.0f/tsize.x(), 1.0f/tsize.y()));
+				}
+			}
+		}
 
 		mRenderSys.SetProgram(pass->GetProgram());
 		mRenderSys.SetVertexLayout(pass->GetInputLayout());

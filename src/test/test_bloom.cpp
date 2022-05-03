@@ -80,6 +80,7 @@ CoTask<bool> TestBloom::OnInitScene()
 		if (mCaseIndex == 1) {
 			mTransform = CoAwait model.Init("buddha", mModel);
 			mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
+			//mTransform->SetPosition(Eigen::Vector3f(0, 2, 0));
 
 			if (isShadowVSM) mTransform->SetScale(Eigen::Vector3f(5, 5, 5));
 		}

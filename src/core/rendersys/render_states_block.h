@@ -48,19 +48,10 @@ private:
 };
 
 struct BlendStateBlock {
-	BlendStateBlock(RenderSystem& renderSys) :mRenderSys(renderSys), mCurrent(renderSys.GetBlendState()) {}
-	void Set(const BlendState& state) {
-		if (mCurrent != state) {
-			mCurrent = state;
-			mRenderSys.SetBlendState(state);
-		}
-	}
-	void operator()(const BlendState& state) { Set(state); }
-	const BlendState& Get() const { return mCurrent; }
 	struct Lock : boost::noncopyable {
 		Lock(BlendStateBlock& block) :mBlock(block), mState(block.Get()) {}
 		Lock(BlendStateBlock& block, const BlendState& state) :mBlock(block), mState(state) { block.Set(state); }
-		Lock(Lock&& other) :mBlock(other.mBlock) ,mState(other.mState) { other.mOwn = false; }
+		Lock(Lock&& other) :mBlock(other.mBlock), mState(other.mState) { other.mOwn = false; }
 		~Lock() { if (mOwn) mBlock.Set(mState); }
 		Lock& operator=(Lock&& other) = delete;
 		BlendStateBlock* operator->() { return &mBlock; }
@@ -70,25 +61,26 @@ struct BlendStateBlock {
 		BlendStateBlock& mBlock;
 		bool mOwn = true;
 	};
+public:
+	BlendStateBlock(RenderSystem& renderSys) :mRenderSys(renderSys), mCurrent(renderSys.GetBlendState()) {}
+	void Set(const BlendState& state) {
+		if (mCurrent != state) {
+			mCurrent = state;
+			mRenderSys.SetBlendState(state);
+		}
+	}
+	void operator()(const BlendState& state) { Set(state); }
+	const BlendState& Get() const { return mCurrent; }
 private:
 	RenderSystem& mRenderSys;
 	BlendState mCurrent;
 };
 
 struct DepthStateBlock {
-	DepthStateBlock(RenderSystem& renderSys) :mRenderSys(renderSys), mCurrent(renderSys.GetDepthState()) {}
-	void Set(const DepthState& state) {
-		if (mCurrent != state) {
-			mCurrent = state;
-			mRenderSys.SetDepthState(state);
-		}
-	}
-	void operator()(const DepthState& state) { Set(state); }
-	const DepthState& Get() const { return mCurrent; }
 	struct Lock : boost::noncopyable {
 		Lock(DepthStateBlock& block) :mBlock(block), mState(block.Get()) {}
 		Lock(DepthStateBlock& block, const DepthState& state) :mBlock(block), mState(state) { block.Set(state); }
-		Lock(Lock&& other) :mBlock(other.mBlock) ,mState(other.mState) { other.mOwn = false; }
+		Lock(Lock&& other) :mBlock(other.mBlock), mState(other.mState) { other.mOwn = false; }
 		~Lock() { if (mOwn) mBlock.Set(mState); }
 		Lock& operator=(Lock&& other) = delete;
 		DepthStateBlock* operator->() { return &mBlock; }
@@ -98,12 +90,36 @@ struct DepthStateBlock {
 		DepthStateBlock& mBlock;
 		bool mOwn = true;
 	};
+public:
+	DepthStateBlock(RenderSystem& renderSys) :mRenderSys(renderSys), mCurrent(renderSys.GetDepthState()) {}
+	void Set(const DepthState& state) {
+		if (mCurrent != state) {
+			mCurrent = state;
+			mRenderSys.SetDepthState(state);
+		}
+	}
+	void operator()(const DepthState& state) { Set(state); }
+	const DepthState& Get() const { return mCurrent; }
 private:
 	RenderSystem& mRenderSys;
 	DepthState mCurrent;
 };
 
 struct TexturesBlock {
+	struct Lock : boost::noncopyable {
+		Lock(TexturesBlock& block, size_t slot, const ITexturePtr& state) :mBlock(block), mSlot(slot), mState(block.Get(slot)) { block.Set(slot, state); }
+		Lock(Lock&& other) :mBlock(other.mBlock), mSlot(other.mSlot), mState(other.mState) { other.mOwn = false; }
+		~Lock() { if (mOwn) mBlock.Set(mSlot, mState); }
+		Lock& operator=(Lock&& other) = delete;
+		TexturesBlock* operator->() { return &mBlock; }
+		void operator()(size_t slot, ITexturePtr state) { mBlock.Set(slot, state); }
+	private:
+		size_t mSlot;
+		ITexturePtr mState;
+		TexturesBlock& mBlock;
+		bool mOwn = true;
+	};
+public:
 	TexturesBlock(RenderSystem& renderSys) :mRenderSys(renderSys) {}
 	void Set(size_t slot, ITexturePtr state) {
 		BOOST_ASSERT(slot < 16);
@@ -120,19 +136,7 @@ struct TexturesBlock {
 	void operator()(size_t slot, ITexturePtr state) { Set(slot, state); }
 	void operator()(size_t slot, const ITexturePtr states[], size_t count) { Sets(slot, states, count); }
 	const ITexturePtr& Get(size_t slot) const { BOOST_ASSERT(slot < 16); return mTextures[slot]; }
-	struct Lock : boost::noncopyable {
-		Lock(TexturesBlock& block, size_t slot, const ITexturePtr& state) :mBlock(block), mSlot(slot), mState(block.Get(slot)) { block.Set(slot, state); }
-		Lock(Lock&& other) :mBlock(other.mBlock), mSlot(other.mSlot), mState(other.mState) { other.mOwn = false; }
-		~Lock() { if (mOwn) mBlock.Set(mSlot, mState); }
-		Lock& operator=(Lock&& other) = delete;
-		TexturesBlock* operator->() { return &mBlock; }
-		void operator()(size_t slot, ITexturePtr state) { mBlock.Set(slot, state); }
-	private:
-		size_t mSlot;
-		ITexturePtr mState;
-		TexturesBlock& mBlock;
-		bool mOwn = true;
-	};
+	const ITexturePtr& operator[](size_t slot) const { return Get(slot); }
 private:
 	RenderSystem& mRenderSys;
 	ITexturePtr mTextures[16];
