@@ -24,6 +24,15 @@ Eigen::AlignedBox3f RenderableSingleRenderOp::GetWorldAABB() const
 	return worldAABB;
 }
 
+CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
+{
+#if MIR_MATERIAL_HOTLOAD
+	if (mMaterial && mMaterial->IsOutOfDate()) {
+		mMaterial = CoAwait mResourceMng.CreateMaterialT(__LaunchAsync__, mMaterial->GetLoadParam());
+	}
+#endif
+}
+
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
 {
 	mMaterial->GetTextures()[0] = texture;

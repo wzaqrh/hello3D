@@ -171,7 +171,7 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	return true;
 }
 
-void RenderSystem11::Update(float dt)
+void RenderSystem11::UpdateFrame(float dt)
 {}
 void RenderSystem11::Dispose()
 {}

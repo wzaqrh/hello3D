@@ -33,6 +33,21 @@ public:
 		BOOST_ASSERT(shaderNode[0].Program.Topo != kPrimTopologyUnkown);
 		return result;
 	}
+	bool PurgeOutOfDates() ThreadSafe {
+		tpl::AutoLock lck(mShaderVariantByParam._GetLock());
+		for (auto& it : mShaderByParam) {
+			if (it.second.DependShaders.CheckOutOfDate()) {
+				mShaderVariantByParam._Clear();
+				mShaderByParam.clear();
+				mIncludeByName.clear();
+				mAttrByName.clear();
+				mUniformByName.clear();
+				mSamplerSetByName.clear();
+				return true;
+			}
+		}
+		return false;
+	}
 private:
 	struct Visitor {
 		int GetMacroValue(const ProgramNode& progNode, const std::string& key) const {
@@ -493,6 +508,7 @@ private:
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Include"))) {
 			auto& incShader = VisitInclude(it.second.data());
 			vis.PredMacros.Merge(incShader.PredMacros);
+			shaderNode.DependShaders.Merge(incShader.DependShaders);
 		}
 		VisitCategory(nodeShader, vis, shaderNode[0]);
 
@@ -502,23 +518,29 @@ private:
 		}
 	}
 	
-	static bool GetShaderAssetPath(const MaterialLoadParam& loadParam, std::string& filepath) {
+	static bool GetShaderAssetPath(const MaterialLoadParam& loadParam, std::string& filepath, time_t& fileTime) {
 		boost_filesystem::path path(loadParam.ShaderVariantName);
 		if (path.has_extension()) path = boost_filesystem::system_complete(path); 
 		else path = boost_filesystem::system_complete("shader/" + loadParam.ShaderVariantName + ".Shader");
+		
+		bool exits = boost_filesystem::exists(path);
 		filepath = path.string();
-		return boost_filesystem::exists(path);
+		fileTime = IF_AND_OR(exits, boost::filesystem::last_write_time(path), 0);
+		return exits;
 	}
 	bool ParseShaderFile(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) {
 		bool result;
 		auto find_iter = mShaderByParam.find(loadParam);
 		if (find_iter == mShaderByParam.end()) {
-			std::string filepath;
-			if (GetShaderAssetPath(loadParam, filepath)) {
+			MaterialProperty::SingleFileDependency fdep;
+			if (GetShaderAssetPath(loadParam, fdep.FilePath, fdep.FileTime)) {
+				shaderNode.DependShaders.AddShader(fdep);
+
 				boost_property_tree::ptree pt;
-				boost_property_tree::read_xml(filepath, pt);
+				boost_property_tree::read_xml(fdep.FilePath, pt);
 				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam, shaderNode.PredMacros }, shaderNode);
 				BOOST_ASSERT(shaderNode.Validate());
+				
 				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
 				result = true;
 			}
@@ -566,18 +588,31 @@ public:
 	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) {
 		return ParseMaterialFile(loadParam, materialNode);
 	}
+	bool PurgeOutOfDates() ThreadSafe {
+		if (! mShaderMng->PurgeOutOfDates()) {
+			tpl::AutoLock lck(mMaterialByPath._GetLock());
+			for (auto& it : mMaterialByPath._GetDic()) {
+				if (it.second.Property->DependSrc.CheckOutOfDate()) {
+					mMaterialByPath._Clear();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 private:
 	void VisitProperties(const PropertyTreePath& nodeProperties, MaterialNode& materialNode) {
+		auto& mprop = *materialNode.Property;
 		for (auto& nodeProp : nodeProperties.Node) {
-			materialNode.Shader.ForEachProgram([&nodeProp, &materialNode](const ProgramNode& prog) {
+			materialNode.Shader.ForEachProgram([&mprop,&nodeProp, &materialNode](const ProgramNode& prog) {
 				size_t index = prog.Samplers.IndexByName(nodeProp.first);
 				if (index != prog.Samplers.IndexNotFound()) {
-					auto& texProp = materialNode.TextureProperies[nodeProp.first];
+					auto& texProp = mprop.Textures[nodeProp.first];
 					texProp.ImagePath = nodeProp.second.data();
 					texProp.Slot = index;
 				}
 				else {
-					materialNode.UniformProperies.insert(std::make_pair(nodeProp.first, nodeProp.second.data()));
+					mprop.UniformByName.insert(std::make_pair(nodeProp.first, nodeProp.second.data()));
 				}
 			});
 		}
@@ -596,7 +631,8 @@ private:
 		materialNode.LoadParam = paramBuilder.Build();
 		materialNode.LoadParam.ShaderVariantName = find_useShader->second.data();
 		if (!mShaderMng->GetShaderNode(materialNode.LoadParam, materialNode.Shader)) return false;
-		
+		materialNode.Property->DependSrc.Shaders = materialNode.Shader.DependShaders.Shaders;
+
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
 			VisitProperties(it.second, materialNode);
 		}
@@ -604,21 +640,23 @@ private:
 	}
 
 	void BuildMaterialNode(MaterialNode& materialNode) {}
-	static bool GetMaterialAssetPath(const MaterialLoadParam& loadParam, std::string& filepath) {
+	static bool GetMaterialAssetPath(const MaterialLoadParam& loadParam, std::string& filepath, time_t& fileTime) {
 		boost_filesystem::path path(loadParam.ShaderVariantName);
 		if (path.has_extension()) path = boost_filesystem::system_complete(path);
 		else path = boost_filesystem::system_complete("shader/" + loadParam.ShaderVariantName + ".Material");
+		
+		bool exits = boost_filesystem::exists(path);
 		filepath = path.string();
-		return boost_filesystem::exists(path);
+		fileTime = IF_AND_OR(exits, boost::filesystem::last_write_time(path), 0);
+		return exits;
 	}
 	bool ParseMaterialFile(const MaterialLoadParam& loadParam, MaterialNode& materialNode) {
-		bool result;
-		auto find_iter = mMaterialByPath.find(loadParam);
-		if (find_iter == mMaterialByPath.end()) {
+		bool result = true;
+		mMaterialByPath.GetOrAdd(loadParam, [&]() {
 			boost_property_tree::ptree pt;
-			std::string filepath;
-			if (GetMaterialAssetPath(loadParam, filepath)) {
-				boost_property_tree::read_xml(filepath, pt);
+			auto& fdep = materialNode.Property->DependSrc.Material;
+			if (GetMaterialAssetPath(loadParam, fdep.FilePath, fdep.FileTime)) {
+				boost_property_tree::read_xml(fdep.FilePath, pt);
 			}
 			else {
 				std::stringstream ss;
@@ -631,19 +669,14 @@ private:
 
 			if (result = VisitMaterial(loadParam, pt.get_child("Material"), materialNode)) {
 				BuildMaterialNode(materialNode);
-				materialNode.MaterialFilePath = filepath;
-				mMaterialByPath.insert(std::make_pair(loadParam, materialNode));
 			}
-		}
-		else {
-			materialNode = find_iter->second;
-			result = true;
-		}
+			return materialNode;
+		}, materialNode);
 		return result;
 	}
 private:
 	std::shared_ptr<ShaderNodeManager> mShaderMng;
-	std::map<MaterialLoadParam, MaterialNode> mMaterialByPath;
+	tpl::AtomicMap<MaterialLoadParam, MaterialNode> mMaterialByPath;
 };
 
 /********** MaterialAssetManager **********/
@@ -659,6 +692,11 @@ bool MaterialAssetManager::GetShaderNode(const MaterialLoadParam& loadParam, Sha
 bool MaterialAssetManager::GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) ThreadSafe
 {
 	return mMaterialNodeMng->GetMaterialNode(loadParam, materialNode);
+}
+
+bool MaterialAssetManager::PurgeOutOfDates() ThreadSafe
+{
+	return mMaterialNodeMng->PurgeOutOfDates();
 }
 
 }

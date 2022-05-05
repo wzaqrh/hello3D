@@ -43,9 +43,10 @@ void BaseTransform::RotateAround(const Eigen::Vector3f& point, const Eigen::Vect
 	mDirty = true;
 }
 
-void BaseTransform::UpdateFrame()
+CoTask<void> BaseTransform::UpdateFrame()
 {
 	mChanged = false;
+	CoReturn;
 }
 
 #if 0

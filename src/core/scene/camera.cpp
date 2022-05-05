@@ -1,6 +1,7 @@
 #include <boost/math/constants/constants.hpp>
-#include "core/scene/camera.h"
 #include "core/resource/resource_manager.h"
+#include "core/renderable/post_process.h"
+#include "core/scene/camera.h"
 #include "core/base/debug.h"
 #include "core/base/math.h"
 #include "test/unit_test/unit_test.h"
@@ -61,6 +62,12 @@ void Camera::SetForward(const Eigen::Vector3f& forward)
 {
 	mTransform->LookForward(forward);
 	mViewDirty = true;
+}
+
+CoTask<void> Camera::UpdateFrame(float dt)
+{
+	for (auto& effect : mPostProcessEffects)
+		CoAwait effect->UpdateFrame(dt);
 }
 
 /********** query **********/
@@ -216,9 +223,6 @@ IFrameBufferPtr Camera::SetOutput(float scale, std::vector<ResourceFormat> forma
 	return SetOutput(mResMng.CreateFrameBuffer(__LaunchSync__, 
 		Eigen::Vector3i(mResMng.WinWidth() * scale, mResMng.WinHeight() * scale, 1), formats));
 }
-
-void Camera::UpdateFrame(float dt)
-{}
 
 /********** CameraFactory **********/
 CameraPtr CameraFactory::CreatePerspective(float aspect, 

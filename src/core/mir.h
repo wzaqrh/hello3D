@@ -17,11 +17,11 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Mir(Launch launchMode);
 	~Mir();
-	bool Initialize(HWND hWnd);
+	CoTask<bool> Initialize(HWND hWnd);
 	void Dispose();
 
-	void Update(float dt);
-	void Render();
+	CoTask<void> Update(float dt);
+	CoTask<void> Render();
 public:
 	Eigen::Vector2i WinSize() const;
 	inline const Configure& Config() const { return mConfigure; }

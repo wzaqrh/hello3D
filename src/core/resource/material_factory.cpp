@@ -17,6 +17,11 @@ MaterialFactory::MaterialFactory()
 	mFrameGpuParameters = CreateInstance<GpuParameters>();
 }
 
+const GpuParametersPtr& MaterialFactory::GetFrameGpuParameters() const { 
+	tpl::AutoLock lck(mParametersCache._GetLock());
+	return mFrameGpuParameters; 
+}
+
 GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters) ThreadSafe
 {
 	const std::string& uniformName = parameters.GetName();
@@ -113,14 +118,15 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	//CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
 	std::vector<CoTask<bool>> tasks;
 
+	material->mProperty = materialNode.Property;
 	material->mShaderVariant = CreateInstance<Shader>();
 	tasks.push_back(DoCreateShader(launchMode, material->mShaderVariant, resMng, materialNode.Shader));
 	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
 
-	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.MaterialFilePath));
+	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.Property->DependSrc.Material.FilePath));
 	assetPath.remove_filename();
 	material->mTextures.Resize(kTextureUserSlotCount);
-	for (const auto& iter : materialNode.TextureProperies) {
+	for (const auto& iter : materialNode.Property->Textures) {
 		boost::filesystem::path imagePath = assetPath / iter.second.ImagePath;
 		BOOST_ASSERT(boost::filesystem::is_regular_file(imagePath));
 		if (boost::filesystem::is_regular_file(imagePath)) {
@@ -142,7 +148,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 				{
 				case kCbShareNone: {
 					GpuParameters::Element newelem = element.Clone(launchMode, resMng);
-					for (const auto& iter : materialNode.UniformProperies)
+					for (const auto& iter : materialNode.Property->UniformByName)
 						newelem.Parameters->SetPropertyByString(iter.first, iter.second);
 					material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
 				}break;
@@ -155,7 +161,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 					else {
 						newelem = element.Clone(launchMode, resMng);
 
-						for (const auto& iter : materialNode.UniformProperies)
+						for (const auto& iter : materialNode.Property->UniformByName)
 							newelem.Parameters->SetPropertyByString(iter.first, iter.second);
 						material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
 					}
@@ -186,6 +192,17 @@ CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& mat
 		material->SetLoaded(false);
 	}
 	CoReturn material->IsLoaded();
+}
+
+bool MaterialFactory::PurgeOutOfDates() ThreadSafe
+{
+	bool result = mMatAssetMng->PurgeOutOfDates();
+	if (result) {
+		tpl::AutoLock lck(mParametersCache._GetLock());
+		mParametersCache._Clear();
+		mFrameGpuParameters = CreateInstance<GpuParameters>();
+	}
+	return result;
 }
 
 //Clone Functions

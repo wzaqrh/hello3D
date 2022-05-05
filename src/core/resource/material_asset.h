@@ -213,18 +213,17 @@ struct ShaderNode : public tpl::Vector<CategoryNode> {
 	}
 public:
 	std::string ShortName;
+	MaterialProperty::SourceFilesDependency DependShaders;
 	MaterialLoadParamBuilder PredMacros;
 };
-struct TextureProperty {
-	std::string ImagePath;
-	int Slot;
-};
+
 struct MaterialNode {
+	MaterialNode() {
+		Property = CreateInstance<MaterialProperty>();
+	}
 	MaterialLoadParam LoadParam;
-	std::string MaterialFilePath;
 	ShaderNode Shader;
-	std::map<std::string, TextureProperty> TextureProperies;
-	std::map<std::string, std::string> UniformProperies; 
+	MaterialPropertyPtr Property;
 };
 
 class ShaderNodeManager;
@@ -235,6 +234,7 @@ public:
 	MaterialAssetManager();
 	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe;
 	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) ThreadSafe;
+	bool PurgeOutOfDates() ThreadSafe;
 private:
 	std::shared_ptr<ShaderNodeManager> mShaderNodeMng;
 	std::shared_ptr<MaterialNodeManager> mMaterialNodeMng;

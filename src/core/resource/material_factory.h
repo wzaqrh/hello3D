@@ -23,11 +23,13 @@ public:
 	CoTask<bool> CreateShader(Launch launch, ShaderPtr& shader, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe;
 	CoTask<bool> CreateMaterial(Launch launch, MaterialPtr& material, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe;
 
+	bool PurgeOutOfDates() ThreadSafe;
+
 	ShaderPtr CloneShader(Launch launch, ResourceManager& resMng, const Shader& material);
 	TechniquePtr CloneTechnique(Launch launch, ResourceManager& resMng, const Technique& technique);
 	PassPtr ClonePass(Launch launch, ResourceManager& resMng, const Pass& pass);
 public:
-	const GpuParametersPtr& GetFrameGpuParameters() const { return mFrameGpuParameters; }
+	const GpuParametersPtr& GetFrameGpuParameters() const;
 private:
 	CoTask<bool> DoCreateShader(Launch launchMode, ShaderPtr shader, ResourceManager& resMng, mat_asset::ShaderNode shaderNode) ThreadSafe;
 	CoTask<bool> DoCreateMaterial(Launch launchMode, MaterialPtr material, ResourceManager& resMng, mat_asset::MaterialNode materialNode) ThreadSafe;

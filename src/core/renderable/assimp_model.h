@@ -59,7 +59,7 @@ public:
 	CoTask<bool> LoadModel(std::string assetPath, std::string redirectResource = "");
 	void PlayAnim(int Index);
 
-	void UpdateFrame(float dt) override;
+	CoTask<void> UpdateFrame(float dt) override;
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	const std::vector<aiMatrix4x4>& GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex);

@@ -418,17 +418,18 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 
 	mTempFbs = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+}
 
-	coroutine::ExecuteTaskSync(resMng.GetSyncService(), [&]()->CoTask<bool> {
-		MaterialLoadParam loadParam(MAT_MODEL);
-		res::MaterialInstance material;
-		CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
+CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
+{
+	MaterialLoadParam loadParam(MAT_MODEL);
+	res::MaterialInstance material;
+	CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
 
-		mGBufferSprite = rend::Sprite::Create(__LaunchAsync__, resMng, material);
-		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
-		mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
-		CoReturn true;
-	}());
+	mGBufferSprite = rend::Sprite::Create(__LaunchAsync__, resMng, material);
+	mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
+	mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
+	CoReturn true;
 }
 
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)

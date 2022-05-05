@@ -114,7 +114,7 @@ void RenderSystem9::_SetRasterizerState()
 	mDevice9->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 }
 
-void RenderSystem9::Update(float dt)
+void RenderSystem9::UpdateFrame(float dt)
 {
 }
 

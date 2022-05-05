@@ -42,7 +42,7 @@ public:
 	void SetLocalRotation(const Eigen::Quaternionf& quat);
 	void RotateAround(const Eigen::Vector3f& point, const Eigen::Vector3f& axis, float angle);
 
-	void UpdateFrame();
+	CoTask<void> UpdateFrame();
 public:
 	const Eigen::Vector3f& GetLocalPosition() const { return mPosition; }
 	const Eigen::Vector3f& GetLocalScale() const { return mScale; }

@@ -27,7 +27,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 {
 	virtual ~IRenderSystem() {}
 	virtual bool Initialize(HWND hWnd, RECT vp = { 0,0,0,0 }) = 0;
-	virtual void Update(float dt) = 0;
+	virtual void UpdateFrame(float dt) = 0;
 	virtual void Dispose() = 0;
 	
 	/***** query *****/

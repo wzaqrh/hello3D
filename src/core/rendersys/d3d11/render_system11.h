@@ -14,7 +14,7 @@ public:
 	~RenderSystem11();
 
 	bool Initialize(HWND hWnd, RECT vp) override;
-	void Update(float dt) override;
+	void UpdateFrame(float dt) override;
 	void Dispose() override;
 	void SetViewPort(int x, int y, int w, int h) override;
 	std::string GetPlatform() const override { return "d3d11"; }

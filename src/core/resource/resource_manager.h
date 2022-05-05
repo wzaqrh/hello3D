@@ -32,7 +32,7 @@ public:
 	ResourceManager(RenderSystem& renderSys, res::MaterialFactory& materialFac, res::AiResourceFactory& aiResFac, std::shared_ptr<cppcoro::io_service> ioService);
 	~ResourceManager();
 	void Dispose() ThreadSafe;
-	void UpdateForLoading() ThreadSafe;
+	CoTask<void> UpdateFrame(float dt) ThreadSafe;
 public:
 	RenderSystem& RenderSys() { return mRenderSys; }
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
@@ -112,6 +112,7 @@ private:
 	std::shared_ptr<cppcoro::static_thread_pool> mThreadPool;
 	std::shared_ptr<cppcoro::io_service> mIoService;
 	std::thread::id mMainThreadId;
+	std::vector<CoTask<bool>> mAsyncTasks;
 private:
 	std::vector<unsigned char> mTempBytes;
 	struct ProgramKey {

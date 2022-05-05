@@ -75,8 +75,14 @@ CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, int interval)
 }
 
 /********** Async Support **********/
-void ResourceManager::UpdateForLoading() ThreadSafe
-{}
+CoTask<void> ResourceManager::UpdateFrame(float dt) ThreadSafe
+{
+#if MIR_MATERIAL_HOTLOAD
+	if (mMaterialFac.PurgeOutOfDates())
+		mMaterialByName.Clear();
+#endif
+	CoReturn;
+}
 
 /********** Create Program **********/
 inline boost::filesystem::path MakeShaderSourcePath(const std::string& name) {

@@ -24,6 +24,7 @@ public:
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
 
 	virtual Eigen::AlignedBox3f GetWorldAABB() const override;
+	CoTask<void> UpdateFrame(float dt) override;
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }
 	bool IsLoaded() const;

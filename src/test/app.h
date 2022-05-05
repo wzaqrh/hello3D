@@ -41,13 +41,12 @@ public:
 	std::string GetName() override final;
 	int MainLoop(HINSTANCE hInstance, HWND hWnd) override final;
 private:
-	bool InitContext(HINSTANCE hInstance, HWND hWnd);
+	CoTask<bool> InitContext(HINSTANCE hInstance, HWND hWnd);
 	CoTask<bool> InitScene();
-	void Render();
+	CoTask<void> Render();
 	void CleanUp();
 protected:
 	virtual CoTask<bool> OnInitScene() { CoReturn true; };
-	virtual void OnRender();
 	virtual void OnInitLight();
 	virtual void OnInitCamera();
 protected:

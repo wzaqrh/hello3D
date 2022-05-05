@@ -28,17 +28,17 @@ void App::Create()
 	mCameraInitInvLengthForward = Eigen::Vector3f::Zero();
 	mContext = new mir::Mir(AppLaunchMode);
 }
-bool App::InitContext(HINSTANCE hInstance, HWND hWnd)
+CoTask<bool> App::InitContext(HINSTANCE hInstance, HWND hWnd)
 {
 	mHnd = hWnd;
-	if (!mContext->Initialize(mHnd)) {
+	if (! CoAwait mContext->Initialize(mHnd)) {
 		mContext->Dispose();
-		return false;
+		CoReturn false;
 	}
 	SetMir(mContext);
 	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
 	mTimer = new mir::debug::Timer;
-	return true;
+	CoReturn true;
 }
 CoTask<bool> App::InitScene()
 {
@@ -55,7 +55,7 @@ void App::OnInitLight()
 	mContext->SceneMng()->CreateAddLightNode<PointLight>();
 }
 
-void App::Render()
+CoTask<void> App::Render()
 {
 	auto renderSys = mContext->RenderSys();
 	auto mScneMng = mContext->SceneMng();
@@ -114,13 +114,8 @@ void App::Render()
 			mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0, 0, 5));
 		}
 	}
-	mContext->Update(mTimer->mDeltaTime);
-
-	OnRender();
-}
-void App::OnRender()
-{
-	mContext->Render();
+	CoAwait mContext->Update(mTimer->mDeltaTime);
+	CoAwait mContext->Render();
 }
 
 void App::CleanUp()
@@ -130,12 +125,11 @@ void App::CleanUp()
 
 int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 {
-	if (!this->InitContext(hInstance, hWnd))
-		return 0;
+	auto mainLoop = [&]()->CoTask<bool> {
+		if (! CoAwait this->InitContext(hInstance, hWnd))
+			CoReturn false;
 
-	auto mainLoop = [this]()->CoTask<bool> {
 		auto initScene = this->InitScene();
-
 		auto procMsg = [this,&initScene]()->CoTask<bool> {
 			MSG msg = { 0 };
 			while (WM_QUIT != msg.message) {
@@ -145,14 +139,13 @@ int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 				}
 				else {
 					if (initScene.is_ready())
-						this->Render();
+						CoAwait this->Render();
 					else
 						mContext->ProcessPendingEvent();
 				}
 			}
 			CoReturn msg.wParam == 0;
 		}();
-
 		CoAwait WhenAllReady(initScene, procMsg);
 
 		this->CleanUp();

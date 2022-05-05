@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include <boost/filesystem.hpp>
 #include "core/predeclare.h"
 #include "core/base/base_type.h"
 
@@ -13,12 +14,14 @@ public:
 public:
 	std::string LightMode, Name, ShortName;
 	PrimitiveTopology TopoLogy;
+	
 	struct GrabOutput {
 		operator bool() const { return !Name.empty(); }
 		std::string Name;
 		std::vector<ResourceFormat> Formats;
 		float Size = 1.0f;
 	} GrabOut;
+	
 	struct GrabInputUnit {
 		operator bool() const { return !Name.empty(); }
 		std::string Name;
@@ -27,11 +30,52 @@ public:
 	};
 	typedef std::vector<GrabInputUnit> GrabInput;
 	GrabInput GrabIn;
+	
 	struct ParameterRelation {
 		ParameterRelation() :TextureSizes(16), HasTextureSize(false) {}
 		std::vector<std::string> TextureSizes;
 		bool HasTextureSize;
 	} Relate2Parameter;
+};
+
+struct MaterialProperty {
+	
+public:
+	struct TextureProperty {
+		std::string ImagePath;
+		int Slot;
+	};
+	std::map<std::string, TextureProperty> Textures;
+
+	std::map<std::string, std::string> UniformByName;
+	
+	struct SingleFileDependency {
+		bool CheckOutOfDate() const { return FileTime != 0 ? FileTime < boost::filesystem::last_write_time(FilePath) : false; }
+		bool operator<(const SingleFileDependency& other) const { return FilePath < other.FilePath; }
+		std::string FilePath;
+		time_t FileTime = 0;
+	};
+	struct SourceFilesDependency {
+	public:
+		void AddShader(const SingleFileDependency& shader) {
+			Shaders.insert(shader);
+		}
+		void Merge(const SourceFilesDependency& other) {
+			for (auto& it : other.Shaders)
+				Shaders.insert(it);
+		}
+		bool CheckOutOfDate() const {
+			if (Material.CheckOutOfDate()) 
+				return true;
+			for (auto& it : Shaders)
+				if (it.CheckOutOfDate())
+					return true;
+			return false;
+		}
+	public:
+		std::set<SingleFileDependency> Shaders;
+		SingleFileDependency Material;
+	} DependSrc;
 };
 
 }

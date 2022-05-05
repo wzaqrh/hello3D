@@ -16,6 +16,7 @@ class MIR_CORE_API RenderPipeline : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Configure& cfg);
+	CoTask<bool> Initialize(ResourceManager& resMng);
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights);

@@ -57,7 +57,7 @@ private:
 
 interface MIR_CORE_API Renderable : public Component
 {
-	virtual void UpdateFrame(float dt) {}
+	virtual CoTask<void> UpdateFrame(float dt) { CoReturn; }
 	virtual void GenRenderOperation(RenderOperationQueue& opList) = 0;
 	virtual Eigen::AlignedBox3f GetWorldAABB() const = 0;
 

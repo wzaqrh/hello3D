@@ -128,7 +128,7 @@ CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectR
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 	mAABB = mAiScene->GetAABB();
 	mAnimeTree.Init(mAiScene->GetSerializeNodes());
-	UpdateFrame(0);
+	CoAwait UpdateFrame(0);
 	CoReturn true;
 }
 
@@ -178,8 +178,9 @@ void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree, std:
 	}
 }
 
-void AssimpModel::UpdateFrame(float dt)
+CoTask<void> AssimpModel::UpdateFrame(float dt)
 {
+	CoAwait Super::UpdateFrame(dt);
 	BOOST_ASSERT(mAiScene->IsLoaded());
 	if (mAiScene == nullptr || !mAiScene->IsLoaded()) return;
 

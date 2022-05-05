@@ -15,7 +15,7 @@ Mir::Mir(Launch launchMode)
 Mir::~Mir()
 {}
 
-bool Mir::Initialize(HWND hWnd) {
+CoTask<bool> Mir::Initialize(HWND hWnd) {
 #if 0
 	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<TRenderSystem9>());
 #else
@@ -23,7 +23,7 @@ bool Mir::Initialize(HWND hWnd) {
 #endif
 	if (FAILED(mRenderSys->Initialize(hWnd))) {
 		mRenderSys->Dispose();
-		return false;
+		CoReturn false;
 	}
 
 	mMaterialFac = CreateInstance<res::MaterialFactory>();
@@ -31,10 +31,11 @@ bool Mir::Initialize(HWND hWnd) {
 	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac, mIoService);
 	
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng, mConfigure);
+	CoAwait mRenderPipe->Initialize(*mResourceMng);
 	mRenderableFac = CreateInstance<RenderableFactory>(*mResourceMng, mLaunchMode);
 
 	mSceneMng = CreateInstance<SceneManager>(*mResourceMng, mRenderableFac);
-	return true;
+	CoReturn true;
 }
 
 void Mir::Dispose() {
@@ -51,14 +52,14 @@ void Mir::Dispose() {
 	}
 }
 
-void Mir::Update(float dt)
+CoTask<void> Mir::Update(float dt)
 {
-	mRenderSys->Update(dt);
-	mResourceMng->UpdateForLoading();
-	mSceneMng->UpdateFrame(dt);
+	mRenderSys->UpdateFrame(dt);
+	CoAwait mResourceMng->UpdateFrame(dt);
+	CoAwait mSceneMng->UpdateFrame(dt);
 }
 
-void Mir::Render()
+CoTask<void> Mir::Render()
 {
 	if (mRenderPipe->BeginFrame()) {
 		mRenderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
@@ -68,6 +69,7 @@ void Mir::Render()
 		mRenderPipe->Render(opQue, mSceneMng->GetCameras(), mSceneMng->GetLights());
 		mRenderPipe->EndFrame();
 	}
+	CoReturn;
 }
 
 Eigen::Vector2i Mir::WinSize() const

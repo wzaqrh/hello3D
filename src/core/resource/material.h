@@ -114,9 +114,11 @@ public:
 	const ShaderPtr& GetShader() const { return mShaderVariant; }
 	TextureVector& GetTextures() { return mTextures; }
 	const TextureVector& GetTextures() const { return mTextures; }
+	bool IsOutOfDate() const { return mProperty->DependSrc.CheckOutOfDate(); }
 private:
 	MaterialLoadParamBuilder mShaderVariantParam;
 	ShaderPtr mShaderVariant;
+	MaterialPropertyPtr mProperty;
 	TextureVector mTextures;
 	GpuParametersPtr mGpuParametersByShareType[kCbShareMax];
 };

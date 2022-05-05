@@ -67,7 +67,7 @@ private:
 	void ResortLights();
 	void ResortCameras();
 public:
-	void UpdateFrame(float dt);
+	CoTask<void> UpdateFrame(float dt);
 	void GenRenderOperation(RenderOperationQueue& opQue);
 private:
 	ResourceManager& mResMng;

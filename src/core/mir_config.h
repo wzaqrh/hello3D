@@ -7,6 +7,7 @@
 #define MIR_TIME_DEBUG
 #define MIR_LOG_LEVEL 0
 #define MIR_COROUTINE_DEBUG 
+#define MIR_MATERIAL_HOTLOAD 1
 //#define MIR_CPPCORO_DISABLED
 
 namespace mir {

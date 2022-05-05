@@ -101,13 +101,13 @@ RenderablePtr SceneManager::AddRendNode(RenderablePtr rend)
 	return rend;
 }
 
-void SceneManager::UpdateFrame(float dt)
+CoTask<void> SceneManager::UpdateFrame(float dt)
 {
 	for (auto& node : mNodes) {
 		if (RenderablePtr rend = node->GetComponent<Renderable>()) 
-			rend->UpdateFrame(dt);
+			CoAwait rend->UpdateFrame(dt);
 		if (CameraPtr camera = node->GetComponent<Camera>())
-			camera->UpdateFrame(dt);
+			CoAwait camera->UpdateFrame(dt);
 	}
 
 	Eigen::AlignedBox3f aabb = this->GetWorldAABB();

@@ -69,7 +69,7 @@ public:
 	CameraType GetType() const { return mType; }
 	Eigen::Vector2f GetOthoWinSize() const;
 public:
-	void UpdateFrame(float dt);
+	CoTask<void> UpdateFrame(float dt);
 private:
 	ResourceManager& mResMng;
 	TransformPtr mTransform;
