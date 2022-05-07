@@ -200,11 +200,13 @@ public:
 			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE);
 		}
 
+		mRenderSys.CopyFrameBuffer(nullptr, -1, mGBuffer, -1);
+
 		//LIGHTMODE_PREPASS_FINAL
 		for (auto& light : Lights)
 		{
 			blend_state(IF_AND_OR(light == mFirstLight, BlendState::MakeAlphaNonPremultiplied(), BlendState::MakeAdditive()));
-			depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+			depth_state(DepthState::Make(kCompareAlways, kDepthWriteMaskZero));
 
 			auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 			auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());

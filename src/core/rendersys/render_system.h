@@ -45,6 +45,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	}
 	virtual void SetFrameBuffer(IFrameBufferPtr rendTarget) = 0;
 	virtual void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
+	virtual void CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment) {}
 
 	virtual IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;

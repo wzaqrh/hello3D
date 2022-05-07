@@ -26,12 +26,15 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Texture11();
 	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
-
-	ID3D11ShaderResourceView*& AsSRV() { return mSRV; }
-	ID3D11RenderTargetView*& AsRTV() { return mRTV; }
-	ID3D11DepthStencilView*& AsDSV() { return mDSV; }
-
-	void OnLoaded() override;
+	void SetTex2D(ID3D11Texture2D* tex2d) { mTex2D = tex2d; }
+	void SetSRV(ID3D11ShaderResourceView* srv) { mSRV = srv; }
+	void SetRTV(ID3D11RenderTargetView* rtv) { mRTV = rtv; }
+	void SetDSV(ID3D11DepthStencilView* dsv) { mDSV = dsv; }
+public:
+	ID3D11Texture2D* AsTex2D() const { return mTex2D; }
+	ID3D11ShaderResourceView* AsSRV() const { return mSRV; }
+	ID3D11RenderTargetView* AsRTV() const { return mRTV; }
+	ID3D11DepthStencilView* AsDSV() const { return mDSV; }
 public:
 	ResourceFormat GetFormat() const override { return mFormat; }
 	HWMemoryUsage GetUsage() const override { return mUsage; }
@@ -40,12 +43,15 @@ public:
 	int GetMipmapCount() const override { return mMipCount; }
 	int GetFaceCount() const override { return mFaceCount; }
 	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
+
+	void OnLoaded() override;
 private:
 	bool mAutoGenMipmap;
 	int mFaceCount, mMipCount;
 	Eigen::Vector2i mSize, mRealSize;
 	ResourceFormat mFormat;
 	HWMemoryUsage mUsage;
+	ID3D11Texture2D* mTex2D;
 	ID3D11ShaderResourceView* mSRV;
 	ID3D11RenderTargetView* mRTV;
 	ID3D11DepthStencilView* mDSV;

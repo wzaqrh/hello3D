@@ -11,6 +11,7 @@ Texture11::Texture11()
 	mFormat = kFormatUnknown;
 	mUsage = kHWUsageDefault;
 
+	mTex2D = nullptr;
 	mSRV = nullptr;
 	mRTV = nullptr;
 	mDSV = nullptr;

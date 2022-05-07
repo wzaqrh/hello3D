@@ -133,97 +133,6 @@ inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 t
     return normal;
 }
 
-/************ ShadowCaster ************/
-struct PSShadowCasterInput 
-{
-	float4 Pos  : SV_POSITION;
-	//float4 Pos0 : POSITION0;
-	//_//float2 Tex : TEXCOORD0;
-};
-PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
-{
-	PSShadowCasterInput output;
-	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
-	output.Pos = mul(mul(LightProjection, mul(LightView, mul(World, transpose(Model)))), skinPos);
-	//output.Pos0 = output.Pos;
-	//_//output.Tex = surf.Tex;
-	return output;
-}
-float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
-{
-	float4 finalColor = float4(0,0,0,1);
-	//finalColor.xy = input.Pos0.xy / input.Pos0.w;
-	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
-	//_//finalColor = GetAlbedo(input.Tex);
-	return finalColor;
-}
-
-struct PSGenerateVSMInput
-{
-	float4 Pos : SV_POSITION;
-	float4 ViewPos : POSITION0;
-	float4 WorldPos : POSITION1;
-};
-PSGenerateVSMInput VSGenerateVSM(vbSurface surf, vbWeightedSkin skin)
-{
-	PSGenerateVSMInput output;
-	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
-	output.WorldPos = mul(mul(World, transpose(Model)), skinPos);
-	output.ViewPos = mul(LightView, output.WorldPos);
-	output.Pos = mul(LightProjection, output.ViewPos);
-	return output;
-}
-float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target
-{
-	float depth = length(input.ViewPos);
-	//float worldPos = input.WorldPos.xyz / input.WorldPos.w;
-	//float depth = length(unity_LightPosition.xyz - worldPos * unity_LightPosition.w);
-	return float4(depth, depth * depth, 0.0f, 1.0f);
-}
-
-struct VSMBlurInput
-{
-	float4 Pos : SV_POSITION;
-	float4 Color : COLOR;
-	float2 texUV : TEXCOORD0;
-};
-VSMBlurInput VSBlurVSM(vbSurface input)
-{
-	VSMBlurInput output;
-	output.Pos = float4(input.Pos, 1.0);
-	output.Color = input.Color;
-	output.texUV = input.Tex;
-	return output;
-}
-inline float BoxFilterStart(float fWidth)  //Assumes filter is odd
-{
-	return ((fWidth - 1.0f) / 2.0f);
-}
-inline float4 BlurVSMFunction(VSMBlurInput input, bool bVertical)
-{
-	const float fFilterWidth = 9.0f;
-	const float fStepSize = 1.0f;
-	
-	float fStartOffset = BoxFilterStart(fFilterWidth);
-	float2 fTexelOffset = float2(bVertical * (fStepSize / ShadowMapSize.x), !bVertical * (fStepSize / ShadowMapSize.y));
-    
-	float2 fTexStart = input.texUV - (fStartOffset * fTexelOffset);
-	float4 output = (float4) 0.0f;
-    
-	for (int i = 0; i < fFilterWidth; ++i)
-		output += MIR_SAMPLE_TEX2D(_GBufferAlbedo, float2(fTexStart + fTexelOffset * i));
-    
-	return output / fFilterWidth;
-}
-float4 PSBlurVSMX(VSMBlurInput input) : SV_Target
-{
-	return BlurVSMFunction(input, false);
-}
-float4 PSBlurVSMY(VSMBlurInput input) : SV_Target
-{
-	return BlurVSMFunction(input, true);
-}
-
 /************ ForwardBase ************/
 struct PixelInput
 {
@@ -377,6 +286,97 @@ float4 PSAdd(PixelInput input) : SV_Target
 	return finalColor;
 }
 
+/************ ShadowCaster ************/
+struct PSShadowCasterInput 
+{
+	float4 Pos  : SV_POSITION;
+	//float4 Pos0 : POSITION0;
+	//_//float2 Tex : TEXCOORD0;
+};
+PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
+{
+	PSShadowCasterInput output;
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
+	output.Pos = mul(mul(LightProjection, mul(LightView, mul(World, transpose(Model)))), skinPos);
+	//output.Pos0 = output.Pos;
+	//_//output.Tex = surf.Tex;
+	return output;
+}
+float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
+{
+	float4 finalColor = float4(0,0,0,1);
+	//finalColor.xy = input.Pos0.xy / input.Pos0.w;
+	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
+	//_//finalColor = GetAlbedo(input.Tex);
+	return finalColor;
+}
+
+struct PSGenerateVSMInput
+{
+	float4 Pos : SV_POSITION;
+	float4 ViewPos : POSITION0;
+	float4 WorldPos : POSITION1;
+};
+PSGenerateVSMInput VSGenerateVSM(vbSurface surf, vbWeightedSkin skin)
+{
+	PSGenerateVSMInput output;
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos, 1.0));
+	output.WorldPos = mul(mul(World, transpose(Model)), skinPos);
+	output.ViewPos = mul(LightView, output.WorldPos);
+	output.Pos = mul(LightProjection, output.ViewPos);
+	return output;
+}
+float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target
+{
+	float depth = length(input.ViewPos);
+	//float worldPos = input.WorldPos.xyz / input.WorldPos.w;
+	//float depth = length(unity_LightPosition.xyz - worldPos * unity_LightPosition.w);
+	return float4(depth, depth * depth, 0.0f, 1.0f);
+}
+
+struct VSMBlurInput
+{
+	float4 Pos : SV_POSITION;
+	float4 Color : COLOR;
+	float2 texUV : TEXCOORD0;
+};
+VSMBlurInput VSBlurVSM(vbSurface input)
+{
+	VSMBlurInput output;
+	output.Pos = float4(input.Pos, 1.0);
+	output.Color = input.Color;
+	output.texUV = input.Tex;
+	return output;
+}
+inline float BoxFilterStart(float fWidth)  //Assumes filter is odd
+{
+	return ((fWidth - 1.0f) / 2.0f);
+}
+inline float4 BlurVSMFunction(VSMBlurInput input, bool bVertical)
+{
+	const float fFilterWidth = 9.0f;
+	const float fStepSize = 1.0f;
+	
+	float fStartOffset = BoxFilterStart(fFilterWidth);
+	float2 fTexelOffset = float2(bVertical * (fStepSize / ShadowMapSize.x), !bVertical * (fStepSize / ShadowMapSize.y));
+    
+	float2 fTexStart = input.texUV - (fStartOffset * fTexelOffset);
+	float4 output = (float4) 0.0f;
+    
+	for (int i = 0; i < fFilterWidth; ++i)
+		output += MIR_SAMPLE_TEX2D(_GBufferAlbedo, float2(fTexStart + fTexelOffset * i));
+    
+	return output / fFilterWidth;
+}
+float4 PSBlurVSMX(VSMBlurInput input) : SV_Target
+{
+	return BlurVSMFunction(input, false);
+}
+float4 PSBlurVSMY(VSMBlurInput input) : SV_Target
+{
+	return BlurVSMFunction(input, true);
+}
+
 /************ PrepassBase ************/
 struct PSPrepassBaseInput
 {
@@ -452,13 +452,13 @@ PSPrepassFinalInput VSPrepassFinal(vbSurface input)
 struct PSPrepassFinalOutput
 {
 	float4 Color : SV_Target0;
-	float Depth : SV_Depth;
+	//float Depth : SV_Depth;
 };
 
 PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 {
 	PSPrepassFinalOutput output;
-	output.Depth = MIR_SAMPLE_TEX2D_LEVEL(_GDepth, input.Tex, 0).r;
+	//output.Depth = MIR_SAMPLE_TEX2D_LEVEL(_GDepth, input.Tex, 0).r;
 	
 	float4 position = float4(MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz * 2.0 - 1.0, 1.0);
 	float4 worldPosition = mul(mul(ViewInv, ProjectionInv), position);

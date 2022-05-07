@@ -25,6 +25,7 @@ public:
 	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats) override;
 	void SetFrameBuffer(IFrameBufferPtr rendTarget) override;
 	void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
+	void CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment) override;
 
 	IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data) override;
 	void SetIndexBuffer(IIndexBufferPtr indexBuffer) override;
@@ -74,7 +75,6 @@ private:
 	ID3D11DeviceContext* mDeviceContext = NULL;
 	IDXGISwapChain* mSwapChain = NULL;
 	
-	ID3D11Texture2D* mDepthStencil = NULL;
 	ID3D11DepthStencilState* mDepthStencilState = NULL;
 	ID3D11BlendState* mBlendState = NULL;
 
