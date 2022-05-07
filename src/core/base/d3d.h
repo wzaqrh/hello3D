@@ -28,6 +28,7 @@ bool ComputePitch(DXGI_FORMAT fmt, size_t width, size_t height,
 	size_t& rowPitch, size_t& slicePitch, int flags);
 
 DXGI_FORMAT MakeTypeless(DXGI_FORMAT fmt);
+DXGI_FORMAT MakeTypeless1(DXGI_FORMAT fmt);
 
 bool IsDepthStencil(DXGI_FORMAT fmt);
 

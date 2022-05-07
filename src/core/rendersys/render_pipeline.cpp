@@ -407,7 +407,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 {
 	Eigen::Vector3i fbSize = Eigen::Vector3i(resMng.WinWidth(), resMng.WinHeight(), 1);
 	
-	if (mCfg.IsShadowVSM()) mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, Eigen::Vector3i(fbSize.x(), fbSize.y(), 0), MakeResFormats(kFormatR32G32Float, kFormatD24UNormS8UInt));
+	if (mCfg.IsShadowVSM()) mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, Eigen::Vector3i(fbSize.x(), fbSize.y(), -1), MakeResFormats(kFormatR32G32Float, kFormatD24UNormS8UInt));
 	else mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 

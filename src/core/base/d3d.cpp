@@ -800,6 +800,15 @@ bool IsDepthStencil(DXGI_FORMAT fmt)
 }
 
 /******* typeless *******/
+DXGI_FORMAT MakeTypeless1(DXGI_FORMAT fmt)
+{
+	switch (static_cast<int>(fmt)) {
+	case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	default:
+		return fmt;
+	}
+}
 DXGI_FORMAT MakeTypeless(DXGI_FORMAT fmt)
 {
 	switch (static_cast<int>(fmt)) {

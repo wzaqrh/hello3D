@@ -25,11 +25,12 @@ class Texture11 : public ImplementResource<ITexture>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Texture11();
-	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
-	void SetTex2D(ID3D11Texture2D* tex2d) { mTex2D = tex2d; }
-	void SetSRV(ID3D11ShaderResourceView* srv) { mSRV = srv; }
-	void SetRTV(ID3D11RenderTargetView* rtv) { mRTV = rtv; }
-	void SetDSV(ID3D11DepthStencilView* dsv) { mDSV = dsv; }
+	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap, bool bindRTOrDS = false);
+	void Init(ID3D11Texture2D* tex2d);
+	ID3D11Texture2D* InitTex(ID3D11Device* device, const D3D11_SUBRESOURCE_DATA datas[] = nullptr);
+	ID3D11ShaderResourceView* InitSRV(ID3D11Device* device);
+	ID3D11RenderTargetView* InitRTV(ID3D11Device* device);
+	ID3D11DepthStencilView* InitDSV(ID3D11Device* device);
 public:
 	ID3D11Texture2D* AsTex2D() const { return mTex2D; }
 	ID3D11ShaderResourceView* AsSRV() const { return mSRV; }
@@ -46,7 +47,7 @@ public:
 
 	void OnLoaded() override;
 private:
-	bool mAutoGenMipmap;
+	bool mAutoGenMipmap, mBindRTOrDS;
 	int mFaceCount, mMipCount;
 	Eigen::Vector2i mSize, mRealSize;
 	ResourceFormat mFormat;

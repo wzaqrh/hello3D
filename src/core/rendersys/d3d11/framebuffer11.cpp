@@ -1,5 +1,6 @@
 #include "core/rendersys/d3d11/framebuffer11.h"
 #include "core/base/debug.h"
+#include "core/base/d3d.h"
 
 namespace mir {
 
@@ -31,6 +32,48 @@ std::vector<ID3D11ShaderResourceView*> FrameBuffer11::AsSRVs() const {
 	if (mAttachZStencil) 
 		vec.push_back(mAttachZStencil->AsSRV());
 	return vec;
+}
+
+static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen::Vector3i& size, ResourceFormat format)
+{
+	constexpr size_t faceCount = 1;
+
+	Texture11Ptr texture = CreateInstance<Texture11>();
+	texture->Init(format, kHWUsageDefault, size.x(), size.y(), faceCount, size.z(), true);
+	if (!texture->InitTex(pDevice)) return nullptr;
+	if (!texture->InitSRV(pDevice)) return nullptr;
+	if (!texture->InitRTV(pDevice)) return nullptr;
+
+	texture->SetLoaded();
+	return texture;
+}
+FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateColorAttachment(ID3D11Device* pDevice, const Eigen::Vector3i& size, ResourceFormat format)
+{
+	return (format != kFormatUnknown) ?  CreateInstance<FrameBufferAttachByTexture11>(_CreateColorAttachTexture(pDevice, size, format)) : nullptr;
+}
+
+static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+{
+	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(format)));
+	BOOST_ASSERT(format == kFormatD24UNormS8UInt
+		|| format == kFormatD32Float
+		|| format == kFormatD16UNorm);
+
+	constexpr size_t faceCount = 1;
+	constexpr size_t mipCount = 1;
+
+	Texture11Ptr texture = CreateInstance<Texture11>();
+	texture->Init(kFormatD24UNormS8UInt, kHWUsageDefault, size.x(), size.y(), faceCount, mipCount, true);
+	if (!texture->InitTex(pDevice)) return nullptr;
+	if (!texture->InitDSV(pDevice)) return nullptr;
+	if (!texture->InitSRV(pDevice)) return nullptr;
+
+	texture->SetLoaded();
+	return texture;
+}
+FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateZStencilAttachment(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+{
+	return (format != kFormatUnknown) ? CreateInstance<FrameBufferAttachByTexture11>(_CreateZStencilAttachTexture(pDevice, size, format)) : nullptr;
 }
 
 }
