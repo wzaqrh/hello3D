@@ -304,7 +304,7 @@ PSShadowCasterInput VSShadowCaster(vbSurface surf, vbWeightedSkin skin)
 }
 float4 PSShadowCasterDebug(PSShadowCasterInput input) : SV_Target
 {
-	float4 finalColor = float4(0,0,0,1);
+	float4 finalColor = float4(1.0,0,0,1);
 	//finalColor.xy = input.Pos0.xy / input.Pos0.w;
 	//finalColor.xy = finalColor.xy * 0.5 + 0.5;
 	//_//finalColor = GetAlbedo(input.Tex);

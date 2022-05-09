@@ -79,7 +79,7 @@ void Mesh::SetVertexs(const vbSurface* vertData, int vertCount)
 void Mesh::SetVertexs(const vbSurface* vertData, int vertCount, int vertPos)
 {
 	mVertDirty = true;
-	mVertPos = max(mVertPos, vertPos + vertCount);
+	mVertPos = std::max(mVertPos, vertPos + vertCount);
 	for (int i = 0; i < vertCount; ++i)
 		mVertices[i + vertPos] = vertData[i];
 
@@ -91,7 +91,7 @@ void Mesh::SetVertexs(const vbSurface* vertData, int vertCount, int vertPos)
 void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
 {
 	mVertDirty = true;
-	mVertPos = max(mVertPos, count);
+	mVertPos = std::max(mVertPos, count);
 	for (int i = 0; i < mVertPos; ++i)
 		mVertices[i].Pos = posData[i];
 
@@ -103,7 +103,7 @@ void Mesh::SetPositions(const Eigen::Vector3f* posData, int count)
 void Mesh::SetColors(const Eigen::Vector4f* colorData, int count)
 {
 	mVertDirty = true;
-	mVertPos = max(mVertPos, count);
+	mVertPos = std::max(mVertPos, count);
 	for (int i = 0; i < mVertPos; ++i) {
 		unsigned char c[4] = {
 			static_cast<unsigned char>(colorData[i].x() * 255),
@@ -118,7 +118,7 @@ void Mesh::SetColors(const Eigen::Vector4f* colorData, int count)
 void Mesh::SetUVs(const Eigen::Vector2f* uvData, int count)
 {
 	mVertDirty = true;
-	mVertPos = max(mVertPos, count);
+	mVertPos = std::max(mVertPos, count);
 	for (int i = 0; i < mVertPos; ++i)
 		mVertices[i].Tex = uvData[i];
 }

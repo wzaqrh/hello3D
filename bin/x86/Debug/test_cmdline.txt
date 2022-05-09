@@ -1,6 +1,9 @@
+14  0	0
+13  0   0
+3 	3	0
+
 5	1	1
 12  1   0
-
 
 10 	1 	1
 2   3   0
@@ -23,6 +26,8 @@ test_deffered_path 1
 test_gltf 0 0
 test_ssao 11 0 0
 test_bloom 0 0
+test_unity 0 0
+test_paint3d 0 0
 
 sprite  0 0 0 
 skybox 	1 0 0

@@ -9,6 +9,8 @@
 #define MAT_BLOOM "Bloom"
 #define MAT_BOX_BLUR "BoxBlur"
 #define MAT_SSAO "HorizonBasedAO"
+#define MAT_PAINT "Paint3D"
+#define MAT_LINE_PAINT "LinePaint3D"
 
 #define LIGHTMODE_SHADOW_CASTER "ShadowCaster"
 #define LIGHTMODE_FORWARD_BASE "ForwardBase"

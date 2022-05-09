@@ -42,11 +42,16 @@ template <class _Instance, typename... T> inline CoTask<std::shared_ptr<_Instanc
 	else return nullptr;
 }
 
-
 }
 
 namespace mir {
 namespace math {
+
+struct Frustum {
+	Eigen::Vector3f NearPlane[4];
+	Eigen::Vector3f FarPlane[4];
+};
+
 /********** point **********/
 namespace point {
 

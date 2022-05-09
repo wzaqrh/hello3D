@@ -80,6 +80,15 @@ private:
 			}
 			return result;
 		}
+		template<typename T> T ConditionGetValue(const ProgramNode& progNode, const boost_property_tree::ptree& node, const std::string& name, T defvalue = T()) const {
+			for (auto& it : boost::make_iterator_range(node.equal_range(name))) {
+				auto& inode = it.second;
+				if (CheckCondition(progNode, inode)) {
+					return boost::lexical_cast<T>(inode.data());
+				}
+			}
+			return defvalue;
+		}
 	public:
 		const bool JustInclude;
 		const MaterialLoadParam& LoadParam;
@@ -146,7 +155,7 @@ private:
 			}
 		}
 
-		progNode.Topo = static_cast<PrimitiveTopology>(nodeProgram.get<int>("Topology", progNode.Topo));
+		progNode.Topo = static_cast<PrimitiveTopology>(vis.ConditionGetValue<int>(progNode, nodeProgram, "Topology", progNode.Topo));
 
 		auto& vertexScd = progNode.VertexSCD;
 		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);

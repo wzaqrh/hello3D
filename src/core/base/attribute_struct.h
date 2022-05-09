@@ -8,6 +8,7 @@ struct vbSurface
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	vbSurface() :Pos(0, 0, 0), Color(0), Tex(0, 0) {}
+	vbSurface(const Eigen::Vector3f& p, unsigned int c, const Eigen::Vector2f& uv): Pos(p), Color(c), Tex(uv) {}
 public:
 	Eigen::Vector3f Pos;
 	unsigned int Color;

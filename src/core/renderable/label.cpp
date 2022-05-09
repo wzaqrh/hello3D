@@ -148,10 +148,10 @@ void Label::UpdateBBox()
 			glyph_bbox.yMin += pen.y();
 			glyph_bbox.yMax += pen.y();
 
-			mBBox.xMin = min(mBBox.xMin, (glyph_bbox.xMin));
-			mBBox.yMin = min(mBBox.yMin, (glyph_bbox.yMin));
-			mBBox.xMax = max(mBBox.xMax, (glyph_bbox.xMax));
-			mBBox.yMax = max(mBBox.yMax, (glyph_bbox.yMax));
+			mBBox.xMin = std::min(mBBox.xMin, (glyph_bbox.xMin));
+			mBBox.yMin = std::min(mBBox.yMin, (glyph_bbox.yMin));
+			mBBox.xMax = std::max(mBBox.xMax, (glyph_bbox.xMax));
+			mBBox.yMax = std::max(mBBox.yMax, (glyph_bbox.yMax));
 
 			mCharSeq[i].quad.SetTexCoord(ch.Atlas->Uv0, ch.Atlas->Uv1);
 			mCharSeq[i].quad.FlipY();

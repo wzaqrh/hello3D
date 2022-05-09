@@ -66,7 +66,7 @@
 #define PBR_UNITY 1
 #define PBR_GLTF 2
 #if !defined PBR_MODE
-#define PBR_MODE 2/*PBR_GLTF*/
+#define PBR_MODE 1/*PBR_GLTF*/
 #endif
 
 #if !defined CubeMapIsRightHandness
@@ -97,7 +97,7 @@
 #define SHADOW_PCSS 4
 #define SHADOW_VSM 5
 #if !defined SHADOW_MODE
-#define SHADOW_MODE 5/*SHADOW_VSM*/
+#define SHADOW_MODE 1/*SHADOW_VSM*/
 #endif
 
 #endif

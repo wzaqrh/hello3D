@@ -83,7 +83,7 @@ void Camera::RecalculateProjection() const
 {
 	switch (mType) {
 	case kCameraPerspective:
-		mProjection = math::cam::MakePerspectiveFovLH(mFov, mAspect, mClipPlane.x(), mClipPlane.y());
+		mProjection = math::cam::MakePerspectiveFovLH(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
 		break;
 	case kCameraOthogonal: {
 	#if defined OTHO_PROJ_CENTER_NOT_ZERO
@@ -179,6 +179,29 @@ Eigen::Vector4f Camera::ProjectPoint(const Eigen::Vector4f& pos) const
 Eigen::Vector3f Camera::ProjectPoint(const Eigen::Vector3f& pos) const
 {
 	return ProjectPoint(Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1.0)).head<3>();
+}
+
+math::Frustum Camera::GetFrustum() const
+{
+	math::Frustum ft;
+	float tan_hfov = tanf(mFov * 0.5f);
+	float n  = mClipPlane[0];
+	float nh = tan_hfov * n;
+	float nw = nh * mAspect;
+	ft.FarPlane[0] = Eigen::Vector3f(-nw,-nh,n);
+	ft.FarPlane[1] = Eigen::Vector3f( nw,-nh,n);
+	ft.FarPlane[2] = Eigen::Vector3f( nw, nh,n);
+	ft.FarPlane[3] = Eigen::Vector3f(-nw, nh,n);
+
+	float f  = mClipPlane[1];
+	float fh = tan_hfov * f;
+	float fw = fh * mAspect;
+	ft.FarPlane[0] = Eigen::Vector3f(-nw, -nh, f);
+	ft.FarPlane[1] = Eigen::Vector3f(nw, -nh, f);
+	ft.FarPlane[2] = Eigen::Vector3f(nw, nh, f);
+	ft.FarPlane[3] = Eigen::Vector3f(-nw, nh, f);
+
+	return ft;
 }
 
 /********** components **********/

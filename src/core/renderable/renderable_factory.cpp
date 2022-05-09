@@ -7,6 +7,7 @@
 #include "core/renderable/cube.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/post_process.h"
+#include "core/renderable/paint3d.h"
 #include "core/base/debug.h"
 #include "core/scene/camera.h"
 #include "core/resource/material_factory.h"
@@ -38,15 +39,29 @@ CoTask<bool> RenderableFactory::CreatePostProcessEffect(rend::PostProcessPtr& ef
 	CoReturn true;
 }
 
+CoTask<bool> RenderableFactory::CreatePaint3D(rend::Paint3DPtr& paint)
+{
+	res::MaterialInstance matLine;
+	MaterialLoadParam paramLine = MAT_LINE_PAINT;
+	CoAwait mResourceMng.CreateMaterial(matLine, mLaunchMode, paramLine);
+
+	res::MaterialInstance matTri;
+	MaterialLoadParam paramTri = MAT_PAINT;
+	CoAwait mResourceMng.CreateMaterial(matTri, mLaunchMode, paramTri);
+
+	paint = CreateInstance<Paint3D>(mLaunchMode, mResourceMng, matTri, matLine);
+	CoReturn true;
+}
+
 CoTask<bool> RenderableFactory::CreateSprite(rend::SpritePtr& sprite, std::string imgpath, MaterialLoadParam param)
 {
 	COROUTINE_VARIABLES_2(imgpath, param);
-	ITexturePtr texture;
-
+	
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SPRITE);
 	auto t0 = mResourceMng.CreateMaterial(material, mLaunchMode, loadParam);
 
+	ITexturePtr texture;
 	if (!imgpath.empty()) {
 		auto t1 = mResourceMng.CreateTextureByFile(texture, mLaunchMode, imgpath);
 		CoAwait WhenAll(t0, t1);

@@ -252,8 +252,11 @@ public:
 	//LIGHTMODE_OVERLAY
 	void RenderOverlay()
 	{
-		auto blend_state = mStatesBlock.LockBlend(BlendState::MakeAlphaNonPremultiplied());
-		auto depth_state = mStatesBlock.LockDepth(DepthState::MakeFor3D(false));
+		auto blend_state = mStatesBlock.LockBlend();
+		auto depth_state = mStatesBlock.LockDepth();
+
+		blend_state(BlendState::MakeAlphaNonPremultiplied());
+		depth_state(DepthState::MakeFor3D(false));
 
 		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY);
 	}

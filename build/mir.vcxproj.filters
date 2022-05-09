@@ -250,14 +250,17 @@
     <ClInclude Include="..\src\core\rendersys\frame_buffer_bank.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\mir_config_macros.h">
-      <Filter>src\core\config</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\mir_config.h">
       <Filter>src\core\config</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\resource\material_property.h">
       <Filter>src\core\resource\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\mir_config_macros.h">
+      <Filter>src\shader\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\renderable\paint3d.h">
+      <Filter>src\core\renderable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -420,6 +423,9 @@
     <ClCompile Include="..\src\core\mir_config.cpp">
       <Filter>src\core\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\renderable\paint3d.cpp">
+      <Filter>src\core\renderable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -569,9 +575,6 @@
       <Filter>src\shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\VarianceShadow.cginc">
-      <Filter>src\shader\inc</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\Macros.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Bloom.hlsl">

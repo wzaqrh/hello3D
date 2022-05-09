@@ -65,6 +65,7 @@ public:
 	const Eigen::Matrix4f& GetProjection() const;
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
+	math::Frustum GetFrustum() const;
 
 	CameraType GetType() const { return mType; }
 	Eigen::Vector2f GetOthoWinSize() const;

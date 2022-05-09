@@ -71,6 +71,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\test\test_paint3d.cpp" />
     <ClCompile Include="..\src\test\test_shadow_map.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
@@ -93,6 +94,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\test\test_ssao.cpp" />
+    <ClCompile Include="..\src\test\test_unity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\test\app.h" />

@@ -67,6 +67,7 @@
     <ClInclude Include="..\src\core\renderable\font.h" />
     <ClInclude Include="..\src\core\renderable\label.h" />
     <ClInclude Include="..\src\core\renderable\mesh.h" />
+    <ClInclude Include="..\src\core\renderable\paint3d.h" />
     <ClInclude Include="..\src\core\renderable\post_process.h" />
     <ClInclude Include="..\src\core\renderable\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\renderable.h" />
@@ -152,6 +153,7 @@
     <ClCompile Include="..\src\core\renderable\font.cpp" />
     <ClCompile Include="..\src\core\renderable\label.cpp" />
     <ClCompile Include="..\src\core\renderable\mesh.cpp" />
+    <ClCompile Include="..\src\core\renderable\paint3d.cpp" />
     <ClCompile Include="..\src\core\renderable\post_process.cpp" />
     <ClCompile Include="..\src\core\renderable\renderable_base.cpp" />
     <ClCompile Include="..\src\core\renderable\renderable_factory.cpp" />
@@ -227,7 +229,6 @@
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Macros.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
@@ -429,7 +430,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -471,7 +472,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;MIR_UNIT_TEST;USE_MATERIAL_INSTANCE=1;USE_COROUTINE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;MIR_UNIT_TEST;USE_MATERIAL_INSTANCE=1;USE_COROUTINE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -511,7 +512,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -550,7 +551,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;MIR_UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;MIR_UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -591,7 +592,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -632,7 +633,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -674,7 +675,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -715,7 +716,7 @@
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

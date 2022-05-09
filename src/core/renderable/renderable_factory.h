@@ -20,6 +20,7 @@ public:
 	CoTask<bool> CreateAssimpModel(rend::AssimpModelPtr& rend, MaterialLoadParam loadParam = "");
 	CoTask<bool> CreateLabel(rend::LabelPtr& rend, std::string fontPath, int fontSize);
 	CoTask<bool> CreatePostProcessEffect(rend::PostProcessPtr& rend, MaterialLoadParam loadParam = "");
+	CoTask<bool> CreatePaint3D(rend::Paint3DPtr& rend);
 
 	DECLARE_COTASK_FUNCTIONS(rend::SkyBoxPtr, CreateSkybox, ThreadSafe);
 	DECLARE_COTASK_FUNCTIONS(rend::SpritePtr, CreateSprite, ThreadSafe);
@@ -28,6 +29,7 @@ public:
 	DECLARE_COTASK_FUNCTIONS(rend::AssimpModelPtr, CreateAssimpModel, ThreadSafe);
 	DECLARE_COTASK_FUNCTIONS(rend::LabelPtr, CreateLabel, ThreadSafe);
 	DECLARE_COTASK_FUNCTIONS(rend::PostProcessPtr, CreatePostProcessEffect, ThreadSafe);
+	DECLARE_COTASK_FUNCTIONS(rend::Paint3DPtr, CreatePaint3D, ThreadSafe);
 
 	template<typename RendClass, typename... T> std::shared_ptr<RendClass> CreateRend(T &&...args) {
 		return CreateRendFunctor<RendClass>()(*this, std::forward<T>(args)...);

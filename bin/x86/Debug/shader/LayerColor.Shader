@@ -7,20 +7,15 @@
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
 		
+		<Topology Condition="POINT_MODE==1">1</Topology>
+		<Topology Condition="LINE_MODE==1">2</Topology>
 		<FileName>LayerColor</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>
 	
 	<SubShader>
 		<Pass>
-			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
-			<PROGRAM> 
-				<VertexEntry>VSShadowCaster</VertexEntry> 
-				<PixelEntry></PixelEntry>
-			</PROGRAM>
-		</Pass>
-		<Pass>
-			<Tags> <LightMode>ForwardBase</LightMode> </Tags>
+			<Tags> <LightMode>Overlay</LightMode> </Tags>
 			<PROGRAM>
 				<PixelEntry>PS</PixelEntry> 
 			</PROGRAM>
