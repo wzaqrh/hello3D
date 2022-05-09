@@ -6,14 +6,14 @@ namespace mir {
 namespace rend {
 
 /********** Mesh **********/
-Mesh::Mesh(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material, int vertCount, int indexCount)
-	:Super(launchMode, resourceMng, material)
+Mesh::Mesh(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material, int vertCount, int indexCount)
+	:Super(launchMode, resMng, material)
 {
 	mIndices.resize(indexCount);
-	mIndexBuffer = mResourceMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(mIndices));
+	mIndexBuffer = mResMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(mIndices));
 
 	mVertices.resize(vertCount);
-	mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
+	mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
 }
@@ -28,13 +28,13 @@ void Mesh::GenRenderOperation(RenderOperationQueue& opList)
 	if (mVertDirty)
 	{
 		mVertDirty = false;
-		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mVertices));
+		mResMng.UpdateBuffer(mVertexBuffer, Data::Make(mVertices));
 	}
 
 	if (mIndiceDirty)
 	{
 		mIndiceDirty = false;
-		mResourceMng.UpdateBuffer(mIndexBuffer, Data::Make(mIndices));
+		mResMng.UpdateBuffer(mIndexBuffer, Data::Make(mIndices));
 	}
 
 	int opCount = 0;

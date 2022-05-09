@@ -48,6 +48,7 @@ class MIR_CORE_API Paint3D : public Paint3DBase
 	typedef Paint3DBase Super;
 public:
 	Paint3D(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matTri, const res::MaterialInstance& matLine);
+	void Clear() override;
 	void SetColor(unsigned color) override;
 	void DrawCube(const Eigen::Vector3f& plb, const Eigen::Vector3f& prt, const Eigen::Vector3f& direction);
 	TemplateArgs void DrawLine(T &&...args) { return mLinePaint->DrawLine(std::forward<T>(args)...); }

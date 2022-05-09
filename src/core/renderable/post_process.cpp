@@ -63,9 +63,7 @@ PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const 
 
 void PostProcess::GenRenderOperation(RenderOperationQueue& ops)
 {
-	RenderOperation op = {};
-	if (MakeRenderOperation(op))
-		ops.AddOP(op);
+	MakeRenderOperation(ops);
 }
 
 /********** PostProcessFactory **********/

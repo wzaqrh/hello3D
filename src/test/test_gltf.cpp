@@ -13,15 +13,6 @@ protected:
 private:
 	AssimpModelPtr mModel;
 };
-/*mCaseIndex
-0: 
-*/
-
-inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
-	MaterialLoadParamBuilder mlpb(MAT_MODEL);
-	mlpb["PBR_MODE"] = 2;
-	return mlpb;
-}
 
 CoTask<bool> TestGLTF::OnInitScene()
 {
@@ -62,16 +53,13 @@ CoTask<bool> TestGLTF::OnInitScene()
 		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
 		dir_light->SetLookAt(Eigen::Vector3f(0.498, -0.71, 0.498), Eigen::Vector3f::Zero());
 		
-		CoTaskVector tasks;
-
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
 
-		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
+		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
-		CoAwait WhenAll(std::move(tasks));
 
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };
 		int caseIndex = mCaseIndex;

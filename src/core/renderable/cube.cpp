@@ -53,19 +53,16 @@ void Cube::SetColor(unsigned bgra)
 	mVertexDirty = true;
 }
 
-void Cube::GenRenderOperation(RenderOperationQueue& opList)
+void Cube::GenRenderOperation(RenderOperationQueue& ops)
 {
-	RenderOperation op = {};
-	if (!MakeRenderOperation(op)) return;
-
-	if (mVertexDirty) {
-		mVertexDirty = false;
-		mVertexData.SetPositionsByCenterHSize(mPosition, mHalfSize);
-		mVertexData.SetColor(mColor);
-		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mVertexData));
+	if (auto op = MakeRenderOperation(ops)) {
+		if (mVertexDirty) {
+			mVertexDirty = false;
+			mVertexData.SetPositionsByCenterHSize(mPosition, mHalfSize);
+			mVertexData.SetColor(mColor);
+			mResMng.UpdateBuffer(mVertexBuffer, Data::Make(mVertexData));
+		}
 	}
-
-	opList.AddOP(op);
 }
 
 

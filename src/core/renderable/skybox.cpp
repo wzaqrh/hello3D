@@ -11,15 +11,15 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const res::Mater
 {
 	if (material->GetLoadParam().GetVariantName() == "Deprecate") {
 		SkyboxVertex Vertexs[4];
-		float fHighW = -1.0f - (1.0f / (float)mResourceMng.WinSize().x());
-		float fHighH = -1.0f - (1.0f / (float)mResourceMng.WinSize().y());
-		float fLowW = 1.0f + (1.0f / (float)mResourceMng.WinSize().x());
-		float fLowH = 1.0f + (1.0f / (float)mResourceMng.WinSize().y());
+		float fHighW = -1.0f - (1.0f / (float)mResMng.WinSize().x());
+		float fHighH = -1.0f - (1.0f / (float)mResMng.WinSize().y());
+		float fLowW = 1.0f + (1.0f / (float)mResMng.WinSize().x());
+		float fLowH = 1.0f + (1.0f / (float)mResMng.WinSize().y());
 		Vertexs[0].Pos = Eigen::Vector3f(fLowW, fLowH, 1.0f);
 		Vertexs[1].Pos = Eigen::Vector3f(fLowW, fHighH, 1.0f);
 		Vertexs[2].Pos = Eigen::Vector3f(fHighW, fLowH, 1.0f);
 		Vertexs[3].Pos = Eigen::Vector3f(fHighW, fHighH, 1.0f);
-		mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
+		mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
 	}
 	else {
 		SkyboxVertex Vertexs[36];
@@ -78,7 +78,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const res::Mater
 
 		std::vector<SkyboxVertex> vec(Vertexs + 0, Vertexs + 36);
 		//face = 3; vec.assign(Vertexs + face * 6, Vertexs + (face + 1) * 6);
-		mVertexBuffer = mResourceMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
+		mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 
 
@@ -101,12 +101,9 @@ void SkyBox::SetLutMap(const ITexturePtr& texture)
 	mLutMap = texture;
 }
 
-void SkyBox::GenRenderOperation(RenderOperationQueue& opList)
+void SkyBox::GenRenderOperation(RenderOperationQueue& ops)
 {
-	RenderOperation op = {};
-	if (!MakeRenderOperation(op)) return;
-
-	opList.AddOP(op);
+	MakeRenderOperation(ops);
 }
 
 }

@@ -1,4 +1,5 @@
 #include "core/renderable/renderable_base.h"
+#include "core/renderable/paint3d.h"
 #include "core/base/debug.h"
 #include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
@@ -7,7 +8,7 @@ namespace mir {
 namespace rend {
 
 RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst)
-	: mResourceMng(resourceMng)
+	: mResMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mMaterial(matInst)
 {}
@@ -28,7 +29,7 @@ CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 {
 #if MIR_MATERIAL_HOTLOAD
 	if (mMaterial && mMaterial->IsOutOfDate()) {
-		mMaterial = CoAwait mResourceMng.CreateMaterialT(__LaunchAsync__, mMaterial->GetLoadParam());
+		mMaterial = CoAwait mResMng.CreateMaterialT(__LaunchAsync__, mMaterial->GetLoadParam());
 	}
 #endif
 }
@@ -48,11 +49,19 @@ bool RenderableSingleRenderOp::IsLoaded() const
 	return true;
 }
 
-bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
+RenderOperation* RenderableSingleRenderOp::MakeRenderOperation(RenderOperationQueue& ops)
 {
-	if (!IsLoaded()) return false;
+	if (!IsLoaded()) return nullptr;
 
-	op = RenderOperation{};
+#if MIR_GRAPHICS_DEBUG
+	if (mDebugPaint) {
+		mDebugPaint->Clear();
+		mDebugPaint->DrawAABBEdge(GetWorldAABB());
+		mDebugPaint->GenRenderOperation(ops);
+	}
+#endif
+
+	RenderOperation op = {};
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
@@ -60,7 +69,9 @@ bool RenderableSingleRenderOp::MakeRenderOperation(RenderOperation& op)
 		op.WorldTransform = GetTransform()->GetWorldMatrix();
 	op.CameraMask = mCameraMask;
 	op.CastShadow = mCastShadow;
-	return true;
+	ops.AddOP(op);
+	
+	return &ops.Back();
 }
 
 }

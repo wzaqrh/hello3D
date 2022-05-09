@@ -32,12 +32,8 @@ public:
 
 struct RenderOperationQueue {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void Clear() {
-		mOps.clear();
-	}
-	void AddOP(const RenderOperation& op) {
-		mOps.push_back(op);
-	}
+	void Clear() { mOps.clear(); }
+	void AddOP(const RenderOperation& op) { mOps.push_back(op); }
 public:
 	std::vector<RenderOperation>::const_iterator begin() const { return mOps.begin(); }
 	std::vector<RenderOperation>::const_iterator end() const { return mOps.end(); }
@@ -51,6 +47,8 @@ public:
 	const RenderOperation& At(size_t pos) const { return mOps[pos]; }
 	RenderOperation& operator[](size_t pos) { return At(pos); }
 	const RenderOperation& operator[](size_t pos) const { return At(pos); }
+
+	RenderOperation& Back() { return mOps.back(); }
 private:
 	std::vector<RenderOperation, mir_allocator<RenderOperation>> mOps;
 };

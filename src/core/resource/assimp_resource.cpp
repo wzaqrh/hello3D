@@ -94,21 +94,19 @@ private:
 		CoAwait WhenAllReady(std::move(tasks));
 
 		BOOST_ASSERT(mAsset.mScene != nullptr);
-		for (unsigned int i = 0; i < mAsset.mScene->mNumMeshes; ++i) {
+		for (unsigned i = 0; i < mAsset.mScene->mNumMeshes; ++i) {
 			const aiMesh* mesh = mAsset.mScene->mMeshes[i];
-			for (unsigned int n = 0; n < mesh->mNumBones; ++n) {
-				const aiBone* bone = mesh->mBones[n];
+			for (unsigned j = 0; j < mesh->mNumBones; ++j) {
+				const aiBone* bone = mesh->mBones[j];
 				BOOST_ASSERT(mAsset.mBoneNodesByName[bone->mName.data] == nullptr
 					|| mAsset.mBoneNodesByName[bone->mName.data]->RawNode == mAsset.mScene->mRootNode->FindNode(bone->mName));
+
 				//mAsset.mBoneNodesByName[bone->mName.data] = mAsset.mScene->mRootNode->FindNode(bone->mName);
 				auto findRawNode = mAsset.mScene->mRootNode->FindNode(bone->mName);
 				auto findIter = std::find_if(mAsset.mNodeBySerializeIndex.begin(), mAsset.mNodeBySerializeIndex.end(), [&findRawNode](const AiNodePtr& nnode) {
 					return nnode->RawNode == findRawNode;
 				});
-				if (findIter != mAsset.mNodeBySerializeIndex.end())
-					mAsset.mBoneNodesByName[bone->mName.data] = *findIter;
-				else
-					mAsset.mBoneNodesByName[bone->mName.data] = nullptr;
+				mAsset.mBoneNodesByName[bone->mName.data] = IF_AND_OR(findIter != mAsset.mNodeBySerializeIndex.end(), *findIter, nullptr);
 			}
 		}
 		CoReturn true;
@@ -173,7 +171,7 @@ private:
 	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, const aiScene* scene, std::vector<CoTask<bool>>& tasks) const {
 		COROUTINE_VARIABLES_2(rawMesh, scene);
 
-		AssimpMeshPtr meshPtr = AssimpMesh::Create();
+		AssimpMeshPtr meshPtr = CreateInstance<AssimpMesh>();
 		auto& mesh = *meshPtr;
 		mesh.mAiMesh = rawMesh;
 

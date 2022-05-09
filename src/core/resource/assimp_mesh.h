@@ -15,10 +15,9 @@ namespace res {
 
 class MIR_CORE_API AssimpMesh
 {
-public:
 	friend class AiSceneLoader;
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	DECLARE_STATIC_CREATE_CONSTRUCTOR(AssimpMesh);
+public:
 	AssimpMesh();
 	void Build(Launch launchMode, ResourceManager& resourceMng);
 public:

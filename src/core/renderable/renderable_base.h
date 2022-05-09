@@ -11,15 +11,13 @@ namespace rend {
 
 struct MIR_CORE_API RenderableSingleRenderOp : public Renderable
 {
-#define INHERIT_RENDERABLE_SINGLE_OP(CLS) DECLARE_STATIC_TASK_CREATE_CONSTRUCTOR(CLS, Launch, ResourceManager&, const res::MaterialInstance& matInst); typedef RenderableSingleRenderOp Super; friend class RenderableFactory
-#define INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(CLS) INHERIT_RENDERABLE_SINGLE_OP(CLS); CLS(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst) :Super(launchMode, resourceMng, matInst) {}
-	INHERIT_RENDERABLE_SINGLE_OP(RenderableSingleRenderOp);
-	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst);
-public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+public:
+	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matInst);
+
 	virtual void SetTexture(const ITexturePtr& Texture);
-	
 	const ITexturePtr& GetTexture() const;
+
 	res::MaterialInstance GetMaterial() const { return mMaterial; }
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
 
@@ -28,14 +26,18 @@ public:
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }
 	bool IsLoaded() const;
-	bool MakeRenderOperation(RenderOperation& op);
+	RenderOperation* MakeRenderOperation(RenderOperationQueue& ops);
 protected:
-	ResourceManager& mResourceMng;
+	ResourceManager& mResMng;
 	const Launch mLaunchMode;
 	res::MaterialInstance mMaterial;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 	Eigen::AlignedBox3f mAABB;
+#if MIR_GRAPHICS_DEBUG
+public:
+	rend::Paint3DPtr mDebugPaint;
+#endif
 };
 
 }

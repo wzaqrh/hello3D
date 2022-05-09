@@ -62,23 +62,21 @@ void Sprite::SetTexture(const ITexturePtr& texture)
 	SetSize(mSize);
 }
 
-void Sprite::GenRenderOperation(RenderOperationQueue& opList)
+void Sprite::GenRenderOperation(RenderOperationQueue& ops)
 {
-	RenderOperation op = {};
-	if (!MakeRenderOperation(op)) return;
+	if (auto op = MakeRenderOperation(ops)) {
+		if (mQuadDirty) {
+			mQuadDirty = false;
 
-	if (mQuadDirty) {
-		mQuadDirty = false;
+			Eigen::Vector3f origin = mPosition - mAnchor.cwiseProduct(mSize);
+			mQuad.SetCornerByRect(origin.head<2>(), mSize.head<2>());
+			mQuad.SetZ(mPosition.z());
+			mQuad.SetColor(mColor);
 
-		Eigen::Vector3f origin = mPosition - mAnchor.cwiseProduct(mSize);
-		mQuad.SetCornerByRect(origin.head<2>(), mSize.head<2>());
-		mQuad.SetZ(mPosition.z());
-		mQuad.SetColor(mColor);
-
-		mResourceMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
+			mResMng.UpdateBuffer(mVertexBuffer, Data::Make(mQuad));
+		}
+		if (GetTransform()) op->WorldTransform = GetTransform()->GetWorldMatrix();
 	}
-	if (GetTransform()) op.WorldTransform = GetTransform()->GetWorldMatrix();
-	opList.AddOP(op);
 }
 
 }

@@ -431,7 +431,7 @@ CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
 	res::MaterialInstance material;
 	CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
 
-	mGBufferSprite = rend::Sprite::Create(__LaunchAsync__, resMng, material);
+	mGBufferSprite = CreateInstance<rend::Sprite>(__LaunchAsync__, resMng, material);
 	mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
 	mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
 	CoReturn true;

@@ -58,7 +58,7 @@ private:
 		TemplateArgs rend::PostProcessPtr operator()(RenderableFactory& __this, T &&...args) const { return __this.CreatePostProcessEffect(std::forward<T>(args)...); }
 	};
 private:
-	ResourceManager& mResourceMng;
+	ResourceManager& mResMng;
 	Launch mLaunchMode;
 	FontCachePtr mFontCache;
 };

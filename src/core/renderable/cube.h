@@ -11,10 +11,11 @@ namespace rend {
 
 class MIR_CORE_API Cube : public RenderableSingleRenderOp
 {
-	INHERIT_RENDERABLE_SINGLE_OP(Cube);
-	Cube(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
+	typedef RenderableSingleRenderOp Super;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	Cube(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
+
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetHalfSize(const Eigen::Vector3f& size);
 	void SetColor(const Eigen::Vector4f& color);

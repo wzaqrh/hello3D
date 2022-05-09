@@ -21,10 +21,24 @@ namespace mir {
 #define NotEmptyOr(Str, DefStr) (!Str.ShaderVariantName.empty() ? Str : MaterialLoadParam(DefStr))
 
 RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
-: mResourceMng(resMng)
+: mResMng(resMng)
 , mLaunchMode(launchMode)
 {
-	mFontCache = CreateInstance<FontCache>(mResourceMng);
+	mFontCache = CreateInstance<FontCache>(mResMng);
+}
+
+CoTask<bool> RenderableFactory::CreatePaint3D(rend::Paint3DPtr& paint)
+{
+	res::MaterialInstance matLine;
+	MaterialLoadParam paramLine = MAT_LINE_PAINT;
+	CoAwait mResMng.CreateMaterial(matLine, mLaunchMode, paramLine);
+
+	res::MaterialInstance matTri;
+	MaterialLoadParam paramTri = MAT_PAINT;
+	CoAwait mResMng.CreateMaterial(matTri, mLaunchMode, paramTri);
+
+	paint = CreateInstance<Paint3D>(mLaunchMode, mResMng, matTri, matLine);
+	CoReturn true;
 }
 
 CoTask<bool> RenderableFactory::CreatePostProcessEffect(rend::PostProcessPtr& effect, MaterialLoadParam loadParam)
@@ -32,24 +46,13 @@ CoTask<bool> RenderableFactory::CreatePostProcessEffect(rend::PostProcessPtr& ef
 	COROUTINE_VARIABLES_1(loadParam);
 
 	res::MaterialInstance material;
-	if (!CoAwait mResourceMng.CreateMaterial(material, mLaunchMode, loadParam))
+	if (!CoAwait mResMng.CreateMaterial(material, mLaunchMode, loadParam))
 		CoReturn false;
 
-	effect = PostProcess::Create(mLaunchMode, mResourceMng, material);
-	CoReturn true;
-}
-
-CoTask<bool> RenderableFactory::CreatePaint3D(rend::Paint3DPtr& paint)
-{
-	res::MaterialInstance matLine;
-	MaterialLoadParam paramLine = MAT_LINE_PAINT;
-	CoAwait mResourceMng.CreateMaterial(matLine, mLaunchMode, paramLine);
-
-	res::MaterialInstance matTri;
-	MaterialLoadParam paramTri = MAT_PAINT;
-	CoAwait mResourceMng.CreateMaterial(matTri, mLaunchMode, paramTri);
-
-	paint = CreateInstance<Paint3D>(mLaunchMode, mResourceMng, matTri, matLine);
+	effect = CreateInstance<PostProcess>(mLaunchMode, mResMng, material);
+#if MIR_GRAPHICS_DEBUG
+	CoAwait CreatePaint3D(effect->mDebugPaint);
+#endif
 	CoReturn true;
 }
 
@@ -59,19 +62,22 @@ CoTask<bool> RenderableFactory::CreateSprite(rend::SpritePtr& sprite, std::strin
 	
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SPRITE);
-	auto t0 = mResourceMng.CreateMaterial(material, mLaunchMode, loadParam);
+	auto t0 = mResMng.CreateMaterial(material, mLaunchMode, loadParam);
 
 	ITexturePtr texture;
 	if (!imgpath.empty()) {
-		auto t1 = mResourceMng.CreateTextureByFile(texture, mLaunchMode, imgpath);
+		auto t1 = mResMng.CreateTextureByFile(texture, mLaunchMode, imgpath);
 		CoAwait WhenAll(t0, t1);
 	}
 	else {
 		CoAwait t0;
 	}
 
-	sprite = Sprite::Create(mLaunchMode, mResourceMng, material);
+	sprite = CreateInstance<Sprite>(mLaunchMode, mResMng, material);
 	sprite->SetTexture(texture);
+#if MIR_GRAPHICS_DEBUG
+	CoAwait CreatePaint3D(sprite->mDebugPaint);
+#endif
 	CoReturn true;
 }
 
@@ -81,10 +87,13 @@ CoTask<bool> RenderableFactory::CreateMesh(rend::MeshPtr& mesh, int vertCount, i
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SPRITE);
-	if (!CoAwait mResourceMng.CreateMaterial(material, mLaunchMode, loadParam))
+	if (!CoAwait mResMng.CreateMaterial(material, mLaunchMode, loadParam))
 		CoReturn false;
 
-	mesh = Mesh::Create(mLaunchMode, mResourceMng, material, vertCount, indexCount);
+	mesh = CreateInstance<Mesh>(mLaunchMode, mResMng, material, vertCount, indexCount);
+#if MIR_GRAPHICS_DEBUG
+	CoAwait CreatePaint3D(mesh->mDebugPaint);
+#endif
 	CoReturn true;
 }
 
@@ -94,13 +103,16 @@ CoTask<bool> RenderableFactory::CreateCube(rend::CubePtr& cube, Eigen::Vector3f 
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_LAYERCOLOR "-Cube");
-	if (!CoAwait mResourceMng.CreateMaterial(material, mLaunchMode, loadParam))
+	if (!CoAwait mResMng.CreateMaterial(material, mLaunchMode, loadParam))
 		CoReturn false;
 
-	cube = Cube::Create(mLaunchMode, mResourceMng, material);
+	cube = CreateInstance<Cube>(mLaunchMode, mResMng, material);
 	cube->SetPosition(center);
 	cube->SetHalfSize(halfsize);
 	cube->SetColor(bgra);
+#if MIR_GRAPHICS_DEBUG
+	CoAwait CreatePaint3D(cube->mDebugPaint);
+#endif
 	CoReturn true;
 }
 
@@ -108,8 +120,10 @@ CoTask<bool> RenderableFactory::CreateAssimpModel(rend::AssimpModelPtr& model, M
 {
 	COROUTINE_VARIABLES_1(param);
 
-	model = AssimpModel::Create(mLaunchMode, mResourceMng, res::MaterialInstance());
-	BOOST_ASSERT(model);
+	model = CreateInstance<AssimpModel>(mLaunchMode, mResMng, res::MaterialInstance()); BOOST_ASSERT(model);
+#if MIR_GRAPHICS_DEBUG
+	//CoAwait CreatePaint3D(model->mDebugPaint);
+#endif
 	CoReturn true;
 }
 
@@ -119,11 +133,14 @@ CoTask<bool> RenderableFactory::CreateLabel(rend::LabelPtr& label, std::string f
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = MAT_LABEL;
-	if (!CoAwait mResourceMng.CreateMaterial(material, mLaunchMode, loadParam))
+	if (!CoAwait mResMng.CreateMaterial(material, mLaunchMode, loadParam))
 		CoReturn false;
 
 	FontPtr font = mFontCache->GetFont(fontPath, fontSize);
-	label = Label::Create(mLaunchMode, mResourceMng, material, font);
+	label = CreateInstance<Label>(mLaunchMode, mResMng, material, font);
+#if MIR_GRAPHICS_DEBUG
+	CoAwait CreatePaint3D(label->mDebugPaint);
+#endif
 	CoReturn true;
 }
 
@@ -134,7 +151,7 @@ CoTask<bool> RenderableFactory::CreateSkybox(rend::SkyBoxPtr& skybox, std::strin
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SKYBOX);
-	tasks.push_back(mResourceMng.CreateMaterial(material, mLaunchMode, loadParam));
+	tasks.push_back(mResMng.CreateMaterial(material, mLaunchMode, loadParam));
 
 	ITexturePtr mainTexture, lutMap, diffuseEnvMap;
 	if (!imgpath.empty()) {
@@ -144,21 +161,21 @@ CoTask<bool> RenderableFactory::CreateSkybox(rend::SkyBoxPtr& skybox, std::strin
 			boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
 			if (boost::filesystem::exists(specularEnvPath)) {
 				boost::filesystem::path lutPath = dir / "lut.png";
-				tasks.push_back(mResourceMng.CreateTextureByFile(lutMap, mLaunchMode, lutPath.string()));
+				tasks.push_back(mResMng.CreateTextureByFile(lutMap, mLaunchMode, lutPath.string()));
 
 				boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
-				tasks.push_back(mResourceMng.CreateTextureByFile(diffuseEnvMap, mLaunchMode, diffuseEnvPath.string()));
+				tasks.push_back(mResMng.CreateTextureByFile(diffuseEnvMap, mLaunchMode, diffuseEnvPath.string()));
 
-				tasks.push_back(mResourceMng.CreateTextureByFile(mainTexture, mLaunchMode, specularEnvPath.string()));
+				tasks.push_back(mResMng.CreateTextureByFile(mainTexture, mLaunchMode, specularEnvPath.string()));
 			}
 		}
 		else {
-			tasks.push_back(mResourceMng.CreateTextureByFile(mainTexture, mLaunchMode, imgpath));
+			tasks.push_back(mResMng.CreateTextureByFile(mainTexture, mLaunchMode, imgpath));
 		}
 	}
 	CoAwait WhenAll(std::move(tasks));
 
-	skybox = SkyBox::Create(mLaunchMode, mResourceMng, material);
+	skybox = CreateInstance<SkyBox>(mLaunchMode, mResMng, material);
 	skybox->SetLutMap(lutMap);
 	skybox->SetDiffuseEnvMap(diffuseEnvMap);
 	skybox->SetTexture(mainTexture);

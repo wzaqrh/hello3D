@@ -15,16 +15,16 @@ struct SkyboxVertex {
 
 class MIR_CORE_API SkyBox : public RenderableSingleRenderOp
 {
-	INHERIT_RENDERABLE_SINGLE_OP(SkyBox);
-	SkyBox(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
+	typedef RenderableSingleRenderOp Super;
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	SkyBox(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material);
 	void SetDiffuseEnvMap(const ITexturePtr& texture);
 	void SetLutMap(const ITexturePtr& texture);
 public:
 	const ITexturePtr& GetDiffuseEnvMap() const { return mDiffuseEnvMap; }
 	const ITexturePtr& GetLutMap() const { return mLutMap; }
 public:
-	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	ITexturePtr mLutMap, mDiffuseEnvMap;

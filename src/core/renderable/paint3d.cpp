@@ -103,7 +103,7 @@ void LinePaint3D::DrawRectEdge(const Eigen::Vector3f& plb, const Eigen::Vector3f
 
 	Eigen::Vector3f p0 = rot_inv * plb;
 	Eigen::Vector3f p1 = rot_inv * prt;
-	BOOST_ASSERT(fabs(p0.z() - p1.z()) < 1e-4f);
+	BOOST_ASSERT(fabs(p0.z() - p1.z()) < 1e-2f);
 
 	float z0 = p0.z();
 	float x0 = std::min(p0.x(), p1.x());
@@ -124,12 +124,14 @@ void LinePaint3D::DrawRectEdge(const Eigen::Vector3f& plb, const Eigen::Vector3f
 
 void LinePaint3D::DrawAABBEdge(const Eigen::AlignedBox3f& aabb)
 {
-	Eigen::Vector3f p0 = aabb.min();
-	Eigen::Vector3f p1 = aabb.max();
-	DrawRectEdge(p0, Eigen::Vector3f(p1.x(), p1.y(), p0.z()), Eigen::Vector3f(0,0,-1));//front
-	DrawRectEdge(Eigen::Vector3f(p0.x(), p0.y(), p1.z()), p1, Eigen::Vector3f(0,0,1));//back
-	DrawRectEdge(Eigen::Vector3f(p0.x(), p1.y(), p0.z()), p1, Eigen::Vector3f(0,1,0));//up
-	DrawRectEdge(p0, Eigen::Vector3f(p1.x(), p0.y(), p1.z()), Eigen::Vector3f(0,-1,0));//down
+	if (!aabb.isEmpty()) {
+		Eigen::Vector3f p0 = aabb.min();
+		Eigen::Vector3f p1 = aabb.max();
+		DrawRectEdge(p0, Eigen::Vector3f(p1.x(), p1.y(), p0.z()), Eigen::Vector3f(0, 0, -1));//front
+		DrawRectEdge(Eigen::Vector3f(p0.x(), p0.y(), p1.z()), p1, Eigen::Vector3f(0, 0, 1));//back
+		DrawRectEdge(Eigen::Vector3f(p0.x(), p1.y(), p0.z()), p1, Eigen::Vector3f(0, 1, 0));//up
+		DrawRectEdge(p0, Eigen::Vector3f(p1.x(), p0.y(), p1.z()), Eigen::Vector3f(0, -1, 0));//down
+	}
 }
 
 /********** Cube **********/
@@ -137,6 +139,12 @@ Paint3D::Paint3D(Launch launchMode, ResourceManager& resMng, const res::Material
 	: Super(launchMode, resMng, matTri)
 {
 	mLinePaint = CreateInstance<LinePaint3D>(launchMode, resMng, matLine);
+}
+
+void Paint3D::Clear()
+{
+	Super::Clear();
+	mLinePaint->Clear();
 }
 
 void Paint3D::SetColor(unsigned color)

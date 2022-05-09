@@ -122,7 +122,7 @@ public:
 /********** AssimpModel **********/
 CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectResource)
 {
-	if (!CoAwait mResourceMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource))) 
+	if (!CoAwait mResMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource))) 
 		CoReturn false;
 
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
@@ -146,16 +146,16 @@ const std::vector<aiMatrix4x4>& AssimpModel::GetBoneMatrices(const res::AiNodePt
 	aiMatrix4x4 globalInverseMeshTransform = anode.GlobalTransform;
 	globalInverseMeshTransform.Inverse();
 
-	for (size_t a = 0; a < rawMesh->mNumBones; ++a) {
-		const aiBone* rawBone = rawMesh->mBones[a];
+	for (size_t i = 0; i < rawMesh->mNumBones; ++i) {
+		const aiBone* rawBone = rawMesh->mBones[i];
 		res::AiNodePtr boneNode = mAiScene->mBoneNodesByName[rawBone->mName.data];
 		if (boneNode) {
 			auto& boneInfo = mAnimeTree.GetNode(boneNode);// mNodeInfos[boneNode];
 			aiMatrix4x4 currentGlobalTransform = boneInfo.GlobalTransform;
-			mTempBoneMatrices[a] = globalInverseMeshTransform * currentGlobalTransform * rawBone->mOffsetMatrix;
+			mTempBoneMatrices[i] = globalInverseMeshTransform * currentGlobalTransform * rawBone->mOffsetMatrix;
 		}
 		else {
-			mTempBoneMatrices[a] = globalInverseMeshTransform * rawBone->mOffsetMatrix;
+			mTempBoneMatrices[i] = globalInverseMeshTransform * rawBone->mOffsetMatrix;
 		}
 	}
 	return mTempBoneMatrices;
@@ -182,7 +182,7 @@ CoTask<void> AssimpModel::UpdateFrame(float dt)
 {
 	CoAwait Super::UpdateFrame(dt);
 	BOOST_ASSERT(mAiScene->IsLoaded());
-	if (mAiScene == nullptr || !mAiScene->IsLoaded()) return;
+	if (mAiScene == nullptr || !mAiScene->IsLoaded()) CoReturn;
 
 	std::vector<res::AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
@@ -222,6 +222,7 @@ CoTask<void> AssimpModel::UpdateFrame(float dt)
 			iterNode = iterNode->Parent.lock();
 		}
 	}
+	CoReturn;
 }
 
 void AssimpModel::PlayAnim(int Index)
@@ -245,7 +246,7 @@ void AssimpModel::PlayAnim(int Index)
 	}
 }
 
-void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList)
+void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& ops)
 {
 	const auto& meshArr = *node;// mNodeInfos[node];
 	if (meshArr.MeshCount() > 0) {
@@ -297,13 +298,13 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opLis
 				op.AddVertexBuffer(mesh->GetVBOSkeleton());
 				op.Material = matInst;
 				op.CameraMask = mCameraMask;
-				opList.AddOP(op);
+				ops.AddOP(op);
 			}
 		}
 	}
 
 	for (int i = 0; i < node->Children.size(); i++)
-		DoDraw(node->Children[i], opList);
+		DoDraw(node->Children[i], ops);
 }
 
 void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)

@@ -10,10 +10,11 @@ namespace rend {
 
 class MIR_CORE_API Mesh : public RenderableSingleRenderOp 
 {
-	INHERIT_RENDERABLE_SINGLE_OP(Mesh);
-	Mesh(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material, int vertCount = 1024, int indexCount = 1024);
+	typedef RenderableSingleRenderOp Super;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	Mesh(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material, int vertCount = 1024, int indexCount = 1024);
+
 	void Clear();
 	void SetVertexs(const vbSurface* vertData, int vertCount);
 	void SetVertexs(const vbSurface* vertData, int vertCount, int vertPos);

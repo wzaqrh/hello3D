@@ -11,11 +11,10 @@ namespace rend {
 
 class MIR_CORE_API Sprite : public RenderableSingleRenderOp
 {
-	friend class RenderPipeline;
-	INHERIT_RENDERABLE_SINGLE_OP(Sprite);
+	typedef RenderableSingleRenderOp Super;
 public:
-	Sprite(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	Sprite(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
 	void SetTexture(const ITexturePtr& Texture) override;
 	void SetPosition(const Eigen::Vector3f& pos);
 	void SetAnchor(const Eigen::Vector3f& anchor);

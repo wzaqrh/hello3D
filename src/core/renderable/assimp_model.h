@@ -53,9 +53,11 @@ public:
 
 class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp 
 {
-	INHERIT_RENDERABLE_SINGLE_OP_CONSTRUCTOR(AssimpModel);
+	typedef RenderableSingleRenderOp Super;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	AssimpModel(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matInst) :Super(launchMode, resMng, matInst) {}
+	
 	CoTask<bool> LoadModel(std::string assetPath, std::string redirectResource = "");
 	void PlayAnim(int Index);
 

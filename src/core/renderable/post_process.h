@@ -23,9 +23,10 @@ public:
 };
 class MIR_CORE_API PostProcess : public RenderableSingleRenderOp 
 {
-	INHERIT_RENDERABLE_SINGLE_OP(PostProcess);
-	PostProcess(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material);
+	typedef RenderableSingleRenderOp Super;
 public:
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	PostProcess(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material);
 	void GenRenderOperation(RenderOperationQueue& ops) override;
 };
 

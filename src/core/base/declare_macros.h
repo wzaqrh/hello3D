@@ -6,12 +6,6 @@
 #define TemplateArgs template <typename... T>
 #define TemplateT template <typename T>
 
-#define DECLARE_STATIC_CREATE_CONSTRUCTOR(CLASS) \
-	template <typename... T> static std::shared_ptr<CLASS> \
-	Create(T &&...args) { return std::shared_ptr<CLASS>(new CLASS(std::forward<T>(args)...)); }
-
-#define DECLARE_STATIC_TASK_CREATE_CONSTRUCTOR(CLASS, P1, P2, P3) DECLARE_STATIC_CREATE_CONSTRUCTOR(CLASS);
-
 #define DECLARE_COTASK_FUNCTIONS(RETURN_TYPE, CREATE_FUNC, ...) \
 	TemplateArgs RETURN_TYPE CREATE_FUNC##ITV/*InTaskVector*/(CoTaskVector& tasks, T &&...args) ##__VA_ARGS__ { \
 		RETURN_TYPE result; \
