@@ -9,7 +9,7 @@
 
 namespace mir {
 
-class MIR_CORE_API SceneManager : boost::noncopyable 
+class MIR_CORE_API SceneManager : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
@@ -49,16 +49,16 @@ public:
 		AddRendNode(rend);
 		return rend;
 	}
-	template<typename RendClass> const std::shared_ptr<RendClass>& AddRendNode(const std::shared_ptr<RendClass>& rend) { AddRendNode(std::static_pointer_cast<Renderable>(rend)); return std::static_pointer_cast<RendClass>(rend); }
+	template<typename RendClass> const std::shared_ptr<RendClass>& AddRendNode(std::shared_ptr<RendClass> rend) { AddRendNode(std::static_pointer_cast<Renderable>(rend)); return std::static_pointer_cast<RendClass>(rend); }
 	RenderablePtr AddRendNode(RenderablePtr rend);
 public:
 	Eigen::AlignedBox3f GetWorldAABB() const;
 
 	const std::vector<scene::CameraPtr>& GetCameras() const { return mCameras; }
-	scene::CameraPtr GetDefCamera() const { return GetCameras().size() ? GetCameras()[0] : nullptr;  }
+	scene::CameraPtr GetDefCamera() const { return GetCameras().size() ? GetCameras()[0] : nullptr; }
 
 	const std::vector<scene::LightPtr>& GetLights() const { return mLights; }
-	scene::LightPtr GetDefLight() const { return GetLights().size() ? GetLights()[0] : nullptr;  } 
+	scene::LightPtr GetDefLight() const { return GetLights().size() ? GetLights()[0] : nullptr; }
 
 	const scene::LightFactoryPtr& GetLightFac() const { return mLightFac; }
 	const scene::CameraFactoryPtr& GetCameraFac() const { return mCameraFac; }
@@ -71,7 +71,7 @@ public:
 	void GenRenderOperation(RenderOperationQueue& opQue);
 private:
 	ResourceManager& mResMng;
-	
+
 	scene::LightFactoryPtr mLightFac;
 	scene::CameraFactoryPtr mCameraFac;
 	SceneNodeFactoryPtr mNodeFac;
@@ -82,6 +82,9 @@ private:
 	std::vector<scene::CameraPtr> mCameras;
 	std::vector<scene::LightPtr> mLights;
 	bool mRendsDirty, mCamerasDirty, mLightsDirty;
+#if MIR_GRAPHICS_DEBUG
+	rend::Paint3DPtr mDebugPaint;
+#endif
 };
 
 };

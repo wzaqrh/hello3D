@@ -3,6 +3,7 @@
 #include "core/scene/light.h"
 #include "core/scene/transform.h"
 #include "core/resource/resource_manager.h"
+#include "core/renderable/paint3d.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
 #include "core/rendersys/render_pipeline.h"
@@ -113,14 +114,25 @@ CoTask<void> SceneManager::UpdateFrame(float dt)
 	Eigen::AlignedBox3f aabb = this->GetWorldAABB();
 	for (auto& light : mLights)
 		light->UpdateLightCamera(aabb);
+
+#if MIR_GRAPHICS_DEBUG
+	if (mDebugPaint == nullptr) mDebugPaint = CoAwait mRendFac->CreatePaint3DT();
+	mDebugPaint->SetColor(0xFF00FF00);
+	mDebugPaint->Clear();
+	mDebugPaint->DrawAABBEdge(aabb);
+#endif
 }
 
 void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
 {
 	for (auto& node : mNodes) {
-		if (RenderablePtr rend = node->GetComponent<Renderable>())
+		if (RenderablePtr rend = node->GetComponent<Renderable>()) {
 			rend->GenRenderOperation(opQue);
+		}
 	}
+#if MIR_GRAPHICS_DEBUG
+	if (mDebugPaint) mDebugPaint->GenRenderOperation(opQue);
+#endif
 }
 
 Eigen::AlignedBox3f SceneManager::GetWorldAABB() const
