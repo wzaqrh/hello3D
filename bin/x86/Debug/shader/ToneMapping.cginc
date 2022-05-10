@@ -1,7 +1,7 @@
 #ifndef TONE_MAPPING_H
 #define TONE_MAPPING_H
-#include "Standard.cginc"
 #include "Macros.cginc"
+#include "Standard.cginc"
 
 #define GAMMA 2.2
 #define INV_GAMMA (1.0 / GAMMA)

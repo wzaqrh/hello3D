@@ -2,7 +2,7 @@
 #include "Skeleton.cginc"
 #include "CommonFunction.cginc"
 #include "Lighting.cginc"
-#include "LightingPbr.cginc"
+#include "Lighting.cginc"
 #include "ToneMapping.cginc"
 #include "Macros.cginc"
 

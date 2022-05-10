@@ -1,0 +1,30 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<Macros>
+	</Macros>
+	<Properties>
+		<EnableAlbedoMap>1</EnableAlbedoMap>
+		<AlbedoMapSRGB>0</AlbedoMapSRGB>
+		<txAlbedo>Intergalactic Spaceship_color_4.png</txAlbedo>
+		
+		<EnableNormalMap>1</EnableNormalMap>
+		<HasTangent>1</HasTangent>
+		<txNormal>Intergalactic Spaceship_nmap_2_Tris.png</txNormal>
+		
+		<EnableMetalnessMap>1</EnableMetalnessMap>
+		<txMetalness>Intergalactic Spaceship_metalness.png</txMetalness>
+		
+		<EnableRoughnessMap>0</EnableRoughnessMap>
+		<txRoughness>Intergalactic Spaceship_rough.png</txRoughness>
+		
+		<AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>0</AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>
+		
+		<EnableAmbientOcclusionMap>0</EnableAmbientOcclusionMap>
+		<OcclusionStrength>0</OcclusionStrength>
+		<txAmbientOcclusion>Intergalactic Spaceship Ao_Blender.png</txAmbientOcclusion>
+		
+		<EnableEmissiveMap>0</EnableEmissiveMap>
+		<EmissiveMapSRGB>1</EmissiveMapSRGB>
+		<EmissiveFactor>0,0,0</EmissiveFactor>
+	</Properties>
+</Material>

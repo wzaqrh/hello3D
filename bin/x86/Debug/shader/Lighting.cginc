@@ -2,6 +2,8 @@
 #define LIGHTING_H
 #include "Standard.cginc"
 #include "CommonFunction.cginc"
+#include "UnityLighting.cginc"
+#include "GltfLighting.cginc"
 
 inline float3 MirLambertLight(float3 toLight, float3 normal, float3 albedo, bool spotLight)
 {

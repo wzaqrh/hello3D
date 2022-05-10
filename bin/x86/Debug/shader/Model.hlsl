@@ -3,7 +3,7 @@
 #include "CommonFunction.cginc"
 #include "Shadow.cginc"
 #include "Lighting.cginc"
-#include "LightingPbr.cginc"
+#include "Lighting.cginc"
 #include "ToneMapping.cginc"
 #include "Macros.cginc"
 
@@ -228,17 +228,17 @@ float4 PS(PixelInput input) : SV_Target
 #elif PBR_MODE == PBR_GLTF
 	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
 	float3 emissive = GetEmissive(input.Tex);
-	finalColor.rgb = gltfPbrLight(toLight, normal, toEye, albedo.rgb, aorm, emissive);
+	finalColor.rgb = GltfPbrLight(toLight, normal, toEye, albedo.rgb, aorm, emissive);
 #endif
     finalColor.a = 1.0;
 
 #if ENABLE_SHADOW_MAP
 	//float depth = length(unity_LightPosition.xyz - input.SurfPos.xyz * unity_LightPosition.w);
-	finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
+	//finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
 #endif
 	
 	//finalColor.xyz = albedo.xyz;
-	//finalColor.xyz = input.Normal;
+	finalColor.xyz = input.Normal;
 	//finalColor.xyz = normal * 0.5 + 0.5;
 	//finalColor.xyz = toEye;
 	//finalColor.xyz = toLight;
@@ -478,7 +478,7 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 #elif PBR_MODE == PBR_UNITY
 	output.Color.rgb = UnityPbrLight(toLight, normal.xyz, toEye, albedo.xyz, aorm);
 #elif PBR_MODE == PBR_GLTF
-	output.Color.rgb = gltfPbrLight(toLight, normal.xyz, toEye, albedo.rgb, aorm, emissive.xyz);
+	output.Color.rgb = GltfPbrLight(toLight, normal.xyz, toEye, albedo.rgb, aorm, emissive.xyz);
 #endif
 	output.Color.a = 1.0;
 	

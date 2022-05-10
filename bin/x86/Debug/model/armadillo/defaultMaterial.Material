@@ -1,0 +1,26 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<Macros>
+	</Macros>
+	<Properties>
+		<txAlbedo>textures/DefaultMaterial_baseColor.png</txAlbedo>
+		<txNormal>textures/DefaultMaterial_normal.png</txNormal>
+		<txAmbientOcclusion>textures/DefaultMaterial_metallicRoughness.png</txAmbientOcclusion>
+		
+		<EmissiveFactor>0,0,0</EmissiveFactor>
+		<EnableEmissiveMap>0</EnableEmissiveMap>
+		<EmissiveMapSRGB>1</EmissiveMapSRGB>
+		
+		<EnableAlbedoMap>1</EnableAlbedoMap>
+		<AlbedoMapSRGB>1</AlbedoMapSRGB>
+		
+		<EnableNormalMap>1</EnableNormalMap>
+		<HasTangent>1</HasTangent>
+		
+		<EnableAmbientOcclusionMap>0</EnableAmbientOcclusionMap>
+		<OcclusionStrength>0</OcclusionStrength>
+		<EnableRoughnessMap>0</EnableRoughnessMap>
+		<EnableMetalnessMap>0</EnableMetalnessMap>
+		<AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>1</AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>
+	</Properties>
+</Material>

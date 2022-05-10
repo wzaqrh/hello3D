@@ -66,7 +66,7 @@
 #define PBR_UNITY 1
 #define PBR_GLTF 2
 #if !defined PBR_MODE
-#define PBR_MODE 2/*PBR_GLTF*/
+#define PBR_MODE 1/*PBR_UNITY*/
 #endif
 
 #if !defined CubeMapIsRightHandness

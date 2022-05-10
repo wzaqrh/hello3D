@@ -221,14 +221,15 @@
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
+    <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc" />
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />
+    <None Include="..\bin\x86\Debug\shader\GltfLighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />
     <None Include="..\bin\x86\Debug\shader\IBL.cginc" />
     <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader" />
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
-    <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
@@ -241,6 +242,7 @@
     <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
     <None Include="..\bin\x86\Debug\shader\Standard.Shader" />
     <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc" />
+    <None Include="..\bin\x86\Debug\shader\UnityLighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\VarianceShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc" />
   </ItemGroup>

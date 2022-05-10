@@ -1,0 +1,26 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<Macros>
+	</Macros>
+	<Properties>
+		<txAlbedo>textures/pavimento_baseColor.png</txAlbedo>
+		<txAmbientOcclusion>textures/pavimento_metallicRoughness.png</txAmbientOcclusion>
+		<txNormal>textures/pavimento_normal.png</txNormal>
+		
+		<EmissiveFactor>0,0,0</EmissiveFactor>
+		<EnableEmissiveMap>0</EnableEmissiveMap>
+		<EmissiveMapSRGB>1</EmissiveMapSRGB>
+		
+		<EnableAlbedoMap>0</EnableAlbedoMap>
+		<AlbedoMapSRGB>1</AlbedoMapSRGB>
+		
+		<EnableNormalMap>0</EnableNormalMap>
+		<HasTangent>1</HasTangent>
+		
+		<OcclusionStrength>0</OcclusionStrength>
+		<RoughnessFactor>0.9</RoughnessFactor>
+		<MetallicFactor>0</MetallicFactor>
+		<EnableAmbientOcclusionMap>0</EnableAmbientOcclusionMap>
+		<AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>0</AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>
+	</Properties>
+</Material>

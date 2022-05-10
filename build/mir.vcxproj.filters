@@ -511,9 +511,6 @@
     <None Include="..\bin\x86\Debug\shader\Standard.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
-    <None Include="..\bin\x86\Debug\shader\LightingPbr.cginc">
-      <Filter>src\shader\inc</Filter>
-    </None>
     <None Include="..\bin\x86\Debug\shader\IBL.cginc">
       <Filter>src\shader\inc</Filter>
     </None>
@@ -579,6 +576,15 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\Bloom.hlsl">
       <Filter>src\shader</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\UnityLighting.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc">
+      <Filter>src\shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\GltfLighting.cginc">
+      <Filter>src\shader\inc</Filter>
     </None>
   </ItemGroup>
 </Project>
