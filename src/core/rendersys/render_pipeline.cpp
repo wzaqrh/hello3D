@@ -226,10 +226,22 @@ public:
 			RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_PREPASS_FINAL, false, &ops);
 		}
 	}
+	//LIGHTMODE_TRANSPARENT
+	void RenderTransparent() {
+		auto depth_state = mStatesBlock.LockDepth();
+		auto blend_state = mStatesBlock.LockBlend();
+
+		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+		blend_state(BlendState::MakeAlphaNonPremultiplied());
+
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_TRANSPARENT);
+	}
+	//LIGHTMODE_SKYBOX
 	void RenderSkybox()
 	{
 		auto skybox = Camera.GetSkyBox();
 		if (skybox == nullptr) return;
+
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
@@ -245,18 +257,18 @@ public:
 				op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(*mPerFrame));
 				op.WrMaterial().FlushGpuParameters(mRenderSys);
 
-				RenderOp(op, LIGHTMODE_FORWARD_BASE);
+				RenderOp(op, LIGHTMODE_SKYBOX);
 			}
 		}
 	}
 	//LIGHTMODE_OVERLAY
 	void RenderOverlay()
 	{
-		auto blend_state = mStatesBlock.LockBlend();
 		auto depth_state = mStatesBlock.LockDepth();
-
-		blend_state(BlendState::MakeAlphaNonPremultiplied());
+		auto blend_state = mStatesBlock.LockBlend();
+		
 		depth_state(DepthState::MakeFor3D(false));
+		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
 		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY);
 	}
@@ -449,6 +461,7 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const 
 	CameraRender render(*this, ops, camera, lights);
 	render.RenderCastShadow();
 	render.RenderForward();
+	render.RenderTransparent();
 	render.RenderSkybox();
 	render.RenderOverlay();
 
@@ -471,6 +484,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const
 	CameraRender render(*this, ops, camera, lights);
 	render.RenderCastShadow();
 	render.RenderPrepass();
+	render.RenderTransparent();
 	render.RenderSkybox();
 	render.RenderOverlay();
 

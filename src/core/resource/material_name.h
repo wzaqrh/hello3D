@@ -18,4 +18,6 @@
 #define LIGHTMODE_POSTPROCESS "PostProcess"
 #define LIGHTMODE_PREPASS_BASE "PrepassBase"
 #define LIGHTMODE_PREPASS_FINAL "PrepassFinal"
+#define LIGHTMODE_TRANSPARENT "Transparent"
+#define LIGHTMODE_SKYBOX "Skybox"
 #define LIGHTMODE_OVERLAY "Overlay"

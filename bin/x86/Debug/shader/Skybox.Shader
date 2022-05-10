@@ -16,6 +16,7 @@
 	
 	<SubShader>
 		<Pass>
+			<Tags> <LightMode>Skybox</LightMode> </Tags>
 			<PROGRAM> <PixelEntry>PS</PixelEntry> </PROGRAM>
 		</Pass>
 	</SubShader>

@@ -1,5 +1,5 @@
 <Material>
-	<UseShader>LayerColor</UseShader>
+	<UseShader>Paint3D</UseShader>
 	<Macros>
 	</Macros>
 	<Properties>
