@@ -22,6 +22,7 @@ public:
 	void Build(Launch launchMode, ResourceManager& resourceMng);
 public:
 	bool IsLoaded() const;
+	void SetMaterial(const MaterialInstance& mat) { mMaterial = mat; }
 	const MaterialInstance& GetMaterial() const { return mMaterial; }
 	const TextureVector& GetTextures() const { return mMaterial->GetTextures(); }
 	const aiMesh* GetRawMesh() const { return mAiMesh; }

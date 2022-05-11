@@ -43,6 +43,7 @@ public:
 				mAttrByName.clear();
 				mUniformByName.clear();
 				mSamplerSetByName.clear();
+				mIncludeFiles.Clear();
 				return true;
 			}
 		}
@@ -111,6 +112,51 @@ private:
 			return &Node;
 		}
 	};
+
+	struct IncludeFiles {
+		void Clear() {
+			mDic.clear();
+		}
+		void GetFileDependecies(const std::string& shadername, MaterialProperty::SourceFilesDependency& cgincs) {
+			boost_filesystem::path filepath = boost_filesystem::system_complete("shader/" + shadername + ".hlsl");
+			const auto& incs = GetFileIncludes(filepath);
+			for (const auto& it : incs)
+				cgincs.AddShader(it);
+		}
+		const std::set<MaterialProperty::SingleFileDependency>& GetFileIncludes(const boost_filesystem::path& filepath) {
+			std::string pathstr = filepath.string();
+			auto find_iter = mDic.find(pathstr);
+			if (find_iter == mDic.end()) {
+				std::set<MaterialProperty::SingleFileDependency> includes;
+				bool exist = boost_filesystem::is_regular_file(filepath);
+				includes.insert(MaterialProperty::SingleFileDependency{ pathstr, exist ? boost::filesystem::last_write_time(filepath) : 0 });
+
+				if (exist) {
+					std::ifstream fs;
+					fs.open(pathstr, std::ios::in);
+					std::string line;
+					const std::regex exp_regex("#include\\s+\"([a-zA-Z0-9_\\.]+)\".*");
+					while (fs.peek() != EOF) {
+						std::getline(fs, line);
+						std::smatch exp_match;
+						if (std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
+							std::string incname = exp_match[1].str();
+							boost_filesystem::path incpath = boost_filesystem::system_complete("shader/" + incname);
+							const auto& incincs = GetFileIncludes(incpath);
+							for (const auto& it : incincs)
+								includes.insert(it);
+						}
+					}
+					fs.close();
+				}
+
+				mDic.insert(std::make_pair(pathstr, std::move(includes)));
+				find_iter = mDic.find(pathstr);
+			}
+			return find_iter->second;
+		}
+		std::map<std::string, std::set<MaterialProperty::SingleFileDependency>> mDic;
+	};
 private:
 	ShaderNode& VisitInclude(const std::string& shaderName) {
 		auto find_iter = mIncludeByName.find(shaderName);
@@ -130,7 +176,7 @@ private:
 			std::ifstream fs;
 			fs.open(path.string(), std::ios::in);
 			std::string line;
-			const std::regex exp_regex("#define\\s+([a-zA-Z0-9_]+)\\s+([0-9]+).*");
+			const std::regex exp_regex(R"(#define\s+([a-zA-Z0-9_]+)\s+([0-9]+).*)");
 			while (fs.peek() != EOF) {
 				std::getline(fs, line);
 				std::smatch exp_match;
@@ -493,7 +539,6 @@ private:
 			++index;
 		}
 	}
-
 	void VisitCategory(const PropertyTreePath& nodeCategory, ConstVisitorRef vis, CategoryNode& categNode) {
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeCategory->equal_range("PROGRAM"))) {
@@ -520,10 +565,13 @@ private:
 			shaderNode.DependShaders.Merge(incShader.DependShaders);
 		}
 		VisitCategory(nodeShader, vis, shaderNode[0]);
+		mIncludeFiles.GetFileDependecies(shaderNode[0].Program.VertexSCD.SourcePath, shaderNode.DependShaders);
 
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Category"))) {
-			VisitCategory(PropertyTreePath(nodeShader, it.second, index++), vis, shaderNode.Emplace());
+			auto& categNode = shaderNode.Emplace();
+			VisitCategory(PropertyTreePath(nodeShader, it.second, index++), vis, categNode);
+			mIncludeFiles.GetFileDependecies(categNode.Program.VertexSCD.SourcePath, shaderNode.DependShaders);
 		}
 	}
 	
@@ -587,6 +635,7 @@ private:
 	std::map<std::string, AttributeNode> mAttrByName;
 	std::map<std::string, UniformNode> mUniformByName;
 	std::map<std::string, SamplerNode> mSamplerSetByName;
+	IncludeFiles mIncludeFiles;
 };
 
 class MaterialNodeManager {

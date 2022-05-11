@@ -59,6 +59,7 @@ public:
 	
 	const AssimpMeshPtr& operator[](size_t index) const { return Meshes[index]; }
 	size_t MeshCount() const { return Meshes.size(); }
+	std::vector<AssimpMeshPtr>& GetMeshes() { return Meshes; }
 public:
 	const size_t SerilizeIndex;
 	const aiNode* RawNode;

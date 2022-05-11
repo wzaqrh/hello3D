@@ -78,8 +78,10 @@ CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, int interval)
 CoTask<void> ResourceManager::UpdateFrame(float dt) ThreadSafe
 {
 #if MIR_MATERIAL_HOTLOAD
-	if (mMaterialFac.PurgeOutOfDates())
+	if (mMaterialFac.PurgeOutOfDates()) {
 		mMaterialByName.Clear();
+		mProgramByKey.Clear();
+	}	 
 #endif
 	CoReturn;
 }

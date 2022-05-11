@@ -64,7 +64,7 @@ private:
 		#define IMPORT_LEFTHAND
 			constexpr uint32_t ImportFlags =
 			#if defined IMPORT_LEFTHAND
-				aiProcess_ConvertToLeftHanded |
+				//aiProcess_ConvertToLeftHanded |
 			#endif
 				aiProcess_Triangulate |
 				aiProcess_CalcTangentSpace |

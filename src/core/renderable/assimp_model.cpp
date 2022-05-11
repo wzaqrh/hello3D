@@ -184,6 +184,17 @@ CoTask<void> AssimpModel::UpdateFrame(float dt)
 	BOOST_ASSERT(mAiScene->IsLoaded());
 	if (mAiScene == nullptr || !mAiScene->IsLoaded()) CoReturn;
 
+#if MIR_MATERIAL_HOTLOAD
+	for (auto& node : mAiScene->GetSerializeNodes()) {
+		for (auto& mesh : node->GetMeshes()) {
+			auto material = mesh->GetMaterial();
+			if (material->IsOutOfDate()) {
+				mesh->SetMaterial(CoAwait mResMng.CreateMaterialT(mLaunchMode, material->GetLoadParam()));
+			}
+		}
+	}
+#endif
+
 	std::vector<res::AiNodePtr> nodeVec;
 	if (mCurrentAnimIndex < 0 || mCurrentAnimIndex >= mAiScene->mScene->mNumAnimations) {
 		std::queue<res::AiNodePtr> nodeQue;
