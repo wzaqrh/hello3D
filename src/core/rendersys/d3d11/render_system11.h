@@ -51,6 +51,10 @@ public:
 	void SetBlendState(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
+	void SetCullMode(CullMode cullMode) override;
+	void SetFillMode(FillMode fillMode) override;
+	void SetDepthBias(const DepthBias& bias) override;
+
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
@@ -66,7 +70,9 @@ private:
 	bool _CreateDeviceAndSwapChain(int width, int height);
 	bool _FetchBackFrameBufferColor(int width, int height);
 	bool _FetchBackBufferZStencil(int width, int height);
-	bool _SetRasterizerState(); 
+	bool _SetBlendState(const BlendState& blendFunc);
+	bool _SetDepthState(const DepthState& depthState);
+	bool _SetRasterizerState(const RasterizerState& rasterState); 
 	bool IsCurrentInMainThread() const;
 private:
 	HWND mHWnd = NULL;
@@ -75,9 +81,9 @@ private:
 	ID3D11DeviceContext* mDeviceContext = NULL;
 	IDXGISwapChain* mSwapChain = NULL;
 	
-	ID3D11DepthStencilState* mDepthStencilState = NULL;
-	ID3D11BlendState* mBlendState = NULL;
-
+	std::map<DepthState, ID3D11DepthStencilState*> mDxDSStates;
+	std::map<BlendState, ID3D11BlendState*> mDxBlendStates;
+	std::map<RasterizerState, ID3D11RasterizerState*> mDxRasterStates;
 	FrameBuffer11Ptr mBackFrameBuffer, mCurFrameBuffer;
 
 	std::thread::id mMainThreadId;

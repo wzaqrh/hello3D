@@ -190,7 +190,12 @@ private:
 		}
 		return result;
 	}
-	static void ParseProgramMacrosTopo(const boost_property_tree::ptree& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {//no_override
+	static void SplitString(std::vector<std::string>& strArr, const std::string& str, const std::string& strAny) {
+		strArr.clear();
+		boost::split(strArr, str, boost::is_any_of(strAny), boost::token_compress_on);
+		if (strArr.back().empty()) strArr.pop_back();
+	}
+	static void ParseProgram(const boost_property_tree::ptree& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {//no_override
 		if (!vis.CheckCondition(progNode, nodeProgram))
 			return;
 
@@ -200,8 +205,6 @@ private:
 				ParseMacrosFile(refName, vis);
 			}
 		}
-
-		progNode.Topo = static_cast<PrimitiveTopology>(vis.ConditionGetValue<int>(progNode, nodeProgram, "Topology", progNode.Topo));
 
 		auto& vertexScd = progNode.VertexSCD;
 		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
@@ -217,6 +220,48 @@ private:
 			for (auto& it : node_macros) {
 				vertexScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
 				pixelScd.AddMacro<true>(ShaderCompileMacro{ it.first, it.second.data() });
+			}
+		}
+
+		{
+			progNode.Topo = static_cast<PrimitiveTopology>(vis.ConditionGetValue<int>(progNode, nodeProgram, "Topology", progNode.Topo));
+			
+			std::string strBlendFunc = nodeProgram.get<std::string>("BlendFunc", "");
+			if (!strBlendFunc.empty()) {
+				std::vector<std::string> strs;
+				SplitString(strs, strBlendFunc, ",");
+				if (strs.size() >= 2) {
+					progNode.Blend = BlendState::Make((BlendFunc)std::stoi(strs[0]), (BlendFunc)std::stoi(strs[1]));
+				}
+			}
+
+			std::string strDepthBias = nodeProgram.get<std::string>("DepthBias", "");
+			if (!strDepthBias.empty()) {
+				std::vector<std::string> strs;
+				SplitString(strs, strDepthBias, ",");
+				if (strs.size() >= 2) {
+					progNode.DepthBias = DepthBias::Make(std::stof(strs[0]), std::stof(strs[1]));
+				}
+			}
+
+			std::string strDepthEnable = nodeProgram.get<std::string>("DepthEnable", "");
+			std::string strDepthFunc = nodeProgram.get<std::string>("DepthFunc", "");
+			std::string strDepthWriteMask = nodeProgram.get<std::string>("DepthWriteMask", "");
+		#define STOI(S, TYPE, DEF) IF_AND_OR(!S.empty(), TYPE(std::stoi(S)), DEF)
+			if (!strDepthEnable.empty() || !strDepthFunc.empty() || !strDepthWriteMask.empty()) {
+				progNode.Depth = DepthState::Make(STOI(strDepthFunc, CompareFunc, kCompareLess),
+					STOI(strDepthWriteMask, DepthWriteMask, kDepthWriteMaskAll),
+					STOI(strDepthEnable, bool, true));
+			}
+
+			std::string strFillMode = nodeProgram.get<std::string>("FillMode", "");
+			if (!strFillMode.empty()) {
+				progNode.Fill = (FillMode)std::stoi(strFillMode);
+			}
+
+			std::string strCullMode = nodeProgram.get<std::string>("CullMode", "");
+			if (!strCullMode.empty()) {
+				progNode.Cull = (CullMode)std::stoi(strCullMode);
 			}
 		}
 	}
@@ -401,7 +446,7 @@ private:
 		}
 	}
 	void VisitProgram(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
-		ParseProgramMacrosTopo(nodeProgram.Node, vis, progNode);
+		ParseProgram(nodeProgram.Node, vis, progNode);
 		VisitAttributes(nodeProgram, vis, progNode);
 		VisitSamplers(nodeProgram, vis, progNode);
 		VisitUniforms(nodeProgram, vis, progNode);
@@ -462,11 +507,6 @@ private:
 			return ! Name.empty();
 		}
 	public:
-		static void SplitString(std::vector<std::string>& strArr, const std::string& str, const std::string& strAny) {
-			strArr.clear();
-			boost::split(strArr, str, boost::is_any_of(strAny), boost::token_compress_on);
-			if (strArr.back().empty()) strArr.pop_back();
-		}
 		template<class T> T Get(const std::string& key, T defValue) {}
 		template<> float Get<float>(const std::string& key, float defValue) {
 			auto& values = Dic[key];
@@ -513,10 +553,16 @@ private:
 
 				pass.Program = categNode.Program;
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("PROGRAM"))) {
-					ParseProgramMacrosTopo(it.second, vis, pass.Program);
+					ParseProgram(it.second, vis, pass.Program);
 				}
-				pprop.TopoLogy = pass.Program.Topo;
-				pprop.Relate2Parameter = pass.Program.Relate2Parameter;
+				auto& passProg = pass.Program;
+				pprop.TopoLogy = passProg.Topo;
+				pprop.Blend = passProg.Blend;
+				pprop.Depth = passProg.Depth;
+				pprop.Fill = passProg.Fill;
+				pprop.Cull = passProg.Cull;
+				pprop.DepthBias = passProg.DepthBias;
+				pprop.Relate2Parameter = passProg.Relate2Parameter;
 
 				GrabString grabStr;
 				if (grabStr.Parse(MakeLoopVarName(node_pass.get<std::string>("GrabPass", ""), i, repeat))) {

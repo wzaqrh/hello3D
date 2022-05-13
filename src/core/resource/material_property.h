@@ -14,7 +14,12 @@ public:
 public:
 	std::string LightMode, Name, ShortName;
 	PrimitiveTopology TopoLogy;
-	
+	std::optional<BlendState> Blend;
+	std::optional<DepthState> Depth;
+	std::optional<FillMode> Fill;
+	std::optional<CullMode> Cull;
+	std::optional<DepthBias> DepthBias;
+
 	struct GrabOutput {
 		operator bool() const { return !Name.empty(); }
 		std::string Name;

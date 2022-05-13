@@ -40,7 +40,8 @@ void LightCamera::Update(const Eigen::AlignedBox3f& sceneAABB)
 	BOOST_ASSERT(FrustumWidth >= 0 && FrustumHeight >= 0);
 
 	FrustumZNear = frustum.min().z();
-	FrustumZFar = __max(frustum.max().z(), 32);
+	//FrustumZFar = __max(frustum.max().z(), 32);
+	FrustumZFar = floor(frustum.max().z());
 
 	if (IsSpotLight) ShadowCasterProj = math::cam::MakePerspectiveLH(FrustumWidth, FrustumHeight, FrustumZNear, FrustumZFar);
 	else ShadowCasterProj = math::cam::MakeOrthographicOffCenterLH(-FrustumWidth * 0.5f, FrustumWidth * 0.5f, -FrustumHeight * 0.5f, FrustumHeight * 0.5f, FrustumZNear, FrustumZFar);

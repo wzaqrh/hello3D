@@ -47,6 +47,12 @@
 		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>
+		
+		<FillMode>3</FillMode>
+		<CullMode>3</CullMode>
+		<DepthEnable>1</DepthEnable>
+		<DepthFunc>4</DepthFunc>
+		<DepthWriteMask>1</DepthWriteMask>
 	</PROGRAM>
 	
 	<SubShader>

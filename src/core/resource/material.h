@@ -28,11 +28,17 @@ public:
 	IProgramPtr GetProgram() const { return mProgram; }
 	std::vector<ISamplerStatePtr> GetSamplers() const { return mSamplers; }
 
-	PrimitiveTopology GetTopoLogy() const { return mProperty->TopoLogy; }
 	const std::string& GetLightMode() const { return mProperty->LightMode; }
 	const PassProperty::GrabInput& GetGrabIn() const { return mProperty->GrabIn; }
 	const PassProperty::GrabOutput& GetGrabOut() const { return mProperty->GrabOut; }
 	const PassProperty::ParameterRelation& GetRelateToParam() const { return mProperty->Relate2Parameter; }
+
+	PrimitiveTopology GetTopoLogy() const { return mProperty->TopoLogy; }
+	const std::optional<BlendState>& GetBlend() const { return mProperty->Blend; }
+	const std::optional<DepthState>& GetDepth() const { return mProperty->Depth; }
+	const std::optional<FillMode>& GetFill() const { return mProperty->Fill; }
+	const std::optional<CullMode>& GetCull() const { return mProperty->Cull; }
+	const std::optional<DepthBias>& GetDepthBias() const { return mProperty->DepthBias; }
 private:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;

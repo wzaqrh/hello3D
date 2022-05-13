@@ -47,6 +47,59 @@ private:
 	std::function<void(IFrameBufferPtr)> mCurrentCb;
 };
 
+struct RasterizerStateBlock {
+	struct Lock : boost::noncopyable {
+		Lock(RasterizerStateBlock& block) :mBlock(block), mState(block.Get()) {}
+		Lock(RasterizerStateBlock& block, const RasterizerState& state) :mBlock(block), mState(state) { block.Set(state); }
+		Lock(Lock&& other) :mBlock(other.mBlock), mState(other.mState) { other.mOwn = false; }
+		~Lock() { if (mOwn) mBlock.Set(mState); }
+		Lock& operator=(Lock&& other) = delete;
+		RasterizerStateBlock* operator->() { return &mBlock; }
+		void operator()(CullMode mode) { mBlock.Set(mode); }
+		void operator()(FillMode mode) { mBlock.Set(mode); }
+		void operator()(const DepthBias& bias) { mBlock.Set(bias); }
+	private:
+		RasterizerState mState;
+		RasterizerStateBlock& mBlock;
+		bool mOwn = true;
+	};
+public:
+	RasterizerStateBlock(RenderSystem& renderSys) :mRenderSys(renderSys) {
+		mCurrent.CullMode = mRenderSys.GetCullMode();
+		mCurrent.FillMode = mRenderSys.GetFillMode();
+	}
+	void Set(CullMode mode) {
+		if (mCurrent.CullMode != mode) {
+			mCurrent.CullMode = mode;
+			mRenderSys.SetCullMode(mode);
+		}
+	}
+	void Set(FillMode mode) {
+		if (mCurrent.FillMode != mode) {
+			mCurrent.FillMode = mode;
+			mRenderSys.SetFillMode(mode);
+		}
+	}
+	void Set(const DepthBias& bias) {
+		if (mCurrent.DepthBias != bias) {
+			mCurrent.DepthBias = bias;
+			mRenderSys.SetDepthBias(bias);
+		}
+	}
+	void Set(const RasterizerState& state) {
+		Set(state.FillMode);
+		Set(state.CullMode);
+		Set(state.DepthBias);
+	}
+	void operator()(CullMode mode) { Set(mode); }
+	void operator()(FillMode mode) { Set(mode); }
+	void operator()(const DepthBias& bias) { Set(bias); }
+	const RasterizerState& Get() const { return mCurrent; }
+private:
+	RenderSystem& mRenderSys;
+	RasterizerState mCurrent;
+};
+
 struct BlendStateBlock {
 	struct Lock : boost::noncopyable {
 		Lock(BlendStateBlock& block) :mBlock(block), mState(block.Get()) {}
@@ -143,7 +196,7 @@ private:
 };
 
 struct RenderStatesBlock {
-	RenderStatesBlock(RenderSystem& rs) :FrameBuffer(rs), Blend(rs), Depth(rs), Textures(rs) {}
+	RenderStatesBlock(RenderSystem& rs) :FrameBuffer(rs), Textures(rs), Blend(rs), Depth(rs), Raster(rs) {}
 	TemplateArgs FrameBufferBlock::Lock LockFrameBuffer(T &&...args) {
 		return std::move(FrameBufferBlock::Lock(FrameBuffer, std::forward<T>(args)...));
 	}
@@ -156,12 +209,16 @@ struct RenderStatesBlock {
 	TemplateArgs DepthStateBlock::Lock LockDepth(T &&...args) {
 		return std::move(DepthStateBlock::Lock(Depth, std::forward<T>(args)...));
 	}
+	TemplateArgs RasterizerStateBlock::Lock LockRaster(T &&...args) {
+		return std::move(RasterizerStateBlock::Lock(Raster, std::forward<T>(args)...));
+	}
 	const IFrameBufferPtr& CurrentFrameBuffer() const { return FrameBuffer.GetCurrent(); }
 public:
 	FrameBufferBlock FrameBuffer;
 	TexturesBlock Textures;
 	BlendStateBlock Blend;
 	DepthStateBlock Depth;
+	RasterizerStateBlock Raster;
 };
 
 }

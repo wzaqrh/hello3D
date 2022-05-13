@@ -32,6 +32,8 @@ enum PipeLineTextureSlot
 	kPipeTextureGBufferEmissive = 15
 };
 
+#define kDepthFormat kFormatD32Float//kFormatD24UNormS8UInt
+
 struct cbPerFrameBuilder {
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {
 		mCBuffer.View = camera.GetView();
@@ -331,6 +333,17 @@ private:
 		res::TechniquePtr tech = op.Material->GetShader()->CurTech();
 		std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
 		for (auto& pass : passes) {
+			auto blend_state = mStatesBlock.LockBlend();
+			const auto& blend = pass->GetBlend(); if (blend) blend_state(blend.value());
+
+			auto depth_state = mStatesBlock.LockDepth();
+			const auto& depth = pass->GetDepth(); if (depth) depth_state(depth.value());
+
+			auto raster_state = mStatesBlock.LockRaster();
+			const auto& cull = pass->GetCull(); if (cull) raster_state(cull.value());
+			const auto& fill = pass->GetFill(); if (fill) raster_state(fill.value());
+			const auto& zbias = pass->GetDepthBias(); if (zbias) raster_state(zbias.value());
+			
 			const auto& passOut = pass->GetGrabOut();
 			if (passOut) {
 				IFrameBufferPtr passFb = mTempGrabDic[passOut.Name];
@@ -422,8 +435,8 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 {
 	Eigen::Vector3i fbSize = Eigen::Vector3i(resMng.WinWidth(), resMng.WinHeight(), 1);
 	
-	if (mCfg.IsShadowVSM()) mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, Eigen::Vector3i(fbSize.x(), fbSize.y(), -1), MakeResFormats(kFormatR32G32Float, kFormatD24UNormS8UInt));
-	else mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+	if (mCfg.IsShadowVSM()) mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, Eigen::Vector3i(fbSize.x(), fbSize.y(), -1), MakeResFormats(kFormatR32G32Float, kDepthFormat));
+	else mShadowMap = resMng.CreateFrameBuffer(__LaunchSync__, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 
 	mGBuffer = resMng.CreateFrameBuffer(__LaunchSync__, fbSize, 
@@ -431,10 +444,10 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 			kFormatR16G16B16A16UNorm,//Normal 
 			kFormatR8G8B8A8UNorm,//Albedo 
 			kFormatR8G8B8A8UNorm,//Emissive 
-			kFormatD24UNormS8UInt));
+			kDepthFormat));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 
-	mTempFbs = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kFormatD24UNormS8UInt));
+	mTempFbs = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
 }
 
 CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
