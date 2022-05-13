@@ -111,7 +111,9 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 bool RenderSystem11::_SetRasterizerState()
 {
 	D3D11_RASTERIZER_DESC wfdesc = {};
+	//wfdesc.FillMode = D3D11_FILL_WIREFRAME;
 	wfdesc.FillMode = D3D11_FILL_SOLID;
+	//wfdesc.CullMode = D3D11_CULL_BACK;
 	wfdesc.CullMode = D3D11_CULL_NONE;
 	wfdesc.SlopeScaledDepthBias = 8;
 	wfdesc.DepthBias = 1e5;

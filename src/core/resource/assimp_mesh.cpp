@@ -19,11 +19,6 @@ void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
 
 	mVBOSkeleton = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.skeleton");
-
-	const aiVector3D &min = mAiMesh->mAABB.mMin, &max = mAiMesh->mAABB.mMax;
-	mAABB = Eigen::AlignedBox3f();
-	mAABB.extend(Eigen::Vector3f(min.x, min.y, min.z));
-	mAABB.extend(Eigen::Vector3f(max.x, max.y, max.z));
 }
 
 bool AssimpMesh::IsLoaded() const

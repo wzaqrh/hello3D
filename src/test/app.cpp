@@ -93,6 +93,21 @@ CoTask<void> App::Render()
 		camera0->SetLookAt(mCameraInitLookAt + curInvForward * forwardLength, mCameraInitLookAt);
 	}
 
+	if (mTransform)
+	{
+		Eigen::Vector2f m = mInput->GetMouseMiddleLocation();
+		float mx = m.x();
+		float my = -m.y();
+		if (mx != 0 || my != 0) {
+			auto p = mTransform->GetPosition();
+			auto cp = camera0->GetTransform()->GetPosition();
+			float offset = fabs(p.z() - cp.z());
+			p.x() += mx * offset;
+			p.y() += my * offset;
+			mTransform->SetPosition(p);
+		}
+	}
+
 	//rotate target
 	if (mTransform)
 	{

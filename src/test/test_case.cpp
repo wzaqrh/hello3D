@@ -115,7 +115,7 @@ struct ModelInfo {
 std::map<std::string, ModelInfo> CResPathMap = {
 	{"nanosuit", {MakeResPath("nanosuit", "obj"),"",1,0}},
 	{"mir", {MakeResPath1("Male03", "Male02", "fbx"),"",0.05,-5}},
-	{"spaceship", {MakeResPath("Spaceship", "fbx"),"",0.01,0}},
+	//{"spaceship", {MakeResPath("Spaceship", "fbx"),"",0.01,0}},
 	{"rock", {MakeResPath("rock", "obj"),"",1,0}},
 	{"floor", {MakeResPath("floor", "obj"),"",0.3,0}},
 	{"planet", {MakeResPath("planet", "obj"),"",0.1,0}},

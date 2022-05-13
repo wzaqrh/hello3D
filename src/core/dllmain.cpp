@@ -25,14 +25,15 @@
 #pragma comment(lib, "dxguid.lib")
 
 #pragma comment(lib, "legacy_stdio_definitions.lib")
-#pragma comment(lib, "assimp.lib")
 #pragma comment(lib, "freetype.lib")
 #ifdef _DEBUG
 #pragma comment(lib, "cppcorod.lib")
 #pragma comment(lib, "DevILd.lib")
+#pragma comment(lib, "assimp.lib")
 #else
 #pragma comment(lib, "cppcoro.lib")
 #pragma comment(lib, "DevIL.lib")
+#pragma comment(lib, "assimp.lib")
 #endif
 
 BOOL APIENTRY DllMain( HMODULE hModule,

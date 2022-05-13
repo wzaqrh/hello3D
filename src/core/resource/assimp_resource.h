@@ -1,20 +1,11 @@
 #pragma once
-#include <assimp/cimport.h>
-#include <assimp/Importer.hpp>
-#include <assimp/ai_assert.h>
-#include <assimp/cfileio.h>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
-#include <assimp/mesh.h>
-#include <assimp/pbrmaterial.h>
-#include <assimp/IOSystem.hpp>
-#include <assimp/IOStream.hpp>
-#include <assimp/LogStream.hpp>
-#include <assimp/DefaultLogger.hpp>
 #include "core/base/cppcoro.h"
 #include "core/rendersys/predeclare.h"
+#include "core/resource/predeclare.h"
 #include "core/resource/resource.h"
 #include "core/resource/assimp_mesh.h"
+
+struct aiAnimation;
 
 namespace mir {
 namespace res {
@@ -22,7 +13,7 @@ namespace res {
 struct AiNode : public std::enable_shared_from_this<AiNode>
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	AiNode(const aiNode* rawNode, const size_t serializeIndex) : RawNode(rawNode), SerilizeIndex(serializeIndex) { mGlobalTransform = GetLocalTransform(); }
+	AiNode(const size_t serializeIndex) :SerilizeIndex(serializeIndex) {}
 	void AddMesh(const AssimpMeshPtr& mesh) {
 		Meshes.push_back(mesh);
 
@@ -52,21 +43,22 @@ struct AiNode : public std::enable_shared_from_this<AiNode>
 	}
 public:
 	const Eigen::AlignedBox3f& GetAABB() const { return mAABB; }
-	const Eigen::Matrix4f& GetLocalTransform() const { return *(Eigen::Matrix4f*)(&RawNode->mTransformation); }
+	const Eigen::Matrix4f& GetLocalTransform() const { return mLocalTransform; }
 
 	const AiNodePtr& GetChild(size_t pos) const { return Children[pos]; }
 	size_t ChildCount() const { return Children.size(); }
+	const std::vector<AiNodePtr>& GetChildren() const { return Children; }
 	
 	const AssimpMeshPtr& operator[](size_t index) const { return Meshes[index]; }
 	size_t MeshCount() const { return Meshes.size(); }
 	std::vector<AssimpMeshPtr>& GetMeshes() { return Meshes; }
 public:
 	const size_t SerilizeIndex;
-	const aiNode* RawNode;
+	std::string mName;
 	std::weak_ptr<AiNode> Parent;
 	std::vector<AiNodePtr> Children;
 	std::vector<AssimpMeshPtr> Meshes;
-	Eigen::Matrix4f mGlobalTransform;
+	Eigen::Matrix4f mLocalTransform, mGlobalTransform;
 	Eigen::AlignedBox3f mAABB;
 };
 
@@ -74,23 +66,30 @@ struct AiScene : public ImplementResource<IResource>
 {
 	friend class AiSceneLoader;
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	AiNodePtr AddNode(const aiNode* rawNode) {
-		AiNodePtr newNode = std::make_shared<AiNode>(rawNode, mNodeBySerializeIndex.size());
-		mNodeBySerializeIndex.push_back(newNode);
+	TemplateArgs AiNodePtr AddNode(T &&...args) {
+		AiNodePtr newNode = std::make_shared<AiNode>(std::forward<T>(args)..., mNodes.size());
+		mNodes.push_back(newNode);
 		return newNode;
 	}
-	const std::vector<AiNodePtr>& GetSerializeNodes() const { return mNodeBySerializeIndex; }
-	std::vector<AiNodePtr>::const_iterator begin() const { return mNodeBySerializeIndex.begin(); }
-	std::vector<AiNodePtr>::const_iterator end() const { return mNodeBySerializeIndex.end(); }
+	AssimpMeshPtr AddMesh() {
+		AssimpMeshPtr mesh = std::make_shared<AssimpMesh>();
+		mMeshes.push_back(mesh);
+		return mesh;
+	}
+	const std::vector<AiNodePtr>& GetNodes() const { return mNodes; }
+	AiNodePtr FindNodeByName(const std::string& name) const {
+		auto find_iter = std::find_if(mNodes.begin(), mNodes.end(), [&name](const AiNodePtr& nnode) { 
+			return nnode->mName == name;
+		});
+		return (find_iter != mNodes.end()) ? *find_iter : nullptr;
+	}
+	const std::vector<AssimpMeshPtr>& GetMeshes() const { return mMeshes; }
 	const Eigen::AlignedBox3f& GetAABB() const { return mRootNode->GetAABB(); }
 public:
-	const aiScene* mScene = nullptr;
 	AiNodePtr mRootNode;
-	std::vector<AiNodePtr> mNodeBySerializeIndex;
-	std::map<std::string, AiNodePtr> mBoneNodesByName;
-	std::map<std::string, ITexturePtr> mLoadedTexture;
-private:
-	const Assimp::Importer* mImporter = nullptr;
+	std::vector<const aiAnimation*> mAnimations;
+	std::vector<AssimpMeshPtr> mMeshes;
+	std::vector<AiNodePtr> mNodes;
 };
 
 class AiResourceFactory {

@@ -94,6 +94,15 @@ void D3DInput::Process()
 		mMouseR = Eigen::Vector2f::Zero();
 	}
 
+	//Êó±êÖÐ¼ü
+	if (m_mouseState.rgbButtons[2] & 0x80) {
+		mMouseM.x() = boost::algorithm::clamp(1.0 * m_mouseState.lX / m_screenWidth, -1, 1);
+		mMouseM.y() = boost::algorithm::clamp(1.0 * m_mouseState.lY / m_screenHeight, -1, 1);
+	}
+	else {
+		mMouseM = Eigen::Vector2f::Zero();
+	}
+
 	//Êó±ê¹öÂÖ
 	mMouseWheel = boost::algorithm::clamp(m_mouseState.lZ / 1000.0, -1, 1);
 	mMouseMiddleDown = (m_mouseState.rgbButtons[2] & 0x80);

@@ -16,6 +16,7 @@ public:
 	void Frame();
 	Eigen::Vector2f GetMouseLeftLocation() const { return mMouseL; }
 	Eigen::Vector2f GetMouseRightLocation() const { return mMouseR; }
+	Eigen::Vector2f GetMouseMiddleLocation() const { return mMouseM; }
 	float GetMouseWheelChange() const { return mMouseWheel; }
 	bool IsKeyPressed(int key);
 private:
@@ -31,7 +32,7 @@ private:
 	DIMOUSESTATE m_mouseState;
 
 	long m_screenWidth = 0, m_screenHeight = 0;
-	Eigen::Vector2f mMouseL, mMouseR;
+	Eigen::Vector2f mMouseL, mMouseR, mMouseM;
 	float mMouseWheel;
 	bool mMouseMiddleDown;
 };

@@ -10,19 +10,20 @@ namespace rend {
 
 struct AiAnimeNode 
 {
+public:
 	void Init(size_t serializeIndex, const res::AiNodePtr& node) {
 		SerilizeIndex = serializeIndex;
 		ChannelIndex = -1;
-		LocalTransform = GlobalTransform = node->RawNode->mTransformation;
+		LocalTransform = GlobalTransform = node->GetLocalTransform();
 	}
 public:
 	size_t SerilizeIndex;
 	int ChannelIndex;
-	aiMatrix4x4 LocalTransform;
-	aiMatrix4x4 GlobalTransform;
+	Eigen::Matrix4f LocalTransform, GlobalTransform;
 };
 struct AiAnimeTree 
 {
+public:
 	void Init(const std::vector<res::AiNodePtr>& serializeNodes) {
 		mNodeBySerializeIndex.assign(serializeNodes.begin(), serializeNodes.end());
 		mAnimeNodes.resize(serializeNodes.size());
@@ -64,7 +65,7 @@ public:
 	CoTask<void> UpdateFrame(float dt) override;
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
-	const std::vector<aiMatrix4x4>& GetBoneMatrices(const res::AiNodePtr& node, size_t meshIndexIndex);
+	const std::vector<Eigen::Matrix4f>& GetBoneMatrices(const res::AiNodePtr& node, const res::AssimpMeshPtr& mesh);
 	void DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList);
 	bool IsMaterialEnabled() const override { return false; }
 private:
@@ -73,7 +74,7 @@ private:
 
 	int mCurrentAnimIndex = -1;
 	float mElapse = 0.0f;
-	std::vector<aiMatrix4x4> mTempBoneMatrices;
+	std::vector<Eigen::Matrix4f> mTempBoneMatrices;
 };
 
 }

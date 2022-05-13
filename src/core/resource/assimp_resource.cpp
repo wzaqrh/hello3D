@@ -3,6 +3,18 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/assert.hpp>
+#include <assimp/cimport.h>
+#include <assimp/Importer.hpp>
+#include <assimp/ai_assert.h>
+#include <assimp/cfileio.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/mesh.h>
+#include <assimp/pbrmaterial.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/IOStream.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
 #include "core/resource/assimp_resource.h"
 #include "core/resource/material.h"
 #include "core/resource/resource_manager.h"
@@ -18,8 +30,6 @@ class AiSceneLoader {
 public:
 	AiSceneLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
 		: mLaunchMode(launchMode), mResourceMng(resMng), mAsset(*asset), mResult(asset) 
-	{}
-	~AiSceneLoader() 
 	{}
 	
 	TemplateArgs CoTask<bool> Execute(T &&...args) {
@@ -64,7 +74,7 @@ private:
 		#define IMPORT_LEFTHAND
 			constexpr uint32_t ImportFlags =
 			#if defined IMPORT_LEFTHAND
-				//aiProcess_ConvertToLeftHanded |
+				aiProcess_ConvertToLeftHanded |
 			#endif
 				aiProcess_Triangulate |
 				aiProcess_CalcTangentSpace |
@@ -76,54 +86,51 @@ private:
 				aiProcess_OptimizeMeshes |
 				aiProcess_Debone |
 				aiProcess_ValidateDataStructure;*/
-			mAsset.mImporter = new Assimp::Importer;
-			mAsset.mScene = const_cast<Assimp::Importer*>(mAsset.mImporter)->ReadFile(imgFullpath.string(), ImportFlags);
+			mAssetImporter = new Assimp::Importer;
+			mAssetScene = const_cast<Assimp::Importer*>(mAssetImporter)->ReadFile(imgFullpath.string(), ImportFlags);
 		}
 		catch (...)
 		{
 			DEBUG_LOG_ERROR("Assimp::Importer ReadFile error");
 		}
-		return mAsset.mScene != nullptr;
+		return mAssetScene != nullptr;
 	}
 	CoTask<bool> ExecuteSetupData()
 	{
 		COROUTINE_VARIABLES;
-		mAsset.mRootNode = mAsset.AddNode(mAsset.mScene->mRootNode);
+		BOOST_ASSERT(mAssetScene != nullptr);
+
+		if (mAssetScene->mNumAnimations > 0) {
+			mAsset.mAnimations.resize(mAssetScene->mNumAnimations);
+			memcpy(&mAsset.mAnimations[0], &mAssetScene->mAnimations[0], mAssetScene->mNumAnimations * sizeof(mAssetScene->mAnimations[0]));
+		}
+
 		std::vector<CoTask<bool>> tasks;
-		ProcessNode(mAsset.mRootNode, mAsset.mScene, tasks);
+		mAsset.mRootNode = ProcessNode(mAssetScene->mRootNode, mAssetScene, tasks);
 		CoAwait WhenAllReady(std::move(tasks));
 
-		BOOST_ASSERT(mAsset.mScene != nullptr);
-		for (unsigned i = 0; i < mAsset.mScene->mNumMeshes; ++i) {
-			const aiMesh* mesh = mAsset.mScene->mMeshes[i];
-			for (unsigned j = 0; j < mesh->mNumBones; ++j) {
-				const aiBone* bone = mesh->mBones[j];
-				BOOST_ASSERT(mAsset.mBoneNodesByName[bone->mName.data] == nullptr
-					|| mAsset.mBoneNodesByName[bone->mName.data]->RawNode == mAsset.mScene->mRootNode->FindNode(bone->mName));
-
-				//mAsset.mBoneNodesByName[bone->mName.data] = mAsset.mScene->mRootNode->FindNode(bone->mName);
-				auto findRawNode = mAsset.mScene->mRootNode->FindNode(bone->mName);
-				auto findIter = std::find_if(mAsset.mNodeBySerializeIndex.begin(), mAsset.mNodeBySerializeIndex.end(), [&findRawNode](const AiNodePtr& nnode) {
-					return nnode->RawNode == findRawNode;
-				});
-				mAsset.mBoneNodesByName[bone->mName.data] = IF_AND_OR(findIter != mAsset.mNodeBySerializeIndex.end(), *findIter, nullptr);
+		for (const auto& mesh : mAsset.GetMeshes()) {
+			for (auto& bone : mesh->mBones) {
+				bone.mRelateNode = mAsset.FindNodeByName(bone.mName);
 			}
 		}
 		CoReturn true;
 	}
 private:
-	AiNodePtr ProcessNode(const AiNodePtr& node, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
+	AiNodePtr ProcessNode(const aiNode* rawNode, const aiScene* rawScene, std::vector<CoTask<bool>>& tasks) {
+		AiNodePtr node = mAsset.AddNode();
 		COROUTINE_VARIABLES_2(node, rawScene);
 
-		const aiNode* rawNode = node->RawNode;
+		node->mName = rawNode->mName.C_Str();
+		node->mLocalTransform = node->mGlobalTransform = *(const Eigen::Matrix4f*)&rawNode->mTransformation;
 		for (int i = 0; i < rawNode->mNumMeshes; i++) {
-			aiMesh* rawMesh = rawScene->mMeshes[rawNode->mMeshes[i]];
-			node->AddMesh(ProcessMesh(rawMesh, rawScene, tasks));
+			unsigned meshIndex = rawNode->mMeshes[i];
+			aiMesh* rawMesh = rawScene->mMeshes[meshIndex];
+			node->AddMesh(ProcessMesh(rawMesh, meshIndex, rawScene, tasks));
 		}
 
 		for (int i = 0; i < rawNode->mNumChildren; i++) {
-			AiNodePtr child = mAsset.AddNode(rawNode->mChildren[i]);
-			node->AddChild(ProcessNode(child, rawScene, tasks));
+			node->AddChild(ProcessNode(rawNode->mChildren[i], rawScene, tasks));
 		}
 		return node;
 	}
@@ -168,12 +175,34 @@ private:
 		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
 		else return result.append(path.string());
 	}
-	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, const aiScene* scene, std::vector<CoTask<bool>>& tasks) const {
+	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, int meshIndex, const aiScene* scene, std::vector<CoTask<bool>>& tasks) const {
 		COROUTINE_VARIABLES_2(rawMesh, scene);
 
-		AssimpMeshPtr meshPtr = CreateInstance<AssimpMesh>();
+		AssimpMeshPtr meshPtr = mAsset.AddMesh();
 		auto& mesh = *meshPtr;
-		mesh.mAiMesh = rawMesh;
+		mesh.mHasBones = rawMesh->HasBones();
+		mesh.mSceneMeshIndex = meshIndex;
+
+		const aiVector3D& mmin = rawMesh->mAABB.mMin, &mmax = rawMesh->mAABB.mMax;
+		mesh.mAABB = Eigen::AlignedBox3f();
+		mesh.mAABB.extend(Eigen::Vector3f(mmin.x, mmin.y, mmin.z));
+		mesh.mAABB.extend(Eigen::Vector3f(mmax.x, mmax.y, mmax.z));
+
+		if (rawMesh->mNumBones > 0) {
+			mesh.mBones.resize(rawMesh->mNumBones);
+			for (size_t i = 0; i < mesh.mBones.size(); ++i) {
+				auto& dst = mesh.mBones[i];
+				const aiBone& src = *rawMesh->mBones[i];
+				dst.mName = src.mName.C_Str();
+				dst.mOffsetMatrix = *(Eigen::Matrix4f*)&src.mOffsetMatrix;
+				if (src.mNumWeights) {
+					dst.mWeights.resize(src.mNumWeights);
+					memcpy(&dst.mWeights[0], &src.mWeights[0], src.mNumWeights * sizeof(src.mWeights[0]));
+					static_assert(sizeof(dst.mWeights[0]) == sizeof(src.mWeights[0]), "");
+				}
+			}
+			memcpy(&mesh.mBones[0], rawMesh->mBones, rawMesh->mNumBones * sizeof(rawMesh->mBones[0]));
+		}
 
 		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
 		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
@@ -292,10 +321,38 @@ private:
 	ResourceManager& mResourceMng;
 	AiScene& mAsset;
 	AiScenePtr mResult;
+	const Assimp::Importer* mAssetImporter = nullptr;
+	const aiScene* mAssetScene = nullptr;
 private:
 	std::string mRedirectResourceDir, mRedirectResourceExt;
 };
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
+
+/********** ObjLoader **********/
+class AiSceneObjLoader {
+public:
+	AiSceneObjLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
+		: mLaunchMode(launchMode), mResourceMng(resMng), mAsset(*asset), mResult(asset)
+	{}
+
+	TemplateArgs CoTask<bool> Execute(T &&...args) {
+		mAsset.SetLoading();
+		CoAwait mResourceMng.SwitchToLaunchService(__LaunchAsync__);
+
+		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
+		return mAsset.IsLoaded();
+	}
+	TemplateArgs CoTask<bool> operator()(T &&...args) {
+		return CoAwait Execute(std::forward<T>(args)...);
+	}
+private:
+
+private:
+	const Launch mLaunchMode;
+	ResourceManager& mResourceMng;
+	AiScene& mAsset;
+	AiScenePtr mResult;
+};
 
 /********** AiAssetManager **********/
 CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& scene, ResourceManager& resMng, std::string assetPath, std::string redirectRes) ThreadSafe
