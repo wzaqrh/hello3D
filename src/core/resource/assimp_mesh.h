@@ -27,6 +27,7 @@ struct AiBone {
 class MIR_CORE_API AssimpMesh
 {
 	friend class AiSceneLoader;
+	friend class AiSceneObjLoader;
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 public:
 	AssimpMesh();

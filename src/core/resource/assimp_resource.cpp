@@ -15,39 +15,25 @@
 #include <assimp/IOStream.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <unordered_map>
 #include "core/resource/assimp_resource.h"
 #include "core/resource/material.h"
 #include "core/resource/resource_manager.h"
 #include "core/base/debug.h"
 #include "core/base/macros.h"
-#include <unordered_map>
+
+#define VEC_ASSIGN(DST, SRC) static_assert(sizeof(DST) == sizeof(SRC)); memcpy(DST.data(), &SRC, sizeof(SRC))
+#define VEC_ASSIGN1(DST, SRC, SIZE) static_assert(sizeof(DST) == SIZE); memcpy(DST.data(), &SRC, SIZE)
 
 namespace mir {
 namespace res {
 
 /********** AiSceneLoader **********/
-class AiSceneLoader {
+struct ResourceRedirector {
 public:
-	AiSceneLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
-		: mLaunchMode(launchMode), mResourceMng(resMng), mAsset(*asset), mResult(asset) 
-	{}
-	
-	TemplateArgs CoTask<bool> Execute(T &&...args) {
-		mAsset.SetLoading();
-		CoAwait mResourceMng.SwitchToLaunchService(__LaunchAsync__);
-
-		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
-		return mAsset.IsLoaded();
-	}
-	TemplateArgs CoTask<bool> operator()(T &&...args) {
-		return CoAwait Execute(std::forward<T>(args)...);
-	}
-private:
-	bool ExecuteLoadRawData(const std::string& imgPath, const std::string& redirectResource)
+	void Init(const std::string& resPath, const std::string& redirectResource) 
 	{
-		TIME_PROFILE((boost::format("\t\taiScene.LoadRawData (%1% %2%)") %imgPath %redirectResource).str());
-
-		boost::filesystem::path imgFullpath = boost::filesystem::system_complete(imgPath);
+		mResFullPath = boost::filesystem::system_complete(resPath);
 
 		if (!redirectResource.empty()) {
 			namespace boost_property_tree = boost::property_tree;
@@ -65,9 +51,45 @@ private:
 			mRedirectResourceDir = boost::filesystem::system_complete(mRedirectResourceDir).string();
 		}
 		else {
-			mRedirectResourceDir = imgFullpath.parent_path().string();
+			mRedirectResourceDir = mResFullPath.parent_path().string();
 		}
 		BOOST_ASSERT(mRedirectResourceDir.empty() || mRedirectResourceDir.back() != '/');
+	}
+	boost::filesystem::path operator()(const boost::filesystem::path& path, bool forceNotRelative = false) const {
+		boost::filesystem::path result(mRedirectResourceDir);
+		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
+		else return result.append(path.string());
+	}
+	const boost::filesystem::path& GetResFullPath() const { return mResFullPath; }
+private:
+	boost::filesystem::path mResFullPath;
+	std::string mRedirectResourceDir, mRedirectResourceExt;
+};
+
+class AiSceneLoader {
+public:
+	AiSceneLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
+		: mLaunchMode(launchMode), mResMng(resMng), mAsset(*asset), mResult(asset) 
+	{}
+	~AiSceneLoader() {
+		delete mAssetImporter;
+	}
+
+	TemplateArgs CoTask<bool> Execute(T &&...args) {
+		mAsset.SetLoading();
+		CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
+
+		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
+		return mAsset.IsLoaded();
+	}
+	TemplateArgs CoTask<bool> operator()(T &&...args) {
+		return CoAwait Execute(std::forward<T>(args)...);
+	}
+private:
+	bool ExecuteLoadRawData(const std::string& resPath, const std::string& redirectResource)
+	{
+		TIME_PROFILE((boost::format("\t\tAiSceneLoader.Execute (%1% %2%)") %resPath %redirectResource).str());
+		mRedirectPathOnDir.Init(resPath, redirectResource);
 
 		try
 		{
@@ -87,7 +109,7 @@ private:
 				aiProcess_Debone |
 				aiProcess_ValidateDataStructure;*/
 			mAssetImporter = new Assimp::Importer;
-			mAssetScene = const_cast<Assimp::Importer*>(mAssetImporter)->ReadFile(imgFullpath.string(), ImportFlags);
+			mAssetScene = const_cast<Assimp::Importer*>(mAssetImporter)->ReadFile(mRedirectPathOnDir.GetResFullPath().string(), ImportFlags);
 		}
 		catch (...)
 		{
@@ -135,46 +157,6 @@ private:
 		return node;
 	}
 	
-	static void ReCalculateTangents(vbSurfaceVector& surfVerts, vbSkeletonVector& skeletonVerts, const std::vector<uint32_t>& indices) 
-	{
-		for (int i = 0; i < indices.size(); i += 3) {
-			//vbSurface
-			vbSurface& surf0 = surfVerts[indices[i + 0]];
-			vbSurface& surf1 = surfVerts[indices[i + 1]];
-			vbSurface& surf2 = surfVerts[indices[i + 2]];
-
-			// Shortcuts for UVs
-			Eigen::Vector2f& uv0 = surf0.Tex;
-			Eigen::Vector2f& uv1 = surf1.Tex;
-			Eigen::Vector2f& uv2 = surf2.Tex;
-
-			// Edges of the triangle : postion delta
-			Eigen::Vector3f deltaPos1 = surf1.Pos - surf0.Pos;
-			Eigen::Vector3f deltaPos2 = surf2.Pos - surf0.Pos;
-
-			//vbSkeleton
-			vbSkeleton& skin0 = skeletonVerts[indices[i + 0]];
-			vbSkeleton& skin1 = skeletonVerts[indices[i + 1]];
-			vbSkeleton& skin2 = skeletonVerts[indices[i + 2]];
-			Eigen::Vector2f deltaUV1 = uv1 - uv0;
-			Eigen::Vector2f deltaUV2 = uv2 - uv0;
-			float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
-			Eigen::Vector3f tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
-			skin0.Tangent = skin0.Tangent + tangent;
-			skin1.Tangent = skin1.Tangent + tangent;
-			skin2.Tangent = skin2.Tangent + tangent;
-
-			Eigen::Vector3f bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
-			skin0.BiTangent = skin0.BiTangent + bitangent;
-			skin1.BiTangent = skin1.BiTangent + bitangent;
-			skin2.BiTangent = skin2.BiTangent + bitangent;
-		}
-	}
-	boost::filesystem::path RedirectPathOnDir(const boost::filesystem::path& path, bool forceNotRelative = false) const {
-		boost::filesystem::path result(mRedirectResourceDir);
-		if (!path.is_relative() || forceNotRelative) return result.append(path.filename().string());
-		else return result.append(path.string());
-	}
 	AssimpMeshPtr ProcessMesh(const aiMesh* rawMesh, int meshIndex, const aiScene* scene, std::vector<CoTask<bool>>& tasks) const {
 		COROUTINE_VARIABLES_2(rawMesh, scene);
 
@@ -187,6 +169,10 @@ private:
 		mesh.mAABB = Eigen::AlignedBox3f();
 		mesh.mAABB.extend(Eigen::Vector3f(mmin.x, mmin.y, mmin.z));
 		mesh.mAABB.extend(Eigen::Vector3f(mmax.x, mmax.y, mmax.z));
+
+		boost::filesystem::path matPath = mRedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
+		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
+		tasks.push_back(mResMng.CreateMaterial(mesh.mMaterial, mLaunchMode, loadParam));
 
 		if (rawMesh->mNumBones > 0) {
 			mesh.mBones.resize(rawMesh->mNumBones);
@@ -204,14 +190,8 @@ private:
 			memcpy(&mesh.mBones[0], rawMesh->mBones, rawMesh->mNumBones * sizeof(rawMesh->mBones[0]));
 		}
 
-		boost::filesystem::path matPath = RedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
-		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
-		tasks.push_back(mResourceMng.CreateMaterial(mesh.mMaterial, mLaunchMode, loadParam));
-
-	#define VEC_ASSIGN(DST, SRC) memcpy(DST.data(), &SRC, sizeof(SRC))
-	#define VEC_ASSIGN1(DST, SRC, SIZE) memcpy(DST.data(), &SRC, SIZE)
-		std::vector<vbSurface, mir_allocator<vbSurface>>& surfVerts(mesh.mSurfVertexs); surfVerts.resize(rawMesh->mNumVertices);
-		std::vector<vbSkeleton, mir_allocator<vbSkeleton>>& skeletonVerts(mesh.mSkeletonVertexs); skeletonVerts.resize(rawMesh->mNumVertices);
+		auto& surfVerts = mesh.mSurfVertexs; surfVerts.resize(rawMesh->mNumVertices);
+		auto& skeletonVerts = mesh.mSkeletonVertexs; skeletonVerts.resize(rawMesh->mNumVertices);
 		for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
 		#if !defined EIGEN_DONT_ALIGN_STATICALLY
 			surfVerts[vertexId].Pos = AS_CONST_REF(Eigen::Vector3f, rawMesh->mVertices[vertexId]);
@@ -232,51 +212,31 @@ private:
 		}
 		if (rawMesh->mNormals) {
 			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
-			#if !defined IMPORT_LEFTHAND
-				skeletonVerts[vertexId].Normal.x() = rawMesh->mNormals[vertexId].x;
-				skeletonVerts[vertexId].Normal.y() = rawMesh->mNormals[vertexId].y;
-				skeletonVerts[vertexId].Normal.z() = -rawMesh->mNormals[vertexId].z;
-			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, rawMesh->mNormals[vertexId]);
 			#else
 				VEC_ASSIGN(skeletonVerts[vertexId].Normal, rawMesh->mNormals[vertexId]);
 			#endif
-			#endif
 			}
 		}
 		if (rawMesh->mTangents) {
 			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
-			#if !defined IMPORT_LEFTHAND
-				skeletonVerts[vertexId].Tangent.x() = rawMesh->mTangents[vertexId].x;
-				skeletonVerts[vertexId].Tangent.y() = rawMesh->mTangents[vertexId].y;
-				skeletonVerts[vertexId].Tangent.z() = -rawMesh->mTangents[vertexId].z;
-			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, rawMesh->mTangents[vertexId]);
 			#else
 				VEC_ASSIGN(skeletonVerts[vertexId].Tangent, rawMesh->mTangents[vertexId]);
 			#endif
-			#endif
 			}
 		}
-
 		if (rawMesh->mBitangents) {
 			for (size_t vertexId = 0; vertexId < rawMesh->mNumVertices; vertexId++) {
-			#if !defined IMPORT_LEFTHAND
-				skeletonVerts[vertexId].BiTangent.x() = rawMesh->mBitangents[vertexId].x;
-				skeletonVerts[vertexId].BiTangent.y() = rawMesh->mBitangents[vertexId].y;
-				skeletonVerts[vertexId].BiTangent.z() = -rawMesh->mBitangents[vertexId].z;
-			#else
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].BiTangent = AS_CONST_REF(Eigen::Vector3f, rawMesh->mBitangents[vertexId]);
 			#else
 				VEC_ASSIGN(skeletonVerts[vertexId].BiTangent, rawMesh->mBitangents[vertexId]);
 			#endif
-			#endif
 			}
 		}
-
 		if (rawMesh->HasBones()) {
 			std::vector<int> spMap(skeletonVerts.size(), 0);
 			for (size_t boneId = 0; boneId < rawMesh->mNumBones; ++boneId) {
@@ -313,18 +273,18 @@ private:
 		#endif
 		}
 
-		mesh.Build(mLaunchMode, mResourceMng);
+		mesh.Build(mLaunchMode, mResMng);
 		return meshPtr;
 	}
 private:
 	const Launch mLaunchMode;
-	ResourceManager& mResourceMng;
+	ResourceManager& mResMng;
 	AiScene& mAsset;
 	AiScenePtr mResult;
+private:
+	ResourceRedirector mRedirectPathOnDir;
 	const Assimp::Importer* mAssetImporter = nullptr;
 	const aiScene* mAssetScene = nullptr;
-private:
-	std::string mRedirectResourceDir, mRedirectResourceExt;
 };
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 
@@ -332,12 +292,12 @@ typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 class AiSceneObjLoader {
 public:
 	AiSceneObjLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
-		: mLaunchMode(launchMode), mResourceMng(resMng), mAsset(*asset), mResult(asset)
+		: mLaunchMode(launchMode), mResMng(resMng), mAsset(*asset), mResult(asset)
 	{}
 
 	TemplateArgs CoTask<bool> Execute(T &&...args) {
 		mAsset.SetLoading();
-		CoAwait mResourceMng.SwitchToLaunchService(__LaunchAsync__);
+		CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
 
 		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
 		return mAsset.IsLoaded();
@@ -346,13 +306,171 @@ public:
 		return CoAwait Execute(std::forward<T>(args)...);
 	}
 private:
+	struct ObjNode {
+		std::vector<Eigen::Vector3f> Vertices;
+		std::vector<Eigen::Vector2f> Uvs;
+		std::vector<Eigen::Vector3f> Normals;
+		std::vector<unsigned int> Indices;
+	};
+	static bool LoadOBJ(const std::string& path,
+		std::vector<Eigen::Vector3f>& vertices,
+		std::vector<Eigen::Vector2f>& uvs,
+		std::vector<Eigen::Vector3f>& normals,
+		std::vector<unsigned int>& vertexIndices) 
+	{
+		FILE* fd = fopen(path.c_str(), "r");
+		if (fd) {
+			char lineHeader[128];
+			while (fscanf(fd, "%s", lineHeader) != EOF) {
+				if (strcmp(lineHeader, "v") == 0) {
+					Eigen::Vector3f vertex;
+					fscanf(fd, "%f %f %f\n", &vertex.x(), &vertex.y(), &vertex.z());
+					vertex.x() = -vertex.x();
+					vertices.push_back(vertex);
+				}
+				else if (strcmp(lineHeader, "vt") == 0) {
+					Eigen::Vector2f uv;
+					fscanf(fd, "%f %f\n", &uv.x(), &uv.y());
+					uvs.push_back(uv);
+				}
+				else if (strcmp(lineHeader, "vn") == 0) {
+					Eigen::Vector3f normal;
+					fscanf(fd, "%f %f %f\n", &normal.x(), &normal.y(), &normal.z());
+					normal.x() = -normal.x();
+					normals.push_back(normal);
+				}
+				else if (strcmp(lineHeader, "f") == 0) {
+					std::string vertex1, vertex2, vertex3;
+					unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+					int matches = fscanf(fd, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+					if (matches != 9) {
+						fclose(fd);
+						fd = NULL;
+						break;
+					}
+					vertexIndices.push_back(vertexIndex[2]-1);
+					vertexIndices.push_back(vertexIndex[1]-1);
+					vertexIndices.push_back(vertexIndex[0]-1);
+				}
+				else {
+					// Probably a comment, eat up the rest of the line
+					char stupidBuffer[1000];
+					fgets(stupidBuffer, 1000, fd);
+				}
+			}
+			if (fd) fclose(fd);
+		}
+		return fd != NULL;
+	}
+	bool ExecuteLoadRawData(const std::string& resPath, const std::string& redirectResource) {
+		TIME_PROFILE((boost::format("\t\tAiSceneObjLoader.Execute (%1% %2%)") %resPath %redirectResource).str());
+		mRedirectPathOnDir.Init(resPath, redirectResource);
 
+		boost::filesystem::path resFullPath = boost::filesystem::system_complete(resPath);
+		return LoadOBJ(resFullPath.string(), mObjNode.Vertices, mObjNode.Uvs, mObjNode.Normals, mObjNode.Indices);
+	}
+
+	static void ReCalculateTangents(vbSurfaceVector& surfVerts, vbSkeletonVector& skeletonVerts, const std::vector<uint32_t>& indices)
+	{
+		for (int i = 0; i < indices.size(); i += 3) {
+			//vbSurface
+			vbSurface& surf0 = surfVerts[indices[i + 0]];
+			vbSurface& surf1 = surfVerts[indices[i + 1]];
+			vbSurface& surf2 = surfVerts[indices[i + 2]];
+
+			// Shortcuts for UVs
+			Eigen::Vector2f& uv0 = surf0.Tex;
+			Eigen::Vector2f& uv1 = surf1.Tex;
+			Eigen::Vector2f& uv2 = surf2.Tex;
+
+			// Edges of the triangle : postion delta
+			Eigen::Vector3f deltaPos1 = surf1.Pos - surf0.Pos;
+			Eigen::Vector3f deltaPos2 = surf2.Pos - surf0.Pos;
+
+			//vbSkeleton
+			vbSkeleton& skin0 = skeletonVerts[indices[i + 0]];
+			vbSkeleton& skin1 = skeletonVerts[indices[i + 1]];
+			vbSkeleton& skin2 = skeletonVerts[indices[i + 2]];
+			Eigen::Vector2f deltaUV1 = uv1 - uv0;
+			Eigen::Vector2f deltaUV2 = uv2 - uv0;
+			float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
+			Eigen::Vector3f tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
+			skin0.Tangent = skin0.Tangent + tangent;
+			skin1.Tangent = skin1.Tangent + tangent;
+			skin2.Tangent = skin2.Tangent + tangent;
+
+			Eigen::Vector3f bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
+			skin0.BiTangent = skin0.BiTangent + bitangent;
+			skin1.BiTangent = skin1.BiTangent + bitangent;
+			skin2.BiTangent = skin2.BiTangent + bitangent;
+		}
+	}
+	CoTask<bool> ExecuteSetupData() {
+		AiNodePtr node = mAsset.mRootNode = mAsset.AddNode();
+		node->mName = mRedirectPathOnDir.GetResFullPath().stem().string();
+		node->mLocalTransform = node->mGlobalTransform = Eigen::Matrix4f::Identity();
+
+		size_t meshIndex = 0;
+		{
+			auto pMesh = mAsset.AddMesh();
+			auto& mesh = *pMesh;
+
+			mesh.mHasBones = false;
+			mesh.mSceneMeshIndex = meshIndex++;
+
+			boost::filesystem::path matPath = mRedirectPathOnDir(boost::filesystem::path(node->mName + ".Material"));
+			std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
+			CoAwait mResMng.CreateMaterial(mesh.mMaterial, mLaunchMode, loadParam);
+
+			mesh.mAABB = Eigen::AlignedBox3f();
+			auto& surfVerts = mesh.mSurfVertexs; surfVerts.resize(mObjNode.Vertices.size());
+			auto& skeletonVerts = mesh.mSkeletonVertexs; skeletonVerts.resize(mObjNode.Vertices.size());
+			for (int vertexId = 0; vertexId < mObjNode.Vertices.size(); vertexId++) {
+				const auto& src = mObjNode;
+				auto& dst_surf = surfVerts[vertexId];
+				auto& dst_skeleton = skeletonVerts[vertexId];
+
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
+				dst_surf.Pos.x() = src.Position.X;
+				dst_surf.Pos.y() = src.Position.Y;
+				dst_surf.Pos.z() = src.Position.Z;
+			#else
+				VEC_ASSIGN(dst_surf.Pos, src.Vertices[vertexId]);
+			#endif
+				mesh.mAABB.extend(dst_surf.Pos);
+
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
+				surfVerts[vertexId].Tex.x() = src.TextureCoordinate.X;
+				surfVerts[vertexId].Tex.y() = src.TextureCoordinate.Y;
+			#else
+				VEC_ASSIGN(dst_surf.Tex, src.Uvs[vertexId]);
+			#endif
+
+			#if !defined EIGEN_DONT_ALIGN_STATICALLY
+				skeletonVerts[vertexId].Normal = AS_CONST_REF(Eigen::Vector3f, rawMesh->mNormals[vertexId]);
+			#else
+				VEC_ASSIGN(dst_skeleton.Normal, src.Normals[vertexId]);
+			#endif
+			}
+			
+			mesh.mIndices = std::move(mObjNode.Indices);
+			ReCalculateTangents(surfVerts, skeletonVerts, mesh.mIndices);
+
+			mesh.Build(mLaunchMode, mResMng);
+			node->AddMesh(pMesh);
+		}
+		CoReturn true;
+	}
 private:
 	const Launch mLaunchMode;
-	ResourceManager& mResourceMng;
+	ResourceManager& mResMng;
 	AiScene& mAsset;
 	AiScenePtr mResult;
+private:
+	ResourceRedirector mRedirectPathOnDir;
+	ObjNode mObjNode;
 };
+typedef std::shared_ptr<AiSceneObjLoader> AiSceneObjLoaderPtr;
 
 /********** AiAssetManager **********/
 CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& scene, ResourceManager& resMng, std::string assetPath, std::string redirectRes) ThreadSafe
@@ -362,8 +480,14 @@ CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& sce
 	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") %assetPath %redirectRes).str());
 
 	scene = IF_OR(scene, CreateInstance<AiScene>());
-	AiSceneLoaderPtr loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
-	CoAwait loader->Execute(assetPath, redirectRes);
+	if (boost::filesystem::path(assetPath).extension() != ".obj") {
+		auto loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
+		CoAwait loader->Execute(assetPath, redirectRes);
+	}
+	else {
+		auto loader = CreateInstance<AiSceneObjLoader>(launchMode, resMng, scene);
+		CoAwait loader->Execute(assetPath, redirectRes);
+	}
 	CoReturn scene->IsLoaded();
 }
 
