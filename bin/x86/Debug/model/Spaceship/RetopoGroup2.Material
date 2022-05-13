@@ -7,7 +7,7 @@
 		<AlbedoMapSRGB>0</AlbedoMapSRGB>
 		<txAlbedo>Intergalactic Spaceship_color_4.png</txAlbedo>
 		
-		<EnableNormalMap>1</EnableNormalMap>
+		<EnableNormalMap>0</EnableNormalMap>
 		<HasTangent>1</HasTangent>
 		<txNormal>Intergalactic Spaceship_nmap_2_Tris.png</txNormal>
 		

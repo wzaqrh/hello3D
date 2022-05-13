@@ -102,7 +102,7 @@ void DirectLight::SetMinPCFRadius(float minPcfRadius)
 
 void DirectLight::UpdateLightCamera(const Eigen::AlignedBox3f& sceneAABB)
 {
-	mCbLight.unity_LightPosition.head<3>() = mCamera.Direction.normalized();
+	mCbLight.unity_LightPosition.head<3>() = -mCamera.Direction.normalized();
 	mCbLight.unity_LightPosition.w() = 0.0f;
 
 	mCamera.Update(sceneAABB);

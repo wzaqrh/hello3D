@@ -5,6 +5,8 @@
 #include "BRDFCommonFunction.cginc"
 #include "ToneMapping.cginc"
 
+#define VectorIdentity float3(1,1,1)
+#define DielectricSpec float4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
 float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_rough_metal)
 {
 	l = normalize(l);
@@ -29,38 +31,58 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_roug
 #endif
     
     //diffuse color
-    float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, albedo);
+    float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, albedo * MIR_PI);
     float reflectivity = lerp(DielectricSpec.x, 1, metalness);
     float kd = 1.0f - reflectivity;
-	float3 diffuse_color = MIR_PI * fd_disney * kd * unity_LightColor.rgb * nl; //π，kd，Li，fd_disney，nl
+	float3 diffuse_color = kd * unity_LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
 
     //D, V
     float roughness = max(perceptualRoughness * perceptualRoughness, 0.002);
     float D = GGXTRDistribution(nh, roughness);
     float V = SmithJointGGXVisibility(nl, nv, roughness);
-
+    
+    float specularTerm = V * D * MIR_PI;
+	#if COLORSPACE_GAMMA
+        specularTerm = sqrt(max(1e-4h, specularTerm));
+	#endif
+    specularTerm = max(0.0, specularTerm * nl);
+    
     //F
     float3 f0  = lerp(DielectricSpec.rgb, albedo, metalness);
     float3 f90 = float3(1,1,1);
     float3 F = SchlickFresnel(f0, f90, lh);
 
     //specular color
-    float3 fs_cook_torrance = max(0.0, D * V) * F;
+    float3 fs_cook_torrance = specularTerm * F;
     float ks = any(f0) ? 1.0 : 0.0; 
     #if _SPECULARHIGHLIGHTS_OFF
 	    ks = 0.0;
     #endif
-    float3 specular_color = MIR_PI * ks * unity_LightColor.rgb * fs_cook_torrance * nl;
+    float3 specular_color =  ks * unity_LightColor.rgb * fs_cook_torrance;
     
     //grazing color
-    float surfaceReduction = 1.0 / (roughness * roughness + 1.0);
+    #if COLORSPACE_GAMMA
+        float surfaceReduction = 1.0-0.28*roughness*perceptualRoughness;
+	#else
+	    float surfaceReduction = 1.0 / (roughness * roughness + 1.0);
+	#endif
     float3 f90_ = saturate(1.0 - perceptualRoughness + reflectivity);
     float3 grazing_color = SchlickFresnel(f0, f90_, nv);
      
     float3 finalColor = diffuse_color + specular_color;
+#if TONEMAP_MODE
+	finalColor = toneMap(finalColor);
+#endif
+
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
+    finalColor = albedo * (1.0 - reflectivity);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
+    finalColor = n * 0.5 + 0.5;
+#endif
+
     //finalColor = float3(1.0,0.0,0.0);
     //finalColor = albedo;
-    finalColor = n * 0.5 + 0.5;
+    //finalColor = n * 0.5 + 0.5;
     //finalColor = VectorIdentity * -n;
     //finalColor = VectorIdentity * -v;
     //finalColor = VectorIdentity * -l;
@@ -69,9 +91,6 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_roug
     //finalColor = VectorIdentity * lh;
     //finalColor = VectorIdentity * nh;
     //finalColor = VectorIdentity * nv;
-#if TONEMAP_MODE
-	//finalColor = toneMap(finalColor);
-#endif   
     return finalColor;
 }
 

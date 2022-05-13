@@ -311,12 +311,14 @@ private:
 		std::vector<Eigen::Vector2f> Uvs;
 		std::vector<Eigen::Vector3f> Normals;
 		std::vector<unsigned int> Indices;
+		std::string MtlName;
 	};
 	static bool LoadOBJ(const std::string& path,
 		std::vector<Eigen::Vector3f>& vertices,
 		std::vector<Eigen::Vector2f>& uvs,
 		std::vector<Eigen::Vector3f>& normals,
-		std::vector<unsigned int>& vertexIndices) 
+		std::vector<unsigned int>& vertexIndices,
+		std::string& materalName) 
 	{
 		FILE* fd = fopen(path.c_str(), "r");
 		if (fd) {
@@ -352,6 +354,11 @@ private:
 					vertexIndices.push_back(vertexIndex[1]-1);
 					vertexIndices.push_back(vertexIndex[0]-1);
 				}
+				else if (strcmp(lineHeader, "usemtl") == 0) {
+					char szMtl[260];
+					fscanf(fd, "%s\n", szMtl);
+					materalName = szMtl;
+				}
 				else {
 					// Probably a comment, eat up the rest of the line
 					char stupidBuffer[1000];
@@ -367,7 +374,7 @@ private:
 		mRedirectPathOnDir.Init(resPath, redirectResource);
 
 		boost::filesystem::path resFullPath = boost::filesystem::system_complete(resPath);
-		return LoadOBJ(resFullPath.string(), mObjNode.Vertices, mObjNode.Uvs, mObjNode.Normals, mObjNode.Indices);
+		return LoadOBJ(resFullPath.string(), mObjNode.Vertices, mObjNode.Uvs, mObjNode.Normals, mObjNode.Indices, mObjNode.MtlName);
 	}
 
 	static void ReCalculateTangents(vbSurfaceVector& surfVerts, vbSkeletonVector& skeletonVerts, const std::vector<uint32_t>& indices)
@@ -407,7 +414,7 @@ private:
 	}
 	CoTask<bool> ExecuteSetupData() {
 		AiNodePtr node = mAsset.mRootNode = mAsset.AddNode();
-		node->mName = mRedirectPathOnDir.GetResFullPath().stem().string();
+		node->mName = IF_AND_OR(!mObjNode.MtlName.empty(), mObjNode.MtlName, mRedirectPathOnDir.GetResFullPath().stem().string());
 		node->mLocalTransform = node->mGlobalTransform = Eigen::Matrix4f::Identity();
 
 		size_t meshIndex = 0;

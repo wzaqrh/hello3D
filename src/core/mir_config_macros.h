@@ -60,13 +60,13 @@
 #define TONEMAP_ACES_HILL 3
 #define TONEMAP_ACES_HILL_EXPOSURE_BOOST 4
 #if !defined TONEMAP_MODE
-#define TONEMAP_MODE 1/*TONEMAP_TO_SRGB*/
+#define TONEMAP_MODE 0/*TONEMAP_LINEAR*/
 #endif
 
 #define PBR_UNITY 1
 #define PBR_GLTF 2
 #if !defined PBR_MODE
-#define PBR_MODE 2/*PBR_GLTF*/
+#define PBR_MODE 1/*PBR_UNITY*/
 #endif
 
 #if !defined CubeMapIsRightHandness

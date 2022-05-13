@@ -52,7 +52,7 @@ cbuffer cbModel : register(b3)
 }
 
 inline float2 GetUV(float2 uv, float4 uvTransform) {
-	return uvTransform.xy + uv * uvTransform.zw;
+	return uvTransform.xy + uv * uvTransform.zw * float2(1.0,-1.0);
 }
 
 inline float4 GetAlbedo(float2 uv) 
@@ -99,37 +99,24 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
 inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent)
 {
 	float3 normal;
-#if USE_NORMAL  
-	float3x3 tbn;
-	if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent));
-	else tbn = GetTBN(uv, worldPos, worldNormal);
-	
+#if USE_NORMAL
     if (EnableNormalMap) {
+		float3x3 tbn;
+		if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent));
+		else tbn = GetTBN(uv, worldPos, worldNormal);
+	
 		float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)).xyz * 2.0 - 1.0;
 		tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0));
         normal = normalize(mul(tangentNormal, tbn));
     }
-	else normal = tbn[2];
+	else {
+		normal = worldNormal;
+	}
 #else
 	float3 dpdx = ddx(worldPos);
 	float3 dpdy = ddy(worldPos);
     normal = normalize(cross(dpdy, dpdx)); 
 #endif
-	
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
-    normal = tangentNormal;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL
-    normal = tbn[2];
-    normal.z = -normal.z;//compare gltf-sample-viewer
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT
-    normal = tbn[0];
-	normal.z = -normal.z;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT 
-    normal = tbn[1];
-	normal.z = -normal.z;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL 
-    normal.z = -normal.z;//compare gltf-sample-viewer
-#endif	
     return normal;
 }
 
@@ -215,19 +202,18 @@ float4 PS(PixelInput input) : SV_Target
     float3 basis_normal = normalize(input.TangentBasis[2]);
     normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
     //normal = normalize(mul(input.TangentBasis, normal));        
-#endif     
+#endif
     
 	float4 albedo = GetAlbedo(input.Tex);
 	float3 toLight = normalize(input.ToLight);
 	float3 toEye = normalize(input.ToEye);
+	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
+	float3 emissive = GetEmissive(input.Tex);
 #if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(toLight, normal, toEye, albedo.rgb, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
 	finalColor.rgb = UnityPbrLight(toLight, normal, toEye, albedo.rgb, aorm);
 #elif PBR_MODE == PBR_GLTF
-	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
-	float3 emissive = GetEmissive(input.Tex);
 	finalColor.rgb = GltfPbrLight(toLight, normal, toEye, albedo.rgb, aorm, emissive);
 #endif
     finalColor.a = 1.0;
@@ -237,12 +223,6 @@ float4 PS(PixelInput input) : SV_Target
 	//finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
 #endif
 	
-	//finalColor.xyz = albedo.xyz;
-	finalColor.xyz = input.Normal;
-	//finalColor.xyz = normal * 0.5 + 0.5;
-	//finalColor.xyz = toEye;
-	//finalColor.xyz = toLight;
-	//finalColor.xyz = aorm;
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     finalColor.rgb = float3(input.Tex, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
@@ -251,28 +231,30 @@ float4 PS(PixelInput input) : SV_Target
 	if (! EnableAmbientOcclusionMap)
 		finalColor.rgb = MakeDummyColor(normalize(input.ToEye));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_NORMAL_TEXTURE
-	if (EnableNormalMap) {
-		finalColor.xyz = normal;
-		finalColor.rgb = (finalColor.xyz + 1.0) / 2.0;
-	}
-	else {
-		finalColor.rgb = MakeDummyColor(normalize(input.ToEye));	
-	}
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT || DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
-	finalColor.xyz = normal;
-	finalColor.rgb = (finalColor.xyz + 1.0) / 2.0;
+	finalColor.rgb = EnableNormalMap ? MIR_SAMPLE_TEX2D(txNormal, GetUV(input.Tex, NormalUV)).xyz : MakeDummyColor(normalize(input.ToEye));
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_NORMAL
+	finalColor.rgb = input.Normal * float3(1.0,1.0,-1.0) * 0.5 + 0.5;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_TANGENT
+	finalColor.rgb = input.Tangent * float3(1.0,1.0,-1.0) * 0.5 + 0.5;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT
+	finalColor.rgb = MakeDummyColor(normalize(input.ToEye));
 #elif DEBUG_CHANNEL == DEBUG_WINDOW_POS
 	finalColor.xyz = float3(input.Pos.xy * FrameBufferSize.zw, 0);
-	finalColor.y = 1.0 - finalColor.y;
+	finalColor.y   = 1.0 - finalColor.y;
 #elif DEBUG_CHANNEL == DEBUG_CAMERA_POS
 	finalColor.xyz = CameraPosition.xyz;
-	finalColor.z = -finalColor.z;
-	finalColor.xyz = (finalColor.xyz + 1.0) / 2.0;
+	finalColor.z   = -finalColor.z;
+	finalColor.xyz = finalColor.xyz * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_SURFACE_POS
-	finalColor.xyz = input.SurfPos;
-	finalColor.z = -finalColor.z;
-	finalColor.xyz = (finalColor.xyz * 32 + 1.0) / 2.0;
+	finalColor.xyz = input.SurfPos * 32 * 0.5 + 0.5;
+	finalColor.z   = -finalColor.z;
 #endif
+	//finalColor.xyz = albedo.xyz;
+	//finalColor.xyz = input.Normal * 0.5 + 0.5;
+	//finalColor.xyz = normal * 0.5 + 0.5;
+	//finalColor.xyz = toEye;
+	//finalColor.xyz = toLight;
+	//finalColor.xyz = aorm;
 	return finalColor/* * input.Color*/;
 }
 

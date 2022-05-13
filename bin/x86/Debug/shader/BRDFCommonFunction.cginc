@@ -61,7 +61,4 @@ inline float3 SchlickFresnel(float3 F0, float3 F90, float VdotH)
     return F0 + (F90 - F0) * pow(1 - VdotH, 5);
 }
 
-#define VectorIdentity float3(1,1,1)
-#define DielectricSpec float4(0.04, 0.04, 0.04, 1.0 - 0.04)
-
 #endif

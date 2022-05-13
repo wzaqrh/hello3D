@@ -32,6 +32,7 @@ CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 		mMaterial = CoAwait mResMng.CreateMaterialT(__LaunchAsync__, mMaterial->GetLoadParam());
 	}
 #endif
+	CoReturn;
 }
 
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)

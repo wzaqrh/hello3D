@@ -73,4 +73,6 @@ inline float3 BlinnPhongLight(float3 toLight_, float3 normal, float3 toEye, floa
     return luminance * CalcLightAtten(lengthSq, toLight_, spotLight);
 }
 
+
+
 #endif

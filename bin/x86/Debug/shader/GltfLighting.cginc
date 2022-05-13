@@ -6,6 +6,8 @@
 #include "ToneMapping.cginc"
 #include "IBL.cginc"
 
+#define DielectricSpec float4(0.04, 0.04, 0.04, 1.0 - 0.04)
+
 float3 GltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, float3 ao_rough_metal, float3 emissive)
 {
     float3 halfView = normalize(toLight + toEye);
@@ -45,6 +47,7 @@ float3 GltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 	fcolor = toneMap(fcolor);
 #endif
 	
+    
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION
 	fcolor = linearTosRGB(float3(ao_rough_metal.x, ao_rough_metal.x, ao_rough_metal.x));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_EMISSIVE
@@ -88,6 +91,8 @@ float3 GltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 	fcolor = linearTosRGB(fcolor);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
     fcolor = linearTosRGB(albedo);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
+	fcolor.rgb = normal.xyz * float3(1.0,1.0,-1.0) * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC
     fcolor = linearTosRGB(float3(ao_rough_metal.z, ao_rough_metal.z, ao_rough_metal.z));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
