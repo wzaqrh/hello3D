@@ -9,6 +9,8 @@ struct FrameBufferBlock {
 		TemplateArgs Lock(FrameBufferBlock& block, T &&...args) :mBlock(block) { mBlock.Push(std::forward<T>(args)...); }
 		Lock(Lock&& other) :mBlock(other.mBlock), mCurrentCb(other.mCurrentCb) { other.mOwn = false; }
 		~Lock() { if (mOwn) { mBlock.Pop(); if (mCurrentCb) mCurrentCb(mBlock.GetCurrent()); } }
+		Lock(const Lock& other) = delete;
+		Lock& operator=(Lock&& other) = delete;
 		void SetCallback(std::function<void(IFrameBufferPtr)> cb) { mCurrentCb = cb; if (mCurrentCb) mCurrentCb(mBlock.GetCurrent()); }
 	private:
 		FrameBufferBlock& mBlock;
@@ -53,6 +55,7 @@ struct RasterizerStateBlock {
 		Lock(RasterizerStateBlock& block, const RasterizerState& state) :mBlock(block), mState(state) { block.Set(state); }
 		Lock(Lock&& other) :mBlock(other.mBlock), mState(other.mState) { other.mOwn = false; }
 		~Lock() { if (mOwn) mBlock.Set(mState); }
+		Lock(const Lock& other) = delete;
 		Lock& operator=(Lock&& other) = delete;
 		RasterizerStateBlock* operator->() { return &mBlock; }
 		void operator()(CullMode mode) { mBlock.Set(mode); }
@@ -106,6 +109,7 @@ struct BlendStateBlock {
 		Lock(BlendStateBlock& block, const BlendState& state) :mBlock(block), mState(state) { block.Set(state); }
 		Lock(Lock&& other) :mBlock(other.mBlock), mState(other.mState) { other.mOwn = false; }
 		~Lock() { if (mOwn) mBlock.Set(mState); }
+		Lock(const Lock& other) = delete;
 		Lock& operator=(Lock&& other) = delete;
 		BlendStateBlock* operator->() { return &mBlock; }
 		void operator()(const BlendState& state) { mBlock.Set(state); }
@@ -135,6 +139,7 @@ struct DepthStateBlock {
 		Lock(DepthStateBlock& block, const DepthState& state) :mBlock(block), mState(state) { block.Set(state); }
 		Lock(Lock&& other) :mBlock(other.mBlock), mState(other.mState) { other.mOwn = false; }
 		~Lock() { if (mOwn) mBlock.Set(mState); }
+		Lock(const Lock& other) = delete;
 		Lock& operator=(Lock&& other) = delete;
 		DepthStateBlock* operator->() { return &mBlock; }
 		void operator()(const DepthState& state) { mBlock.Set(state); }
@@ -163,6 +168,7 @@ struct TexturesBlock {
 		Lock(TexturesBlock& block, size_t slot, const ITexturePtr& state) :mBlock(block), mSlot(slot), mState(block.Get(slot)) { block.Set(slot, state); }
 		Lock(Lock&& other) :mBlock(other.mBlock), mSlot(other.mSlot), mState(other.mState) { other.mOwn = false; }
 		~Lock() { if (mOwn) mBlock.Set(mSlot, mState); }
+		Lock(const Lock& other) = delete;
 		Lock& operator=(Lock&& other) = delete;
 		TexturesBlock* operator->() { return &mBlock; }
 		void operator()(size_t slot, ITexturePtr state) { mBlock.Set(slot, state); }

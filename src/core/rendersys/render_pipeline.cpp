@@ -382,7 +382,7 @@ private:
 		mRenderSys.SetIndexBuffer(op.IndexBuffer);
 		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->GetProgram());
 
-		const TextureVector& textures = op.Material->GetTextures();
+		const TextureVector& textures = op.Material.GetTextures();
 		if (textures.Count() > 0) mStatesBlock.Textures(kTextureUserSlotFirst, &textures[0], textures.Count());
 		else mStatesBlock.Textures(kTextureUserSlotFirst, nullptr, 0);
 

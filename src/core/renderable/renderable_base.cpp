@@ -15,7 +15,7 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 
 const ITexturePtr& RenderableSingleRenderOp::GetTexture() const 
 {
-	return mMaterial->GetTextures()[0];
+	return mMaterial.GetTextures()[0];
 }
 
 Eigen::AlignedBox3f RenderableSingleRenderOp::GetWorldAABB() const
@@ -29,7 +29,7 @@ CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 {
 #if MIR_MATERIAL_HOTLOAD
 	if (mMaterial && mMaterial->IsOutOfDate()) {
-		mMaterial = CoAwait mResMng.CreateMaterialT(__LaunchAsync__, mMaterial->GetLoadParam());
+		CoAwait mMaterial.Reload(mLaunchMode, mResMng);
 	}
 #endif
 	CoReturn;
@@ -37,7 +37,7 @@ CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
 {
-	mMaterial->GetTextures()[0] = texture;
+	mMaterial.GetTextures()[0] = texture;
 }
 
 bool RenderableSingleRenderOp::IsLoaded() const
