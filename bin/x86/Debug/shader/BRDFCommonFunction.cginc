@@ -26,7 +26,7 @@ inline float3 DisneyDiffuse(float nv, float nl, float lh, float perceptualRoughn
     float fd90 = 0.5 + 2 * lh * lh * perceptualRoughness;
     float lightScatter = (1 + (fd90 - 1) * Pow5(1 - nl));
     float viewScatter  = (1 + (fd90 - 1) * Pow5(1 - nv));
-    return baseColor / MIR_PI * lightScatter * viewScatter;
+    return baseColor * lightScatter * viewScatter;
 }
 inline float3 LambertDiffuse(float3 baseColor)
 {

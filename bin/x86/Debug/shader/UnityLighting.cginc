@@ -5,12 +5,13 @@
 #include "BRDFCommonFunction.cginc"
 #include "ToneMapping.cginc"
 
+
 #define VectorIdentity float3(1,1,1)
 #define DielectricSpec float4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
 float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_rough_metal)
 {
 	l = normalize(l);
-    float3 h = normalize(l + v);
+    float3 h = SafeNormalize(l + v);
 
     float nv = abs(dot(n, v));
 
@@ -26,16 +27,21 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_roug
     
 #if 1
     #define _SPECULARHIGHLIGHTS_OFF 1
+    #define PBS3 1
     metalness = 0.0;
-    perceptualRoughness = 1.0;
+    perceptualRoughness = 0.0;
 #endif
     
     //diffuse color
-    float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, albedo * MIR_PI);
+    float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, float3(1,1,1));
     float reflectivity = lerp(DielectricSpec.x, 1, metalness);
     float kd = 1.0f - reflectivity;
-	float3 diffuse_color = kd * unity_LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
-
+	float3 diffuse_color = kd * albedo * unity_LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
+	//diffuse_color = kd * albedo * unity_LightColor.rgb * nl;
+	
+    #if PBS3
+        //diffuse_color = kd * albedo * unity_LightColor.rgb * nl;
+    #endif
     //D, V
     float roughness = max(perceptualRoughness * perceptualRoughness, 0.002);
     float D = GGXTRDistribution(nh, roughness);
@@ -69,7 +75,7 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_roug
     float3 f90_ = saturate(1.0 - perceptualRoughness + reflectivity);
     float3 grazing_color = SchlickFresnel(f0, f90_, nv);
      
-    float3 finalColor = diffuse_color + specular_color;
+    float3 finalColor = diffuse_color;// + specular_color;
 #if TONEMAP_MODE
 	finalColor = toneMap(finalColor);
 #endif
@@ -79,18 +85,22 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float3 albedo, float3 ao_roug
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
     finalColor = n * 0.5 + 0.5;
 #endif
+	//finalColor = albedo * (1.0 - reflectivity);
+    //finalColor = n * 0.5 + 0.5;
 
     //finalColor = float3(1.0,0.0,0.0);
     //finalColor = albedo;
     //finalColor = n * 0.5 + 0.5;
     //finalColor = VectorIdentity * -n;
-    //finalColor = VectorIdentity * -v;
-    //finalColor = VectorIdentity * -l;
+    //finalColor = VectorIdentity * v * 0.5 + 0.5;
+    //finalColor = VectorIdentity * l;
     //finalColor = VectorIdentity * -h;
     //finalColor = VectorIdentity * nl;
+    //finalColor = VectorIdentity * (1-0.5*Pow5(1-nl));
+    //finalColor = VectorIdentity * nv;
+    //finalColor = VectorIdentity * (1-0.5*Pow5(1-nv));
     //finalColor = VectorIdentity * lh;
     //finalColor = VectorIdentity * nh;
-    //finalColor = VectorIdentity * nv;
     return finalColor;
 }
 

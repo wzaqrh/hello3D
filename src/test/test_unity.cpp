@@ -24,7 +24,7 @@ CoTask<bool> TestUnity::OnInitScene()
 	switch (mCaseIndex) {
 	case 0:
 	case 1: {
-		camera->SetLookAt(Eigen::Vector3f(0, 1, -10), Eigen::Vector3f::Zero());
+		camera->SetLookAt(Eigen::Vector3f(0, 0, -10), Eigen::Vector3f::Zero());
 
 		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
 		dir_light->SetLookAt(Eigen::Vector3f(0, 3, 0), Eigen::Vector3f::Zero());

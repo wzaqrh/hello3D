@@ -5,17 +5,17 @@
 	<Properties>
 		<EnableAlbedoMap>1</EnableAlbedoMap>
 		<AlbedoMapSRGB>0</AlbedoMapSRGB>
-		<txAlbedo>Intergalactic Spaceship_color_4.png</txAlbedo>
+		<txAlbedo>Intergalactic Spaceship_color_4-flip.png</txAlbedo>
 		
-		<EnableNormalMap>0</EnableNormalMap>
+		<EnableNormalMap>1</EnableNormalMap>
 		<HasTangent>1</HasTangent>
-		<txNormal>Intergalactic Spaceship_nmap_2_Tris.png</txNormal>
+		<txNormal>Intergalactic Spaceship_nmap_2_Tris-flip.png</txNormal>
 		
-		<EnableMetalnessMap>1</EnableMetalnessMap>
-		<txMetalness>Intergalactic Spaceship_metalness.png</txMetalness>
+		<EnableMetalnessMap>0</EnableMetalnessMap>
+		<txMetalness>Intergalactic Spaceship_metalness-flip.png</txMetalness>
 		
 		<EnableRoughnessMap>0</EnableRoughnessMap>
-		<txRoughness>Intergalactic Spaceship_rough.png</txRoughness>
+		<txRoughness>Intergalactic Spaceship_nmap_2_Tris-flip.png</txRoughness>
 		
 		<AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>0</AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>
 		

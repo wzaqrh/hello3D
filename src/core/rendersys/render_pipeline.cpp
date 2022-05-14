@@ -41,6 +41,9 @@ struct cbPerFrameBuilder {
 
 		mCBuffer.ViewInv = mCBuffer.View.inverse();
 		mCBuffer.ProjectionInv = mCBuffer.Projection.inverse();
+
+		mCBuffer.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
+		mCBuffer.CameraPosition.w() = 1.0f;
 		return *this;
 	}
 	void SetBackFrameBufferSize(Eigen::Vector2i backBufferSize) {

@@ -256,9 +256,6 @@
     <ClInclude Include="..\src\core\resource\material_property.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\mir_config_macros.h">
-      <Filter>src\shader\inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\renderable\paint3d.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>

@@ -24,6 +24,7 @@
 
 #define VEC_ASSIGN(DST, SRC) static_assert(sizeof(DST) == sizeof(SRC)); memcpy(DST.data(), &SRC, sizeof(SRC))
 #define VEC_ASSIGN1(DST, SRC, SIZE) static_assert(sizeof(DST) == SIZE); memcpy(DST.data(), &SRC, SIZE)
+#define VEC_ASSIGN2(DST, SRC, SIZE) memcpy(DST.data(), &SRC, sizeof(SRC))
 
 namespace mir {
 namespace res {
@@ -224,7 +225,8 @@ private:
 			#if !defined EIGEN_DONT_ALIGN_STATICALLY
 				skeletonVerts[vertexId].Tangent = AS_CONST_REF(Eigen::Vector3f, rawMesh->mTangents[vertexId]);
 			#else
-				VEC_ASSIGN(skeletonVerts[vertexId].Tangent, rawMesh->mTangents[vertexId]);
+				VEC_ASSIGN2(skeletonVerts[vertexId].Tangent, rawMesh->mTangents[vertexId]);
+				skeletonVerts[vertexId].Tangent.w() = 1.0f;
 			#endif
 			}
 		}
@@ -401,15 +403,23 @@ private:
 			Eigen::Vector2f deltaUV1 = uv1 - uv0;
 			Eigen::Vector2f deltaUV2 = uv2 - uv0;
 			float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
-			Eigen::Vector3f tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
-			skin0.Tangent = skin0.Tangent + tangent;
-			skin1.Tangent = skin1.Tangent + tangent;
-			skin2.Tangent = skin2.Tangent + tangent;
+			Eigen::Vector3f tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r; tangent.normalize();
+			skin0.Tangent.head<3>() = skin0.Tangent.head<3>() + tangent;
+			skin1.Tangent.head<3>() = skin1.Tangent.head<3>() + tangent;
+			skin2.Tangent.head<3>() = skin2.Tangent.head<3>() + tangent;
 
-			Eigen::Vector3f bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r;
+			Eigen::Vector3f bitangent = (deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r; bitangent.normalize();
 			skin0.BiTangent = skin0.BiTangent + bitangent;
 			skin1.BiTangent = skin1.BiTangent + bitangent;
 			skin2.BiTangent = skin2.BiTangent + bitangent;
+		}
+		for (auto& skin : skeletonVerts) {
+			skin.Tangent.head<3>().normalize();
+			skin.BiTangent.normalize();
+
+			float dp = skin.BiTangent.head<3>().dot(skin.Normal.cross(skin.Tangent.head<3>()));
+			if (dp < 0.0f) skin.Tangent.w() = -1.0;
+			else skin.Tangent.w() = 1.0;
 		}
 	}
 	CoTask<bool> ExecuteSetupData() {

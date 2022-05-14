@@ -69,6 +69,14 @@
 #define PBR_MODE 1/*PBR_UNITY*/
 #endif
 
+#if !defined COLORSPACE_GAMMA
+#define COLORSPACE_GAMMA 1
+#endif
+
+#if !defined RIGHT_HANDNESS_RESOURCE
+#define RIGHT_HANDNESS_RESOURCE 1
+#endif
+
 #if !defined CubeMapIsRightHandness
 #define CubeMapIsRightHandness 1
 #endif

@@ -52,7 +52,10 @@ cbuffer cbModel : register(b3)
 }
 
 inline float2 GetUV(float2 uv, float4 uvTransform) {
-	return uvTransform.xy + uv * uvTransform.zw * float2(1.0,-1.0);
+#if RIGHT_HANDNESS_RESOURCE
+	//uv *= float2(1.0,-1.0);
+#endif
+	return uvTransform.xy + uv * uvTransform.zw;
 }
 
 inline float4 GetAlbedo(float2 uv) 
@@ -96,27 +99,34 @@ inline float3 GetAmbientOcclusionRoughnessMetalness(float2 uv)
     return value;
 }
 
-inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent)
+inline float3 GetNormal(float2 uv, float3 worldPos, float3 worldNormal, float3 tangent, float3 bitangent)
 {
 	float3 normal;
-#if USE_NORMAL
-    if (EnableNormalMap) {
-		float3x3 tbn;
-		if (HasTangent) tbn = GetTBN(worldNormal, normalize(tangent));
-		else tbn = GetTBN(uv, worldPos, worldNormal);
 	
+#if ! USE_NORMAL
+	float3 dpx = ddx(worldPos);
+	float3 dpy = ddy(worldPos);
+    worldNormal = normalize(cross(dpy, dpx));
+#endif
+
+    if (EnableNormalMap) {
+	#if NORMAL_PACKED
+		float3 tangentNormal = UnpackScaleNormalRGorAG(MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)), NormalScale);
+	#else
 		float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)).xyz * 2.0 - 1.0;
 		tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0));
-        normal = normalize(mul(tangentNormal, tbn));
-    }
+	#endif
+	
+	#if 1	
+		normal = normalize(tangent * tangentNormal.x + bitangent * tangentNormal.y + worldNormal * tangentNormal.z);
+    #else
+		float3x3 tbn = HasTangent ?  GetTBN(normalize(tangent), worldNormal) : GetTBN(worldPos, uv, worldNormal);
+		normal = normalize(mul(tangentNormal, tbn));
+	#endif
+	}
 	else {
 		normal = worldNormal;
 	}
-#else
-	float3 dpdx = ddx(worldPos);
-	float3 dpdy = ddy(worldPos);
-    normal = normalize(cross(dpdy, dpdx)); 
-#endif
     return normal;
 }
 
@@ -126,10 +136,11 @@ struct PixelInput
     float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD0;
 	float4 Color : COLOR;
-	float3 Normal : NORMAL0;//world space
-    float3 Tangent : NORMAL1;
 	float3 ToEye  : TEXCOORD1;//world space
 	float3 ToLight : TEXCOORD2;//world space
+	float4 Normal : TEXCOORD3;//world space
+    float4 Tangent : TEXCOORD4;
+	float4 BiTangent : TEXCOORD5;
 #if ENABLE_SHADOW_MAP
 	float4 ViewPosLight : POSITION0;
 	float4 PosLight : POSITION1; //light's ndc space
@@ -145,20 +156,28 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 {
 	PixelInput output;
 	matrix MW = mul(World, transpose(Model));
-	
-	//Normal && Tangent
-	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
-	output.Normal = normalize(mul(MW, skinNormal).xyz);
-	
-    float4 skinTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Tangent.xyz, 0.0));
-	output.Tangent = normalize(mul(MW, skinTangent).xyz);
-    
-	//ToEye
+		
+	//WorldPos
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
 	output.Pos = mul(MW, float4(surf.Pos.xyz, 1.0));
 	
-	output.ToEye = CameraPosition.xyz - output.Pos.xyz;
-    
+	//Normal && Tangent && BiTangent
+	float4 skinNormal = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Normal.xyz, 0.0));
+	output.Normal.xyz = normalize(mul(MW, skinNormal).xyz);
+	output.Normal.w = output.Pos.z;
+	
+    float4 skinTangent = Skinning(skin.BlendWeights, skin.BlendIndices, float4(skin.Tangent.xyz, 0.0));
+	output.Tangent.xyz = normalize(mul(MW, skinTangent).xyz);
+	output.Tangent.w = output.Pos.x;
+	
+	output.BiTangent.xyz = cross(output.Normal.xyz, output.Tangent.xyz) * skin.Tangent.w;
+	output.BiTangent.w = output.Pos.y;
+	
+	//ToEye
+	output.ToEye = CameraPosition.xyz - output.Pos.xyz;// * float3(-1,1,-1);
+	
+	//output.ToEye = CameraPosition.xyz - mul(transpose(Model), float4(surf.Pos.xyz, 1.0)).xyz;
+	
 	//PosLight
 #if ENABLE_SHADOW_MAP
 	output.ViewPosLight = mul(LightView, output.Pos);
@@ -194,19 +213,21 @@ float4 PS(PixelInput input) : SV_Target
 	float4 finalColor;
     
 #if DEBUG_TBN != 2
-    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent);
+	float3 bitangent = input.BiTangent.xyz;
+	float3 vp = mul(View, float4(input.SurfPos, 1.0)).xyz;
+    float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal.xyz, input.Tangent.xyz, bitangent);
 #else        
     float3 normal = normalize(2.0 * MIR_SAMPLE_TEX2D(txNormal, input.Tex).xyz - 1.0);
     float3 basis_tangent = normalize(input.TangentBasis[0]);
     float3 basis_bitangent = normalize(input.TangentBasis[1]);
     float3 basis_normal = normalize(input.TangentBasis[2]);
-    normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));
-    //normal = normalize(mul(input.TangentBasis, normal));        
+    normal = normalize(float3(dot(basis_tangent, normal), dot(basis_bitangent, normal), dot(basis_normal, normal)));     
 #endif
     
 	float4 albedo = GetAlbedo(input.Tex);
 	float3 toLight = normalize(input.ToLight);
 	float3 toEye = normalize(input.ToEye);
+	//float3 toEye = normalize(CameraPosition.xyz - input.SurfPos);
 	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
 	float3 emissive = GetEmissive(input.Tex);
 #if !PBR_MODE
@@ -262,7 +283,7 @@ float4 PS(PixelInput input) : SV_Target
 float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
-	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent);
+	float3 normal = GetNormal(input.Tex, input.SurfPos, input.Normal.xyz, input.Tangent.xyz, input.BiTangent.xyz);
 	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex).rgb, IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
@@ -411,7 +432,7 @@ PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 	PSPrepassBaseOutput output;
 	output.Pos = float4(input.Pos.xyz / input.Pos.w * 0.5 + 0.5, 1.0);
 	float3 aorm = GetAmbientOcclusionRoughnessMetalness(input.Tex);
-	output.Normal = float4(GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent) * 0.5 + 0.5, aorm.x);
+	output.Normal = float4(GetNormal(input.Tex, input.SurfPos, input.Normal, input.Tangent, input.Tangent) * 0.5 + 0.5, aorm.x);
 	output.Albedo = float4(GetAlbedo(input.Tex).xyz, aorm.y);
 	output.Emissive = float4(GetEmissive(input.Tex).xyz, aorm.z);
 	return output;

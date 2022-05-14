@@ -3,46 +3,80 @@
 #include "HLSLSupport.cginc"
 #include "Macros.cginc"
 
-//world normal coordinate system
-inline float3x3 GetTBN(float3 normal, float3 tangent)
+inline float3x3 GetTBN(float3 T, float3 N)
 {
-	float3 bitangent = cross(tangent, normal); //normal劾翌, tangent劾嘔
-    return float3x3(tangent, bitangent, normal);
+	float3 B = cross(N, T);
+    return float3x3(T, B, N);
 }
-inline float3x3 GetTBN(float2 t, float3 worldPos, float3 worldNormal)
+/*
+dPos = k，dTex
+=>
+|dp0|   |du0 dv0| |T|
+|dp1| = |du1 dv1|，|B|，k
+=>
+|T|      | dv1 -dv1| |dpx|
+|B| = k'，|-du0  du0|，|dpy|
+	    ---------------
+      du0，dv1 - du1，dv0
+		
+|dpx|   |dtx.x dtx.y| |T|
+|dpy| = |dty.x dty.y|，|B|
+=>
+|T|   | dty.y -dtx.y| |dpx|
+|B| = |-dty.x  dtx.x|，|dpy|
+	  ---------------
+ dtx.x，dty.y - dty.x，dtx.y
+*/
+inline float3x3 GetTBN(float3 worldPos, float2 uv, float3 N)
 {
     float3 dpx = ddx(worldPos);
     float3 dpy = ddy(worldPos);
-    float2 dtx = ddx(t);
-    float2 dty = ddy(t);
-
-#if 0
-    float3 N = normalize(cross(dpx, dpy));
-#else
-    float3 N = worldNormal;
-#endif  
-    
-    float3 T = - dpx * dty.y + dpy * dtx.y;
+    float2 dtx = ddx(uv);
+    float2 dty = ddy(uv);
+	float det = dtx.x * dty.y - dty.x * dtx.y;
+	
+    float3 T = (dty.y * dpx - dtx.y * dpy) / det;
     T = normalize(T - dot(T,N) * N);
-    float3 B = normalize(cross(T, N));
-    
+
+    float3 B = normalize(cross(N, T));
+
     return float3x3(T, B, N);
 }
 
-inline float3x3 GetTBN(float2 uv, float3 worldPos)
+inline float3x3 GetTBN(float3 worldPos, float2 uv)
 {
-	float3 dpdx = ddx(worldPos);
-	float3 dpdy = ddy(worldPos);
-	float2 duvdx = ddx(uv);
-	float2 duvdy = ddy(uv);
+    float3 dpx = ddx(worldPos);
+    float3 dpy = ddy(worldPos);
+    float2 dtx = ddx(uv);
+    float2 dty = ddy(uv);
+	float det = dtx.x * dty.y - dty.x * dtx.y;
+	
+	float3 N = normalize(cross(dpy, dpx));
+	
+    float3 T = (dty.y * dpx - dtx.y * dpy) / det;
+    T = normalize(T - dot(T,N) * N);
 
-	float3 N = normalize(cross(dpdy, dpdx));
-    
-	float3 T = -dpdx * duvdy.y + dpdy * duvdx.y;
-	T = normalize(T - dot(T, N) * N);
-	float3 B = normalize(cross(T, N));
-    
-	return float3x3(T, B, N);
+    float3 B = normalize(cross(N, T));
+
+    return float3x3(T, B, N);
+}
+
+float3 UnpackScaleNormalRGorAG(float4 packednormal, float bumpScale)
+{
+#if defined(NO_DXT5nm)
+    half3 normal = packednormal.xyz * 2 - 1;
+    normal.xy *= bumpScale;
+    return normal;
+#else
+    // This do the trick
+	packednormal.x *= packednormal.w;
+
+	float3 normal;
+	normal.xy = (packednormal.xy * 2 - 1);
+    normal.xy *= bumpScale;
+	normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+	return normal;
+#endif
 }
 
 float2 DepthGradient(float2 uv, float z)
