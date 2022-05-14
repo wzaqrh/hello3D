@@ -722,20 +722,21 @@ private:
 		}
 	}
 	bool VisitMaterial(const MaterialLoadParam& loadParam, const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
+		auto find_useShader = nodeMaterial->find("UseShader");
+		if (find_useShader == nodeMaterial->not_found()) return false;
+		
 		MaterialLoadParamBuilder paramBuilder = MaterialLoadParamBuilder(loadParam);
 		for (auto& mit : boost::make_iterator_range(nodeMaterial->equal_range("Macros"))) {
 			auto& node_macros = mit.second;
 			for (auto& it : node_macros)
 				paramBuilder[it.first] = boost::lexical_cast<int>(it.second.data());
 		}
-
-		auto find_useShader = nodeMaterial->find("UseShader");
-		if (find_useShader == nodeMaterial->not_found()) return false;
-
-		materialNode.LoadParam = paramBuilder.Build();
+		materialNode.LoadParam = paramBuilder;
 		materialNode.LoadParam.ShaderVariantName = find_useShader->second.data();
-		if (!mShaderMng->GetShaderNode(materialNode.LoadParam, materialNode.Shader)) return false;
+		if (!mShaderMng->GetShaderNode(materialNode.LoadParam, materialNode.Shader)) 
+			return false;
 		materialNode.Property->DependSrc.Shaders = materialNode.Shader.DependShaders.Shaders;
+		materialNode.LoadParam = loadParam;
 
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
 			VisitProperties(it.second, materialNode);

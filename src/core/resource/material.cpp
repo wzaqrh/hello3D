@@ -81,7 +81,8 @@ MaterialInstance::MaterialInstance(const MaterialPtr& material, const TextureVec
 }
 CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng)
 {
-	*this = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	*mSelf = *mtl.mSelf;
 	CoReturn true;
 }
 

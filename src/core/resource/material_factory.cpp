@@ -122,7 +122,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 		material->mProperty = materialNode.Property;
 		material->mShader = CreateInstance<Shader>();
 		tasks.push_back(DoCreateShader(launchMode, material->mShader, resMng, materialNode.Shader));
-		material->mLoadParam = MaterialLoadParamBuilder(materialNode.LoadParam);
+		material->mLoadParam = materialNode.LoadParam;
 
 		boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.Property->DependSrc.Material.FilePath)); assetPath.remove_filename();
 		material->mTextures.Resize(kTextureUserSlotCount);
