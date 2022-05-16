@@ -42,6 +42,7 @@
     <ClInclude Include="..\src\core\base\data.h" />
     <ClInclude Include="..\src\core\base\debug.h" />
     <ClInclude Include="..\src\core\base\declare_macros.h" />
+    <ClInclude Include="..\src\core\base\deffered_signal.h" />
     <ClInclude Include="..\src\core\base\il_helper.h" />
     <ClInclude Include="..\src\core\base\input.h" />
     <ClInclude Include="..\src\core\base\launch.h" />

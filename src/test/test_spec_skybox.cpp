@@ -17,7 +17,7 @@ CoTask<bool> TestSpecSkybox::OnInitScene()
 {
 	switch (mCaseIndex) {
 	case 0: {
-		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 		MaterialLoadParamBuilder matname = MAT_SKYBOX;
 		matname["CubeMapIsRightHandness"] = TRUE;
 		if (mCaseSecondIndex == 0)
@@ -26,15 +26,15 @@ CoTask<bool> TestSpecSkybox::OnInitScene()
 			camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::sky::footprint_court::Specular(), matname));
 	}break;
 	case 1: {
-		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(mCaseSecondIndex % 3)));//bc1a mipmap cube
 	}break;
 	case 2: {
-		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateCameraNode(kCameraOthogonal);
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));//bc1a mipmap cube
 	}break;
 	case 3: {
-		CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+		CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), MAT_SKYBOX "-Deprecate"));//bc1a mipmap cube
 	}break;
 	default:

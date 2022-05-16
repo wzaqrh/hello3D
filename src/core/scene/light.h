@@ -109,23 +109,31 @@ public:
 	DirectLightPtr CreateDirectLight();
 	PointLightPtr CreatePointLight();
 	SpotLightPtr CreateSpotLight();
-
-	template<typename LightClass, typename... T> std::shared_ptr<LightClass> CreateLight(T &&...args) {
-		return CreateLightFunctor<LightClass>()(*this, std::forward<T>(args)...);
+	TemplateArgs LightPtr CreateLightByType(LightType type, T &&...args) {
+		if (type == kLightDirectional) return CreateDirectLight(std::forward<T>(args)...);
+		else if (type == kLightPoint) return CreatePointLight(std::forward<T>(args)...);
+		else return CreateSpotLight(std::forward<T>(args)...);
 	}
+	template<typename LightClass, typename... T> std::shared_ptr<LightClass> CreateLight(T &&...args) {
+		if constexpr (std::is_same<LightClass, DirectLight>::value) return CreateDirectLight();
+		else if constexpr (std::is_same<LightClass, PointLight>::value) return CreatePointLight();
+		else if constexpr (std::is_same<LightClass, SpotLight>::value) return CreateSpotLight();
+		else static_assert(false);
+	}
+
+#if LIGHT_FAC_CACHE
+	const std::vector<scene::LightPtr>& GetLights() const { return mLights; }
+	scene::LightPtr GetDefLight() const { return GetLights().size() ? GetLights()[0] : nullptr; }
+#endif
 private:
-	template<typename LightClass> struct CreateLightFunctor {};
-	template<> struct CreateLightFunctor<DirectLight> {
-		TemplateArgs DirectLightPtr operator()(LightFactory& __this, T &&...args) const { return __this.CreateDirectLight(std::forward<T>(args)...); }
-	};
-	template<> struct CreateLightFunctor<PointLight> {
-		TemplateArgs PointLightPtr operator()(LightFactory& __this, T &&...args) const { return __this.CreatePointLight(std::forward<T>(args)...); }
-	};
-	template<> struct CreateLightFunctor<SpotLight> {
-		TemplateArgs SpotLightPtr operator()(LightFactory& __this, T &&...args) const { return __this.CreateSpotLight(std::forward<T>(args)...); }
-	};
+	void DoAddLight(scene::LightPtr light);
+	void ResortLights();
 private:
 	int mDefCameraMask = -1;
+#if LIGHT_FAC_CACHE
+	std::vector<scene::LightPtr> mLights;
+	bool mLightsDirty = false;
+#endif
 };
 }
 }

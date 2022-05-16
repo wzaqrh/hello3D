@@ -169,23 +169,48 @@ void PointLight::UpdateLightCamera(const Eigen::AlignedBox3f& sceneAABB)
 DirectLightPtr LightFactory::CreateDirectLight()
 {
 	DirectLightPtr light = CreateInstance<DirectLight>();
-	light->SetCameraMask(mDefCameraMask);
+	DoAddLight(light);
 	return light;
 }
 
 PointLightPtr LightFactory::CreatePointLight()
 {
 	PointLightPtr light = CreateInstance<PointLight>();
-	light->SetCameraMask(mDefCameraMask);
+	DoAddLight(light);
 	return light;
 }
 
 SpotLightPtr LightFactory::CreateSpotLight()
 {
 	SpotLightPtr light = CreateInstance<SpotLight>();
-	light->SetCameraMask(mDefCameraMask);
+	DoAddLight(light);
 	return light;
 }
+
+void LightFactory::DoAddLight(scene::LightPtr light)
+{
+	light->SetCameraMask(mDefCameraMask);
+#if LIGHT_FAC_CACHE
+	mLights.push_back(light);
+	mLightsDirty = true;
+#endif
+}
+
+#if LIGHT_FAC_CACHE
+void LightFactory::ResortLights()
+{
+	if (mLightsDirty) {
+		mLightsDirty = false;
+
+		struct CompLightByType {
+			bool operator()(const LightPtr& l, const LightPtr& r) const {
+				return l->GetType() < r->GetType();
+			}
+		};
+		std::sort(mLights.begin(), mLights.end(), CompLightByType());
+	}
+}
+#endif
 
 }
 }

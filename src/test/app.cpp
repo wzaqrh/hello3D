@@ -48,11 +48,11 @@ CoTask<bool> App::InitScene()
 }
 void App::OnInitCamera()
 {
-	mContext->SceneMng()->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	mContext->SceneMng()->CreateCameraNode(kCameraPerspective);
 }
 void App::OnInitLight()
 {
-	mContext->SceneMng()->CreateAddLightNode<PointLight>();
+	mContext->SceneMng()->CreateLightNode(kLightPoint);
 }
 
 CoTask<void> App::Render()

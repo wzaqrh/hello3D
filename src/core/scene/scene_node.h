@@ -32,6 +32,8 @@ public:
 	template<> const scene::LightPtr& GetComponent<scene::Light>() const { return mLight; }
 	template<> const scene::CameraPtr& GetComponent<scene::Camera>() const { return mCamera; }
 private:
+	void FireSetComponenteEvent();
+private:
 	TransformPtr mTransform;
 	RenderablePtr mRenderable;
 	scene::LightPtr mLight;

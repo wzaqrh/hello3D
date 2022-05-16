@@ -34,30 +34,30 @@ CoTask<bool> TestLight::OnInitScene()
 
 	switch (caseIndex) {
 	case 0: {
-		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(Eigen::Vector3f(0, 10, -5));
+		mScneMng->CreateLightNode<PointLight>()->SetPosition(Eigen::Vector3f(0, 10, -5));
 	}break;
 	case 1: {
-		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(Eigen::Vector3f(-10, 0, -5));
+		mScneMng->CreateLightNode<PointLight>()->SetPosition(Eigen::Vector3f(-10, 0, -5));
 	}break;
 	case 2: {
-		mScneMng->CreateAddLightNode<PointLight>()->SetPosition(Eigen::Vector3f(10, 0, 0));
+		mScneMng->CreateLightNode<PointLight>()->SetPosition(Eigen::Vector3f(10, 0, 0));
 	}break;
 	case 3: {
-		auto pt_light = mScneMng->CreateAddLightNode<PointLight>();
+		auto pt_light = mScneMng->CreateLightNode<PointLight>();
 		pt_light->SetPosition(Eigen::Vector3f(15, -15, -10));
 		pt_light->SetAttenuation(0.01);
 	}break;
 	default: {
-		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(25, 0, 5));
-		mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, 0, 1));
+		mScneMng->CreateLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(25, 0, 5));
+		mScneMng->CreateLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}
 
-	CameraPtr camera = mScneMng->CreateAddCameraNode((CameraType)cameraType, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateCameraNode((CameraType)cameraType);
 	camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
 
 	mModel = CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL);
-	mScneMng->AddRendNode(mModel);
+	mScneMng->AddRendAsNode(mModel);
 	mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 	CoReturn true;
 }

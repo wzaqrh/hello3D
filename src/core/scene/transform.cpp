@@ -10,25 +10,24 @@ BaseTransform::BaseTransform()
 	mPosition = math::vec::Zero();
 	mQuat = Eigen::Quaternionf::Identity();
 	mSRT = Eigen::Matrix4f::Identity();
-	mDirty = mChanged = false;
 }
 
 void BaseTransform::SetLocalPosition(const Eigen::Vector3f& position)
 {
 	mPosition = position;
-	mDirty = true;
+	mSignal();
 }
 
 void BaseTransform::SetLocalScale(const Eigen::Vector3f& scale)
 {
 	mScale = scale;
-	mDirty = true;
+	mSignal();
 }
 
 void BaseTransform::SetLocalRotation(const Eigen::Quaternionf& quat)
 {
 	mQuat = quat;
-	mDirty = true;
+	mSignal();
 }
 void BaseTransform::SetLocalEulerAngles(const Eigen::Vector3f& euler)
 {
@@ -40,12 +39,11 @@ void BaseTransform::RotateAround(const Eigen::Vector3f& point, const Eigen::Vect
 {
 	auto quat = Eigen::AngleAxisf(angle / boost::math::constants::radian<float>(), axis);
 	mPosition = point + quat * (mPosition - point);
-	mDirty = true;
+	mSignal();
 }
 
 CoTask<void> BaseTransform::UpdateFrame()
 {
-	mChanged = false;
 	CoReturn;
 }
 
@@ -61,6 +59,7 @@ void BaseTransform::CalculateTSR(Eigen::Matrix4f& matrix) const
 	matrix = t.matrix();
 }
 #endif
+
 void BaseTransform::CalculateSRT(Eigen::Matrix4f& matrix) const
 {
 	Transform3fAffine t = Transform3fAffine::Identity();
@@ -71,16 +70,10 @@ void BaseTransform::CalculateSRT(Eigen::Matrix4f& matrix) const
 	t.pretranslate(mPosition);
 	matrix = t.matrix();
 }
-void BaseTransform::CheckDirtyAndRecalculate() const
-{
-	if (mDirty) {
-		mDirty = false;
-		CalculateSRT(mSRT);
-	}
-}
 const Eigen::Matrix4f& BaseTransform::GetSRT() const
 {
-	CheckDirtyAndRecalculate();
+	if (mSignal.Slot.AcquireSignal()) 
+		CalculateSRT(mSRT);
 	return mSRT;
 }
 
@@ -118,7 +111,7 @@ void Transform::SetParent(TransformPtr parent, bool worldPositionStays)
 		SetLocalScale(t.affine().diagonal().head<3>());
 	}
 
-	mDirty = true;
+	mSignal();
 }
 
 void Transform::SetPosition(const Eigen::Vector3f& position)
@@ -129,7 +122,7 @@ void Transform::SetPosition(const Eigen::Vector3f& position)
 	else {
 		mPosition = position;
 	}
-	mDirty = true;
+	mSignal();
 }
 void Transform::SetScale(const Eigen::Vector3f& s)
 {
@@ -140,7 +133,7 @@ void Transform::SetScale(const Eigen::Vector3f& s)
 	else {
 		mScale = s;
 	}
-	mDirty = true;
+	mSignal();
 }
 void Transform::SetRotation(const Eigen::Quaternionf& quat)
 {
@@ -152,7 +145,7 @@ void Transform::SetRotation(const Eigen::Quaternionf& quat)
 	else {
 		mQuat = quat;
 	}
-	mDirty = true;
+	mSignal();
 }
 void Transform::SetEulerAngles(const Eigen::Vector3f& euler)
 {
@@ -166,13 +159,13 @@ void Transform::LookAt(const Eigen::Vector3f& at)
 	auto forward = at - GetPosition();
 	this->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mForwardLength = forward.norm();
-	mDirty = true;
+	mSignal();
 }
 void Transform::LookForward(const Eigen::Vector3f& forward)
 {
 	this->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mForwardLength = 1;
-	mDirty = true;
+	mSignal();
 }
 
 void Transform::Translate(const Eigen::Vector3f& translation, RelativeSpace relativeTo)
@@ -188,8 +181,7 @@ void Transform::Translate(const Eigen::Vector3f& translation, RelativeSpace rela
 
 		mPosition = t.translation();
 	}
-
-	mDirty = true;
+	mSignal();
 }
 void Transform::Rotate(const Eigen::Vector3f& euler, RelativeSpace relativeTo)
 {
@@ -209,8 +201,7 @@ void Transform::Rotate(const Eigen::Vector3f& euler, RelativeSpace relativeTo)
 		mPosition = t.translation();
 		mQuat = Eigen::Quaternionf(t.rotation());
 	}
-
-	mDirty = true;
+	mSignal();
 }
 
 TransformPtr Transform::GetRoot() const

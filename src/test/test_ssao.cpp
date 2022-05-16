@@ -29,7 +29,7 @@ CoTask<bool> TestSSAO::OnInitScene()
 {
 	TIME_PROFILE("testSSAO.OnInitScene");
 
-	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(40.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
@@ -38,7 +38,7 @@ CoTask<bool> TestSSAO::OnInitScene()
 	case 0: {
 		camera->SetLookAt(Eigen::Vector3f(0, 2, -1), Eigen::Vector3f::Zero());
 
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
@@ -47,11 +47,11 @@ CoTask<bool> TestSSAO::OnInitScene()
 
 		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
 		modelMat["CubeMapIsRightHandness"] = TRUE;
-		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		mTransform = CoAwait model.Init("dragon", mModel);
 		mTransform->SetScale(Eigen::Vector3f(0.005, 0.005, 0.005));
 
-		auto floor = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		auto floor = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
 		floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));

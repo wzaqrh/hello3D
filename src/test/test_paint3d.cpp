@@ -15,9 +15,9 @@ protected:
 
 CoTask<bool> TestPaint3D::OnInitScene()
 {
-	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 
-	rend::Paint3DPtr paint = mScneMng->AddRendNode(CoAwait mRendFac->CreatePaint3DT());
+	rend::Paint3DPtr paint = mScneMng->AddRendAsNode(CoAwait mRendFac->CreatePaint3DT());
 	paint->SetColor(0xFFD3D3D3);//gray
 	paint->DrawLine(Eigen::Vector3f(-10, -10, 0), Eigen::Vector3f(10, 10, 5));
 

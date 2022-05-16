@@ -259,6 +259,9 @@
     <ClInclude Include="..\src\core\renderable\paint3d.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\base\deffered_signal.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
