@@ -219,6 +219,14 @@
     <ClCompile Include="..\src\test\unit_test\unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\x86\Debug\model\armadillo\defaultMaterial.Material" />
+    <None Include="..\bin\x86\Debug\model\buddha\material_0.Material" />
+    <None Include="..\bin\x86\Debug\model\dragon\DefaultMaterial.Material" />
+    <None Include="..\bin\x86\Debug\model\floor\defaultobject.Material" />
+    <None Include="..\bin\x86\Debug\model\Spaceship\RetopoGroup2.Material" />
+    <None Include="..\bin\x86\Debug\model\ToyCar\Fabric.Material" />
+    <None Include="..\bin\x86\Debug\model\ToyCar\Glass.Material" />
+    <None Include="..\bin\x86\Debug\model\ToyCar\ToyCar.Material" />
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc" />

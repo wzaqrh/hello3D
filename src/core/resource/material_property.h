@@ -55,7 +55,11 @@ public:
 	std::map<std::string, std::string> UniformByName;
 	
 	struct SingleFileDependency {
-		bool CheckOutOfDate() const { return FileTime != 0 ? FileTime < boost::filesystem::last_write_time(FilePath) : false; }
+		bool CheckOutOfDate() const { 
+			boost::filesystem::path path(FilePath);
+			if (boost::filesystem::is_regular_file(path) && FileTime < boost::filesystem::last_write_time(path)) return true;
+			else return false; 
+		}
 		bool operator<(const SingleFileDependency& other) const { return FilePath < other.FilePath; }
 		std::string FilePath;
 		time_t FileTime = 0;

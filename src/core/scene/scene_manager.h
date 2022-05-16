@@ -35,7 +35,7 @@ public:
 		return light;
 	}
 
-	template<typename RendClass> const std::shared_ptr<RendClass>& AddRendAsNode(std::shared_ptr<RendClass> rend) { AddRendAsNode(std::static_pointer_cast<Renderable>(rend)); return std::static_pointer_cast<RendClass>(rend); }
+	template<typename RendClass> std::shared_ptr<RendClass> AddRendAsNode(std::shared_ptr<RendClass> rend) { AddRendAsNode(std::static_pointer_cast<Renderable>(rend)); return std::static_pointer_cast<RendClass>(rend); }
 	RenderablePtr AddRendAsNode(RenderablePtr rend);
 public:
 	Eigen::AlignedBox3f GetWorldAABB() const;

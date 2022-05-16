@@ -3,62 +3,78 @@
 #include "HLSLSupport.cginc"
 #include "Macros.cginc"
 
-inline float3x3 GetTBN(float3 T, float3 N)
+struct DpDuv 
+{
+	float3 dpx;
+    float3 dpy;
+    float2 dtx;
+    float2 dty;
+	float det;
+};
+inline DpDuv GetDpDuv(float3 worldPos, float2 uv) 
+{
+	DpDuv dd;
+    dd.dpx = ddx(worldPos);
+    dd.dpy = ddy(worldPos);
+    dd.dtx = ddx(uv);
+    dd.dty = ddy(uv);
+	dd.det = dd.dtx.x * dd.dty.y - dd.dty.x * dd.dtx.y;
+	return dd;
+}
+
+#if ENABLE_CORRCET_TANGENT_BASIS
+inline void CorrectBitangent(inout float3 B, DpDuv dd) {
+	float3 bitangent = (- dd.dty.x * dd.dpx + dd.dtx.x * dd.dpy) / dd.det;
+	if (dot(bitangent, B) < 0) 
+		B = -B;
+}
+#define CORRECT_BITANGENT(B, DD) CorrectBitangent(B, DD)
+#else
+#define CORRECT_BITANGENT(B, DD)
+#endif
+
+inline float3x3 GetTBN(float3 T, float3 N, DpDuv dd)
 {
 	float3 B = cross(N, T);
+	CORRECT_BITANGENT(B, dd);
+	
     return float3x3(T, B, N);
 }
+
 /*
 dPos = k·dTex
 =>
-|dp0|   |du0 dv0| |T|
+|dp0|   |du0 dv0|  |T|
 |dp1| = |du1 dv1|·|B|·k
 =>
-|T|      | dv1 -dv1| |dpx|
+|T|       | dv1 -dv1|  |dpx|
 |B| = k'·|-du0  du0|·|dpy|
 	    ---------------
       du0·dv1 - du1·dv0
 		
-|dpx|   |dtx.x dtx.y| |T|
+|dpx|   |dtx.x dtx.y|  |T|
 |dpy| = |dty.x dty.y|·|B|
 =>
-|T|   | dty.y -dtx.y| |dpx|
+|T|   | dty.y -dtx.y|  |dpx|
 |B| = |-dty.x  dtx.x|·|dpy|
 	  ---------------
  dtx.x·dty.y - dty.x·dtx.y
 */
-inline float3x3 GetTBN(float3 worldPos, float2 uv, float3 N)
+inline float3x3 GetTBN(float3 N, DpDuv dd)
 {
-    float3 dpx = ddx(worldPos);
-    float3 dpy = ddy(worldPos);
-    float2 dtx = ddx(uv);
-    float2 dty = ddy(uv);
-	float det = dtx.x * dty.y - dty.x * dtx.y;
-	
-    float3 T = (dty.y * dpx - dtx.y * dpy) / det;
+    float3 T = (dd.dty.y * dd.dpx - dd.dtx.y * dd.dpy) / dd.det;
     T = normalize(T - dot(T,N) * N);
-
-    float3 B = normalize(cross(N, T));
-
-    return float3x3(T, B, N);
+    
+	float3 B = normalize(cross(N, T));
+	CORRECT_BITANGENT(B, dd);
+	
+    return float3x3(T/*row0*/, B, N);//相当于转置
 }
 
-inline float3x3 GetTBN(float3 worldPos, float2 uv)
+inline float3x3 GetTBN(DpDuv dd)
 {
-    float3 dpx = ddx(worldPos);
-    float3 dpy = ddy(worldPos);
-    float2 dtx = ddx(uv);
-    float2 dty = ddy(uv);
-	float det = dtx.x * dty.y - dty.x * dtx.y;
-	
-	float3 N = normalize(cross(dpy, dpx));
-	
-    float3 T = (dty.y * dpx - dtx.y * dpy) / det;
-    T = normalize(T - dot(T,N) * N);
-
-    float3 B = normalize(cross(N, T));
-
-    return float3x3(T, B, N);
+	float3 N = normalize(cross(dd.dpy, dd.dpx));
+    return GetTBN(N, dd);
 }
 
 float3 UnpackScaleNormalRGorAG(float4 packednormal, float bumpScale)

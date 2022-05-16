@@ -1,30 +1,33 @@
 <Material>
 	<UseShader>Model</UseShader>
 	<Macros>
+		<ENABLE_ALBEDO_MAP>1</ENABLE_ALBEDO_MAP>
+		<ALBEDO_MAP_SRGB>0</ALBEDO_MAP_SRGB>
+		
+		<ENABLE_NORMAL_MAP>1</ENABLE_NORMAL_MAP>
+		<HAS_ATTRIBUTE_NORMAL>1</HAS_ATTRIBUTE_NORMAL>
+		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
+		
+		<ENABLE_AO_ROUGHNESS_METALLIC_MAP>0</ENABLE_AO_ROUGHNESS_METALLIC_MAP>
+		<ENABLE_METALLIC_X_X_SMOOTHNESS_MAP>1</ENABLE_METALLIC_X_X_SMOOTHNESS_MAP>
+		<ENABLE_AO_MAP>0</ENABLE_AO_MAP>
+		<ENABLE_METALLIC_MAP>0</ENABLE_METALLIC_MAP>
+		<ENABLE_ROUGHNESS_MAP>0</ENABLE_ROUGHNESS_MAP>
+    
+		<ENABLE_EMISSIVE_MAP>0</ENABLE_EMISSIVE_MAP>
+		<EMISSIVE_MAP_SRGB>0</EMISSIVE_MAP_SRGB>
+		
+		<FLIP_UV0_Y>1</FLIP_UV0_Y>
 	</Macros>
 	<Properties>
-		<EnableAlbedoMap>1</EnableAlbedoMap>
-		<AlbedoMapSRGB>0</AlbedoMapSRGB>
-		<txAlbedo>Intergalactic Spaceship_color_4-flip.png</txAlbedo>
-		
-		<EnableNormalMap>1</EnableNormalMap>
-		<HasTangent>1</HasTangent>
-		<txNormal>Intergalactic Spaceship_nmap_2_Tris-flip.png</txNormal>
-		
-		<EnableMetalnessMap>0</EnableMetalnessMap>
-		<txMetalness>Intergalactic Spaceship_metalness-flip.png</txMetalness>
-		
-		<EnableRoughnessMap>0</EnableRoughnessMap>
-		<txRoughness>Intergalactic Spaceship_nmap_2_Tris-flip.png</txRoughness>
-		
-		<AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>0</AmbientOcclusion_ChannelGRoughness_ChannelBMetalness>
-		
-		<EnableAmbientOcclusionMap>0</EnableAmbientOcclusionMap>
-		<OcclusionStrength>0</OcclusionStrength>
-		<txAmbientOcclusion>Intergalactic Spaceship Ao_Blender.png</txAmbientOcclusion>
-		
-		<EnableEmissiveMap>0</EnableEmissiveMap>
-		<EmissiveMapSRGB>1</EmissiveMapSRGB>
-		<EmissiveFactor>0,0,0</EmissiveFactor>
+		<txAlbedo1>basecolor.png</txAlbedo1>
+		<txNormal>normal.png</txNormal>
+		<txMetalness>metallic_smoothness.png</txMetalness>
+		<txRoughness>roughness.png</txRoughness>
+		<txAmbientOcclusion>ao.png</txAmbientOcclusion>
+		<OcclusionStrength>1</OcclusionStrength>
+
+		<txEmissive>emissive.png</txEmissive>
+		<EmissiveFactor>1,1,1,0</EmissiveFactor>
 	</Properties>
 </Material>

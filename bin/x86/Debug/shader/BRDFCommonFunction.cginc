@@ -10,7 +10,7 @@ inline float3 SafeNormalize(float3 inVec)
 	float dp3 = max(0.001f, dot(inVec, inVec));
 	return inVec * rsqrt(dp3);
 }
-inline half Pow5(half x)
+inline float Pow5(float x)
 {
 	return x * x * x * x * x;
 }
@@ -26,17 +26,17 @@ inline float3 DisneyDiffuse(float nv, float nl, float lh, float perceptualRoughn
     float fd90 = 0.5 + 2 * lh * lh * perceptualRoughness;
     float lightScatter = (1 + (fd90 - 1) * Pow5(1 - nl));
     float viewScatter  = (1 + (fd90 - 1) * Pow5(1 - nv));
-    return baseColor * lightScatter * viewScatter;
+    return baseColor / MIR_PI * lightScatter * viewScatter;
 }
 inline float3 LambertDiffuse(float3 baseColor)
 {
     return baseColor / MIR_PI;
 }
 
-inline float GGXTRDistribution(float NdotH, float roughness) 
+inline float GGXTRDistribution(float nh, float roughness) 
 {
 	float a2 = roughness * roughness;
-    float denom = NdotH * NdotH * (a2 - 1) + 1.0f;
+    float denom = nh * nh * (a2 - 1) + 1.0f;
     return a2 * MIR_INV_PI / (denom * denom + 1e-7);
 }
 
@@ -56,9 +56,9 @@ inline float SmithJointGGXFilamentVisibility(float nl, float nv, float roughness
 }
 
 //·µ»Ølerp(f0, f90, (1-vh)^5)
-inline float3 SchlickFresnel(float3 F0, float3 F90, float VdotH)
+inline float3 SchlickFresnel(float3 F0, float3 F90, float vh)
 {
-    return F0 + (F90 - F0) * pow(1 - VdotH, 5);
+    return F0 + (F90 - F0) * Pow5(1 - vh);
 }
 
 #endif
