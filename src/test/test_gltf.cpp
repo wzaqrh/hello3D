@@ -18,7 +18,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 {
 	TIME_PROFILE("testGLTF.OnInitScene");
 
-	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
@@ -50,7 +50,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 			camera->SetLookAt(Eigen::Vector3f(0, 0, -5), Eigen::Vector3f::Zero());
 		}
 
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetLookAt(Eigen::Vector3f(0.498, -0.71, 0.498), Eigen::Vector3f::Zero());
 		
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
@@ -59,19 +59,19 @@ CoTask<bool> TestGLTF::OnInitScene()
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 		modelMat["CubeMapIsRightHandness"] = TRUE;
-		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };
 		int caseIndex = mCaseIndex;
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);
 	}break;
 	case 10: {
-		auto pt_light = mScneMng->CreateAddLightNode<PointLight>();
+		auto pt_light = mScneMng->CreateLightNode<PointLight>();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);
 	}break;
 	default: {
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}

@@ -54,12 +54,12 @@ struct vbSkeleton
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	vbSkeleton() 
-	: Normal(0, 0, 0), Tangent(0, 0, 0), BiTangent(0, 0, 0)
+	: Normal(0, 0, 0), Tangent(0, 0, 0, 0), BiTangent(0, 0, 0)
 	, BlendWeights(0, 0, 0, 0), BlendIndices(0, 0, 0, 0) 
 	{}
 public:
 	Eigen::Vector3f Normal;
-	Eigen::Vector3f Tangent;
+	Eigen::Vector4f Tangent;
 	Eigen::Vector3f BiTangent;
 
 	Eigen::Vector4f BlendWeights;

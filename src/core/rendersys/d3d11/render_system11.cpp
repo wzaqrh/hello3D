@@ -108,27 +108,6 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 #endif
 	return true;
 }
-bool RenderSystem11::_SetRasterizerState()
-{
-	D3D11_RASTERIZER_DESC wfdesc = {};
-	//wfdesc.FillMode = D3D11_FILL_WIREFRAME;
-	wfdesc.FillMode = D3D11_FILL_SOLID;
-	//wfdesc.CullMode = D3D11_CULL_BACK;
-	wfdesc.CullMode = D3D11_CULL_NONE;
-	wfdesc.SlopeScaledDepthBias = 8;
-	wfdesc.DepthBias = 1e5;
-	ID3D11RasterizerState* pRasterizerState = nullptr;
-	if (CheckHR(mDevice->CreateRasterizerState(&wfdesc, &pRasterizerState))) return false;
-
-	mDeviceContext->RSSetState(pRasterizerState);
-	return true;
-}
-
-bool RenderSystem11::IsCurrentInMainThread() const
-{
-	return mMainThreadId == std::this_thread::get_id();
-}
-
 bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 {
 	mMainThreadId = std::this_thread::get_id();
@@ -141,15 +120,14 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	UINT rcHeight = rc.bottom - rc.top;
 
 	if (!_CreateDeviceAndSwapChain(rcWidth, rcHeight)) return false;
-
-	if (!_FetchBackFrameBufferColor(rcWidth, rcHeight) 
-	 || !_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
+	
+	if (!_FetchBackFrameBufferColor(rcWidth, rcHeight)) return false; 
+	if (!_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
 	SetFrameBuffer(nullptr);
 
-	if (!_SetRasterizerState()) return false;
-	
-	SetDepthState(DepthState{ true, kCompareLessEqual, kDepthWriteMaskAll });
-	SetBlendState(BlendState::MakeAlphaPremultiplied());
+	if (!_SetRasterizerState(mCurRasterState = RasterizerState{kFillSolid, kCullBack})) return false;
+	if (!_SetDepthState(mCurDepthState = DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll, true))) return false;
+	if (!_SetBlendState(mCurBlendState = BlendState::MakeAlphaPremultiplied())) return false;
 
 	if (vp.right == 0 || vp.bottom == 0) 
 		GetClientRect(mHWnd, &vp);
@@ -159,6 +137,10 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	return true;
 }
 
+bool RenderSystem11::IsCurrentInMainThread() const
+{
+	return mMainThreadId == std::this_thread::get_id();
+}
 void RenderSystem11::UpdateFrame(float dt)
 {}
 void RenderSystem11::Dispose()
@@ -685,42 +667,118 @@ void RenderSystem11::SetSamplers(size_t slot, const ISamplerStatePtr samplers[],
 	mDeviceContext->PSSetSamplers(0, passSamplers.size(), !passSamplers.empty() ? &passSamplers[0] : nullptr);
 }
 
+bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
+{
+	BOOST_ASSERT(IsCurrentInMainThread());
+
+	ID3D11BlendState* pBlendState;
+	auto iter = mDxBlendStates.find(blendFunc);
+	if (iter != mDxBlendStates.end()) {
+		pBlendState = iter->second;
+	}
+	else {
+		D3D11_BLEND_DESC blendDesc = { 0 };
+		blendDesc.RenderTarget[0].BlendEnable = true;
+		blendDesc.RenderTarget[0].SrcBlend = static_cast<D3D11_BLEND>(blendFunc.Src);
+		blendDesc.RenderTarget[0].DestBlend = static_cast<D3D11_BLEND>(blendFunc.Dst);
+		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		if (CheckHR(mDevice->CreateBlendState(&blendDesc, &pBlendState)))
+			return false;
+		mDxBlendStates.insert(std::make_pair(blendFunc, pBlendState));
+	}
+
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	mDeviceContext->OMSetBlendState(pBlendState, blendFactor, 0xffffffff);
+	return true;
+}
 void RenderSystem11::SetBlendState(const BlendState& blendFunc)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	mCurBlendState = blendFunc;
-
-	D3D11_BLEND_DESC blendDesc = { 0 };
-	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlend = static_cast<D3D11_BLEND>(blendFunc.Src);
-	blendDesc.RenderTarget[0].DestBlend = static_cast<D3D11_BLEND>(blendFunc.Dst);
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	if (CheckHR(mDevice->CreateBlendState(&blendDesc, &mBlendState))) return;
-
-	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mDeviceContext->OMSetBlendState(mBlendState, blendFactor, 0xffffffff);
+	if (mCurBlendState != blendFunc) {
+		mCurBlendState = blendFunc;
+		_SetBlendState(mCurBlendState);
+	}
 }
-void RenderSystem11::SetDepthState(const DepthState& depthState)
+
+bool RenderSystem11::_SetDepthState(const DepthState& depthState)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	mCurDepthState = depthState;
+	ID3D11DepthStencilState* pDSState;
+	auto iter = mDxDSStates.find(depthState);
+	if (iter != mDxDSStates.end()) {
+		pDSState = iter->second;
+	}
+	else {
+		D3D11_DEPTH_STENCIL_DESC desc = {};
+		desc.DepthEnable = depthState.DepthEnable;
+		desc.DepthWriteMask = static_cast<D3D11_DEPTH_WRITE_MASK>(depthState.WriteMask);
+		desc.DepthFunc = static_cast<D3D11_COMPARISON_FUNC>(depthState.CmpFunc);
+		desc.StencilEnable = FALSE;
+		if (CheckHR(mDevice->CreateDepthStencilState(&desc, &pDSState)))
+			return false;
+		mDxDSStates.insert(std::make_pair(depthState, pDSState));
+	}
 
-	D3D11_DEPTH_STENCIL_DESC DSDesc;
-	ZeroMemory(&DSDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	DSDesc.DepthEnable = depthState.DepthEnable;
-	DSDesc.DepthWriteMask = static_cast<D3D11_DEPTH_WRITE_MASK>(depthState.WriteMask);
-	DSDesc.DepthFunc = static_cast<D3D11_COMPARISON_FUNC>(depthState.CmpFunc);
-	DSDesc.StencilEnable = FALSE;
-	if (CheckHR(mDevice->CreateDepthStencilState(&DSDesc, &mDepthStencilState))) 
-		return;
-	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
+	mDeviceContext->OMSetDepthStencilState(pDSState, 1);
+	return true;
+}
+void RenderSystem11::SetDepthState(const DepthState& depthState)
+{
+	if (mCurDepthState != depthState) {
+		mCurDepthState = depthState;
+		_SetDepthState(mCurDepthState);
+	}
+}
+
+bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
+{
+	BOOST_ASSERT(IsCurrentInMainThread());
+
+	ID3D11RasterizerState* pRasterizerState;
+	auto iter = mDxRasterStates.find(rasterState);
+	if (iter != mDxRasterStates.end()) {
+		pRasterizerState = iter->second;
+	}
+	else {
+		D3D11_RASTERIZER_DESC desc = {};
+		desc.FillMode = static_cast<D3D11_FILL_MODE>(rasterState.FillMode);
+		desc.CullMode = static_cast<D3D11_CULL_MODE>(rasterState.CullMode);
+		desc.SlopeScaledDepthBias = rasterState.DepthBias.Bias;
+		desc.DepthBias = rasterState.DepthBias.SlopeScaledBias;
+		if (CheckHR(mDevice->CreateRasterizerState(&desc, &pRasterizerState))) 
+			return false;
+		mDxRasterStates.insert(std::make_pair(rasterState, pRasterizerState));
+	}
+
+	mDeviceContext->RSSetState(pRasterizerState);
+	return true;
+}
+void RenderSystem11::SetCullMode(CullMode cullMode)
+{
+	if (mCurRasterState.CullMode != cullMode) {
+		mCurRasterState.CullMode = cullMode;
+		_SetRasterizerState(mCurRasterState);
+	}
+}
+void RenderSystem11::SetFillMode(FillMode fillMode)
+{
+	if (mCurRasterState.FillMode == fillMode) {
+		mCurRasterState.FillMode = fillMode;
+		_SetRasterizerState(mCurRasterState);
+	}
+}
+void RenderSystem11::SetDepthBias(const DepthBias& bias)
+{
+	if (mCurRasterState.DepthBias == bias) {
+		mCurRasterState.DepthBias = bias;
+		_SetRasterizerState(mCurRasterState);
+	}
 }
 
 void RenderSystem11::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {

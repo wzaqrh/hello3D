@@ -116,21 +116,22 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	COROUTINE_VARIABLES_4(launchMode, resMng, materialNode, material);
 	material->SetLoading();
 	//CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+
 	std::vector<CoTask<bool>> tasks;
+	{
+		material->mProperty = materialNode.Property;
+		material->mShader = CreateInstance<Shader>();
+		tasks.push_back(DoCreateShader(launchMode, material->mShader, resMng, materialNode.Shader));
+		material->mLoadParam = materialNode.LoadParam;
 
-	material->mProperty = materialNode.Property;
-	material->mShaderVariant = CreateInstance<Shader>();
-	tasks.push_back(DoCreateShader(launchMode, material->mShaderVariant, resMng, materialNode.Shader));
-	material->mShaderVariantParam = MaterialLoadParamBuilder(materialNode.LoadParam);
-
-	boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.Property->DependSrc.Material.FilePath));
-	assetPath.remove_filename();
-	material->mTextures.Resize(kTextureUserSlotCount);
-	for (const auto& iter : materialNode.Property->Textures) {
-		boost::filesystem::path imagePath = assetPath / iter.second.ImagePath;
-		BOOST_ASSERT(boost::filesystem::is_regular_file(imagePath));
-		if (boost::filesystem::is_regular_file(imagePath)) {
-			tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, imagePath.string()));
+		boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.Property->DependSrc.Material.FilePath)); assetPath.remove_filename();
+		material->mTextures.Resize(kTextureUserSlotCount);
+		for (const auto& iter : materialNode.Property->Textures) {
+			boost::filesystem::path imagePath = assetPath / iter.second.ImagePath;
+			BOOST_ASSERT(boost::filesystem::is_regular_file(imagePath));
+			if (boost::filesystem::is_regular_file(imagePath)) {
+				tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, imagePath.string()));
+			}
 		}
 	}
 	CoAwait WhenAll(std::move(tasks));
@@ -174,7 +175,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 		}
 	}
 
-	material->SetLoaded(material->mShaderVariant->IsLoaded());
+	material->SetLoaded(material->mShader->IsLoaded());
 	CoReturn material->IsLoaded();
 }
 CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& material, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe

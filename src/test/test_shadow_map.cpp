@@ -28,7 +28,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	//SetPPU(1);
 	TIME_PROFILE("testSSAO.OnInitScene");
 
-	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(45.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
@@ -41,7 +41,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 		if (mCaseIndex == 1) {
 			camera->SetLookAt(Eigen::Vector3f(0, 5, -5), Eigen::Vector3f::Zero());
 
-			auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+			auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 			dir_light->SetLightRadius(1.0);
 			dir_light->SetLookAt(Eigen::Vector3f(5, 5, -5), Eigen::Vector3f::Zero());
 		}
@@ -49,7 +49,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 			if (isShadowVSM) camera->SetLookAt(Eigen::Vector3f(-5, 10, -10), Eigen::Vector3f::Zero());
 			else camera->SetLookAt(Eigen::Vector3f(-0.644995f, 0.614183f, -0.660632f), Eigen::Vector3f::Zero());
 
-			auto dir_light = mScneMng->CreateAddLightNode<SpotLight>();
+			auto dir_light = mScneMng->CreateLightNode<SpotLight>();
 			dir_light->SetLightRadius(1.0);
 			if (isShadowVSM) dir_light->SetLookAt(Eigen::Vector3f(0.5f, 1.0f, -1.0f) * 20, Eigen::Vector3f::Zero());
 			else dir_light->SetLookAt(Eigen::Vector3f(3.57088f, 6.989f, -9.19698f), Eigen::Vector3f::Zero());
@@ -63,7 +63,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 		modelMat["CubeMapIsRightHandness"] = TRUE;
 
 	#if 1
-		auto floor = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		auto floor = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
 
@@ -75,7 +75,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	#endif
 
 	#if 1
-		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		if (mCaseIndex == 1) {
 			mTransform = CoAwait model.Init("buddha", mModel);
 			mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));

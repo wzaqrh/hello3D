@@ -65,52 +65,48 @@ bool Shader::Validate() const
 	return true;
 }
 
-/********** MaterialInstance **********/
-MaterialInstance::MaterialInstance()
-{}
-
-MaterialInstance::MaterialInstance(const MaterialPtr& material, const GpuParametersPtr& gpuParamters)
-	: mMaterial(material)
-	, mGpuParameters(gpuParamters)
-{}
-
-std::vector<IContantBufferPtr> MaterialInstance::GetConstBuffers() const
-{
-	return mGpuParameters->GetConstBuffers();
-}
-void MaterialInstance::WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data)
-{
-	mGpuParameters->WriteToElementCb(renderSys, cbName, data);
-}
-void MaterialInstance::FlushGpuParameters(RenderSystem& renderSys)
-{
-	mGpuParameters->FlushToGpu(renderSys);
-}
-
 /********** Material **********/
-Material::Material()
-{}
-
-void Material::EnableKeyword(const std::string& macroName, int value /*= TRUE*/)
-{
-	mShaderVariantParam[macroName] = value;
-	mShaderVariant = nullptr;
-}
-
-CoTask<bool> Material::Build(Launch launchMode, ResourceManager& resMng)
-{
-	if (mShaderVariant == nullptr) {
-		CoAwait resMng.CreateShader(mShaderVariant, launchMode, mShaderVariantParam.Build());
-	}
-	CoReturn mShaderVariant->IsLoaded();
-}
-
 MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng) const
 {
 	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbShareNone]->Clone(launchMode, resMng);
 	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerMaterial]);
 	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerFrame]);
-	return MaterialInstance(const_cast<Material*>(this)->shared_from_this(), newParametrs);
+	return MaterialInstance(const_cast<Material*>(this)->shared_from_this(), mTextures, newParametrs, mLoadParam);
+}
+
+/********** MaterialInstance **********/
+MaterialInstance::MaterialInstance(const MaterialPtr& material, const TextureVector& textures, const GpuParametersPtr& gpuParamters, const MaterialLoadParam& loadParam)
+{
+	mSelf = CreateInstance<SharedBlock>(material, textures, gpuParamters, loadParam);
+}
+CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng)
+{
+	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	*mSelf = *mtl.mSelf;
+	CoReturn true;
+}
+
+void MaterialInstance::UpdateKeyword(const std::string& macroName, int value /*= TRUE*/)
+{
+	mSelf->LoadParam[macroName] = value;
+}
+CoTask<bool> MaterialInstance::CommitKeywords(Launch launchMode, ResourceManager& resMng)
+{
+	*this = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	CoReturn true;
+}
+
+std::vector<IContantBufferPtr> MaterialInstance::GetConstBuffers() const
+{
+	return mSelf->GpuParameters->GetConstBuffers();
+}
+void MaterialInstance::WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data)
+{
+	mSelf->GpuParameters->WriteToElementCb(renderSys, cbName, data);
+}
+void MaterialInstance::FlushGpuParameters(RenderSystem& renderSys)
+{
+	mSelf->GpuParameters->FlushToGpu(renderSys);
 }
 
 }

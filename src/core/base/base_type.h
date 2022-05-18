@@ -36,10 +36,11 @@ enum BlendFunc {
 	kBlendInvSrc1Alpha = 19
 };
 struct BlendState {
-	static BlendState MakeDisable() { return BlendState{ kBlendOne, kBlendZero }; }
-	static BlendState MakeAlphaPremultiplied() { return BlendState{ kBlendOne, kBlendInvSrcAlpha }; }
-	static BlendState MakeAlphaNonPremultiplied() { return BlendState{ kBlendSrcAlpha, kBlendInvSrcAlpha }; }
-	static BlendState MakeAdditive() { return BlendState{ kBlendSrcAlpha, kBlendOne }; }
+	constexpr static BlendState MakeDisable() { return BlendState{ kBlendOne, kBlendZero }; }
+	constexpr static BlendState MakeAlphaPremultiplied() { return BlendState{ kBlendOne, kBlendInvSrcAlpha }; }
+	constexpr static BlendState MakeAlphaNonPremultiplied() { return BlendState{ kBlendSrcAlpha, kBlendInvSrcAlpha }; }
+	constexpr static BlendState MakeAdditive() { return BlendState{ kBlendSrcAlpha, kBlendOne }; }
+	constexpr static BlendState Make(BlendFunc src, BlendFunc dst) { return BlendState{ src, dst }; }
 public:
 	BlendFunc Src, Dst;
 };
@@ -59,33 +60,56 @@ enum DepthWriteMask {
 	kDepthWriteMaskAll = 1
 };
 struct DepthState {
-	static DepthState MakeFor2D() {
-		return DepthState{ false, kCompareLess, kDepthWriteMaskZero };
-	}
-	static DepthState MakeFor3D(bool depthEnable = true) {
-		return DepthState{ depthEnable, kCompareLess, kDepthWriteMaskAll };
-	}
-	static DepthState Make(CompareFunc cmp, DepthWriteMask mask) {
-		return DepthState{ true, cmp, mask };
+	constexpr static DepthState MakeFor2D() { return DepthState{ kCompareLess, kDepthWriteMaskZero, false }; }
+	constexpr static DepthState MakeFor3D(bool depthEnable = true) { return DepthState{ kCompareLess, kDepthWriteMaskAll, depthEnable }; }
+	constexpr static DepthState Make(CompareFunc cmp, DepthWriteMask mask, bool enable = true) { return DepthState{ cmp, mask, enable }; }
+	bool operator<(const DepthState& r) const {
+		if (DepthEnable != r.DepthEnable) return DepthEnable < r.DepthEnable;
+		if (CmpFunc != r.CmpFunc) return CmpFunc < r.CmpFunc;
+		return WriteMask < r.WriteMask;
 	}
 public:
-	bool DepthEnable;
 	CompareFunc CmpFunc;
 	DepthWriteMask WriteMask;
+	bool DepthEnable;
 };
-inline bool operator==(const DepthState& l, const DepthState& r) {
-	return l.DepthEnable == r.DepthEnable
-		&& l.CmpFunc == r.CmpFunc
-		&& l.WriteMask == r.WriteMask;
-}
-inline bool operator!=(const DepthState& l, const DepthState& r) {
-	return !(l == r);
-}
-inline bool operator<(const DepthState& l, const DepthState& r) {
-	if (l.DepthEnable != r.DepthEnable) return l.DepthEnable < r.DepthEnable;
-	if (l.CmpFunc != r.CmpFunc) return l.CmpFunc < r.CmpFunc;
-	return l.WriteMask < r.WriteMask;
-}
+inline bool operator==(const DepthState& l, const DepthState& r) { return l.DepthEnable == r.DepthEnable && l.CmpFunc == r.CmpFunc && l.WriteMask == r.WriteMask; }
+inline bool operator!=(const DepthState& l, const DepthState& r) { return !(l == r); }
+
+enum FillMode {
+	kFillUnkown = 0,
+	kFillWireFrame = 2,
+	kFillSolid = 3
+};
+
+enum CullMode {
+	kCullUnkown = 0,
+	kCullNone = 1,
+	kCullFront = 2,
+	kCullBack = 3
+};
+
+struct DepthBias {
+	constexpr static DepthBias Make(float bias, float slopeScaleBias) { return DepthBias{ bias, slopeScaleBias }; }
+	bool operator<(const DepthBias& r) const { return (Bias != r.Bias) ? (Bias < r.Bias) : (SlopeScaledBias < r.SlopeScaledBias); }
+public:
+	float Bias;
+	float SlopeScaledBias;
+};
+inline bool operator==(const DepthBias& l, const DepthBias& r) { return l.Bias == r.Bias && l.SlopeScaledBias == r.SlopeScaledBias; }
+inline bool operator!=(const DepthBias& l, const DepthBias& r) { return !(l == r); }
+
+struct RasterizerState {
+	bool operator<(const RasterizerState& r) const {
+		if (FillMode != r.FillMode) return FillMode < r.FillMode;
+		if (CullMode != r.CullMode) return CullMode < r.CullMode;
+		return DepthBias < r.DepthBias;
+	}
+public:
+	FillMode FillMode;
+	CullMode CullMode;
+	DepthBias DepthBias;
+};
 
 enum ResourceFormat {
 	kFormatUnknown = 0,

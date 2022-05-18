@@ -95,6 +95,15 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual const DepthState& GetDepthState() const = 0;
 	virtual void SetDepthState(const DepthState& depthState) = 0;
 
+	virtual void SetCullMode(CullMode cullMode) = 0;
+	virtual CullMode GetCullMode() const = 0;
+
+	virtual void SetFillMode(FillMode fillMode) = 0;
+	virtual FillMode GetFillMode() const = 0;
+
+	virtual void SetDepthBias(const DepthBias& bias) = 0;
+	virtual const DepthBias& GetDepthBias() const = 0;
+
 	/***** about draw *****/
 	virtual void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) = 0;
 	virtual void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) = 0;
@@ -111,10 +120,14 @@ public:
 	Eigen::Vector2i WinSize() const override { return mScreenSize; }
 	const BlendState& GetBlendState() const override { return mCurBlendState; }
 	const DepthState& GetDepthState() const override { return mCurDepthState; }
+	CullMode GetCullMode() const override { return mCurRasterState.CullMode; }
+	FillMode GetFillMode() const override { return mCurRasterState.FillMode; }
+	const DepthBias& GetDepthBias() const override { return mCurRasterState.DepthBias; }
 protected:
 	Eigen::Vector2i mScreenSize;
 	BlendState mCurBlendState;
 	DepthState mCurDepthState;
+	RasterizerState mCurRasterState;
 };
 
 }

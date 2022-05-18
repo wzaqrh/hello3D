@@ -3,46 +3,96 @@
 #include "HLSLSupport.cginc"
 #include "Macros.cginc"
 
-//world normal coordinate system
-inline float3x3 GetTBN(float3 normal, float3 tangent)
+struct DpDuv 
 {
-	float3 bitangent = cross(tangent, normal); //normal朝外, tangent朝右
-    return float3x3(tangent, bitangent, normal);
+	float3 dpx;
+    float3 dpy;
+    float2 dtx;
+    float2 dty;
+	float det;
+};
+inline DpDuv GetDpDuv(float3 worldPos, float2 uv) 
+{
+	DpDuv dd;
+    dd.dpx = ddx(worldPos);
+    dd.dpy = ddy(worldPos);
+    dd.dtx = ddx(uv);
+    dd.dty = ddy(uv);
+	dd.det = dd.dtx.x * dd.dty.y - dd.dty.x * dd.dtx.y;
+	return dd;
 }
-inline float3x3 GetTBN(float2 t, float3 worldPos, float3 worldNormal)
-{
-    float3 dpx = ddx(worldPos);
-    float3 dpy = ddy(worldPos);
-    float2 dtx = ddx(t);
-    float2 dty = ddy(t);
 
-#if 0
-    float3 N = normalize(cross(dpx, dpy));
+#if ENABLE_CORRCET_TANGENT_BASIS
+inline void CorrectBitangent(inout float3 B, DpDuv dd) {
+	float3 bitangent = (- dd.dty.x * dd.dpx + dd.dtx.x * dd.dpy) / dd.det;
+	if (dot(bitangent, B) < 0) 
+		B = -B;
+}
+#define CORRECT_BITANGENT(B, DD) CorrectBitangent(B, DD)
 #else
-    float3 N = worldNormal;
-#endif  
-    
-    float3 T = - dpx * dty.y + dpy * dtx.y;
-    T = normalize(T - dot(T,N) * N);
-    float3 B = normalize(cross(T, N));
-    
+#define CORRECT_BITANGENT(B, DD)
+#endif
+
+inline float3x3 GetTBN(float3 T, float3 N, DpDuv dd)
+{
+	float3 B = cross(N, T);
+	CORRECT_BITANGENT(B, dd);
+	
     return float3x3(T, B, N);
 }
 
-inline float3x3 GetTBN(float2 uv, float3 worldPos)
+/*
+dPos = k·dTex
+=>
+|dp0|   |du0 dv0|  |T|
+|dp1| = |du1 dv1|·|B|·k
+=>
+|T|       | dv1 -dv1|  |dpx|
+|B| = k'·|-du0  du0|·|dpy|
+	    ---------------
+      du0·dv1 - du1·dv0
+		
+|dpx|   |dtx.x dtx.y|  |T|
+|dpy| = |dty.x dty.y|·|B|
+=>
+|T|   | dty.y -dtx.y|  |dpx|
+|B| = |-dty.x  dtx.x|·|dpy|
+	  ---------------
+ dtx.x·dty.y - dty.x·dtx.y
+*/
+inline float3x3 GetTBN(float3 N, DpDuv dd)
 {
-	float3 dpdx = ddx(worldPos);
-	float3 dpdy = ddy(worldPos);
-	float2 duvdx = ddx(uv);
-	float2 duvdy = ddy(uv);
+    float3 T = (dd.dty.y * dd.dpx - dd.dtx.y * dd.dpy) / dd.det;
+    T = normalize(T - dot(T,N) * N);
+    
+	float3 B = normalize(cross(N, T));
+	CORRECT_BITANGENT(B, dd);
+	
+    return float3x3(T/*row0*/, B, N);//相当于转置
+}
 
-	float3 N = normalize(cross(dpdy, dpdx));
-    
-	float3 T = -dpdx * duvdy.y + dpdy * duvdx.y;
-	T = normalize(T - dot(T, N) * N);
-	float3 B = normalize(cross(T, N));
-    
-	return float3x3(T, B, N);
+inline float3x3 GetTBN(DpDuv dd)
+{
+	float3 N = normalize(cross(dd.dpy, dd.dpx));
+    return GetTBN(N, dd);
+}
+
+float3 UnpackScaleNormalRGorAG(float4 packednormal, float bumpScale)
+{
+#if defined(NO_DXT5nm)
+    half3 normal = packednormal.xyz * 2 - 1;
+    normal.xy *= bumpScale;
+    return normal;
+#else
+    // This do the trick
+	packednormal.x *= packednormal.w;
+
+	float3 normal;
+	normal.xy = (packednormal.xy * 2 - 1);
+    normal.xy *= bumpScale;
+	normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+	return normal;
+#endif
 }
 
 float2 DepthGradient(float2 uv, float z)

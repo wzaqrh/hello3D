@@ -11,57 +11,50 @@ namespace scene {
 
 Camera::Camera(ResourceManager& resMng)
 : mResMng(resMng)
+{}
+
+void Camera::PostSetComponent()
 {
-	mTransform = CreateInstance<Transform>();
-	mRenderPath = kRenderPathForward;
-	mCameraMask = -1;
-	mDepth = 0;
-
-	mType = kCameraPerspective;
-	mClipPlane = Eigen::Vector2f::Zero();
-	mFov = mOrthoSize = 0;
-	mAspect = 1.0;
-
-	mViewDirty = true;
-	mProjectionDirty = true;
+	if (auto transform = GetTransform())
+		transform->GetSignal().Connect(mTransformSlot);
 }
 
 void Camera::SetType(CameraType type)
 {
 	mType = type;
-	mProjectionDirty = true;
+	mProjSignal();
 }
 
 void Camera::SetClippingPlane(const Eigen::Vector2f& zRange)
 {
 	mClipPlane = zRange;
-	mProjectionDirty = true;
+	mProjSignal();
 }
 void Camera::SetAspect(float aspect)
 {
 	mAspect = aspect;
-	mProjectionDirty = mViewDirty = true;
+	mProjSignal();
 }
 void Camera::SetFov(float fov)
 {
 	mFov = fov / boost::math::constants::radian<float>();
-	mProjectionDirty = true;
+	mProjSignal();
 }
 void Camera::SetOrthographicSize(float size)
 {
 	mOrthoSize = size;
-	mProjectionDirty = true;
+	mProjSignal();
 }
 void Camera::SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at)
 {
-	mTransform->SetPosition(eye);
-	mTransform->LookAt(at);
-	mViewDirty = true;
+	GetTransform()->SetPosition(eye);
+	GetTransform()->LookAt(at);
+	mProjSignal();
 }
 void Camera::SetForward(const Eigen::Vector3f& forward)
 {
-	mTransform->LookForward(forward);
-	mViewDirty = true;
+	GetTransform()->LookForward(forward);
+	mProjSignal();
 }
 
 CoTask<void> Camera::UpdateFrame(float dt)
@@ -122,8 +115,7 @@ void Camera::RecalculateProjection() const
 }
 const Eigen::Matrix4f& Camera::GetProjection() const
 {
-	if (mProjectionDirty) {
-		mProjectionDirty = false;
+	if (mProjSignal.Slot.AcquireSignal()) {
 		RecalculateProjection();
 	}
 	return mProjection;
@@ -131,14 +123,15 @@ const Eigen::Matrix4f& Camera::GetProjection() const
 
 void Camera::RecalculateView() const
 {
-	auto eyePos = mTransform->GetLocalPosition();
-	auto forward = mTransform->GetForward();
-	auto up = mTransform->GetUp();
+	auto transform = GetTransform();
+	auto eyePos = transform->GetLocalPosition();
+	auto forward = transform->GetForward();
+	auto up = transform->GetUp();
 	mView = math::cam::MakeLookForwardLH(eyePos, forward, up);
 
 	Transform3fAffine t(Transform3fAffine::Identity());
 	{
-		auto s = mTransform->GetLocalScale();
+		auto s = transform->GetLocalScale();
 		t.prescale(Eigen::Vector3f(1 / s.x(), 1 / s.y(), 1 / s.z()));
 
 	#if defined OTHO_PROJ_CENTER_NOT_ZERO
@@ -156,8 +149,7 @@ void Camera::RecalculateView() const
 }
 const Eigen::Matrix4f& Camera::GetView() const
 {
-	if (mViewDirty) {
-		mViewDirty = false;
+	if (mTransformSlot.AcquireSignal()) {
 		RecalculateView();
 	}
 	return mWorldView;
@@ -205,11 +197,6 @@ math::Frustum Camera::GetFrustum() const
 }
 
 /********** components **********/
-const TransformPtr& Camera::GetTransform() const
-{
-	mViewDirty = true;
-	return mTransform;
-}
 void Camera::SetSkyBox(const rend::SkyBoxPtr& skybox)
 {
 	mSkyBox = skybox;
@@ -235,70 +222,74 @@ IFrameBufferPtr Camera::SetOutput(IFrameBufferPtr output)
 {
 	mOutput = output;
 	DEBUG_SET_PRIV_DATA(mOutput, "camera.output");
-
-	//mSize = mOutput->GetSize();
-	mProjectionDirty = true;
-
 	return mOutput;
 }
 IFrameBufferPtr Camera::SetOutput(float scale, std::vector<ResourceFormat> formats)
 {
-	return SetOutput(mResMng.CreateFrameBuffer(__LaunchSync__, 
-		Eigen::Vector3i(mResMng.WinWidth() * scale, mResMng.WinHeight() * scale, 1), formats));
+	return SetOutput(mResMng.CreateFrameBuffer(__LaunchSync__, Eigen::Vector3i(mResMng.WinWidth() * scale, mResMng.WinHeight() * scale, 1), formats));
 }
 
 /********** CameraFactory **********/
-CameraPtr CameraFactory::CreatePerspective(float aspect, 
-	const Eigen::Vector3f& eyePos, 
-	const Eigen::Vector3f& length_forward, 
-	const Eigen::Vector2f& clipPlane, 
-	float fov, 
-	unsigned cameraMask)
+CameraPtr CameraFactory::CreatePerspective(SceneNodePtr node)
 {
-	CameraPtr camera = CreateInstance<Camera>(mResMng);
+	CameraPtr camera = DoCreateAddCamera(node);
 
 	camera->SetType(kCameraPerspective);
-	camera->SetClippingPlane(clipPlane);
-	camera->SetFov(fov);
-	camera->SetAspect(aspect);
-	camera->SetLookAt(eyePos, eyePos + length_forward);
-	camera->SetCullingMask(cameraMask);
+	camera->SetFov(mDefault.Fov);
+	camera->SetAspect(mDefault.Aspect);
+	camera->SetClippingPlane(mDefault.ClipPlane);
+	camera->SetLookAt(mDefault.EyePos, mDefault.EyePos + mDefault.LengthForward);
+	camera->SetCullingMask(mDefault.CameraMask);
 
 	return camera;
 }
 
-CameraPtr CameraFactory::CreateDefPerspective(const Eigen::Vector3f& eyePos)
+CameraPtr CameraFactory::CreateOthogonal(SceneNodePtr node)
 {
-	auto size = mResMng.WinSize();
-	return CreatePerspective(1.0f * size.x() / size.y(), eyePos, math::vec::Forward() * fabs(eyePos.z()),
-		math::cam::DefClippingPlane(), math::cam::DefFov());
-}
-
-CameraPtr CameraFactory::CreateOthogonal(float aspect, 
-	const Eigen::Vector3f& eyePos, 
-	const Eigen::Vector3f& length_forward, 
-	const Eigen::Vector2f& clipPlane,
-	float othoSize, 
-	unsigned cameraMask)
-{
-	CameraPtr camera = CreateInstance<Camera>(mResMng);
+	CameraPtr camera = DoCreateAddCamera(node);
 
 	camera->SetType(kCameraOthogonal);
-	camera->SetClippingPlane(clipPlane);
-	camera->SetOrthographicSize(othoSize);
-	camera->SetAspect(aspect);
-	camera->SetLookAt(eyePos, eyePos + length_forward);
-	camera->SetCullingMask(cameraMask);
-	
+	camera->SetOrthographicSize(mDefault.OthoSize);
+	camera->SetAspect(mDefault.Aspect);
+	camera->SetClippingPlane(mDefault.ClipPlane);
+	camera->SetLookAt(mDefault.EyePos, mDefault.EyePos + mDefault.LengthForward);
+	camera->SetCullingMask(mDefault.CameraMask);
+
 	return camera;
 }
 
-CameraPtr CameraFactory::CreateDefOthogonal(const Eigen::Vector3f& eyePos)
+CameraPtr CameraFactory::DoCreateAddCamera(SceneNodePtr node)
 {
-	auto size = mResMng.WinSize();
-	return CreateOthogonal(1.0f * size.x() / size.y(), eyePos, math::vec::Forward() * fabs(eyePos.z()),
-		math::cam::DefClippingPlane(), math::cam::DefOthoSize() * mPixelPerUnit);
+	CameraPtr camera = CreateInstance<Camera>(mResMng);
+	node->SetCamera(camera);
+
+#if CAMERA_FAC_CACHE
+	mCameras.push_back(camera);
+	mSignal();
+#endif
+
+	return camera;
 }
+
+#if CAMERA_FAC_CACHE
+const std::vector<mir::scene::CameraPtr>& CameraFactory::GetCameras() const
+{
+	ResortCameras();
+	return mCameras;
+}
+
+void CameraFactory::ResortCameras() const
+{
+	if (mSignal.Slot.AcquireSignal()) {
+		struct CompCameraByDepth {
+			bool operator()(const CameraPtr& l, const CameraPtr& r) const {
+				return l->GetDepth() < r->GetDepth();
+			}
+		};
+		std::stable_sort(mCameras.begin(), mCameras.end(), CompCameraByDepth());
+	}
+}
+#endif
 
 }
 }

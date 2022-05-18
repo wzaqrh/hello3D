@@ -42,6 +42,7 @@
     <ClInclude Include="..\src\core\base\data.h" />
     <ClInclude Include="..\src\core\base\debug.h" />
     <ClInclude Include="..\src\core\base\declare_macros.h" />
+    <ClInclude Include="..\src\core\base\deffered_signal.h" />
     <ClInclude Include="..\src\core\base\il_helper.h" />
     <ClInclude Include="..\src\core\base\input.h" />
     <ClInclude Include="..\src\core\base\launch.h" />
@@ -59,7 +60,6 @@
     <ClInclude Include="..\src\core\base\uniform_struct.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
-    <ClInclude Include="..\src\core\mir_config_macros.h" />
     <ClInclude Include="..\src\core\mir_export.h" />
     <ClInclude Include="..\src\core\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\assimp_model.h" />
@@ -219,6 +219,14 @@
     <ClCompile Include="..\src\test\unit_test\unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\x86\Debug\model\armadillo\defaultMaterial.Material" />
+    <None Include="..\bin\x86\Debug\model\buddha\material_0.Material" />
+    <None Include="..\bin\x86\Debug\model\dragon\DefaultMaterial.Material" />
+    <None Include="..\bin\x86\Debug\model\floor\defaultobject.Material" />
+    <None Include="..\bin\x86\Debug\model\Spaceship\RetopoGroup2.Material" />
+    <None Include="..\bin\x86\Debug\model\ToyCar\Fabric.Material" />
+    <None Include="..\bin\x86\Debug\model\ToyCar\Glass.Material" />
+    <None Include="..\bin\x86\Debug\model\ToyCar\ToyCar.Material" />
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc" />
@@ -230,6 +238,7 @@
     <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader" />
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Macros.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
@@ -455,7 +464,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -496,7 +505,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -535,7 +544,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -574,7 +583,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -616,7 +625,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -657,7 +666,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -698,7 +707,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -739,7 +748,7 @@
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(SolutionDir)src\core\mir_config_macros.h"  "$(OutDir)shader\Macros.cginc"</Command>
+      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

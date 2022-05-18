@@ -158,8 +158,25 @@ inline Eigen::Matrix4f MakeLookForwardLH(const Eigen::Vector3f& eye,
 	const Eigen::Vector3f& up)
 {
 	Eigen::Vector3f n = /*(at - eye)*/forward.normalized();  //z' = n = normalize(at-eye)
-	Eigen::Vector3f u = up.cross(n).normalized(); //x' = u = normalize(up x z');
-	Eigen::Vector3f v = n.cross(u);			      //y' = v = z' x x'
+	Eigen::Vector3f u = up.cross(n).normalized(); //x' = u
+	Eigen::Vector3f v = n.cross(u);			      //y' = v
+
+	Eigen::Matrix4f view;
+	view <<
+		u.x(), u.y(), u.z(), -u.dot(eye),
+		v.x(), v.y(), v.z(), -v.dot(eye),
+		n.x(), n.y(), n.z(), -n.dot(eye),
+		0, 0, 0, 1;
+	return view;
+}
+
+inline Eigen::Matrix4f MakeLookForwardRH(const Eigen::Vector3f& eye,
+	const Eigen::Vector3f& normal,
+	const Eigen::Vector3f& up)
+{
+	Eigen::Vector3f n = /*(eye - at)*/normal.normalized();  //z' = n
+	Eigen::Vector3f u = up.cross(n).normalized(); //x' = u
+	Eigen::Vector3f v = n.cross(u);			      //y' = v
 
 	Eigen::Matrix4f view;
 	view <<
@@ -177,32 +194,47 @@ inline Eigen::Matrix4f MakeLookAtLH(const Eigen::Vector3f& eye,
 	return MakeLookForwardLH(eye, at - eye, up);
 }
 
-inline Eigen::Matrix4f MakePerspectiveLH(float w, float h, float zn, float zf)
+inline Eigen::Matrix4f MakePerspectiveLH(float w, float h, float n, float f)
 {
-	const float sh = 2.0f * zn / h;
-	const float sw = 2.0f * zn / w;
-	const float q = zf / (zf - zn);
+	const float sh = 2.0f * n / h;
+	const float sw = 2.0f * n / w;
+	const float q = f / (f - n);
 
 	Eigen::Matrix4f projection;
 	projection <<
 		sw, 0, 0, 0,
 		0, sh, 0, 0,
-		0,  0, q, -zn * q,
+		0,  0, q, -n * q,
 		0,  0, 1, 0;
 	return projection;
 }
 
-inline Eigen::Matrix4f MakePerspectiveFovLH(float fovY, float aspect, float nearZ, float farZ)
+inline Eigen::Matrix4f MakePerspectiveFovLHReversZ(float fovY, float aspect, float n, float f)
 {
 	const float h(1.0f / tan(fovY / 2));
 	const float w(h / aspect);
-	const float q(farZ / (farZ - nearZ));
+	const float q = n / (n - f);
 
 	Eigen::Matrix4f projection;
 	projection <<
 		w, 0, 0, 0,
 		0, h, 0, 0,
-		0, 0, q, -nearZ * q,
+		0, 0, q, -f * q,
+		0, 0, 1, 0;
+	return projection;
+}
+
+inline Eigen::Matrix4f MakePerspectiveFovLH(float fovY, float aspect, float n, float f)
+{
+	const float h(1.0f / tan(fovY / 2));
+	const float w(h / aspect);
+	const float q(f / (f - n));
+
+	Eigen::Matrix4f projection;
+	projection <<
+		w, 0, 0, 0,
+		0, h, 0, 0,
+		0, 0, q, -n * q,
 		0, 0, 1, 0;
 	return projection;
 }

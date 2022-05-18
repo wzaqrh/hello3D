@@ -29,29 +29,29 @@ CoTask<bool> TestCameraOutput::OnInitScene()
 	{
 		if (mCaseIndex == 1) 
 		{
-			camera2 = mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter));
+			camera2 = mScneMng->CreateCameraNode(kCameraOthogonal);
 			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
 
-			auto light2 = mScneMng->CreateAddLightNode<DirectLight>();
+			auto light2 = mScneMng->CreateLightNode<DirectLight>();
 			light2->SetCameraMask(cameraMask2);
 			light2->SetDirection(test1::vec::DirLight());
 		}
 		else 
 		{
-			camera2 = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+			camera2 = mScneMng->CreateCameraNode(kCameraPerspective);
 			//camera2->GetTransform()->SetScale(Eigen::Vector3f(2, 2, 1));
 			camera2->SetCullingMask(cameraMask2);
 			camera2->SetDepth(1);
 			camera2->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky()));
 
-			auto light2 = mScneMng->CreateAddLightNode<PointLight>();
+			auto light2 = mScneMng->CreateLightNode<PointLight>();
 			light2->SetCameraMask(cameraMask2);
 			light2->SetPosition(mWinCenter + Eigen::Vector3f(10, 10, -10));
 			light2->SetAttenuation(0.0001);
 		}
 
-		auto mModel2 = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL));
+		auto mModel2 = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(MAT_MODEL));
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel2);
 		mModel2->SetCameraMask(cameraMask2);
 		mModel2->PlayAnim(0);
@@ -62,21 +62,21 @@ CoTask<bool> TestCameraOutput::OnInitScene()
 
 	if (mCaseIndex == 1)
 	{
-		mScneMng->AddRendNode(CoAwait test1::res::cube::far_plane::Create(mRendFac, mWinCenter));
-		mScneMng->AddRendNode(CoAwait test1::res::cube::near_plane::Create(mRendFac, mWinCenter));
+		mScneMng->AddRendAsNode(CoAwait test1::res::cube::far_plane::Create(mRendFac, mWinCenter));
+		mScneMng->AddRendAsNode(CoAwait test1::res::cube::near_plane::Create(mRendFac, mWinCenter));
 	}
 
 	constexpr unsigned cameraMask1 = 0x02;
 	if (mCaseIndex == 0)
 	{
-		auto camera1 = mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter));
+		auto camera1 = mScneMng->CreateCameraNode(kCameraOthogonal);
 		camera1->SetDepth(2);
 		camera1->SetCullingMask(cameraMask1);
 
-		auto light1 = mScneMng->CreateAddLightNode<PointLight>();
+		auto light1 = mScneMng->CreateLightNode<PointLight>();
 		light1->SetCameraMask(cameraMask1);
 
-		auto mSprite1 = mScneMng->AddRendNode(CoAwait mRendFac->CreateSpriteT("model/lenna.dds"));
+		auto mSprite1 = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateSpriteT("model/lenna.dds"));
 		mSprite1->SetCameraMask(cameraMask1);
 		mSprite1->GetTransform()->SetPosition(-mHalfSize);
 

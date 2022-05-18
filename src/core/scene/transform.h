@@ -2,6 +2,7 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/base/math.h"
+#include "core/base/deffered_signal.h"
 #include "core/scene/predeclare.h"
 #include "core/scene/component.h"
 
@@ -44,14 +45,13 @@ public:
 
 	CoTask<void> UpdateFrame();
 public:
+	const DefferedSignal& GetSignal() const { return mSignal; }
 	const Eigen::Vector3f& GetLocalPosition() const { return mPosition; }
 	const Eigen::Vector3f& GetLocalScale() const { return mScale; }
 	constexpr RotationOrder GetEulerOrder() const { return kExtrinsicZXY; }
 	const Eigen::Quaternionf& GetLocalRotation() const { return mQuat; }
-	bool HasChanged() const { return mChanged; }
 protected:
 	void CalculateSRT(Eigen::Matrix4f& matrix) const;
-	void CheckDirtyAndRecalculate() const;
 	const Eigen::Matrix4f& GetSRT() const;
 protected:
 	Eigen::Vector3f mPosition;
@@ -59,8 +59,7 @@ protected:
 	Eigen::Quaternionf mQuat;
 
 	mutable Eigen::Matrix4f mSRT;
-	mutable bool mDirty;
-	bool mChanged;
+	mutable DefferedConnctedSignal mSignal;
 };
 
 class MIR_CORE_API Transform : public std::enable_shared_from_this<Transform>, public BaseTransform {

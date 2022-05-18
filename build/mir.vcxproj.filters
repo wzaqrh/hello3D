@@ -256,11 +256,11 @@
     <ClInclude Include="..\src\core\resource\material_property.h">
       <Filter>src\core\resource\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\mir_config_macros.h">
-      <Filter>src\shader\inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\renderable\paint3d.h">
       <Filter>src\core\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\deffered_signal.h">
+      <Filter>src\core\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -470,121 +470,154 @@
     <Filter Include="src\core\rendersys\interface">
       <UniqueIdentifier>{9bdcc5a6-7e83-4a77-840a-cc086231b1e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\shader">
-      <UniqueIdentifier>{850b275f-17d8-48d5-a3e4-9553376a3584}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\shader\inc">
-      <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\shader\xml">
-      <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\base\tpl">
       <UniqueIdentifier>{83b933a7-c99d-4e06-bf3d-d62aaa54c2ef}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\config">
       <UniqueIdentifier>{36a443b8-0b16-4943-aeac-a575c08d7413}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{850b275f-17d8-48d5-a3e4-9553376a3584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\inc">
+      <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\xml">
+      <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\material">
+      <UniqueIdentifier>{62b4cbdb-7b95-4418-9119-659c6154c15f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\material\toycar">
+      <UniqueIdentifier>{bb2b7cbe-16de-4568-a37a-68fc56ffc39b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Model.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skybox.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Sprite.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skeleton.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Standard.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\IBL.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Standard.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Sprite.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skybox.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skeleton.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Model.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\BoxBlur.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader">
-      <Filter>src\shader\xml</Filter>
+      <Filter>shader\xml</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Shadow.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Poisson.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\VarianceShadow.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Bloom.hlsl">
-      <Filter>src\shader</Filter>
+      <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\UnityLighting.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\GltfLighting.cginc">
-      <Filter>src\shader\inc</Filter>
+      <Filter>shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Macros.cginc">
+      <Filter>shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\armadillo\defaultMaterial.Material">
+      <Filter>shader\material</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\buddha\material_0.Material">
+      <Filter>shader\material</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\dragon\DefaultMaterial.Material">
+      <Filter>shader\material</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\floor\defaultobject.Material">
+      <Filter>shader\material</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\Spaceship\RetopoGroup2.Material">
+      <Filter>shader\material</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\ToyCar\Fabric.Material">
+      <Filter>shader\material\toycar</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\ToyCar\Glass.Material">
+      <Filter>shader\material\toycar</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\model\ToyCar\ToyCar.Material">
+      <Filter>shader\material\toycar</Filter>
     </None>
   </ItemGroup>
 </Project>

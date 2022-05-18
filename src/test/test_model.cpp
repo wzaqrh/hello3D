@@ -36,36 +36,36 @@ CoTask<bool> TestModel::OnInitScene()
 
 	switch (caseIndex) {
 	case 0: {
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(0, -1, 0));
 	}break;
 	case 1:
 	case 2: {
-		auto pt_light = mScneMng->CreateAddLightNode<PointLight>();
+		auto pt_light = mScneMng->CreateLightNode<PointLight>();
 		pt_light->SetPosition(Eigen::Vector3f(0, 15, -5));
 		pt_light->SetAttenuation(0.001);
 	}break;
 	case 3: {
-		auto pt_light = mScneMng->CreateAddLightNode<PointLight>();
+		auto pt_light = mScneMng->CreateLightNode<PointLight>();
 		pt_light->SetPosition(Eigen::Vector3f(25, 0, -5));
 		pt_light->SetAttenuation(0.005);
 
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(25, 0, 0));
 	}break;
 	case 4:{
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(0, -1, 1));
 	}break;
 	default: {
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(0, 0, 1));
 	}break;
 	}
 
 	CameraPtr camera = useOtho 
-		? mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam::Eye(mWinCenter))
-		: mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+		? mScneMng->CreateCameraNode(kCameraOthogonal)
+		: mScneMng->CreateCameraNode(kCameraPerspective);
 
 	test1::res::model model;
 	switch (caseIndex) {
@@ -76,7 +76,7 @@ CoTask<bool> TestModel::OnInitScene()
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(1)));
 
 		auto mModel = CoAwait mRendFac->CreateAssimpModelT(GetMatName(mCaseSecondIndex));
-		mScneMng->AddRendNode(mModel);
+		mScneMng->AddRendAsNode(mModel);
 		std::string modelNameArr[] = { "toycar", "box-space", "mir" };
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex], mModel);
 
@@ -86,7 +86,7 @@ CoTask<bool> TestModel::OnInitScene()
 	case 4: 
 	case 5: {
 		auto mModel = CoAwait mRendFac->CreateAssimpModelT(GetMatName(mCaseSecondIndex));
-		mScneMng->AddRendNode(mModel);
+		mScneMng->AddRendAsNode(mModel);
 		std::string modelNameArr[] = { "spaceship", "rock", "floor" };
 		mTransform = CoAwait model.Init(modelNameArr[caseIndex-3], mModel);
 

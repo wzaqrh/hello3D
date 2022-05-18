@@ -16,7 +16,7 @@ private:
 
 CoTask<bool> TestUnity::OnInitScene()
 {
-	CameraPtr camera = mScneMng->CreateAddCameraNode(kCameraPerspective, test1::cam::Eye(mWinCenter));
+	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(60);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
@@ -24,16 +24,16 @@ CoTask<bool> TestUnity::OnInitScene()
 	switch (mCaseIndex) {
 	case 0:
 	case 1: {
-		camera->SetLookAt(Eigen::Vector3f(0, 1, -10), Eigen::Vector3f::Zero());
+		camera->SetLookAt(Eigen::Vector3f(0, 0, -10), Eigen::Vector3f::Zero());
 
-		auto dir_light = mScneMng->CreateAddLightNode<DirectLight>();
+		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetLookAt(Eigen::Vector3f(0, 3, 0), Eigen::Vector3f::Zero());
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
-		mModel = mScneMng->AddRendNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		
 	#define PPI 3.14159265358979323846264338327
 	#if 1

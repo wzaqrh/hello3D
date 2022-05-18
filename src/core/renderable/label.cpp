@@ -51,7 +51,7 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 			if (lastTex != nullptr) {
 				RenderOperation op = {};
 				op.Material = mMaterial;
-				mMaterial->GetTextures()[0] = lastTex;
+				mMaterial.GetTextures()[0] = lastTex;
 				op.AddVertexBuffer(mVertexBuffer);
 				op.IndexBuffer = mIndexBuffer;
 				op.IndexBase = 4 * (i - lastCount);
@@ -70,7 +70,7 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 	if (lastTex) {
 		RenderOperation op = {};
 		op.Material = mMaterial;
-		mMaterial->GetTextures()[0] = lastTex;
+		mMaterial.GetTextures()[0] = lastTex;
 		op.AddVertexBuffer(mVertexBuffer);
 		op.IndexBuffer = mIndexBuffer;
 		op.IndexBase = 4 * (mCharSeqOrder.size() - lastCount);

@@ -6,33 +6,44 @@
 
 namespace mir {
 
+#define SAFE_CALL(V, FUNC) if (V) V->FUNC
+
 SceneNode::SceneNode()
 {}
 
 void SceneNode::SetTransform(const TransformPtr& transform)
 {
 	BOOST_ASSERT(transform);
+	SAFE_CALL(mTransform, DettachSceneNode());
 	mTransform = CreateInstance<Transform>();
-	mTransform->AttachSceneNode(shared_from_this());
+	SAFE_CALL(mTransform, AttachSceneNode(shared_from_this()));
+
+	FireSetComponenteEvent();
 }
 
 void SceneNode::SetRenderable(const RenderablePtr& rend)
 {
+	SAFE_CALL(mRenderable, DettachSceneNode());
 	mRenderable = rend;
-	if (mRenderable) 
-		mRenderable->AttachSceneNode(shared_from_this());
+	SAFE_CALL(mRenderable, AttachSceneNode(shared_from_this()));
+
+	FireSetComponenteEvent();
 }
 void SceneNode::SetLight(const scene::LightPtr& light)
 {
+	SAFE_CALL(mLight, DettachSceneNode());
 	mLight = light;
-	if (mLight) 
-		mLight->AttachSceneNode(shared_from_this());
+	SAFE_CALL(mLight, AttachSceneNode(shared_from_this()));
+
+	FireSetComponenteEvent();
 }
 void SceneNode::SetCamera(const scene::CameraPtr& camera)
 {
+	SAFE_CALL(mCamera, DettachSceneNode());
 	mCamera = camera;
-	if (mCamera) 
-		mCamera->AttachSceneNode(shared_from_this());
+	SAFE_CALL(mCamera, AttachSceneNode(shared_from_this()));
+
+	FireSetComponenteEvent();
 }
 
 const Eigen::AlignedBox3f SceneNode::GetAABB() const
@@ -40,6 +51,15 @@ const Eigen::AlignedBox3f SceneNode::GetAABB() const
 	return mRenderable ? mRenderable->GetWorldAABB() : Eigen::AlignedBox3f();
 }
 
+void SceneNode::FireSetComponenteEvent()
+{
+	if (mTransform) mTransform->PostSetComponent();
+	if (mRenderable) mRenderable->PostSetComponent();
+	if (mLight) mLight->PostSetComponent();
+	if (mCamera) mCamera->PostSetComponent();
+}
+
+/********** SceneNodeFactory **********/
 SceneNodePtr SceneNodeFactory::CreateNode()
 {
 	SceneNodePtr node = CreateInstance<SceneNode>();

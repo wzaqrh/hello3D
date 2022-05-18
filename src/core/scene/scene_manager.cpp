@@ -15,12 +15,13 @@ namespace mir {
 SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac)
 	: mResMng(resMng)
 	, mRendFac(rendFac)
-	, mCamerasDirty(false)
-	, mLightsDirty(false)
 {
 	mLightFac = CreateInstance<LightFactory>();
 	mCameraFac = CreateInstance<CameraFactory>(resMng);
 	mNodeFac = CreateInstance<SceneNodeFactory>();
+
+	mNodesSignal.Connect(mCamerasSlot);
+	mNodesSignal.Connect(mLightsSlot);
 }
 
 void SceneManager::SetPixelPerUnit(float ppu)
@@ -31,89 +32,35 @@ void SceneManager::SetPixelPerUnit(float ppu)
 SceneNodePtr SceneManager::AddNode()
 {
 	SceneNodePtr node = mNodeFac->CreateNode();
+	node->SetTransform(CreateInstance<Transform>());
+	
 	mNodes.push_back(node);
+	mNodesSignal();
+
 	return node;
 }
 
-scene::CameraPtr SceneManager::CreateAddCameraNode(scene::CameraPtr camera)
-{
-	BOOST_ASSERT(camera);
-	auto node = AddNode();
-	node->SetCamera(camera);
-
-	mCameras.push_back(camera);
-	mCamerasDirty = true;
-	return camera;
-}
-void SceneManager::RemoveAllCameras()
-{
-	mCameras.clear();
-}
-void SceneManager::ResortCameras() 
-{
-	if (mCamerasDirty) {
-		mCamerasDirty = false;
-
-		struct CompCameraByDepth {
-			bool operator()(const CameraPtr& l, const CameraPtr& r) const {
-				return l->GetDepth() < r->GetDepth();
-			}
-		};
-		std::stable_sort(mCameras.begin(), mCameras.end(), CompCameraByDepth());
-	}
-}
-
-scene::LightPtr SceneManager::AddLightNode(scene::LightPtr light)
-{
-	BOOST_ASSERT(light);
-	auto node = AddNode();
-	node->SetLight(light);
-
-	mLights.push_back(light);
-	mLightsDirty = true;
-	return light;
-}
-void SceneManager::RemoveAllLights()
-{
-	mLights.clear();
-}
-void SceneManager::ResortLights() 
-{
-	if (mLightsDirty) {
-		mLightsDirty = false;
-
-		struct CompLightByType {
-			bool operator()(const LightPtr& l, const LightPtr& r) const {
-				return l->GetType() < r->GetType();
-			}
-		};
-		std::sort(mLights.begin(), mLights.end(), CompLightByType());
-	}
-}
-
-RenderablePtr SceneManager::AddRendNode(RenderablePtr rend)
+RenderablePtr SceneManager::AddRendAsNode(RenderablePtr rend)
 {
 	BOOST_ASSERT(rend);
 	auto node = AddNode();
 	node->SetRenderable(rend);
-
-	mRends.push_back(rend);
-	mRendsDirty = true;
 	return rend;
 }
 
 CoTask<void> SceneManager::UpdateFrame(float dt)
 {
-	for (auto& node : mNodes) {
-		if (RenderablePtr rend = node->GetComponent<Renderable>()) 
-			CoAwait rend->UpdateFrame(dt);
-		if (CameraPtr camera = node->GetComponent<Camera>())
-			CoAwait camera->UpdateFrame(dt);
-	}
-
 	Eigen::AlignedBox3f aabb = this->GetWorldAABB();
-	for (auto& light : mLights)
-		light->UpdateLightCamera(aabb);
+	for (auto& node : mNodes) {
+		if (RenderablePtr rend = node->GetRenderable()) 
+			CoAwait rend->UpdateFrame(dt);
+
+		if (CameraPtr camera = node->GetCamera())
+			CoAwait camera->UpdateFrame(dt);
+
+		if (scene::LightPtr light = node->GetLight())
+			light->UpdateLightCamera(aabb);
+	}
 
 #if MIR_GRAPHICS_DEBUG
 	if (mDebugPaint == nullptr) mDebugPaint = CoAwait mRendFac->CreatePaint3DT();
@@ -143,6 +90,44 @@ Eigen::AlignedBox3f SceneManager::GetWorldAABB() const
 		aabb.extend(node->GetAABB());
 	}
 	return aabb;
+}
+
+const std::vector<mir::scene::CameraPtr>& SceneManager::GetCameras() const
+{
+	if (mCamerasSlot.AcquireSignal()) {
+		mCameras.clear();
+		for (auto& node : mNodes) {
+			if (auto camera = node->GetCamera())
+				mCameras.push_back(camera);
+		}
+
+		struct CompCameraByDepth {
+			bool operator()(const CameraPtr& l, const CameraPtr& r) const {
+				return l->GetDepth() < r->GetDepth();
+			}
+		};
+		std::stable_sort(mCameras.begin(), mCameras.end(), CompCameraByDepth());
+	}
+	return mCameras;
+}
+
+const std::vector<mir::scene::LightPtr>& SceneManager::GetLights() const
+{
+	if (mLightsSlot.AcquireSignal()) {
+		mLights.clear();
+		for (auto& node : mNodes) {
+			if (auto light = node->GetLight())
+				mLights.push_back(light);
+		}
+
+		struct CompLightByType {
+			bool operator()(const LightPtr& l, const LightPtr& r) const {
+				return l->GetType() < r->GetType();
+			}
+		};
+		std::stable_sort(mLights.begin(), mLights.end(), CompLightByType());
+	}
+	return mLights;
 }
 
 }

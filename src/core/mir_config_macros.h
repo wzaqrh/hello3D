@@ -60,13 +60,33 @@
 #define TONEMAP_ACES_HILL 3
 #define TONEMAP_ACES_HILL_EXPOSURE_BOOST 4
 #if !defined TONEMAP_MODE
-#define TONEMAP_MODE 1/*TONEMAP_TO_SRGB*/
+#define TONEMAP_MODE 0/*TONEMAP_LINEAR*/
 #endif
 
 #define PBR_UNITY 1
 #define PBR_GLTF 2
 #if !defined PBR_MODE
-#define PBR_MODE 2/*PBR_GLTF*/
+#define PBR_MODE 1/*PBR_UNITY*/
+#endif
+
+#if !defined ENABLE_CORRCET_TANGENT_BASIS
+#define ENABLE_CORRCET_TANGENT_BASIS 1
+#endif
+
+#if !defined HAS_ATTRIBUTE_NORMAL
+#define HAS_ATTRIBUTE_NORMAL 1
+#endif
+
+#if !defined HAS_ATTRIBUTE_TANGENT
+#define HAS_ATTRIBUTE_TANGENT 1
+#endif
+
+#if !defined COLORSPACE_GAMMA
+#define COLORSPACE_GAMMA 1
+#endif
+
+#if !defined RIGHT_HANDNESS_RESOURCE
+#define RIGHT_HANDNESS_RESOURCE 1
 #endif
 
 #if !defined CubeMapIsRightHandness
@@ -100,6 +120,10 @@
 #define SHADOW_VSM 5
 #if !defined SHADOW_MODE
 #define SHADOW_MODE 5/*SHADOW_VSM*/
+#endif
+
+#if !defined ENABLE_SHADOW_MAP
+#define ENABLE_SHADOW_MAP 1
 #endif
 
 #endif

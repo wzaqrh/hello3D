@@ -1,12 +1,11 @@
 <Material>
 	<UseShader>Model</UseShader>
 	<Macros>
+		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
 	</Macros>
 	<Properties>
 		<AlbedoFactor>0.8,0.3,0.8,1</AlbedoFactor>
 		<MetallicFactor>0</MetallicFactor>
 		<RoughnessFactor>0</RoughnessFactor>
-		
-		<HasTangent>1</HasTangent>
 	</Properties>
 </Material>

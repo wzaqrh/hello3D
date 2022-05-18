@@ -59,6 +59,10 @@ public:
 	void SetBlendState(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
 
+	void SetCullMode(CullMode cullMode) override {}
+	void SetFillMode(FillMode fillMode) override {}
+	void SetDepthBias(const DepthBias& bias) override {}
+
 	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
 		const Eigen::Vector4i& w_h_step_arrlen, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;

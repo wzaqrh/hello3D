@@ -119,22 +119,33 @@ struct ProgramNode {
 		Samplers.Merge<true>(other.Samplers);
 		VertexSCD.Merge<true>(other.VertexSCD);
 		PixelSCD.Merge<true>(other.PixelSCD);
+		
+		if (other.Blend) Blend = other.Blend;
+		if (other.Depth) Depth = other.Depth;
+		if (other.Fill) Fill = other.Fill;
+		if (other.Cull) Cull = other.Cull;
 	}
 	bool Validate() const {
 		for (auto& attr : Attrs)
 			if (!VR(attr.IsValid()))
 				return false;
 		#if 0
-		return VR((Topo != kPrimTopologyUnkown) && 
-			(Attrs.Count() > 0) &&
-			VertexSCD.Validate() &&
-			PixelSCD.Validate());
+			return VR((Topo != kPrimTopologyUnkown) && 
+				(Attrs.Count() > 0) &&
+				VertexSCD.Validate() &&
+				PixelSCD.Validate());
 		#else
-		return VR(Attrs.Count() > 0);
+			return VR(Attrs.Count() > 0);
 		#endif
 	}
 public:
 	PrimitiveTopology Topo = kPrimTopologyTriangleList;
+	std::optional<BlendState> Blend;
+	std::optional<DepthState> Depth;
+	std::optional<FillMode> Fill;
+	std::optional<CullMode> Cull;
+	std::optional<DepthBias> DepthBias;
+
 	AttributeNodeVector Attrs;
 	UniformNodeVector Uniforms;
 	SamplerNode Samplers;

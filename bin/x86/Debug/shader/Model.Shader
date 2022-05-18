@@ -22,18 +22,7 @@
 			<Element Name="OcclusionStrength"       Type="float"  Default="1"></Element>
 			<Element Name="RoughnessFactor"         Type="float"  Default="1"></Element>
 			<Element Name="MetallicFactor"          Type="float"  Default="1"></Element>
-			<Element Name="EmissiveFactor"          Type="float3"></Element>
-			
-			<Element Name="EnableAlbedoMap"           Type="bool"></Element>
-			<Element Name="EnableNormalMap"           Type="bool"></Element>
-			<Element Name="EnableAmbientOcclusionMap" Type="bool"></Element>
-			<Element Name="EnableRoughnessMap"        Type="bool"></Element>
-			<Element Name="EnableMetalnessMap"        Type="bool"></Element>
-			<Element Name="EnableEmissiveMap"         Type="bool"></Element>
-			<Element Name="AmbientOcclusion_ChannelGRoughness_ChannelBMetalness" Type="bool"></Element>
-			<Element Name="AlbedoMapSRGB"             Type="bool"  Default="1"></Element>
-			<Element Name="EmissiveMapSRGB"           Type="bool"  Default="1"></Element>
-			<Element Name="HasTangent"                Type="bool"></Element>
+			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
 		</Uniform>   
 		<Texture>
 			<Element Slot="0" Address="1">txAlbedo</Element>
@@ -43,10 +32,31 @@
 			<Element Slot="4" Address="1">txAmbientOcclusion</Element>
 			<Element Slot="5" Address="1">txEmissive</Element>
 		</Texture>
-		<Macros>
+		<Macros>			
+			<ENABLE_ALBEDO_MAP>0</ENABLE_ALBEDO_MAP>
+			<ALBEDO_MAP_SRGB>1</ALBEDO_MAP_SRGB>
+			
+			<ENABLE_EMISSIVE_MAP>0</ENABLE_EMISSIVE_MAP>
+			<EMISSIVE_MAP_SRGB>1</EMISSIVE_MAP_SRGB>
+			
+			<ENABLE_AO_ROUGHNESS_METALLIC_MAP>0</ENABLE_AO_ROUGHNESS_METALLIC_MAP>
+      <ENABLE_METALLIC_X_X_SMOOTHNESS_MAP>0</ENABLE_METALLIC_X_X_SMOOTHNESS_MAP>
+			<ENABLE_AO_MAP>0</ENABLE_AO_MAP>
+			<ENABLE_ROUGHNESS_MAP>0</ENABLE_ROUGHNESS_MAP>
+			<ENABLE_METALLIC_MAP>0</ENABLE_METALLIC_MAP>
+			
+			<HAS_ATTRIBUTE_NORMAL>1</HAS_ATTRIBUTE_NORMAL>
+			<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
+			<ENABLE_PIXEL_BTN>1</ENABLE_PIXEL_BTN>
 		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>
+		
+		<FillMode>3</FillMode>
+		<CullMode>3</CullMode>
+		<DepthEnable>1</DepthEnable>
+		<DepthFunc>4</DepthFunc>
+		<DepthWriteMask>1</DepthWriteMask>
 	</PROGRAM>
 	
 	<SubShader>

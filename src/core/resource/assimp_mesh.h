@@ -27,6 +27,7 @@ struct AiBone {
 class MIR_CORE_API AssimpMesh
 {
 	friend class AiSceneLoader;
+	friend class AiSceneObjLoader;
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 public:
 	AssimpMesh();
@@ -37,9 +38,8 @@ public:
 	const std::vector<AiBone>& GetBones() const { return mBones; }
 
 	bool IsLoaded() const;
-	void SetMaterial(const MaterialInstance& mat) { mMaterial = mat; }
 	const MaterialInstance& GetMaterial() const { return mMaterial; }
-	const TextureVector& GetTextures() const { return mMaterial->GetTextures(); }
+	const TextureVector& GetTextures() const { return mMaterial.GetTextures(); }
 	const IVertexBufferPtr& GetVBOSurface() const { return mVBOSurface; }
 	const IVertexBufferPtr& GetVBOSkeleton() const { return mVBOSkeleton; }
 	const IIndexBufferPtr& GetIndexBuffer() const { return mIndexBuffer; }

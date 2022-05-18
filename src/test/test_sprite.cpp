@@ -25,8 +25,8 @@ protected:
 
 CoTask<bool> TestSprite::OnInitScene()
 {
-	mScneMng->CreateAddLightNode<DirectLight>();
-	mScneMng->CreateAddCameraNode(kCameraOthogonal, test1::cam_otho::Eye(mWinCenter));
+	mScneMng->CreateLightNode<DirectLight>();
+	mScneMng->CreateCameraNode(kCameraOthogonal);
 	SetPPU(C_WINDOW_HEIGHT / 10.0);
 
 	Launch sync = __LaunchSync__;
@@ -94,7 +94,7 @@ CoTask<bool> TestSprite::OnInitScene()
 	default:
 		break;
 	}
-	mScneMng->AddRendNode(mSprite);
+	mScneMng->AddRendAsNode(mSprite);
 
 	CoReturn true;
 }

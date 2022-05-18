@@ -41,17 +41,17 @@ CoTask<bool> TestCamera::OnInitScene()
 	CoTaskVector tasks;
 	if (1)
 	{
-		auto mModel = mScneMng->AddRendNode(mContext->RenderableFac()->CreateAssimpModelITV(tasks, MAT_MODEL));
+		auto mModel = mScneMng->AddRendAsNode(mContext->RenderableFac()->CreateAssimpModelITV(tasks, MAT_MODEL));
 		CoAwait WhenAll(std::move(tasks));
 		mTransform = CoAwait test1::res::model().Init("spaceship", mModel);
 		if (cameraType == 0)
 			mTransform->SetScale(mTransform->GetLossyScale() * 2);
 	}
 
-	mScneMng->CreateAddLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, -1, 1));
+	mScneMng->CreateLightNode<DirectLight>()->SetDirection(Eigen::Vector3f(0, -1, 1));
 
 	mControlCamera = false;
-	CameraPtr camera = mScneMng->CreateAddCameraNode((CameraType)cameraType, Eigen::Vector3f(0, 0, -10));
+	CameraPtr camera = mScneMng->CreateCameraNode((CameraType)cameraType);
 	camera->SetSkyBox(mRendFac->CreateSkyboxITV(tasks, test1::res::Sky()));
 	switch (caseIndex) {
 	case 0: {
