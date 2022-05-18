@@ -95,28 +95,72 @@ static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	std::string asmName = name;
 	asmName += "_" + desc.EntryPoint;
 	asmName += " " + desc.ShaderModel;
+
+	boost::filesystem::create_directories("shader/asm/" + platform);
+#if 0
 	for (const auto& macro : desc.Macros)
 		asmName += " (" + macro.Name + "=" + macro.Definition + ")";
+#else
+	std::string macrosStr = "";
+	for (const auto& macro : desc.Macros)
+		macrosStr += " (" + macro.Name + "=" + macro.Definition + ")";
+
+	std::string macrosHashStr;
+	bool hashMatch = false;
+	int loopCount = 0;
+	do {
+		loopCount++;
+		size_t macrosHash = std::hash<std::string>()(macrosStr + boost::lexical_cast<std::string>(loopCount));
+		macrosHashStr = boost::lexical_cast<std::string>(macrosHash);
+		std::string macrosHashFilename = ("shader/asm/" + platform + "/") + asmName + " " + macrosHashStr + ".txt";
+		FILE* fhash = fopen(macrosHashFilename.c_str(), "rb");
+		if (fhash) {
+			std::string rdMacrosStr;
+			char buf[2048];
+			while (int rd = fread(buf, 1, 2047, fhash)) {
+				buf[rd] = 0;
+				rdMacrosStr += buf;
+			}
+			fclose(fhash);
+
+			if (rdMacrosStr == macrosStr) {
+				hashMatch = true;
+			}
+		}
+		else {
+			fhash = fopen(macrosHashFilename.c_str(), "wb");
+			fwrite(macrosStr.c_str(), 1, macrosStr.size(), fhash);
+			fclose(fhash);
+
+			hashMatch = true;
+		}
+	} while (! hashMatch);
+	asmName += " " + macrosHashStr;
+#endif
+
 #if defined MIR_RESOURCE_DEBUG
 	auto sourcePath = MakeShaderSourcePath(name);
-	tm lwt;
 	time_t time = boost::filesystem::last_write_time(sourcePath);
+
+	static time_t cgincs_time = 0;
+	if (cgincs_time == 0)
 	{
 		boost::filesystem::directory_iterator diter("shader/"), dend;
 		for (; diter != dend; ++diter) {
 			if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".cginc") {
 				time_t htime = boost::filesystem::last_write_time((*diter).path());
-				time = std::max(time, htime);
+				cgincs_time = std::max(cgincs_time, htime);
 			}
 		}
 	}
+	time = std::max(time, cgincs_time);
 
+	tm lwt;
 	gmtime_s(&lwt, &time);
 	boost::format fmt(" [%d-%d-%d %d.%d.%d]");
 	fmt %lwt.tm_year %lwt.tm_mon %lwt.tm_mday;
 	fmt %lwt.tm_hour %lwt.tm_min %lwt.tm_sec;
 	asmName += fmt.str();
-	boost::filesystem::create_directories("shader/asm/" + platform);
 #endif
 	asmName += ".cso";
 	std::string filepath = "shader/asm/" + platform + "/" + asmName;
@@ -165,7 +209,7 @@ CoTask<bool> ResourceManager::_LoadProgram(Launch launchMode, IProgramPtr progra
 			if (!bytes.empty()) {
 				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bytes));
 			#if defined MIR_RESOURCE_DEBUG
-				input::WriteFile(psAsmPath.string().c_str(), "wb", blobPS->GetBytes(), blobPS->GetSize());
+				BOOST_ASSERT(input::WriteFile(psAsmPath.string().c_str(), "wb", blobPS->GetBytes(), blobPS->GetSize()));
 			#endif
 			}
 		}

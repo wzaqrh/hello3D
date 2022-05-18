@@ -12,6 +12,7 @@ D3DInput::D3DInput(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHe
 	memset(&m_mouseState, 0, sizeof(m_mouseState));
 	memset(&mMouseL, 0, sizeof(mMouseL));
 	memset(&mMouseR, 0, sizeof(mMouseR));
+	memset(&mMouseM, 0, sizeof(mMouseM));
 	mMouseWheel = 0;
 	mMouseMiddleDown = false;
 	Init(hinstance, hwnd, screenWidth, screenHeight);
@@ -139,15 +140,17 @@ std::vector<char> ReadFile(const char* fileName, const char* mode)
 	return ret;
 }
 
-void WriteFile(const char* fileName, const char* mode, const char bytes[], size_t byteCount)
+bool WriteFile(const char* fileName, const char* mode, const char bytes[], size_t byteCount)
 {
 	if (bytes && byteCount) {
 		FILE* fd = fopen(fileName, mode);
 		if (fd) {
 			fwrite(bytes, sizeof(char), byteCount, fd);
 			fclose(fd);
+			return true;
 		}
 	}
+	return false;
 }
 
 }
