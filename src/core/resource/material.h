@@ -96,7 +96,6 @@ public:
 
 	/********** about material **********/
 	const MaterialPtr& GetMaterial() const { return mSelf ? mSelf->Material : nullptr; }
-	MaterialPtr& operator->() { return mSelf ? mSelf->Material : nullptr; }
 	const MaterialPtr& operator->() const { return GetMaterial(); };
 	operator bool() const { return mSelf && mSelf->Material != nullptr; }
 

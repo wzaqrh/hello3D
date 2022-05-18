@@ -50,6 +50,8 @@ cbuffer cbPerFrame : register(b0)
 	matrix LightView;
 	matrix LightProjection;
 	
+	matrix SHC0C1;
+	
     float4 CameraPosition;
 	float4 FrameBufferSize;
 	float4 ShadowMapSize; 

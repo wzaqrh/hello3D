@@ -35,6 +35,10 @@ enum PipeLineTextureSlot
 #define kDepthFormat kFormatD32Float//kFormatD24UNormS8UInt
 
 struct cbPerFrameBuilder {
+	cbPerFrameBuilder& SetSkybox(const rend::SkyBoxPtr& skybox) {
+		mCBuffer.SHC0C1 = IF_AND_OR(skybox, skybox->GetSphericalHarmonicsConstants(), Eigen::Matrix4f::Zero());
+		return *this;
+	}
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {
 		mCBuffer.View = camera.GetView();
 		mCBuffer.Projection = camera.GetProjection();
@@ -44,7 +48,7 @@ struct cbPerFrameBuilder {
 
 		mCBuffer.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
 		mCBuffer.CameraPosition.w() = 1.0f;
-		return *this;
+		return SetSkybox(camera.GetSkyBox());
 	}
 	void SetBackFrameBufferSize(Eigen::Vector2i backBufferSize) {
 		mBackBufferSize = backBufferSize;

@@ -247,6 +247,7 @@
     <None Include="..\bin\x86\Debug\shader\Skeleton.Shader" />
     <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader" />
     <None Include="..\bin\x86\Debug\shader\Skybox.Shader" />
+    <None Include="..\bin\x86\Debug\shader\SphericalHarmonics.cginc" />
     <None Include="..\bin\x86\Debug\shader\Sprite.Shader" />
     <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
     <None Include="..\bin\x86\Debug\shader\Standard.Shader" />

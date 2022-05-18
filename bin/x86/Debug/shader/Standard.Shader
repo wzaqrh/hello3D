@@ -9,16 +9,18 @@
 		</Attribute>
 		
 		<Uniform Name="cbPerFrame" Slot="0" ShareMode="2">
-			<Element Name="World" 		  	Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
-			<Element Name="View" 	 	    Type="matrix"></Element>
-			<Element Name="Projection" 		Type="matrix"></Element>
+			<Element Name="World" 		  		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
+			<Element Name="View" 	 			Type="matrix"></Element>
+			<Element Name="Projection" 			Type="matrix"></Element>
 			
-			<Element Name="ViewInv" 	    Type="matrix"></Element>
-			<Element Name="ProjectionInv"	Type="matrix"></Element>
+			<Element Name="ViewInv" 			Type="matrix"></Element>
+			<Element Name="ProjectionInv"		Type="matrix"></Element>
 			
-			<Element Name="LightView" 	 	Type="matrix"></Element>
-			<Element Name="LightProjection" Type="matrix"></Element>
+			<Element Name="LightView" 	 		Type="matrix"></Element>
+			<Element Name="LightProjection" 	Type="matrix"></Element>
 
+			<Element Name="SHC0C1"					Type="matrix"></Element>
+			
 			<Element Name="CameraPosition"  Type="float4"></Element>
 			<Element Name="FrameBufferSize" Type="float4"></Element>
 			<Element Name="ShadowMapSize"   Type="float4"></Element>

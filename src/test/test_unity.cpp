@@ -1,5 +1,6 @@
 #include "test/test_case.h"
 #include "test/app.h"
+#include "core/renderable/skybox.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -30,7 +31,15 @@ CoTask<bool> TestUnity::OnInitScene()
 		dir_light->SetLookAt(Eigen::Vector3f(0, 3, 0), Eigen::Vector3f::Zero());
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
-		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
+		auto skybox = CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat);
+		Eigen::Matrix4f c0c1; 
+		c0c1 <<
+			-0.015, -0.022, -0.035, 0,
+			   0.1,   0.12,   0.15, 0,
+			-0.096, 0.0035,  0.011, 0,
+			  0.17,   0.15,   0.16, 0;
+		skybox->SetSphericalHarmonicsConstants(c0c1);
+		camera->SetSkyBox(skybox);
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));

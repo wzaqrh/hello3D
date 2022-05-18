@@ -619,5 +619,8 @@
     <None Include="..\bin\x86\Debug\model\ToyCar\ToyCar.Material">
       <Filter>shader\material\toycar</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\SphericalHarmonics.cginc">
+      <Filter>shader\inc</Filter>
+    </None>
   </ItemGroup>
 </Project>

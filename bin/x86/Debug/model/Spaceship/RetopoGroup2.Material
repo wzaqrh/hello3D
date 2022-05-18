@@ -20,7 +20,7 @@
 		<FLIP_UV0_Y>1</FLIP_UV0_Y>
 	</Macros>
 	<Properties>
-		<txAlbedo1>basecolor.png</txAlbedo1>
+		<txAlbedo>basecolor.png</txAlbedo>
 		<txNormal>normal.png</txNormal>
 		<txMetalness>metallic_smoothness.png</txMetalness>
 		<txRoughness>roughness.png</txRoughness>

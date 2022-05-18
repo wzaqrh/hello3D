@@ -13,6 +13,7 @@ struct UNIFORM_ALIGN cbPerFrame
 		World = View = Projection = Eigen::Matrix4f::Identity();
 		ViewInv = ProjectionInv = Eigen::Matrix4f::Identity();
 		LightView = LightProjection = Eigen::Matrix4f::Identity();
+		SHC0C1 = Eigen::Matrix4f::Zero();
 		FrameBufferSize = Eigen::Vector4f::Zero();
 		ShadowMapSize = Eigen::Vector4f::Zero();
 		CameraPosition = Eigen::Vector4f::Zero();
@@ -29,6 +30,8 @@ public:
 
 	Eigen::Matrix4f LightView;
 	Eigen::Matrix4f LightProjection;
+
+	Eigen::Matrix4f SHC0C1;
 
 	Eigen::Vector4f CameraPosition;
 	Eigen::Vector4f FrameBufferSize;
