@@ -38,7 +38,7 @@ private:
 };
 
 std::vector<char> ReadFile(const char* fileName, const char* mode);
-void WriteFile(const char* fileName, const char* mode, const char bytes[], size_t byteCount);
+bool WriteFile(const char* fileName, const char* mode, const char bytes[], size_t byteCount);
 
 }
 }
