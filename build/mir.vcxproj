@@ -60,6 +60,7 @@
     <ClInclude Include="..\src\core\base\uniform_struct.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
+    <ClInclude Include="..\src\core\mir_config_macros.h" />
     <ClInclude Include="..\src\core\mir_export.h" />
     <ClInclude Include="..\src\core\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\assimp_model.h" />
@@ -228,6 +229,7 @@
     <None Include="..\bin\x86\Debug\model\ToyCar\Glass.Material" />
     <None Include="..\bin\x86\Debug\model\ToyCar\ToyCar.Material" />
     <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Bloom.Shader" />
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc" />
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />

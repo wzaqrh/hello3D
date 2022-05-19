@@ -12,21 +12,17 @@ namespace mir {
 
 struct RenderOperation {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	RenderOperation() 
-		: IndexPos(0), IndexCount(0), IndexBase(0), WorldTransform(Eigen::Matrix4f::Identity()), CameraMask(-1) 
-	{}
-	void AddVertexBuffer(IVertexBufferPtr vbo) {
-		VertexBuffers.push_back(vbo);
-	}
+	RenderOperation() {}
+	void AddVertexBuffer(IVertexBufferPtr vbo) { VertexBuffers.push_back(vbo); }
 	res::MaterialInstance& WrMaterial() const { return const_cast<res::MaterialInstance&>(Material); }
 public:
-	Eigen::Matrix4f WorldTransform;
-	unsigned CameraMask;
+	Eigen::Matrix4f WorldTransform = Eigen::Matrix4f::Identity();
+	unsigned CameraMask = (unsigned)-1;
 	bool CastShadow = true;
 
 	std::vector<IVertexBufferPtr> VertexBuffers;
 	IIndexBufferPtr IndexBuffer;
-	short IndexPos, IndexCount, IndexBase;
+	short IndexPos = 0, IndexCount = 0, IndexBase = 0;
 	res::MaterialInstance Material;
 };
 

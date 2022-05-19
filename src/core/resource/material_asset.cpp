@@ -12,6 +12,7 @@
 #include "core/base/macros.h"
 #include "core/base/tpl/vector.h"
 #include "core/base/d3d.h"
+#include "core/mir_config_macros.h"
 #include "core/resource/material_name.h"
 #include "core/resource/material_asset.h"
 
@@ -57,10 +58,12 @@ private:
 			value = IF_AND_OR(value, value, progNode.VertexSCD[key]);
 			return value;
 		}
-		bool CheckCondition(const ProgramNode& progNode, const boost_property_tree::ptree& node) const {
+		bool CheckCondition(const ProgramNode& progNode, const boost_property_tree::ptree& node, bool* pHasCondition = nullptr) const {
 			bool result = true;
 			std::string condition = node.get<std::string>("<xmlattr>.Condition", "");
 			if (!condition.empty()) {
+				if (pHasCondition)
+					*pHasCondition = true;
 				const std::regex exp_regex("([a-zA-Z0-9_]+)([<>=]+)([0-9]+)");
 				std::smatch exp_match;
 				if (std::regex_match(condition, exp_match, exp_regex) && exp_match.size() == 4) {
@@ -386,6 +389,8 @@ private:
 	}
 	void VisitSamplers(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseTexture"))) {
+			if (!vis.CheckCondition(progNode, it.second))
+				continue;
 			std::string refName = it.second.data();
 			auto find_iter = mSamplerSetByName.find(refName);
 			if (find_iter != mSamplerSetByName.end()) {
@@ -397,10 +402,13 @@ private:
 		for (auto& tit : boost::make_iterator_range(nodeProgram->equal_range("Texture"))) {
 			auto& node_sampler = tit.second;
 			SamplerNode samplerSet;
-			if (! vis.CheckCondition(progNode, node_sampler))
+			if (! vis.CheckCondition(progNode, node_sampler, nullptr))
 				continue;
 
+			bool hasCondition = false;
 			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("UseTexture"))) {
+				if (!vis.CheckCondition(progNode, it.second, &hasCondition))
+					continue;
 				std::string refName = it.second.data();
 				auto find_iter = mSamplerSetByName.find(refName);
 				if (find_iter != mSamplerSetByName.end()) {
@@ -410,7 +418,7 @@ private:
 
 			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("Element"))) {
 				auto& node_element = it.second;
-				if (!vis.CheckCondition(progNode, node_element))
+				if (!vis.CheckCondition(progNode, node_element, &hasCondition))
 					continue;
 
 				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
@@ -434,7 +442,8 @@ private:
 
 			std::string shortName = node_sampler.get<std::string>("<xmlattr>.Name", "");
 			shortName = node_sampler.get<std::string>("<xmlattr>.ShortName", shortName);
-			if (!shortName.empty()) mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
+			if (!hasCondition && !shortName.empty()) 
+				mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
 
 		#if ENABLE_USEXXX_FULLPATH
 			shortName = PropertyTreePath(nodeProgram, node_sampler, index).Path.string();
@@ -542,11 +551,14 @@ private:
 				PassNode pass;
 				auto& pprop = *pass.Property;
 
-				pprop.LightMode = LIGHTMODE_FORWARD_BASE;
+				pprop.LightMode = LIGHTMODE_FORWARD_BASE_;
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("Tags"))) {
 					auto& node_tag = it.second;
 					pprop.LightMode = node_tag.get<std::string>("LightMode", pprop.LightMode);
 				}
+				int lightModeValue = GetLightModeValueByName(pprop.LightMode);
+				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(lightModeValue) });
+				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(lightModeValue) });
 
 				pprop.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 				pprop.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));

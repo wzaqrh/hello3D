@@ -5,7 +5,7 @@
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
-		<UseTexture>txGlobal</UseTexture>
+		<UseTexture>txPostProcess</UseTexture>
 		<Uniform Name="cbBloom" Slot="3" ShareMode="1">
 			<Element Name="_SceneImage_TexelSize" Type="float4"></Element>
 			<Element Name="BloomThresholdIntensity" Type="float4" Default="0.25,0.25,0.25,0.8"></Element>

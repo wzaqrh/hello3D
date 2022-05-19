@@ -17,6 +17,8 @@
 		<ENABLE_EMISSIVE_MAP>0</ENABLE_EMISSIVE_MAP>
 		<EMISSIVE_MAP_SRGB>0</EMISSIVE_MAP_SRGB>
 		
+		<ENABLE_LIGHT_MAP>1</ENABLE_LIGHT_MAP>
+		
 		<FLIP_UV0_Y>1</FLIP_UV0_Y>
 	</Macros>
 	<Properties>
@@ -26,7 +28,7 @@
 		<txRoughness>roughness.png</txRoughness>
 		<txAmbientOcclusion>ao.png</txAmbientOcclusion>
 		<OcclusionStrength>1</OcclusionStrength>
-
+		<_LightMap>lightmap.png</_LightMap>
 		<txEmissive>emissive.png</txEmissive>
 		<EmissiveFactor>1,1,1,0</EmissiveFactor>
 	</Properties>

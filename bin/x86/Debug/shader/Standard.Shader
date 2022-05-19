@@ -19,11 +19,12 @@
 			<Element Name="LightView" 	 		Type="matrix"></Element>
 			<Element Name="LightProjection" 	Type="matrix"></Element>
 
-			<Element Name="SHC0C1"					Type="matrix"></Element>
+			<Element Name="SHC0C1"				Type="matrix"></Element>
 			
 			<Element Name="CameraPosition"  Type="float4"></Element>
 			<Element Name="FrameBufferSize" Type="float4"></Element>
 			<Element Name="ShadowMapSize"   Type="float4"></Element>
+			<Element Name="LightMapUV"		Type="float4"></Element>
 			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
 			<Element Name="Exposure"        Type="float"></Element>
 		</Uniform>
@@ -52,12 +53,23 @@
 			<Element Slot="12" Filter="0x15">_GBufferPos</Element>
 			<Element Slot="13" Filter="0x15">_GBufferNormal</Element>
 			<Element Slot="14" Filter="0x15">_GBufferAlbedo</Element>
-		    <Element Slot="15" Filter="0x15">_GBufferEmissive</Element>
+			<Element Slot="15" Filter="0x15">_GBufferEmissive</Element>
 		</Texture>
-		<Texture Name="txGlobal">
+		<Texture Name="txLightMap">
+			<Element Slot="6" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_LightMap</Element>
+		</Texture>   
+		<Texture Name="txPostProcessInput">
 			<Element Slot="6" Filter="0x15">_SceneImage</Element>
+		</Texture>
+
+		<Texture Name="txGlobal">
+			<UseTexture>txLightMap</UseTexture>
 			<UseTexture>txShadowMap</UseTexture>
 			<UseTexture>txEnv</UseTexture>
+			<UseTexture>txGBuffer</UseTexture>
+		</Texture>
+		<Texture Name="txPostProcess">
+			<UseTexture>txPostProcessInput</UseTexture>
 			<UseTexture>txGBuffer</UseTexture>
 		</Texture>
 	</PROGRAM>

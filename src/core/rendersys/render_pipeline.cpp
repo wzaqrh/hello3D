@@ -3,6 +3,7 @@
 #include "core/rendersys/render_states_block.h"
 #include "core/rendersys/frame_buffer_bank.h"
 #include "core/resource/resource_manager.h"
+#include "core/resource/material_name.h"
 #include "core/resource/material_factory.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/skybox.h"
@@ -21,6 +22,7 @@ namespace mir {
 enum PipeLineTextureSlot 
 {
 	kPipeTextureSceneImage = 6,
+	kPipeTextureLightMap = 6,
 	kPipeTextureGDepth = 7,
 	kPipeTextureShadowMap = 8,
 	kPipeTextureDiffuseEnv = 9,
@@ -136,7 +138,7 @@ public:
 		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		blend_state(BlendState::MakeDisable());
 
-		RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER, true);
+		RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_, true);
 
 		if (mCfg.IsShadowVSM())
 		{
@@ -157,7 +159,7 @@ public:
 			for (auto& op : ops)
 				op.Material = mat;
 
-			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER "+1", true, &ops);
+			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_ "+1", true, &ops);
 
 			mRenderSys.GenerateMips(mShadowMap->GetAttachColorTexture(0));
 		}
@@ -182,13 +184,13 @@ public:
 				depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 				blend_state(BlendState::MakeDisable());
 
-				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_BASE);
+				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_BASE_);
 			}
 			else {
 				depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskZero));
 				blend_state(BlendState::MakeAdditive());
 
-				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_ADD);
+				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_ADD_);
 			}
 		}
 	}
@@ -206,7 +208,7 @@ public:
 			auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer, Eigen::Vector4f::Zero(), 1.0, 0);
 			fb_gbuffer.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE);
+			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE_);
 		}
 
 		mRenderSys.CopyFrameBuffer(nullptr, -1, mGBuffer, -1);
@@ -232,7 +234,7 @@ public:
 
 			RenderOperationQueue ops;
 			mGBufferSprite->GenRenderOperation(ops);
-			RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_PREPASS_FINAL, false, &ops);
+			RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_PREPASS_FINAL_, false, &ops);
 		}
 	}
 	//LIGHTMODE_TRANSPARENT
@@ -243,7 +245,7 @@ public:
 		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_TRANSPARENT);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_TRANSPARENT_);
 	}
 	//LIGHTMODE_SKYBOX
 	void RenderSkybox()
@@ -266,7 +268,7 @@ public:
 				op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(*mPerFrame));
 				op.WrMaterial().FlushGpuParameters(mRenderSys);
 
-				RenderOp(op, LIGHTMODE_SKYBOX);
+				RenderOp(op, LIGHTMODE_SKYBOX_);
 			}
 		}
 	}
@@ -279,7 +281,7 @@ public:
 		depth_state(DepthState::MakeFor3D(false));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY_);
 	}
 	//LIGHTMODE_POSTPROCESS
 	void RenderPostProcess(const IFrameBufferPtr& fbInput)
@@ -311,7 +313,7 @@ public:
 
 			RenderOperationQueue ops;
 			effects[i]->GenRenderOperation(ops);
-			RenderLight(*mPerFrame, nullptr, LIGHTMODE_POSTPROCESS, false, &ops);
+			RenderLight(*mPerFrame, nullptr, LIGHTMODE_POSTPROCESS_, false, &ops);
 		}
 	}
 private:
@@ -390,8 +392,17 @@ private:
 		mRenderSys.SetConstBuffers(op.Material.GetConstBuffers(), pass->GetProgram());
 
 		const TextureVector& textures = op.Material.GetTextures();
-		if (textures.Count() > 0) mStatesBlock.Textures(kTextureUserSlotFirst, &textures[0], textures.Count());
-		else mStatesBlock.Textures(kTextureUserSlotFirst, nullptr, 0);
+		if (textures.Count() > 0) {
+			mStatesBlock.Textures(kTextureUserSlotFirst, &textures[0], std::min((size_t)kTextureUserSlotCount, textures.Count()));
+			for (size_t slot = kTextureUserSlotLast; slot < textures.Count(); ++slot) {
+				if (textures[slot]) {
+					mStatesBlock.Textures(slot, textures[slot]);
+				}
+			}
+		}
+		else {
+			mStatesBlock.Textures(kTextureUserSlotFirst, nullptr, 0);
+		}
 
 		const auto& relParam = pass->GetRelateToParam();
 		if (relParam.HasTextureSize) {

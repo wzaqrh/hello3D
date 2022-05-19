@@ -262,6 +262,9 @@
     <ClInclude Include="..\src\core\base\deffered_signal.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\mir_config_macros.h">
+      <Filter>src\core\config</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -621,6 +624,9 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\SphericalHarmonics.cginc">
       <Filter>shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Bloom.Shader">
+      <Filter>shader\xml</Filter>
     </None>
   </ItemGroup>
 </Project>

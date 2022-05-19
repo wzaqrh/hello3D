@@ -10,6 +10,7 @@
 #include "core/renderable/paint3d.h"
 #include "core/base/debug.h"
 #include "core/scene/camera.h"
+#include "core/resource/material_name.h"
 #include "core/resource/material_factory.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/resource_manager.h"

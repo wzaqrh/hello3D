@@ -2,6 +2,7 @@
 #include "core/renderable/post_process.h"
 #include "core/renderable/renderable_factory.h"
 #include "core/resource/resource_manager.h"
+#include "core/resource/material_name.h"
 #include "core/resource/material.h"
 #include "core/base/macros.h"
 #include "core/base/debug.h"

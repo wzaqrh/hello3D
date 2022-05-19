@@ -1,3 +1,4 @@
+#include "core/base/debug.h"
 #include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
@@ -63,7 +64,9 @@ CoTask<void> SceneManager::UpdateFrame(float dt)
 	}
 
 #if MIR_GRAPHICS_DEBUG
-	if (mDebugPaint == nullptr) mDebugPaint = CoAwait mRendFac->CreatePaint3DT();
+	if (mDebugPaint == nullptr) 
+		mDebugPaint = CoAwait mRendFac->CreatePaint3DT();
+	COROUTINE_VARIABLES;
 	mDebugPaint->SetColor(0xFF00FF00);
 	mDebugPaint->Clear();
 	mDebugPaint->DrawAABBEdge(aabb);

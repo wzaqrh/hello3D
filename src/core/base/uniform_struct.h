@@ -16,6 +16,7 @@ struct UNIFORM_ALIGN cbPerFrame
 		SHC0C1 = Eigen::Matrix4f::Zero();
 		FrameBufferSize = Eigen::Vector4f::Zero();
 		ShadowMapSize = Eigen::Vector4f::Zero();
+		LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
 		CameraPosition = Eigen::Vector4f::Zero();
 		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
 		Exposure = 1;
@@ -36,6 +37,7 @@ public:
 	Eigen::Vector4f CameraPosition;
 	Eigen::Vector4f FrameBufferSize;
 	Eigen::Vector4f ShadowMapSize;
+	Eigen::Vector4f LightMapUV;
 	Eigen::Vector4f glstate_lightmodel_ambient;
 	float Exposure;
 };

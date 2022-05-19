@@ -102,8 +102,8 @@
 #define LIGHTMODE_SKYBOX 6
 #define LIGHTMODE_OVERLAY 7
 #define LIGHTMODE_POSTPROCESS 8
-#if !defined CubeMapIsRightHandness
-#define LIGHTMODE LIGHTMODE_POSTPROCESS
+#if !defined LIGHTMODE
+#define LIGHTMODE -1
 #endif
 
 #define PCSS_QUALITY_LOW 1

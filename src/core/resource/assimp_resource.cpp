@@ -17,6 +17,7 @@
 #include <assimp/DefaultLogger.hpp>
 #include <unordered_map>
 #include "core/resource/assimp_resource.h"
+#include "core/resource/material_name.h"
 #include "core/resource/material.h"
 #include "core/resource/resource_manager.h"
 #include "core/base/debug.h"

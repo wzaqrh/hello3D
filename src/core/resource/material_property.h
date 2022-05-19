@@ -10,9 +10,10 @@ namespace res {
 class PassProperty 
 {
 public:
-	operator bool() const { return !LightMode.empty() && !Name.empty(); }
+	operator bool() const { return (! LightMode.empty()) && (! Name.empty()); }
 public:
 	std::string LightMode, Name, ShortName;
+	//int LightMode = -1;
 	PrimitiveTopology TopoLogy;
 	std::optional<BlendState> Blend;
 	std::optional<DepthState> Depth;

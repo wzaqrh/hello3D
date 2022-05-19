@@ -130,6 +130,8 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 			boost::filesystem::path imagePath = assetPath / iter.second.ImagePath;
 			BOOST_ASSERT(boost::filesystem::is_regular_file(imagePath));
 			if (boost::filesystem::is_regular_file(imagePath)) {
+				if (iter.second.Slot >= material->mTextures.Count())
+					material->mTextures.Resize(iter.second.Slot + 1);
 				tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, imagePath.string()));
 			}
 		}

@@ -10,8 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "build\test.vcxproj"
 		{06EDC280-1187-4614-A248-E640C095FA6B} = {06EDC280-1187-4614-A248-E640C095FA6B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnityShader", "..\MyDoc\笔记\unity\shader\Unity_builtin_shaders\UnityShader\UnityShader\UnityShader.vcxproj", "{0936309C-C6D3-46B3-B8D7-203581982521}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppcoro", "thirdparty\cppcoro\build\cppcoro.vcxproj", "{82E2BD05-5E0B-4E41-B42E-A527AF780058}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "thirdparty\assimp\build\code\assimp.vcxproj", "{1467F5D3-A249-3445-AD4D-690B4B975060}"
@@ -70,26 +68,6 @@ Global
 		{C953C70C-F0B8-495E-963C-BBCEF595D07A}.RelWithDebInfo|x86.Build.0 = Release|Win32
 		{C953C70C-F0B8-495E-963C-BBCEF595D07A}.UnitTest|x64.ActiveCfg = Release|x64
 		{C953C70C-F0B8-495E-963C-BBCEF595D07A}.UnitTest|x86.ActiveCfg = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Debug|x64.ActiveCfg = Debug|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Debug|x64.Build.0 = Debug|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Debug|x86.ActiveCfg = Debug|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Debug|x86.Build.0 = Debug|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.MinSizeRel|x64.ActiveCfg = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.MinSizeRel|x64.Build.0 = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.MinSizeRel|x86.ActiveCfg = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.MinSizeRel|x86.Build.0 = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Release|x64.ActiveCfg = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Release|x64.Build.0 = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Release|x86.ActiveCfg = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.Release|x86.Build.0 = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.RelWithDebInfo|x64.ActiveCfg = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.RelWithDebInfo|x64.Build.0 = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.RelWithDebInfo|x86.Build.0 = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.UnitTest|x64.ActiveCfg = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.UnitTest|x64.Build.0 = Release|x64
-		{0936309C-C6D3-46B3-B8D7-203581982521}.UnitTest|x86.ActiveCfg = Release|Win32
-		{0936309C-C6D3-46B3-B8D7-203581982521}.UnitTest|x86.Build.0 = Release|Win32
 		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x64.ActiveCfg = Debug|x64
 		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x64.Build.0 = Debug|x64
 		{82E2BD05-5E0B-4E41-B42E-A527AF780058}.Debug|x86.ActiveCfg = Debug|Win32

@@ -39,15 +39,6 @@ cbuffer cbModel : register(b3)
 	float4 EmissiveFactor;
 }
 
-inline float2 GetUV(float2 uv, float4 uvTransform) 
-{
-	uv = uvTransform.xy + uv * uvTransform.zw;
-#if FLIP_UV0_Y
-	uv.y = 1.0 - uv.y;
-#endif
-	return uv;
-}
-
 inline float4 GetAlbedo(float2 uv) 
 {
     float4 albedo = AlbedoFactor;
@@ -224,7 +215,7 @@ float4 PS(PixelInput input) : SV_Target
 #if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(toLight, normal, toEye, albedo.rgb, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	finalColor.rgb = UnityPbrLight(toLight, normal, toEye, albedo.rgb, aorm);
+	finalColor.rgb = UnityPbrLight(input.Tex, toLight, normal, toEye, albedo.rgb, aorm);
 #elif PBR_MODE == PBR_GLTF
 	finalColor.rgb = GltfPbrLight(toLight, normal, toEye, albedo.rgb, aorm, emissive);
 #endif
@@ -490,7 +481,7 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 #if !PBR_MODE
     output.Color.rgb = BlinnPhongLight(toLight, normal.xyz, toEye, albedo.xyz, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	output.Color.rgb = UnityPbrLight(toLight, normal.xyz, toEye, albedo.xyz, aorm);
+	output.Color.rgb = UnityPbrLight(input.Tex, toLight, normal.xyz, toEye, albedo.xyz, aorm);
 #elif PBR_MODE == PBR_GLTF
 	output.Color.rgb = GltfPbrLight(toLight, normal.xyz, toEye, albedo.rgb, aorm, emissive.xyz);
 #endif

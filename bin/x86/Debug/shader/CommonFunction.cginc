@@ -3,6 +3,15 @@
 #include "HLSLSupport.cginc"
 #include "Macros.cginc"
 
+inline float2 GetUV(float2 uv, float4 uvTransform) 
+{
+	uv = uvTransform.xy + uv * uvTransform.zw;
+#if FLIP_UV0_Y
+	uv.y = 1.0 - uv.y;
+#endif
+	return uv;
+}
+
 struct DpDuv 
 {
 	float3 dpx;
@@ -221,6 +230,20 @@ inline float3 tangent_eye_pos(float2 uv, float4 tangentPlane, float4 depthParam,
 	if (NdotV < 0.0)
 		V *= (tangentPlane.w / NdotV);
 	return V;
+}
+
+inline float3 DecodeLightmapRGBM (float4 data, float4 decodeInstructions)
+{
+    // If Linear mode is not supported we can skip exponent part
+#if COLORSPACE_GAMMA
+    #if FORCE_LINEAR_READ_FOR_RGBM
+        return (decodeInstructions.x * data.a) * sqrt(data.rgb);
+    #else
+        return (decodeInstructions.x * data.a) * data.rgb;
+    #endif
+#else
+    return (decodeInstructions.x * pow(data.a, decodeInstructions.y)) * data.rgb;
+#endif
 }
 
 #endif

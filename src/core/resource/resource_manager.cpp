@@ -142,8 +142,7 @@ static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	auto sourcePath = MakeShaderSourcePath(name);
 	time_t time = boost::filesystem::last_write_time(sourcePath);
 
-	static time_t cgincs_time = 0;
-	if (cgincs_time == 0)
+	time_t cgincs_time = 0;
 	{
 		boost::filesystem::directory_iterator diter("shader/"), dend;
 		for (; diter != dend; ++diter) {

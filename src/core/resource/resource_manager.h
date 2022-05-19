@@ -17,7 +17,6 @@
 #include "core/rendersys/texture.h"
 #include "core/rendersys/framebuffer.h"
 #include "core/rendersys/render_system.h"
-#include "core/resource/material_name.h"
 #include "core/resource/material.h"
 
 namespace mir {
