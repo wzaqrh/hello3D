@@ -350,7 +350,9 @@ private:
 
 			auto raster_state = mStatesBlock.LockRaster();
 			const auto& cull = pass->GetCull(); if (cull) raster_state(cull.value());
-			const auto& fill = pass->GetFill(); if (fill) raster_state(fill.value());
+			const auto& fill = pass->GetFill(); 
+			if (fill) 
+				raster_state(fill.value());
 			const auto& zbias = pass->GetDepthBias(); if (zbias) raster_state(zbias.value());
 			
 			const auto& passOut = pass->GetGrabOut();

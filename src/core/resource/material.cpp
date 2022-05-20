@@ -68,7 +68,7 @@ bool Shader::Validate() const
 /********** Material **********/
 MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng) const
 {
-	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbShareNone]->Clone(launchMode, resMng);
+	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbSharePerInstance]->Clone(launchMode, resMng);
 	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerMaterial]);
 	newParametrs->Merge(*mGpuParametersByShareType[kCbSharePerFrame]);
 	return MaterialInstance(const_cast<Material*>(this)->shared_from_this(), mTextures, newParametrs, mLoadParam);

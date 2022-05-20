@@ -1,6 +1,7 @@
 <Material>
 	<UseShader>Paint3D</UseShader>
 	<Macros>
+		<POINT_MODE>1</POINT_MODE>
 	</Macros>
 	<Properties>
 	</Properties>

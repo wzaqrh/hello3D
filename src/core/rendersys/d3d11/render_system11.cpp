@@ -768,14 +768,14 @@ void RenderSystem11::SetCullMode(CullMode cullMode)
 }
 void RenderSystem11::SetFillMode(FillMode fillMode)
 {
-	if (mCurRasterState.FillMode == fillMode) {
+	if (mCurRasterState.FillMode != fillMode) {
 		mCurRasterState.FillMode = fillMode;
 		_SetRasterizerState(mCurRasterState);
 	}
 }
 void RenderSystem11::SetDepthBias(const DepthBias& bias)
 {
-	if (mCurRasterState.DepthBias == bias) {
+	if (mCurRasterState.DepthBias != bias) {
 		mCurRasterState.DepthBias = bias;
 		_SetRasterizerState(mCurRasterState);
 	}

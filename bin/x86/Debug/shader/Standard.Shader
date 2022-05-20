@@ -3,12 +3,12 @@
 		<PredMacros>Macros</PredMacros>
 		
 		<Attribute Name="vbSurface">
-			<Element SemanticName="POSITION" Format="6" SemanticIndex="0"></Element>
-			<Element SemanticName="COLOR" 	 Format="28"></Element>
-			<Element SemanticName="TEXCOORD" Format="16"></Element>
+			<Element SemanticName="POSITION" Format="rgb32f" SemanticIndex="0"></Element>
+			<Element SemanticName="COLOR" 	 Format="rgba8un"></Element>
+			<Element SemanticName="TEXCOORD" Format="rg32f"></Element>
 		</Attribute>
 		
-		<Uniform Name="cbPerFrame" Slot="0" ShareMode="2">
+		<Uniform Name="cbPerFrame" Slot="0" ShareMode="PerFrame">
 			<Element Name="World" 		  		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 			<Element Name="View" 	 			Type="matrix"></Element>
 			<Element Name="Projection" 			Type="matrix"></Element>
@@ -21,14 +21,14 @@
 
 			<Element Name="SHC0C1"				Type="matrix"></Element>
 			
-			<Element Name="CameraPosition"  Type="float4"></Element>
-			<Element Name="FrameBufferSize" Type="float4"></Element>
-			<Element Name="ShadowMapSize"   Type="float4"></Element>
-			<Element Name="LightMapUV"		Type="float4"></Element>
+			<Element Name="CameraPosition"		Type="float4"></Element>
+			<Element Name="FrameBufferSize"		Type="float4"></Element>
+			<Element Name="ShadowMapSize"		Type="float4"></Element>
+			<Element Name="LightMapUV"			Type="float4"></Element>
 			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
-			<Element Name="Exposure"        Type="float"></Element>
+			<Element Name="Exposure"			Type="float"></Element>
 		</Uniform>
-		<Uniform Name="cbPerLight" Slot="1" ShareMode="2">
+		<Uniform Name="cbPerLight" Slot="1" ShareMode="PerFrame">
 			<Element Name="unity_LightPosition"	Type="float4"></Element>
 			<Element Name="unity_LightColor"	Type="float4"></Element> 
 			<Element Name="unity_SpecColor"		Type="float4"></Element>
@@ -40,26 +40,26 @@
 		</Uniform>
 		
 		<Texture Name="txShadowMap">
-			<Element Slot="8" CompFunc="2" AddressU="4" AddressV="4" AddressW="1" >_ShadowMap</Element>
-			<Element Slot="8" Filter="0x15" AddressU="3" AddressV="3" AddressW="1" Condition="SHADOW_MODE==5">_ShadowMap</Element>
+			<Element Slot="8" CompFunc="Less" AddressU="Border" AddressV="Border" AddressW="Wrap" >_ShadowMap</Element>
+			<Element Slot="8" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap" Condition="SHADOW_MODE==5">_ShadowMap</Element>
 		</Texture>
 		<Texture Name="txEnv">
-			<Element Slot="9" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_DiffuseCube</Element>
-			<Element Slot="10" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_SpecCube</Element>
-			<Element Slot="11" Filter="0x15">_LUT</Element>				
+			<Element Slot="9" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_DiffuseCube</Element>
+			<Element Slot="10" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_SpecCube</Element>
+			<Element Slot="11" Filter="MinMagMipLinear">_LUT</Element>				
 		</Texture>
 		<Texture Name="txGBuffer">
-			<Element Slot="7" Filter="0x0">_GDepth</Element>
-			<Element Slot="12" Filter="0x15">_GBufferPos</Element>
-			<Element Slot="13" Filter="0x15">_GBufferNormal</Element>
-			<Element Slot="14" Filter="0x15">_GBufferAlbedo</Element>
-			<Element Slot="15" Filter="0x15">_GBufferEmissive</Element>
+			<Element Slot="7" Filter="Point">_GDepth</Element>
+			<Element Slot="12" Filter="MinMagMipLinear">_GBufferPos</Element>
+			<Element Slot="13" Filter="MinMagMipLinear">_GBufferNormal</Element>
+			<Element Slot="14" Filter="MinMagMipLinear">_GBufferAlbedo</Element>
+			<Element Slot="15" Filter="MinMagMipLinear">_GBufferEmissive</Element>
 		</Texture>
 		<Texture Name="txLightMap">
-			<Element Slot="6" Filter="0x15" AddressU="3" AddressV="3" AddressW="1">_LightMap</Element>
+			<Element Slot="6" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_LightMap</Element>
 		</Texture>   
 		<Texture Name="txPostProcessInput">
-			<Element Slot="6" Filter="0x15">_SceneImage</Element>
+			<Element Slot="6" Filter="MinMagMipLinear">_SceneImage</Element>
 		</Texture>
 
 		<Texture Name="txGlobal">

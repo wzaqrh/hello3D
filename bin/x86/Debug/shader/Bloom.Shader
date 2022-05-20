@@ -6,7 +6,7 @@
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txPostProcess</UseTexture>
-		<Uniform Name="cbBloom" Slot="3" ShareMode="1">
+		<Uniform Name="cbBloom" Slot="3" ShareMode="PerMaterial">
 			<Element Name="_SceneImage_TexelSize" Type="float4"></Element>
 			<Element Name="BloomThresholdIntensity" Type="float4" Default="0.25,0.25,0.25,0.8"></Element>
 			<Element Name="LensFlareThesholdIntensity" Type="float4" Default="0.1,0.1,0.1,0.2"></Element>

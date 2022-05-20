@@ -88,7 +88,16 @@ private:
 			for (auto& it : boost::make_iterator_range(node.equal_range(name))) {
 				auto& inode = it.second;
 				if (CheckCondition(progNode, inode)) {
-					return boost::lexical_cast<T>(inode.data());
+					return static_cast<T>(std::stoi(inode.data()));
+				}
+			}
+			return defvalue;
+		}
+		template<> std::string ConditionGetValue<std::string>(const ProgramNode& progNode, const boost_property_tree::ptree& node, const std::string& name, std::string defvalue) const {
+			for (auto& it : boost::make_iterator_range(node.equal_range(name))) {
+				auto& inode = it.second;
+				if (CheckCondition(progNode, inode)) {
+					return inode.data();
 				}
 			}
 			return defvalue;
@@ -160,6 +169,39 @@ private:
 		}
 		std::map<std::string, std::set<MaterialProperty::SingleFileDependency>> mDic;
 	};
+
+	template<typename T> static T GetNodeAttribute(const std::string& str, T defValue, const std::vector<std::tuple<std::string, std::string, int>>& patterns) {
+		if ((str.size() >= 2 && str[0] == '0' && str[1] == 'x' && std::all_of(str.begin() + 2, str.end(), isxdigit)) || (!str.empty() && std::all_of(str.begin(), str.end(), isdigit))) {
+			return static_cast<T>(std::stoi(str));
+		}
+		else {
+			auto iter = std::find_if(patterns.begin(), patterns.end(), [&](const std::tuple<std::string, std::string, int>& item) {
+				return std::get<1>(item) == str;
+			});
+			if (iter != patterns.end()) return static_cast<T>(std::get<2>(*iter));
+			else return defValue;
+		}
+	}
+	template<typename T> static T GetNodeAttribute(const boost_property_tree::ptree& node, const std::string& attrName, T defValue, const std::vector<std::tuple<std::string, std::string, int>>& patterns) {
+		std::string str = node.get<std::string>(attrName, "");
+		if (!str.empty()) {
+			return GetNodeAttribute<T>(str, defValue, patterns);
+		}
+		else {
+			bool hasValue = false;
+			int value = 0;
+			for (auto& it : node) {
+				auto iter = std::find_if(patterns.begin(), patterns.end(), [&](const std::tuple<std::string, std::string, int>& item) {
+					return (std::get<0>(item) == it.first) && (std::get<1>(item) == it.second.data());
+					});
+				if (iter != patterns.end()) {
+					value |= std::get<2>(*iter);
+					hasValue = true;
+				}
+			}
+			return IF_AND_OR(hasValue, static_cast<T>(value), defValue);
+		}
+	}
 private:
 	ShaderNode& VisitInclude(const std::string& shaderName) {
 		auto find_iter = mIncludeByName.find(shaderName);
@@ -227,14 +269,45 @@ private:
 		}
 
 		{
-			progNode.Topo = static_cast<PrimitiveTopology>(vis.ConditionGetValue<int>(progNode, nodeProgram, "Topology", progNode.Topo));
+			std::string strTopo = vis.ConditionGetValue<std::string>(progNode, nodeProgram, "Topology", "");
+			if (!strTopo.empty()) {
+				static std::vector<std::tuple<std::string, std::string, int>> topoPatterns = {
+					{"", "PointList", kPrimTopologyPointList},
+					{"", "LineList", kPrimTopologyLineList},
+					{"", "TriangleList", kPrimTopologyTriangleList},
+
+					{"", "LineListAdj", kPrimTopologyLineListAdj},
+					{"", "TriangleListAdj", kPrimTopologyTriangleListAdj},
+
+					{"", "LineStrip", kPrimTopologyLineStrip},
+					{"", "TriangleStrip", kPrimTopologyTriangleStrip},
+
+					{"", "LineStripAdj", kPrimTopologyLineStripAdj},
+					{"", "TriangleStripAdj", kPrimTopologyTriangleStripAdj},
+				};
+				progNode.Topo = GetNodeAttribute<PrimitiveTopology>(strTopo, progNode.Topo, topoPatterns);
+			}
 			
 			std::string strBlendFunc = nodeProgram.get<std::string>("BlendFunc", "");
 			if (!strBlendFunc.empty()) {
 				std::vector<std::string> strs;
 				SplitString(strs, strBlendFunc, ",");
 				if (strs.size() >= 2) {
-					progNode.Blend = BlendState::Make((BlendFunc)std::stoi(strs[0]), (BlendFunc)std::stoi(strs[1]));
+					static std::vector<std::tuple<std::string, std::string, int>> blendPatterns = {
+						{"", "One", kBlendZero},
+						{"", "Zero", kBlendOne},
+						{"", "Src_Color", kBlendSrcColor},
+						{"", "One_Minus_SrcColor", kBlendInvSrcColor},
+						{"", "Src_A", kBlendSrcAlpha},
+						{"", "One_Minus_SrcA", kBlendInvSrcAlpha},
+						{"", "Dst_A", kBlendDstAlpha},
+						{"", "One_Minus_DstA", kBlendInvDstAlpha},
+						{"", "Dst_Color", kBlendDstColor},
+						{"", "One_Minus_DstColor", kBlendInvDstColor}
+					};
+					BlendFunc src = GetNodeAttribute<BlendFunc>(strs[0], kBlendOne, blendPatterns);
+					BlendFunc dst = GetNodeAttribute<BlendFunc>(strs[1], kBlendZero, blendPatterns);
+					progNode.Blend = BlendState::Make(src, dst);
 				}
 			}
 
@@ -250,22 +323,52 @@ private:
 			std::string strDepthEnable = nodeProgram.get<std::string>("DepthEnable", "");
 			std::string strDepthFunc = nodeProgram.get<std::string>("DepthFunc", "");
 			std::string strDepthWriteMask = nodeProgram.get<std::string>("DepthWriteMask", "");
-		#define STOI(S, TYPE, DEF) IF_AND_OR(!S.empty(), TYPE(std::stoi(S)), DEF)
 			if (!strDepthEnable.empty() || !strDepthFunc.empty() || !strDepthWriteMask.empty()) {
-				progNode.Depth = DepthState::Make(STOI(strDepthFunc, CompareFunc, kCompareLess),
-					STOI(strDepthWriteMask, DepthWriteMask, kDepthWriteMaskAll),
-					STOI(strDepthEnable, bool, true));
+				static std::vector<std::tuple<std::string, std::string, int>> compFuncPatterns = {
+					{"", "Never", kCompareNever},
+					{"", "Less", kCompareLess},
+					{"", "Equal", kCompareEqual},
+					{"", "LessEqual", kCompareLessEqual},
+					{"", "Greater", kCompareGreater},
+					{"", "NotEqual", kCompareNotEqual},
+					{"", "GreaterEqual", kCompareGreaterEqual},
+					{"", "Always", kCompareAlways},
+				};
+				CompareFunc compFunc = GetNodeAttribute<CompareFunc>(strDepthFunc, kCompareLess, compFuncPatterns);
+
+				static std::vector<std::tuple<std::string, std::string, int>> zWriteMaskPatterns = {
+					{"", "All", kDepthWriteMaskAll},
+					{"", "Zero", kDepthWriteMaskZero},
+				};
+				DepthWriteMask zWriteMask = GetNodeAttribute<DepthWriteMask>(strDepthWriteMask, kDepthWriteMaskAll, zWriteMaskPatterns);
+
+				static std::vector<std::tuple<std::string, std::string, int>> boolPatterns = {
+					{"", "True", TRUE},
+					{"", "true", TRUE},
+					{"", "False", FALSE},
+					{"", "false", FALSE},
+				};
+				bool depthEnable = GetNodeAttribute<bool>(strDepthEnable, true, boolPatterns);
+
+				progNode.Depth = DepthState::Make(compFunc, zWriteMask, depthEnable);
 			}
 
-			std::string strFillMode = nodeProgram.get<std::string>("FillMode", "");
-			if (!strFillMode.empty()) {
-				progNode.Fill = (FillMode)std::stoi(strFillMode);
-			}
+			static std::vector<std::tuple<std::string, std::string, int>> fillPatterns = {
+				{"", "WireFrame", kFillWireFrame},
+				{"", "Solid", kFillSolid},
+			};
+			FillMode fillMode = GetNodeAttribute<FillMode>(nodeProgram, "FillMode", kFillUnkown, fillPatterns);
+			if (fillMode != kFillUnkown) 
+				progNode.Fill = fillMode;
 
-			std::string strCullMode = nodeProgram.get<std::string>("CullMode", "");
-			if (!strCullMode.empty()) {
-				progNode.Cull = (CullMode)std::stoi(strCullMode);
-			}
+			static std::vector<std::tuple<std::string, std::string, int>> cullPatterns = {
+				{"", "None", kCullNone},
+				{"", "Front", kCullFront},
+				{"", "Back", kCullBack}
+			};
+			CullMode cullMode = GetNodeAttribute<CullMode>(nodeProgram, "CullMode", kCullUnkown, cullPatterns);
+			if (cullMode != kCullUnkown) 
+				progNode.Cull = cullMode;
 		}
 	}
 	void VisitAttributes(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
@@ -286,11 +389,103 @@ private:
 			attribute.Layout.resize(elementCount);
 			int byteOffset = 0, j = 0;
 			for (auto& element : boost::make_iterator_range(node_attribute.equal_range("Element"))) {
+				static std::vector<std::tuple<std::string, std::string, int>> formatPatterns = {
+					//rgba
+					{"", "rgba32f", kFormatR32G32B32A32Float},
+					{"", "rgba32u", kFormatR32G32B32A32UInt},
+					{"", "rgba32s", kFormatR32G32B32A32SInt},
+
+					{"", "rgba16f", kFormatR16G16B16A16Float},
+					{"", "rgba16un", kFormatR16G16B16A16UNorm},
+					{"", "rgba16u", kFormatR16G16B16A16UInt},
+					{"", "rgba16sn", kFormatR16G16B16A16SNorm},
+					{"", "rgba16s", kFormatR16G16B16A16SInt},
+
+					{"", "rgba8un", kFormatR8G8B8A8UNorm},
+					{"", "rgba8un_srgb", kFormatR8G8B8A8UNormSRgb},
+					{"", "rgba8u", kFormatR8G8B8A8UInt},
+					{"", "rgba8sn", kFormatR8G8B8A8SNorm},
+					{"", "rgba8s", kFormatR8G8B8A8SInt},
+
+					//rgb
+					{"", "rgb32f", kFormatR32G32B32Float},
+					{"", "rgb32u", kFormatR32G32B32UInt},
+					{"", "rgb32s", kFormatR32G32B32SInt},
+
+					//rg
+					{"", "rg32f", kFormatR32G32Float},
+					{"", "rg32u", kFormatR32G32UInt},
+					{"", "rg32s", kFormatR32G32SInt},
+
+					{"", "rg16f", kFormatR16G16Float},
+					{"", "rg16un", kFormatR16G16UNorm},
+					{"", "rg16u", kFormatR16G16UInt},
+					{"", "rg16sn", kFormatR16G16SNorm},
+					{"", "rg16s", kFormatR16G16SInt},
+
+					{"", "rg8un", kFormatR8G8UNorm},
+					{"", "rg8u", kFormatR8G8UInt},
+					{"", "rg8sn", kFormatR8G8SNorm},
+					{"", "rg8s", kFormatR8G8SInt},
+
+					//r
+					{"", "r32f", kFormatR32Float},
+					{"", "r32u", kFormatR32UInt},
+					{"", "r32s", kFormatR32SInt},
+
+					{"", "r16f", kFormatR16Float},
+					{"", "r16un", kFormatR16UNorm},
+					{"", "r16u", kFormatR16UInt},
+					{"", "r16sn", kFormatR16SNorm},
+					{"", "r16s", kFormatR16SInt},
+
+					{"", "r8un", kFormatR8UNorm},
+					{"", "r8u", kFormatR8UInt},
+					{"", "r8sn", kFormatR8SNorm},
+					{"", "r8s", kFormatR8SInt},
+					
+					//a
+					{"", "a8un", kFormatA8UNorm},
+
+					//bgra, bgrx
+					{"", "bgr565un", kFormatB5G6R5UNorm},
+					{"", "bgra5551un", kFormatB5G5R5A1UNorm},
+					{"", "bgra8un", kFormatB8G8R8A8UNorm},
+					{"", "bgrx8un", kFormatB8G8R8X8UNorm},
+					{"", "bgra8un_srgb", kFormatB8G8R8A8UNormSRgb},
+					{"", "bgrx8un_srgb", kFormatB8G8R8X8UNormSRgb},
+
+					//depth
+					{"", "d32f", kFormatD32Float},
+					{"", "d16un", kFormatD16UNorm},
+					{"", "d24un_s8u", kFormatD24UNormS8UInt},
+
+					//compressed format
+					{"", "bc1un", kFormatBC1UNorm},
+					{"", "bc1un_srgb", kFormatBC1UNormSRgb},
+
+					{"", "bc2un", kFormatBC2UNorm},
+					{"", "bc2un_srgb", kFormatBC2UNormSRgb},
+
+					{"", "bc3un", kFormatBC3UNorm},
+					{"", "bc3un_srgb", kFormatBC3UNormSRgb},
+
+					{"", "bc4un", kFormatBC4UNorm},
+					{"", "bc4sn", kFormatBC4SNorm},
+
+					{"", "bc5un", kFormatBC5UNorm},
+					{"", "bc5sn", kFormatBC5SNorm},
+
+					{"", "bc7un", kFormatBC7UNorm},
+					{"", "bc7un_srgb", kFormatBC7UNormSRgb},
+				};
+				ResourceFormat format = GetNodeAttribute<ResourceFormat>(element.second, "<xmlattr>.Format", kFormatUnknown, formatPatterns);
+
 				auto& layoutJ = attribute.Layout[j];
 				layoutJ = LayoutInputElement{
 					element.second.get<std::string>("<xmlattr>.SemanticName"),
 					element.second.get<uint32_t>("<xmlattr>.SemanticIndex", 0),
-					static_cast<ResourceFormat>(element.second.get<uint32_t>("<xmlattr>.Format")),
+					format,
 					element.second.get<uint32_t>("<xmlattr>.InputSlot", 0),
 					element.second.get<uint32_t>("<xmlattr>.ByteOffset", byteOffset),
 					kLayoutInputPerVertexData,
@@ -313,21 +508,6 @@ private:
 			++index;
 		}
 	}
-	static CbElementType GetCBElementTypeByString(const std::string& str) {
-		CbElementType result = kCBElementMax;
-		if (str == "bool") result = kCBElementBool;
-		else if (str == "int") result = kCBElementInt;
-		else if (str == "int2") result = kCBElementInt2;
-		else if (str == "int3") result = kCBElementInt3;
-		else if (str == "int4") result = kCBElementInt4;
-		else if (str == "float") result = kCBElementFloat;
-		else if (str == "float2") result = kCBElementFloat2;
-		else if (str == "float3") result = kCBElementFloat3;
-		else if (str == "float4") result = kCBElementFloat4;
-		else if (str == "matrix") result = kCBElementMatrix;
-		else BOOST_ASSERT(false);
-		return result;
-	}
 	void VisitUniforms(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseUniform"))) {
 			std::string refName = it.second.data();
@@ -344,13 +524,24 @@ private:
 			UniformNode uniform;
 			UniformParametersBuilder uniBuilder(uniform);
 			for (auto& element : boost::make_iterator_range(node_uniform.equal_range("Element"))) {
+				static std::vector<std::tuple<std::string, std::string, int>> typePatterns = {
+					{"", "bool", kCBElementBool},
+					{"", "int", kCBElementInt},
+					{"", "int2", kCBElementInt2},
+					{"", "int3", kCBElementInt3},
+					{"", "int4", kCBElementInt4},
+					{"", "float", kCBElementFloat},
+					{"", "float2", kCBElementFloat2},
+					{"", "float3", kCBElementFloat3},
+					{"", "float4", kCBElementFloat4},
+					{"", "matrix", kCBElementMatrix},
+				};
+				CbElementType type = GetNodeAttribute<CbElementType>(element.second, "<xmlattr>.Type", kCBElementMax, typePatterns); BOOST_ASSERT(type != kCBElementMax);
 				std::string name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
-				CbElementType type = GetCBElementTypeByString(element.second.get<std::string>("<xmlattr>.Type"));
 				size_t size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
 				size_t count = element.second.get<int>("<xmlattr>.Count", 0);
 				size_t offset = element.second.get<int>("<xmlattr>.Offset", -1);
 				std::string strDefault = element.second.get<std::string>("<xmlattr>.Default", "");
-
 				uniBuilder.AddParameter(name, type, size, count, offset, strDefault);
 
 				if (!name.empty() && name[0] == '_') {
@@ -365,11 +556,15 @@ private:
 					}
 				}
 			}
-			uniBuilder.Slot() = node_uniform.get<int>("<xmlattr>.Slot", -1);
-			BOOST_ASSERT(uniBuilder.Slot() >= 0);
-			uniBuilder.ShareMode() = static_cast<CBufferShareMode>(node_uniform.get<int>("<xmlattr>.ShareMode", kCbShareNone)) ;
+			uniBuilder.Slot() = node_uniform.get<int>("<xmlattr>.Slot", -1); BOOST_ASSERT(uniBuilder.Slot() >= 0);
+			static std::vector<std::tuple<std::string, std::string, int>> sharePatterns = {
+				{"", "PerInstance", kCbSharePerInstance},
+				{"", "PerMaterial", kCbSharePerMaterial},
+				{"", "PerFrame", kCbSharePerFrame},
+			};
+			uniBuilder.ShareMode() = GetNodeAttribute<CBufferShareMode>(node_uniform, "<xmlattr>.ShareMode", kCbSharePerInstance, sharePatterns);
 			uniBuilder.IsReadOnly() = node_uniform.get<bool>("<xmlattr>.IsReadOnly", false);
-			BOOST_ASSERT(!uniBuilder.IsReadOnly() || uniBuilder.ShareMode() != kCbShareNone);
+			BOOST_ASSERT(!uniBuilder.IsReadOnly() || uniBuilder.ShareMode() != kCbSharePerInstance);
 
 			auto& shortName = uniBuilder.ShortName();
 			shortName = node_uniform.get<std::string>("<xmlattr>.Name", "");
@@ -421,23 +616,47 @@ private:
 				if (!vis.CheckCondition(progNode, node_element, &hasCondition))
 					continue;
 
-				CompareFunc cmpFunc = static_cast<CompareFunc>(node_element.get<int>("<xmlattr>.CompFunc", kCompareNever));
+				static std::vector<std::tuple<std::string, std::string, int>> compFuncPatterns = {
+					{"", "Never", kCompareNever},
+					{"", "Less", kCompareLess},
+					{"", "Equal", kCompareEqual},
+					{"", "LessEqual", kCompareLessEqual},
+					{"", "Greater", kCompareGreater},
+					{"", "NotEqual", kCompareNotEqual},
+					{"", "GreaterEqual", kCompareGreaterEqual},
+					{"", "Always", kCompareAlways},
+				};
+				CompareFunc cmpFunc = GetNodeAttribute<CompareFunc>(node_element, "<xmlattr>.CompFunc", kCompareNever, compFuncPatterns);
 
+				static std::vector<std::tuple<std::string, std::string, int>> filterPatterns = {
+					{"", "Point", kSFMMBase},
+					{"", "MinLinear", kSFMMLinear_Min},
+					{"", "MagLinear", kSFMMLinear_Mag},
+					{"", "MipLinear", kSFMMLinear_Mip},
+					{"", "MinMipLinear", kSFMMLinear_Min | kSFMMLinear_Mip},
+					{"", "MagMipLinear", kSFMMLinear_Mag | kSFMMLinear_Mip},
+					{"", "MinMagLinear", kSFMMLinear_Min | kSFMMLinear_Mag},
+					{"", "MinMagMipLinear", kSFMMLinear_Min | kSFMMLinear_Mag | kSFMMLinear_Mip},
+					{"", "Anisotropic", kSFMMAnisotropic}
+				};
 				SamplerFilterMode filter = (cmpFunc != kCompareNever) ? kSamplerFilterCmpMinMagLinearMipPoint : kSamplerFilterMinMagMipLinear;
-				filter = static_cast<SamplerFilterMode>(node_element.get<int>("<xmlattr>.Filter", filter));
+				filter = GetNodeAttribute<SamplerFilterMode>(node_element, "<xmlattr>.Filter", filter, filterPatterns);
 
-				int address = (cmpFunc != kCompareNever) ? kAddressBorder : kAddressClamp;
-				address = node_element.get<int>("<xmlattr>.Address", address);
+				static std::vector<std::tuple<std::string, std::string, int>> addrPatterns = {
+					{"", "Wrap", kAddressWrap},
+					{"", "Mirror", kAddressMirror},
+					{"", "Clamp", kAddressClamp},
+					{"", "Border", kAddressBorder},
+					{"", "MirrorOnce", kAddressMirrorOnce},
+				};
+				AddressMode address = (cmpFunc != kCompareNever) ? kAddressBorder : kAddressClamp;
+				address = GetNodeAttribute<AddressMode>(node_element, "<xmlattr>.Address", address, addrPatterns);
+				AddressMode addrU = GetNodeAttribute<AddressMode>(node_element, "<xmlattr>.AddressU", address, addrPatterns);
+				AddressMode addrV = GetNodeAttribute<AddressMode>(node_element, "<xmlattr>.AddressV", address, addrPatterns);
+				AddressMode addrW = GetNodeAttribute<AddressMode>(node_element, "<xmlattr>.AddressW", address, addrPatterns);
 
 				int slot = node_element.get<int>("<xmlattr>.Slot", -1);
-				samplerSet.AddOrSet(SamplerDescEx::Make(
-					filter,
-					cmpFunc,
-					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressU", address)),
-					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressV", address)),
-					static_cast<AddressMode>(node_element.get<int>("<xmlattr>.AddressW", address)),
-					it.second.data()
-				), slot);
+				samplerSet.AddOrSet(SamplerDescEx::Make(filter, cmpFunc, addrU, addrV, addrW, it.second.data()), slot);
 			}
 
 			std::string shortName = node_sampler.get<std::string>("<xmlattr>.Name", "");
@@ -546,7 +765,7 @@ private:
 			auto& node_pass = pit.second;
 
 			std::string strRepeat = node_pass.get<std::string>("<xmlattr>.Repeat", "1");
-			int repeat = __max(vis.GetMacroValue(categNode.Program, strRepeat), atoi(strRepeat.c_str()));
+			int repeat = std::max(vis.GetMacroValue(categNode.Program, strRepeat), atoi(strRepeat.c_str()));
 			for (int i = 0; i < repeat; ++i) {
 				PassNode pass;
 				auto& pprop = *pass.Property;
@@ -741,7 +960,7 @@ private:
 		for (auto& mit : boost::make_iterator_range(nodeMaterial->equal_range("Macros"))) {
 			auto& node_macros = mit.second;
 			for (auto& it : node_macros)
-				paramBuilder[it.first] = boost::lexical_cast<int>(it.second.data());
+				paramBuilder[it.first] = std::stoi(it.second.data());
 		}
 		materialNode.LoadParam = paramBuilder;
 		materialNode.LoadParam.ShaderVariantName = find_useShader->second.data();

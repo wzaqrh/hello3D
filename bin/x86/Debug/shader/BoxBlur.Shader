@@ -6,7 +6,7 @@
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
-		<Uniform Name="cbBoxFilter" Slot="3" ShareMode="1">
+		<Uniform Name="cbBoxFilter" Slot="3" ShareMode="PerMaterial">
 			<Element Name="BoxKernelWeights" Type="float" Count="28" Default="0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111,0.11111"></Element>
 		</Uniform>  
 

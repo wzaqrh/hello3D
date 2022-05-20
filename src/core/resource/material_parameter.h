@@ -10,7 +10,7 @@ namespace mir {
 namespace res {
 
 enum CBufferShareMode {
-	kCbShareNone = 0,
+	kCbSharePerInstance = 0,
 	kCbSharePerMaterial = 1,
 	kCbSharePerFrame = 2,
 	kCbShareMax
@@ -64,7 +64,7 @@ public:
 private:
 	ConstBufferDecl mDecl;
 	std::string mShortName;
-	CBufferShareMode mShareMode = kCbShareNone;
+	CBufferShareMode mShareMode = kCbSharePerInstance;
 	size_t mSlot = 0;
 	bool mIsReadOnly = false;
 private:
@@ -80,7 +80,7 @@ class GpuParameters
 		bool IsValid() const { return CBuffer != nullptr; }
 		operator bool() const { return IsValid(); }
 		int GetSlot() const { return Parameters->GetSlot(); }
-		bool IsShared() const { return Parameters->GetShareMode() != kCbShareNone; }
+		bool IsShared() const { return Parameters->GetShareMode() != kCbSharePerInstance; }
 		CBufferShareMode GetShareMode() const { return Parameters->GetShareMode(); }
 		Element() {}
 		Element(IContantBufferPtr cbuffer, UniformParametersPtr parameters) :CBuffer(cbuffer), Parameters(parameters) {}

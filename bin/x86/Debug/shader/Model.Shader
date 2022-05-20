@@ -9,7 +9,7 @@
 		<UseUniform>cbPerLight</UseUniform>
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
-		<Uniform Name="cbModel" Slot="3" ShareMode="1">
+		<Uniform Name="cbModel" Slot="3" ShareMode="PerMaterial">
 			<Element Name="AlbedoUV"              Type="float4" Default="0,0,1,1"></Element>
 			<Element Name="NormalUV"              Type="float4" Default="0,0,1,1"></Element>
 			<Element Name="OcclusionUV"           Type="float4" Default="0,0,1,1"></Element>
@@ -25,12 +25,12 @@
 			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
 		</Uniform>   
 		<Texture>
-			<Element Slot="0" Address="1">txAlbedo</Element>
-			<Element Slot="1" Address="1">txNormal</Element>
-			<Element Slot="2" Address="1">txMetalness</Element>
-			<Element Slot="3" Address="1">txRoughness</Element>
-			<Element Slot="4" Address="1">txAmbientOcclusion</Element>
-			<Element Slot="5" Address="1">txEmissive</Element>
+			<Element Slot="0" Address="Wrap">txAlbedo</Element>
+			<Element Slot="1" Address="Wrap">txNormal</Element>
+			<Element Slot="2" Address="Wrap">txMetalness</Element>
+			<Element Slot="3" Address="Wrap">txRoughness</Element>
+			<Element Slot="4" Address="Wrap">txAmbientOcclusion</Element>
+			<Element Slot="5" Address="Wrap">txEmissive</Element>
 		</Texture>
 		<Macros>			
 			<ENABLE_ALBEDO_MAP>0</ENABLE_ALBEDO_MAP>
@@ -52,11 +52,11 @@
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>
 		
-		<FillMode>3</FillMode>
-		<CullMode>3</CullMode>
-		<DepthEnable>1</DepthEnable>
-		<DepthFunc>4</DepthFunc>
-		<DepthWriteMask>1</DepthWriteMask>
+		<FillMode>Solid</FillMode>
+		<CullMode>Back</CullMode>
+		<DepthEnable>True</DepthEnable>
+		<DepthFunc>LessEqual</DepthFunc>
+		<DepthWriteMask>All</DepthWriteMask>
 	</PROGRAM>
 	
 	<SubShader>

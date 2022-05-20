@@ -139,7 +139,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	CoAwait WhenAll(std::move(tasks));
 
 	std::map<std::string, GpuParameters::Element> matParamCache;
-	material->mGpuParametersByShareType[kCbShareNone] = CreateInstance<GpuParameters>();
+	material->mGpuParametersByShareType[kCbSharePerInstance] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerMaterial] = CreateInstance<GpuParameters>();
 	material->mGpuParametersByShareType[kCbSharePerFrame] = mFrameGpuParameters;
 	for (const auto& categNode : materialNode.Shader) {
@@ -149,11 +149,11 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 				GpuParameters::Element element = AddToParametersCache(launchMode, resMng, uniform);
 				switch (element.GetShareMode())
 				{
-				case kCbShareNone: {
+				case kCbSharePerInstance: {
 					GpuParameters::Element newelem = element.Clone(launchMode, resMng);
 					for (const auto& iter : materialNode.Property->UniformByName)
 						newelem.Parameters->SetPropertyByString(iter.first, iter.second);
-					material->mGpuParametersByShareType[kCbShareNone]->AddElement(newelem);
+					material->mGpuParametersByShareType[kCbSharePerInstance]->AddElement(newelem);
 				}break;
 				case kCbSharePerMaterial: {
 					GpuParameters::Element newelem;
