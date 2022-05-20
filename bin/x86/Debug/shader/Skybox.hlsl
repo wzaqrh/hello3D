@@ -1,6 +1,6 @@
+#include "Macros.cginc"
 #include "Standard.cginc"
 #include "ToneMapping.cginc"
-#include "Macros.cginc"
 
 MIR_DECLARE_TEXCUBE(_MainTex, 0);
 
@@ -44,7 +44,7 @@ float4 PS(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	finalColor.rgb = MIR_SAMPLE_TEXCUBE(_MainTex, input.Tex).rgb;
-#if PBR_MODE
+#if TONEMAP_MODE
 	finalColor.rgb = toneMap(finalColor.rgb, CameraPositionExposure.w);
 #endif
 	finalColor.a = 1.0;

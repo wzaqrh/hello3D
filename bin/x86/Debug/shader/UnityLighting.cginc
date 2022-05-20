@@ -2,23 +2,23 @@
 #define UNITY_LIGHTING_H
 #include "Macros.cginc"
 #include "Standard.cginc"
+#include "LightingInput.cginc"
 #include "CommonFunction.cginc"
 #include "BRDFCommonFunction.cginc"
 #include "SphericalHarmonics.cginc"
 #include "ToneMapping.cginc"
 
-#if COLORSPACE_GAMMA
-    #define DielectricSpec float4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
-#endif
-
 float3 GetLightMap(float2 uv) 
 {
     float4 color = MIR_SAMPLE_TEX2D(_LightMap, GetUV(uv, LightMapUV));
-    //return DecodeLightmapRGBM(color, float4(5,1,0,1));
+#if 0   
+    return DecodeLightmapRGBM(color, float4(5,1,0,1));
+#else    
     return color.rgb;
+#endif    
 }
 
-float3 UnityPbrLight(float3 l, float3 n, float3 v, float2 uv, float3 albedo, float3 ao_rough_metal)
+float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
 {
     float3 h = SafeNormalize(l + v);
 
@@ -30,21 +30,21 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float2 uv, float3 albedo, flo
     float lh = saturate(dot(l, h));
     float lv = saturate(dot(l, v));
     
-    float ao = ao_rough_metal.x;
-    float perceptualRoughness = ao_rough_metal.y;
-    float metalness = ao_rough_metal.z;
+    float ao = i.ao_rough_metal.x;
+    float perceptualRoughness = i.ao_rough_metal.y;
+    float metalness = i.ao_rough_metal.z;
     
     //diffuse color
-    float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, albedo);
+    float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, i.albedo.rgb);
     float reflectivity = lerp(DielectricSpec.r, 1, metalness);
     float kd = 1.0f - reflectivity;
 	float3 diffuse_color = MIR_PI * kd * LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
 	
     //env diffuse color
 #if ENABLE_LIGHT_MAP  
-    float3 sh_diffuse_color = kd * albedo * GetLightMap(uv);
+    float3 sh_diffuse_color = kd * i.albedo.rgb * GetLightMap(i.uv);
 #else
-    float3 sh_diffuse_color = kd * albedo * GetSphericalHarmonicsDgree01(float4(n, 1.0), SHC0C1);
+    float3 sh_diffuse_color = kd * i.albedo.rgb * GetSphericalHarmonicsDgree01(float4(n, 1.0), SHC0C1);
 #endif
     
     //D, V
@@ -59,7 +59,7 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float2 uv, float3 albedo, flo
     specularTerm = max(0.0, specularTerm * nl);
     
     //F
-    float3 f0  = lerp(DielectricSpec.rgb, albedo, metalness);
+    float3 f0  = lerp(DielectricSpec.rgb, i.albedo.rgb, metalness);
     float3 f90 = float3(1,1,1);
     float3 F = SchlickFresnel(f0, f90, lh);
 
@@ -89,7 +89,7 @@ float3 UnityPbrLight(float3 l, float3 n, float3 v, float2 uv, float3 albedo, flo
     finalColor = n * 0.5 + 0.5;
 #endif
 
-#define VectorIdentity float3(1,1,1)   
+    #define VectorIdentity float3(1,1,1)   
     //finalColor = float3(1.0,0.0,0.0);
     //finalColor = albedo;
     //finalColor = n * 0.5 + 0.5;

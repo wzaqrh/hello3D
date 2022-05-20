@@ -628,5 +628,8 @@
     <None Include="..\bin\x86\Debug\shader\Bloom.Shader">
       <Filter>shader\xml</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\LightingInput.cginc">
+      <Filter>shader\inc</Filter>
+    </None>
   </ItemGroup>
 </Project>

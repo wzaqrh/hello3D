@@ -240,6 +240,7 @@
     <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader" />
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
+    <None Include="..\bin\x86\Debug\shader\LightingInput.cginc" />
     <None Include="..\bin\x86\Debug\shader\Macros.cginc" />
     <None Include="..\bin\x86\Debug\shader\Model.Shader" />
     <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
