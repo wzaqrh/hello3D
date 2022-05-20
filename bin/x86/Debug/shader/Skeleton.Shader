@@ -7,7 +7,7 @@
 			<Element Format="rgba32f" SemanticName="BLENDWEIGHT"></Element>
 			<Element Format="rgba32u" SemanticName="BLENDINDICES"></Element>
 		</Attribute>
-		<Uniform Name="cbWeightedSkin" Slot="2">
+		<Uniform Name="cbWeightedSkin" Slot="2" ShareMode="PerInstance">
 			<Element Name="Model" Type="matrix" Default="1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1"></Element>
 			<Element Name="Models" Type="matrix" Count="56"></Element>
 		</Uniform>

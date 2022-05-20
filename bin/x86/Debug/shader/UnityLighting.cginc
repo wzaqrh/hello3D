@@ -18,7 +18,7 @@ float3 GetLightMap(float2 uv)
     return color.rgb;
 }
 
-float3 UnityPbrLight(float2 uv, float3 l, float3 n, float3 v, float3 albedo, float3 ao_rough_metal)
+float3 UnityPbrLight(float3 l, float3 n, float3 v, float2 uv, float3 albedo, float3 ao_rough_metal)
 {
     float3 h = SafeNormalize(l + v);
 
@@ -38,7 +38,7 @@ float3 UnityPbrLight(float2 uv, float3 l, float3 n, float3 v, float3 albedo, flo
     float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, albedo);
     float reflectivity = lerp(DielectricSpec.r, 1, metalness);
     float kd = 1.0f - reflectivity;
-	float3 diffuse_color = MIR_PI * kd * unity_LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
+	float3 diffuse_color = MIR_PI * kd * LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
 	
     //env diffuse color
 #if ENABLE_LIGHT_MAP  
@@ -66,7 +66,7 @@ float3 UnityPbrLight(float2 uv, float3 l, float3 n, float3 v, float3 albedo, flo
     //specular color
     float3 fs_cook_torrance = specularTerm * F;
     float ks = any(f0) ? 1.0 : 0.0; 
-    float3 specular_color =  ks * unity_LightColor.rgb * fs_cook_torrance;
+    float3 specular_color =  ks * LightColor.rgb * fs_cook_torrance;
     
     //grazing color
     #if COLORSPACE_GAMMA
@@ -80,7 +80,7 @@ float3 UnityPbrLight(float2 uv, float3 l, float3 n, float3 v, float3 albedo, flo
     //float3 finalColor = diffuse_color + sh_diffuse_color + specular_color;
     float3 finalColor = sh_diffuse_color;
 #if TONEMAP_MODE
-	finalColor = toneMap(finalColor);
+	finalColor = toneMap(finalColor, CameraPositionExposure.w);
 #endif
 
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR

@@ -74,11 +74,31 @@ MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& re
 	return MaterialInstance(const_cast<Material*>(this)->shared_from_this(), mTextures, newParametrs, mLoadParam);
 }
 
+MaterialPtr Material::Clone(Launch launchMode, ResourceManager& resMng) const
+{
+	MaterialPtr mtl = std::make_shared<Material>();
+	mtl->mShader = mShader;
+	mtl->mTextures = mTextures;
+	mtl->mProperty = mProperty;
+	mtl->mLoadParam = mLoadParam;
+	mtl->mGpuParametersByShareType[kCbSharePerInstance] = mGpuParametersByShareType[kCbSharePerInstance];
+	mtl->mGpuParametersByShareType[kCbSharePerMaterial] = mGpuParametersByShareType[kCbSharePerMaterial]->Clone(launchMode, resMng);
+	mtl->mGpuParametersByShareType[kCbSharePerFrame] = mGpuParametersByShareType[kCbSharePerFrame];
+	return mtl;
+}
+
 /********** MaterialInstance **********/
 MaterialInstance::MaterialInstance(const MaterialPtr& material, const TextureVector& textures, const GpuParametersPtr& gpuParamters, const MaterialLoadParam& loadParam)
 {
 	mSelf = CreateInstance<SharedBlock>(material, textures, gpuParamters, loadParam);
 }
+
+MaterialInstance MaterialInstance::Clone(Launch launchMode, ResourceManager& resMng) const
+{
+	auto cloneMtl = mSelf->Material->Clone(launchMode, resMng);
+	return cloneMtl->CreateInstance(launchMode, resMng);
+}
+
 CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng)
 {
 	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);

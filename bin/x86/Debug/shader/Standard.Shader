@@ -21,17 +21,14 @@
 
 			<Element Name="SHC0C1"				Type="matrix"></Element>
 			
-			<Element Name="CameraPosition"		Type="float4"></Element>
+			<Element Name="CameraPositionExposure"	Type="float4"></Element>
 			<Element Name="FrameBufferSize"		Type="float4"></Element>
 			<Element Name="ShadowMapSize"		Type="float4"></Element>
 			<Element Name="LightMapUV"			Type="float4"></Element>
-			<Element Name="glstate_lightmodel_ambient"  Type="float4" Default="0.1,0.1,0.1,0.1"></Element>
-			<Element Name="Exposure"			Type="float"></Element>
 		</Uniform>
 		<Uniform Name="cbPerLight" Slot="1" ShareMode="PerFrame">
-			<Element Name="unity_LightPosition"	Type="float4"></Element>
-			<Element Name="unity_LightColor"	Type="float4"></Element> 
-			<Element Name="unity_SpecColor"		Type="float4"></Element>
+			<Element Name="LightPosition"		Type="float4"></Element>
+			<Element Name="LightColor"			Type="float4"></Element> 
 			<Element Name="unity_LightAtten"	Type="float4"></Element>
 			<Element Name="unity_SpotDirection"	Type="float4"></Element>
 			<Element Name="LightRadiusUVNearFar" Type="float4"></Element>

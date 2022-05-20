@@ -76,6 +76,7 @@ class MIR_CORE_API MaterialInstance
 public:
 	MaterialInstance() {}
 	MaterialInstance(const MaterialPtr& material, const TextureVector& textures, const GpuParametersPtr& gpuParamters, const MaterialLoadParam& loadParam);
+	MaterialInstance Clone(Launch launchMode, ResourceManager& resMng) const;
 	CoTask<bool> Reload(Launch launchMode, ResourceManager& resMng);
 
 	/********** about keywords **********/
@@ -150,6 +151,7 @@ class MIR_CORE_API Material : public std::enable_shared_from_this<Material>, pub
 public:
 	Material() {}
 	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
+	MaterialPtr Clone(Launch launchMode, ResourceManager& resMng) const;
 	bool IsOutOfDate() const { return mProperty->DependSrc.CheckOutOfDate(); }
 	const ShaderPtr& GetShader() const { return mShader; }
 	const MaterialLoadParam& GetLoadParam() const { return mLoadParam; }

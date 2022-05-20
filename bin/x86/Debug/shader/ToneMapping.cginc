@@ -14,7 +14,6 @@ const static float3x3 ACESInputMat = float3x3
     0.04823, 0.01566, 0.83777
 );
 
-
 // ODT_SAT => XYZ => D60_2_D65 => sRGB
 const static float3x3 ACESOutputMat = float3x3
 (
@@ -74,9 +73,9 @@ inline float3 toneMapACES_Hill(float3 color)
     return color;
 }
 
-float3 toneMap(float3 color)
+float3 toneMap(float3 color, float exposure)
 {
-    color *= Exposure;
+    color *= exposure;
 
 #if TONEMAP_MODE == TONEMAP_ACES_NARKOWICZ
     color = toneMapACES_Narkowicz(color);

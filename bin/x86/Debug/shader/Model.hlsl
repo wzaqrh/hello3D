@@ -175,7 +175,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 #endif
 	
 	//ToEye
-	output.ToEye = CameraPosition.xyz - output.Pos.xyz;
+	output.ToEye = CameraPositionExposure.xyz - output.Pos.xyz;
 
 	//PosLight
 #if ENABLE_SHADOW_MAP
@@ -184,7 +184,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 #endif
 	
     //ToLight
-    output.ToLight = unity_LightPosition.xyz - output.Pos.xyz * unity_LightPosition.w;
+    output.ToLight = LightPosition.xyz - output.Pos.xyz * LightPosition.w;
     
 	//WorldPos	
 	output.WorldPos = output.Pos.xyz / output.Pos.w;
@@ -215,14 +215,14 @@ float4 PS(PixelInput input) : SV_Target
 #if !PBR_MODE
     finalColor.rgb = BlinnPhongLight(toLight, normal, toEye, albedo.rgb, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	finalColor.rgb = UnityPbrLight(input.Tex, toLight, normal, toEye, albedo.rgb, aorm);
+	finalColor.rgb = UnityPbrLight(toLight, normal, toEye, input.Tex, albedo.rgb, aorm);
 #elif PBR_MODE == PBR_GLTF
 	finalColor.rgb = GltfPbrLight(toLight, normal, toEye, albedo.rgb, aorm, emissive);
 #endif
     finalColor.a = 1.0;
 
 #if ENABLE_SHADOW_MAP
-	//float depth = length(unity_LightPosition.xyz - input.WorldPos.xyz * unity_LightPosition.w);
+	//float depth = length(LightPosition.xyz - input.WorldPos.xyz * LightPosition.w);
 	//finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
 #endif
 	
@@ -253,7 +253,7 @@ float4 PS(PixelInput input) : SV_Target
 	finalColor.xyz = float3(input.Pos.xy * FrameBufferSize.zw, 0);
 	finalColor.y   = 1.0 - finalColor.y;
 #elif DEBUG_CHANNEL == DEBUG_CAMERA_POS
-	finalColor.xyz = CameraPosition.xyz;
+	finalColor.xyz = CameraPositionExposure.xyz;
 	finalColor.z   = -finalColor.z;
 	finalColor.xyz = finalColor.xyz * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_SURFACE_POS
@@ -274,7 +274,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 {	
 	float4 finalColor;
 	SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
-	finalColor.rgb = BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex).rgb, IsSpotLight);
+	finalColor.rgb = float3(0,0,0);//BlinnPhongLight(input.ToLight, normal, normalize(input.ToEye), GetAlbedo(input.Tex).rgb, IsSpotLight);
 	finalColor.a = 1.0;
 	return finalColor;
 }
@@ -323,7 +323,7 @@ float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target
 {
 	float depth = length(input.ViewPos);
 	//float worldPos = input.WorldPos.xyz / input.WorldPos.w;
-	//float depth = length(unity_LightPosition.xyz - worldPos * unity_LightPosition.w);
+	//float depth = length(LightPosition.xyz - worldPos * LightPosition.w);
 	return float4(depth, depth * depth, 0.0f, 1.0f);
 }
 
@@ -475,13 +475,13 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	float4 emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);
 	float3 aorm = float3(normal.w, albedo.w, emissive.w);
 	
-	float3 toLight = normalize(unity_LightPosition.xyz - worldPosition.xyz * unity_LightPosition.w);
-	float3 toEye = normalize(CameraPosition.xyz - worldPosition.xyz);
+	float3 toLight = normalize(LightPosition.xyz - worldPosition.xyz * LightPosition.w);
+	float3 toEye = normalize(CameraPositionExposure.xyz - worldPosition.xyz);
 
 #if !PBR_MODE
     output.Color.rgb = BlinnPhongLight(toLight, normal.xyz, toEye, albedo.xyz, IsSpotLight);
 #elif PBR_MODE == PBR_UNITY
-	output.Color.rgb = UnityPbrLight(input.Tex, toLight, normal.xyz, toEye, albedo.xyz, aorm);
+	output.Color.rgb = UnityPbrLight(toLight, normal.xyz, toEye, input.Tex, albedo.xyz, aorm);
 #elif PBR_MODE == PBR_GLTF
 	output.Color.rgb = GltfPbrLight(toLight, normal.xyz, toEye, albedo.rgb, aorm, emissive.xyz);
 #endif

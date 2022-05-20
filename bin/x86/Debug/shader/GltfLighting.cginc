@@ -32,8 +32,8 @@ float3 GltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
     
     float3 kd = float3(1.0, 1.0, 1.0) - specularWeight * F;
     float ks = specularWeight;
-	diffuse  = kd * diffuse * unity_LightColor.rgb * NdotL;
-	specular = ks * specular * unity_LightColor.rgb * NdotL;
+	diffuse  = kd * diffuse * LightColor.rgb * NdotL;
+	specular = ks * specular * LightColor.rgb * NdotL;
     fcolor += diffuse + specular;
 #endif    
     
@@ -44,7 +44,7 @@ float3 GltfPbrLight(float3 toLight, float3 normal, float3 toEye, float3 albedo, 
 #endif
 	fcolor += emissive;
 #if TONEMAP_MODE
-	fcolor = toneMap(fcolor);
+	fcolor = toneMap(fcolor, CameraPositionExposure.w);
 #endif
 	
     

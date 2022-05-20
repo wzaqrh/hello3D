@@ -17,9 +17,7 @@ struct UNIFORM_ALIGN cbPerFrame
 		FrameBufferSize = Eigen::Vector4f::Zero();
 		ShadowMapSize = Eigen::Vector4f::Zero();
 		LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
-		CameraPosition = Eigen::Vector4f::Zero();
-		glstate_lightmodel_ambient = Eigen::Vector4f(0.01, 0.01, 0.01, 0.01);
-		Exposure = 1;
+		CameraPositionExposure = Eigen::Vector4f(0, 0, 0, 1);
 	}
 public:
 	Eigen::Matrix4f World;
@@ -34,21 +32,18 @@ public:
 
 	Eigen::Matrix4f SHC0C1;
 
-	Eigen::Vector4f CameraPosition;
+	Eigen::Vector4f CameraPositionExposure;
 	Eigen::Vector4f FrameBufferSize;
 	Eigen::Vector4f ShadowMapSize;
 	Eigen::Vector4f LightMapUV;
-	Eigen::Vector4f glstate_lightmodel_ambient;
-	float Exposure;
 };
 
 struct UNIFORM_ALIGN cbPerLight
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	cbPerLight() {
-		unity_LightPosition = Eigen::Vector4f::Zero();
-		unity_LightColor = Eigen::Vector4f::Ones();
-		unity_SpecColor = Eigen::Vector4f::Ones();
+		LightPosition = Eigen::Vector4f::Zero();
+		LightColor = Eigen::Vector4f::Ones();
 		unity_LightAtten = Eigen::Vector4f::Zero();
 		unity_SpotDirection = Eigen::Vector4f::Zero();
 		LightRadiusUVNearFar = Eigen::Vector4f(0.0001f, 0.0001f, 0.3f, 1000.0f);
@@ -56,9 +51,8 @@ struct UNIFORM_ALIGN cbPerLight
 		IsSpotLight = false;
 	}
 public:
-	Eigen::Vector4f unity_LightPosition;//world space
-	Eigen::Vector4f unity_LightColor;//w(gloss)
-	Eigen::Vector4f unity_SpecColor;//w(shiness)
+	Eigen::Vector4f LightPosition;//world space
+	Eigen::Vector4f LightColor;
 	Eigen::Vector4f unity_LightAtten;//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	Eigen::Vector4f unity_SpotDirection;
 	Eigen::Vector4f LightRadiusUVNearFar;

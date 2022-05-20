@@ -48,8 +48,8 @@ struct cbPerFrameBuilder {
 		mCBuffer.ViewInv = mCBuffer.View.inverse();
 		mCBuffer.ProjectionInv = mCBuffer.Projection.inverse();
 
-		mCBuffer.CameraPosition.head<3>() = camera.GetTransform()->GetPosition();
-		mCBuffer.CameraPosition.w() = 1.0f;
+		mCBuffer.CameraPositionExposure.head<3>() = camera.GetTransform()->GetPosition();
+		mCBuffer.CameraPositionExposure.w() = 1.0f;
 		return SetSkybox(camera.GetSkyBox());
 	}
 	void SetBackFrameBufferSize(Eigen::Vector2i backBufferSize) {

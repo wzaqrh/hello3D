@@ -34,8 +34,7 @@ public:
 	void SetCastShadow(bool castShadow) { mCastShadow = castShadow; }
 	bool DidCastShadow() const { return mCastShadow && GetType() != kLightPoint; }
 
-	void SetDiffuse(const Eigen::Vector3f& color);
-	void SetSpecular(const Eigen::Vector3f& color, float shiness, float luminance);
+	void SetColor(const Eigen::Vector3f& color);
 protected:
 	cbPerLight mCbLight;
 	unsigned mCameraMask = -1;

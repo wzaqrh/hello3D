@@ -9,16 +9,9 @@ namespace scene {
 Light::Light()
 {}
 
-void Light::SetDiffuse(const Eigen::Vector3f& color)
+void Light::SetColor(const Eigen::Vector3f& color)
 {
-	mCbLight.unity_LightColor.head<3>() = color;
-}
-
-void Light::SetSpecular(const Eigen::Vector3f& color, float shiness, float luminance)
-{
-	mCbLight.unity_SpecColor.head<3>() = color;
-	mCbLight.unity_SpecColor.w() = shiness;
-	mCbLight.unity_LightColor.w() = luminance;
+	mCbLight.LightColor.head<3>() = color;
 }
 
 /********** LightCamera **********/
@@ -102,8 +95,8 @@ void DirectLight::SetMinPCFRadius(float minPcfRadius)
 
 void DirectLight::UpdateLightCamera(const Eigen::AlignedBox3f& sceneAABB)
 {
-	mCbLight.unity_LightPosition.head<3>() = -mCamera.Direction.normalized();
-	mCbLight.unity_LightPosition.w() = 0.0f;
+	mCbLight.LightPosition.head<3>() = -mCamera.Direction.normalized();
+	mCbLight.LightPosition.w() = 0.0f;
 
 	mCamera.Update(sceneAABB);
 	mCbLight.LightRadiusUVNearFar = Eigen::Vector4f(mLightRadius / mCamera.FrustumWidth, mLightRadius / mCamera.FrustumHeight, mCamera.FrustumZNear, mCamera.FrustumZFar);
@@ -132,8 +125,8 @@ void SpotLight::SetAngle(float radian)
 
 void SpotLight::UpdateLightCamera(const Eigen::AlignedBox3f& sceneAABB)
 {
-	mCbLight.unity_LightPosition.head<3>() = mCamera.Position;
-	mCbLight.unity_LightPosition.w() = 1.0f;
+	mCbLight.LightPosition.head<3>() = mCamera.Position;
+	mCbLight.LightPosition.w() = 1.0f;
 
 	mCbLight.unity_SpotDirection.head<3>() = mCamera.Direction.normalized();
 
@@ -151,8 +144,8 @@ PointLight::PointLight()
 
 void PointLight::SetPosition(const Eigen::Vector3f& pos)
 {
-	mCbLight.unity_LightPosition.head<3>() = pos;
-	mCbLight.unity_LightPosition.w() = 1.0f;
+	mCbLight.LightPosition.head<3>() = pos;
+	mCbLight.LightPosition.w() = 1.0f;
 }
 
 void PointLight::SetAttenuation(float c)
