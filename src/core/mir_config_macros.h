@@ -50,10 +50,6 @@
 #define USE_PUNCTUAL 1
 #endif
 
-#if !defined DEBUG_TBN
-#define DEBUG_TBN 0
-#endif
-
 #if !defined COLORSPACE_GAMMA
 #define COLORSPACE_GAMMA 1
 #endif

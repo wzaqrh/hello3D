@@ -36,7 +36,7 @@ CoTask<bool> TestSprite::OnInitScene()
 	case 0: {
 		mSprite = CoAwait mRendFac->CreateSpriteT();
 		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::dds::Kenny()));
+		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::dds::Lenna()));//bc1, mipmap
 		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 	}break;
 	case 1: {

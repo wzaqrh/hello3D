@@ -2,7 +2,7 @@
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
-#include "core/base/il_helper.h"
+#include <OpenImageIO/imageio.h>
 #include "core/base/d3d.h"
 #include "core/base/input.h"
 #include "core/base/debug.h"
@@ -11,6 +11,8 @@
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/assimp_resource.h"
+
+#define USE_OIIO
 
 namespace mir {
 
@@ -21,9 +23,14 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, res::MaterialFactory& 
 {
 	mMainThreadId = std::this_thread::get_id();
 	constexpr int CThreadPoolNumber = 8;
+#if defined USE_OIIO
+	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber);
+	mIoService = ioService;
+#else
 	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber, ilInit, ilShutDown);
 	mIoService = ioService;
 	ilInit();
+#endif	
 	TIME_PROFILE((boost::format("resMng.main_tid %1%") %mMainThreadId).str());
 }
 ResourceManager::~ResourceManager()
@@ -34,7 +41,9 @@ void ResourceManager::Dispose() ThreadSafe
 {
 	if (mThreadPool) {
 		mThreadPool = nullptr;
+	#if !defined USE_OIIO
 		ilShutDown();
+	#endif
 	}
 }
 
@@ -255,6 +264,84 @@ CoTask<bool> ResourceManager::CreateProgram(IProgramPtr& program, Launch launchM
 }
 
 /********** Create Texture **********/
+
+#if defined USE_OIIO
+CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr texture, std::string imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+{
+	texture->SetLoading();
+	CoAwait SwitchToLaunchService(launchMode);
+	COROUTINE_VARIABLES_5(texture, launchMode, imgFullpath, format, autoGenMipmap);
+
+	TIME_PROFILE((boost::format("\t\tresMng._LoadTextureByFile (%1% %2% %3%)") % imgFullpath % format % autoGenMipmap).str());
+	ITexturePtr ret = nullptr;
+	OIIO::ImageSpec spec;
+	OIIO::ImageSpec config;
+	config["oiio:UnassociatedAlpha"] = TRUE;
+	config["oiio:RawColor"] = TRUE;
+	if (auto inp = OIIO::ImageInput::open(imgFullpath, &config)) {
+		auto get_spec_dimensions = [&](OIIO::ImageSpec& spec, int faceIdx, int mipIdx) -> bool {
+			spec = inp->spec_dimensions(faceIdx, mipIdx);
+			return spec.format != OIIO::TypeUnknown;
+		};
+
+		std::vector<unsigned char> bytes(2048), bytes2(2048);
+		size_t bytePos = 0;
+		std::vector<Data> vecData;
+		int width = 0, height = 0;
+		int faceCount = 0, mipCount = 0;
+		while (++faceCount) {
+			int mipPlus = 0;
+			while (get_spec_dimensions(spec, faceCount - 1, mipPlus++)) {
+				BOOST_ASSERT(spec.depth <= 1);
+				//BOOST_ASSERT(spec.z_channel == -1);
+
+				const char* compression = nullptr;
+				spec.getattribute("compression", OIIO::TypeString, &compression);
+
+				if (faceCount == 1 && mipPlus == 1) {
+					width  = spec.width;
+					height = spec.height;
+					if (format == kFormatUnknown) {
+						auto specfmt = spec.format;
+						BOOST_ASSERT(specfmt.basetype != OIIO::TypeDesc::UNKNOWN);
+						BOOST_ASSERT(specfmt.aggregate <= OIIO::TypeDesc::VEC4);
+						BOOST_ASSERT(specfmt.arraylen == 0);
+
+					}
+				}
+				
+				size_t imgSize = spec.image_bytes(true);
+				if (bytePos + imgSize > bytes.size())
+					bytes.resize(std::max(bytePos + imgSize, bytes.size() * 2));
+				inp->read_image(faceCount - 1, mipPlus - 1, 0, spec.nchannels, OIIO::TypeDesc::UNKNOWN, &bytes[bytePos]);
+
+				bytes2.resize(bytes.size());
+				inp->read_native_scanlines(faceCount - 1, mipPlus - 1, 0, spec.height, 0, &bytes2[bytePos]);
+
+				vecData.emplace_back(Data::Make(&bytes[bytePos], imgSize));
+				
+				bytePos += imgSize;
+			}			
+			if (mipPlus == 1) 
+				break;
+			if (faceCount == 1) 
+				mipCount = mipPlus - 1;
+			BOOST_ASSERT(mipCount == mipPlus - 1);
+		}
+
+		if (mipCount == 1 && autoGenMipmap)
+			mipCount = -1;
+
+		CoAwait SwitchToLaunchService(__LaunchSync__);
+		ret = mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &vecData[0]);
+
+		inp->close();
+	}//if fd
+
+	texture->SetLoaded(ret != nullptr);
+	CoReturn texture->IsLoaded();
+}
+#else
 CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr texture, std::string imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	texture->SetLoading();
@@ -420,6 +507,7 @@ CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr 
 	texture->SetLoaded(ret != nullptr);
 	CoReturn texture->IsLoaded();
 }
+#endif
 CoTask<bool> ResourceManager::CreateTextureByFile(ITexturePtr& texture, Launch launchMode, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(launchMode);

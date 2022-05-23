@@ -102,7 +102,7 @@ std::string Kenny() { return "model/theyKilledKenny.hdr"; }
 }
 namespace dds {
 std::string Kenny() { return "model/theyKilledKenny.dds"; }
-std::string Lenna() { return "model/lenna.dds"; }
+std::string Lenna() { return "model/a.dds"; }
 }
 
 struct ModelInfo {
