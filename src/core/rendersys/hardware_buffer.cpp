@@ -2,25 +2,31 @@
 
 namespace mir {
 
-size_t GetCbElementTypeByteWidth(CbElementType type) {
+size_t CbDeclElement::GetByteWidth(Type type)
+{
 	switch (type)
 	{
-	case kCBElementBool: return sizeof(BOOL);
-	case kCBElementInt: return sizeof(int);
-	case kCBElementInt2: return sizeof(int) * 2;
-	case kCBElementInt3: return sizeof(int) * 3;
-	case kCBElementInt4: return sizeof(int) * 4;
-	case kCBElementFloat: return sizeof(float);
-	case kCBElementFloat2: return sizeof(float) * 2;
-	case kCBElementFloat3: return sizeof(float) * 3;
-	case kCBElementFloat4: return sizeof(float) * 4;
-	case kCBElementMatrix: return sizeof(float) * 16;
-	case kCBElementMax:
+	case Type::Bool: return sizeof(BOOL);
+	case Type::Int: return sizeof(int);
+	case Type::Int2: return sizeof(int) * 2;
+	case Type::Int3: return sizeof(int) * 3;
+	case Type::Int4: return sizeof(int) * 4;
+	case Type::Float: return sizeof(float);
+	case Type::Float2: return sizeof(float) * 2;
+	case Type::Float3: return sizeof(float) * 3;
+	case Type::Float4: return sizeof(float) * 4;
+	case Type::Matrix: return sizeof(float) * 16;
+	case Type::Max:
 	default:
 		BOOST_ASSERT(false);
 		break;
 	}
 	return 0;
+}
+
+size_t CbDeclElement::GetByteWidth() const
+{
+	return GetByteWidth(Type1);
 }
 
 }

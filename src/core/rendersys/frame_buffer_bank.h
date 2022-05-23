@@ -3,19 +3,17 @@
 #include "core/resource/predeclare.h"
 #include "core/base/stl.h"
 #include "core/base/math.h"
-#include "core/base/base_type.h"
+#include "core/rendersys/base/res_format.h"
 
 namespace mir {
 
 class FrameBufferBank
 {
 	struct Element {
-		Element(const Eigen::Vector3i& fbSize, const std::vector<ResourceFormat>& fmts)
+		Element(const Eigen::Vector3i& fbSize, const std::vector<ResourceFormat>& fmts) 
 			:mFbSize(fbSize), mFbFormats(fmts)
 		{}
-		void ReturnAll() {
-			mBorrowCount = 0;
-		}
+		void ReturnAll() { mBorrowCount = 0; }
 		IFrameBufferPtr Borrow(ResourceManager& resMng);
 		const std::vector<ResourceFormat>& GetFmts() const { return mFbFormats; }
 		const Eigen::Vector3i& GetSize() const { return mFbSize; }

@@ -2,13 +2,14 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
-#include "core/base/base_type.h"
 #include "core/base/declare_macros.h"
 #include "core/base/deffered_signal.h"
+#include "core/rendersys/base/res_format.h"
 #include "core/scene/transform.h"
 #include "core/scene/component.h"
 
 namespace mir {
+
 enum RenderingPath {
 	kRenderPathForward,
 	kRenderPathDeffered
@@ -18,6 +19,7 @@ enum CameraType {
 	kCameraPerspective,
 	kCameraOthogonal
 };
+
 namespace scene {
 
 class MIR_CORE_API Camera : public Component

@@ -6,13 +6,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regex>
+#include "core/mir_config_macros.h"
 #include "core/base/stl.h"
 #include "core/base/tpl/atomic_map.h"
-#include "core/base/base_type.h"
-#include "core/base/macros.h"
 #include "core/base/tpl/vector.h"
+#include "core/base/macros.h"
 #include "core/base/d3d.h"
-#include "core/mir_config_macros.h"
 #include "core/resource/material_name.h"
 #include "core/resource/material_asset.h"
 
@@ -525,18 +524,18 @@ private:
 			UniformParametersBuilder uniBuilder(uniform);
 			for (auto& element : boost::make_iterator_range(node_uniform.equal_range("Element"))) {
 				static std::vector<std::tuple<std::string, std::string, int>> typePatterns = {
-					{"", "bool", kCBElementBool},
-					{"", "int", kCBElementInt},
-					{"", "int2", kCBElementInt2},
-					{"", "int3", kCBElementInt3},
-					{"", "int4", kCBElementInt4},
-					{"", "float", kCBElementFloat},
-					{"", "float2", kCBElementFloat2},
-					{"", "float3", kCBElementFloat3},
-					{"", "float4", kCBElementFloat4},
-					{"", "matrix", kCBElementMatrix},
+					{"", "bool", (int)CbDeclElement::Type::Bool},
+					{"", "int", (int)CbDeclElement::Type::Int},
+					{"", "int2", (int)CbDeclElement::Type::Int2},
+					{"", "int3", (int)CbDeclElement::Type::Int3},
+					{"", "int4", (int)CbDeclElement::Type::Int4},
+					{"", "float", (int)CbDeclElement::Type::Float},
+					{"", "float2", (int)CbDeclElement::Type::Float2},
+					{"", "float3", (int)CbDeclElement::Type::Float3},
+					{"", "float4", (int)CbDeclElement::Type::Float4},
+					{"", "matrix", (int)CbDeclElement::Type::Matrix},
 				};
-				CbElementType type = GetNodeAttribute<CbElementType>(element.second, "<xmlattr>.Type", kCBElementMax, typePatterns); BOOST_ASSERT(type != kCBElementMax);
+				CbDeclElement::Type type = GetNodeAttribute<CbDeclElement::Type>(element.second, "<xmlattr>.Type", CbDeclElement::Type::Max, typePatterns); BOOST_ASSERT(type != CbDeclElement::Type::Max);
 				std::string name = element.second.get<std::string>("<xmlattr>.Name"/*, ""*/);
 				size_t size = element.second.get<int>("<xmlattr>.Size", 0); BOOST_ASSERT(size % 4 == 0);
 				size_t count = element.second.get<int>("<xmlattr>.Count", 0);

@@ -12,20 +12,20 @@ bool UniformParameters::SetPropertyByString(const std::string& name, std::string
 	int slot = FindProperty(name);
 	if (slot >= 0) {
 		const auto& decl = mDecl[slot];
-		switch (decl.Type) {
-		case kCBElementBool:
-		case kCBElementInt:
-		case kCBElementInt2:
-		case kCBElementInt3:
-		case kCBElementInt4:
+		switch (decl.Type1) {
+		case CbDeclElement::Type::Bool:
+		case CbDeclElement::Type::Int:
+		case CbDeclElement::Type::Int2:
+		case CbDeclElement::Type::Int3:
+		case CbDeclElement::Type::Int4:
 			mDataDirty = true;
 			mData.SetByParseString<int>(decl.Offset / sizeof(int), decl.Size / sizeof(int), strDefault);
 			break;
-		case kCBElementFloat:
-		case kCBElementFloat2:
-		case kCBElementFloat3:
-		case kCBElementFloat4:
-		case kCBElementMatrix:
+		case CbDeclElement::Type::Float:
+		case CbDeclElement::Type::Float2:
+		case CbDeclElement::Type::Float3:
+		case CbDeclElement::Type::Float4:
+		case CbDeclElement::Type::Matrix:
 			mDataDirty = true;
 			mData.SetByParseString<float>(decl.Offset / sizeof(int), decl.Size / sizeof(int), strDefault);
 			break;
@@ -49,13 +49,13 @@ void UniformParameters::WriteToConstBuffer(RenderSystem& renderSys, IContantBuff
 }
 
 /********** UniformParametersBuilder **********/
-void UniformParametersBuilder::AddParameter(const std::string& name, CbElementType type, size_t size, size_t count, size_t offset,
+void UniformParametersBuilder::AddParameter(const std::string& name, CbDeclElement::Type type, size_t size, size_t count, size_t offset,
 	const std::string& defValue)
 {
 	auto& element = mResult.mDecl.Emplace();
 	element.Name = name;
-	element.Type = type;
-	element.Size = (size > 0) ? size : GetCbElementTypeByteWidth(type) * std::max<int>(1, count);
+	element.Type1 = type;
+	element.Size = (size > 0) ? size : CbDeclElement::GetByteWidth(type) * std::max<int>(1, count);
 	element.Count = count;
 	element.Offset = (offset >= 0) ? offset : mCurrentByteOffset;
 	element.Offset = mResult.mDecl.BufferSize;

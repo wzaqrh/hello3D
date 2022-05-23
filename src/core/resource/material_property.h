@@ -1,8 +1,10 @@
 #pragma once
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
-#include "core/predeclare.h"
-#include "core/base/base_type.h"
+#include "core/rendersys/base/primitive_topology.h"
+#include "core/rendersys/base/blend_state.h"
+#include "core/rendersys/base/depth_state.h"
+#include "core/rendersys/base/rasterizer_state.h"
 
 namespace mir {
 namespace res {
@@ -44,8 +46,8 @@ public:
 	} Relate2Parameter;
 };
 
-struct MaterialProperty {
-	
+struct MaterialProperty 
+{	
 public:
 	struct TextureProperty {
 		std::string ImagePath;

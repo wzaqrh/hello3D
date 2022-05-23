@@ -4,7 +4,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/data.h"
-#include "core/base/base_type.h"
+#include "core/rendersys/base_type.h"
 #include "core/rendersys/hardware_buffer.h"
 #include "core/rendersys/program.h"
 #include "core/rendersys/sampler.h"

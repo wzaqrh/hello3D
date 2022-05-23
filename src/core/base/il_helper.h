@@ -2,7 +2,7 @@
 #define IL_STATIC_LIB
 #include <IL/il.h>
 #include <boost/assert.hpp>
-#include "core/base/base_type.h"
+#include "core/rendersys/base_type.h"
 
 namespace mir {
 

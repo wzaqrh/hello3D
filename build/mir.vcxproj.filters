@@ -22,9 +22,6 @@
     <ClInclude Include="..\src\core\rendersys\render_system.h">
       <Filter>src\core\rendersys</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\mir.h">
       <Filter>src\core</Filter>
     </ClInclude>
@@ -148,27 +145,6 @@
     <ClInclude Include="..\src\core\rendersys\d3d11\predeclare.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\framebuffer9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\hardware_buffer9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\input_layout9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\predeclare.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\program9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\texture9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\blob9.h">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClInclude>
@@ -185,9 +161,6 @@
       <Filter>src\unit_test</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\base\attribute_struct.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\base\base_type.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\renderable\renderable_base.h">
@@ -421,6 +394,33 @@
     <ClInclude Include="..\include\OpenImageIO\version.h">
       <Filter>src\thirdparty\OpenImageIO</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\blend_state.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\cube_face.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\depth_state.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\hardware_memory_usage.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\primitive_topology.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\rasterizer_state.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\res_format.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base_type.h">
+      <Filter>src\core\rendersys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\compare_func.h">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -437,9 +437,6 @@
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\sprite.cpp">
       <Filter>src\core\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\render_system9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\mir.cpp">
       <Filter>src\core</Filter>
@@ -509,24 +506,6 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\framebuffer11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\hardware_buffer9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\input_layout9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\program9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\texture9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\blob9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\framebuffer9.cpp">
-      <Filter>src\core\rendersys\d3d9</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
@@ -658,6 +637,9 @@
     </Filter>
     <Filter Include="src\thirdparty\OpenImageIO\detail">
       <UniqueIdentifier>{36261bb4-2bd1-4a26-a168-e0b295e69ad3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\base">
+      <UniqueIdentifier>{7c715055-6b6a-4abb-bd68-4c2ee860558c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

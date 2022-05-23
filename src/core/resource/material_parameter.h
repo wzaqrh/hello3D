@@ -30,12 +30,12 @@ public:
 	}
 	TemplateT const T& GetProperty(const std::string& propertyName) const {
 		auto element = mDecl[propertyName]; 
-		BOOST_ASSERT(element && DetectCbElementType(T()) == element->Type);
+		BOOST_ASSERT(element && CbDeclElement::DetectType(T()) == element->Type1);
 		return mData.As<T, 1>(element->Offset);
 	}
 	template<> const BOOL& GetProperty<BOOL>(const std::string& propertyName) const {
 		auto element = mDecl[propertyName];
-		BOOST_ASSERT(element && DetectCbElementType(bool()) == element->Type);
+		BOOST_ASSERT(element && CbDeclElement::DetectType(bool()) == element->Type1);
 		return mData.As<BOOL, 1>(element->Offset);
 	}
 	TemplateT T& GetProperty(const std::string& propertyName) {
@@ -163,7 +163,7 @@ class UniformParametersBuilder
 {
 public:
 	UniformParametersBuilder(UniformParameters& result) :mResult(result) {}
-	void AddParameter(const std::string& propertyName, CbElementType type, size_t size, size_t count, size_t offset, const std::string& defValue);
+	void AddParameter(const std::string& propertyName, CbDeclElement::Type type, size_t size, size_t count, size_t offset, const std::string& defValue);
 	std::string& ShortName() { return mResult.mShortName; }
 	size_t& Slot() { return mResult.mSlot; }
 	CBufferShareMode& ShareMode() { return mResult.mShareMode; }

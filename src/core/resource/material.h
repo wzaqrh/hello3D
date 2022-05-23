@@ -1,12 +1,11 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include "core/base/tpl/vector.h"
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/cppcoro.h"
 #include "core/base/declare_macros.h"
 #include "core/base/data.h"
-#include "core/base/base_type.h"
-#include "core/base/tpl/vector.h"
 #include "core/base/material_load_param.h"
 #include "core/rendersys/texture.h"
 #include "core/resource/resource.h"

@@ -88,7 +88,6 @@
     <ClInclude Include="..\include\OpenImageIO\varyingref.h" />
     <ClInclude Include="..\include\OpenImageIO\version.h" />
     <ClInclude Include="..\src\core\base\attribute_struct.h" />
-    <ClInclude Include="..\src\core\base\base_type.h" />
     <ClInclude Include="..\src\core\base\cppcoro.h" />
     <ClInclude Include="..\src\core\base\d3d.h" />
     <ClInclude Include="..\src\core\base\data.h" />
@@ -128,6 +127,15 @@
     <ClInclude Include="..\src\core\renderable\renderable_factory.h" />
     <ClInclude Include="..\src\core\renderable\skybox.h" />
     <ClInclude Include="..\src\core\renderable\sprite.h" />
+    <ClInclude Include="..\src\core\rendersys\base\blend_state.h" />
+    <ClInclude Include="..\src\core\rendersys\base\compare_func.h" />
+    <ClInclude Include="..\src\core\rendersys\base\cube_face.h" />
+    <ClInclude Include="..\src\core\rendersys\base\depth_state.h" />
+    <ClInclude Include="..\src\core\rendersys\base\hardware_memory_usage.h" />
+    <ClInclude Include="..\src\core\rendersys\base\primitive_topology.h" />
+    <ClInclude Include="..\src\core\rendersys\base\rasterizer_state.h" />
+    <ClInclude Include="..\src\core\rendersys\base\res_format.h" />
+    <ClInclude Include="..\src\core\rendersys\base_type.h" />
     <ClInclude Include="..\src\core\rendersys\blob.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\blob11.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\framebuffer11.h" />
@@ -137,30 +145,6 @@
     <ClInclude Include="..\src\core\rendersys\d3d11\program11.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h" />
     <ClInclude Include="..\src\core\rendersys\d3d11\texture11.h" />
-    <ClInclude Include="..\src\core\rendersys\d3d9\blob9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\framebuffer9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\hardware_buffer9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\input_layout9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\predeclare.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\program9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\render_system9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\src\core\rendersys\d3d9\texture9.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\framebuffer.h" />
     <ClInclude Include="..\src\core\rendersys\frame_buffer_bank.h" />
     <ClInclude Include="..\src\core\rendersys\hardware_buffer.h" />
@@ -219,27 +203,6 @@
     <ClCompile Include="..\src\core\rendersys\d3d11\program11.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\texture11.cpp" />
-    <ClCompile Include="..\src\core\rendersys\d3d9\blob9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\framebuffer9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\hardware_buffer9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\input_layout9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\program9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\render_system9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\core\rendersys\d3d9\texture9.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\src\core\rendersys\frame_buffer_bank.cpp" />
     <ClCompile Include="..\src\core\rendersys\hardware_buffer.cpp" />
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp" />

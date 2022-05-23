@@ -3,7 +3,6 @@
 #include "core/base/d3d.h"
 #include "core/base/macros.h"
 #include "core/base/debug.h"
-#include "core/base/rendersys_debug.h"
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_asset.h"
 #include "core/resource/material_factory.h"

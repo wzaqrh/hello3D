@@ -2,7 +2,7 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
-#include "core/base/base_type.h"
+//#include "core/base/base_type.h"
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
 #include "core/renderable/renderable_factory.h"

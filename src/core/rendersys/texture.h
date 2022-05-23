@@ -1,7 +1,8 @@
 #pragma once
-#include "core/rendersys/predeclare.h"
-#include "core/base/base_type.h"
 #include "core/base/tpl/vector.h"
+#include "core/rendersys/predeclare.h"
+#include "core/rendersys/base/res_format.h"
+#include "core/rendersys/base/hardware_memory_usage.h"
 #include "core/resource/resource.h"
 
 namespace mir {

@@ -1,15 +1,18 @@
 #pragma once
-#include "core/base/base_type.h"
+#include "core/rendersys/base/res_format.h"
 #include "core/rendersys/predeclare.h"
 #include "core/resource/resource.h"
 
 namespace mir {
 
-enum LayoutInputClass {
+enum LayoutInputClass 
+{
 	kLayoutInputPerVertexData = 0,
 	kLayoutInputPerInstanceData = 1
 };
-struct LayoutInputElement {
+
+struct LayoutInputElement 
+{
 	std::string SemanticName;
 	unsigned SemanticIndex;
 	ResourceFormat Format;

@@ -1,14 +1,13 @@
 #pragma once
-#include "core/rendersys/predeclare.h"
-#include "core/base/base_type.h"
 #include "core/base/tpl/vector.h"
+#include "core/rendersys/predeclare.h"
+#include "core/rendersys/base/compare_func.h"
 #include "core/resource/resource.h"
 
 namespace mir {
 
-#define SAMPLER_FILTER_MIP_LINEAR 0x01
-
-enum SamplerFilterModeMask {
+enum SamplerFilterModeMask 
+{
 	kSFMMBase = 0,
 	kSFMMCmp = 0x80,
 	kSFMMMinimum = 0x100,
@@ -19,7 +18,8 @@ enum SamplerFilterModeMask {
 	kSFMMLinear_Min = 0x10,
 };
 
-enum SamplerFilterMode {
+enum SamplerFilterMode 
+{
 	kSamplerFilterMinMagMipPoint = kSFMMBase,
 	kSamplerFilterMinMagPointMipLinear = kSFMMLinear_Mip,
 	kSamplerFilterMinPointMagLinearMipPoint = kSFMMLinear_Mag,
@@ -60,7 +60,9 @@ enum SamplerFilterMode {
 	kSamplerFilterMaximumMinMagMipLinear = kSamplerFilterMinMagMipLinear | kSFMMMaximum,
 	kSamplerFilterMaximumAnisotropic = kSamplerFilterAnisotropic | kSFMMMaximum
 };
-enum AddressMode {
+
+enum AddressMode 
+{
 	kAddressUnkown = 0,
 	kAddressWrap = 1,
 	kAddressMirror = 2,
@@ -68,7 +70,9 @@ enum AddressMode {
 	kAddressBorder = 4,
 	kAddressMirrorOnce = 5
 };
-struct SamplerDesc {
+
+struct SamplerDesc 
+{
 	static SamplerDesc Make(SamplerFilterMode filter, CompareFunc cmpFunc,
 		AddressMode addrU = kAddressWrap, AddressMode addrV = kAddressWrap, AddressMode addrW = kAddressWrap) {
 		return SamplerDesc{ filter, cmpFunc, addrU, addrV, addrW };
