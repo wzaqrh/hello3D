@@ -19,9 +19,14 @@ const ITexturePtr& RenderableSingleRenderOp::GetTexture() const
 
 Eigen::AlignedBox3f RenderableSingleRenderOp::GetWorldAABB() const
 {
-	Transform3fAffine t(GetTransform()->GetWorldMatrix());
-	Eigen::AlignedBox3f worldAABB = mAABB.transformed(t);
-	return worldAABB;
+	Eigen::AlignedBox3f bounds = mAABB;
+	if (!mAABB.isEmpty()) {
+		if (auto transform = this->GetTransform()) {
+			Transform3fAffine t(transform->GetWorldMatrix());
+			bounds = mAABB.transformed(t);
+		}
+	}
+	return bounds;
 }
 
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
