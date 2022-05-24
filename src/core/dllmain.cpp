@@ -31,6 +31,7 @@
 #pragma comment(lib, "OpenImageIO_d.lib")
 #pragma comment(lib, "OpenImageIO_Util_d.lib")
 #pragma comment(lib, "assimp.lib")
+#pragma comment(lib, "DevILd.lib")
 #else
 #pragma comment(lib, "cppcoro.lib")
 #pragma comment(lib, "OpenImageIO.lib")

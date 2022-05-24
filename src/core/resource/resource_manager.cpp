@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <OpenImageIO/imageio.h>
+#include "core/base/il_helper.h"
 #include "core/base/d3d.h"
 #include "core/base/input.h"
 #include "core/base/debug.h"
@@ -284,12 +285,12 @@ CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr 
 			return spec.format != OIIO::TypeUnknown;
 		};
 
-		std::vector<unsigned char> bytes(2048), bytes2(2048);
+		std::vector<unsigned char> bytes(1024);
 		size_t bytePos = 0;
 		std::vector<Data> vecData;
 		int width = 0, height = 0;
 		int faceCount = 0, mipCount = 0;
-		while (++faceCount) {
+		while (++faceCount <= 6) {
 			int mipPlus = 0;
 			while (get_spec_dimensions(spec, faceCount - 1, mipPlus++)) {
 				BOOST_ASSERT(spec.depth <= 1);
@@ -298,42 +299,82 @@ CoTask<bool> ResourceManager::_LoadTextureByFile(Launch launchMode, ITexturePtr 
 				const char* compression = nullptr;
 				spec.getattribute("compression", OIIO::TypeString, &compression);
 
+				int channels = spec.nchannels;
 				if (faceCount == 1 && mipPlus == 1) {
 					width  = spec.width;
 					height = spec.height;
 					if (format == kFormatUnknown) {
 						auto specfmt = spec.format;
 						BOOST_ASSERT(specfmt.basetype != OIIO::TypeDesc::UNKNOWN);
-						BOOST_ASSERT(specfmt.aggregate <= OIIO::TypeDesc::VEC4);
+						BOOST_ASSERT(specfmt.aggregate == OIIO::TypeDesc::SCALAR);
 						BOOST_ASSERT(specfmt.arraylen == 0);
 
+						ResourceBaseFormat baseFormat = kRBF_Unkown;
+						ResourceDataType dataType = kRDT_Max;
+						int bitsPerChannel = 0;
+						bool isSRGB = false;
+
+						static auto CalBaseFormat = [](int channels)
+						{
+							ResourceBaseFormat baseFormat = kRBF_Unkown;
+							switch (channels)
+							{
+							case 1: baseFormat = kRBF_R; break;
+							case 2: baseFormat = kRBF_RG; break;
+							case 3: baseFormat = kRBF_RGB; break;
+							case 4: baseFormat = kRBF_RGBA; break;
+							default: BOOST_ASSERT(false); break;
+							}
+							return baseFormat;
+						};
+						baseFormat = CalBaseFormat(spec.nchannels);
+
+						switch (specfmt.basetype)
+						{
+						case OIIO::TypeDesc::UINT8: dataType = kRDT_UNorm; bitsPerChannel = 8; break;
+						case OIIO::TypeDesc::INT8: dataType = kRDT_Int; bitsPerChannel = 8; break;
+						case OIIO::TypeDesc::UINT16: dataType = kRDT_UInt; bitsPerChannel = 16; break;
+						case OIIO::TypeDesc::INT16: dataType = kRDT_Int; bitsPerChannel = 16; break;
+						case OIIO::TypeDesc::UINT32: dataType = kRDT_UInt; bitsPerChannel = 32; break;
+						case OIIO::TypeDesc::INT32: dataType = kRDT_Int; bitsPerChannel = 32; break;
+						case OIIO::TypeDesc::HALF: dataType = kRDT_Float; bitsPerChannel = 16; break;
+						case OIIO::TypeDesc::FLOAT: dataType = kRDT_Float; bitsPerChannel = 32; break;
+						default: break;
+						}
+
+						format = MakeResFormat(baseFormat, dataType, bitsPerChannel, isSRGB);
+						if (format == kFormatUnknown && channels == 3) {
+							baseFormat = CalBaseFormat(++channels);
+							format = MakeResFormat(baseFormat, dataType, bitsPerChannel, isSRGB);
+						}
+						BOOST_ASSERT(format != kFormatUnknown);
 					}
 				}
 				
-				size_t imgSize = spec.image_bytes(true);
+				size_t imgSize = spec.image_bytes(true); BOOST_ASSERT(imgSize % spec.height == 0);
 				if (bytePos + imgSize > bytes.size())
 					bytes.resize(std::max(bytePos + imgSize, bytes.size() * 2));
-				inp->read_image(faceCount - 1, mipPlus - 1, 0, spec.nchannels, OIIO::TypeDesc::UNKNOWN, &bytes[bytePos]);
+				inp->read_image(faceCount - 1, mipPlus - 1, 0, channels, OIIO::TypeDesc::UNKNOWN, &bytes[bytePos]);
 
-				bytes2.resize(bytes.size());
-				inp->read_native_scanlines(faceCount - 1, mipPlus - 1, 0, spec.height, 0, &bytes2[bytePos]);
-
-				vecData.emplace_back(Data::Make(&bytes[bytePos], imgSize));
+				vecData.emplace_back(Data::Make((void*)bytePos, imgSize / spec.height));
 				
 				bytePos += imgSize;
 			}			
-			if (mipPlus == 1) 
+			if (mipPlus == 1)
 				break;
 			if (faceCount == 1) 
 				mipCount = mipPlus - 1;
 			BOOST_ASSERT(mipCount == mipPlus - 1);
 		}
 
+		for (auto& data : vecData)
+			data.Bytes = &bytes[(int)data.Bytes];
+
 		if (mipCount == 1 && autoGenMipmap)
 			mipCount = -1;
 
 		CoAwait SwitchToLaunchService(__LaunchSync__);
-		ret = mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &vecData[0]);
+		ret = mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount - 1), mipCount, &vecData[0]);
 
 		inp->close();
 	}//if fd

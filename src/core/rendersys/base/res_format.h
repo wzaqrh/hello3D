@@ -4,30 +4,31 @@
 
 namespace mir {
 
-enum ResourceBaseType 
+enum ResourceBaseFormat
 {
-	kRBT_Unkown,
-	kRBT_Typeless,
-	kRBT_Float,
-	kRBT_UInt,
-	kRBT_Int,
-	kRBT_UNorm,
-	kRBT_SNorm,
-	kRBT_Max
+	kRBF_Unkown,
+	kRBF_RGBA,
+	kRBF_RGB,
+	kRBF_RG,
+	kRBF_R,
+	kRBF_A,
+	kRBF_D,
+	kRBF_BGRA,
+	kRBF_BGRX,
+	kRBF_DS,
+	kRBF_Max
 };
 
-enum ResourceChannelSeqType 
+enum ResourceDataType 
 {
-	kRCST_Unkown,
-	kRCST_RGBA,
-	kRCST_RGB,
-	kRCST_RG,
-	kRCST_R,
-	kRCST_A,
-	kRCST_BGRA,
-	kRCST_BGRX,
-	kRCST_DS,
-	kRCST_Max
+	kRDT_Unkown,
+	kRDT_Typeless,
+	kRDT_Float,
+	kRDT_UInt,
+	kRDT_Int,
+	kRDT_UNorm,
+	kRDT_SNorm,
+	kRDT_Max
 };
 
 enum ResourceFormat 
@@ -112,10 +113,6 @@ enum ResourceFormat
 	kFormatR8SInt = 64,
 
 	kFormatA8UNorm = 65,
-	kFormatR1UNorm = 66,
-	kFormatR9G9B9E5ShaderExp = 67,
-	kFormatR8G8B8G8UNorm = 68,
-	kFormatG8R8G8B8UNorm = 69,
 
 	kFormatBC1Typeless = 70,
 	kFormatBC1UNorm = 71,
@@ -149,5 +146,7 @@ enum ResourceFormat
 	kFormatBC7UNormSRgb = 99,
 };
 #define MakeResFormats(...) std::vector<ResourceFormat>{ ##__VA_ARGS__ }
+
+ResourceFormat MakeResFormat(ResourceBaseFormat baseFormat, ResourceDataType dataType, int bitsPerChannel, bool isSRGB);
 
 }

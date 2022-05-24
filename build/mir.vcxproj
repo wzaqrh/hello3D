@@ -196,6 +196,7 @@
     <ClCompile Include="..\src\core\renderable\renderable_factory.cpp" />
     <ClCompile Include="..\src\core\renderable\skybox.cpp" />
     <ClCompile Include="..\src\core\renderable\sprite.cpp" />
+    <ClCompile Include="..\src\core\rendersys\base\res_format.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\blob11.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\framebuffer11.cpp" />
     <ClCompile Include="..\src\core\rendersys\d3d11\hardware_buffer11.cpp" />

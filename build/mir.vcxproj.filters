@@ -564,6 +564,9 @@
     <ClCompile Include="..\src\core\renderable\paint3d.cpp">
       <Filter>src\core\renderable</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\base\res_format.cpp">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -602,9 +605,6 @@
     <Filter Include="src\core\scene">
       <UniqueIdentifier>{095f3967-7dbc-4ef5-9595-cf51fe1e8384}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\rendersys\d3d9">
-      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\rendersys\interface">
       <UniqueIdentifier>{9bdcc5a6-7e83-4a77-840a-cc086231b1e3}</UniqueIdentifier>
     </Filter>
@@ -637,6 +637,9 @@
     </Filter>
     <Filter Include="src\thirdparty\OpenImageIO\detail">
       <UniqueIdentifier>{36261bb4-2bd1-4a26-a168-e0b295e69ad3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\rendersys\d3d9">
+      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\rendersys\base">
       <UniqueIdentifier>{7c715055-6b6a-4abb-bd68-4c2ee860558c}</UniqueIdentifier>
