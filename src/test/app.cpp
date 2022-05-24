@@ -141,11 +141,13 @@ void App::CleanUp()
 int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 {
 	auto mainLoop = [&]()->CoTask<bool> {
+		auto time = std::make_shared<mir::debug::TimeProfile>("App.InitScene");
+
 		if (! CoAwait this->InitContext(hInstance, hWnd))
 			CoReturn false;
 
 		auto initScene = this->InitScene();
-		auto procMsg = [this,&initScene]()->CoTask<bool> {
+		auto procMsg = [this,&initScene,&time]()->CoTask<bool> {
 			MSG msg = { 0 };
 			while (WM_QUIT != msg.message) {
 				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -153,8 +155,10 @@ int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 					DispatchMessage(&msg);
 				}
 				else {
-					if (initScene.is_ready())
+					if (initScene.is_ready()) {
+						time = nullptr;
 						CoAwait this->Render();
+					}
 					else
 						mContext->ProcessPendingEvent();
 				}

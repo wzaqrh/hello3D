@@ -15,6 +15,7 @@
 #else
 #pragma comment(lib, "cppcoro.lib")
 #endif
+#pragma comment(lib, "winmm.lib")
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pHandle);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

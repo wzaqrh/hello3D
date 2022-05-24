@@ -18,6 +18,9 @@ DECLARE_CLASS(Technique);
 DECLARE_CLASS(Shader);
 DECLARE_CLASS(Material);
 DECLARE_CLASS(MaterialFactory);
+DECLARE_CLASS(ProgramFactory);
+DECLARE_CLASS(TextureFactory);
+DECLARE_CLASS(DeviceResFactory);
 
 DECLARE_CLASS(AssimpMesh);
 DECLARE_CLASS(AiNode);

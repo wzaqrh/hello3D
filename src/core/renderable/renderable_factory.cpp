@@ -12,6 +12,7 @@
 #include "core/scene/camera.h"
 #include "core/resource/material_name.h"
 #include "core/resource/material_factory.h"
+#include "core/resource/texture_factory.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/resource_manager.h"
 

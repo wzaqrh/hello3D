@@ -6,47 +6,29 @@
 #include "core/resource/resource_manager.h"
 #include "core/resource/material_asset.h"
 #include "core/resource/material_factory.h"
+#include "core/resource/texture_factory.h"
+#include "core/resource/program_factory.h"
 
 namespace mir {
 namespace res {
 
-MaterialFactory::MaterialFactory()
+MaterialFactory::MaterialFactory(ResourceManager& mResMng)
+	:mResMng(mResMng)
 {
 	mMatAssetMng = CreateInstance<mat_asset::MaterialAssetManager>();
 	mFrameGpuParameters = CreateInstance<GpuParameters>();
 }
 
-const GpuParametersPtr& MaterialFactory::GetFrameGpuParameters() const { 
-	tpl::AutoLock lck(mParametersCache._GetLock());
+const GpuParametersPtr& MaterialFactory::GetFrameGpuParameters() const 
+{ 
+	tpl::AutoLock lck(mMaterialCache._GetLock());
 	return mFrameGpuParameters; 
 }
 
-GpuParameters::Element MaterialFactory::AddToParametersCache(Launch launchMode, ResourceManager& resMng, const UniformParameters& parameters) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateShaderByShaderNode(ShaderPtr shader, Launch lchMode, mat_asset::ShaderNode shaderNode) ThreadSafe
 {
-	const std::string& uniformName = parameters.GetName();
-	if (!uniformName.empty()) {
-		return mParametersCache.GetOrAdd(uniformName, [&]() {
-			GpuParameters::Element result;
-			result.Parameters = CreateInstance<UniformParameters>(parameters);
-			result.CBuffer = result.Parameters->CreateConstBuffer(launchMode, resMng, IF_AND_OR(parameters.IsReadOnly(), kHWUsageImmutable, kHWUsageDynamic));
-
-			if (parameters.GetShareMode() == kCbSharePerFrame)
-				mFrameGpuParameters->AddElement(result);
-			return result;
-		});
-	}
-	else {
-		GpuParameters::Element result;
-		result.Parameters = CreateInstance<UniformParameters>(parameters);
-		result.CBuffer = result.Parameters->CreateConstBuffer(launchMode, resMng, IF_AND_OR(parameters.IsReadOnly(), kHWUsageImmutable, kHWUsageDynamic));
-		return result;
-	}
-}
-CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader, ResourceManager& resMng, mat_asset::ShaderNode shaderNode) ThreadSafe
-{
-	COROUTINE_VARIABLES_4(launchMode, resMng, shaderNode, shader);
-	shader->SetLoading();
-	//CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+	//shader->SetLoading(); CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+	COROUTINE_VARIABLES_3(lchMode, shaderNode, shader);
 	std::vector<CoTask<bool>> tasks;
 
 	for (const auto& categNode : shaderNode) {
@@ -60,13 +42,13 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 				curTech->AddPass(curPass);
 				curPass->mProperty = passNode.Property;
 
-				tasks.push_back([&resMng,launchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
-					if (!CoAwait resMng.CreateProgram(pass->mProgram, launchMode, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
+				tasks.push_back([this, lchMode](PassPtr pass, const mat_asset::ProgramNode& programNode)->CoTask<bool> {
+					if (!CoAwait mResMng.CreateProgram(pass->mProgram, lchMode, programNode.VertexSCD.SourcePath, programNode.VertexSCD, programNode.PixelSCD))
 						CoReturn false;
 
 					BOOST_ASSERT(programNode.Attrs.Count() >= 1);
 					if (programNode.Attrs.Count() == 1) {
-						pass->mInputLayout = resMng.CreateLayout(launchMode, pass->mProgram, programNode.Attrs[0].Layout);
+						pass->mInputLayout = mResMng.CreateLayout(lchMode, pass->mProgram, programNode.Attrs[0].Layout);
 					}
 					else if (programNode.Attrs.Count() > 1) {
 						auto layout_compose = programNode.Attrs[0].Layout;
@@ -76,7 +58,7 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 								layout_compose.push_back(element_slot);
 								layout_compose.back().InputSlot = slot;
 							}
-							pass->mInputLayout = resMng.CreateLayout(launchMode, pass->mProgram, layout_compose);
+							pass->mInputLayout = mResMng.CreateLayout(lchMode, pass->mProgram, layout_compose);
 							++slot;
 						}
 					}
@@ -84,7 +66,7 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 				}(curPass, passProgram));
 
 				for (const auto& sampler : passProgram.Samplers)
-					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, resMng.CreateSampler(launchMode, sampler)));
+					curPass->AddSampler(IF_AND_NULL(sampler.CmpFunc != kCompareUnkown, mResMng.CreateSampler(lchMode, sampler)));
 			}//for techniqueNode.Passes
 		}//for shaderNode.SubShaders
 	}//for shaderNode.Categories
@@ -94,15 +76,15 @@ CoTask<bool> MaterialFactory::DoCreateShader(Launch launchMode, ShaderPtr shader
 	shader->SetLoaded();
 	CoReturn shader->IsLoaded();
 }
-CoTask<bool> MaterialFactory::CreateShader(Launch launchMode, ShaderPtr& shader, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe 
+CoTask<bool> MaterialFactory::CreateShader(ShaderPtr& shader, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe 
 {
-	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, shader);
-	//CoAwait resMng.SwitchToLaunchService(__LaunchAsync__);
+	//CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
+	COROUTINE_VARIABLES_3(lchMode, loadParam, shader);
 
 	shader = IF_OR(shader, CreateInstance<Shader>());
 	mat_asset::ShaderNode shaderNode;
 	if (mMatAssetMng->GetShaderNode(loadParam, shaderNode)) {
-		CoAwait DoCreateShader(launchMode, shader, resMng, std::move(shaderNode));
+		CoAwait this->DoCreateShaderByShaderNode(shader, lchMode, std::move(shaderNode));
 	}
 	else {
 		shader->SetLoaded(false);
@@ -110,17 +92,35 @@ CoTask<bool> MaterialFactory::CreateShader(Launch launchMode, ShaderPtr& shader,
 	CoReturn shader->IsLoaded();
 }
 
-CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr material, ResourceManager& resMng, mat_asset::MaterialNode materialNode) ThreadSafe
+GpuParameters::Element MaterialFactory::DoCreateGpuParameterElement(Launch lchMode, const UniformParameters& parameters)  ThreadSafe
 {
-	COROUTINE_VARIABLES_4(launchMode, resMng, materialNode, material);
-	material->SetLoading();
-	//CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+	GpuParameters::Element result;
+	result.Parameters = CreateInstance<UniformParameters>(parameters);
+	result.CBuffer = result.Parameters->CreateConstBuffer(lchMode, mResMng, IF_AND_OR(parameters.IsReadOnly(), kHWUsageImmutable, kHWUsageDynamic));
+
+	if (parameters.GetShareMode() == kCbSharePerFrame) {
+		tpl::AutoLock lck(mMaterialCache._GetLock());
+		const auto& uniformName = parameters.GetName();
+		BOOST_ASSERT(! uniformName.empty());
+		auto iter = mParametersByUniformName.find(uniformName);
+		if (iter == mParametersByUniformName.end()) {
+			mParametersByUniformName.insert(std::make_pair(uniformName, result));
+			mFrameGpuParameters->AddElement(result);
+		}
+	}
+	
+	return result;
+}
+CoTask<bool> MaterialFactory::DoCreateMaterialByMtlNode(MaterialPtr material, Launch lchMode, mat_asset::MaterialNode materialNode) ThreadSafe
+{
+	//material->SetLoading(); CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+	COROUTINE_VARIABLES_3(lchMode, materialNode, material);
 
 	std::vector<CoTask<bool>> tasks;
 	{
 		material->mProperty = materialNode.Property;
 		material->mShader = CreateInstance<Shader>();
-		tasks.push_back(DoCreateShader(launchMode, material->mShader, resMng, materialNode.Shader));
+		tasks.push_back(DoCreateShaderByShaderNode(material->mShader, lchMode, materialNode.Shader));
 		material->mLoadParam = materialNode.LoadParam;
 
 		boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.Property->DependSrc.Material.FilePath)); assetPath.remove_filename();
@@ -131,7 +131,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 			if (boost::filesystem::is_regular_file(imagePath)) {
 				if (iter.second.Slot >= material->mTextures.Count())
 					material->mTextures.Resize(iter.second.Slot + 1);
-				tasks.push_back(resMng.CreateTextureByFile(material->mTextures[iter.second.Slot], launchMode, imagePath.string()));
+				tasks.push_back(mResMng.CreateTextureByFile(material->mTextures[iter.second.Slot], lchMode, imagePath.string()));
 			}
 		}
 	}
@@ -145,24 +145,22 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 		const auto& categProgram = categNode.Program;
 		for (const auto& uniform : categProgram.Uniforms) {
 			if (uniform.IsValid()) {
-				GpuParameters::Element element = AddToParametersCache(launchMode, resMng, uniform);
+				GpuParameters::Element element = DoCreateGpuParameterElement(lchMode, uniform);
 				switch (element.GetShareMode())
 				{
 				case kCbSharePerInstance: {
-					GpuParameters::Element newelem = element.Clone(launchMode, resMng);
+					auto& newelem = element;
 					for (const auto& iter : materialNode.Property->UniformByName)
 						newelem.Parameters->SetPropertyByString(iter.first, iter.second);
 					material->mGpuParametersByShareType[kCbSharePerInstance]->AddElement(newelem);
 				}break;
 				case kCbSharePerMaterial: {
-					GpuParameters::Element newelem;
 					auto find_share = matParamCache.find(uniform.GetName());
 					if (find_share != matParamCache.end()) {
-						newelem = find_share->second;
+						auto& newelem = find_share->second;
 					}
 					else {
-						newelem = element.Clone(launchMode, resMng);
-
+						auto& newelem = element;
 						for (const auto& iter : materialNode.Property->UniformByName)
 							newelem.Parameters->SetPropertyByString(iter.first, iter.second);
 						material->mGpuParametersByShareType[kCbSharePerMaterial]->AddElement(newelem);
@@ -179,36 +177,69 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(Launch launchMode, MaterialPtr ma
 	material->SetLoaded(material->mShader->IsLoaded());
 	CoReturn material->IsLoaded();
 }
-CoTask<bool> MaterialFactory::CreateMaterial(Launch launchMode, MaterialPtr& material, ResourceManager& resMng, MaterialLoadParam loadParam) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe
 {
-	COROUTINE_VARIABLES_4(launchMode, resMng, loadParam, material);
-	//CoAwait resMng.SwitchToLaunchService(__LaunchAsync__);
+	//CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
+	COROUTINE_VARIABLES_3(lchMode, loadParam, material);
 
 	material = IF_OR(material, CreateInstance<Material>());
 	mat_asset::MaterialNode materialNode;
 	if (mMatAssetMng->GetMaterialNode(loadParam, materialNode)) {
 		TIME_PROFILE((boost::format("\tmatFac.CreateMaterial (name:%1% variant:%2%)") %loadParam.GetShaderName() %loadParam.GetVariantDesc()).str());
-		CoAwait DoCreateMaterial(launchMode, material, resMng, std::move(materialNode));
+		CoAwait DoCreateMaterialByMtlNode(material, lchMode, std::move(materialNode));
 	}
 	else {
 		material->SetLoaded(false);
 	}
 	CoReturn material->IsLoaded();
 }
+CoTask<bool> MaterialFactory::CreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe
+{
+	COROUTINE_VARIABLES_2(lchMode, loadParam);
+	//CoAwait SwitchToLaunchService(loadParam);
+
+	bool resNeedLoad = false;
+	material = mMaterialCache.GetOrAdd(loadParam, [&]() {
+		auto material = CreateInstance<res::Material>();
+		DEBUG_SET_RES_PATH(material, (boost::format("name:%1% variant:%2%") %loadParam.GetShaderName() %loadParam.GetVariantDesc()).str());
+		DEBUG_SET_CALL(material, lchMode);
+		resNeedLoad = true;
+		return material;
+	});
+	if (resNeedLoad) {
+		CoAwait this->DoCreateMaterial(material, lchMode, std::move(loadParam));
+	}
+	else {
+		CoAwait mResMng.WaitResComplete(material);
+	}
+	CoReturn material->IsLoaded();
+}
+CoTask<bool> MaterialFactory::CreateMaterial(res::MaterialInstance& mtlInst, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe
+{
+	MaterialPtr material;
+	CoAwait CreateMaterial(material, lchMode, loadParam);
+	mtlInst = material->CreateInstance(lchMode, mResMng);
+	CoReturn mtlInst->IsLoaded();
+}
 
 bool MaterialFactory::PurgeOutOfDates() ThreadSafe
 {
-	bool result = mMatAssetMng->PurgeOutOfDates();
-	if (result) {
-		tpl::AutoLock lck(mParametersCache._GetLock());
-		mParametersCache._Clear();
-		mFrameGpuParameters = CreateInstance<GpuParameters>();
+	if (mMatAssetMng->PurgeOutOfDates()) {
+		PurgeAll();
+		return true;
 	}
-	return result;
+	else return false;
+}
+void MaterialFactory::PurgeAll() ThreadSafe
+{
+	tpl::AutoLock lck(mMaterialCache._GetLock());
+	mMaterialCache._Clear();
+	mParametersByUniformName.clear();
+	mFrameGpuParameters = CreateInstance<GpuParameters>();
 }
 
 //Clone Functions
-PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, const Pass& proto)
+PassPtr MaterialFactory::ClonePass(Launch lchMode, const Pass& proto)
 {
 	PassPtr result = CreateInstance<Pass>();
 	result->mProperty = proto.mProperty;
@@ -221,26 +252,27 @@ PassPtr MaterialFactory::ClonePass(Launch launchMode, ResourceManager& resMng, c
 	result->SetLoaded();
 	return result;
 }
-TechniquePtr MaterialFactory::CloneTechnique(Launch launchMode, ResourceManager& resMng, const Technique& proto)
+TechniquePtr MaterialFactory::CloneTechnique(Launch lchMode, const Technique& proto)
 {
 	TechniquePtr result = CreateInstance<Technique>();
 	for (const auto& protoPass : proto)
-		result->AddPass(this->ClonePass(launchMode, resMng, *protoPass));
+		result->AddPass(this->ClonePass(lchMode, *protoPass));
 
 	result->SetLoaded();
 	return result;
 }
-ShaderPtr MaterialFactory::CloneShader(Launch launchMode, ResourceManager& resMng, const Shader& proto)
+ShaderPtr MaterialFactory::CloneShader(Launch lchMode, const Shader& proto)
 {
 	BOOST_ASSERT(proto.IsLoaded());
 
 	ShaderPtr result = CreateInstance<Shader>();
 	for (const auto& protoTech : proto)
-		result->AddTechnique(this->CloneTechnique(launchMode, resMng, *protoTech));
+		result->AddTechnique(this->CloneTechnique(lchMode, *protoTech));
 	result->mCurTechIdx = proto.mCurTechIdx;
 
 	result->SetLoaded();
 	return result;
 }
+
 }
 }

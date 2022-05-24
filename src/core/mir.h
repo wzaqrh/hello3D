@@ -5,10 +5,11 @@
 #include "core/base/launch.h"
 #include "core/predeclare.h"
 #include "core/rendersys/render_system.h"
+#include "core/rendersys/render_pipeline.h"
 #include "core/renderable/renderable_factory.h"
+#include "core/resource/texture_factory.h"
 #include "core/resource/resource_manager.h"
 #include "core/scene/scene_manager.h"
-#include "core/rendersys/render_pipeline.h"
 
 namespace mir {
 
@@ -39,8 +40,6 @@ private:
 	Launch mLaunchMode;
 	Configure mConfigure;
 	RenderSystemPtr mRenderSys;
-	res::MaterialFactoryPtr mMaterialFac;
-	res::AiResourceFactoryPtr mAiResourceFac;
 	std::shared_ptr<cppcoro::io_service> mIoService;
 	ResourceManagerPtr mResourceMng;
 	RenderPipelinePtr mRenderPipe;

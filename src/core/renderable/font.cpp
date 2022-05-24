@@ -5,7 +5,7 @@ namespace mir {
 
 /********** FontTexture **********/
 FontTexture::FontTexture(ResourceManager& resourceMng, Eigen::Vector2i size)
-	:mResourceMng(resourceMng)
+:mResourceMng(resourceMng)
 {
 	mWidth = size.x();
 	mHeight = size.y();

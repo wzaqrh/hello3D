@@ -5,13 +5,14 @@
 namespace mir {
 namespace tpl {
 
-#define ATOMIC_LOCK(LCK) for (bool expected = false; !LCK.compare_exchange_strong(expected, true, std::memory_order_acq_rel); expected = true);
-#define ATOMIC_UNLOCK(LCK) LCK.store(false, std::memory_order_release);
+#define ATOMIC_LOCK(LCK) while(LCK.test_and_set(std::memory_order_acquire)) ;
+#define ATOMIC_UNLOCK(LCK) LCK.clear(std::memory_order_release)
+#define ATOMIC_IS_LOCKED(LCK) LCK.test_and_set(std::memory_order_acquire)
 
 struct AutoLock {
-	AutoLock(std::atomic<bool>& lock) :mLock(lock) { ATOMIC_LOCK(mLock); }
+	AutoLock(std::atomic_flag& lock) :mLock(lock) { ATOMIC_LOCK(mLock); }
 	~AutoLock() { ATOMIC_UNLOCK(mLock); }
-	std::atomic<bool>& mLock;
+	std::atomic_flag& mLock;
 };
 
 template<class KeyType, class ValueType> class AtomicMap {
@@ -33,20 +34,14 @@ public:
 	void AddOrSet(const_key_reference key, const_reference value) {
 		ATOMIC_LOCK(mLock);
 		auto iter = mDic.find(key);
-		if (iter != mDic.end()) {
-			iter->second = value;
-		}
-		else {
-			mDic.insert(std::make_pair(key, value));
-		}
+		if (iter != mDic.end()) iter->second = value;
+		else mDic.insert(std::make_pair(key, value));
 		ATOMIC_UNLOCK(mLock);
 	}
 	template<typename CreateValueFunc> void GetOrAdd(const_key_reference key, CreateValueFunc fn, reference result) {
 		ATOMIC_LOCK(mLock);
 		auto iter = mDic.find(key);
-		if (iter != mDic.end()) {
-			result = iter->second;
-		}
+		if (iter != mDic.end()) result = iter->second;
 		else {
 			result = fn();
 			mDic.insert(std::make_pair(key, result));
@@ -63,12 +58,8 @@ public:
 		value_type result;
 		ATOMIC_LOCK(mLock);
 		auto iter = mDic.find(key);
-		if (iter != mDic.end()) {
-			result = iter->second;
-		}
-		else {
-			result = value_type();
-		}
+		if (iter != mDic.end()) result = iter->second;
+		else result = value_type();
 		ATOMIC_UNLOCK(mLock);
 		return std::move(result);
 	}
@@ -78,10 +69,11 @@ public:
 	void _Unlock() { ATOMIC_UNLOCK(mLock); }
 	void _Clear() { mDic.clear(); }
 	std::map<KeyType, ValueType>& _GetDic() { return mDic; }
-	std::atomic<bool>& _GetLock() const { return mLock; }
+	std::atomic_flag& _GetLock() const { return mLock; }
+	bool _IsLocked() const { return ATOMIC_IS_LOCKED(mLock); }
 private:
 	std::map<KeyType, ValueType> mDic;
-	mutable std::atomic<bool> mLock = false;
+	mutable std::atomic_flag mLock = ATOMIC_FLAG_INIT;
 };
 
 }

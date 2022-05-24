@@ -1,4 +1,5 @@
 #include "core/mir.h"
+#include "core/base/debug.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d9/render_system9.h"
 #include "core/resource/material_factory.h"
@@ -16,6 +17,7 @@ Mir::~Mir()
 {}
 
 CoTask<bool> Mir::Initialize(HWND hWnd) {
+	TIME_PROFILE("Mir.Initialize");
 #if 0
 	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<TRenderSystem9>());
 #else
@@ -26,9 +28,7 @@ CoTask<bool> Mir::Initialize(HWND hWnd) {
 		CoReturn false;
 	}
 
-	mMaterialFac = CreateInstance<res::MaterialFactory>();
-	mAiResourceFac = CreateInstance<res::AiResourceFactory>();
-	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, *mMaterialFac, *mAiResourceFac, mIoService);
+	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, mIoService);
 	
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng, mConfigure);
 	CoAwait mRenderPipe->Initialize(*mResourceMng);
@@ -41,7 +41,6 @@ CoTask<bool> Mir::Initialize(HWND hWnd) {
 void Mir::Dispose() {
 	if (mRenderSys) {
 		mRenderableFac = nullptr;
-		mMaterialFac = nullptr;
 		mSceneMng = nullptr;
 		
 		mResourceMng->Dispose();

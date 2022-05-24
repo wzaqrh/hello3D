@@ -16,12 +16,14 @@
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <unordered_map>
+#include "core/base/debug.h"
+#include "core/base/macros.h"
+#include "core/resource/assimp_factory.h"
 #include "core/resource/assimp_resource.h"
 #include "core/resource/material_name.h"
 #include "core/resource/material.h"
+#include "core/resource/material_factory.h"
 #include "core/resource/resource_manager.h"
-#include "core/base/debug.h"
-#include "core/base/macros.h"
 
 #define VEC_ASSIGN(DST, SRC) static_assert(sizeof(DST) == sizeof(SRC)); memcpy(DST.data(), &SRC, sizeof(SRC))
 #define VEC_ASSIGN1(DST, SRC, SIZE) static_assert(sizeof(DST) == SIZE); memcpy(DST.data(), &SRC, SIZE)
@@ -70,8 +72,8 @@ private:
 
 class AiSceneLoader {
 public:
-	AiSceneLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
-		: mLaunchMode(launchMode), mResMng(resMng), mAsset(*asset), mResult(asset) 
+	AiSceneLoader(Launch lchMode, ResourceManager& resMng, AiScenePtr asset)
+		: mLaunchMode(lchMode), mResMng(resMng), mAsset(*asset), mResult(asset) 
 	{}
 	~AiSceneLoader() {
 		delete mAssetImporter;
@@ -294,8 +296,8 @@ typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** ObjLoader **********/
 class AiSceneObjLoader {
 public:
-	AiSceneObjLoader(Launch launchMode, ResourceManager& resMng, AiScenePtr asset)
-		: mLaunchMode(launchMode), mResMng(resMng), mAsset(*asset), mResult(asset)
+	AiSceneObjLoader(Launch lchMode, ResourceManager& resMng, AiScenePtr asset)
+		: mLaunchMode(lchMode), mResMng(resMng), mAsset(*asset), mResult(asset)
 	{}
 
 	TemplateArgs CoTask<bool> Execute(T &&...args) {
@@ -491,22 +493,49 @@ private:
 typedef std::shared_ptr<AiSceneObjLoader> AiSceneObjLoaderPtr;
 
 /********** AiAssetManager **********/
-CoTask<bool> AiResourceFactory::CreateAiScene(Launch launchMode, AiScenePtr& scene, ResourceManager& resMng, std::string assetPath, std::string redirectRes) ThreadSafe
+AiResourceFactory::AiResourceFactory(ResourceManager& resMng)
+: mResMng(resMng)
 {
-	COROUTINE_VARIABLES_5(launchMode, scene, resMng, assetPath, redirectRes);
-	//CoAwait mResourceMng.SwitchToLaunchService(launchMode)
-	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") %assetPath %redirectRes).str());
+}
+
+CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMode, std::string assetPath, std::string redirectRes) ThreadSafe
+{
+	//CoAwait mResourceMng.SwitchToLaunchService(lchMode)
+	COROUTINE_VARIABLES_4(lchMode, scene, assetPath, redirectRes);
+	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") % assetPath % redirectRes).str());
 
 	scene = IF_OR(scene, CreateInstance<AiScene>());
 	if (boost::filesystem::path(assetPath).extension() != ".obj") {
-		auto loader = CreateInstance<AiSceneLoader>(launchMode, resMng, scene);
+		auto loader = CreateInstance<AiSceneLoader>(lchMode, mResMng, scene);
 		CoAwait loader->Execute(assetPath, redirectRes);
 	}
 	else {
-		auto loader = CreateInstance<AiSceneObjLoader>(launchMode, resMng, scene);
+		auto loader = CreateInstance<AiSceneObjLoader>(lchMode, mResMng, scene);
 		CoAwait loader->Execute(assetPath, redirectRes);
 	}
 	CoReturn scene->IsLoaded();
+}
+CoTask<bool> AiResourceFactory::CreateAiScene(AiScenePtr& aiScene, Launch lchMode, std::string assetPath, std::string redirectRes) ThreadSafe
+{
+	//CoAwait SwitchToLaunchService(lchMode);
+	COROUTINE_VARIABLES_3(lchMode, assetPath, redirectRes);
+
+	AiResourceKey key{ assetPath, redirectRes };
+	bool resNeedLoad = false;
+	aiScene = mAiSceneByKey.GetOrAdd(key, [&]() {
+		auto aiScene = CreateInstance<res::AiScene>();
+		DEBUG_SET_RES_PATH(aiScene, (boost::format("path:%1%, redirect:%2%") % assetPath % redirectRes).str());
+		DEBUG_SET_CALL(aiScene, lchMode);
+		resNeedLoad = true;
+		return aiScene;
+	});
+	if (resNeedLoad) {
+		CoAwait this->DoCreateAiScene(aiScene, lchMode, std::move(assetPath), std::move(redirectRes));
+	}
+	else {
+		CoAwait mResMng.WaitResComplete(aiScene);
+	}
+	CoReturn aiScene->IsLoaded();
 }
 
 }

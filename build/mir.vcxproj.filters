@@ -421,6 +421,18 @@
     <ClInclude Include="..\src\core\rendersys\base\compare_func.h">
       <Filter>src\core\rendersys\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\resource\program_factory.h">
+      <Filter>src\core\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\texture_factory.h">
+      <Filter>src\core\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\assimp_factory.h">
+      <Filter>src\core\resource\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\device_res_factory.h">
+      <Filter>src\core\resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -473,9 +485,6 @@
     </ClCompile>
     <ClCompile Include="..\src\core\resource\material.cpp">
       <Filter>src\core\resource\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\resource\assimp_resource.cpp">
-      <Filter>src\core\resource\assimp</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\resource\assimp_mesh.cpp">
       <Filter>src\core\resource\assimp</Filter>
@@ -566,6 +575,15 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\base\res_format.cpp">
       <Filter>src\core\rendersys\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\program_factory.cpp">
+      <Filter>src\core\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\texture_factory.cpp">
+      <Filter>src\core\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\assimp_factory.cpp">
+      <Filter>src\core\resource\assimp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

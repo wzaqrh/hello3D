@@ -92,11 +92,5 @@ public:
 	std::vector<AiNodePtr> mNodes;
 };
 
-class AiResourceFactory {
-public:
-	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	CoTask<bool> CreateAiScene(Launch launchMode, AiScenePtr& aiScene, ResourceManager& resMng, std::string assetPath, std::string redirectRes) ThreadSafe;
-};
-
 }
 }

@@ -8,6 +8,7 @@
 #include "core/scene/transform.h"
 #include "core/renderable/assimp_model.h"
 #include "core/resource/resource_manager.h"
+#include "core/resource/assimp_factory.h"
 
 namespace mir {
 namespace rend {
