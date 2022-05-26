@@ -28,16 +28,18 @@
 #pragma comment(lib, "freetype.lib")
 #ifdef _DEBUG
 #pragma comment(lib, "cppcorod.lib")
+#pragma comment(lib, "DevILd.lib")
 #pragma comment(lib, "OpenImageIO_d.lib")
 #pragma comment(lib, "OpenImageIO_Util_d.lib")
-#pragma comment(lib, "assimp.lib")
-#pragma comment(lib, "DevILd.lib")
+#pragma comment(lib, "FreeImagePlusd.lib")
 #else
 #pragma comment(lib, "cppcoro.lib")
+#pragma comment(lib, "DevIL.lib")
 #pragma comment(lib, "OpenImageIO.lib")
 #pragma comment(lib, "OpenImageIO_Util.lib")
-#pragma comment(lib, "assimp.lib")
+#pragma comment(lib, "FreeImagePlus.lib")
 #endif
+#pragma comment(lib, "assimp.lib")
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

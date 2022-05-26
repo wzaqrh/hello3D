@@ -8,3 +8,5 @@
 #define IF_OR(COND, OR)				IF_AND_OR(COND, COND, OR)
 
 #define VECTOR_AT_OR_NULL(VECTOR, POS) IF_AND_OR(POS < VECTOR.size(), VECTOR[POS], nullptr)
+
+#define FLOOR_DIV(A, B) ((A + B -1) / B)

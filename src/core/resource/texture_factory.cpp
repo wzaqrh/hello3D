@@ -1,30 +1,247 @@
 #include <boost/assert.hpp>
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
+#include <boost/filesystem.hpp>
+#include <gli/gli.hpp>
 #include <OpenImageIO/imageio.h>
+#include <FreeImage/FreeImagePlus.h>
 #include "core/base/il_helper.h"
+#include "core/base/macros.h"
 #include "core/base/debug.h"
 #include "core/resource/texture_factory.h"
 #include "core/resource/resource_manager.h"
 
-#define USE_OIIO
+//#define USE_OIIO
+#define USE_FREE_IMAGE
 
 namespace mir {
 namespace res {
 
 TextureFactory::TextureFactory(ResourceManager& resMng)
-	: mResMng(resMng)
-	, mRenderSys(resMng.RenderSys())
+: mResMng(resMng)
+, mRenderSys(resMng.RenderSys())
 {
 }
 
-#if defined USE_OIIO
+#if defined USE_FREE_IMAGE
+CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string imgFullPath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+{
+	texture->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
+	COROUTINE_VARIABLES_5(texture, lchMode, imgFullPath, format, autoGenMipmap);
+	TIME_PROFILE((boost::format("\t\tresMng._LoadTextureByFile (%1% %2% %3%)") %imgFullPath %format %autoGenMipmap).str());
+
+	int faceCount = 0;
+	int mipCount = 0;
+	int width = 0;
+	int height = 0;
+	std::vector<Data> vecData;
+
+	boost::filesystem::path path = imgFullPath;
+	static std::string gliPatterns[] = { ".dds", ".ktx", ".ktx2" };
+	if (std::find(std::begin(gliPatterns), std::end(gliPatterns), path.extension()) != std::end(gliPatterns)) 
+	{
+		gli::texture tex = gli::load(imgFullPath);
+		if (!tex.empty())
+		{
+			BOOST_ASSERT(tex.layers() == 1);
+			BOOST_ASSERT(tex.base_face() == 0 && (tex.faces() == 1 || tex.faces() == 6));
+			BOOST_ASSERT(tex.base_level() == 0);
+			faceCount = tex.faces();
+			mipCount = tex.levels();
+
+			auto extent = tex.extent(0);
+			width = extent.x;
+			height = extent.y;
+
+			constexpr int layer0 = 0;
+			auto block_ext = gli::block_extent(tex.format());
+			auto block_size = gli::block_size(tex.format());
+			BOOST_ASSERT(block_size % block_ext.y == 0);
+			for (int face = 0; face < faceCount; ++face) {
+				for (int level = 0; level < mipCount; ++level) {
+					auto extent = tex.extent(level);
+					BOOST_ASSERT(tex.size(level) == block_size * FLOOR_DIV(extent.x, block_ext.x) * FLOOR_DIV(extent.y, block_ext.y));
+					int pitch = block_size * FLOOR_DIV(extent.x, block_ext.x);
+					vecData.push_back(Data::Make(tex.data(layer0, face, level), pitch));
+				}
+			}
+
+			if (format == kFormatUnknown) {
+				ResourceBaseFormat baseFormat = kRBF_Unkown;
+				ResourceDataType dataType = kRDT_Max;
+				int bitsPerChannel = 0;
+				bool isSRGB = false;
+
+				gli::gl GL(gli::gl::PROFILE_GL33);
+				const gli::gl::format fmt = GL.translate(tex.format(), tex.swizzles());
+
+				//https://www.khronos.org/opengl/wiki/Image_Format
+				if (gli::is_compressed(tex.format())) {
+					switch (fmt.Internal) {
+					case gli::gl::INTERNAL_RGB_DXT1: format = kFormatBC1UNorm; break;
+					case gli::gl::INTERNAL_RGBA_DXT1: format = kFormatBC1UNorm; break;
+					case gli::gl::INTERNAL_RGBA_DXT3: format = kFormatBC2UNorm; break;
+					case gli::gl::INTERNAL_RGBA_DXT5: format = kFormatBC3UNorm; break;
+					case gli::gl::INTERNAL_SRGB_DXT1: format = kFormatBC1UNormSRgb; break;
+					case gli::gl::INTERNAL_SRGB_ALPHA_DXT1: format = kFormatBC1UNormSRgb; break;
+					case gli::gl::INTERNAL_SRGB_ALPHA_DXT3: format = kFormatBC2UNormSRgb; break;
+					case gli::gl::INTERNAL_SRGB_ALPHA_DXT5: format = kFormatBC3UNormSRgb; break;
+					default:
+						BOOST_ASSERT(FALSE);
+						break;
+					}
+				}
+				else {
+					switch (fmt.External) {
+					case gli::gl::EXTERNAL_RED: baseFormat = kRBF_R; break;
+					case gli::gl::EXTERNAL_RG: baseFormat = kRBF_RG; break;
+					case gli::gl::EXTERNAL_RGB: baseFormat = kRBF_RGB; break;
+					case gli::gl::EXTERNAL_BGR: baseFormat = kRBF_BGRX; break;
+					case gli::gl::EXTERNAL_RGBA: baseFormat = kRBF_RGBA; break;
+					case gli::gl::EXTERNAL_BGRA: baseFormat = kRBF_BGRA; break;
+					case gli::gl::EXTERNAL_DEPTH: baseFormat = kRBF_D; break;
+					case gli::gl::EXTERNAL_DEPTH_STENCIL: baseFormat = kRBF_DS; break;
+					case gli::gl::EXTERNAL_ALPHA: baseFormat = kRBF_A; break;
+					case gli::gl::EXTERNAL_LUMINANCE:
+					case gli::gl::EXTERNAL_LUMINANCE_ALPHA:
+					case gli::gl::EXTERNAL_SRGB_EXT:
+					case gli::gl::EXTERNAL_SRGB_ALPHA_EXT:
+					case gli::gl::EXTERNAL_NONE:
+					case gli::gl::EXTERNAL_RED_INTEGER:
+					case gli::gl::EXTERNAL_RG_INTEGER:
+					case gli::gl::EXTERNAL_RGB_INTEGER:
+					case gli::gl::EXTERNAL_BGR_INTEGER:
+					case gli::gl::EXTERNAL_RGBA_INTEGER:
+					case gli::gl::EXTERNAL_BGRA_INTEGER:
+					case gli::gl::EXTERNAL_STENCIL:
+					default:
+						BOOST_ASSERT(FALSE);
+						break;
+					}
+
+					switch (fmt.Type) {
+					case gli::gl::TYPE_I8: dataType = kRDT_SNorm; bitsPerChannel = 8; break;
+					case gli::gl::TYPE_U8: dataType = kRDT_UNorm; bitsPerChannel = 8; break;
+					case gli::gl::TYPE_I16: dataType = kRDT_Int; bitsPerChannel = 16; break;
+					case gli::gl::TYPE_U16: dataType = kRDT_UInt; bitsPerChannel = 16; break;
+					case gli::gl::TYPE_I32: dataType = kRDT_Int; bitsPerChannel = 32; break;
+					case gli::gl::TYPE_U32: dataType = kRDT_UInt; bitsPerChannel = 32; break;
+					case gli::gl::TYPE_I64: dataType = kRDT_Int; bitsPerChannel = 64; break;
+					case gli::gl::TYPE_U64: dataType = kRDT_UInt; bitsPerChannel = 64; break;
+					case gli::gl::TYPE_F16: dataType = kRDT_Float; bitsPerChannel = 16; break;
+					case gli::gl::TYPE_F32: dataType = kRDT_Float; bitsPerChannel = 32; break;
+					case gli::gl::TYPE_F64: dataType = kRDT_Float; bitsPerChannel = 64; break;
+					case gli::gl::TYPE_NONE:
+					case gli::gl::TYPE_F16_OES:
+					case gli::gl::TYPE_UINT32_RGB9_E5_REV:
+					case gli::gl::TYPE_UINT32_RG11B10F_REV:
+					case gli::gl::TYPE_UINT8_RG3B2:
+					case gli::gl::TYPE_UINT8_RG3B2_REV:
+					case gli::gl::TYPE_UINT16_RGB5A1:
+					case gli::gl::TYPE_UINT16_RGB5A1_REV:
+					case gli::gl::TYPE_UINT16_R5G6B5:
+					case gli::gl::TYPE_UINT16_R5G6B5_REV:
+					case gli::gl::TYPE_UINT16_RGBA4:
+					case gli::gl::TYPE_UINT16_RGBA4_REV:
+					case gli::gl::TYPE_UINT32_RGBA8:
+					case gli::gl::TYPE_UINT32_RGBA8_REV:
+					case gli::gl::TYPE_UINT32_RGB10A2:
+					case gli::gl::TYPE_UINT32_RGB10A2_REV:
+					case gli::gl::TYPE_UINT8_RG4_REV_GTC:
+					case gli::gl::TYPE_UINT16_A1RGB5_GTC:
+					default:
+						BOOST_ASSERT(FALSE);
+						break;
+					}
+
+					format = MakeResFormat(baseFormat, dataType, bitsPerChannel, isSRGB);
+					BOOST_ASSERT(format != kFormatUnknown);
+				}
+			}
+		
+			if (mipCount == 1 && autoGenMipmap)
+				mipCount = -1;
+
+			CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+			texture->SetLoaded(mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &vecData[0]) != nullptr);
+		}
+	}
+	else 
+	{
+		fipImage fi;
+		if (fi.load(imgFullPath.c_str()))
+		{
+			faceCount = 1;
+			mipCount = 1;
+
+			width = fi.getWidth();
+			height = fi.getHeight();
+
+			const int stride = fi.getScanWidth();
+			vecData.push_back(Data::Make(fi.accessPixels(), stride));
+
+			if (format == kFormatUnknown)
+			{
+				ResourceBaseFormat baseFormat = kRBF_Unkown;
+				ResourceDataType dataType = kRDT_Max;
+				int bitsPerChannel = 0;
+				bool isSRGB = false;
+
+				static auto CalBaseFormat = [](FREE_IMAGE_COLOR_TYPE colorType)
+				{
+					ResourceBaseFormat baseFormat = kRBF_Unkown;
+					switch (colorType)
+					{
+					case FIC_RGB: baseFormat = kRBF_RGB; break;
+					case FIC_RGBALPHA: baseFormat = kRBF_RGBA; break;
+					default: BOOST_ASSERT(false); break;
+					}
+					return baseFormat;
+				};
+				FREE_IMAGE_COLOR_TYPE fiColorType = fi.getColorType();
+				baseFormat = CalBaseFormat(fiColorType);
+
+				int bpp = fi.getBitsPerPixel();
+				FREE_IMAGE_TYPE fiImgType = fi.getImageType();
+				switch (fiImgType)
+				{
+				case FIT_BITMAP: {
+					BOOL res;
+					switch (bpp) {
+						//case 24: dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGB); break;
+					case 24: res = fi.convertTo32Bits(); BOOST_ASSERT(res); bitsPerChannel = 8; baseFormat = kRBF_RGBA; break;
+					case 32: dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGBA); break;
+					default: BOOST_ASSERT(FALSE); break;
+					}
+				}break;
+				case FIT_RGB16: dataType = kRDT_Float; bitsPerChannel = 16; BOOST_ASSERT(baseFormat == kRBF_RGB && bpp == 48); break;
+				case FIT_RGBA16: dataType = kRDT_Float; bitsPerChannel = 16; BOOST_ASSERT(baseFormat == kRBF_RGBA && bpp == 64); break;
+				case FIT_RGBF: dataType = kRDT_Float; bitsPerChannel = 32; BOOST_ASSERT(baseFormat == kRBF_RGB && bpp == 96); break;
+				case FIT_RGBAF: dataType = kRDT_Float; bitsPerChannel = 32; BOOST_ASSERT(baseFormat == kRBF_RGBA && bpp == 128); break;
+				default: BOOST_ASSERT(FALSE); break;
+				}
+
+				format = MakeResFormat(baseFormat, dataType, bitsPerChannel, isSRGB);
+				BOOST_ASSERT(format != kFormatUnknown);
+			}
+
+			if (mipCount == 1 && autoGenMipmap)
+				mipCount = -1;
+
+			CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+			texture->SetLoaded(mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &vecData[0]) != nullptr);
+		}
+	}
+
+	CoReturn texture->IsLoaded();
+}
+#elif defined USE_OIIO
 CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string imgFullpath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	texture->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
 	COROUTINE_VARIABLES_5(texture, lchMode, imgFullpath, format, autoGenMipmap);
-
 	TIME_PROFILE((boost::format("\t\tresMng._LoadTextureByFile (%1% %2% %3%)") % imgFullpath % format % autoGenMipmap).str());
+
 	ITexturePtr ret = nullptr;
 	OIIO::ImageSpec spec;
 	OIIO::ImageSpec config;

@@ -421,17 +421,17 @@
     <ClInclude Include="..\src\core\rendersys\base\compare_func.h">
       <Filter>src\core\rendersys\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\resource\program_factory.h">
-      <Filter>src\core\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\resource\texture_factory.h">
-      <Filter>src\core\resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\resource\assimp_factory.h">
       <Filter>src\core\resource\assimp</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\resource\device_res_factory.h">
       <Filter>src\core\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\program_factory.h">
+      <Filter>src\core\resource\program</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\resource\texture_factory.h">
+      <Filter>src\core\resource\texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -576,14 +576,14 @@
     <ClCompile Include="..\src\core\rendersys\base\res_format.cpp">
       <Filter>src\core\rendersys\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\resource\program_factory.cpp">
-      <Filter>src\core\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\resource\texture_factory.cpp">
-      <Filter>src\core\resource</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\resource\assimp_factory.cpp">
       <Filter>src\core\resource\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\program_factory.cpp">
+      <Filter>src\core\resource\program</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\resource\texture_factory.cpp">
+      <Filter>src\core\resource\texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -661,6 +661,12 @@
     </Filter>
     <Filter Include="src\core\rendersys\base">
       <UniqueIdentifier>{7c715055-6b6a-4abb-bd68-4c2ee860558c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\resource\program">
+      <UniqueIdentifier>{9c08fbf9-a5dc-41b6-88e0-f11242177e24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\resource\texture">
+      <UniqueIdentifier>{65c671af-4697-4304-90d7-e856a921db5d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
