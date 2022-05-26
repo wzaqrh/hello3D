@@ -22,15 +22,16 @@
 #ifndef FREEIMAGEPLUS_H
 #define FREEIMAGEPLUS_H
 
+#define FREEIMAGEPLUS_LIB
+
 #ifdef _WIN32
 #include <windows.h>
 #endif // _WIN32
 #include "FreeImage.h"
 
-#define FREEIMAGE_LIB
 // Compiler options ---------------------------------------------------------
 
-#if defined(FREEIMAGE_LIB)
+#if defined(FREEIMAGEPLUS_LIB)
 	#define FIP_API
 	#define FIP_CALLCONV
 #else
@@ -62,7 +63,7 @@
 			#define FIP_API
 		#endif
 	#endif // WIN32 / !WIN32
-#endif // FREEIMAGE_LIB
+#endif // FREEIMAGEPLUS_LIB
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 

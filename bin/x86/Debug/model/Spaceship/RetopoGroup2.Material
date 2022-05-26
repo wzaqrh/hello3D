@@ -28,7 +28,7 @@
 		<txRoughness>roughness.png</txRoughness>
 		<txAmbientOcclusion>ao.png</txAmbientOcclusion>
 		<OcclusionStrength>1</OcclusionStrength>
-		<_LightMap>lightmap.png</_LightMap>
+		<_LightMap>lightmap.exr</_LightMap>
 		<txEmissive>emissive.png</txEmissive>
 		<EmissiveFactor>1,1,1,0</EmissiveFactor>
 	</Properties>

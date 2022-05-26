@@ -24,6 +24,31 @@ TextureFactory::TextureFactory(ResourceManager& resMng)
 }
 
 #if defined USE_FREE_IMAGE
+template <class T> void INPLACESWAP(T& a, T& b) { a ^= b; b ^= a; a ^= b; }
+static BOOL SwapRedBlue32(FIBITMAP* dib) 
+{
+	if (FreeImage_GetImageType(dib) != FIT_BITMAP) {
+		return FALSE;
+	}
+
+	const unsigned bytesperpixel = FreeImage_GetBPP(dib) / 8;
+	if (bytesperpixel > 4 || bytesperpixel < 3) {
+		return FALSE;
+	}
+
+	const unsigned height = FreeImage_GetHeight(dib);
+	const unsigned pitch = FreeImage_GetPitch(dib);
+	const unsigned lineSize = FreeImage_GetLine(dib);
+
+	BYTE* line = FreeImage_GetBits(dib);
+	for (unsigned y = 0; y < height; ++y, line += pitch) {
+		for (BYTE* pixel = line; pixel < line + lineSize; pixel += bytesperpixel) {
+			INPLACESWAP(pixel[0], pixel[2]);
+		}
+	}
+
+	return TRUE;
+}
 CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string imgFullPath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
 {
 	texture->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
@@ -165,21 +190,16 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 			CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 			texture->SetLoaded(mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &vecData[0]) != nullptr);
 		}
+		BOOST_ASSERT(!tex.empty());
 	}
 	else 
 	{
+		static std::string flipExts[] = { ".png", ".jpg", ".jpeg", ".bmp"};
+		const bool isPngJpgOrBmp = std::find(std::begin(flipExts), std::end(flipExts), path.extension()) != std::end(flipExts);
+
 		fipImage fi;
 		if (fi.load(imgFullPath.c_str()))
 		{
-			faceCount = 1;
-			mipCount = 1;
-
-			width = fi.getWidth();
-			height = fi.getHeight();
-
-			const int stride = fi.getScanWidth();
-			vecData.push_back(Data::Make(fi.accessPixels(), stride));
-
 			if (format == kFormatUnknown)
 			{
 				ResourceBaseFormat baseFormat = kRBF_Unkown;
@@ -187,31 +207,28 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 				int bitsPerChannel = 0;
 				bool isSRGB = false;
 
-				static auto CalBaseFormat = [](FREE_IMAGE_COLOR_TYPE colorType)
-				{
-					ResourceBaseFormat baseFormat = kRBF_Unkown;
-					switch (colorType)
-					{
-					case FIC_RGB: baseFormat = kRBF_RGB; break;
-					case FIC_RGBALPHA: baseFormat = kRBF_RGBA; break;
-					default: BOOST_ASSERT(false); break;
-					}
-					return baseFormat;
-				};
-				FREE_IMAGE_COLOR_TYPE fiColorType = fi.getColorType();
-				baseFormat = CalBaseFormat(fiColorType);
-
 				int bpp = fi.getBitsPerPixel();
+				FREE_IMAGE_COLOR_TYPE fiColorType = fi.getColorType();
+				switch (fiColorType)
+				{
+				case FIC_RGB: baseFormat = kRBF_RGB; break;
+				case FIC_RGBALPHA: baseFormat = kRBF_RGBA; break;
+				default: BOOST_ASSERT(false); break;
+				}
+
 				FREE_IMAGE_TYPE fiImgType = fi.getImageType();
 				switch (fiImgType)
 				{
 				case FIT_BITMAP: {
-					BOOL res;
-					switch (bpp) {
-						//case 24: dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGB); break;
-					case 24: res = fi.convertTo32Bits(); BOOST_ASSERT(res); bitsPerChannel = 8; baseFormat = kRBF_RGBA; break;
-					case 32: dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGBA); break;
-					default: BOOST_ASSERT(FALSE); break;
+					if (bpp == 24) {
+						BOOL res = fi.convertTo32Bits(); BOOST_ASSERT(res && fi.getBitsPerPixel() == 32);
+						dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGBA || baseFormat == kRBF_RGB); baseFormat = kRBF_RGBA;
+					}
+					else if (bpp == 32) {
+						dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGBA || baseFormat == kRBF_RGB); baseFormat = kRBF_RGBA;
+					}
+					else {
+						BOOST_ASSERT(FALSE);
 					}
 				}break;
 				case FIT_RGB16: dataType = kRDT_Float; bitsPerChannel = 16; BOOST_ASSERT(baseFormat == kRBF_RGB && bpp == 48); break;
@@ -225,14 +242,32 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 				BOOST_ASSERT(format != kFormatUnknown);
 			}
 
+			width = fi.getWidth();
+			height = fi.getHeight();
+			
+			if (isPngJpgOrBmp) {
+			#if !defined FREEIMAGE_BIGENDIAN
+				if (fi.getImageType() == FIT_BITMAP) 
+					SwapRedBlue32(fi);
+			#endif
+				fi.flipVertical();
+			}
+			const int stride = fi.getScanWidth();
+			vecData.push_back(Data::Make(fi.accessPixels(), stride));
+			
+			faceCount = 1;
+			mipCount = 1;
+
 			if (mipCount == 1 && autoGenMipmap)
 				mipCount = -1;
 
 			CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 			texture->SetLoaded(mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(width, height, 0, faceCount), mipCount, &vecData[0]) != nullptr);
 		}
+		BOOST_ASSERT(fi.isValid());
 	}
 
+	BOOST_ASSERT(texture->IsLoaded());
 	CoReturn texture->IsLoaded();
 }
 #elif defined USE_OIIO
