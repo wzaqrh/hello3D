@@ -67,9 +67,6 @@
     <ClInclude Include="..\src\core\base\stl.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\base\il_helper.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\launch.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
@@ -167,9 +164,6 @@
       <Filter>src\core\renderable</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\base\uniform_struct.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\base\rendersys_debug.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\base\macros.h">

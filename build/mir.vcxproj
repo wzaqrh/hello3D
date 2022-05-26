@@ -42,14 +42,12 @@
     <ClInclude Include="..\src\core\base\debug.h" />
     <ClInclude Include="..\src\core\base\declare_macros.h" />
     <ClInclude Include="..\src\core\base\deffered_signal.h" />
-    <ClInclude Include="..\src\core\base\il_helper.h" />
     <ClInclude Include="..\src\core\base\input.h" />
     <ClInclude Include="..\src\core\base\launch.h" />
     <ClInclude Include="..\src\core\base\macros.h" />
     <ClInclude Include="..\src\core\base\material_load_param.h" />
     <ClInclude Include="..\src\core\base\math.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
-    <ClInclude Include="..\src\core\base\rendersys_debug.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
     <ClInclude Include="..\src\core\base\thread.h" />
     <ClInclude Include="..\src\core\base\tpl\atomic_map.h" />
