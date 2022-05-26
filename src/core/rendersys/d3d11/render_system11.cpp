@@ -5,8 +5,6 @@
 #include <windows.h>
 #include <dxerr.h>
 #include <d3dcompiler.h>
-#include <wrl/client.h>
-#include <IL/il.h>
 #include "core/mir_config.h"
 #include "core/base/d3d.h"
 #include "core/base/debug.h"
