@@ -54,6 +54,10 @@
 #define COLORSPACE_GAMMA 1
 #endif
 
+#if !defined REVERSE_Z
+#define REVERSE_Z 1
+#endif
+
 #define TONEMAP_LINEAR 0
 #define TONEMAP_TO_SRGB 1
 #define TONEMAP_ACES_NARKOWICZ 2

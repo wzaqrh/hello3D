@@ -41,6 +41,8 @@ struct cbPerFrameBuilder {
 		return *this;
 	}
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {
+		mReversedZ = camera.IsReverseZ();
+
 		mCBuffer.View = camera.GetView();
 		mCBuffer.Projection = camera.GetProjection();
 
@@ -72,6 +74,12 @@ struct cbPerFrameBuilder {
 		mCBuffer.LightProjection = light.GetRecvShadowProj();
 		return *this;
 	}
+	float GetZCear() const {
+		return IF_AND_OR(mReversedZ, 0.0, 1.0);
+	}
+	CompareFunc GetZFunc(CompareFunc func) const {
+		return IF_AND_OR(mReversedZ, GetReverseZCompareFunc(func), func);
+	}
 	cbPerFrame& Build() {
 		return mCBuffer;
 	}
@@ -80,6 +88,7 @@ struct cbPerFrameBuilder {
 	}
 private:
 	Eigen::Vector2i mBackBufferSize;
+	bool mReversedZ = false;
 	cbPerFrame mCBuffer;
 };
 
@@ -123,6 +132,10 @@ public:
 	}
 public:
 	#define MakePerLight(light) ((light).MakeCbLight())
+	void Clear() 
+	{
+		mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
+	}
 	//LIGHTMODE_SHADOW_CASTER
 	void RenderCastShadow()
 	{
@@ -131,10 +144,10 @@ public:
 		auto blend_state = mStatesBlock.LockBlend();
 
 		auto shadow_clr_color = IF_AND_OR(mCfg.IsShadowVSM(), Eigen::Vector4f(1e4, 1e8, 0, 0), Eigen::Vector4f::Zero());
-		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, 1.0, 0);
+		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, mPerFrame.GetZCear(), 0);
 		fb_shadow_map.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 		blend_state(BlendState::MakeDisable());
 
 		RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_, true);
@@ -180,13 +193,13 @@ public:
 		{
 			if (mFirstLight == light)
 			{
-				depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+				depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 				blend_state(BlendState::MakeDisable());
 
 				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_BASE_);
 			}
 			else {
-				depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskZero));
+				depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLessEqual), kDepthWriteMaskZero));
 				blend_state(BlendState::MakeAdditive());
 
 				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_ADD_);
@@ -202,9 +215,9 @@ public:
 		//LIGHTMODE_PREPASS_BASE
 		{
 			blend_state(BlendState::MakeDisable());
-			depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+			depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 
-			auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer, Eigen::Vector4f::Zero(), 1.0, 0);
+			auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer, Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
 			fb_gbuffer.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
 			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE_);
@@ -241,7 +254,7 @@ public:
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
 		RenderLight(*mPerFrame, nullptr, LIGHTMODE_TRANSPARENT_);
@@ -255,7 +268,7 @@ public:
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		depth_state(DepthState::Make(kCompareLessEqual, kDepthWriteMaskZero));
+		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLessEqual), kDepthWriteMaskZero));
 		blend_state(BlendState::MakeDisable());
 
 		RenderOperationQueue ops;
@@ -345,13 +358,20 @@ private:
 			const auto& blend = pass->GetBlend(); if (blend) blend_state(blend.value());
 
 			auto depth_state = mStatesBlock.LockDepth();
-			const auto& depth = pass->GetDepth(); if (depth) depth_state(depth.value());
-
+			const auto& depth = pass->GetDepth(); 
+			if (depth) {
+				if (Camera.IsReverseZ()) {
+					auto ds = depth.value();
+					ds.CmpFunc = GetReverseZCompareFunc(ds.CmpFunc);
+					depth_state(ds);
+				}
+				else {
+					depth_state(depth.value());
+				}
+			}
 			auto raster_state = mStatesBlock.LockRaster();
 			const auto& cull = pass->GetCull(); if (cull) raster_state(cull.value());
-			const auto& fill = pass->GetFill(); 
-			if (fill) 
-				raster_state(fill.value());
+			const auto& fill = pass->GetFill(); if (fill) raster_state(fill.value());
 			const auto& zbias = pass->GetDepthBias(); if (zbias) raster_state(zbias.value());
 			
 			const auto& passOut = pass->GetGrabOut();
@@ -481,6 +501,11 @@ CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
 	CoReturn true;
 }
 
+void RenderPipeline::SetBackColor(Eigen::Vector4f color)
+{
+	mBackgndColor = color;
+}
+
 void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
@@ -488,9 +513,8 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const 
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
-	mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), 1.0, 0);
-
 	CameraRender render(*this, ops, camera, lights);
+	render.Clear();
 	render.RenderCastShadow();
 	render.RenderForward();
 	render.RenderTransparent();
@@ -511,9 +535,8 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
-	mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), 1.0, 0);
-
 	CameraRender render(*this, ops, camera, lights);
+	render.Clear();
 	render.RenderCastShadow();
 	render.RenderPrepass();
 	render.RenderTransparent();

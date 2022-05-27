@@ -1037,3 +1037,17 @@ bool MaterialAssetManager::PurgeOutOfDates() ThreadSafe
 }
 }
 }
+
+int GetLightModeValueByName(const std::string& lightModeName)
+{
+	if (lightModeName == LIGHTMODE_SHADOW_CASTER_) return LIGHTMODE_SHADOW_CASTER;
+	if (lightModeName == LIGHTMODE_FORWARD_BASE_) return LIGHTMODE_FORWARD_BASE;
+	if (lightModeName == LIGHTMODE_FORWARD_ADD_) return LIGHTMODE_FORWARD_ADD;
+	if (lightModeName == LIGHTMODE_PREPASS_BASE_) return LIGHTMODE_PREPASS_BASE;
+	if (lightModeName == LIGHTMODE_PREPASS_FINAL_) return LIGHTMODE_PREPASS_FINAL;
+	if (lightModeName == LIGHTMODE_TRANSPARENT_) return LIGHTMODE_TRANSPARENT;
+	if (lightModeName == LIGHTMODE_SKYBOX_) return LIGHTMODE_SKYBOX;
+	if (lightModeName == LIGHTMODE_OVERLAY_) return LIGHTMODE_OVERLAY;
+	if (lightModeName == LIGHTMODE_POSTPROCESS_) return LIGHTMODE_POSTPROCESS;
+	return -1;
+}

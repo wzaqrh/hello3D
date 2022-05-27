@@ -1,6 +1,7 @@
 #include <boost/math/constants/constants.hpp>
 #include "core/resource/resource_manager.h"
 #include "core/renderable/post_process.h"
+#include "core/renderable/skybox.h"
 #include "core/scene/camera.h"
 #include "core/base/debug.h"
 #include "core/base/math.h"
@@ -40,6 +41,13 @@ void Camera::SetFov(float fov)
 	mFov = fov / boost::math::constants::radian<float>();
 	mProjSignal();
 }
+
+void Camera::SetReverseZ(bool reverseZ)
+{
+	mReverseZ = reverseZ;
+	mProjSignal();
+}
+
 void Camera::SetOrthographicSize(float size)
 {
 	mOrthoSize = size;
@@ -61,6 +69,10 @@ CoTask<void> Camera::UpdateFrame(float dt)
 {
 	for (auto& effect : mPostProcessEffects)
 		CoAwait effect->UpdateFrame(dt);
+#if MIR_MATERIAL_HOTLOAD
+	if (mSkyBox) CoAwait mSkyBox->UpdateFrame(dt);
+#endif
+	CoReturn;
 }
 
 /********** query **********/
@@ -76,7 +88,8 @@ void Camera::RecalculateProjection() const
 {
 	switch (mType) {
 	case kCameraPerspective:
-		mProjection = math::cam::MakePerspectiveFovLH(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
+		if (mReverseZ) mProjection = math::cam::MakePerspectiveFovLHReversZ(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
+		else mProjection = math::cam::MakePerspectiveFovLH(mFov, 1.0, mClipPlane[0], mClipPlane[1]);
 		break;
 	case kCameraOthogonal: {
 	#if defined OTHO_PROJ_CENTER_NOT_ZERO
@@ -237,6 +250,7 @@ CameraPtr CameraFactory::CreatePerspective(SceneNodePtr node)
 	camera->SetType(kCameraPerspective);
 	camera->SetFov(mDefault.Fov);
 	camera->SetAspect(mDefault.Aspect);
+	camera->SetReverseZ(mDefault.ReverseZ);
 	camera->SetClippingPlane(mDefault.ClipPlane);
 	camera->SetLookAt(mDefault.EyePos, mDefault.EyePos + mDefault.LengthForward);
 	camera->SetCullingMask(mDefault.CameraMask);

@@ -598,9 +598,6 @@
     <None Include="..\bin\x86\Debug\shader\GltfLighting.cginc">
       <Filter>shader\inc</Filter>
     </None>
-    <None Include="..\bin\x86\Debug\shader\Macros.cginc">
-      <Filter>shader\inc</Filter>
-    </None>
     <None Include="..\bin\x86\Debug\model\armadillo\defaultMaterial.Material">
       <Filter>shader\material</Filter>
     </None>
@@ -633,6 +630,9 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\LightingInput.cginc">
       <Filter>shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Macros.cginc">
+      <Filter>shader</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include "test/test_case.h"
 #include "test/app.h"
 #include "core/renderable/skybox.h"
+#include "core/renderable/cube.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -11,8 +12,6 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
-private:
-	AssimpModelPtr mModel;
 };
 
 CoTask<bool> TestUnity::OnInitScene()
@@ -41,23 +40,26 @@ CoTask<bool> TestUnity::OnInitScene()
 		skybox->SetSphericalHarmonicsConstants(c0c1);
 		camera->SetSkyBox(skybox);
 
-		MaterialLoadParamBuilder modelMat = MAT_MODEL;
-		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
-		
-	#define PPI 3.14159265358979323846264338327
 	#if 1
+		MaterialLoadParamBuilder modelMat = MAT_MODEL;
+		auto mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+
 		mTransform = CoAwait model.Init("Spaceship", mModel);
-		//mTransform->SetEulerAngles(Eigen::Vector3f(0, PPI, 0));
 		#define MODEL_SCALE 0.01
 		mTransform->SetScale(Eigen::Vector3f(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE));
-	#else
-		mTransform = CoAwait model.Init("buddha", mModel);
-		mTransform->SetEulerAngles(Eigen::Vector3f(0, PPI, 0));
-	#define MODEL_SCALE 10
-		mTransform->SetScale(Eigen::Vector3f(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE));
-	#endif
 
 		mModel->PlayAnim(0);
+	#elif 1
+		MaterialLoadParamBuilder modelMat = MAT_MODEL;
+		auto mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+
+		mTransform = CoAwait model.Init("buddha", mModel);
+		//mTransform->SetEulerAngles(Eigen::Vector3f(0, PPI, 0));
+		#define MODEL_SCALE 10
+		mTransform->SetScale(Eigen::Vector3f(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE));
+	#else
+		mScneMng->AddRendAsNode(CoAwait mRendFac->CreateCubeT(Eigen::Vector3f::Zero(), Eigen::Vector3f(3.5, 3.5, 3.5)));
+	#endif
 	}break;
 	default:
 		break;

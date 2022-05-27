@@ -36,6 +36,7 @@ public:
 	void SetClippingPlane(const Eigen::Vector2f& zRange);
 	void SetAspect(float aspect);
 	void SetFov(float fov);
+	void SetReverseZ(bool reverseZ);
 	
 	void SetCullingMask(unsigned mask) { mCameraMask = mask; }
 	void SetDepth(unsigned depth) { mDepth = depth; }
@@ -46,6 +47,7 @@ public:
 	const Eigen::Vector2f& GetClippingPlane() const { return mClipPlane; }
 	float GetAspect() const { return mAspect; }
 	float GetFov() const { return mFov; }
+	bool IsReverseZ() const { return mReverseZ; }
 	unsigned GetCullingMask() const { return mCameraMask; }
 	unsigned GetDepth() const { return mDepth; }
 	RenderingPath GetRenderingPath() const { return mRenderPath; }
@@ -88,7 +90,8 @@ private:
 	float mAspect = 1;
 	float mFov = 60;
 	Eigen::Vector2f mClipPlane = Eigen::Vector2f(0.3f, 1000);//near, far
-	
+	bool mReverseZ = false;
+
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 	mutable DefferedConnctedSignal mProjSignal;
 	mutable DefferedSlot mTransformSlot;
@@ -109,6 +112,7 @@ public:
 	void SetEyePos(Eigen::Vector3f eyePos) { mDefault.EyePos = eyePos; }
 	void SetForward(Eigen::Vector3f forward) { mDefault.LengthForward = forward; }
 	void SetForward(unsigned cameraMask) { mDefault.CameraMask = cameraMask; }
+	void SetReverseZ(bool reverseZ) { mDefault.ReverseZ = reverseZ; }
 
 	CameraPtr CreatePerspective(SceneNodePtr node);
 	CameraPtr CreateOthogonal(SceneNodePtr node);
@@ -131,6 +135,7 @@ private:
 		float OthoSize = math::cam::DefOthoSize();//othographic
 		float Aspect = 1.0;//perspective
 		float Fov = 60.0f;//perspective
+		bool ReverseZ = true;//perspective
 		Eigen::Vector2f ClipPlane = math::cam::DefClippingPlane();
 		Eigen::Vector3f EyePos = math::cam::DefEye();
 		Eigen::Vector3f LengthForward = math::vec::Forward();

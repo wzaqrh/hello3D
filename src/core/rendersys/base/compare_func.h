@@ -15,4 +15,22 @@ enum CompareFunc
 	kCompareAlways = 8
 };
 
+inline CompareFunc GetReverseZCompareFunc(CompareFunc func) 
+{
+	switch (func)
+	{
+	case kCompareLess: return kCompareGreater;
+	case kCompareLessEqual: return kCompareGreaterEqual;
+	case kCompareGreater: return kCompareLess;
+	case kCompareGreaterEqual: return kCompareLessEqual;
+	case kCompareEqual:
+	case kCompareNotEqual:
+	case kCompareNever:
+	case kCompareAlways:
+	case kCompareUnkown:
+	default:
+		return func;
+	}
+}
+
 }

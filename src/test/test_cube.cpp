@@ -1,5 +1,7 @@
 #include "test/test_case.h"
 #include "test/app.h"
+#include "core/resource/texture_factory.h"
+#include "core/resource/resource_manager.h"
 #include "core/renderable/cube.h"
 
 using namespace mir;

@@ -1,24 +1,27 @@
 #include "core/base/debug.h"
-#include "core/scene/scene_manager.h"
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
 #include "core/scene/transform.h"
+#include "core/scene/scene_manager.h"
 #include "core/resource/resource_manager.h"
 #include "core/renderable/paint3d.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/post_process.h"
+#include "core/renderable/renderable_factory.h"
 #include "core/rendersys/render_pipeline.h"
 
 using namespace mir::scene;
 
 namespace mir {
 
-SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac)
+SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, const Configure& cfg)
 	: mResMng(resMng)
 	, mRendFac(rendFac)
 {
 	mLightFac = CreateInstance<LightFactory>();
 	mCameraFac = CreateInstance<CameraFactory>(resMng);
+	mCameraFac->SetReverseZ(cfg.IsReverseZ());
+	mCameraFac->SetAspect(1.0f * mResMng.WinWidth() / mResMng.WinHeight());
 	mNodeFac = CreateInstance<SceneNodeFactory>();
 
 	mNodesSignal.Connect(mCamerasSlot);

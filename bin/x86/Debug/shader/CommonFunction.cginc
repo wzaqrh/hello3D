@@ -42,7 +42,7 @@ inline void CorrectBitangent(inout float3 B, DpDuv dd) {
 #define CORRECT_BITANGENT(B, DD)
 #endif
 
-inline float3x3 GetTBN(float3 T, float3 N, DpDuv dd)
+inline float3x3 GetTangentToWorldTBN(float3 T, float3 N, DpDuv dd)
 {
 	float3 B = cross(N, T);
 	CORRECT_BITANGENT(B, dd);
@@ -69,7 +69,7 @@ dPos = k·dTex
 	  ---------------
  dtx.x·dty.y - dty.x·dtx.y
 */
-inline float3x3 GetTBN(float3 N, DpDuv dd)
+inline float3x3 GetTangentToWorldTBN(float3 N, DpDuv dd)
 {
     float3 T = (dd.dty.y * dd.dpx - dd.dtx.y * dd.dpy) / dd.det;
     T = normalize(T - dot(T,N) * N);
@@ -77,13 +77,13 @@ inline float3x3 GetTBN(float3 N, DpDuv dd)
 	float3 B = normalize(cross(N, T));
 	CORRECT_BITANGENT(B, dd);
 	
-    return float3x3(T/*row0*/, B, N);//相当于转置
+    return float3x3(T/*row0*/, B, N);
 }
 
-inline float3x3 GetTBN(DpDuv dd)
+inline float3x3 GetTangentToWorldTBN(DpDuv dd)
 {
 	float3 N = normalize(cross(dd.dpy, dd.dpx));
-    return GetTBN(N, dd);
+    return GetTangentToWorldTBN(N, dd);
 }
 
 float3 UnpackScaleNormalRGorAG(float4 packednormal, float bumpScale)

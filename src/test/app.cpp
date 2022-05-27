@@ -1,11 +1,12 @@
 #include <boost/algorithm/clamp.hpp>
 #include <boost/filesystem.hpp>
-#include "core/scene/transform.h"
-#include "core/base/input.h"
-#include "core/rendersys/render_system.h"
-#include "core/scene/scene_manager.h"
 #include "test/app.h"
 #include "test/test_case.h"
+#include "core/base/input.h"
+#include "core/scene/transform.h"
+#include "core/scene/camera.h"
+#include "core/scene/light.h"
+#include "core/scene/scene_manager.h"
 
 using namespace mir;
 
@@ -36,7 +37,7 @@ CoTask<bool> App::InitContext(HINSTANCE hInstance, HWND hWnd)
 		CoReturn false;
 	}
 	SetMir(mContext);
-	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->RenderSys()->WinSize().x(), mContext->RenderSys()->WinSize().y());
+	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->WinSize().x(), mContext->WinSize().y());
 	mTimer = new mir::debug::Timer;
 	CoReturn true;
 }
@@ -57,7 +58,6 @@ void App::OnInitLight()
 
 CoTask<void> App::Render()
 {
-	auto renderSys = mContext->RenderSys();
 	auto mScneMng = mContext->SceneMng();
 
 	mTimer->Update();
@@ -220,7 +220,7 @@ void MirManager::SetMir(mir::Mir* ctx)
 	mScneMng = ctx->SceneMng();
 	mRendFac = ctx->RenderableFac();
 	mResMng = ctx->ResourceMng();
-	auto size = ctx->ResourceMng()->WinSize();
+	auto size = ctx->WinSize();
 	mHalfSize = Eigen::Vector3f(size.x() / 2, size.y() / 2, 0);
 	mWinCenter = Eigen::Vector3f(0, 0, 0);
 

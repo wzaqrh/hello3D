@@ -17,6 +17,7 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Configure& cfg);
 	CoTask<bool> Initialize(ResourceManager& resMng);
+	void SetBackColor(Eigen::Vector4f color);
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderOperationQueue& opQueue, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights);
@@ -31,6 +32,7 @@ private:
 	FrameBufferBankPtr mTempFbs;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
+	Eigen::Vector4f mBackgndColor = Eigen::Vector4f::Zero();;
 };
 
 }

@@ -16,8 +16,10 @@ namespace mir {
 struct MIR_CORE_API Configure : boost::noncopyable {
 	Configure();
 	bool IsShadowVSM() const;
+	bool IsReverseZ() const;
 public:
 	int _SHADOW_MODE;
+	int _REVERSE_Z;
 };
 
 }

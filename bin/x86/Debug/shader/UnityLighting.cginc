@@ -91,7 +91,7 @@ float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
 
     #define VectorIdentity float3(1,1,1)   
     //finalColor = float3(1.0,0.0,0.0);
-    //finalColor = albedo;
+    //finalColor = i.albedo.rgb * (1.0 - reflectivity);
     //finalColor = n * 0.5 + 0.5;
     //finalColor = VectorIdentity * perceptualRoughness * (1.0 - reflectivity);
     //finalColor = VectorIdentity * v * 0.5 + 0.5;

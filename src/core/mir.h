@@ -4,11 +4,7 @@
 #include "core/base/cppcoro.h"
 #include "core/base/launch.h"
 #include "core/predeclare.h"
-#include "core/rendersys/render_system.h"
-#include "core/rendersys/render_pipeline.h"
 #include "core/renderable/renderable_factory.h"
-#include "core/resource/texture_factory.h"
-#include "core/resource/resource_manager.h"
 #include "core/scene/scene_manager.h"
 
 namespace mir {
@@ -45,8 +41,6 @@ private:
 	RenderPipelinePtr mRenderPipe;
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
-private:
-	Eigen::Vector4f mBackgndColor;
 };
 
 }

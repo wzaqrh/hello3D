@@ -35,7 +35,12 @@ PixelInput VS(VertexInput input)
     output.Tex = float3(input.Pos.x, input.Pos.y, -input.Pos.z);
 #endif
 	output.Pos = mul(View, float4(input.Pos, 0.0));//没有平移
+#if REVERSE_Z
+	output.Pos.xyw = mul(Projection, output.Pos).xyw;
+	output.Pos.z = 0.0;//z永远为0
+#else
 	output.Pos = mul(Projection, output.Pos).xyww;//z永远为1
+#endif
 	return output;
 }
 #endif

@@ -2,8 +2,9 @@
 #include "core/mir.h"
 #include "core/resource/material_name.h"
 #include "core/renderable/assimp_model.h"
-#include "core/scene/transform.h"
+#include "core/scene/light.h"
 #include "core/scene/camera.h"
+#include "core/scene/transform.h"
 #include "core/scene/scene_manager.h"
 
 using namespace mir;

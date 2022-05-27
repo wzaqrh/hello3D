@@ -2,15 +2,20 @@
 #include "core/base/debug.h"
 #include "core/rendersys/d3d11/render_system11.h"
 #include "core/rendersys/d3d9/render_system9.h"
+#include "core/rendersys/render_system.h"
+#include "core/rendersys/render_pipeline.h"
 #include "core/resource/material_factory.h"
 #include "core/resource/assimp_resource.h"
+#include "core/resource/texture_factory.h"
+#include "core/resource/resource_manager.h"
+#include "core/scene/camera.h"
+#include "core/scene/light.h"
 
 namespace mir {
 
 Mir::Mir(Launch launchMode)
 	:mLaunchMode(launchMode)
 {
-	mBackgndColor = Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f);
 	mIoService = CreateInstance<cppcoro::io_service>(8);
 }
 Mir::~Mir()
@@ -32,9 +37,10 @@ CoTask<bool> Mir::Initialize(HWND hWnd) {
 	
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng, mConfigure);
 	CoAwait mRenderPipe->Initialize(*mResourceMng);
+	//mRenderPipe->SetBackColor(Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f));
 	mRenderableFac = CreateInstance<RenderableFactory>(*mResourceMng, mLaunchMode);
 
-	mSceneMng = CreateInstance<SceneManager>(*mResourceMng, mRenderableFac);
+	mSceneMng = CreateInstance<SceneManager>(*mResourceMng, mRenderableFac, mConfigure);
 	CoReturn true;
 }
 
@@ -61,8 +67,6 @@ CoTask<void> Mir::Update(float dt)
 CoTask<void> Mir::Render()
 {
 	if (mRenderPipe->BeginFrame()) {
-		mRenderSys->ClearFrameBuffer(nullptr, mBackgndColor, 1.0f, 0);
-
 		RenderOperationQueue opQue;
 		mSceneMng->GenRenderOperation(opQue);
 		mRenderPipe->Render(opQue, mSceneMng->GetCameras(), mSceneMng->GetLights());

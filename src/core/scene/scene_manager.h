@@ -2,10 +2,9 @@
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
-//#include "core/base/base_type.h"
-#include "core/scene/camera.h"
-#include "core/scene/light.h"
-#include "core/renderable/renderable_factory.h"
+#include "core/base/deffered_signal.h"
+//#include "core/scene/camera.h"
+//#include "core/scene/light.h"
 
 namespace mir {
 
@@ -13,12 +12,12 @@ class MIR_CORE_API SceneManager : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac);
+	SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, const Configure& cfg);
 	void SetPixelPerUnit(float ppu);
 
 	SceneNodePtr AddNode();
 
-	TemplateArgs scene::CameraPtr CreateCameraNode(CameraType cameraType, T &&...args) {
+	template <typename CameraType, typename... T> scene::CameraPtr CreateCameraNode(CameraType cameraType, T &&...args) {
 		return mCameraFac->CreateCameraByType(AddNode(), cameraType, std::forward<T>(args)...);
 	}
 
@@ -26,7 +25,7 @@ public:
 		AddNode()->SetLight(light);
 		return light;
 	}
-	TemplateArgs scene::LightPtr CreateLightNode(LightType type, T &&...args) {
+	template <typename LightType, typename... T> scene::LightPtr CreateLightNode(LightType type, T &&...args) {
 		return AddLightAsNode(mLightFac->CreateLightByType(type, std::forward<T>(args)...));
 	}
 	template<typename LightClass, typename... T> std::shared_ptr<LightClass> CreateLightNode(T &&...args) {
