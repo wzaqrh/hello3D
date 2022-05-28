@@ -48,20 +48,22 @@ cbuffer cbPerFrame : register(b0)
 	matrix World;
 	matrix View;
 	matrix Projection;
-	
 	matrix ViewInv;
 	matrix ProjectionInv;
 
 	matrix LightView;
 	matrix LightProjection;
 	
-	matrix SHC0C1;
-    float4 CameraPositionExposure;
+	float4 CameraPositionExposure;
 	
-	float4 FrameBufferSize;
-	float4 ShadowMapSize;
+	matrix SHC0C1;
+	matrix SHC2;
+	float4 SHC2_2;
 	float4 LightMapUV;
 	float4 EnvDiffuseColor;
 	float4 EnvSpecColor;
+	
+	float4 FrameBufferSize;
+	float4 ShadowMapSize;
 }
 #endif

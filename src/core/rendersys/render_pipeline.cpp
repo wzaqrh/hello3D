@@ -37,7 +37,10 @@ enum PipeLineTextureSlot
 
 struct cbPerFrameBuilder {
 	cbPerFrameBuilder& SetSkybox(const rend::SkyBoxPtr& skybox) {
-		mCBuffer.SHC0C1 = IF_AND_OR(skybox, skybox->GetSphericalHarmonicsConstants(), Eigen::Matrix4f::Zero());
+		auto shc = IF_AND_OR(skybox, skybox->GetSphericalHarmonicsConstants(), rend::SphericalHarmonicsConstants());
+		mCBuffer.SHC0C1 = shc.C0C1;
+		mCBuffer.SHC2 = shc.C2;
+		mCBuffer.SHC2_2 = shc.C2_2;
 		return *this;
 	}
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {

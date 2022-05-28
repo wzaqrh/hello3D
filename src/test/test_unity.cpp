@@ -31,13 +31,13 @@ CoTask<bool> TestUnity::OnInitScene()
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		auto skybox = CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat);
-		Eigen::Matrix4f c0c1; 
-		c0c1 <<
-			-0.015, -0.022, -0.035, 0,
-			   0.1,   0.12,   0.15, 0,
-			-0.096, 0.0035,  0.011, 0,
-			  0.17,   0.15,   0.16, 0;
-		skybox->SetSphericalHarmonicsConstants(c0c1);
+		mir::rend::SphericalHarmonicsConstants shc;
+		shc.C0C1 <<
+			-0.0152, -0.0218, -0.0346, 0,
+			 0.1034,  0.1204,  0.1464, 0,
+			-0.0096,  0.0035,  0.0114, 0,
+			 0.1712,  0.1500,  0.1627, 0;
+		skybox->SetSphericalHarmonicsConstants(shc);
 		camera->SetSkyBox(skybox);
 
 	#if 1

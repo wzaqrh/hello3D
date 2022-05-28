@@ -12,12 +12,39 @@ inline float3 LinearToGammaSpace (float3 linRGB)
     //return half3(LinearToGammaSpaceExact(linRGB.r), LinearToGammaSpaceExact(linRGB.g), LinearToGammaSpaceExact(linRGB.b));
 }
 
-//c0c1 = |c0:0.x c1:-1.x c1:0.x c1:1.x|
-//		 |c0:0.y c1:-1.y c1:0.y c1:1.y|
-//		 |c0:0.z c1:-1.z c1:0.z c1:1.z|
-//		 |	   0	   0	  0		 0|
-float3 GetSphericalHarmonicsDgree01(float4 normal, matrix c0c1) {
-	float3 color = mul(normal, c0c1).xyz;
+//c0c1 = |c0.x c1[-1].x c1[0].x c1[1].x|
+//		 |c0.y c1[-1].y c1[0].y c1[1].y|
+//		 |c0.z c1[-1].z c1[0].z c1[1].z|
+//		 |0	   0	    0		0      |
+float3 GetSHDgree01(float4 normal, matrix c0c1) {
+    return mul(normal, c0c1).xyz;
+}
+
+//c2 = |c2[-2].x c2[-1].x c2[0].x c2[1].x|
+//	   |c2[-2].y c2[-1].y c2[0].y c2[1].y|
+//	   |c2[-2].z c2[-1].z c2[0].z c2[1].z|
+//	   |0	     0	      0		  0      |
+//c2_2 = c2[2]
+float3 GetSHDgree2(float4 normal, matrix c2, float4 c2_2) {
+	float3 color = mul(normal.xyzz * normal.yzzx, c2).xyz;
+    color += (normal.x*normal.x - normal.y*normal.y) * c2_2.rgb;
+#if COLORSPACE_GAMMA
+    color = LinearToGammaSpace(color);
+#endif
+    return color;
+}
+
+float3 GetSphericalHarmonics01(float4 normal, matrix c0c1) {
+    float3 color = GetSHDgree01(normal, c0c1);
+#if COLORSPACE_GAMMA
+    color = LinearToGammaSpace(color);
+#endif
+    return color;
+}
+
+float3 GetSphericalHarmonics012(float4 normal, matrix c0c1, matrix c2, float4 c2_2) {
+    float3 color = GetSHDgree01(normal, c0c1);
+    color += GetSHDgree2(normal, c2, c2_2);
 #if COLORSPACE_GAMMA
     color = LinearToGammaSpace(color);
 #endif

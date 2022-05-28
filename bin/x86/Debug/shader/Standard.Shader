@@ -12,19 +12,23 @@
 			<Element Name="World" 		  		Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 			<Element Name="View" 	 			Type="matrix"></Element>
 			<Element Name="Projection" 			Type="matrix"></Element>
-			
 			<Element Name="ViewInv" 			Type="matrix"></Element>
 			<Element Name="ProjectionInv"		Type="matrix"></Element>
 			
 			<Element Name="LightView" 	 		Type="matrix"></Element>
 			<Element Name="LightProjection" 	Type="matrix"></Element>
 
-			<Element Name="SHC0C1"				Type="matrix"></Element>
-			
 			<Element Name="CameraPositionExposure"	Type="float4"></Element>
+			
+			<Element Name="SHC0C1"				Type="matrix"></Element>
+			<Element Name="SHC2"				Type="matrix"></Element>
+			<Element Name="SHC2_2"				Type="float4"></Element>
+			<Element Name="LightMapUV"			Type="float4"></Element>
+			<Element Name="EnvDiffuseColor"		Type="float4"></Element>
+			<Element Name="EnvSpecColor"		Type="float4"></Element>
+			
 			<Element Name="FrameBufferSize"		Type="float4"></Element>
 			<Element Name="ShadowMapSize"		Type="float4"></Element>
-			<Element Name="LightMapUV"			Type="float4"></Element>
 		</Uniform>
 		<Uniform Name="cbPerLight" Slot="1" ShareMode="PerFrame">
 			<Element Name="LightPosition"		Type="float4"></Element>

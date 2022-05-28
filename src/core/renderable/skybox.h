@@ -13,6 +13,13 @@ struct SkyboxVertex {
 	Eigen::Vector3f Pos;
 };
 
+struct SphericalHarmonicsConstants {
+	MIR_MAKE_ALIGNED_OPERATOR_NEW;
+	Eigen::Matrix4f C0C1 = Eigen::Matrix4f::Zero();
+	Eigen::Matrix4f C2 = Eigen::Matrix4f::Zero();
+	Eigen::Vector4f C2_2 = Eigen::Vector4f::Zero();
+};
+
 class MIR_CORE_API SkyBox : public RenderableSingleRenderOp
 {
 	typedef RenderableSingleRenderOp Super;
@@ -21,16 +28,16 @@ public:
 	SkyBox(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material);
 	void SetDiffuseEnvMap(const ITexturePtr& texture);
 	void SetLutMap(const ITexturePtr& texture);
-	void SetSphericalHarmonicsConstants(const Eigen::Matrix4f& c0c1);
+	void SetSphericalHarmonicsConstants(const SphericalHarmonicsConstants& shc);
 public:
 	const ITexturePtr& GetDiffuseEnvMap() const { return mDiffuseEnvMap; }
 	const ITexturePtr& GetLutMap() const { return mLutMap; }
-	const Eigen::Matrix4f& GetSphericalHarmonicsConstants() const { return mSHC0C1; }
+	const SphericalHarmonicsConstants& GetSphericalHarmonicsConstants() const { return mSHConstants; }
 public:
 	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	ITexturePtr mLutMap, mDiffuseEnvMap;
-	Eigen::Matrix4f mSHC0C1;
+	SphericalHarmonicsConstants mSHConstants;
 };
 
 }

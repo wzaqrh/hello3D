@@ -44,7 +44,8 @@ float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
 #if ENABLE_LIGHT_MAP  
     float3 sh_diffuse_color = kd * i.albedo.rgb * GetLightMap(i.uv);
 #else
-    float3 sh_diffuse_color = kd * i.albedo.rgb * GetSphericalHarmonicsDgree01(float4(n, 1.0), SHC0C1);
+    float3 sh = GetSphericalHarmonics012(float4(n, 1.0), SHC0C1, SHC2, SHC2_2);
+    float3 sh_diffuse_color = kd * i.albedo.rgb * sh;
 #endif
     
     //D, V

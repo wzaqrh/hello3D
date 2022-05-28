@@ -16,26 +16,29 @@ struct UNIFORM_ALIGN cbPerFrame
 		SHC0C1 = Eigen::Matrix4f::Zero();
 		FrameBufferSize = Eigen::Vector4f::Zero();
 		ShadowMapSize = Eigen::Vector4f::Zero();
-		LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
-		CameraPositionExposure = Eigen::Vector4f(0, 0, 0, 1);
 	}
 public:
-	Eigen::Matrix4f World;
-	Eigen::Matrix4f View;
-	Eigen::Matrix4f Projection;
+	Eigen::Matrix4f World = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f View = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f Projection = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f ViewInv = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f ProjectionInv = Eigen::Matrix4f::Identity();
 
-	Eigen::Matrix4f ViewInv;
-	Eigen::Matrix4f ProjectionInv;
+	Eigen::Matrix4f LightView = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f LightProjection = Eigen::Matrix4f::Identity();
 
-	Eigen::Matrix4f LightView;
-	Eigen::Matrix4f LightProjection;
+	Eigen::Vector4f CameraPositionExposure = Eigen::Vector4f(0, 0, 0, 1);
 
-	Eigen::Matrix4f SHC0C1;
+	Eigen::Matrix4f SHC0C1 = Eigen::Matrix4f::Zero();
+	Eigen::Matrix4f SHC2 = Eigen::Matrix4f::Zero();
+	Eigen::Vector4f SHC2_2 = Eigen::Vector4f::Zero();
+	Eigen::Vector4f LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
+	Eigen::Vector4f EnvDiffuseColor = Eigen::Vector4f::Zero();
+	Eigen::Vector4f EnvSpecColor = Eigen::Vector4f::Zero();
 
-	Eigen::Vector4f CameraPositionExposure;
-	Eigen::Vector4f FrameBufferSize;
-	Eigen::Vector4f ShadowMapSize;
-	Eigen::Vector4f LightMapUV;
+	Eigen::Vector4f FrameBufferSize = Eigen::Vector4f::Zero();
+	Eigen::Vector4f ShadowMapSize = Eigen::Vector4f::Zero();
+	
 };
 
 struct UNIFORM_ALIGN cbPerLight

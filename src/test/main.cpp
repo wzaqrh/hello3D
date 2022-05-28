@@ -74,8 +74,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	SetWindowPos(handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE);
 	POINT topleft = {0, 0};
 	ClientToScreen(handle, &topleft);
+#if 0//debug gltf
 	SetWindowPos(handle, HWND_NOTOPMOST, 0 - topleft.x, 103 - topleft.y, 0, 0, SWP_NOSIZE);
-
+#else//debug unity
+	SetWindowPos(handle, HWND_NOTOPMOST, 471 - topleft.x, 32 + 94 - topleft.y, 0, 0, SWP_NOSIZE);
+#endif
 #if defined _DEBUG
 	RECT rect;
 	GetClientRect(handle, &rect);
