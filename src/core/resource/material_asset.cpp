@@ -944,6 +944,7 @@ private:
 					auto& texProp = mprop.Textures[nodeProp.first];
 					texProp.ImagePath = nodeProp.second.data();
 					texProp.Slot = index;
+					texProp.GenMipmap = nodeProp.second.get<bool>("<xmlattr>.GenMipmap", true);
 				}
 				else {
 					mprop.UniformByName.insert(std::make_pair(nodeProp.first, nodeProp.second.data()));

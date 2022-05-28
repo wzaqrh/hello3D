@@ -52,6 +52,7 @@ public:
 	struct TextureProperty {
 		std::string ImagePath;
 		int Slot;
+		bool GenMipmap = false;
 	};
 	std::map<std::string, TextureProperty> Textures;
 

@@ -131,7 +131,7 @@ CoTask<bool> MaterialFactory::DoCreateMaterialByMtlNode(MaterialPtr material, La
 			if (boost::filesystem::is_regular_file(imagePath)) {
 				if (iter.second.Slot >= material->mTextures.Count())
 					material->mTextures.Resize(iter.second.Slot + 1);
-				tasks.push_back(mResMng.CreateTextureByFile(material->mTextures[iter.second.Slot], lchMode, imagePath.string()));
+				tasks.push_back(mResMng.CreateTextureByFile(material->mTextures[iter.second.Slot], lchMode, imagePath.string(), kFormatUnknown, iter.second.GenMipmap));
 			}
 		}
 	}
