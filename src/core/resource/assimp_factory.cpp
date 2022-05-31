@@ -72,8 +72,8 @@ private:
 
 class AiSceneLoader {
 public:
-	AiSceneLoader(Launch lchMode, ResourceManager& resMng, AiScenePtr asset)
-		: mLaunchMode(lchMode), mResMng(resMng), mAsset(*asset), mResult(asset) 
+	AiSceneLoader(Launch lchMode, ResourceManager& resMng, MaterialLoadParam loadParam, AiScenePtr asset)
+		: mLaunchMode(lchMode), mResMng(resMng), mLoadParam(loadParam), mAsset(*asset), mResult(asset) 
 	{}
 	~AiSceneLoader() {
 		delete mAssetImporter;
@@ -175,7 +175,8 @@ private:
 		mesh.mAABB.extend(Eigen::Vector3f(mmax.x, mmax.y, mmax.z));
 
 		boost::filesystem::path matPath = mRedirectPathOnDir(boost::filesystem::path(std::string(rawMesh->mName.C_Str()) + ".Material"));
-		std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
+		MaterialLoadParam loadParam = mLoadParam;
+		loadParam.ShaderVariantName = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
 		tasks.push_back(mResMng.CreateMaterial(mesh.mMaterial, mLaunchMode, loadParam));
 
 		if (rawMesh->mNumBones > 0) {
@@ -284,6 +285,7 @@ private:
 private:
 	const Launch mLaunchMode;
 	ResourceManager& mResMng;
+	MaterialLoadParam mLoadParam;
 	AiScene& mAsset;
 	AiScenePtr mResult;
 private:
@@ -296,8 +298,8 @@ typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 /********** ObjLoader **********/
 class AiSceneObjLoader {
 public:
-	AiSceneObjLoader(Launch lchMode, ResourceManager& resMng, AiScenePtr asset)
-		: mLaunchMode(lchMode), mResMng(resMng), mAsset(*asset), mResult(asset)
+	AiSceneObjLoader(Launch lchMode, ResourceManager& resMng, MaterialLoadParam loadParam, AiScenePtr asset)
+	: mLaunchMode(lchMode), mResMng(resMng), mLoadParam(loadParam), mAsset(*asset), mResult(asset)
 	{}
 
 	TemplateArgs CoTask<bool> Execute(T &&...args) {
@@ -439,7 +441,8 @@ private:
 			mesh.mSceneMeshIndex = meshIndex++;
 
 			boost::filesystem::path matPath = mRedirectPathOnDir(boost::filesystem::path(node->mName + ".Material"));
-			std::string loadParam = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
+			auto loadParam = mLoadParam;
+			loadParam.ShaderVariantName = boost::filesystem::is_regular_file(matPath) ? matPath.string() : MAT_MODEL;
 			CoAwait mResMng.CreateMaterial(mesh.mMaterial, mLaunchMode, loadParam);
 
 			mesh.mAABB = Eigen::AlignedBox3f();
@@ -484,6 +487,7 @@ private:
 private:
 	const Launch mLaunchMode;
 	ResourceManager& mResMng;
+	MaterialLoadParam mLoadParam;
 	AiScene& mAsset;
 	AiScenePtr mResult;
 private:
@@ -498,7 +502,7 @@ AiResourceFactory::AiResourceFactory(ResourceManager& resMng)
 {
 }
 
-CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMode, std::string assetPath, std::string redirectRes) ThreadSafe
+CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe
 {
 	//CoAwait mResourceMng.SwitchToLaunchService(lchMode)
 	COROUTINE_VARIABLES_4(lchMode, scene, assetPath, redirectRes);
@@ -506,21 +510,21 @@ CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMod
 
 	scene = IF_OR(scene, CreateInstance<AiScene>());
 	if (boost::filesystem::path(assetPath).extension() != ".obj") {
-		auto loader = CreateInstance<AiSceneLoader>(lchMode, mResMng, scene);
+		auto loader = CreateInstance<AiSceneLoader>(lchMode, mResMng, mlp, scene);
 		CoAwait loader->Execute(assetPath, redirectRes);
 	}
 	else {
-		auto loader = CreateInstance<AiSceneObjLoader>(lchMode, mResMng, scene);
+		auto loader = CreateInstance<AiSceneObjLoader>(lchMode, mResMng, mlp, scene);
 		CoAwait loader->Execute(assetPath, redirectRes);
 	}
 	CoReturn scene->IsLoaded();
 }
-CoTask<bool> AiResourceFactory::CreateAiScene(AiScenePtr& aiScene, Launch lchMode, std::string assetPath, std::string redirectRes) ThreadSafe
+CoTask<bool> AiResourceFactory::CreateAiScene(AiScenePtr& aiScene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe
 {
 	//CoAwait SwitchToLaunchService(lchMode);
 	COROUTINE_VARIABLES_3(lchMode, assetPath, redirectRes);
 
-	AiResourceKey key{ assetPath, redirectRes };
+	AiResourceKey key{ assetPath, redirectRes, mlp };
 	bool resNeedLoad = false;
 	aiScene = mAiSceneByKey.GetOrAdd(key, [&]() {
 		auto aiScene = CreateInstance<res::AiScene>();
@@ -530,7 +534,7 @@ CoTask<bool> AiResourceFactory::CreateAiScene(AiScenePtr& aiScene, Launch lchMod
 		return aiScene;
 	});
 	if (resNeedLoad) {
-		CoAwait this->DoCreateAiScene(aiScene, lchMode, std::move(assetPath), std::move(redirectRes));
+		CoAwait this->DoCreateAiScene(aiScene, lchMode, std::move(assetPath), std::move(redirectRes), std::move(mlp));
 	}
 	else {
 		CoAwait mResMng.WaitResComplete(aiScene);

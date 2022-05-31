@@ -58,7 +58,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
-		modelMat["CubeMapIsRightHandness"] = TRUE;
+		modelMat["LIGHTING_MODE"] = 2;
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 
 		std::string modelNameArr[] = { "damaged-helmet", "toycar", "box-space", "BoomBox", "Box" };

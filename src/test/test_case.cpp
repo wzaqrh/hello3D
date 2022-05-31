@@ -146,29 +146,21 @@ static bool IsFileExits(const std::string& path) {
 void model::Init(const std::string& name)
 {
 	mName = name;
-	auto iter = CResPathMap.find(name);
-	if (iter != CResPathMap.end()) {
-		mPath = iter->second.mPath;
-		float s = iter->second.mScale;
-		mScale = Eigen::Vector3f(s, s, s);
-		mPos = Eigen::Vector3f(0, iter->second.mPosY, 0);
-	}
-	else {
-		mPath = "model/gltf/2.0/" + name + "/glTF/" + name + ".gltf";
-		FILE* fd = fopen(mPath.c_str(), "rb");
-		if (! IsFileExits(mPath)) {
-			std::string exts[] = { ".obj", ".gltf", ".fbx" };
-			for (auto ext : exts) {
-				mPath = "model/" + name + "/" + name + ext;
-				if (IsFileExits(mPath))
-					break;
-			}
-		}
 
-		float s = 1;
-		mScale = Eigen::Vector3f(s, s, s);
-		mPos = Eigen::Vector3f(0, 0, 0);
+	mPath = "model/gltf/2.0/" + name + "/glTF/" + name + ".gltf";
+	FILE* fd = fopen(mPath.c_str(), "rb");
+	if (!IsFileExits(mPath)) {
+		std::string exts[] = { ".obj", ".gltf", ".fbx" };
+		for (auto ext : exts) {
+			mPath = "model/" + name + "/" + name + ext;
+			if (IsFileExits(mPath))
+				break;
+		}
 	}
+
+	float s = 1;
+	mScale = Eigen::Vector3f(s, s, s);
+	mPos = Eigen::Vector3f(0, 0, 0);
 }
 CoTask<mir::TransformPtr> model::Init(const std::string& name, mir::rend::AssimpModelPtr aiModel)
 {

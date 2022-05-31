@@ -125,7 +125,7 @@ public:
 /********** AssimpModel **********/
 CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectResource)
 {
-	if (!CoAwait mResMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource))) 
+	if (!CoAwait mResMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource), mLoadParam)) 
 		CoReturn false;
 
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);

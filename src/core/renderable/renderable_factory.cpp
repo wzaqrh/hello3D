@@ -122,7 +122,7 @@ CoTask<bool> RenderableFactory::CreateAssimpModel(rend::AssimpModelPtr& model, M
 {
 	COROUTINE_VARIABLES_1(param);
 
-	model = CreateInstance<AssimpModel>(mLaunchMode, mResMng, res::MaterialInstance()); BOOST_ASSERT(model);
+	model = CreateInstance<AssimpModel>(mLaunchMode, mResMng, param); BOOST_ASSERT(model);
 #if MIR_GRAPHICS_DEBUG
 	//CoAwait CreatePaint3D(model->mDebugPaint);
 #endif

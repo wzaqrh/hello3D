@@ -57,7 +57,7 @@ class MIR_CORE_API AssimpModel : public RenderableSingleRenderOp
 	typedef RenderableSingleRenderOp Super;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	AssimpModel(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matInst) :Super(launchMode, resMng, matInst) {}
+	AssimpModel(Launch launchMode, ResourceManager& resMng, MaterialLoadParam mlp = "") :Super(launchMode, resMng, res::MaterialInstance()) ,mLoadParam(mlp) {}
 	
 	CoTask<bool> LoadModel(std::string assetPath, std::string redirectResource = "");
 	void PlayAnim(int Index);
@@ -69,6 +69,7 @@ private:
 	void DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList);
 	bool IsMaterialEnabled() const override { return false; }
 private:
+	MaterialLoadParam mLoadParam;
 	res::AiScenePtr mAiScene;
 	AiAnimeTree mAnimeTree;
 
