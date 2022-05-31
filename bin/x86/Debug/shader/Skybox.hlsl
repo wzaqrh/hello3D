@@ -29,7 +29,7 @@ PixelInput VS(VertexInput input)
 PixelInput VS(VertexInput input)
 {
 	PixelInput output;
-#if !CubeMapIsRightHandness
+#if !RIGHT_HANDNESS_RESOURCE
 	output.Tex = input.Pos;
 #else
     output.Tex = float3(input.Pos.x, input.Pos.y, -input.Pos.z);

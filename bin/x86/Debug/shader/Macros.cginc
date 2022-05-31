@@ -98,10 +98,6 @@
 #define RIGHT_HANDNESS_RESOURCE 1
 #endif
 
-#if !defined CubeMapIsRightHandness
-#define CubeMapIsRightHandness 1
-#endif
-
 #define LIGHTMODE_SHADOW_CASTER 0
 #define LIGHTMODE_FORWARD_BASE 1
 #define LIGHTMODE_FORWARD_ADD 2

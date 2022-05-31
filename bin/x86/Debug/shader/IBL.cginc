@@ -11,7 +11,7 @@ float clampedDot(float3 x, float3 y)
 
 float3 GetDiffuseLight(float3 normal)
 {
-#if CubeMapIsRightHandness
+#if RIGHT_HANDNESS_RESOURCE
     normal.z = -normal.z;
 #endif  
 	return MIR_SAMPLE_TEXCUBE(_DiffuseCube, normal).rgb;
@@ -20,7 +20,7 @@ float3 GetDiffuseLight(float3 normal)
 float3 GetSpecularLight(float3 normal, float3 toEye, float lod)
 {
     float3 reflUVW = normalize(reflect(-toEye, normal));
-#if CubeMapIsRightHandness
+#if RIGHT_HANDNESS_RESOURCE
 	reflUVW.z = -reflUVW.z;
 #endif	
     return MIR_SAMPLE_TEXCUBE_LOD(_SpecCube, reflUVW, lod).rgb;
@@ -72,7 +72,7 @@ float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness,
 	fcolor = float3(mip / 32.0, perceptualRoughness, mip * perceptualRoughness);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV_UV
     float3 reflUVW = normalize(reflect(-toEye, normal));
-#if CubeMapIsRightHandness
+#if RIGHT_HANDNESS_RESOURCE
 	reflUVW.z = -reflUVW.z;
 #endif	
 	fcolor = reflUVW;
