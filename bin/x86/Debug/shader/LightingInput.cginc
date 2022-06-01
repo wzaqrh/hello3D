@@ -11,16 +11,16 @@
 struct LightingInput
 {
 	float4 albedo; 
-	float4 ao_rough_metal; 
+	float4 ao_rough_metal_tx; 
 	float4 emissive; 
 	float2 uv;
+	float3 world_pos;
 #if DEBUG_CHANNEL
     float2 uv1;
 	float3 tangent_normal;
     float3 normal_basis;
 	float3 tangent_basis;
 	float3 bitangent_basis;
-	float3 world_pos;
 	float3 window_pos;
 #endif
 };

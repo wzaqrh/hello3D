@@ -9,6 +9,7 @@
 
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
 		<COLORSPACE_GAMMA>0</COLORSPACE_GAMMA>
+		<TONEMAP_MODE>2</TONEMAP_MODE>
 	</Macros>
 	<Properties>
 		<txAlbedo>Fabric_baseColor.png</txAlbedo>

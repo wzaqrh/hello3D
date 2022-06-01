@@ -22,6 +22,7 @@
 			<Element Name="OcclusionStrength"       Type="float"  Default="1"></Element>
 			<Element Name="RoughnessFactor"         Type="float"  Default="1"></Element>
 			<Element Name="MetallicFactor"          Type="float"  Default="1"></Element>
+			<Element Name="TransmissionFactor"      Type="float"  Default="0"></Element>
 			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
 		</Uniform>   
 		<Texture>

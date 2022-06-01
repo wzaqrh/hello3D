@@ -30,9 +30,9 @@ float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
     float lh = saturate(dot(l, h));
     float lv = saturate(dot(l, v));
     
-    float ao = i.ao_rough_metal.x;
-    float perceptualRoughness = i.ao_rough_metal.y;
-    float metalness = i.ao_rough_metal.z;
+    float ao = i.ao_rough_metal_tx.x;
+    float perceptualRoughness = i.ao_rough_metal_tx.y;
+    float metalness = i.ao_rough_metal_tx.z;
     
     //diffuse color
     float3 fd_disney = DisneyDiffuse(nv, nl, lh, perceptualRoughness, i.albedo.rgb);

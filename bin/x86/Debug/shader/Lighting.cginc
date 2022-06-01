@@ -26,7 +26,7 @@ inline float3 BlinnPhongLight(LightingInput i, float3 l, float3 n, float3 v)
 	//diffuse
     color += LightColor.rgb * i.albedo.rgb * nl;
 	//specular
-	color += i.ao_rough_metal.rgb * i.albedo.w * pow(nh, i.ao_rough_metal.w * 128.0);
+	color += i.ao_rough_metal_tx.rgb * i.albedo.w * pow(nh, i.ao_rough_metal_tx.w * 128.0);
 	return color;
 }
 
@@ -59,9 +59,9 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 #endif
 	
 #if DEBUG_CHANNEL 	
-	float ao = i.ao_rough_metal.x;
-    float perceptualRoughness = i.ao_rough_metal.y;
-	float metallic = i.ao_rough_metal.z;
+	float ao = i.ao_rough_metal_tx.x;
+    float perceptualRoughness = i.ao_rough_metal_tx.y;
+	float metallic = i.ao_rough_metal_tx.z;
 #endif
 	
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION

@@ -7,12 +7,7 @@
 #include "ToneMapping.cginc"
 #include "Macros.cginc"
 
-MIR_DECLARE_TEX2D(txAlbedo, 0);
-MIR_DECLARE_TEX2D(txNormal, 1);
-MIR_DECLARE_TEX2D(txMetalness, 2);
-MIR_DECLARE_TEX2D(txRoughness, 3);
-MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
-MIR_DECLARE_TEX2D(txEmissive, 5);
+
 
 //#define HAS_ATTRIBUTE_NORMAL 1 
 //#define HAS_ATTRIBUTE_TANGENT 1 
@@ -36,6 +31,7 @@ cbuffer cbModel : register(b3)
     float OcclusionStrength;
     float RoughnessFactor;
     float MetallicFactor;
+	float TransmissionFactor;
 	float4 EmissiveFactor;
 }
 
@@ -65,13 +61,13 @@ inline float4 GetEmissive(float2 uv)
     return emissive;
 }
 
-inline float4 GetAoRoughnessMetallic(float2 uv)
+inline float4 GetAoRoughnessMetallicTransmission(float2 uv)
 {
-    float4 value = float4(1.0, RoughnessFactor, MetallicFactor, 1.0);
+    float4 value = float4(1.0, RoughnessFactor, MetallicFactor, TransmissionFactor);
 #if ENABLE_AO_ROUGHNESS_METALLIC_MAP
-	float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).rgb;
-	value.x = lerp(1.0, arm.x, OcclusionStrength);
-	value.yz *= arm.yz;
+	float4 armt = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).rgba;
+	value.x = lerp(1.0, armt.x, OcclusionStrength);
+	value.yz *= armt.yz;
 #elif ENABLE_METALLIC_X_X_SMOOTHNESS_MAP
     #if ENABLE_AO_MAP
 		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).r;
@@ -209,9 +205,10 @@ float4 PS(PixelInput input) : SV_Target
 	
 	LightingInput li;
 	li.albedo = GetAlbedo(input.Tex);
-	li.ao_rough_metal = GetAoRoughnessMetallic(input.Tex);
+	li.ao_rough_metal_tx = GetAoRoughnessMetallicTransmission(input.Tex);
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
+	li.world_pos = input.WorldPos;
 #if DEBUG_CHANNEL   
 	li.uv1 = MakeDummyColor(toEye).xy;
 	#if ENABLE_NORMAL_MAP
@@ -243,7 +240,6 @@ float4 PS(PixelInput input) : SV_Target
 	#else
 		li.bitangent_basis = MakeDummyColor(toEye);
 	#endif
-	li.world_pos = input.WorldPos;
 	li.window_pos = input.Pos.xyz;
 #endif	
 	return input.Color * Lighting(li, toLight, normal, toEye);
@@ -258,7 +254,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 	
 	LightingInput li = (LightingInput)0;
 	li.albedo = GetAlbedo(input.Tex);	
-	li.ao_rough_metal = GetAoRoughnessMetallic(input.Tex);	
+	li.ao_rough_metal_tx = GetAoRoughnessMetallicTransmission(input.Tex);	
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
 	//return input.Color * Lighting(li, toLight, normal, toEye);
@@ -415,7 +411,7 @@ PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
 	PSPrepassBaseOutput output;
 	output.Pos = float4(input.Pos.xyz / input.Pos.w * 0.5 + 0.5, 1.0);
-	float4 aorm = GetAoRoughnessMetallic(input.Tex);
+	float4 aorm = GetAoRoughnessMetallicTransmission(input.Tex);
 	SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
 	output.Normal = float4(normal * 0.5 + 0.5, aorm.x);
 	output.Albedo = float4(GetAlbedo(input.Tex).xyz, aorm.y);
@@ -459,7 +455,7 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	LightingInput li = (LightingInput)0;
 	li.albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);
 	li.emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);
-	li.ao_rough_metal = float4(normal.w, li.albedo.w, li.emissive.w, 1.0);
+	li.ao_rough_metal_tx = float4(normal.w, li.albedo.w, li.emissive.w, 1.0);
 	li.uv = input.Tex;
 	output.Color = Lighting(li, toLight, normal.xyz, toEye);
 	
