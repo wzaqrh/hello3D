@@ -2,21 +2,26 @@
 	<UseShader>Model</UseShader>
 	<Macros>
 		<ENABLE_ALBEDO_MAP>1</ENABLE_ALBEDO_MAP>
+		<ALBEDO_MAP_SRGB>1</ALBEDO_MAP_SRGB>
+		
 		<ENABLE_NORMAL_MAP>1</ENABLE_NORMAL_MAP>
-		<ENABLE_AO_MAP>1</ENABLE_AO_MAP>
-		<ENABLE_EMISSIVE_MAP>1</ENABLE_EMISSIVE_MAP>
 		
 		<ENABLE_AO_ROUGHNESS_METALLIC_MAP>1</ENABLE_AO_ROUGHNESS_METALLIC_MAP>
-		<ALBEDO_MAP_SRGB>1</ALBEDO_MAP_SRGB>
+		<ENABLE_AO_MAP>0</ENABLE_AO_MAP>
+		<ENABLE_ROUGHNESS_MAP>0</ENABLE_ROUGHNESS_MAP>
+		<ENABLE_METALLIC_MAP>0</ENABLE_METALLIC_MAP>
+		
+		<ENABLE_EMISSIVE_MAP>1</ENABLE_EMISSIVE_MAP>
 		<EMISSIVE_MAP_SRGB>1</EMISSIVE_MAP_SRGB>
+		
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
+		<COLORSPACE_GAMMA>0</COLORSPACE_GAMMA>
 	</Macros>
 	<Properties>
-		<txAlbedo>ToyCar_basecolor.png</txAlbedo>
-		<txNormal>ToyCar_normal.png</txNormal>
-		<txAmbientOcclusion>ToyCar_occlusion_roughness_metallic.png</txAmbientOcclusion>
-		<txEmissive>ToyCar_emissive.png</txEmissive>
-		
+		<txAlbedo GenMipmap="false">ToyCar_basecolor.png</txAlbedo>
+		<txNormal GenMipmap="false">ToyCar_normal.png</txNormal>
+		<txAmbientOcclusion GenMipmap="false">ToyCar_occlusion_roughness_metallic.png</txAmbientOcclusion>
+		<txEmissive GenMipmap="false">ToyCar_emissive.png</txEmissive>
 		<EmissiveFactor>1,1,1,0</EmissiveFactor>
 	</Properties>
 </Material>

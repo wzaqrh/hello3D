@@ -21,6 +21,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pH
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char* ConvertLPWSTRToLPSTR(LPWSTR lpwszStrIn);
 
+static int WINDOW_WIDTH, WINDOW_HEIGHT;
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -74,16 +75,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	SetWindowPos(handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE);
 	POINT topleft = {0, 0};
 	ClientToScreen(handle, &topleft);
-#if 0//debug gltf
-	SetWindowPos(handle, HWND_NOTOPMOST, 0 - topleft.x, 103 - topleft.y, 0, 0, SWP_NOSIZE);
-#else//debug unity
-	SetWindowPos(handle, HWND_NOTOPMOST, 471 - topleft.x, 32 + 94 - topleft.y, 0, 0, SWP_NOSIZE);
-#endif
+
+	if (appName == "test_gltf") {
+		WINDOW_WIDTH = 1520;
+		WINDOW_HEIGHT = 937;
+		SetWindowPos(handle, HWND_NOTOPMOST, 0 - topleft.x, 103 - topleft.y, 0, 0, SWP_NOSIZE);
+	}
+	else {
+		WINDOW_WIDTH = 800;
+		WINDOW_HEIGHT = 600;
+		SetWindowPos(handle, HWND_NOTOPMOST, 471 - topleft.x, 32 + 94 - topleft.y, 0, 0, SWP_NOSIZE);
+	}
 #if defined _DEBUG
 	RECT rect;
 	GetClientRect(handle, &rect);
-	BOOST_ASSERT(rect.bottom - rect.top == C_WINDOW_HEIGHT);
-	BOOST_ASSERT(rect.right - rect.left == C_WINDOW_WIDTH);
+	BOOST_ASSERT(rect.right - rect.left == WINDOW_WIDTH);
+	BOOST_ASSERT(rect.bottom - rect.top == WINDOW_HEIGHT);
 #endif
 	return AppDraw->MainLoop(hInstance, handle);
 }
@@ -134,7 +141,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pH
 		return E_FAIL;
 
 	// Create window
-	RECT rc = { 0, 0, C_WINDOW_WIDTH, C_WINDOW_HEIGHT };
+	RECT rc = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	auto HWnd = CreateWindowA("TutorialWindowClass", name, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,

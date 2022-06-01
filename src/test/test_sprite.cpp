@@ -29,7 +29,7 @@ CoTask<bool> TestSprite::OnInitScene()
 {
 	mScneMng->CreateLightNode<DirectLight>();
 	mScneMng->CreateCameraNode(kCameraOthogonal);
-	SetPPU(C_WINDOW_HEIGHT / 10.0);
+	SetPPU(mHalfSize.y() * 2 / 10.0);
 
 	Launch sync = __LaunchSync__;
 	Launch async = __LaunchAsync__;

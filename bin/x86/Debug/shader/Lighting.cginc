@@ -88,18 +88,27 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 		fcolor.z = -fcolor.z;
 	#endif
 	fcolor = fcolor * 0.5 + 0.5;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
-    fcolor = linearTosRGB(i.albedo.rgb);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
 	fcolor = n.xyz;	
 	#if DEBUG_RIGHT_HANDEDNESS
-		fcolor.z = -fcolor.z;
+		#if ENABLE_NORMAL_MAP
+			float3 _t = i.tangent_basis.xyz * 2.0 - 1.0;
+			float3 _b = i.bitangent_basis.xyz * 2.0 - 1.0;
+			float3 _n = i.normal_basis.xyz * 2.0 - 1.0;
+			float3 tn = i.tangent_normal.xyz * 2.0 - 1.0;
+			fcolor.x += -2.0 * _b.x * tn.y;					//dot(tn.xyz, float3(_t.x, -_b.x, _n.x));
+			fcolor.y += -2.0 * _b.y * tn.y;					//dot(tn.xyz, float3(_t.y, -_b.y, _n.y));
+			fcolor.z += -2.0 * (_t.z * tn.x + _n.z * tn.z); //dot(tn.xyz, float3(-_t.z, _b.z, -_n.z));
+			fcolor = normalize(fcolor);
+		#else
+			fcolor.z = -fcolor.z;
+		#endif
 	#endif
 	fcolor = fcolor * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC
     fcolor = linearTosRGB(float3(metallic, metallic, metallic));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
-    fcolor = (float3(perceptualRoughness, perceptualRoughness, perceptualRoughness));
+    fcolor = linearTosRGB(float3(perceptualRoughness, perceptualRoughness, perceptualRoughness));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     fcolor = float3(i.uv, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
@@ -117,9 +126,12 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 		fcolor.z = 1.0 - fcolor.z;
 	#endif
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_GEOMETRY_BITANGENT
-	fcolor = MakeDummyColor(v);
+	fcolor = i.bitangent_basis.xyz;
+	#if DEBUG_RIGHT_HANDEDNESS
+		fcolor.xy = 1.0 - fcolor.xy;
+	#endif
 #elif DEBUG_CHANNEL == DEBUG_WINDOW_POS
-	fcolor = float3(input.Pos.xy * FrameBufferSize.zw, 0);
+	fcolor = float3(i.window_pos.xy * FrameBufferSize.zw, 0);
 	fcolor.y = 1.0 - fcolor.y;
 #elif DEBUG_CHANNEL == DEBUG_CAMERA_POS
 	fcolor.xyz = CameraPositionExposure.xyz;

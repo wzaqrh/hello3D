@@ -67,12 +67,11 @@ inline float4 GetEmissive(float2 uv)
 
 inline float4 GetAoRoughnessMetallic(float2 uv)
 {
-    float4 value = float4(1.0, 1.0, MetallicFactor, 1.0);
+    float4 value = float4(1.0, RoughnessFactor, MetallicFactor, 1.0);
 #if ENABLE_AO_ROUGHNESS_METALLIC_MAP
 	float3 arm = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).rgb;
 	value.x = lerp(1.0, arm.x, OcclusionStrength);
 	value.yz *= arm.yz;
-	value.y = 0.5;
 #elif ENABLE_METALLIC_X_X_SMOOTHNESS_MAP
     #if ENABLE_AO_MAP
 		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).r;
@@ -124,7 +123,7 @@ inline float4 GetAoRoughnessMetallic(float2 uv)
 #else
 	#define APPLY_NORMALMAP(normal, uv, worldPos, tangentBasis, bitangentBasis)
 #endif
-#define SETUP_NORMAL(normal, uv, worldPos, tangentBasis, bitangentBasis, worldNormal) float3 normal; { SET_WORLD_NORMAL(normal, worldNormal, worldPos); APPLY_NORMALMAP(normal, uv, worldPos, tangentBasis, bitangentBasis); }
+#define SETUP_NORMAL(normal, uv, worldPos, tangentBasis, bitangentBasis, worldNormal) float3 normal; SET_WORLD_NORMAL(normal, worldNormal, worldPos); APPLY_NORMALMAP(normal, uv, worldPos, tangentBasis, bitangentBasis);
 
 /************ ForwardBase ************/
 struct PixelInput
@@ -214,20 +213,38 @@ float4 PS(PixelInput input) : SV_Target
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
 #if DEBUG_CHANNEL   
-	li.uv1 = MakeDummyColor(v).xy;
-	li.tangent_normal = MakeDummyColor(toEye);
+	li.uv1 = MakeDummyColor(toEye).xy;
 	#if ENABLE_NORMAL_MAP
-		li.tangent_normal = MIR_SAMPLE_TEX2D(txNormal, GetUV(input.Tex, NormalUV)).xyz;
+		li.tangent_normal = MIR_SAMPLE_TEX2D(txNormal, GetUV(input.Tex, NormalUV)).xyz * 2.0 - 1.0;
+		li.tangent_normal = normalize(li.tangent_normal * float3(NormalScale, NormalScale, 1.0));
+		li.tangent_normal = li.tangent_normal * 0.5 + 0.5;
+	#else
+		li.tangent_normal = MakeDummyColor(toEye);
 	#endif
-	li.normal_basis = MakeDummyColor(toEye);
 	#if HAS_ATTRIBUTE_NORMAL
-		li.normal_basis = normal * 0.5 + 0.5;
+		li.normal_basis = normalize(input.Normal.xyz) * 0.5 + 0.5;
+	#else
+		li.normal_basis = MakeDummyColor(toEye);
 	#endif
-	li.tangent_basis = MakeDummyColor(toEye);
 	#if HAS_ATTRIBUTE_TANGENT
-		li.tangent_basis = normal * 0.5 + 0.5;
+		li.tangent_basis = normalize(input.Tangent.xyz) * 0.5 + 0.5;
+	#else
+		li.tangent_basis = MakeDummyColor(toEye);
+	#endif
+	#if HAS_ATTRIBUTE_NORMAL && HAS_ATTRIBUTE_TANGENT
+		#if !ENABLE_PIXEL_BTN
+			li.bitangent_basis = normalize(input.Bitangent.xyz) * 0.5 + 0.5;
+		#elif ENABLE_NORMAL_MAP
+			li.bitangent_basis = tbn[1] * 0.5 + 0.5;
+		#else
+			float3x3 tbn = GetTangentToWorldTBN(normalize(input.Tangent.xyz), normalize(input.Normal.xyz), GetDpDuv(input.WorldPos, input.Tex));
+			li.bitangent_basis = tbn[1] * 0.5 + 0.5;
+		#endif
+	#else
+		li.bitangent_basis = MakeDummyColor(toEye);
 	#endif
 	li.world_pos = input.WorldPos;
+	li.window_pos = input.Pos.xyz;
 #endif	
 	return input.Color * Lighting(li, toLight, normal, toEye);
 }
@@ -239,29 +256,13 @@ float4 PSAdd(PixelInput input) : SV_Target
 	float3 toLight = normalize(input.ToLight);
 	float3 toEye = normalize(input.ToEye);
 	
-	LightingInput li;
+	LightingInput li = (LightingInput)0;
 	li.albedo = GetAlbedo(input.Tex);	
 	li.ao_rough_metal = GetAoRoughnessMetallic(input.Tex);	
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
-#if DEBUG_CHANNEL   
-	li.uv1 = MakeDummyColor(v).xy;
-	li.tangent_normal = MakeDummyColor(toEye);
-	#if ENABLE_NORMAL_MAP
-		li.tangent_normal = MIR_SAMPLE_TEX2D(txNormal, GetUV(input.Tex, NormalUV)).xyz;
-	#endif
-	li.normal_basis = MakeDummyColor(toEye);
-	#if HAS_ATTRIBUTE_NORMAL
-		li.normal_basis = normal * 0.5 + 0.5;
-	#endif
-	li.tangent_basis = MakeDummyColor(toEye);
-	#if HAS_ATTRIBUTE_TANGENT
-		li.tangent_basis = normal * 0.5 + 0.5;
-	#endif
-	li.world_pos = input.WorldPos;
-#endif
-
-	return input.Color * Lighting(li, toLight, normal, toEye);
+	//return input.Color * Lighting(li, toLight, normal, toEye);
+	return float4(0.0,0.0,0.0,0.0);
 }
 
 /************ ShadowCaster ************/
@@ -455,19 +456,11 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	float3 toLight = normalize(LightPosition.xyz - worldPosition.xyz * LightPosition.w);
 	float3 toEye = normalize(CameraPositionExposure.xyz - worldPosition.xyz);
 	
-	LightingInput li;
+	LightingInput li = (LightingInput)0;
 	li.albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);
 	li.emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);
 	li.ao_rough_metal = float4(normal.w, li.albedo.w, li.emissive.w, 1.0);
 	li.uv = input.Tex;
-#if DEBUG_CHANNEL   
-	li.uv1 = MakeDummyColor(v).xy;
-	li.tangent_normal = MakeDummyColor(toEye);
-	li.normal_basis = MakeDummyColor(toEye);
-	li.tangent_basis = MakeDummyColor(toEye);
-	li.world_pos = worldPosition.xyz;
-#endif
-
 	output.Color = Lighting(li, toLight, normal.xyz, toEye);
 	
 	return output;

@@ -61,7 +61,7 @@ cbuffer cbPerFrame : register(b0)
 	float4 SHC2_2;
 	float4 LightMapUV;
 	float4 EnvDiffuseColor;
-	float4 EnvSpecColor;
+	float4 EnvSpecColorMipCnt;
 	
 	float4 FrameBufferSize;
 	float4 ShadowMapSize;

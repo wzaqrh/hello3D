@@ -45,11 +45,11 @@ bool CheckHResultFailed(HRESULT hr)
 		Log(DXGetErrorDescriptionA(hr));
 		Log(DXGetErrorStringA(hr));
 
-		DXTRACE_ERR_MSGBOX(DXGetErrorDescription(hr), hr);
-		DXTRACE_ERR_MSGBOX(DXGetErrorString(hr), hr);
-		DXTRACE_ERR_MSGBOX(L"Clear failed!", hr); // Use customized error string
-		DXTRACE_MSG(DXGetErrorDescription(hr));
-		DXTRACE_ERR(DXGetErrorDescription(hr), hr);
+		//DXTRACE_ERR_MSGBOX(DXGetErrorDescription(hr), hr);
+		//DXTRACE_ERR_MSGBOX(DXGetErrorString(hr), hr);
+		//DXTRACE_ERR_MSGBOX(L"Clear failed!", hr); // Use customized error string
+		//DXTRACE_MSG(DXGetErrorDescription(hr));
+		//DXTRACE_ERR(DXGetErrorDescription(hr), hr);
 
 		BOOST_ASSERT(false);
 		return true;

@@ -2,10 +2,12 @@
 	<UseShader>Model</UseShader>
 	<Macros>
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
+		<COLORSPACE_GAMMA>0</COLORSPACE_GAMMA>
 	</Macros>
 	<Properties>
-		<AlbedoFactor>0.8,0.3,0.8,1</AlbedoFactor>
+		<AlbedoFactor>0.3,0.8,0.3,1</AlbedoFactor>
 		<MetallicFactor>0</MetallicFactor>
 		<RoughnessFactor>0</RoughnessFactor>
+		<EmissiveFactor>0,0,0,0</EmissiveFactor>
 	</Properties>
 </Material>

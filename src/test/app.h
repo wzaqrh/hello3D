@@ -4,9 +4,6 @@
 #include "core/base/debug.h"
 #include "core/predeclare.h"
 
-#define C_WINDOW_WIDTH (800)
-#define C_WINDOW_HEIGHT (600)
-
 struct IApp
 {
 	virtual void Create() = 0;

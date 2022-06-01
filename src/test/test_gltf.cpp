@@ -51,7 +51,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 		}
 
 		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
-		dir_light->SetLookAt(Eigen::Vector3f(0.498, -0.71, 0.498), Eigen::Vector3f::Zero());
+		dir_light->SetLookAt(Eigen::Vector3f(-0.5, 0.707, -0.5), Eigen::Vector3f::Zero());
 		
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["CubeMapIsRightHandness"] = TRUE;

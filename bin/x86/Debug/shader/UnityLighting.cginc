@@ -85,7 +85,7 @@ float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
 #endif
 
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
-    finalColor = albedo * (1.0 - reflectivity);
+    finalColor = i.albedo.rgb * (1.0 - reflectivity);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHADING_NORMAL
     finalColor = n * 0.5 + 0.5;
 #endif

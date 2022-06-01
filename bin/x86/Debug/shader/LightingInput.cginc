@@ -17,9 +17,11 @@ struct LightingInput
 #if DEBUG_CHANNEL
     float2 uv1;
 	float3 tangent_normal;
-	float3 tangent_basis;
     float3 normal_basis;
+	float3 tangent_basis;
+	float3 bitangent_basis;
 	float3 world_pos;
+	float3 window_pos;
 #endif
 };
 

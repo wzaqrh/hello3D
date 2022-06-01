@@ -9,14 +9,6 @@ namespace mir {
 struct UNIFORM_ALIGN cbPerFrame
 {
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	cbPerFrame() {
-		World = View = Projection = Eigen::Matrix4f::Identity();
-		ViewInv = ProjectionInv = Eigen::Matrix4f::Identity();
-		LightView = LightProjection = Eigen::Matrix4f::Identity();
-		SHC0C1 = Eigen::Matrix4f::Zero();
-		FrameBufferSize = Eigen::Vector4f::Zero();
-		ShadowMapSize = Eigen::Vector4f::Zero();
-	}
 public:
 	Eigen::Matrix4f World = Eigen::Matrix4f::Identity();
 	Eigen::Matrix4f View = Eigen::Matrix4f::Identity();
@@ -34,7 +26,7 @@ public:
 	Eigen::Vector4f SHC2_2 = Eigen::Vector4f::Zero();
 	Eigen::Vector4f LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
 	Eigen::Vector4f EnvDiffuseColor = Eigen::Vector4f::Zero();
-	Eigen::Vector4f EnvSpecColor = Eigen::Vector4f::Zero();
+	Eigen::Vector4f EnvSpecColorMipCnt = Eigen::Vector4f(0, 0, 0, 1);
 
 	Eigen::Vector4f FrameBufferSize = Eigen::Vector4f::Zero();
 	Eigen::Vector4f ShadowMapSize = Eigen::Vector4f::Zero();

@@ -31,11 +31,11 @@ float3 GltfPbrLight(LightingInput i, float3 l, float3 n, float3 v)
     float3 F = SchlickFresnel(f0, f90, lh);
     float3 specular = D * V * F;
     
-    float3 kd = float3(1.0, 1.0, 1.0) - specularWeight * F;
+    float3 kd = 1.0 - specularWeight * F;
     float ks = specularWeight;
-	diffuse  = kd * diffuse * LightColor.rgb * nl;
-	specular = ks * specular * LightColor.rgb * nl;
-    fcolor += diffuse + specular;
+	float3 diffuse_color  = kd * diffuse * LightColor.rgb * nl;
+	float3 specular_color = ks * specular * LightColor.rgb * nl;
+    fcolor += diffuse_color + specular_color;
 #endif    
     
 #if USE_IBL
@@ -50,7 +50,9 @@ float3 GltfPbrLight(LightingInput i, float3 l, float3 n, float3 v)
 	fcolor = toneMap(fcolor, CameraPositionExposure.w);
 #endif
     
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_DIFFUSE
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
+    fcolor = linearTosRGB(i.albedo.rgb);   
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_DIFFUSE
 	fcolor = kd * diffuse;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR
 	fcolor = ks * specular;
