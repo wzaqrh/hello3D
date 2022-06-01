@@ -1,4 +1,8 @@
 #include <boost/format.hpp>
+#include "core/mir_config_macros.h"
+#include "core/base/macros.h"
+#include "core/base/debug.h"
+#include "core/base/attribute_struct.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/rendersys/render_states_block.h"
 #include "core/rendersys/frame_buffer_bank.h"
@@ -11,9 +15,6 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
-#include "core/base/macros.h"
-#include "core/base/debug.h"
-#include "core/base/attribute_struct.h"
 #include "test/unit_test/unit_test.h"
 
 namespace mir {
@@ -35,7 +36,8 @@ enum PipeLineTextureSlot
 
 #define kDepthFormat kFormatD32Float//kFormatD24UNormS8UInt
 
-struct cbPerFrameBuilder {
+struct cbPerFrameBuilder 
+{
 	cbPerFrameBuilder& SetSkybox(const rend::SkyBoxPtr& skybox) {
 		auto shc = IF_AND_OR(skybox, skybox->GetSphericalHarmonicsConstants(), rend::SphericalHarmonicsConstants());
 		mCBuffer.SHC0C1 = shc.C0C1;
@@ -99,11 +101,11 @@ private:
 class CameraRender 
 {
 public:
-	CameraRender(CameraRender& other, const RenderOperationQueue& ops)
-		:CameraRender(other.Pipe, ops, other.Camera, other.Lights)
+	CameraRender(CameraRender& other, const RenderableCollection& rends)
+		:CameraRender(other.Pipe, rends, other.Camera, other.Lights)
 	{}
 	CameraRender(RenderPipeline& pipe,
-		const RenderOperationQueue& ops,
+		const RenderableCollection& rends,
 		const scene::Camera& camera,
 		const std::vector<scene::LightPtr>& lights)
 		: Pipe(pipe)
@@ -114,7 +116,7 @@ public:
 		, mShadowMap(Pipe.mShadowMap)
 		, mGBuffer(Pipe.mGBuffer)
 		, mGBufferSprite(Pipe.mGBufferSprite)
-		, Ops(ops)
+		, Rends(rends)
 		, Camera(camera)
 		, CameraMask(camera.GetCullingMask())
 	{
@@ -131,6 +133,36 @@ public:
 
 				if (mMainLight == nullptr && light->DidCastShadow()) 
 					mMainLight = light;
+			}
+		}
+
+		RenderOperationQueue ops;
+		for (auto& r : Rends) {
+			if (r->GetCameraMask() & CameraMask) {
+				int position = ops.Count();
+				r->GenRenderOperation(ops);
+				for (int i = position; i < ops.Count(); ++i) {
+					ops[i].CastShadow = r->IsCastShadow();
+				}
+			}
+		}
+		for (auto& op : ops) {
+			auto renderType = op.Material->GetProperty().RenderType;
+			BOOST_ASSERT(renderType > RENDER_TYPE_UNKOWN && renderType < RENDER_TYPE_MAX);
+			mOpsByRenderType[renderType].AddOP(op);
+		}
+		for (const auto& op : mOpsByRenderType[RENDER_TYPE_GEOMETRY]) {
+			if (op.CastShadow) {
+				mCastShadowOps.AddOP(op);
+			}
+		}
+		for (const auto& op : mOpsByRenderType[RENDER_TYPE_GEOMETRY]) {
+			if (op.CastShadow) {
+				mGBufferSprite->GenRenderOperation(mDefferedOps);
+				for (auto& dop : mDefferedOps) {
+					dop.Material = op.Material;
+				}
+				break;
 			}
 		}
 	}
@@ -154,29 +186,14 @@ public:
 		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 		blend_state(BlendState::MakeDisable());
 
-		RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_, true);
+		RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER, mCastShadowOps);
 
-		if (mCfg.IsShadowVSM())
+		if (mCfg.IsShadowVSM() && !mDefferedOps.IsEmpty())
 		{
 			mGrabDic["_ShadowMap"] = mShadowMap;
 			depth_state(DepthState::MakeFor3D(false));
 
-			res::MaterialInstance mat;
-			for (auto& op : Ops) {
-				if (op.CastShadow) {
-					mat = op.Material;
-					break;
-				}
-			}
-			BOOST_ASSERT(mat);
-
-			RenderOperationQueue ops;
-			mGBufferSprite->GenRenderOperation(ops);
-			for (auto& op : ops)
-				op.Material = mat;
-
-			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_ "+1", true, &ops);
-
+			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_POSTPROCESS, mDefferedOps);
 			mRenderSys.GenerateMips(mShadowMap->GetAttachColorTexture(0));
 		}
 	}
@@ -200,13 +217,13 @@ public:
 				depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 				blend_state(BlendState::MakeDisable());
 
-				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_BASE_);
+				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_BASE, mOpsByRenderType[RENDER_TYPE_GEOMETRY]);
 			}
 			else {
 				depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLessEqual), kDepthWriteMaskZero));
 				blend_state(BlendState::MakeAdditive());
 
-				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_ADD_);
+				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_ADD, mOpsByRenderType[RENDER_TYPE_GEOMETRY]);
 			}
 		}
 	}
@@ -224,7 +241,7 @@ public:
 			auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer, Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
 			fb_gbuffer.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE_);
+			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE, mOpsByRenderType[RENDER_TYPE_GEOMETRY]);
 		}
 
 		mRenderSys.CopyFrameBuffer(nullptr, -1, mGBuffer, -1);
@@ -250,18 +267,19 @@ public:
 
 			RenderOperationQueue ops;
 			mGBufferSprite->GenRenderOperation(ops);
-			RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_PREPASS_FINAL_, false, &ops);
+			RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_PREPASS_FINAL, ops);
 		}
 	}
 	//LIGHTMODE_TRANSPARENT
-	void RenderTransparent() {
+	void RenderTransparent() 
+	{
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
 		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_TRANSPARENT_);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRenderType[RENDER_TYPE_TRANSPARENT]);
 	}
 	//LIGHTMODE_SKYBOX
 	void RenderSkybox()
@@ -277,16 +295,7 @@ public:
 
 		RenderOperationQueue ops;
 		skybox->GenRenderOperation(ops);
-		for (const auto& op : ops) {
-			auto shader = op.Material->GetShader();
-			if ((op.CameraMask & CameraMask) && shader->IsLoaded()) {
-				(*mPerFrame).World = op.WorldTransform;
-				op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(*mPerFrame));
-				op.WrMaterial().FlushGpuParameters(mRenderSys);
-
-				RenderOp(op, LIGHTMODE_SKYBOX_);
-			}
-		}
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, ops);
 	}
 	//LIGHTMODE_OVERLAY
 	void RenderOverlay()
@@ -297,7 +306,7 @@ public:
 		depth_state(DepthState::MakeFor3D(false));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY_);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY, mOpsByRenderType[RENDER_TYPE_OVERLAY]);
 	}
 	//LIGHTMODE_POSTPROCESS
 	void RenderPostProcess(const IFrameBufferPtr& fbInput)
@@ -329,30 +338,22 @@ public:
 
 			RenderOperationQueue ops;
 			effects[i]->GenRenderOperation(ops);
-			RenderLight(*mPerFrame, nullptr, LIGHTMODE_POSTPROCESS_, false, &ops);
+			RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, ops);
 		}
 	}
 private:
-	void RenderLight(cbPerFrame& perFrame, const cbPerLight* perLight, const std::string& lightMode, bool castShadow = false, const RenderOperationQueue* ops = nullptr)
+	void RenderLight(cbPerFrame& perFrame, const cbPerLight* perLight, int lightMode, const RenderOperationQueue& ops)
 	{
-		if (ops == nullptr) ops = &Ops;
+		for (const auto& op : ops) {
+			perFrame.World = op.WorldTransform;
+			op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(perFrame));
+			if (perLight) op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*perLight));
+			op.WrMaterial().FlushGpuParameters(mRenderSys);
 
-		for (const auto& op : *ops) {
-			auto shader = op.Material->GetShader();
-			if (castShadow && (!op.CastShadow))
-				continue;
-
-			if ((op.CameraMask & CameraMask) && shader->IsLoaded()) {
-				perFrame.World = op.WorldTransform;
-				op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerFrame), Data::Make(perFrame));
-				if (perLight) op.WrMaterial().WriteToCb(mRenderSys, MAKE_CBNAME(cbPerLight), Data::Make(*perLight));
-				op.WrMaterial().FlushGpuParameters(mRenderSys);
-
-				RenderOp(op, lightMode);
-			}
+			RenderOp(op, lightMode);
 		}
 	}
-	void RenderOp(const RenderOperation& op, const std::string& lightMode)
+	void RenderOp(const RenderOperation& op, int lightMode)
 	{
 		mTempGrabDic = mGrabDic;
 		res::TechniquePtr tech = op.Material->GetShader()->CurTech();
@@ -460,10 +461,12 @@ private:
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
 private:
-	const RenderOperationQueue& Ops;
+	const RenderableCollection& Rends;
 	const scene::Camera& Camera;
 	const unsigned CameraMask;
 	std::vector<scene::LightPtr> Lights;
+	RenderOperationQueue mDefferedOps, mCastShadowOps;
+	RenderOperationQueue mOpsByRenderType[RENDER_TYPE_MAX];
 private:
 	std::map<std::string, IFrameBufferPtr> mTempGrabDic, mGrabDic;
 	scene::LightPtr mMainLight, mFirstLight;
@@ -510,14 +513,14 @@ void RenderPipeline::SetBackColor(Eigen::Vector4f color)
 	mBackgndColor = color;
 }
 
-void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
+void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
 
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
-	CameraRender render(*this, ops, camera, lights);
+	CameraRender render(*this, rends, camera, lights);
 	render.Clear();
 	render.RenderCastShadow();
 	render.RenderForward();
@@ -532,14 +535,14 @@ void RenderPipeline::RenderCameraForward(const RenderOperationQueue& ops, const 
 	}
 }
 
-void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
+void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (lights.empty()) return;
 
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
-	CameraRender render(*this, ops, camera, lights);
+	CameraRender render(*this, rends, camera, lights);
 	render.Clear();
 	render.RenderCastShadow();
 	render.RenderPrepass();
@@ -554,14 +557,14 @@ void RenderPipeline::RenderCameraDeffered(const RenderOperationQueue& ops, const
 	}
 }
 
-void RenderPipeline::Render(const RenderOperationQueue& opQueue, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights)
+void RenderPipeline::Render(const RenderableCollection& rends, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights)
 {
 	for (auto& camera : cameras) 
 	{
 		auto fb_camera_output = mStatesBlock.LockFrameBuffer(IF_OR(camera->GetOutput(), nullptr));
 
-		if (camera->GetRenderingPath() == kRenderPathForward) RenderCameraForward(opQueue, *camera, lights);
-		else RenderCameraDeffered(opQueue, *camera, lights);
+		if (camera->GetRenderingPath() == kRenderPathForward) RenderCameraForward(rends, *camera, lights);
+		else RenderCameraDeffered(rends, *camera, lights);
 	}
 }
 

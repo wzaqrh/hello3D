@@ -19,8 +19,9 @@
 	</PROGRAM>
 	
 	<SubShader>
+		<RenderType>Overlay</RenderType> 
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSAO</PixelEntry>
 			</PROGRAM>
@@ -28,7 +29,7 @@
 		</Pass>
 		<Pass>
 			<UseGrab>PassOutAo{bind_slot:14}</UseGrab>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM>
 				<PixelEntry>PSBlurX</PixelEntry>
 			</PROGRAM>
@@ -36,7 +37,7 @@
 		</Pass>
 		<Pass>
 			<UseGrab>PassOutBlurX{bind_slot:14}</UseGrab>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM>
 				<PixelEntry>PSBlurY</PixelEntry>
 			</PROGRAM>

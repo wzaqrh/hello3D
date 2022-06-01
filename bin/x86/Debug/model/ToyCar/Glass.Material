@@ -1,5 +1,6 @@
 <Material>
 	<UseShader>Model</UseShader>
+	<RenderType>Transparent</RenderType>
 	<Macros>
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
 		<ENABLE_TRANSMISSION>1</ENABLE_TRANSMISSION>

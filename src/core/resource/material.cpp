@@ -30,7 +30,7 @@ void Pass::AddSampler(ISamplerStatePtr sampler)
 
 bool Pass::Validate() const
 {
-	return VR(!mProperty->LightMode.empty()
+	return VR(mProperty->LightMode
 		&& mProperty->TopoLogy != kPrimTopologyUnkown
 		&& mInputLayout
 		&& mProgram);
@@ -45,7 +45,7 @@ bool Technique::Validate() const
 	return true;
 }
 
-std::vector<PassPtr> Technique::GetPassesByLightMode(const std::string& lightMode)
+std::vector<PassPtr> Technique::GetPassesByLightMode(int lightMode)
 {
 	std::vector<PassPtr> result;
 	for (auto& pass : mElements) {

@@ -27,7 +27,7 @@ public:
 	IProgramPtr GetProgram() const { return mProgram; }
 	std::vector<ISamplerStatePtr> GetSamplers() const { return mSamplers; }
 
-	const std::string& GetLightMode() const { return mProperty->LightMode; }
+	int GetLightMode() const { return mProperty->LightMode; }
 	const PassProperty::GrabInput& GetGrabIn() const { return mProperty->GrabIn; }
 	const PassProperty::GrabOutput& GetGrabOut() const { return mProperty->GrabOut; }
 	const PassProperty::ParameterRelation& GetRelateToParam() const { return mProperty->Relate2Parameter; }
@@ -53,7 +53,7 @@ public:
 	void AddPass(PassPtr pass) { Add(pass); }
 	bool Validate() const;
 
-	std::vector<PassPtr> GetPassesByLightMode(const std::string& lightMode);
+	std::vector<PassPtr> GetPassesByLightMode(int lightMode);
 };
 
 class MIR_CORE_API Shader : public tpl::Vector<TechniquePtr, ImplementResource<IResource>>
@@ -154,6 +154,7 @@ public:
 	bool IsOutOfDate() const { return mProperty->DependSrc.CheckOutOfDate(); }
 	const ShaderPtr& GetShader() const { return mShader; }
 	const MaterialLoadParam& GetLoadParam() const { return mLoadParam; }
+	const MaterialProperty& GetProperty() const { return *mProperty; }
 private:
 	ShaderPtr mShader;
 	TextureVector mTextures;

@@ -15,7 +15,10 @@
 	
 	<SubShader>
 		<Pass>
-			<Tags> <LightMode>Transparent</LightMode> </Tags>
+			<Tags> 
+				<LightMode>ForwardBase</LightMode>
+				<RenderQueue>Geometry</RenderQueue>
+			</Tags>
 			<PROGRAM>
 				<PixelEntry>PS</PixelEntry> 
 			</PROGRAM>

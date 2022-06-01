@@ -12,10 +12,13 @@ namespace res {
 class PassProperty 
 {
 public:
-	operator bool() const { return (! LightMode.empty()) && (! Name.empty()); }
+	operator bool() const { return LightMode && !Name.empty(); }
 public:
-	std::string LightMode, Name, ShortName;
-	//int LightMode = -1;
+	std::string Name, ShortName;
+	int LightMode = 0;
+#if defined _DEBUG
+	std::string LightMode_;
+#endif
 	PrimitiveTopology TopoLogy;
 	std::optional<BlendState> Blend;
 	std::optional<DepthState> Depth;
@@ -46,7 +49,7 @@ public:
 	} Relate2Parameter;
 };
 
-struct MaterialProperty 
+class MaterialProperty 
 {	
 public:
 	struct TextureProperty {
@@ -89,6 +92,11 @@ public:
 		std::set<SingleFileDependency> Shaders;
 		SingleFileDependency Material;
 	} DependSrc;
+
+	int RenderType = 0;
+#if defined _DEBUG
+	std::string RenderType_;
+#endif
 };
 
 }

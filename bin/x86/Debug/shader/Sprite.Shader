@@ -16,7 +16,8 @@
 	
 	<SubShader>
 		<Pass>
-			<Tags> <LightMode>Overlay</LightMode> </Tags>
+			<RenderType>Overlay</RenderType>
+			<LightMode>ForwardBase</LightMode>
 			<PROGRAM> 
 				<Macros>
 					<DEBUG_SHADOW_MAP>0</DEBUG_SHADOW_MAP>

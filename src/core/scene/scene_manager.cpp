@@ -76,15 +76,15 @@ CoTask<void> SceneManager::UpdateFrame(float dt)
 #endif
 }
 
-void SceneManager::GenRenderOperation(RenderOperationQueue& opQue)
+void SceneManager::GetRenderables(RenderableCollection& rends)
 {
 	for (auto& node : mNodes) {
 		if (RenderablePtr rend = node->GetComponent<Renderable>()) {
-			rend->GenRenderOperation(opQue);
+			rends.AddRenderable(rend);
 		}
 	}
 #if MIR_GRAPHICS_DEBUG
-	if (mDebugPaint) mDebugPaint->GenRenderOperation(opQue);
+	if (mDebugPaint) rends.AddRenderable(mDebugPaint);
 #endif
 }
 

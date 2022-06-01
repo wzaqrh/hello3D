@@ -57,6 +57,11 @@ bool RenderableSingleRenderOp::IsLoaded() const
 	return true;
 }
 
+void RenderableSingleRenderOp::GenRenderOperation(RenderOperationQueue& ops)
+{
+	MakeRenderOperation(ops);
+}
+
 RenderOperation* RenderableSingleRenderOp::MakeRenderOperation(RenderOperationQueue& ops)
 {
 	if (!IsLoaded()) return nullptr;
@@ -73,8 +78,7 @@ RenderOperation* RenderableSingleRenderOp::MakeRenderOperation(RenderOperationQu
 	op.Material = mMaterial;
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
-	if (GetTransform())
-		op.WorldTransform = GetTransform()->GetWorldMatrix();
+	if (GetTransform()) op.WorldTransform = GetTransform()->GetWorldMatrix();
 	op.CameraMask = mCameraMask;
 	op.CastShadow = mCastShadow;
 	ops.AddOP(op);

@@ -15,8 +15,9 @@
 	</PROGRAM>
 	
 	<SubShader>
+		<RenderType>Background</RenderType>
 		<Pass>
-			<Tags> <LightMode>Skybox</LightMode> </Tags>
+			<LightMode>ForwardBase</LightMode>
 			<PROGRAM> <PixelEntry>PS</PixelEntry> </PROGRAM>
 		</Pass>
 	</SubShader>

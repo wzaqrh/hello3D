@@ -757,8 +757,29 @@ private:
 		std::map<std::string, std::vector<float>> Dic;
 		std::vector<std::string> TmpStrKeyValues, TmpStrTokens;
 	};
+	static bool ParseRenderType(const boost_property_tree::ptree& node, int& renderType, std::string& renderTypeStr) {
+		static std::vector<std::tuple<std::string, std::string, int>> renderTypePatterns = {
+			{"", "Background", RENDER_TYPE_BACKGROUND},
+			{"", "Geometry", RENDER_TYPE_GEOMETRY},
+			{"", "Transparent", RENDER_TYPE_TRANSPARENT},
+			{"", "Overlay", RENDER_TYPE_OVERLAY},
+		};
+		renderTypeStr = node.get<std::string>("RenderType", renderTypeStr);
+		if (!renderTypeStr.empty()) {
+			renderType = GetNodeAttribute<int>(renderTypeStr, RENDER_TYPE_GEOMETRY, renderTypePatterns);
+			return true;
+		}
+		else return false;
+	}
 	void VisitSubShader(const PropertyTreePath& nodeTechnique, ConstVisitorRef vis, CategoryNode& categNode) {
 		TechniqueNode& techniqueNode = categNode.Emplace();
+
+		std::string renderTypeStr = "Geometry";
+		ParseRenderType(nodeTechnique.Node, categNode.Program.RenderType, renderTypeStr);
+	#if defined _DEBUG
+		categNode.Program.RenderType_ = renderTypeStr;
+	#endif
+
 		int index = 0;
 		for (auto& pit : boost::make_iterator_range(nodeTechnique->equal_range("Pass"))) {
 			auto& node_pass = pit.second;
@@ -769,14 +790,23 @@ private:
 				PassNode pass;
 				auto& pprop = *pass.Property;
 
-				pprop.LightMode = LIGHTMODE_FORWARD_BASE_;
-				for (auto& it : boost::make_iterator_range(node_pass.equal_range("Tags"))) {
-					auto& node_tag = it.second;
-					pprop.LightMode = node_tag.get<std::string>("LightMode", pprop.LightMode);
-				}
-				int lightModeValue = GetLightModeValueByName(pprop.LightMode);
-				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(lightModeValue) });
-				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(lightModeValue) });
+				static std::vector<std::tuple<std::string, std::string, int>> lightModePatterns = {
+					{"", "ShadowCaster", LIGHTMODE_SHADOW_CASTER},
+					{"", "ShadowCaster_PostProcess", LIGHTMODE_SHADOW_CASTER_POSTPROCESS},
+					{"", "ForwardBase", LIGHTMODE_FORWARD_BASE},
+					{"", "ForwardAdd", LIGHTMODE_FORWARD_ADD},
+					{"", "PrepassBase", LIGHTMODE_PREPASS_BASE},
+					{"", "PrepassFinal", LIGHTMODE_PREPASS_FINAL},
+					{"", "PostProcess", LIGHTMODE_POSTPROCESS},
+					{"", "Overlay", LIGHTMODE_OVERLAY},
+				};
+				std::string lightModeStr = node_pass.get<std::string>("LightMode", "ForwardBase");
+				pprop.LightMode = GetNodeAttribute<int>(lightModeStr, LIGHTMODE_FORWARD_BASE, lightModePatterns);
+			#if defined _DEBUG
+				pprop.LightMode_ = lightModeStr;
+			#endif
+				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
+				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
 
 				pprop.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 				pprop.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
@@ -842,12 +872,24 @@ private:
 		}
 		VisitCategory(nodeShader, vis, shaderNode[0]);
 		mIncludeFiles.GetFileDependecies(shaderNode[0].Program.VertexSCD.SourcePath, shaderNode.DependShaders);
+		if (shaderNode[0].Program.RenderType != -1) {
+			shaderNode.RenderType = shaderNode[0].Program.RenderType;
+		#if defined _DEBUG
+			shaderNode.RenderType_ = shaderNode[0].Program.RenderType_;
+		#endif
+		}
 
 		int index = 0;
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Category"))) {
 			auto& categNode = shaderNode.Emplace();
 			VisitCategory(PropertyTreePath(nodeShader, it.second, index++), vis, categNode);
 			mIncludeFiles.GetFileDependecies(categNode.Program.VertexSCD.SourcePath, shaderNode.DependShaders);
+			if (categNode.Program.RenderType != -1) {
+				shaderNode.RenderType = categNode.Program.RenderType;
+			#if defined _DEBUG
+				shaderNode.RenderType_ = categNode.Program.RenderType_;
+			#endif
+			}
 		}
 	}
 	
@@ -955,7 +997,7 @@ private:
 	bool VisitMaterial(const MaterialLoadParam& loadParam, const PropertyTreePath& nodeMaterial, MaterialNode& materialNode) {
 		auto find_useShader = nodeMaterial->find("UseShader");
 		if (find_useShader == nodeMaterial->not_found()) return false;
-		
+
 		MaterialLoadParamBuilder paramBuilder = MaterialLoadParamBuilder(loadParam);
 		for (auto& mit : boost::make_iterator_range(nodeMaterial->equal_range("Macros"))) {
 			auto& node_macros = mit.second;
@@ -967,10 +1009,21 @@ private:
 		if (!mShaderMng->GetShaderNode(materialNode.LoadParam, materialNode.Shader)) 
 			return false;
 		materialNode.Property->DependSrc.Shaders = materialNode.Shader.DependShaders.Shaders;
+		materialNode.Property->RenderType = materialNode.Shader.RenderType;
+	#if defined _DEBUG
+		materialNode.Property->RenderType_ = materialNode.Shader.RenderType_;
+	#endif
 		materialNode.LoadParam = loadParam;
 
 		for (auto& it : boost::make_iterator_range(nodeMaterial->equal_range("Properties"))) {
 			VisitProperties(it.second, materialNode);
+		}
+
+		std::string renderTypeStr;
+		if (ShaderNodeManager::ParseRenderType(nodeMaterial.Node, materialNode.Property->RenderType, renderTypeStr)) {
+		#if defined _DEBUG
+			materialNode.Property->RenderType_ = renderTypeStr;
+		#endif
 		}
 		return true;
 	}
@@ -1037,18 +1090,4 @@ bool MaterialAssetManager::PurgeOutOfDates() ThreadSafe
 
 }
 }
-}
-
-int GetLightModeValueByName(const std::string& lightModeName)
-{
-	if (lightModeName == LIGHTMODE_SHADOW_CASTER_) return LIGHTMODE_SHADOW_CASTER;
-	if (lightModeName == LIGHTMODE_FORWARD_BASE_) return LIGHTMODE_FORWARD_BASE;
-	if (lightModeName == LIGHTMODE_FORWARD_ADD_) return LIGHTMODE_FORWARD_ADD;
-	if (lightModeName == LIGHTMODE_PREPASS_BASE_) return LIGHTMODE_PREPASS_BASE;
-	if (lightModeName == LIGHTMODE_PREPASS_FINAL_) return LIGHTMODE_PREPASS_FINAL;
-	if (lightModeName == LIGHTMODE_TRANSPARENT_) return LIGHTMODE_TRANSPARENT;
-	if (lightModeName == LIGHTMODE_SKYBOX_) return LIGHTMODE_SKYBOX;
-	if (lightModeName == LIGHTMODE_OVERLAY_) return LIGHTMODE_OVERLAY;
-	if (lightModeName == LIGHTMODE_POSTPROCESS_) return LIGHTMODE_POSTPROCESS;
-	return -1;
 }

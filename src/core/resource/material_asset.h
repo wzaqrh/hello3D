@@ -151,6 +151,10 @@ public:
 	SamplerNode Samplers;
 	ShaderCompileDescEx VertexSCD, PixelSCD;
 	PassProperty::ParameterRelation Relate2Parameter;
+#if defined _DEBUG
+	std::string RenderType_;
+#endif
+	int RenderType = -1;
 };
 struct PassNode : public PassProperty {
 	PassNode() { Property = CreateInstance<PassProperty>(); }
@@ -225,6 +229,10 @@ struct ShaderNode : public tpl::Vector<CategoryNode> {
 public:
 	std::string ShortName;
 	MaterialProperty::SourceFilesDependency DependShaders;
+#if defined _DEBUG
+	std::string RenderType_;
+#endif
+	int RenderType = -1;
 	MaterialLoadParamBuilder PredMacros;
 };
 

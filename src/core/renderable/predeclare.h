@@ -22,9 +22,10 @@ DECLARE_CLASS(LinePaint3D);
 }
 DECLARE_CLASS(FontCache);
 
-DECLARE_STRUCT(RenderOperation);
-DECLARE_STRUCT(RenderOperationQueue);
+DECLARE_CLASS(RenderOperation);
+DECLARE_CLASS(RenderOperationQueue);
 DECLARE_STRUCT(Renderable);
 DECLARE_CLASS(RenderableFactory);
+DECLARE_CLASS(RenderableCollection);
 
 }

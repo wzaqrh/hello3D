@@ -61,8 +61,9 @@
 	</PROGRAM>
 	
 	<SubShader>
+		<RenderType>Geometry</RenderType>
 		<Pass>
-			<Tags> <LightMode>ShadowCaster</LightMode> </Tags>
+			<LightMode>ShadowCaster</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VSShadowCaster</VertexEntry> 
 				<PixelEntry>PSShadowCasterDebug</PixelEntry>
@@ -74,7 +75,7 @@
 		</Pass>
 		<Pass>
 			<UseGrab>_ShadowMap{bind_slot:14}</UseGrab>
-			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
+			<LightMode>ShadowCaster+1</LightMode>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>
 				<PixelEntry>PSBlurVSMX</PixelEntry>
@@ -83,7 +84,7 @@
 		</Pass>
 		<Pass>
 			<UseGrab>VSM_BlurX{bind_slot:14}</UseGrab>
-			<Tags> <LightMode>ShadowCaster+1</LightMode> </Tags>
+			<LightMode>ShadowCaster+1</LightMode>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>
 				<PixelEntry>PSBlurVSMY</PixelEntry>
@@ -92,14 +93,14 @@
 		</Pass>
 		
 		<Pass>
-			<Tags> <LightMode>ForwardBase</LightMode> </Tags>
+			<LightMode>ForwardBase</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VS</VertexEntry> 
 				<PixelEntry>PS</PixelEntry> 
 			</PROGRAM>
 		</Pass>
 		<Pass>
-			<Tags> <LightMode>ForwardAdd</LightMode> </Tags>
+			<LightMode>ForwardAdd</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VS</VertexEntry>
 				<PixelEntry>PSAdd</PixelEntry> 
@@ -107,14 +108,14 @@
 		</Pass>
 		
 		<Pass>
-			<Tags> <LightMode>PrepassBase</LightMode> </Tags>
+			<LightMode>PrepassBase</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VSPrepassBase</VertexEntry> 
 				<PixelEntry>PSPrepassBase</PixelEntry>
 			</PROGRAM>
 		</Pass>
 		<Pass>
-			<Tags> <LightMode>PrepassFinal</LightMode> </Tags>
+			<LightMode>PrepassFinal</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VSPrepassFinal</VertexEntry> 
 				<PixelEntry>PSPrepassFinal</PixelEntry>

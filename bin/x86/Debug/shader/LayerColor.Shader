@@ -14,8 +14,9 @@
 	</PROGRAM>
 	
 	<SubShader>
+		<RenderType>Overlay</RenderType>
 		<Pass>
-			<Tags> <LightMode>Overlay</LightMode> </Tags>
+			<LightMode>ForwardBase</LightMode>
 			<PROGRAM>
 				<PixelEntry>PS</PixelEntry> 
 			</PROGRAM>

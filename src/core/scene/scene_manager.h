@@ -50,7 +50,7 @@ public:
 	const SceneNodeFactoryPtr& GetNodeFac() const { return mNodeFac; }
 public:
 	CoTask<void> UpdateFrame(float dt);
-	void GenRenderOperation(RenderOperationQueue& opQue);
+	void GetRenderables(RenderableCollection& rends);
 private:
 	ResourceManager& mResMng;
 

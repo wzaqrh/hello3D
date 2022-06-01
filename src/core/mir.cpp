@@ -67,9 +67,9 @@ CoTask<void> Mir::Update(float dt)
 CoTask<void> Mir::Render()
 {
 	if (mRenderPipe->BeginFrame()) {
-		RenderOperationQueue opQue;
-		mSceneMng->GenRenderOperation(opQue);
-		mRenderPipe->Render(opQue, mSceneMng->GetCameras(), mSceneMng->GetLights());
+		RenderableCollection rends;
+		mSceneMng->GetRenderables(rends);
+		mRenderPipe->Render(rends, mSceneMng->GetCameras(), mSceneMng->GetLights());
 		mRenderPipe->EndFrame();
 	}
 	CoReturn;

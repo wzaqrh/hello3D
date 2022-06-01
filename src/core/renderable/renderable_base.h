@@ -23,6 +23,7 @@ public:
 
 	virtual Eigen::AlignedBox3f GetWorldAABB() const override;
 	CoTask<void> UpdateFrame(float dt) override;
+	void GenRenderOperation(RenderOperationQueue& ops) override;
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }
 	bool IsLoaded() const;
