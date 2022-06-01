@@ -27,7 +27,6 @@ class MIR_CORE_API PostProcess : public RenderableSingleRenderOp
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	PostProcess(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material);
-	void GenRenderOperation(RenderOperationQueue& ops) override;
 };
 
 class MIR_CORE_API PostProcessFactory {

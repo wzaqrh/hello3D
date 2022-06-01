@@ -300,7 +300,6 @@ void AssimpModel::DoDraw(const res::AiNodePtr& node, RenderOperationQueue& ops)
 				op.AddVertexBuffer(mesh->GetVBOSurface());
 				op.AddVertexBuffer(mesh->GetVBOSkeleton());
 				op.Material = mat;
-				op.CameraMask = mCameraMask;
 				ops.AddOP(op);
 			}
 		}
@@ -316,14 +315,13 @@ void AssimpModel::GenRenderOperation(RenderOperationQueue& opList)
 		|| !mAnimeTree.IsInited())
 		return;
 
-	int count = opList.Count();
+	int position = opList.Count();
 	DoDraw(mAiScene->mRootNode, opList);
-
-	Eigen::Matrix4f world = GetTransform()->GetWorldMatrix();
-	for (int i = count; i < opList.Count(); ++i) {
-		opList[i].CastShadow = mCastShadow;
-		opList[i].CameraMask = mCameraMask;
-		opList[i].WorldTransform = world;
+	if (auto transform = GetTransform()) {
+		Eigen::Matrix4f world = transform->GetWorldMatrix();
+		for (int i = position; i < opList.Count(); ++i) {
+			opList[i].WorldTransform = world;
+		}
 	}
 }
 

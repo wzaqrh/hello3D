@@ -79,8 +79,6 @@ RenderOperation* RenderableSingleRenderOp::MakeRenderOperation(RenderOperationQu
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
 	if (GetTransform()) op.WorldTransform = GetTransform()->GetWorldMatrix();
-	op.CameraMask = mCameraMask;
-	op.CastShadow = mCastShadow;
 	ops.AddOP(op);
 	
 	return &ops.Back();

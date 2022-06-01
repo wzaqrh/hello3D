@@ -18,14 +18,12 @@ public:
 	void AddVertexBuffer(IVertexBufferPtr vbo) { VertexBuffers.push_back(vbo); }
 	res::MaterialInstance& WrMaterial() const { return const_cast<res::MaterialInstance&>(Material); }
 public:
-	Eigen::Matrix4f WorldTransform = Eigen::Matrix4f::Identity();
-	unsigned CameraMask = (unsigned)-1;
-	bool CastShadow = true;
-
+	res::MaterialInstance Material;
 	std::vector<IVertexBufferPtr> VertexBuffers;
 	IIndexBufferPtr IndexBuffer;
 	short IndexPos = 0, IndexCount = 0, IndexBase = 0;
-	res::MaterialInstance Material;
+	bool CastShadow;//setup by pipeline
+	Eigen::Matrix4f WorldTransform = Eigen::Matrix4f::Identity();
 };
 
 class RenderOperationQueue 

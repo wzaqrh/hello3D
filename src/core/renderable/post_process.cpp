@@ -62,11 +62,6 @@ PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const 
 	mVertexBuffer = resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
-void PostProcess::GenRenderOperation(RenderOperationQueue& ops)
-{
-	MakeRenderOperation(ops);
-}
-
 /********** PostProcessFactory **********/
 //https://medium.com/@aryamansharda/image-filters-gaussian-blur-eb36db6781b1
 CoTask<PostProcessPtr> PostProcessFactory::CreateGaussianBlur(int radius, std::string matName)

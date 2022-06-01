@@ -106,10 +106,5 @@ void SkyBox::SetSphericalHarmonicsConstants(const SphericalHarmonicsConstants& s
 	mSHConstants = shc;
 }
 
-void SkyBox::GenRenderOperation(RenderOperationQueue& ops)
-{
-	MakeRenderOperation(ops);
-}
-
 }
 }

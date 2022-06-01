@@ -41,8 +41,6 @@ void Paint3DBase::GenRenderOperation(RenderOperationQueue& ops)
 	op.IndexBuffer = mIndexBuffer;
 	op.AddVertexBuffer(mVertexBuffer);
 	if (GetTransform()) op.WorldTransform = GetTransform()->GetWorldMatrix();
-	op.CameraMask = mCameraMask;
-	op.CastShadow = mCastShadow;
 	op.IndexCount = mIndexPos;
 	ops.AddOP(op);
 }

@@ -17,7 +17,7 @@ public:
 	void SetColor(const Eigen::Vector4f& color);
 public:
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
-	virtual void GenRenderOperation(RenderOperationQueue& ops);
+	void GenRenderOperation(RenderOperationQueue& ops) override;
 	virtual Eigen::AlignedBox3f GetWorldAABB() const { return Eigen::AlignedBox3f(); }
 protected:
 	ResourceManager& mResMng;
@@ -56,7 +56,7 @@ public:
 	TemplateArgs void DrawAABBEdge(T &&...args) { return mLinePaint->DrawAABBEdge(std::forward<T>(args)...); }
 	TemplateArgs void DrawRectEdge(T &&...args) { return mLinePaint->DrawRectEdge(std::forward<T>(args)...); }
 public:
-	void GenRenderOperation(RenderOperationQueue& opList) override;
+	void GenRenderOperation(RenderOperationQueue& ops) override;
 private:
 	LinePaint3DPtr mLinePaint;
 };

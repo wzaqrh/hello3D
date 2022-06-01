@@ -57,7 +57,6 @@ void Label::GenRenderOperation(RenderOperationQueue& opList)
 				op.IndexBase = 4 * (i - lastCount);
 				op.IndexCount = 6 * lastCount;
 				op.WorldTransform = GetTransform()->GetWorldMatrix();
-				op.CameraMask = mCameraMask;
 				opList.AddOP(op);
 				++count;
 			}

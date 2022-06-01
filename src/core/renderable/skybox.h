@@ -33,8 +33,6 @@ public:
 	const ITexturePtr& GetDiffuseEnvMap() const { return mDiffuseEnvMap; }
 	const ITexturePtr& GetLutMap() const { return mLutMap; }
 	const SphericalHarmonicsConstants& GetSphericalHarmonicsConstants() const { return mSHConstants; }
-public:
-	void GenRenderOperation(RenderOperationQueue& opList) override;
 private:
 	ITexturePtr mLutMap, mDiffuseEnvMap;
 	SphericalHarmonicsConstants mSHConstants;
