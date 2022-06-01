@@ -1,6 +1,0 @@
-1.depth of field
-2.color grading
-3.ambient occlusion
-4.vignette
-5.bloom
-6.motion blur
