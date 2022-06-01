@@ -23,7 +23,7 @@ float3 GetSpecularLight(float3 normal, float3 toEye, float perceptualRoughness)
 #if RIGHT_HANDNESS_RESOURCE
 	reflUVW.z = -reflUVW.z;
 #endif	
-    float lod = EnvSpecColorMipCnt.w * (EnvSpecColorMipCnt.w - 1);
+    float lod = perceptualRoughness * (EnvSpecColorMipCnt.w - 1);
     return MIR_SAMPLE_TEXCUBE_LOD(_SpecCube, reflUVW, lod).rgb;
 }
 

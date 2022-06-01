@@ -68,6 +68,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (caseSecondIndex != -1)
 		AppDraw->SetCaseSecondIndex(caseSecondIndex);
 
+	if (appName == "test_gltf") {
+		WINDOW_WIDTH = 1520;
+		WINDOW_HEIGHT = 937;
+	}
+	else {
+		WINDOW_WIDTH = 800;
+		WINDOW_HEIGHT = 600;
+	}
+
 	HWND handle;
 	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), &handle)))
 		return 0;
@@ -77,13 +86,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	ClientToScreen(handle, &topleft);
 
 	if (appName == "test_gltf") {
-		WINDOW_WIDTH = 1520;
-		WINDOW_HEIGHT = 937;
 		SetWindowPos(handle, HWND_NOTOPMOST, 0 - topleft.x, 103 - topleft.y, 0, 0, SWP_NOSIZE);
 	}
 	else {
-		WINDOW_WIDTH = 800;
-		WINDOW_HEIGHT = 600;
 		SetWindowPos(handle, HWND_NOTOPMOST, 471 - topleft.x, 32 + 94 - topleft.y, 0, 0, SWP_NOSIZE);
 	}
 #if defined _DEBUG
