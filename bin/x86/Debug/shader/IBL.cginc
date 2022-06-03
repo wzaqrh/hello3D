@@ -23,7 +23,7 @@ float3 GetSpecularLight(float3 normal, float3 toEye, float perceptualRoughness)
 #if RIGHT_HANDNESS_RESOURCE
 	reflUVW.z = -reflUVW.z;
 #endif	
-    float lod = perceptualRoughness * (EnvSpecColorMipCnt.w - 1);
+    float lod = perceptualRoughness * (EnvSpecColorMip.z - 1);
     return MIR_SAMPLE_TEXCUBE_LOD(_SpecCube, reflUVW, lod).rgb;
 }
 
@@ -34,6 +34,9 @@ float3 GetIBLRadianceLambertian(float3 normal, float3 toEye, float perceptualRou
     float2 f_ab = MIR_SAMPLE_TEX2D(_LUT, saturate(float2(NdotV, perceptualRoughness))).rg;
 
     float3 irradiance = GetDiffuseLight(normal);
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE_PREFILTER_ENV
+	return irradiance;
+#endif
 
     float smoothness = 1.0 - perceptualRoughness;
     float3 Fr = max(float3(smoothness,smoothness,smoothness), F0) - F0;
@@ -47,9 +50,6 @@ float3 GetIBLRadianceLambertian(float3 normal, float3 toEye, float perceptualRou
     float3 k_D = diffuseColor * (1.0 - FssEss + FmsEms); // we use +FmsEms as indicated by the formula in the blog post (might be a typo in the implementation)
 
     float3 fcolor = (FmsEms + k_D) * irradiance;
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_DIFFUSE_PREFILTER_ENV
-	fcolor = irradiance;
-#endif
 	return fcolor;
 }
 
@@ -77,7 +77,7 @@ float3 GetIBLRadianceGGX(float3 normal, float3 toEye, float perceptualRoughness,
 	fcolor = reflUVW;
 	fcolor = (fcolor + 1.0) / 2.0;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV
-    float lod = perceptualRoughness * (EnvSpecColorMipCnt.w - 1);
+    float lod = perceptualRoughness * (EnvSpecColorMip.z - 1);
 	fcolor = GetSpecularLight(normal, toEye, lod);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT
 	fcolor = float3(f_ab, 0.0);

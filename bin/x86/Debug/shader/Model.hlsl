@@ -7,8 +7,6 @@
 #include "ToneMapping.cginc"
 #include "Macros.cginc"
 
-
-
 //#define HAS_ATTRIBUTE_NORMAL 1 
 //#define HAS_ATTRIBUTE_TANGENT 1 
 //#define ENABLE_PIXEL_BTN 1 
@@ -19,27 +17,27 @@
 
 cbuffer cbModel : register(b3)
 {
-	float4 AlbedoUV;
-	float4 NormalUV; 
-    float4 OcclusionUV;
-    float4 RoughnessUV;
-    float4 MetallicUV;
-	float4 EmissiveUV;
+	float4 AlbedoTransUV;
+	float4 NormalTransUV; 
+    float4 AoTransUV;
+    float4 RoughnessTransUV;
+    float4 MetallicTransUV;
+	float4 EmissiveTransUV;
 	
 	float4 AlbedoFactor;
+	float4 EmissiveFactor;
 	float NormalScale;
-    float OcclusionStrength;
+    float AoStrength;
     float RoughnessFactor;
     float MetallicFactor;
 	float TransmissionFactor;
-	float4 EmissiveFactor;
 }
 
 inline float4 GetAlbedo(float2 uv) 
 {
     float4 albedo = AlbedoFactor;
 #if ENABLE_ALBEDO_MAP
-	float4 color = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoUV));
+	float4 color = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoTransUV));
 	#if ALBEDO_MAP_SRGB
 		color = sRGBToLinear(color);
 	#endif
@@ -52,7 +50,7 @@ inline float4 GetEmissive(float2 uv)
 {
     float4 emissive = EmissiveFactor;
 #if ENABLE_EMISSIVE_MAP
-	float3 color = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveUV)).rgb;
+	float3 color = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveTransUV)).rgb;
 	#if EMISSIVE_MAP_SRGB
 		color = sRGBToLinear(color);
 	#endif
@@ -65,29 +63,29 @@ inline float4 GetAoRoughnessMetallicTransmission(float2 uv)
 {
     float4 value = float4(1.0, RoughnessFactor, MetallicFactor, TransmissionFactor);
 #if ENABLE_AO_ROUGHNESS_METALLIC_MAP
-	float4 armt = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).rgba;
-	value.x = lerp(1.0, armt.x, OcclusionStrength);
+	float4 armt = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, AoTransUV)).rgba;
+	value.x = lerp(1.0, armt.x, AoStrength);
 	value.yz *= armt.yz;
 #elif ENABLE_METALLIC_X_X_SMOOTHNESS_MAP
     #if ENABLE_AO_MAP
-		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).r;
+		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, AoTransUV)).r;
 		value.x = 1.0 + (ao - 1.0) * value.x;
 	#endif
-	float2 ms = MIR_SAMPLE_TEX2D(txMetalness, GetUV(uv, RoughnessUV)).ra;
+	float2 ms = MIR_SAMPLE_TEX2D(txMetallic, GetUV(uv, RoughnessTransUV)).ra;
 	value.y *= 1.0 - ms.y;
 	value.z *= ms.x; 
 #elif ENABLE_SPECULAR_MAP
-	value = MIR_SAMPLE_TEX2D(txMetalness, GetUV(uv, MetallicUV));
+	value = MIR_SAMPLE_TEX2D(txMetallic, GetUV(uv, MetallicTransUV));
 #else
     #if ENABLE_AO_MAP
-		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, OcclusionUV)).r;
+		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, AoTransUV)).r;
 		value.x = 1.0 + (ao - 1.0) * value.x;
 	#endif
     #if ENABLE_ROUGHNESS_MAP 
-		value.y *= MIR_SAMPLE_TEX2D(txRoughness, GetUV(uv, RoughnessUV)).r;
+		value.y *= MIR_SAMPLE_TEX2D(txRoughness, GetUV(uv, RoughnessTransUV)).r;
 	#endif
     #if ENABLE_METALLIC_MAP
-		value.z *= MIR_SAMPLE_TEX2D(txMetalness, GetUV(uv, MetallicUV)).r;
+		value.z *= MIR_SAMPLE_TEX2D(txMetallic, GetUV(uv, MetallicTransUV)).r;
 	#endif
 #endif
 	return value;
@@ -100,9 +98,9 @@ inline float4 GetAoRoughnessMetallicTransmission(float2 uv)
 #endif
 #if ENABLE_NORMAL_MAP
 	#if NORMAL_TEXTURE_PACKED
-		#define INIT_TANGENT_NORMAL(uv) float3 tangentNormal = UnpackScaleNormalRGorAG(MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)), NormalScale)
+		#define INIT_TANGENT_NORMAL(uv) float3 tangentNormal = UnpackScaleNormalRGorAG(MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalTransUV)), NormalScale)
 	#else
-		#define INIT_TANGENT_NORMAL(uv) float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalUV)).xyz * 2.0 - 1.0; tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0))
+		#define INIT_TANGENT_NORMAL(uv) float3 tangentNormal = MIR_SAMPLE_TEX2D(txNormal, GetUV(uv, NormalTransUV)).xyz * 2.0 - 1.0; tangentNormal = normalize(tangentNormal * float3(NormalScale, NormalScale, 1.0))
 	#endif
 	
 	#if !ENABLE_PIXEL_BTN	
@@ -209,10 +207,10 @@ float4 PS(PixelInput input) : SV_Target
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
 	li.world_pos = input.WorldPos;
-#if DEBUG_CHANNEL   
+#if DEBUG_CHANNEL 
 	li.uv1 = MakeDummyColor(toEye).xy;
 	#if ENABLE_NORMAL_MAP
-		li.tangent_normal = MIR_SAMPLE_TEX2D(txNormal, GetUV(input.Tex, NormalUV)).xyz * 2.0 - 1.0;
+		li.tangent_normal = MIR_SAMPLE_TEX2D(txNormal, GetUV(input.Tex, NormalTransUV)).xyz * 2.0 - 1.0;
 		li.tangent_normal = normalize(li.tangent_normal * float3(NormalScale, NormalScale, 1.0));
 		li.tangent_normal = li.tangent_normal * 0.5 + 0.5;
 	#else

@@ -105,10 +105,10 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 	CoAwait mResMng.SwitchToLaunchService(lchMode);
 	COROUTINE_VARIABLES_5(program, lchMode, name, vertexSCD, pixelSCD);
 
-#if defined MIR_TIME_DEBUG
-	std::string msg = (boost::format("\t\tresMng._LoadProgram (%1% %2% %3%") % name % vertexSCD.EntryPoint % pixelSCD.EntryPoint).str();
+#if defined MIR_TIME_DEBUG || defined MIR_RESOURCE_DEBUG
+	std::string msg = (boost::format("\t\tresMng._LoadProgram (%1% %2% %3%") %name %vertexSCD.EntryPoint % pixelSCD.EntryPoint).str();
 	for (auto& macro : vertexSCD.Macros)
-		msg += (boost::format(" %1%=%2%") % macro.Name % macro.Definition).str();
+		msg += (boost::format(" %1%=%2%") %macro.Name %macro.Definition).str();
 	msg += ")";
 	TIME_PROFILE(msg);
 #endif
@@ -158,6 +158,7 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 		return this->mRenderSys.LoadProgram(program, shaders);
 	};
 	program->SetLoaded(loadProgram(program) != nullptr);
+	DEBUG_SET_PRIV_DATA(program, msg);
 	CoReturn program->IsLoaded();
 }
 

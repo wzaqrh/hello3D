@@ -59,9 +59,10 @@ cbuffer cbPerFrame : register(b0)
 	matrix SHC0C1;
 	matrix SHC2;
 	float4 SHC2_2;
-	float4 LightMapUV;
 	float4 EnvDiffuseColor;
-	float4 EnvSpecColorMipCnt;
+	float4 EnvSpecColorMip;
+	float4 LightMapUV;
+	float4 LightMapSizeMip;
 	
 	float4 FrameBufferSize;
 	float4 ShadowMapSize;

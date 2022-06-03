@@ -23,9 +23,10 @@
 			<Element Name="SHC0C1"				Type="matrix"></Element>
 			<Element Name="SHC2"				Type="matrix"></Element>
 			<Element Name="SHC2_2"				Type="float4"></Element>
-			<Element Name="LightMapUV"			Type="float4"></Element>
 			<Element Name="EnvDiffuseColor"		Type="float4"></Element>
-			<Element Name="EnvSpecColorMipCnt"		Type="float4"></Element>
+			<Element Name="EnvSpecColorMip"		Type="float4"></Element>
+			<Element Name="LightMapUV"			Type="float4"></Element>
+			<Element Name="LightMapSizeMip"		Type="float4"></Element>
 			
 			<Element Name="FrameBufferSize"		Type="float4"></Element>
 			<Element Name="ShadowMapSize"		Type="float4"></Element>

@@ -29,7 +29,7 @@ private:
 	RenderSystem& mRenderSys;
 	RenderStatesBlockPtr mStatesBlockPtr;
 	RenderStatesBlock& mStatesBlock;
-	FrameBufferBankPtr mTempFbs;
+	FrameBufferBankPtr mFbsBank;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
 	Eigen::Vector4f mBackgndColor = Eigen::Vector4f::Zero();;

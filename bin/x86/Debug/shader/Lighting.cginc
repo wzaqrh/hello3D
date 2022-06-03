@@ -42,20 +42,20 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 #endif
 
 #if 0
-#if ENABLE_SHADOW_MAP
-	//float depth = length(LightPosition.xyz - input.WorldPos.xyz * LightPosition.w);
-	//finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
-#endif
+	#if ENABLE_SHADOW_MAP
+		//float depth = length(LightPosition.xyz - input.WorldPos.xyz * LightPosition.w);
+		//finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
+	#endif
 
-#if ENABLE_SHADOW_MAP
-	float4 viewPosLight = mul(LightView, worldPosition);
-	float4 posLight = mul(LightProjection, viewPosLight);
-#if ENABLE_SHADOW_MAP_BIAS
-	float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
-	posLight.z -= bias * posLight.w;
-#endif
-	output.Color.rgb *= CalcShadowFactor(posLight.xyz / posLight.w, viewPosLight.xyz);
-#endif
+	#if ENABLE_SHADOW_MAP
+		float4 viewPosLight = mul(LightView, worldPosition);
+		float4 posLight = mul(LightProjection, viewPosLight);
+		#if ENABLE_SHADOW_MAP_BIAS
+			float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
+			posLight.z -= bias * posLight.w;
+		#endif
+		output.Color.rgb *= CalcShadowFactor(posLight.xyz / posLight.w, viewPosLight.xyz);
+	#endif
 #endif
 	
 #if DEBUG_CHANNEL 	

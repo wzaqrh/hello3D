@@ -24,13 +24,13 @@ public:
 	Eigen::Matrix4f SHC0C1 = Eigen::Matrix4f::Zero();
 	Eigen::Matrix4f SHC2 = Eigen::Matrix4f::Zero();
 	Eigen::Vector4f SHC2_2 = Eigen::Vector4f::Zero();
-	Eigen::Vector4f LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
 	Eigen::Vector4f EnvDiffuseColor = Eigen::Vector4f::Zero();
-	Eigen::Vector4f EnvSpecColorMipCnt = Eigen::Vector4f(0, 0, 0, 1);
+	Eigen::Vector4f EnvSpecColorMip = Eigen::Vector4f(0, 0, 0, 1);
+	Eigen::Vector4f LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
+	Eigen::Vector4f LightMapSizeMip = Eigen::Vector4f::Zero();
 
 	Eigen::Vector4f FrameBufferSize = Eigen::Vector4f::Zero();
 	Eigen::Vector4f ShadowMapSize = Eigen::Vector4f::Zero();
-	
 };
 
 struct UNIFORM_ALIGN cbPerLight

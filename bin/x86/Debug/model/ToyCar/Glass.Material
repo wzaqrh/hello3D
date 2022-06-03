@@ -4,16 +4,14 @@
 	<Macros>
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
 		<ENABLE_TRANSMISSION>1</ENABLE_TRANSMISSION>
-		<COLORSPACE_GAMMA>0</COLORSPACE_GAMMA>
-		<TONEMAP_MODE>2</TONEMAP_MODE>
 	</Macros>
 	<Properties>
-		<AlbedoFactor>0.3,0.8,0.3,1</AlbedoFactor>
+		<txMetallic>Transmission.png</txMetallic>
 		<MetallicFactor>0</MetallicFactor>
+		
+		<AlbedoFactor>0.3,0.8,0.3,1</AlbedoFactor>
 		<RoughnessFactor>0</RoughnessFactor>
 		<EmissiveFactor>0,0,0,0</EmissiveFactor>
 		<TransmissionFactor>1</TransmissionFactor>
-		
-		<txMetalness>Transmission.png</txMetalness>
 	</Properties>
 </Material>

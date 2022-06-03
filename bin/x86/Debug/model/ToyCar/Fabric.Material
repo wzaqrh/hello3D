@@ -8,21 +8,20 @@
 		<ENABLE_AO_MAP>1</ENABLE_AO_MAP>
 
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
-		<COLORSPACE_GAMMA>0</COLORSPACE_GAMMA>
-		<TONEMAP_MODE>2</TONEMAP_MODE>
 	</Macros>
 	<Properties>
 		<txAlbedo>Fabric_baseColor.png</txAlbedo>
-		<txNormal>Fabric_normal.png</txNormal>
-		<txAmbientOcclusion>Fabric_occlusion.png</txAmbientOcclusion>
-		
-		<AlbedoUV>0,0,3,3</AlbedoUV>
-		<NormalUV>0,0,3,3</NormalUV>
-		
+		<AlbedoTransUV>0,0,3,3</AlbedoTransUV>
 		<AlbedoFactor>0.15,0.15,0.15,1</AlbedoFactor>
+		
+		<txNormal>Fabric_normal.png</txNormal>
+		<NormalTransUV>0,0,3,3</NormalTransUV>
+		
+		<txAmbientOcclusion>Fabric_occlusion.png</txAmbientOcclusion>
+		<AoStrength>1</AoStrength>
+		
 		<MetallicFactor>0</MetallicFactor>
 		<RoughnessFactor>1</RoughnessFactor>
-		<OcclusionStrength>1</OcclusionStrength>
 		<EmissiveFactor>0,0,0,0</EmissiveFactor>
 	</Properties>
 </Material>

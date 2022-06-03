@@ -24,10 +24,10 @@
 	<Properties>
 		<txAlbedo>basecolor.png</txAlbedo>
 		<txNormal>normal.png</txNormal>
-		<txMetalness>metallic_smoothness.png</txMetalness>
+		<txMetallic>metallic_smoothness.png</txMetallic>
 		<txRoughness>roughness.png</txRoughness>
 		<txAmbientOcclusion>ao.png</txAmbientOcclusion>
-		<OcclusionStrength>1</OcclusionStrength>
+		<AoStrength>1</AoStrength>
 		<_LightMap>lightmap.exr</_LightMap>
 		<txEmissive>emissive.png</txEmissive>
 		<EmissiveFactor>1,1,1,0</EmissiveFactor>

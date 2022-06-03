@@ -10,25 +10,25 @@
 		<UseUniform>cbWeightedSkin</UseUniform>
 		<UseTexture>txGlobal</UseTexture>
 		<Uniform Name="cbModel" Slot="3" ShareMode="PerMaterial">
-			<Element Name="AlbedoUV"              Type="float4" Default="0,0,1,1"></Element>
-			<Element Name="NormalUV"              Type="float4" Default="0,0,1,1"></Element>
-			<Element Name="OcclusionUV"           Type="float4" Default="0,0,1,1"></Element>
-			<Element Name="RoughnessUV"           Type="float4" Default="0,0,1,1"></Element>
-			<Element Name="MetallicUV"            Type="float4" Default="0,0,1,1"></Element>
-			<Element Name="EmissiveUV"            Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="AlbedoTransUV"			Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="NormalTransUV"			Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="AoTransUV"				Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="RoughnessTransUV"        Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="MetallicTransUV"         Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="EmissiveTransUV"         Type="float4" Default="0,0,1,1"></Element>
 			
 			<Element Name="AlbedoFactor"            Type="float4" Default="1,1,1,1"></Element>
+			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
 			<Element Name="NormalScale"             Type="float"  Default="1"></Element>
-			<Element Name="OcclusionStrength"       Type="float"  Default="1"></Element>
+			<Element Name="AoStrength"				Type="float"  Default="1"></Element>
 			<Element Name="RoughnessFactor"         Type="float"  Default="1"></Element>
 			<Element Name="MetallicFactor"          Type="float"  Default="1"></Element>
-			<Element Name="TransmissionFactor"      Type="float"  Default="0"></Element>
-			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
+			<Element Name="TransmissionFactor"      Type="float"  Default="0"></Element>		
 		</Uniform>   
 		<Texture>
 			<Element Slot="0" Address="Wrap">txAlbedo</Element>
 			<Element Slot="1" Address="Wrap">txNormal</Element>
-			<Element Slot="2" Address="Wrap">txMetalness</Element>
+			<Element Slot="2" Address="Wrap">txMetallic</Element>
 			<Element Slot="3" Address="Wrap">txRoughness</Element>
 			<Element Slot="4" Address="Wrap">txAmbientOcclusion</Element>
 			<Element Slot="5" Address="Wrap">txEmissive</Element>
@@ -75,7 +75,7 @@
 		</Pass>
 		<Pass>
 			<UseGrab>_ShadowMap{bind_slot:14}</UseGrab>
-			<LightMode>ShadowCaster+1</LightMode>
+			<LightMode>ShadowCaster_PostProcess</LightMode>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>
 				<PixelEntry>PSBlurVSMX</PixelEntry>
@@ -84,7 +84,7 @@
 		</Pass>
 		<Pass>
 			<UseGrab>VSM_BlurX{bind_slot:14}</UseGrab>
-			<LightMode>ShadowCaster+1</LightMode>
+			<LightMode>ShadowCaster_PostProcess</LightMode>
 			<PROGRAM>
 				<VertexEntry>VSBlurVSM</VertexEntry>
 				<PixelEntry>PSBlurVSMY</PixelEntry>
@@ -93,6 +93,7 @@
 		</Pass>
 		
 		<Pass>
+			<UseGrab Condition="ENABLE_TRANSMISSION==1">_geometry_skybox{bind_slot:6}</UseGrab>
 			<LightMode>ForwardBase</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VS</VertexEntry> 

@@ -8,10 +8,14 @@ namespace mir {
 
 struct MaterialLoadParam 
 {
+	typedef std::string Hash;
 	MaterialLoadParam(const char* shaderName) :ShaderVariantName(shaderName) {};
 	MaterialLoadParam(const std::string& shaderName = "") :ShaderVariantName(shaderName) {}
-	std::string GetVariantDesc() const {
-		std::string name = GetVariantName();
+	Hash MakeHash(const std::string& shaderVarName) const { return shaderVarName + ":" + GetVariantDesc(); }
+	Hash GetHash() const { return ShaderVariantName + ":" + GetVariantDesc(); }
+	std::string GetVariantDesc() const { return GetVariantName() + GetMacrosDesc(); }
+	std::string GetMacrosDesc() const {
+		std::string name;
 		if (!Macros.empty()) {
 			name += "(";
 			int count = 0;
@@ -29,9 +33,7 @@ struct MaterialLoadParam
 		if (strArr.size() >= 2) return boost::lexical_cast<std::string>(strArr[1]);
 		else return "";
 	}
-	std::string GetShaderName() const {
-		return boost::trim_right_copy_if(ShaderVariantName, boost::is_any_of("-"));
-	}
+	std::string GetShaderName() const { return boost::trim_right_copy_if(ShaderVariantName, boost::is_any_of("-")); }
 	int operator[](const std::string& macroName) const {
 		int result = 0;
 		auto find_it = std::find_if(Macros.begin(), Macros.end(), [&](const ShaderCompileMacro& v) { return v.Name == macroName; });
@@ -43,8 +45,7 @@ public:
 	std::vector<ShaderCompileMacro> Macros;
 };
 inline bool operator==(const MaterialLoadParam& l, const MaterialLoadParam& r) {
-	return l.ShaderVariantName == r.ShaderVariantName
-		&& l.Macros == r.Macros;
+	return l.ShaderVariantName == r.ShaderVariantName && l.Macros == r.Macros;
 }
 inline bool operator<(const MaterialLoadParam& l, const MaterialLoadParam& r) {
 	if (l.ShaderVariantName != r.ShaderVariantName) return l.ShaderVariantName < r.ShaderVariantName;

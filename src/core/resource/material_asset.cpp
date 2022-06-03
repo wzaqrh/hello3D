@@ -74,7 +74,7 @@ private:
 					std::string str_right_value = exp_match[3];
 					int right_value = atoi(str_right_value.c_str());
 
-					if (compare == "==") result = (left_value == right_value);
+					if (compare == "==" || compare == "=") result = (left_value == right_value);
 					else if (compare == "<=") result = (left_value <= right_value);
 					else if (compare == ">=") result = (left_value >= right_value);
 					else if (compare == "<") result = (left_value < right_value);
@@ -170,13 +170,17 @@ private:
 	};
 
 	template<typename T> static T GetNodeAttribute(const std::string& str, T defValue, const std::vector<std::tuple<std::string, std::string, int>>& patterns) {
-		if ((str.size() >= 2 && str[0] == '0' && str[1] == 'x' && std::all_of(str.begin() + 2, str.end(), isxdigit)) || (!str.empty() && std::all_of(str.begin(), str.end(), isdigit))) {
+		if (str.empty()) {
+			return defValue;
+		}
+		else if ((str.size() >= 2 && str[0] == '0' && str[1] == 'x' && std::all_of(str.begin() + 2, str.end(), isxdigit)) || std::all_of(str.begin(), str.end(), isdigit)) {
 			return static_cast<T>(std::stoi(str));
 		}
 		else {
 			auto iter = std::find_if(patterns.begin(), patterns.end(), [&](const std::tuple<std::string, std::string, int>& item) {
 				return std::get<1>(item) == str;
 			});
+			BOOST_ASSERT(iter != patterns.end());
 			if (iter != patterns.end()) return static_cast<T>(std::get<2>(*iter));
 			else return defValue;
 		}
@@ -202,15 +206,19 @@ private:
 		}
 	}
 private:
-	ShaderNode& VisitInclude(const std::string& shaderName) {
-		auto find_iter = mIncludeByName.find(shaderName);
+	ShaderNode& VisitInclude(const std::string& shaderName, ConstVisitorRef vis) {
+		auto loadIncHash = vis.LoadParam.MakeHash(shaderName);
+		auto find_iter = mIncludeByName.find(loadIncHash);
 		if (find_iter == mIncludeByName.end()) {
 			ShaderNode shaderNode;
-			MaterialLoadParam loadParam(shaderName);
-			ParseShaderFile(loadParam, shaderNode);
-			mIncludeByName.insert(std::make_pair(shaderName, std::move(shaderNode)));
+			MaterialLoadParam loadIncParam = vis.LoadParam;
+			loadIncParam.ShaderVariantName = shaderName;
+			ParseShaderFile(loadIncParam, shaderNode);
+
+			mIncludeByName.insert(std::make_pair(loadIncHash, std::move(shaderNode)));
+			find_iter = mIncludeByName.find(loadIncHash);
 		}
-		return mIncludeByName[shaderName];
+		return find_iter->second;
 	}
 
 	static bool ParseMacrosFile(const std::string& macroName, ConstVisitorRef vis) {
@@ -220,7 +228,7 @@ private:
 			std::ifstream fs;
 			fs.open(path.string(), std::ios::in);
 			std::string line;
-			const std::regex exp_regex(R"(#define\s+([a-zA-Z0-9_]+)\s+([0-9]+).*)");
+			const std::regex exp_regex(R"(\s*#define\s+([a-zA-Z0-9_]+)\s+([0-9]+).*)");
 			while (fs.peek() != EOF) {
 				std::getline(fs, line);
 				std::smatch exp_match;
@@ -372,8 +380,8 @@ private:
 	}
 	void VisitAttributes(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseAttribute"))) {
-			std::string refName = it.second.data();
-			auto find_iter = mAttrByName.find(refName);
+			auto attrHash = vis.LoadParam.MakeHash(it.second.data());
+			auto find_iter = mAttrByName.find(attrHash);
 			if (find_iter != mAttrByName.end()) {
 				progNode.Attrs.Add(find_iter->second);
 			}
@@ -496,21 +504,16 @@ private:
 
 			std::string shortName = node_attribute.get<std::string>("<xmlattr>.Name", "");
 			shortName = node_attribute.get<std::string>("<xmlattr>.ShortName", shortName);
-			if (!shortName.empty()) mAttrByName.insert(std::make_pair(shortName, attribute));
+			if (!shortName.empty()) mAttrByName.insert(std::make_pair(vis.LoadParam.MakeHash(shortName), attribute));
 		
-		#if ENABLE_USEXXX_FULLPATH
-			shortName = PropertyTreePath(nodeProgram, node_attribute, index).Path.string();
-			mAttrByName.insert(std::make_pair(shortName, attribute));
-		#endif
-
 			progNode.Attrs.Add(std::move(attribute));
 			++index;
 		}
 	}
 	void VisitUniforms(const PropertyTreePath& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseUniform"))) {
-			std::string refName = it.second.data();
-			auto find_iter = mUniformByName.find(refName);
+			auto uniformHash = vis.LoadParam.MakeHash(it.second.data());
+			auto find_iter = mUniformByName.find(uniformHash);
 			if (find_iter != mUniformByName.end()) {
 				int refSlot = it.second.get<int>("<xmlattr>.Slot", find_iter->second.GetSlot());
 				progNode.Uniforms.AddOrSet(find_iter->second, refSlot);
@@ -570,13 +573,8 @@ private:
 			shortName = node_uniform.get<std::string>("<xmlattr>.ShortName", shortName);
 			uniBuilder.Build();
 
-			if (!shortName.empty()) mUniformByName.insert(std::make_pair(shortName, uniform));
+			if (!shortName.empty()) mUniformByName.insert(std::make_pair(vis.LoadParam.MakeHash(shortName), uniform));
 		
-		#if ENABLE_USEXXX_FULLPATH
-			shortName = PropertyTreePath(nodeProgram, node_uniform, index).Path.string();
-			mUniformByName.insert(std::make_pair(shortName, uniform));
-		#endif
-
 			progNode.Uniforms.AddOrSet(std::move(uniform), uniform.GetSlot());
 			++index;
 		}
@@ -585,8 +583,7 @@ private:
 		for (auto& it : boost::make_iterator_range(nodeProgram->equal_range("UseTexture"))) {
 			if (!vis.CheckCondition(progNode, it.second))
 				continue;
-			std::string refName = it.second.data();
-			auto find_iter = mSamplerSetByName.find(refName);
+			auto find_iter = mSamplerSetByName.find(vis.LoadParam.MakeHash(it.second.data()));
 			if (find_iter != mSamplerSetByName.end()) {
 				progNode.Samplers.Merge<true>(find_iter->second);
 			}
@@ -603,8 +600,7 @@ private:
 			for (auto& it : boost::make_iterator_range(node_sampler.equal_range("UseTexture"))) {
 				if (!vis.CheckCondition(progNode, it.second, &hasCondition))
 					continue;
-				std::string refName = it.second.data();
-				auto find_iter = mSamplerSetByName.find(refName);
+				auto find_iter = mSamplerSetByName.find(vis.LoadParam.MakeHash(it.second.data()));
 				if (find_iter != mSamplerSetByName.end()) {
 					samplerSet.Merge<true>(find_iter->second);
 				}
@@ -660,13 +656,7 @@ private:
 
 			std::string shortName = node_sampler.get<std::string>("<xmlattr>.Name", "");
 			shortName = node_sampler.get<std::string>("<xmlattr>.ShortName", shortName);
-			if (!hasCondition && !shortName.empty()) 
-				mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
-
-		#if ENABLE_USEXXX_FULLPATH
-			shortName = PropertyTreePath(nodeProgram, node_sampler, index).Path.string();
-			mSamplerSetByName.insert(std::make_pair(shortName, samplerSet));
-		#endif
+			if (!shortName.empty()) mSamplerSetByName.insert(std::make_pair(vis.LoadParam.MakeHash(shortName), samplerSet));
 
 			progNode.Samplers.Merge<true>(std::move(samplerSet));
 			++index;
@@ -831,6 +821,8 @@ private:
 					grabStr.Get("fmts", pprop.GrabOut.Formats);
 				}
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("UseGrab"))) {
+					if (!vis.CheckCondition(categNode.Program, it.second, nullptr))
+						continue;
 					if (grabStr.Parse(it.second.data())) {
 						pprop.GrabIn.emplace_back();
 						auto& unit = pprop.GrabIn.back();
@@ -866,7 +858,7 @@ private:
 		}
 
 		for (auto& it : boost::make_iterator_range(nodeShader->equal_range("Include"))) {
-			auto& incShader = VisitInclude(it.second.data());
+			auto& incShader = VisitInclude(it.second.data(), vis);
 			vis.PredMacros.Merge(incShader.PredMacros);
 			shaderNode.DependShaders.Merge(incShader.DependShaders);
 		}
@@ -905,7 +897,8 @@ private:
 	}
 	bool ParseShaderFile(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) {
 		bool result;
-		auto find_iter = mShaderByParam.find(loadParam);
+		auto loadParamHash = loadParam.GetHash();
+		auto find_iter = mShaderByParam.find(loadParamHash);
 		if (find_iter == mShaderByParam.end()) {
 			MaterialProperty::SingleFileDependency fdep;
 			if (GetShaderAssetPath(loadParam, fdep.FilePath, fdep.FileTime)) {
@@ -916,7 +909,7 @@ private:
 				VisitShader(pt.get_child("Shader"), Visitor{ false, loadParam, shaderNode.PredMacros }, shaderNode);
 				BOOST_ASSERT(shaderNode.Validate());
 				
-				mShaderByParam.insert(std::make_pair(loadParam, shaderNode));
+				mShaderByParam.insert(std::make_pair(loadParamHash, shaderNode));
 				result = true;
 			}
 			else {
@@ -948,11 +941,11 @@ private:
 	}
 private:
 	tpl::AtomicMap<MaterialLoadParam, ShaderNode> mShaderVariantByParam;
-	std::map<MaterialLoadParam, ShaderNode> mShaderByParam;
-	std::map<std::string, ShaderNode> mIncludeByName;
-	std::map<std::string, AttributeNode> mAttrByName;
-	std::map<std::string, UniformNode> mUniformByName;
-	std::map<std::string, SamplerNode> mSamplerSetByName;
+	std::map<MaterialLoadParam::Hash, ShaderNode> mShaderByParam;
+	std::map<MaterialLoadParam::Hash, ShaderNode> mIncludeByName;
+	std::map<MaterialLoadParam::Hash, AttributeNode> mAttrByName;
+	std::map<MaterialLoadParam::Hash, UniformNode> mUniformByName;
+	std::map<MaterialLoadParam::Hash, SamplerNode> mSamplerSetByName;
 	IncludeFiles mIncludeFiles;
 };
 

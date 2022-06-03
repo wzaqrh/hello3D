@@ -19,7 +19,7 @@
 		<txAlbedo>textures/pavimento_baseColor.png</txAlbedo>
 		<txAmbientOcclusion>textures/pavimento_metallicRoughness.png</txAmbientOcclusion>
 		<txNormal>textures/pavimento_normal.png</txNormal>
-		<OcclusionStrength>0</OcclusionStrength>
+		<AoStrength>0</AoStrength>
 		<RoughnessFactor>0.9</RoughnessFactor>
 		<MetallicFactor>0</MetallicFactor>
 		<EmissiveFactor>0,0,0,0</EmissiveFactor>
