@@ -211,13 +211,13 @@ inline float LinearEyeDepth(float d, float2 depthParam)
 
 inline float fetch_eye_z(float2 uv, float2 depthParam, MIR_ARGS_TEX2D(tDepth))
 {
-	float d = MIR_SAMPLE_TEX2D(tDepth, uv);
+	float d = MIR_SAMPLE_TEX2D(tDepth, uv).r;
 	return LinearEyeDepth(d, depthParam);
 }
 //获取uv对应的, '相机空间'上的, 离相机最近的表面位置
 inline float3 fetch_eye_pos(float2 uv, float4 depthParam, float4 focalLen, MIR_ARGS_TEX2D(tDepth))
 {
-	float d = MIR_SAMPLE_TEX2D_LEVEL(tDepth, uv, 0);
+	float d = MIR_SAMPLE_TEX2D_LEVEL(tDepth, uv, 0).r;
 	return uv_to_eye(uv, LinearEyeDepth(d, depthParam.xy), focalLen.zw);
 }
 //获取fetch_eye_pos, 并确保其与'法线'同向

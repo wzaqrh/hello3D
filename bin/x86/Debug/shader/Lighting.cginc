@@ -16,29 +16,40 @@ inline float CalcLightAtten(float lengthSq, float3 toLight, bool spotLight) {
 	return atten;
 }
 
-inline float3 BlinnPhongLight(LightingInput i, float3 l, float3 n, float3 v)
+inline float3 BlinnPhongLightBase()
+{
+	//ambient
+	return EnvDiffuseColor.rgb;
+}
+inline float3 BlinnPhongLightAdditive(LightingInput i, float3 l, float3 n, float3 v)
 {
 	float3 h = normalize(l + v);
 	float nl = max(0, dot(n, l));
 	float nh = max(0, dot(n, h));
-	//ambient
-	float3 color = EnvDiffuseColor.rgb;
 	//diffuse
-    color += LightColor.rgb * i.albedo.rgb * nl;
+    float3 color = LightColor.rgb * i.albedo.rgb * (1.0 - i.metallic) * nl;
 	//specular
-	color += i.ao_rough_metal_tx.rgb * i.albedo.w * pow(nh, i.ao_rough_metal_tx.w * 128.0);
+	color += LightColor.rgb * i.metallic * pow(nh, (1.0 - i.percertual_roughness) * 128.0);
 	return color;
 }
 
-inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v) 
+inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v, bool isAdditive) 
 {
-	float3 fcolor;
+	float3 fcolor = 0.0;
 #if LIGHTING_MODE == LIGHTING_BLINN_PHONG
-	fcolor.rgb = BlinnPhongLight(i, l, n, v);
+	if (!isAdditive) fcolor += BlinnPhongLightBase();
+	fcolor += BlinnPhongLightAdditive(i, l, n, v);
 #elif LIGHTING_MODE == LIGHTING_UNITY
-	fcolor.rgb = UnityPbrLight(i, l, n, v);
+	if (!isAdditive) fcolor += UnityLightBase(i, l, n, v);
+	fcolor += UnityLightAdditive(i, l, n, v);
 #elif LIGHTING_MODE == LIGHTING_GLTF
-	fcolor.rgb = GltfPbrLight(i, l, n, v);
+	GltfLightInput gli = GetGlftInput(i, l, n, v);
+	if (!isAdditive) fcolor += GltfLightBase(gli, i, l, n, v);
+	fcolor += GltfLightAdditive(gli, i, l, n, v);
+#endif
+
+#if TONEMAP_MODE && !DEBUG_CHANNEL
+	fcolor = toneMap(fcolor, CameraPositionExposure.w);
 #endif
 
 #if 0
@@ -48,26 +59,22 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 	#endif
 
 	#if ENABLE_SHADOW_MAP
-		float4 viewPosLight = mul(LightView, worldPosition);
-		float4 posLight = mul(LightProjection, viewPosLight);
-		#if ENABLE_SHADOW_MAP_BIAS
-			float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
-			posLight.z -= bias * posLight.w;
-		#endif
-		output.Color.rgb *= CalcShadowFactor(posLight.xyz / posLight.w, viewPosLight.xyz);
+		if (!isAdditive && any(LightColor)) {
+			float4 viewPosLight = mul(LightView, worldPosition);
+			float4 posLight = mul(LightProjection, viewPosLight);
+			#if ENABLE_SHADOW_MAP_BIAS
+				float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
+				posLight.z -= bias * posLight.w;
+			#endif
+			output.Color.rgb *= CalcShadowFactor(posLight.xyz / posLight.w, viewPosLight.xyz);
+		}
 	#endif
 #endif
 	
-#if DEBUG_CHANNEL 	
-	float ao = i.ao_rough_metal_tx.x;
-    float perceptualRoughness = i.ao_rough_metal_tx.y;
-	float metallic = i.ao_rough_metal_tx.z;
-#endif
-	
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION
-	fcolor = linearTosRGB(float3(ao, ao, ao));
+	fcolor = i.ao;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_EMISSIVE
-	fcolor = linearTosRGB(i.emissive.rgb);
+	fcolor = i.emissive;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_VECTOR_L
 	fcolor = l;
 	#if DEBUG_RIGHT_HANDEDNESS
@@ -81,7 +88,7 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 	#endif
 	fcolor = fcolor * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_INTENSITY_NDOTL
-	fcolor = float3(nl, nl, nl);
+	fcolor = saturate(dot(n, l));
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_VECTOR_R
 	fcolor = normalize(reflect(-v, n));
 	#if DEBUG_RIGHT_HANDEDNESS
@@ -106,9 +113,9 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 	#endif
 	fcolor = fcolor * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC
-    fcolor = linearTosRGB(float3(metallic, metallic, metallic));
+    fcolor = i.metallic;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_PERCEPTUAL_ROUGHNESS
-    fcolor = linearTosRGB(float3(perceptualRoughness, perceptualRoughness, perceptualRoughness));
+    fcolor = i.percertual_roughness;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_0
     fcolor = float3(i.uv, 0);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_UV_1
@@ -144,6 +151,10 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v)
 	#if DEBUG_RIGHT_HANDEDNESS
 		fcolor.z = 1.0 - fcolor.z;
 	#endif
+#endif
+
+#if DEBUG_CHANNEL	
+	if (isAdditive) fcolor = 0.0;
 #endif
 	return float4(fcolor, 1.0);
 }

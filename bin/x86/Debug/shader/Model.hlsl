@@ -209,8 +209,12 @@ float4 PS(PixelInput input) : SV_Target
 	float3 toEye = normalize(input.ToEye);
 	
 	LightingInput li;
-	li.albedo = GetAlbedo(input.Tex);
-	li.ao_rough_metal_tx = GetAoRoughnessMetallicTransmission(input.Tex);
+	li.albedo = input.Color * GetAlbedo(input.Tex);
+	float4 armt = GetAoRoughnessMetallicTransmission(input.Tex);
+	li.ao = armt.x;
+	li.percertual_roughness = armt.y;
+	li.metallic = armt.z;
+	li.transmission_factor = armt.w;
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
 	li.world_pos = input.WorldPos;
@@ -247,7 +251,7 @@ float4 PS(PixelInput input) : SV_Target
 	#endif
 	li.window_pos = input.Pos.xyz;
 #endif	
-	return input.Color * Lighting(li, toLight, normal, toEye);
+	return Lighting(li, toLight, normal, toEye, false);
 }
 
 /************ ForwardAdd ************/
@@ -258,12 +262,15 @@ float4 PSAdd(PixelInput input) : SV_Target
 	float3 toEye = normalize(input.ToEye);
 	
 	LightingInput li = (LightingInput)0;
-	li.albedo = GetAlbedo(input.Tex);	
-	li.ao_rough_metal_tx = GetAoRoughnessMetallicTransmission(input.Tex);	
+	li.albedo = input.Color * GetAlbedo(input.Tex);	
+	float4 armt = GetAoRoughnessMetallicTransmission(input.Tex);
+	li.ao = armt.x;
+	li.percertual_roughness = armt.y;
+	li.metallic = armt.z;
+	li.transmission_factor = armt.w;
 	li.emissive = GetEmissive(input.Tex);
 	li.uv = input.Tex;
-	//return input.Color * Lighting(li, toLight, normal, toEye);
-	return float4(0.0,0.0,0.0,0.0);
+	return Lighting(li, toLight, normal, toEye, true);
 }
 
 /************ ShadowCaster ************/
@@ -446,21 +453,26 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 {
 	PSPrepassFinalOutput output;
 
+	LightingInput li = (LightingInput)0;
+	
 	float4 worldPosition = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);//worldPos(RGB), roughness(A)
-	worldPosition.xyz = worldPosition.xyz * 2.0 - 1.0;
+	li.world_pos = worldPosition.xyz * 2.0 - 1.0;
+	li.percertual_roughness = worldPosition.w;
 	
 	float4 worldNormal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex);//worldNormal(RGB), metallic(A)
 	worldNormal.xyz = worldNormal.xyz * 2.0 - 1.0;
+	li.metallic = worldNormal.w;
+	float3 toLight = normalize(LightPosition.xyz - li.world_pos * LightPosition.w);
+	float3 toEye = normalize(CameraPositionExposure.xyz - li.world_pos);
 	
-	float3 toLight = normalize(LightPosition.xyz - worldPosition.xyz * LightPosition.w);
-	float3 toEye = normalize(CameraPositionExposure.xyz - worldPosition.xyz);
+	float4 albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);//albedo(RGB), ao(A)
+	li.albedo = albedo.rgb;
+	li.ao = albedo.w;
 	
-	LightingInput li = (LightingInput)0;
-	li.albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);//albedo(RGB), ao(A)
-	li.emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);//emissive(RGB), transmissionFactor(A)
-	li.ao_rough_metal_tx = float4(li.albedo.w, worldPosition.w, worldNormal.w, li.emissive.w);
+	float4 emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);//emissive(RGB), transmissionFactor(A)
+	li.emissive = emissive.rgb;
+	li.transmission_factor = emissive.w;
 	
-	output.Color = Lighting(li, toLight, worldNormal.xyz, toEye);
-	
+	output.Color = Lighting(li, toLight, worldNormal.xyz, toEye, false);
 	return output;
 }

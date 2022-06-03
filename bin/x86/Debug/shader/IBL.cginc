@@ -18,7 +18,7 @@ float3 GetEnvSpecularColor(float3 n, float3 v, float perceptualRoughness)
 #if RIGHT_HANDNESS_RESOURCE
 	reflUVW.z = -reflUVW.z;
 #endif	
-    float lod = perceptualRoughness * (EnvSpecColorMip.z - 1);
+    float lod = perceptualRoughness * (EnvSpecColorMip.z - 1.0);
     return MIR_SAMPLE_TEXCUBE_LOD(_SpecCube, reflUVW, lod).rgb;
 }
 
@@ -63,6 +63,7 @@ float3 GetIBLRadianceGGX(IBLInput i, float3 n, float3 v, float perceptualRoughne
     float3 fcolor = i.specularWeight * specularLight * i.FssEss;
     
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_MIP_LEVEL
+    float mip = (EnvSpecColorMip.z - 1.0);
 	fcolor = float3(mip / 32.0, perceptualRoughness, mip * perceptualRoughness);
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV_UV
     float3 reflUVW = normalize(reflect(-v, n));
@@ -72,8 +73,6 @@ float3 GetIBLRadianceGGX(IBLInput i, float3 n, float3 v, float perceptualRoughne
 	fcolor = reflUVW * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV
 	fcolor = specularLight;
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_LUT
-	fcolor = float3(f_ab, 0.0);
 #endif
 	return fcolor;
 }

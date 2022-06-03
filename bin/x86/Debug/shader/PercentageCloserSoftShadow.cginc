@@ -88,7 +88,7 @@ void FindBlocker(out float avgBlockerDepth, out float numBlockers,
 		for (float y = -BLOCKER_SEARCH_STEP_COUNT; y <= BLOCKER_SEARCH_STEP_COUNT; ++y)
 		{
 			float2 offset = float2(x, y) * stepUV;
-			float shadowMapDepth = MIR_SAMPLE_TEX2D_LEVEL(tDepth, uv + offset, 0);
+			float shadowMapDepth = MIR_SAMPLE_TEX2D_LEVEL(tDepth, uv + offset, 0).r;
 			float z = BiasedZ(z0, dz_duv, offset);
 			if (shadowMapDepth < z)
 			{
@@ -120,7 +120,7 @@ float PCF_Filter(float2 uv, float z0, float2 dz_duv, float2 filterRadiusUV,
 		{
 			float2 offset = float2(x, y) * stepUV;
 			float z = BiasedZ(z0, dz_duv, offset);
-			sum += MIR_SAMPLE_SHADOW(tDepthMap, float3(uv + offset, z));
+			sum += MIR_SAMPLE_SHADOW(tDepthMap, float3(uv + offset, z)).r;
 		}            
 	float numSamples = (PCF_FILTER_STEP_COUNT * 2 + 1);
 	return sum / (numSamples * numSamples);
@@ -188,15 +188,15 @@ inline float FastPCFShadow(float3 coord, float3 receiverPlaneDepthBias, float2 t
 {
 	float2 base_uv = coord.xy;
 	float shadow = 0;
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, -ts.y), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, -ts.y), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, 0), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, 0), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, 0), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, ts.y), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, ts.y), coord.z, receiverPlaneDepthBias));
-	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, ts.y), coord.z, receiverPlaneDepthBias));
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, -ts.y), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, -ts.y), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, -ts.y), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, 0), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, 0), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, 0), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(-ts.x, ts.y), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(0, ts.y), coord.z, receiverPlaneDepthBias)).r;
+	shadow += MIR_SAMPLE_SHADOW(tDepthMap, CombineShadowcoordComponents(base_uv, float2(ts.x, ts.y), coord.z, receiverPlaneDepthBias)).r;
 	shadow /= 9.0;
 	return shadow;
 }
