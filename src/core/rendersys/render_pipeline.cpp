@@ -43,7 +43,7 @@ struct cbPerFrameBuilder
 		mCBuffer.SHC0C1 = shc.C0C1;
 		mCBuffer.SHC2 = shc.C2;
 		mCBuffer.SHC2_2 = shc.C2_2;
-		mCBuffer.EnvSpecColorMip.z = skybox->GetTexture()->GetMipmapCount();
+		mCBuffer.EnvSpecColorMip.z() = skybox->GetTexture()->GetMipmapCount();
 		return *this;
 	}
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {

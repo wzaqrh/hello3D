@@ -7,6 +7,13 @@
 #include "ToneMapping.cginc"
 #include "Macros.cginc"
 
+MIR_DECLARE_TEX2D(txAlbedo, 0);
+MIR_DECLARE_TEX2D(txNormal, 1);
+MIR_DECLARE_TEX2D(txMetallic, 2);
+MIR_DECLARE_TEX2D(txRoughness, 3);
+MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
+MIR_DECLARE_TEX2D(txEmissive, 5);
+
 //#define HAS_ATTRIBUTE_NORMAL 1 
 //#define HAS_ATTRIBUTE_TANGENT 1 
 //#define ENABLE_PIXEL_BTN 1 
@@ -65,7 +72,7 @@ inline float4 GetAoRoughnessMetallicTransmission(float2 uv)
 #if ENABLE_AO_ROUGHNESS_METALLIC_MAP
 	float4 armt = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, AoTransUV)).rgba;
 	value.x = lerp(1.0, armt.x, AoStrength);
-	value.yz *= armt.yz;
+	value.yzw *= armt.yzw;
 #elif ENABLE_METALLIC_X_X_SMOOTHNESS_MAP
     #if ENABLE_AO_MAP
 		float ao = MIR_SAMPLE_TEX2D(txAmbientOcclusion, GetUV(uv, AoTransUV)).r;
