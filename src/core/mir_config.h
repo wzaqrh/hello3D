@@ -15,11 +15,20 @@ namespace mir {
 
 struct MIR_CORE_API Configure : boost::noncopyable {
 	Configure();
+	void SetShadowMode(int shadowMode) { _SHADOW_MODE = shadowMode; }
+	int GetShadowMode() const { return _SHADOW_MODE; }
 	bool IsShadowVSM() const;
-	bool IsReverseZ() const;
+
+	void SetReverseZ(bool reverseZ) { _REVERSE_Z = reverseZ; }
+	bool IsReverseZ() const { return _REVERSE_Z; }
+	
+	void SetColorSpace(int colorSpace) { _COLORSPACE = colorSpace; }
+	int GetColorSpace() const { return _COLORSPACE; }
+	bool IsGammaSpace() const;
 public:
 	int _SHADOW_MODE;
 	int _REVERSE_Z;
+	int _COLORSPACE;
 };
 
 }

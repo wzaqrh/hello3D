@@ -7,6 +7,7 @@ Configure::Configure()
 {
 	_SHADOW_MODE = SHADOW_MODE;
 	_REVERSE_Z = REVERSE_Z;
+	_COLORSPACE = COLORSPACE;
 }
 
 bool Configure::IsShadowVSM() const 
@@ -14,9 +15,9 @@ bool Configure::IsShadowVSM() const
 	return _SHADOW_MODE == SHADOW_VSM; 
 }
 
-bool Configure::IsReverseZ() const
+bool Configure::IsGammaSpace() const
 {
-	return _REVERSE_Z;
+	return _COLORSPACE == COLORSPACE_GAMMA;
 }
 
 }

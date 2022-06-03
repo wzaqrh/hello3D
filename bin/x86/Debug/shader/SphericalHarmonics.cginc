@@ -28,7 +28,7 @@ float3 GetSHDgree01(float4 normal, matrix c0c1) {
 float3 GetSHDgree2(float4 normal, matrix c2, float4 c2_2) {
 	float3 color = mul(normal.xyzz * normal.yzzx, c2).xyz;
     color += (normal.x*normal.x - normal.y*normal.y) * c2_2.rgb;
-#if COLORSPACE_GAMMA
+#if COLORSPACE == COLORSPACE_GAMMA
     color = LinearToGammaSpace(color);
 #endif
     return color;
@@ -36,7 +36,7 @@ float3 GetSHDgree2(float4 normal, matrix c2, float4 c2_2) {
 
 float3 GetSphericalHarmonics01(float4 normal, matrix c0c1) {
     float3 color = GetSHDgree01(normal, c0c1);
-#if COLORSPACE_GAMMA
+#if COLORSPACE == COLORSPACE_GAMMA
     color = LinearToGammaSpace(color);
 #endif
     return color;
@@ -45,7 +45,7 @@ float3 GetSphericalHarmonics01(float4 normal, matrix c0c1) {
 float3 GetSphericalHarmonics012(float4 normal, matrix c0c1, matrix c2, float4 c2_2) {
     float3 color = GetSHDgree01(normal, c0c1);
     color += GetSHDgree2(normal, c2, c2_2);
-#if COLORSPACE_GAMMA
+#if COLORSPACE == COLORSPACE_GAMMA
     color = LinearToGammaSpace(color);
 #endif
     return color;

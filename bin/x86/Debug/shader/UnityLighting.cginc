@@ -54,7 +54,7 @@ float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
     float V = SmithJointGGXVisibility(nl, nv, roughness);
     
     float specularTerm = V * D * MIR_PI;
-	#if COLORSPACE_GAMMA
+	#if COLORSPACE == COLORSPACE_GAMMA
         specularTerm = sqrt(max(1e-4h, specularTerm));
 	#endif
     specularTerm = max(0.0, specularTerm * nl);
@@ -70,7 +70,7 @@ float3 UnityPbrLight(LightingInput i, float3 l, float3 n, float3 v)
     float3 specular_color =  ks * LightColor.rgb * fs_cook_torrance;
     
     //grazing color
-    #if COLORSPACE_GAMMA
+    #if COLORSPACE == COLORSPACE_GAMMA
         float surfaceReduction = 1.0-0.28*roughness*perceptualRoughness;
 	#else
 	    float surfaceReduction = 1.0 / (roughness * roughness + 1.0);

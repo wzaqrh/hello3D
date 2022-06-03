@@ -171,7 +171,24 @@ public:
 		}
 	}
 public:
-	#define MakePerLight(light) ((light).MakeCbLight())
+	void RenderForwardPath()
+	{
+		RenderCastShadow();
+		RenderForward();
+		RenderTransparent();
+		RenderSkybox();
+		RenderOverlay();
+	}
+	void RenderDefferedPath()
+	{
+		//RenderCastShadow();
+		RenderPrepass();
+		//RenderTransparent();
+		//RenderSkybox();
+		//RenderOverlay();
+	}
+public:
+#define MakePerLight(light) ((light).MakeCbLight())
 	void Clear() 
 	{
 		mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
@@ -543,7 +560,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 			kDepthFormat));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 
-	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
+	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(IF_AND_OR(mCfg.IsGammaSpace(), kFormatR8G8B8A8UNorm, kFormatR16G16B16A16UNorm), kDepthFormat));
 }
 
 CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
@@ -572,11 +589,7 @@ void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, cons
 
 	CameraRender render(*this, rends, camera, lights);
 	render.Clear();
-	render.RenderCastShadow();
-	render.RenderForward();
-	render.RenderTransparent();
-	render.RenderSkybox();
-	render.RenderOverlay();
+	render.RenderForwardPath();
 
 	if (camera.GetPostProcessInput()) {
 		mStatesBlock.FrameBuffer.Pop();
@@ -594,11 +607,7 @@ void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, con
 
 	CameraRender render(*this, rends, camera, lights);
 	render.Clear();
-	render.RenderCastShadow();
-	render.RenderPrepass();
-	render.RenderTransparent();
-	render.RenderSkybox();
-	render.RenderOverlay();
+	render.RenderDefferedPath();
 
 	if (camera.GetPostProcessInput()) {
 		mStatesBlock.FrameBuffer.Pop();

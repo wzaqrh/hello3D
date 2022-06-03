@@ -2,7 +2,7 @@
 #define LIGHTING_INPUT_H
 #include "Macros.cginc"
 
-#if COLORSPACE_GAMMA
+#if COLORSPACE == COLORSPACE_GAMMA
     #define DielectricSpec float4(0.220916301, 0.220916301, 0.220916301, 1.0 - 0.220916301)
 #else
     #define DielectricSpec float4(0.04, 0.04, 0.04, 1.0 - 0.04)

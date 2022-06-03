@@ -45,7 +45,7 @@ inline float4 GetAlbedo(float2 uv)
     float4 albedo = AlbedoFactor;
 #if ENABLE_ALBEDO_MAP
 	float4 color = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoTransUV));
-	#if ALBEDO_MAP_SRGB
+	#if ALBEDO_MAP_SRGB && (COLORSPACE == COLORSPACE_LINEAR)
 		color = sRGBToLinear(color);
 	#endif
 	albedo *= color;
@@ -58,7 +58,7 @@ inline float4 GetEmissive(float2 uv)
     float4 emissive = EmissiveFactor;
 #if ENABLE_EMISSIVE_MAP
 	float3 color = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveTransUV)).rgb;
-	#if EMISSIVE_MAP_SRGB
+	#if EMISSIVE_MAP_SRGB && (COLORSPACE == COLORSPACE_LINEAR)
 		color = sRGBToLinear(color);
 	#endif
     emissive.rgb *= color;
@@ -358,7 +358,7 @@ float4 PSBlurVSMY(VSMBlurInput input) : SV_Target
 struct PSPrepassBaseInput
 {
 	float4 SVPos : SV_POSITION;
-    float4 Pos : POSITION0;//world space
+	float3 WorldPos : POSITION0; //world space
 	float2 Tex : TEXCOORD0;
 #if HAS_ATTRIBUTE_NORMAL
 	float3 Normal : TEXCOORD1;
@@ -369,12 +369,16 @@ struct PSPrepassBaseInput
 #if HAS_ATTRIBUTE_NORMAL && HAS_ATTRIBUTE_TANGENT && !ENABLE_PIXEL_BTN
 	float3 Bitangent : TEXCOORD3;
 #endif
-	float3 WorldPos : POSITION1; //world space
 };
 PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 {
 	PSPrepassBaseInput output;
 	matrix MW = mul(World, transpose(Model));
+	
+	//Pos && WorldPos
+	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
+	output.SVPos = mul(MW, skinPos);
+	output.WorldPos = output.SVPos.xyz / output.SVPos.w;
 	
 	//normal && tangent && bitangent
 #if HAS_ATTRIBUTE_NORMAL
@@ -391,14 +395,9 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 	output.Bitangent = cross(output.Normal.xyz, output.Tangent.xyz) * skin.Tangent.w;
 #endif
 	
-	//Pos && WorldPos
-	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
-	output.Pos = mul(MW, skinPos);
-	output.WorldPos = output.Pos.xyz / output.Pos.w;
-	
-	output.Pos = mul(View, output.Pos);
-    output.Pos = mul(Projection, output.Pos);
-	output.SVPos = output.Pos;
+	//Pos
+	output.SVPos = mul(View, output.SVPos);
+    output.SVPos = mul(Projection, output.SVPos);
 	
 	//Tex
 	output.Tex = surf.Tex;
@@ -407,20 +406,20 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 
 struct PSPrepassBaseOutput
 {
-	float4 Pos : SV_Target0;
-    float4 Normal : SV_Target1;
-    float4 Albedo : SV_Target2;
-	float4 Emissive : SV_Target3;
+	float4 Pos : SV_Target0;//worldPos(RGB), roughness(A)
+    float4 Normal : SV_Target1;//worldNormal(RGB), metallic(A)
+    float4 Albedo : SV_Target2;//albedo(RGB), ao(A)
+	float4 Emissive : SV_Target3;//emissive(RGB), transmissionFactor(A)
 };
 PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
 	PSPrepassBaseOutput output;
-	output.Pos = float4(input.Pos.xyz / input.Pos.w * 0.5 + 0.5, 1.0);
-	float4 aorm = GetAoRoughnessMetallicTransmission(input.Tex);
+	float4 armt = GetAoRoughnessMetallicTransmission(input.Tex);
+	output.Pos = float4(input.WorldPos * 0.5 + 0.5, armt.y);
 	SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
-	output.Normal = float4(normal * 0.5 + 0.5, aorm.x);
-	output.Albedo = float4(GetAlbedo(input.Tex).xyz, aorm.y);
-	output.Emissive = float4(GetEmissive(input.Tex).xyz, aorm.z);
+	output.Normal = float4(normal * 0.5 + 0.5, armt.z);
+	output.Albedo = float4(GetAlbedo(input.Tex).xyz, armt.x);
+	output.Emissive = float4(GetEmissive(input.Tex).xyz, armt.w);
 	return output;
 }
 
@@ -446,23 +445,22 @@ struct PSPrepassFinalOutput
 PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 {
 	PSPrepassFinalOutput output;
-	///output.Depth = MIR_SAMPLE_TEX2D_LEVEL(_GDepth, input.Tex, 0).r;
+
+	float4 worldPosition = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);//worldPos(RGB), roughness(A)
+	worldPosition.xyz = worldPosition.xyz * 2.0 - 1.0;
 	
-	float4 position = float4(MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex).xyz * 2.0 - 1.0, 1.0);
-	float4 worldPosition = mul(mul(ViewInv, ProjectionInv), position);
-	worldPosition /= worldPosition.w;
+	float4 worldNormal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex);//worldNormal(RGB), metallic(A)
+	worldNormal.xyz = worldNormal.xyz * 2.0 - 1.0;
 	
-	float4 normal = MIR_SAMPLE_TEX2D(_GBufferNormal, input.Tex);
-	normal.xyz = normal.xyz * 2.0 - 1.0;
 	float3 toLight = normalize(LightPosition.xyz - worldPosition.xyz * LightPosition.w);
 	float3 toEye = normalize(CameraPositionExposure.xyz - worldPosition.xyz);
 	
 	LightingInput li = (LightingInput)0;
-	li.albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);
-	li.emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);
-	li.ao_rough_metal_tx = float4(normal.w, li.albedo.w, li.emissive.w, 1.0);
-	li.uv = input.Tex;
-	output.Color = Lighting(li, toLight, normal.xyz, toEye);
+	li.albedo = MIR_SAMPLE_TEX2D(_GBufferAlbedo, input.Tex);//albedo(RGB), ao(A)
+	li.emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);//emissive(RGB), transmissionFactor(A)
+	li.ao_rough_metal_tx = float4(li.albedo.w, worldPosition.w, worldNormal.w, li.emissive.w);
+	
+	output.Color = Lighting(li, toLight, worldNormal.xyz, toEye);
 	
 	return output;
 }

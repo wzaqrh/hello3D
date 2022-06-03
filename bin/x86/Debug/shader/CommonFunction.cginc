@@ -235,7 +235,7 @@ inline float3 tangent_eye_pos(float2 uv, float4 tangentPlane, float4 depthParam,
 inline float3 DecodeLightmapRGBM (float4 data, float4 decodeInstructions)
 {
     // If Linear mode is not supported we can skip exponent part
-#if COLORSPACE_GAMMA
+#if COLORSPACE == COLORSPACE_GAMMA
     #if FORCE_LINEAR_READ_FOR_RGBM
         return (decodeInstructions.x * data.a) * sqrt(data.rgb);
     #else
