@@ -55,9 +55,9 @@
 		
 		<FillMode>Solid</FillMode>
 		<CullMode>Back</CullMode>
-		<DepthEnable>True</DepthEnable>
-		<DepthFunc>LessEqual</DepthFunc>
-		<DepthWriteMask>All</DepthWriteMask>
+		<DepthEnable1>True</DepthEnable1>
+		<DepthFunc1>LessEqual</DepthFunc1>
+		<DepthWriteMask1>All</DepthWriteMask1>
 	</PROGRAM>
 	
 	<SubShader>
@@ -116,10 +116,18 @@
 			</PROGRAM>
 		</Pass>
 		<Pass>
+			<UseGrab Condition="ENABLE_TRANSMISSION==1">_geometry_skybox{bind_slot:6}</UseGrab>
 			<LightMode>PrepassFinal</LightMode>
 			<PROGRAM> 
 				<VertexEntry>VSPrepassFinal</VertexEntry> 
 				<PixelEntry>PSPrepassFinal</PixelEntry>
+			</PROGRAM>
+		</Pass>
+		<Pass>
+			<LightMode>PrepassFinalAdd</LightMode>
+			<PROGRAM> 
+				<VertexEntry>VSPrepassFinal</VertexEntry> 
+				<PixelEntry>PSPrepassFinalAdd</PixelEntry>
 			</PROGRAM>
 		</Pass>
 	</SubShader>

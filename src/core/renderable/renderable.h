@@ -47,6 +47,40 @@ public:
 	const RenderOperation& operator[](size_t pos) const { return At(pos); }
 
 	RenderOperation& Back() { return mOps.back(); }
+
+	template<typename Visitor> bool ForEachOp(Visitor vis) const {
+		for (const auto& op : mOps) {
+			if (vis(op)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	template<typename Visitor> bool ForEachPass(int lightMode, Visitor vis) const {
+		for (const auto& op : mOps) {
+			auto tech = op.Material->GetShader()->CurTech();
+			auto passes = tech->GetPassesByLightMode(lightMode);
+			for (const auto& pass : passes) {
+				if (vis(*pass)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	const res::Pass* FindPassByGrabInName(int lightMode, const std::string& grabInName) const {
+		const res::Pass* findPass = nullptr;
+		this->ForEachPass(lightMode, [&grabInName, &findPass](const res::Pass& pass) {
+			for (auto& unit : pass.GetGrabIn()) {
+				if (unit.Name == grabInName) {
+					findPass = &pass;
+					return true;
+				}
+			}
+			return false;
+		});
+		return findPass;
+	}
 private:
 	std::vector<RenderOperation, mir_allocator<RenderOperation>> mOps;
 };

@@ -40,11 +40,11 @@ cbuffer cbModel : register(b3)
 	float TransmissionFactor;
 }
 
-inline float4 GetAlbedo(float2 uv) 
+inline float3 GetAlbedo(float2 uv) 
 {
-    float4 albedo = AlbedoFactor;
+    float3 albedo = AlbedoFactor.rgb;
 #if ENABLE_ALBEDO_MAP
-	float4 color = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoTransUV));
+	float3 color = MIR_SAMPLE_TEX2D(txAlbedo, GetUV(uv, AlbedoTransUV)).rgb;
 	#if ALBEDO_MAP_SRGB && (COLORSPACE == COLORSPACE_LINEAR)
 		color = sRGBToLinear(color);
 	#endif
@@ -53,15 +53,15 @@ inline float4 GetAlbedo(float2 uv)
     return albedo;
 }
 
-inline float4 GetEmissive(float2 uv) 
+inline float3 GetEmissive(float2 uv) 
 {
-    float4 emissive = EmissiveFactor;
+    float3 emissive = EmissiveFactor.rgb;
 #if ENABLE_EMISSIVE_MAP
 	float3 color = MIR_SAMPLE_TEX2D(txEmissive, GetUV(uv, EmissiveTransUV)).rgb;
 	#if EMISSIVE_MAP_SRGB && (COLORSPACE == COLORSPACE_LINEAR)
 		color = sRGBToLinear(color);
 	#endif
-    emissive.rgb *= color;
+    emissive *= color;
 #endif
     return emissive;
 }
@@ -126,7 +126,7 @@ inline float4 GetAoRoughnessMetallicTransmission(float2 uv)
 #endif
 #define SETUP_NORMAL(normal, uv, worldPos, tangentBasis, bitangentBasis, worldNormal) float3 normal; SET_WORLD_NORMAL(normal, worldNormal, worldPos); APPLY_NORMALMAP(normal, uv, worldPos, tangentBasis, bitangentBasis);
 
-/************ ForwardBase ************/
+/************ ForwardBase && ForwardAdd ************/
 struct PixelInput
 {
     float4 Pos : SV_POSITION;
@@ -149,7 +149,6 @@ struct PixelInput
 	float4 ViewPosLight : POSITION2;
 #endif
 };
-
 PixelInput VS(vbSurface surf, vbWeightedSkin skin)
 {
 	PixelInput output;
@@ -202,14 +201,14 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     return output;
 }
 
-float4 PS(PixelInput input) : SV_Target
-{	
+float4 PS_(PixelInput input, bool additive)
+{
     SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
 	float3 toLight = normalize(input.ToLight);
 	float3 toEye = normalize(input.ToEye);
 	
 	LightingInput li;
-	li.albedo = input.Color * GetAlbedo(input.Tex);
+	li.albedo = input.Color.rgb * GetAlbedo(input.Tex);
 	float4 armt = GetAoRoughnessMetallicTransmission(input.Tex);
 	li.ao = armt.x;
 	li.percertual_roughness = armt.y;
@@ -251,26 +250,15 @@ float4 PS(PixelInput input) : SV_Target
 	#endif
 	li.window_pos = input.Pos.xyz;
 #endif	
-	return Lighting(li, toLight, normal, toEye, false);
+	return Lighting(li, toLight, normal, toEye, additive);	
 }
-
-/************ ForwardAdd ************/
+float4 PS(PixelInput input) : SV_Target
+{	
+	return PS_(input, false);
+}
 float4 PSAdd(PixelInput input) : SV_Target
 {	
-    SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
-	float3 toLight = normalize(input.ToLight);
-	float3 toEye = normalize(input.ToEye);
-	
-	LightingInput li = (LightingInput)0;
-	li.albedo = input.Color * GetAlbedo(input.Tex);	
-	float4 armt = GetAoRoughnessMetallicTransmission(input.Tex);
-	li.ao = armt.x;
-	li.percertual_roughness = armt.y;
-	li.metallic = armt.z;
-	li.transmission_factor = armt.w;
-	li.emissive = GetEmissive(input.Tex);
-	li.uv = input.Tex;
-	return Lighting(li, toLight, normal, toEye, true);
+	return PS_(input, true);
 }
 
 /************ ShadowCaster ************/
@@ -365,7 +353,6 @@ float4 PSBlurVSMY(VSMBlurInput input) : SV_Target
 struct PSPrepassBaseInput
 {
 	float4 SVPos : SV_POSITION;
-	float3 WorldPos : POSITION0; //world space
 	float2 Tex : TEXCOORD0;
 #if HAS_ATTRIBUTE_NORMAL
 	float3 Normal : TEXCOORD1;
@@ -376,6 +363,8 @@ struct PSPrepassBaseInput
 #if HAS_ATTRIBUTE_NORMAL && HAS_ATTRIBUTE_TANGENT && !ENABLE_PIXEL_BTN
 	float3 Bitangent : TEXCOORD3;
 #endif
+	float3 WorldPos : POSITION0; //world space
+	float4 Color : COLOR;
 };
 PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 {
@@ -384,8 +373,8 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 	
 	//Pos && WorldPos
 	float4 skinPos = Skinning(skin.BlendWeights, skin.BlendIndices, float4(surf.Pos.xyz, 1.0));
-	output.SVPos = mul(MW, skinPos);
-	output.WorldPos = output.SVPos.xyz / output.SVPos.w;
+	float4 worldPos = mul(MW, skinPos);
+	output.WorldPos = worldPos.xyz / worldPos.w;
 	
 	//normal && tangent && bitangent
 #if HAS_ATTRIBUTE_NORMAL
@@ -403,11 +392,12 @@ PSPrepassBaseInput VSPrepassBase(vbSurface surf, vbWeightedSkin skin)
 #endif
 	
 	//Pos
-	output.SVPos = mul(View, output.SVPos);
+	output.SVPos = mul(View, worldPos);
     output.SVPos = mul(Projection, output.SVPos);
 	
-	//Tex
+	//Tex, Color
 	output.Tex = surf.Tex;
+	output.Color = surf.Color;
     return output;
 }
 
@@ -425,12 +415,12 @@ PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 	output.Pos = float4(input.WorldPos * 0.5 + 0.5, armt.y);
 	SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
 	output.Normal = float4(normal * 0.5 + 0.5, armt.z);
-	output.Albedo = float4(GetAlbedo(input.Tex).xyz, armt.x);
-	output.Emissive = float4(GetEmissive(input.Tex).xyz, armt.w);
+	output.Albedo = float4(input.Color.rgb * GetAlbedo(input.Tex), armt.x);
+	output.Emissive = float4(GetEmissive(input.Tex), armt.w);
 	return output;
 }
 
-/************ PrepassFinal ************/
+/************ PrepassFinal && PrepassFinalAdd ************/
 struct PSPrepassFinalInput
 {
     float4 Pos : SV_POSITION;
@@ -444,15 +434,8 @@ PSPrepassFinalInput VSPrepassFinal(vbSurface input)
     return output;
 }
 
-struct PSPrepassFinalOutput
+float4 PSPrepassFinal_(PSPrepassFinalInput input, bool additive)
 {
-	float4 Color : SV_Target0;
-	///float Depth : SV_Depth;
-};
-PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
-{
-	PSPrepassFinalOutput output;
-
 	LightingInput li = (LightingInput)0;
 	
 	float4 worldPosition = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);//worldPos(RGB), roughness(A)
@@ -473,6 +456,13 @@ PSPrepassFinalOutput PSPrepassFinal(PSPrepassFinalInput input)
 	li.emissive = emissive.rgb;
 	li.transmission_factor = emissive.w;
 	
-	output.Color = Lighting(li, toLight, worldNormal.xyz, toEye, false);
-	return output;
+	return Lighting(li, toLight, worldNormal.xyz, toEye, additive);
+}
+float4 PSPrepassFinal(PSPrepassFinalInput input) : SV_Target0
+{
+	return PSPrepassFinal_(input, false);
+}
+float4 PSPrepassFinalAdd(PSPrepassFinalInput input) : SV_Target0
+{
+	return PSPrepassFinal_(input, true);	
 }

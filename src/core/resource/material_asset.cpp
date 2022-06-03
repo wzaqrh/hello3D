@@ -787,6 +787,7 @@ private:
 					{"", "ForwardAdd", LIGHTMODE_FORWARD_ADD},
 					{"", "PrepassBase", LIGHTMODE_PREPASS_BASE},
 					{"", "PrepassFinal", LIGHTMODE_PREPASS_FINAL},
+					{"", "PrepassFinalAdd", LIGHTMODE_PREPASS_FINAL_ADD},
 					{"", "PostProcess", LIGHTMODE_POSTPROCESS},
 					{"", "Overlay", LIGHTMODE_OVERLAY},
 				};

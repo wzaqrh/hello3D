@@ -23,7 +23,7 @@ public:
 	virtual ~Light() {}
 	virtual LightType GetType() const = 0;
 	virtual void UpdateLightCamera(const Eigen::AlignedBox3f& sceneAABB) = 0;
-	const cbPerLight& MakeCbLight() const { return mCbLight; }
+	const cbPerLight& GetCbLight() const { return mCbLight; }
 	virtual Eigen::Matrix4f GetView() const = 0;
 	virtual Eigen::Matrix4f GetCastShadowProj() const = 0;
 	virtual Eigen::Matrix4f GetRecvShadowProj() const = 0;

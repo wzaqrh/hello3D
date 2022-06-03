@@ -34,7 +34,7 @@ enum PipeLineTextureSlot
 	kPipeTextureGBufferEmissive = 15
 };
 
-#define kDepthFormat kFormatD32Float//kFormatD24UNormS8UInt
+#define kDepthFormat kFormatD24UNormS8UInt//kFormatD24UNormS8UInt
 
 struct cbPerFrameBuilder 
 {
@@ -75,21 +75,23 @@ struct cbPerFrameBuilder
 		_SetFrameBuffer(frameBuffer);
 		return *this;
 	}
-	cbPerFrameBuilder& SetLight(const scene::Light& light) {
-		mCBuffer.LightView = light.GetView();
-		mCBuffer.LightProjection = light.GetRecvShadowProj();
+	cbPerFrameBuilder& SetLight(const scene::LightPtr& light) {
+		if (light) {
+			mCBuffer.LightView = light->GetView();
+			mCBuffer.LightProjection = light->GetRecvShadowProj();
+		}
+		else {
+			mCBuffer.LightProjection = mCBuffer.LightView = Eigen::Matrix4f::Identity();
+		}
 		return *this;
 	}
 	cbPerFrameBuilder& SetLightMapSize(const Eigen::Vector2i& size, int mipCount) {
 		mCBuffer.LightMapSizeMip = Eigen::Vector4f(size.x(), size.y(), mipCount, 0);
 		return *this;
 	}
-	float GetZCear() const {
-		return IF_AND_OR(mReversedZ, 0.0, 1.0);
-	}
-	CompareFunc GetZFunc(CompareFunc func) const {
-		return IF_AND_OR(mReversedZ, GetReverseZCompareFunc(func), func);
-	}
+	float GetZFar() const { return IF_AND_OR(mReversedZ, 0.0, 1.0); }
+	float GetZNear() const { return IF_AND_OR(mReversedZ, 1.0, 0.0); } 
+	CompareFunc GetZFunc(CompareFunc func) const { return IF_AND_OR(mReversedZ, GetReverseZCompareFunc(func), func); }
 	cbPerFrame& Build() {
 		return mCBuffer;
 	}
@@ -128,6 +130,9 @@ public:
 		mPerFrame.SetBackFrameBufferSize(Pipe.mRenderSys.WinSize());
 		mPerFrame.SetShadowMap(*mShadowMap);
 
+		mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, mPerFrame.GetZNear()));
+		mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, mPerFrame.GetZNear()));
+
 		for (auto& light : lights) {
 			if (light->GetCameraMask() & CameraMask) {
 				Lights.push_back(light);
@@ -139,6 +144,7 @@ public:
 					mMainLight = light;
 			}
 		}
+		if (Lights.empty()) Lights.push_back(nullptr);
 
 		RenderOperationQueue ops;
 		for (auto& r : Rends) {
@@ -153,14 +159,14 @@ public:
 		for (auto& op : ops) {
 			auto renderType = op.Material->GetProperty().RenderType;
 			BOOST_ASSERT(renderType > RENDER_TYPE_UNKOWN && renderType < RENDER_TYPE_MAX);
-			mOpsByRenderType[renderType].AddOP(op);
+			mOpsByRT[renderType].AddOP(op);
 		}
-		for (const auto& op : mOpsByRenderType[RENDER_TYPE_GEOMETRY]) {
+		for (const auto& op : mOpsByRT[RENDER_TYPE_GEOMETRY]) {
 			if (op.CastShadow) {
 				mCastShadowOps.AddOP(op);
 			}
 		}
-		for (const auto& op : mOpsByRenderType[RENDER_TYPE_GEOMETRY]) {
+		for (const auto& op : mOpsByRT[RENDER_TYPE_GEOMETRY]) {
 			if (op.CastShadow) {
 				mGBufferSprite->GenRenderOperation(mDefferedOps);
 				for (auto& dop : mDefferedOps) {
@@ -174,46 +180,55 @@ public:
 	void RenderForwardPath()
 	{
 		RenderCastShadow();
+
 		RenderForward();
-		RenderTransparent();
 		RenderSkybox();
+
+		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_FORWARD_BASE);
+		RenderTransparent();
+
 		RenderOverlay();
 	}
 	void RenderDefferedPath()
 	{
-		//RenderCastShadow();
-		RenderPrepass();
-		//RenderTransparent();
-		//RenderSkybox();
-		//RenderOverlay();
+		RenderCastShadow();
+
+		RenderPrepassBase();
+		RenderPrepassFinal();
+		RenderSkybox();
+
+		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_PREPASS_FINAL);
+		RenderTransparent();
+
+		RenderOverlay();
 	}
 public:
-#define MakePerLight(light) ((light).MakeCbLight())
 	void Clear() 
 	{
-		mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
+		mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
 	}
 	void RenderCastShadow()
 	{
 		if (mMainLight == nullptr) return;
+
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
 		auto shadow_clr_color = IF_AND_OR(mCfg.IsShadowVSM(), Eigen::Vector4f(1e4, 1e8, 0, 0), Eigen::Vector4f::Zero());
-		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, mPerFrame.GetZCear(), 0);
+		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, mPerFrame.GetZFar(), 0);
 		fb_shadow_map.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
 		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
 		blend_state(BlendState::MakeDisable());
 
-		RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER, mCastShadowOps);
+		RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER, mCastShadowOps);
 
 		if (mCfg.IsShadowVSM() && !mDefferedOps.IsEmpty())
 		{
 			mGrabDic["_ShadowMap"] = mShadowMap;
 			depth_state(DepthState::MakeFor3D(false));
 
-			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_SHADOW_CASTER_POSTPROCESS, mDefferedOps);
+			RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER_POSTPROCESS, mDefferedOps);
 			mRenderSys.GenerateMips(mShadowMap->GetAttachColorTexture(0));
 		}
 	}
@@ -229,44 +244,49 @@ public:
 		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 		auto tex_env_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
 
-		for (auto& light : Lights)
-		{
-			if (mFirstLight == light)
-			{
-				depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
-				blend_state(BlendState::MakeDisable());
+		if (mFirstLight) {
+			for (auto& light : Lights) {
+				if (mFirstLight == light) {
+					depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
+					blend_state(BlendState::MakeDisable());
 
-				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_BASE, mOpsByRenderType[RENDER_TYPE_GEOMETRY]);
-			}
-			else {
-				depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLessEqual), kDepthWriteMaskZero));
-				blend_state(BlendState::MakeAdditive());
+					RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), LIGHTMODE_FORWARD_BASE, mOpsByRT[RENDER_TYPE_GEOMETRY]);
+				}
+				else {
+					depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLessEqual), kDepthWriteMaskZero));
+					blend_state(BlendState::MakeAdditive());
 
-				RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_FORWARD_ADD, mOpsByRenderType[RENDER_TYPE_GEOMETRY]);
+					RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), LIGHTMODE_FORWARD_ADD, mOpsByRT[RENDER_TYPE_GEOMETRY]);
+				}
 			}
 		}
 	}
-	void RenderPrepass()
+	void RenderPrepassBase()
 	{
 		auto depth_state = mStatesBlock.LockDepth();
 		auto blend_state = mStatesBlock.LockBlend();
 
-		{
-			blend_state(BlendState::MakeDisable());
-			depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
+		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
+		blend_state(BlendState::MakeDisable());
 
-			auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer, Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
-			fb_gbuffer.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
+		auto fb_gbuffer = mStatesBlock.LockFrameBuffer(mGBuffer, Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
+		fb_gbuffer.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-			RenderLight(*mPerFrame.SetLight(*mMainLight), &MakePerLight(*mMainLight), LIGHTMODE_PREPASS_BASE, mOpsByRenderType[RENDER_TYPE_GEOMETRY]);
-		}
+		RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_PREPASS_BASE, mOpsByRT[RENDER_TYPE_GEOMETRY]);
+	}
+	void RenderPrepassFinal() 
+	{
+		auto depth_state = mStatesBlock.LockDepth();
+		auto blend_state = mStatesBlock.LockBlend();
 
-		mRenderSys.CopyFrameBuffer(nullptr, -1, mGBuffer, -1);
+		auto curFB = mStatesBlock.CurrentFrameBuffer();
+		if (curFB == nullptr || curFB->GetSize() == mGBuffer->GetSize())
+			mRenderSys.CopyFrameBuffer(curFB, -1, mGBuffer, -1);
 
 		for (auto& light : Lights)
 		{
-			blend_state(IF_AND_OR(light == mFirstLight, BlendState::MakeAlphaNonPremultiplied(), BlendState::MakeAdditive()));
 			depth_state(DepthState::Make(kCompareAlways, kDepthWriteMaskZero));
+			blend_state(IF_AND_OR(light == mFirstLight, BlendState::MakeAlphaNonPremultiplied(), BlendState::MakeAdditive()));
 
 			auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 			auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
@@ -283,7 +303,7 @@ public:
 
 			RenderOperationQueue ops;
 			mGBufferSprite->GenRenderOperation(ops);
-			RenderLight(*mPerFrame.SetLight(*light), &MakePerLight(*light), LIGHTMODE_PREPASS_FINAL, ops);
+			RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), IF_AND_OR(light == mFirstLight, LIGHTMODE_PREPASS_FINAL, LIGHTMODE_PREPASS_FINAL_ADD), ops);
 		}
 	}
 	void RenderTransparent()
@@ -301,18 +321,7 @@ public:
 		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 		auto tex_env_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
 
-		for (const auto& op : mOpsByRenderType[RENDER_TYPE_TRANSPARENT]) {
-			res::TechniquePtr tech = op.Material->GetShader()->CurTech();
-			std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(LIGHTMODE_FORWARD_BASE);
-			for (auto& pass : passes) {
-				for (auto& unit : pass->GetGrabIn()) {
-					if (unit.Name == "_geometry_skybox") {
-						QueryGrabDic(unit.Name);
-					}
-				}
-			}
-		}
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRenderType[RENDER_TYPE_TRANSPARENT]);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRT[RENDER_TYPE_TRANSPARENT]);
 	}
 	void RenderSkybox()
 	{
@@ -337,7 +346,7 @@ public:
 		depth_state(DepthState::MakeFor3D(false));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY, mOpsByRenderType[RENDER_TYPE_OVERLAY]);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY, mOpsByRT[RENDER_TYPE_OVERLAY]);
 	}
 	void RenderPostProcess(const IFrameBufferPtr& fbInput)
 	{
@@ -372,40 +381,44 @@ public:
 		}
 	}
 private:
-#if _DEBUG
-	bool mQueryGrabDicLock = false;
-#endif
-	IFrameBufferPtr QueryGrabDic(const std::string& name) {
+	const cbPerLight* MakePerLight(const scene::LightPtr& light) {
+		static cbPerLight blackLight;
+		return IF_AND_OR(light, &light->GetCbLight(), &blackLight);
+	}
+	void EnsureGeometrySkybox(int renderType, int lightMode) 
+	{
+		#define str_geometry_skybox "_geometry_skybox"
+		if (mOpsByRT[renderType].FindPassByGrabInName(lightMode, str_geometry_skybox)) 
+		{
+			auto size = Eigen::Vector3i(512, 512, -1);
+			auto fb = mFbBank->Borrow(MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat), size);
+
+			{
+				auto fb_geometry_skybox = mStatesBlock.LockFrameBuffer(fb, Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
+				fb_geometry_skybox.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
+
+				if (lightMode == LIGHTMODE_FORWARD_BASE) {
+					RenderForward();
+					RenderSkybox();
+				}
+				else {
+					RenderForward();
+					RenderSkybox();
+				}
+			}
+
+			mRenderSys.GenerateMips(fb->GetAttachColorTexture(0));
+			mPerFrame.SetLightMapSize(size.head<2>(), fb->GetAttachColorTexture(0)->GetMipmapCount());
+			mGrabDic[str_geometry_skybox] = fb;
+		}
+	}
+	IFrameBufferPtr QueryGrabDic(const std::string& name) 
+	{
 		auto iter = mTempGrabDic.find(name);
 		if (iter != mTempGrabDic.end()) return iter->second;
 
 		iter = mGrabDic.find(name);
 		if (iter != mGrabDic.end()) return iter->second;
-
-		if (name == "_geometry_skybox") {
-			auto size = Eigen::Vector3i(512,512,-1);
-			auto fb = mFbBank->Borrow(MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat), size);
-
-		#if _DEBUG
-			BOOST_ASSERT(!mQueryGrabDicLock);
-			mQueryGrabDicLock = true;
-		#endif
-			{
-				auto fb_geometry_skybox = mStatesBlock.LockFrameBuffer(fb, Eigen::Vector4f::Zero(), mPerFrame.GetZCear(), 0);
-				fb_geometry_skybox.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
-
-				RenderForward();
-				RenderSkybox();
-			}
-		#if _DEBUG
-			mQueryGrabDicLock = false;
-		#endif
-
-			mRenderSys.GenerateMips(fb->GetAttachColorTexture(0));
-			mPerFrame.SetLightMapSize(size.head<2>(), fb->GetAttachColorTexture(0)->GetMipmapCount());
-			mGrabDic[name] = fb;
-			return fb;
-		}
 
 		return nullptr;
 	}
@@ -533,7 +546,7 @@ private:
 	const unsigned CameraMask;
 	std::vector<scene::LightPtr> Lights;
 	RenderOperationQueue mDefferedOps, mCastShadowOps;
-	RenderOperationQueue mOpsByRenderType[RENDER_TYPE_MAX];
+	RenderOperationQueue mOpsByRT[RENDER_TYPE_MAX];
 private:
 	std::map<std::string, IFrameBufferPtr> mTempGrabDic, mGrabDic;
 	scene::LightPtr mMainLight, mFirstLight;
@@ -570,8 +583,6 @@ CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
 	CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
 
 	mGBufferSprite = CreateInstance<rend::Sprite>(__LaunchAsync__, resMng, material);
-	mGBufferSprite->SetPosition(Eigen::Vector3f(-1, -1, 0));
-	mGBufferSprite->SetSize(Eigen::Vector3f(2, 2, 0));
 	CoReturn true;
 }
 
