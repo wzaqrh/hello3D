@@ -166,13 +166,12 @@ public:
 				mCastShadowOps.AddOP(op);
 			}
 		}
-		for (const auto& op : mOpsByRT[RENDER_TYPE_GEOMETRY]) {
-			if (op.CastShadow) {
-				mGBufferSprite->GenRenderOperation(mDefferedOps);
-				for (auto& dop : mDefferedOps) {
-					dop.Material = op.Material;
-				}
-				break;
+		if (!mCastShadowOps.IsEmpty()) {
+			RenderOperation op = mCastShadowOps[0];
+			op.WorldTransform = Eigen::Matrix4f::Identity();
+			mGBufferSprite->GenRenderOperation(mDefferedOps);
+			for (auto& dop : mDefferedOps) {
+				dop.Material = op.Material;
 			}
 		}
 	}
@@ -181,10 +180,10 @@ public:
 	{
 		RenderCastShadow();
 
-		RenderForward();
-		RenderSkybox();
-
-		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_FORWARD_BASE);
+		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_FORWARD_BASE, [this]() {
+			RenderForward();
+			RenderSkybox();
+		});
 		RenderTransparent();
 
 		RenderOverlay();
@@ -193,11 +192,11 @@ public:
 	{
 		RenderCastShadow();
 
-		RenderPrepassBase();
-		RenderPrepassFinal();
-		RenderSkybox();
-
-		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_PREPASS_FINAL);
+		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_PREPASS_FINAL, [this]() {
+			RenderPrepassBase();
+			RenderPrepassFinal();
+			RenderSkybox();
+		});
 		RenderTransparent();
 
 		RenderOverlay();
@@ -280,8 +279,8 @@ public:
 		auto blend_state = mStatesBlock.LockBlend();
 
 		auto curFB = mStatesBlock.CurrentFrameBuffer();
-		if (curFB == nullptr || curFB->GetSize() == mGBuffer->GetSize())
-			mRenderSys.CopyFrameBuffer(curFB, -1, mGBuffer, -1);
+		BOOST_ASSERT(curFB == nullptr || curFB->GetSize() == mGBuffer->GetSize());
+		mRenderSys.CopyFrameBuffer(curFB, -1, mGBuffer, -1);
 
 		for (auto& light : Lights)
 		{
@@ -301,9 +300,7 @@ public:
 			auto tex_galbedo = mStatesBlock.LockTexture(kPipeTextureGBufferAlbedo, mGBuffer->GetAttachColorTexture(2));
 			auto tex_gemissive = mStatesBlock.LockTexture(kPipeTextureGBufferEmissive, mGBuffer->GetAttachColorTexture(3));
 
-			RenderOperationQueue ops;
-			mGBufferSprite->GenRenderOperation(ops);
-			RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), IF_AND_OR(light == mFirstLight, LIGHTMODE_PREPASS_FINAL, LIGHTMODE_PREPASS_FINAL_ADD), ops);
+			RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), IF_AND_OR(light == mFirstLight, LIGHTMODE_PREPASS_FINAL, LIGHTMODE_PREPASS_FINAL_ADD), mDefferedOps);
 		}
 	}
 	void RenderTransparent()
@@ -363,6 +360,7 @@ public:
 			tempOutputs[i] = mFbBank->Borrow();
 		tempOutputs.back() = Camera.GetOutput();
 
+		DEBUG_SET_PRIV_DATA(scene_image, "_scene_image");
 		mGrabDic["_SceneImage"] = scene_image;
 
 		for (size_t i = 0; i < effects.size(); ++i) {
@@ -385,31 +383,35 @@ private:
 		static cbPerLight blackLight;
 		return IF_AND_OR(light, &light->GetCbLight(), &blackLight);
 	}
-	void EnsureGeometrySkybox(int renderType, int lightMode) 
+	void EnsureGeometrySkybox(int renderType, int lightMode, std::function<void()> geoSkyRender) 
 	{
 		#define str_geometry_skybox "_geometry_skybox"
 		if (mOpsByRT[renderType].FindPassByGrabInName(lightMode, str_geometry_skybox)) 
 		{
-			auto size = Eigen::Vector3i(512, 512, -1);
-			auto fb = mFbBank->Borrow(MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat), size);
+			auto fbsize = mFbBank->GetFbSize(); fbsize.z() = -1;
+			auto fbGS = mFbBank->Borrow(mFbBank->GetFbFormats(), fbsize);
+			BOOST_ASSERT(fbGS->GetAttachColorCount() == 1 && fbGS->GetAttachZStencil());
 
 			{
-				auto fb_geometry_skybox = mStatesBlock.LockFrameBuffer(fb, Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
+				auto fb_geometry_skybox = mStatesBlock.LockFrameBuffer(fbGS, Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
 				fb_geometry_skybox.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-				if (lightMode == LIGHTMODE_FORWARD_BASE) {
-					RenderForward();
-					RenderSkybox();
-				}
-				else {
-					RenderForward();
-					RenderSkybox();
-				}
+				geoSkyRender();
 			}
 
-			mRenderSys.GenerateMips(fb->GetAttachColorTexture(0));
-			mPerFrame.SetLightMapSize(size.head<2>(), fb->GetAttachColorTexture(0)->GetMipmapCount());
-			mGrabDic[str_geometry_skybox] = fb;
+			auto curFB = mStatesBlock.CurrentFrameBuffer();
+			BOOST_ASSERT(curFB == nullptr || curFB->GetSize() == fbGS->GetSize());
+			mRenderSys.CopyFrameBuffer(curFB, -1, fbGS, -1);
+			mRenderSys.CopyFrameBuffer(curFB,  0, fbGS,  0);
+
+			mRenderSys.GenerateMips(fbGS->GetAttachColorTexture(0));
+			mPerFrame.SetLightMapSize(fbsize.head<2>(), fbGS->GetAttachColorTexture(0)->GetMipmapCount());
+			DEBUG_SET_PRIV_DATA(fbGS, str_geometry_skybox);
+			mGrabDic[str_geometry_skybox] = fbGS;
+		}
+		else 
+		{
+			geoSkyRender();
 		}
 	}
 	IFrameBufferPtr QueryGrabDic(const std::string& name) 

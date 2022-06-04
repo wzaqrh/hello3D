@@ -92,17 +92,38 @@ bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data)
 }
 
 /********** SetDebugXXX **********/
-static void SetChildrenPrivateData(const std::vector<void*>& children, const std::string& name)
+#if defined MIR_RESOURCE_DEBUG
+static void SetChildrenPrivateData(const std::vector<std::pair<void*,std::string>>& children, const std::string& name)
 {
-	for (auto& child : children)
-		if (child) static_cast<ID3D11DeviceChild*>(child)->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
-}
+	for (auto& child : children) {
+		if (child.first) {
+			std::string str_child_res = "__child_res";
+			if (child.second.size() >= str_child_res.size() && child.second.substr(0, str_child_res.size()) == str_child_res) {
+				IResource* child_res = (IResource*)(child.first);
+				
+				child_res->_Debug._PrivData = name;
+				if (child.second.size() > str_child_res.size())
+					child_res->_Debug._PrivData += "." + child.second.substr(str_child_res.size());
 
-void ResourceAddDebugDevice(IResourcePtr res, void* device)
+				SetChildrenPrivateData(child_res->_Debug._DeviceChilds, child_res->_Debug.GetDebugInfo());
+			}
+			else {
+				auto fullname = name;
+				if (!child.second.empty())
+					fullname += "." + child.second;
+
+				static_cast<ID3D11DeviceChild*>(child.first)->SetPrivateData(WKPDID_D3DDebugObjectName, fullname.size(), fullname.c_str());
+			}
+		}
+	}
+}
+#endif
+
+void ResourceAddDebugDevice(IResourcePtr res, void* device, const std::string& devName)
 {
 #if defined MIR_RESOURCE_DEBUG
 	if (res) {
-		res->_Debug._DeviceChilds.push_back(device);
+		res->_Debug._DeviceChilds.push_back(std::make_pair(device, devName));
 		SetChildrenPrivateData(res->_Debug._DeviceChilds, res->_Debug.GetDebugInfo());
 	}
 #endif

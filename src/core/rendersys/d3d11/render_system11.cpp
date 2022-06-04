@@ -99,9 +99,10 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 	mBackFrameBuffer->SetAttachZStencil(CreateInstance<FrameBufferAttachByTexture11>(texture));
 	
 #if defined MIR_RESOURCE_DEBUG
+	int idx = 0;
 	for (auto rtv : mBackFrameBuffer->AsRTVs())
-		DEBUG_RES_ADD_DEVICE(mBackFrameBuffer, rtv);
-	DEBUG_RES_ADD_DEVICE(mBackFrameBuffer, mBackFrameBuffer->AsDSV());
+		DEBUG_RES_ADD_DEVICE(mBackFrameBuffer, rtv, "rtv" + boost::lexical_cast<std::string>(idx++));
+	DEBUG_RES_ADD_DEVICE(mBackFrameBuffer, mBackFrameBuffer->AsDSV(), "-1");
 	DEBUG_SET_PRIV_DATA(mBackFrameBuffer, "device.backbuffer");
 #endif
 	return true;
@@ -201,11 +202,13 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 		framebuffer->SetAttachZStencil(FrameBufferAttachFactory::CreateZStencilAttachment(mDevice, size.head<2>(), formats.back()));
 
 #if defined MIR_RESOURCE_DEBUG
+	int idx = 0;
 	for (auto rtv : framebuffer->AsRTVs())
-		DEBUG_RES_ADD_DEVICE(framebuffer, rtv);
+		DEBUG_RES_ADD_DEVICE(framebuffer, rtv, "rtv" + boost::lexical_cast<std::string>(idx++));
+	idx = 0;
 	for (auto srv : framebuffer->AsSRVs())
-		DEBUG_RES_ADD_DEVICE(framebuffer, srv);
-	DEBUG_RES_ADD_DEVICE(framebuffer, framebuffer->AsDSV());
+		DEBUG_RES_ADD_DEVICE(framebuffer, srv, "srv" + boost::lexical_cast<std::string>(idx++));
+	DEBUG_RES_ADD_DEVICE(framebuffer, framebuffer->AsDSV(), "-1");
 #endif
 	return framebuffer;
 }
@@ -229,7 +232,7 @@ void RenderSystem11::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFr
 	Texture11Ptr texDst = std::static_pointer_cast<Texture11>(IF_AND_OR(dstAttachment >= 0, fbDst->GetAttachColorTexture(dstAttachment), fbDst->GetAttachZStencilTexture()));
 	Texture11Ptr texSrc = std::static_pointer_cast<Texture11>(IF_AND_OR(srcAttachment >= 0, fbSrc->GetAttachColorTexture(srcAttachment), fbSrc->GetAttachZStencilTexture()));
 
-	mDeviceContext->CopyResource(texDst->AsTex2D(), texSrc->AsTex2D());
+	mDeviceContext->CopySubresourceRegion(texDst->AsTex2D(), 0, 0, 0, 0, texSrc->AsTex2D(), 0, nullptr);
 }
 void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 {
@@ -368,8 +371,8 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 		}
 	}
 	
-	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mVertex, GetShader11()));
-	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mPixel, GetShader11()));
+	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mVertex, GetShader11()), "vs");
+	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mPixel, GetShader11()), "ps");
 	return program;
 }
 void RenderSystem11::SetProgram(IProgramPtr program)
@@ -596,7 +599,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		mDeviceContext->GenerateMips(texture->AsSRV());
 	}
 
-	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV());
+	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV(), "");
 	return texture;
 }
 void RenderSystem11::GenerateMips(ITexturePtr res)

@@ -34,6 +34,9 @@ public:
 	IFrameBufferPtr Borrow(bool temp = true) { return mElements[0]->Borrow(mResMng, temp); }
 	IFrameBufferPtr Borrow(const std::vector<ResourceFormat>& fmts, float size = 1.0f, bool temp = true);
 	IFrameBufferPtr Borrow(const std::vector<ResourceFormat>& fmts, const Eigen::Vector3i& size, bool temp = true);
+	
+	const Eigen::Vector3i& GetFbSize() const { return mFbSize; }
+	const std::vector<ResourceFormat>& GetFbFormats() const { return mFbFormats; }
 private:
 	ResourceManager& mResMng;
 	Eigen::Vector3i mFbSize;

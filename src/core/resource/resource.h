@@ -24,7 +24,7 @@ public:
 		return _ResourcePath;
 	}
 public:
-	std::vector<void*> _DeviceChilds;
+	std::vector<std::pair<void*,std::string>> _DeviceChilds;
 	std::string _PrivData, _ResourcePath, _DebugInfo, _CallStack;
 };
 

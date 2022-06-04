@@ -31,7 +31,7 @@ bool CheckHResultFailed(HRESULT result);
 bool CheckCompileFailed(HRESULT hr, ID3DBlob* pErrorBlob);
 bool CheckCompileFailed(HRESULT hr, IBlobDataPtr data);
 
-void MIR_CORE_API ResourceAddDebugDevice(IResourcePtr res, void* device);
+void MIR_CORE_API ResourceAddDebugDevice(IResourcePtr res, void* device, const std::string& devName);
 void MIR_CORE_API SetDebugPrivData(IResourcePtr res, const std::string& privData);
 void MIR_CORE_API SetDebugResourcePath(IResourcePtr res, const std::string& resPath);
 void MIR_CORE_API SetDebugCallStack(IResourcePtr res, const std::string& callstack);
@@ -83,12 +83,12 @@ void Log(const D3DCAPS9& caps);
 #endif
 
 #if defined MIR_RESOURCE_DEBUG
-#define DEBUG_RES_ADD_DEVICE(A, DEVICE) mir::debug::ResourceAddDebugDevice(A, DEVICE)
+#define DEBUG_RES_ADD_DEVICE(A, DEVICE, DEVNAME) mir::debug::ResourceAddDebugDevice(A, DEVICE, DEVNAME)
 #define DEBUG_SET_PRIV_DATA(A, NAME)	mir::debug::SetDebugPrivData(A, NAME)
 #define DEBUG_SET_RES_PATH(A, PATH)		mir::debug::SetDebugResourcePath(A, PATH)
 #define DEBUG_SET_CALL(A, CALL)
 #else
-#define DEBUG_RES_ADD_DEVICE(A, DEVICE)
+#define DEBUG_RES_ADD_DEVICE(A, DEVICE, DEVNAME)
 #define SET_DEBUG_NAME(A, NAME)		
 #define DEBUG_SET_RES_PATH(A, PATH) 
 #define DEBUG_SET_CALL(A, CALL)		
