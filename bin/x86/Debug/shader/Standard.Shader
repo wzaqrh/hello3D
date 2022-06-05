@@ -25,6 +25,7 @@
 			<Element Name="SHC2_2"				Type="float4"></Element>
 			<Element Name="EnvDiffuseColor"		Type="float4"></Element>
 			<Element Name="EnvSpecColorMip"		Type="float4"></Element>
+			<Element Name="EnvSheenColorMip"	Type="float4"></Element>
 			<Element Name="LightMapUV"			Type="float4"></Element>
 			<Element Name="LightMapSizeMip"		Type="float4"></Element>
 			
@@ -42,24 +43,26 @@
 		</Uniform>
 		
 		<Texture Name="tGrpShadowMap">
-			<Element Slot="12" CompFunc="Less" AddressU="Border" AddressV="Border" AddressW="Wrap" >_ShadowMap</Element>
-			<Element Slot="12" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap" Condition="SHADOW_MODE==5">_ShadowMap</Element>
+			<Element Slot="11" CompFunc="Less" AddressU="Border" AddressV="Border" AddressW="Wrap" >_ShadowMap</Element>
+			<Element Slot="11" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap" Condition="SHADOW_MODE==5">_ShadowMap</Element>
 		</Texture>
 		<Texture Name="tGrpEnv">
-			<Element Slot="13" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_DiffuseCube</Element>
-			<Element Slot="14" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_SpecCube</Element>
-			<Element Slot="15" Filter="MinMagMipLinear">_LUT</Element>				
-		</Texture>		
+			<Element Slot="12" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_EnvSheenMap</Element>
+			<Element Slot="13" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_EnvDiffuseMap</Element>
+			<Element Slot="14" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_EnvSpecMap</Element>
+			<Element Slot="15" Filter="MinMagMipLinear">_LUT</Element>
+		</Texture>
 		<Texture Name="tGrpGBuffer">
 			<Element Slot="0" Filter="Point">_GDepth</Element>
 			<Element Slot="1" Filter="MinMagMipLinear">_GBufferPos</Element>
 			<Element Slot="2" Filter="MinMagMipLinear">_GBufferNormal</Element>
 			<Element Slot="3" Filter="MinMagMipLinear">_GBufferAlbedo</Element>
 			<Element Slot="4" Filter="MinMagMipLinear">_GBufferEmissive</Element>
+			<Element Slot="5" Filter="MinMagMipLinear">_GBufferSheen</Element>
 		</Texture>
 		<Texture Name="tGrpLightMap">
 			<Element Slot="8" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_LightMap</Element>
-		</Texture>   
+		</Texture>
 		<Texture Name="tGrpPostProcessInput">
 			<Element Slot="8" Filter="MinMagMipLinear">_SceneImage</Element>
 		</Texture>

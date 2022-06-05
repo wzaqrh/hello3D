@@ -476,9 +476,6 @@
     <Filter Include="shader\inc">
       <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shader\xml">
-      <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shader\material">
       <UniqueIdentifier>{62b4cbdb-7b95-4418-9119-659c6154c15f}</UniqueIdentifier>
     </Filter>
@@ -496,6 +493,9 @@
     </Filter>
     <Filter Include="src\core\resource\texture">
       <UniqueIdentifier>{65c671af-4697-4304-90d7-e856a921db5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\shader">
+      <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -530,31 +530,31 @@
       <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Standard.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Sprite.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skybox.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Skeleton.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Model.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\BoxBlur.hlsl">
       <Filter>shader</Filter>
@@ -563,7 +563,7 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc">
       <Filter>shader\inc</Filter>
@@ -626,13 +626,16 @@
       <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Bloom.Shader">
-      <Filter>shader\xml</Filter>
+      <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\LightingInput.cginc">
       <Filter>shader\inc</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Macros.cginc">
       <Filter>shader</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\Deferred.Shader">
+      <Filter>shader\shader</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@
 #define MAT_LABEL "Label"
 #define MAT_SKYBOX "Skybox"
 #define MAT_MODEL "Model"
-#define MAT_MODEL_SHADOW "ModelShadow"
+#define MAT_DEFFERED "Deferred"
 #define MAT_BLOOM "Bloom"
 #define MAT_BOX_BLUR "BoxBlur"
 #define MAT_SSAO "HorizonBasedAO"

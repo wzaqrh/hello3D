@@ -26,14 +26,15 @@ enum PipeLineTextureSlot
 	kPipeTextureGBufferNormal = 2,
 	kPipeTextureGBufferAlbedo = 3,
 	kPipeTextureGBufferEmissive = 4,
+	kPipeTextureGBufferSheen = 5,
 
 	kPipeTextureSceneImage = 8,
 	kPipeTextureLightMap = 8,
 
-	kPipeTextureShadowMap = 12,
-	
-	kPipeTextureDiffuseEnv = 13,
-	kPipeTextureSpecEnv = 14,
+	kPipeTextureShadowMap = 11,
+	kPipeTextureEnvSheen = 12,
+	kPipeTextureEnvDiffuse = 13,
+	kPipeTextureEnvSpec = 14,
 	kPipeTextureLUT = 15,
 };
 
@@ -46,7 +47,8 @@ struct cbPerFrameBuilder
 		mCBuffer.SHC0C1 = shc.C0C1;
 		mCBuffer.SHC2 = shc.C2;
 		mCBuffer.SHC2_2 = shc.C2_2;
-		mCBuffer.EnvSpecColorMip.z() = skybox->GetTexture()->GetMipmapCount();
+		mCBuffer.EnvSpecColorMip.w() = NULLABLE_MEM(skybox->GetTexture(), GetMipmapCount(), 1);
+		mCBuffer.EnvSheenColorMip.w() = NULLABLE_MEM(skybox->GetSheenMap(), GetMipmapCount(), 1);
 		return *this;
 	}
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {
@@ -169,16 +171,7 @@ public:
 				mCastShadowOps.AddOP(op);
 			}
 		}
-		if (!mCastShadowOps.IsEmpty()) {
-			RenderOperation op = mCastShadowOps[0];
-			op.WorldTransform = Eigen::Matrix4f::Identity();
-			op.Material = op.Material.ShallowClone();
-			op.Material.GetTextures().Clear();
-			mGBufferSprite->GenRenderOperation(mDefferedOps);
-			for (auto& dop : mDefferedOps) {
-				dop.Material = op.Material;
-			}
-		}
+		mGBufferSprite->GenRenderOperation(mDefferedOps);
 	}
 public:
 	void RenderForwardPath()
@@ -197,7 +190,7 @@ public:
 	{
 		RenderCastShadow();
 
-		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_PREPASS_FINAL, [this]() {
+		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_FORWARD_BASE, [this]() {
 			RenderPrepassBase();
 			RenderPrepassFinal();
 			RenderSkybox();
@@ -244,8 +237,9 @@ public:
 		auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
 		auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
 		
-		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
-		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
+		auto tex_env_sheen = mStatesBlock.LockTexture(kPipeTextureEnvSheen, NULLABLE(Camera.GetSkyBox(), GetSheenMap()));
+		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureEnvDiffuse, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
+		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureEnvSpec, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 		auto tex_env_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
 
 		if (mFirstLight) {
@@ -292,18 +286,20 @@ public:
 			depth_state(DepthState::Make(kCompareAlways, kDepthWriteMaskZero));
 			blend_state(IF_AND_OR(light == mFirstLight, BlendState::MakeAlphaNonPremultiplied(), BlendState::MakeAdditive()));
 
-			auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 			auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
 			auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
 
-			auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
-			auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
+			auto tex_env_sheen = mStatesBlock.LockTexture(kPipeTextureEnvSheen, NULLABLE(Camera.GetSkyBox(), GetSheenMap()));
+			auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureEnvDiffuse, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
+			auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureEnvSpec, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 			auto tex_env_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
 
-			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
-			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
-			auto tex_galbedo = mStatesBlock.LockTexture(kPipeTextureGBufferAlbedo, mGBuffer->GetAttachColorTexture(2));
-			auto tex_gemissive = mStatesBlock.LockTexture(kPipeTextureGBufferEmissive, mGBuffer->GetAttachColorTexture(3));
+			auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
+			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferPos-1));
+			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferNormal-1));
+			auto tex_galbedo = mStatesBlock.LockTexture(kPipeTextureGBufferAlbedo, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferAlbedo-1));
+			auto tex_gemissive = mStatesBlock.LockTexture(kPipeTextureGBufferEmissive, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferEmissive-1));
+			auto tex_gsheen = mStatesBlock.LockTexture(kPipeTextureGBufferSheen, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferSheen-1));
 
 			RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), IF_AND_OR(light == mFirstLight, LIGHTMODE_PREPASS_FINAL, LIGHTMODE_PREPASS_FINAL_ADD), mDefferedOps);
 		}
@@ -319,8 +315,9 @@ public:
 		auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
 		auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
 
-		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureDiffuseEnv, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
-		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureSpecEnv, NULLABLE(Camera.GetSkyBox(), GetTexture()));
+		auto tex_env_sheen = mStatesBlock.LockTexture(kPipeTextureEnvSheen, NULLABLE(Camera.GetSkyBox(), GetSheenMap()));
+		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureEnvDiffuse, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
+		auto tex_env_spec = mStatesBlock.LockTexture(kPipeTextureEnvSpec, NULLABLE(Camera.GetSkyBox(), GetTexture()));
 		auto tex_env_lut = mStatesBlock.LockTexture(kPipeTextureLUT, NULLABLE(Camera.GetSkyBox(), GetLutMap()));
 
 		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRT[RENDER_TYPE_TRANSPARENT]);
@@ -577,15 +574,17 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 			kFormatR16G16B16A16UNorm,//Normal 
 			kFormatR8G8B8A8UNorm,//Albedo 
 			kFormatR8G8B8A8UNorm,//Emissive 
+			kFormatR8G8B8A8UNorm,//Sheen
 			kDepthFormat));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 
-	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(IF_AND_OR(mCfg.IsGammaSpace(), kFormatR8G8B8A8UNorm, kFormatR16G16B16A16UNorm), kDepthFormat));
+	//mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(IF_AND_OR(mCfg.IsGammaSpace(), kFormatR8G8B8A8UNorm, kFormatR16G16B16A16UNorm), kDepthFormat));
+	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
 }
 
 CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
 {
-	MaterialLoadParam loadParam(MAT_MODEL);
+	MaterialLoadParam loadParam(MAT_DEFFERED);
 	res::MaterialInstance material;
 	CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
 

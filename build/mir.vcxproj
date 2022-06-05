@@ -201,6 +201,7 @@
     <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
     <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc" />
     <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />
+    <None Include="..\bin\x86\Debug\shader\Deferred.Shader" />
     <None Include="..\bin\x86\Debug\shader\GltfLighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />

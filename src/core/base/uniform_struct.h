@@ -26,6 +26,7 @@ public:
 	Eigen::Vector4f SHC2_2 = Eigen::Vector4f::Zero();
 	Eigen::Vector4f EnvDiffuseColor = Eigen::Vector4f::Zero();
 	Eigen::Vector4f EnvSpecColorMip = Eigen::Vector4f(0, 0, 0, 1);
+	Eigen::Vector4f EnvSheenColorMip = Eigen::Vector4f(0, 0, 0, 1);
 	Eigen::Vector4f LightMapUV = Eigen::Vector4f(0, 0, 1, 1);
 	Eigen::Vector4f LightMapSizeMip = Eigen::Vector4f::Zero();
 

@@ -28,13 +28,15 @@ public:
 	SkyBox(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material);
 	void SetDiffuseEnvMap(const ITexturePtr& texture);
 	void SetLutMap(const ITexturePtr& texture);
+	void SetSheenMap(const ITexturePtr& texture);
 	void SetSphericalHarmonicsConstants(const SphericalHarmonicsConstants& shc);
 public:
 	const ITexturePtr& GetDiffuseEnvMap() const { return mDiffuseEnvMap; }
 	const ITexturePtr& GetLutMap() const { return mLutMap; }
+	const ITexturePtr& GetSheenMap() const { return mSheenMap; }
 	const SphericalHarmonicsConstants& GetSphericalHarmonicsConstants() const { return mSHConstants; }
 private:
-	ITexturePtr mLutMap, mDiffuseEnvMap;
+	ITexturePtr mLutMap, mDiffuseEnvMap, mSheenMap;
 	SphericalHarmonicsConstants mSHConstants;
 };
 

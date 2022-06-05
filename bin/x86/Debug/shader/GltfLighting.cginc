@@ -152,10 +152,14 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
 
     float3 ibl_diff = 0.0;
     float3 ibl_spec = 0.0;
+    float3 ibl_sheen = 0.0;
 #if USE_IBL
-    IBLInput ibl_i = GetIBLInput(i.percertual_roughness, gli.nv, f_ab, gli.f0, gli.specular_weight);
-    ibl_diff = GetIBLRadianceLambertian(ibl_i, n, f_ab, gli.f0, gli.diff);
-    ibl_spec = GetIBLRadianceGGX(ibl_i, n, v, i.percertual_roughness);
+    IBLInput ibl_i = GetIBLInput(n, v, gli.nv, i.percertual_roughness, f_ab, gli.f0, gli.specular_weight);
+    ibl_diff = GetIBLRadianceLambertian(ibl_i, n, f_ab, gli.f0, gli.diff, gli.specular_weight);
+    ibl_spec = GetIBLRadianceGGX(ibl_i, i.percertual_roughness, gli.specular_weight);
+    #if ENABLE_SHEEN
+        ibl_sheen = GetIBLRadianceCharlie(ibl_i, gli.nv, i.sheen_color_roughness);
+    #endif
 #endif
 
     float3 ibl_transmission = 0.0;
@@ -180,13 +184,14 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
     #endif 
 #endif
 
-    float3 fcolor = float3(0, 0, 0);
+    float3 fcolor = 0.0;
  #if ENABLE_TRANSMISSION   
     fcolor += lerp(ibl_diff * i.ao, ibl_transmission * i.transmission_factor, i.transmission_factor);
  #else
     fcolor += ibl_diff * i.ao;
  #endif
     fcolor += ibl_spec * i.ao;
+    fcolor += ibl_sheen * i.ao;
 	fcolor += i.emissive.rgb;
     
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
@@ -218,6 +223,12 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
     fcolor = gli.atten_color_distance.xyz;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_ATTENUATION_DISTANCE_SEPC_WEIGHT
     fcolor = float3(gli.atten_color_distance.w * 0.05, gli.specular_weight * 0.05, 0);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LUT_UV || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LOD || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_IRRADIANCE
+    fcolor = ibl_sheen;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_COLOR
+    fcolor = i.sheen_color_roughness.rgb;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_ROUGHNESS_SCALING
+    fcolor = float3(i.sheen_color_roughness.a, 1.0, 1.0);
 #elif DEBUG_CHANNEL
     fcolor = 0.0;
 #endif

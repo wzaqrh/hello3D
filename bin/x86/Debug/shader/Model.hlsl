@@ -13,7 +13,10 @@ MIR_DECLARE_TEX2D(txMetallic, 2);
 MIR_DECLARE_TEX2D(txRoughness, 3);
 MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 MIR_DECLARE_TEX2D(txEmissive, 5);
-MIR_DECLARE_TEX2D(PrePassOutput, 9);
+MIR_DECLARE_TEX2D(txSheen, 6);
+#if LIGHTMODE == LIGHTMODE_SHADOW_CASTER_POSTPROCESS
+	MIR_DECLARE_TEX2D(PrePassOutput, 9);
+#endif
 
 //#define HAS_ATTRIBUTE_NORMAL 1 
 //#define HAS_ATTRIBUTE_TANGENT 1 
@@ -31,9 +34,11 @@ cbuffer cbModel : register(b3)
     float4 RoughnessTransUV;
     float4 MetallicTransUV;
 	float4 EmissiveTransUV;
+	float4 SheenTransUV;
 	
 	float4 AlbedoFactor;
 	float4 EmissiveFactor;
+	float4 SheenColorRoughness;
 	float NormalScale;
     float AoStrength;
     float RoughnessFactor;
@@ -65,6 +70,19 @@ inline float3 GetEmissive(float2 uv)
     emissive *= color;
 #endif
     return emissive;
+}
+
+inline float4 GetSheenColorRoughness(float2 uv)
+{
+    float4 sheen = SheenColorRoughness;
+#if ENABLE_SHEEN_MAP
+	float4 color = MIR_SAMPLE_TEX2D(txSheen, GetUV(uv, SheenTransUV));
+	#if SHEEN_MAP_SRGB && (COLORSPACE == COLORSPACE_LINEAR)
+		color.rgb = sRGBToLinear(color.rgb);
+	#endif
+    sheen *= color;
+#endif
+    return sheen;	
 }
 
 inline float4 GetAoRoughnessMetallicTransmission(float2 uv)
@@ -216,6 +234,7 @@ float4 PS_(PixelInput input, bool additive)
 	li.metallic = armt.z;
 	li.transmission_factor = armt.w;
 	li.emissive = GetEmissive(input.Tex);
+	li.sheen_color_roughness = GetSheenColorRoughness(input.Tex);
 	li.uv = input.Tex;
 	li.world_pos = input.WorldPos;
 #if DEBUG_CHANNEL 
@@ -307,6 +326,7 @@ float4 PSGenerateVSM(PSGenerateVSMInput input) : SV_Target
 	return float4(depth, depth * depth, 0.0f, 1.0f);
 }
 
+#if LIGHTMODE == LIGHTMODE_SHADOW_CASTER_POSTPROCESS
 struct VSMBlurInput
 {
 	float4 Pos : SV_POSITION;
@@ -349,6 +369,7 @@ float4 PSBlurVSMY(VSMBlurInput input) : SV_Target
 {
 	return BlurVSMFunction(input, true);
 }
+#endif
 
 /************ PrepassBase ************/
 struct PSPrepassBaseInput
@@ -408,6 +429,7 @@ struct PSPrepassBaseOutput
     float4 Normal : SV_Target1;//worldNormal(RGB), metallic(A)
     float4 Albedo : SV_Target2;//albedo(RGB), ao(A)
 	float4 Emissive : SV_Target3;//emissive(RGB), transmissionFactor(A)
+	float4 Sheen : SV_Target4;//sheenColor(RGB), sheenRoughness(A)
 };
 PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 {
@@ -418,6 +440,7 @@ PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 	output.Normal = float4(normal * 0.5 + 0.5, armt.z);
 	output.Albedo = float4(input.Color.rgb * GetAlbedo(input.Tex), armt.x);
 	output.Emissive = float4(GetEmissive(input.Tex), armt.w);
+	output.Sheen = GetSheenColorRoughness(input.Tex);
 	return output;
 }
 
@@ -457,6 +480,8 @@ float4 PSPrepassFinal_(PSPrepassFinalInput input, bool additive)
 	float4 emissive = MIR_SAMPLE_TEX2D(_GBufferEmissive, input.Tex);//emissive(RGB), transmissionFactor(A)
 	li.emissive = emissive.rgb;
 	li.transmission_factor = emissive.w;
+	
+	li.sheen_color_roughness = MIR_SAMPLE_TEX2D(_GBufferSheen, input.Tex);//sheenColor(RGB), sheenRoughness(A)
 	
 	return Lighting(li, toLight, worldNormal.xyz, toEye, additive);
 }

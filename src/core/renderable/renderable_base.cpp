@@ -34,9 +34,9 @@ CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 {
 #if MIR_MATERIAL_HOTLOAD
 	if (mMaterial && mMaterial->IsOutOfDate()) {
-		auto mainTex = mMaterial.GetTextures()[0];
+		auto mainTex = mMaterial.GetTextures().AtOrNull(0);
 		CoAwait mMaterial.Reload(mLaunchMode, mResMng);
-		mMaterial.GetTextures()[0] = mainTex;
+		mMaterial.GetTextures().AddOrSet(mainTex, 0);
 	}
 #endif
 	CoReturn;

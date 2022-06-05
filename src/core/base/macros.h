@@ -2,7 +2,8 @@
 
 #define AS_CONST_REF(TYPE, V)		*(const TYPE*)(&V)
 
-#define NULLABLE(CLS, MEM)			(CLS ? CLS->MEM : nullptr)
+#define NULLABLE_MEM(CLS, MEM, DEF) (CLS ? CLS->MEM : DEF)
+#define NULLABLE(CLS, MEM)			NULLABLE_MEM(CLS, MEM, nullptr)
 #define IF_AND_OR(COND, AND, OR)	(COND ? AND : OR)
 #define IF_AND_NULL(COND, AND)		IF_AND_OR(COND, AND, nullptr)
 #define IF_OR(COND, OR)				IF_AND_OR(COND, COND, OR)

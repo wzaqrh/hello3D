@@ -16,6 +16,7 @@ struct LightingInput
 	float transmission_factor;
 	float3 world_pos;
 	float percertual_roughness;
+	float4 sheen_color_roughness;
 	float metallic;
 	float2 uv;
 #if DEBUG_CHANNEL

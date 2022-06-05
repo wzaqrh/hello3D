@@ -10,13 +10,14 @@
 #endif
 
 #if SHADOW_MODE == SHADOW_VSM
-	MIR_DECLARE_TEX2D(_ShadowMap, 12);
+	MIR_DECLARE_TEX2D(_ShadowMap, 11);
 #else
-	MIR_DECLARE_SHADOWMAP(_ShadowMap, 12);
+	MIR_DECLARE_SHADOWMAP(_ShadowMap, 11);
 #endif
 
-MIR_DECLARE_TEXCUBE(_DiffuseCube, 13);
-MIR_DECLARE_TEXCUBE(_SpecCube, 14);
+MIR_DECLARE_TEXCUBE(_EnvSheenMap, 12);
+MIR_DECLARE_TEXCUBE(_EnvDiffuseMap, 13);
+MIR_DECLARE_TEXCUBE(_EnvSpecMap, 14);
 MIR_DECLARE_TEX2D(_LUT, 15);
 
 #if LIGHTMODE == LIGHTMODE_PREPASS_FINAL || LIGHTMODE == LIGHTMODE_PREPASS_FINAL_ADD
@@ -25,6 +26,7 @@ MIR_DECLARE_TEX2D(_LUT, 15);
 	MIR_DECLARE_TEX2D(_GBufferNormal, 2);
 	MIR_DECLARE_TEX2D(_GBufferAlbedo, 3);
 	MIR_DECLARE_TEX2D(_GBufferEmissive, 4);
+	MIR_DECLARE_TEX2D(_GBufferSheen, 5);
 #endif
 
 struct vbSurface
@@ -63,6 +65,7 @@ cbuffer cbPerFrame : register(b0)
 	float4 SHC2_2;
 	float4 EnvDiffuseColor;
 	float4 EnvSpecColorMip;
+	float4 EnvSheenColorMip;
 	float4 LightMapUV;
 	float4 LightMapSizeMip;
 	

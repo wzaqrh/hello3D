@@ -101,6 +101,11 @@ void SkyBox::SetLutMap(const ITexturePtr& texture)
 	mLutMap = texture;
 }
 
+void SkyBox::SetSheenMap(const ITexturePtr& texture)
+{
+	mSheenMap = texture;
+}
+
 void SkyBox::SetSphericalHarmonicsConstants(const SphericalHarmonicsConstants& shc)
 {
 	mSHConstants = shc;
