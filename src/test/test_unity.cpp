@@ -30,7 +30,7 @@ CoTask<bool> TestUnity::OnInitScene()
 		dir_light->SetLookAt(Eigen::Vector3f(0, 3, 0), Eigen::Vector3f::Zero());
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
-		auto skybox = CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat);
+		auto skybox = CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), skyMat);
 		mir::rend::SphericalHarmonicsConstants shc;
 		shc.C0C1 <<
 			-0.0152, -0.0218, -0.0346, 0,

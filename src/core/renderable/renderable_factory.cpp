@@ -146,41 +146,27 @@ CoTask<bool> RenderableFactory::CreateLabel(rend::LabelPtr& label, std::string f
 	CoReturn true;
 }
 
-CoTask<bool> RenderableFactory::CreateSkybox(rend::SkyBoxPtr& skybox, std::string imgpath, MaterialLoadParam param)
+CoTask<bool> RenderableFactory::CreateSkybox(rend::SkyBoxPtr& skybox, std::vector<std::string> filenames, MaterialLoadParam param)
 {
-	COROUTINE_VARIABLES_2(imgpath, param);
+	COROUTINE_VARIABLES_2(filenames, param);
 	std::vector<CoTask<bool>> tasks;
 
 	res::MaterialInstance material;
 	MaterialLoadParam loadParam = NotEmptyOr(param, MAT_SKYBOX);
 	tasks.push_back(mResMng.CreateMaterial(material, mLaunchMode, loadParam));
 
-	ITexturePtr mainTexture, lutMap, diffuseEnvMap;
-	if (!imgpath.empty()) {
-		if (!boost::filesystem::is_regular_file(imgpath)) {
-			boost::filesystem::path dir(imgpath);
-			dir.remove_filename();
-			boost::filesystem::path specularEnvPath = dir / "specular_env.dds";
-			if (boost::filesystem::exists(specularEnvPath)) {
-				boost::filesystem::path lutPath = dir / "lut.png";
-				tasks.push_back(mResMng.CreateTextureByFile(lutMap, mLaunchMode, lutPath.string()));
-
-				boost::filesystem::path diffuseEnvPath = dir / "diffuse_env.dds";
-				tasks.push_back(mResMng.CreateTextureByFile(diffuseEnvMap, mLaunchMode, diffuseEnvPath.string()));
-
-				tasks.push_back(mResMng.CreateTextureByFile(mainTexture, mLaunchMode, specularEnvPath.string()));
-			}
-		}
-		else {
-			tasks.push_back(mResMng.CreateTextureByFile(mainTexture, mLaunchMode, imgpath));
-		}
-	}
+	ITexturePtr specEnvMap, diffuseEnvMap, sheenEnvMap, lutMap;
+	if (filenames.size() >= 0) tasks.push_back(mResMng.CreateTextureByFile(specEnvMap, mLaunchMode, filenames[0]));
+	if (filenames.size() >= 1) tasks.push_back(mResMng.CreateTextureByFile(diffuseEnvMap, mLaunchMode, filenames[1]));
+	if (filenames.size() >= 2) tasks.push_back(mResMng.CreateTextureByFile(lutMap, mLaunchMode, filenames[2]));
+	if (filenames.size() >= 3) tasks.push_back(mResMng.CreateTextureByFile(sheenEnvMap, mLaunchMode, filenames[3]));
 	CoAwait WhenAll(std::move(tasks));
 
 	skybox = CreateInstance<SkyBox>(mLaunchMode, mResMng, material);
 	skybox->SetLutMap(lutMap);
 	skybox->SetDiffuseEnvMap(diffuseEnvMap);
-	skybox->SetTexture(mainTexture);
+	skybox->SetTexture(specEnvMap);
+	skybox->SetSheenMap(sheenEnvMap);
 	CoReturn true;
 }
 

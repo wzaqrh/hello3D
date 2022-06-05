@@ -13,60 +13,12 @@ using namespace mir::scene;
 
 namespace test1 {
 
-namespace math {
-float ToRadian(float angle);
-}
-
-namespace vec {
-Eigen::Vector3f DirLight();
-Eigen::Vector3f PosLight();
-}
-
-namespace cam {
-Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
-float Near();
-float Far();
-}
-namespace cam_otho {
-Eigen::Vector3f Eye(Eigen::Vector3f mWinCenter);
-float Near();
-float Far();
-}
-
 namespace res {
 
-std::string Sky(int index = 0);
+std::vector<std::string> Sky(std::string name = "footprint_court");
 
-namespace sky {
-namespace footprint_court {
-std::string Diffuse();
-std::string Specular();
-}
-}
-
-namespace cube {
-namespace far_plane {
-CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
-}
-namespace near_plane {
-CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, Eigen::Vector3f winCenter, const mir::MaterialLoadParam& matname = "");
-}
-namespace floor {
-CoTask<mir::rend::CubePtr> Create(mir::RenderableFactoryPtr rendFac, float y, const mir::MaterialLoadParam& matname = "");
-}
-}
-
-namespace png {
-std::string Kenny();
+std::string Image(std::string name);
 void SetPos(mir::rend::SpritePtr sp, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor = mir::math::vec::anchor::LeftBottom());
-}
-namespace hdr {
-std::string Kenny();
-}
-namespace dds {
-std::string Kenny();
-std::string Lenna();
-}
 
 struct model {
 	model();

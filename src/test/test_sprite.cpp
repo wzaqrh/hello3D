@@ -52,55 +52,12 @@ CoTask<bool> TestSprite::OnInitScene()
 		};
 		std::string img = "model/image/formats/" + filenames[mCaseSecondIndex];
 		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, img));
-		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
+		test1::res::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 	}break;
 	case 1: {
 		mSprite = CoAwait mRendFac->CreateSpriteT();
-		mSprite->SetTexture(mResMng->CreateTextureByFileS(async, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
-	
-		test1::res::png::SetPos(mSprite, mCamWinHSize, mCamWinHSize, math::vec::anchor::RightTop());
-	}break;
-	case 2: {
-		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::png::Kenny());
-
-		test1::res::png::SetPos(mSprite, mWinCenter, mCamWinHSize * 2, math::vec::anchor::Center());
-	}break;
-	case 3: {
-		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::hdr::Kenny());//zlib
-
-		test1::res::png::SetPos(mSprite, Eigen::Vector3f::Zero(), mCamWinHSize, math::vec::anchor::LeftTop());
-	}break;
-	case 4: {
-		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::dds::Lenna());//bc1a
-
-		mSprite->SetPosition(mWinCenter);
-		mSprite->SetAnchor(math::vec::anchor::Center());
-	}break;
-	case 5: {
-		mSprite = CoAwait mRendFac->CreateSpriteT(test1::res::dds::Kenny());//bc1a + mipmap
-
-		test1::res::png::SetPos(mSprite, -mCamWinHSize / 2, mCamWinHSize);
-	}break;
-	case 6: {
-		mSprite = CoAwait mRendFac->CreateSpriteT();
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::png::Kenny(), kFormatUnknown, true));//auto_gen_mipmap
-	
-		mSprite->SetPosition(-mCamWinHSize);
-	}break;
-	case 7: {
-		mSprite = CoAwait mRendFac->CreateSpriteT();
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::dds::Kenny()));
-		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
-
-		auto effect = CoAwait PostProcessFactory(mRendFac).CreateAverageBlur(2);
-		mScneMng->GetDefCamera()->AddPostProcessEffect(effect);
-		mScneMng->GetDefCamera()->SetRenderingPath(kRenderPathDeffered);
-	}break;
-	case 8: {
-		mSprite = CoAwait mRendFac->CreateSpriteT();
-		//mSprite->SetTexture(mResMng->CreateTextureByFile(sync, test1::res::Sky(), kFormatR32G32B32A32Float));
-		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::dds::Kenny()));
-		test1::res::png::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
+		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, test1::res::Image("theyKilledKenny.dds")));
+		test1::res::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 
 		auto effect = CoAwait PostProcessFactory(mRendFac).CreateGaussianBlur(2);
 		mScneMng->GetDefCamera()->AddPostProcessEffect(effect);

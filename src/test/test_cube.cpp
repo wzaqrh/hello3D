@@ -37,7 +37,7 @@ CoTask<bool> TestCube::OnInitScene()
 		param["USE_NORMAL"] = FALSE;
 		param["PBR_MODE"] = 0;
 		auto mCube = CoAwait mRendFac->CreateCubeT(mWinCenter, Eigen::Vector3f(1, 1, 1), 0xff87CEFA, param);
-		mCube->SetTexture(CoAwait mResMng->CreateTextureByFileT(__LaunchAsync__, test1::res::dds::Kenny()));
+		mCube->SetTexture(CoAwait mResMng->CreateTextureByFileT(__LaunchAsync__, test1::res::Image("theyKilledKenny.dds")));
 		mCube->GetMaterial().SetProperty<BOOL>("EnableAlbedoMap", TRUE);
 		mScneMng->AddRendAsNode(mCube);
 		mTransform = mCube->GetTransform();

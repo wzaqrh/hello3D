@@ -56,7 +56,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 		
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		skyMat["LIGHTING_MODE"] = 2;
-		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(2), skyMat));
+		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), skyMat));
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 		modelMat["LIGHTING_MODE"] = 2;
