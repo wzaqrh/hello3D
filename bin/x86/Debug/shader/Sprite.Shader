@@ -5,7 +5,7 @@
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
-		<UseTexture>txGlobal</UseTexture>
+		<UseTexture>tGrpForward</UseTexture>
 		<Texture>
 			<Element Slot="0">_MainTex</Element>
 		</Texture>

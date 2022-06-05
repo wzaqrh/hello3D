@@ -124,13 +124,18 @@ CoTask<bool> MaterialFactory::DoCreateMaterialByMtlNode(MaterialPtr material, La
 		material->mLoadParam = materialNode.LoadParam;
 
 		boost::filesystem::path assetPath(boost::filesystem::system_complete(materialNode.Property->DependSrc.Material.FilePath)); assetPath.remove_filename();
-		material->mTextures.Resize(kTextureUserSlotCount);
+
+		int textureCount = 0;
+		for (const auto& iter : materialNode.Property->Textures) {
+			textureCount = std::max(textureCount, iter.second.Slot + 1);
+		}
+		material->mTextures.Resize(textureCount);
+
 		for (const auto& iter : materialNode.Property->Textures) {
 			boost::filesystem::path imagePath = assetPath / iter.second.ImagePath;
 			BOOST_ASSERT(boost::filesystem::is_regular_file(imagePath));
 			if (boost::filesystem::is_regular_file(imagePath)) {
-				if (iter.second.Slot >= material->mTextures.Count())
-					material->mTextures.Resize(iter.second.Slot + 1);
+				BOOST_ASSERT(iter.second.Slot < material->mTextures.Count());
 				tasks.push_back(mResMng.CreateTextureByFile(material->mTextures[iter.second.Slot], lchMode, imagePath.string(), kFormatUnknown, iter.second.GenMipmap));
 			}
 		}

@@ -796,15 +796,18 @@ private:
 			#if defined _DEBUG
 				pprop.LightMode_ = lightModeStr;
 			#endif
-				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
-				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
+				BOOST_ASSERT(pprop.LightMode);
 
 				pprop.ShortName = node_pass.get<std::string>("ShortName", node_pass.get<std::string>("Name", ""));
 				pprop.Name = node_pass.get<std::string>("Name", boost::lexical_cast<std::string>(index));
 
 				pass.Program = categNode.Program;
+				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
+				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
+				int pindex = 0;
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("PROGRAM"))) {
 					ParseProgram(it.second, vis, pass.Program);
+					VisitSamplers(PropertyTreePath(node_pass, it.second, pindex++), vis, pass.Program);
 				}
 				auto& passProg = pass.Program;
 				pprop.TopoLogy = passProg.Topo;

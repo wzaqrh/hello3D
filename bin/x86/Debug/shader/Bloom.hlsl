@@ -7,6 +7,8 @@
 #include "Macros.cginc"
 #include "BilateralBlur.cginc"
 
+MIR_DECLARE_TEX2D(OrgSceneImage, 9);
+
 cbuffer cbBloom : register(b3)
 {
 	float4 _SceneImage_TexelSize;
@@ -134,6 +136,6 @@ float4 PSLensFlare(PixelInput i) : SV_Target
 float4 PSBlendAdd(PixelInput i) : SV_Target
 {
 	float4 addedbloom = MIR_SAMPLE_TEX2D(_SceneImage, i.Tex);
-	float4 screencolor = MIR_SAMPLE_TEX2D(_GBufferAlbedo, i.Tex);
+	float4 screencolor = MIR_SAMPLE_TEX2D(OrgSceneImage, i.Tex);
 	return addedbloom * BloomThresholdIntensity.w + screencolor;
 }

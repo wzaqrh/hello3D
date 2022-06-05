@@ -16,7 +16,7 @@ public:
 	RenderableSingleRenderOp(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matInst);
 
 	virtual void SetTexture(const ITexturePtr& Texture);
-	const ITexturePtr& GetTexture() const;
+	ITexturePtr GetTexture() const;
 
 	res::MaterialInstance GetMaterial() const { return mMaterial; }
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }

@@ -13,9 +13,9 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 	, mMaterial(matInst)
 {}
 
-const ITexturePtr& RenderableSingleRenderOp::GetTexture() const 
+ITexturePtr RenderableSingleRenderOp::GetTexture() const 
 {
-	return mMaterial.GetTextures()[0];
+	return mMaterial.GetTextures().AtOrNull(0);
 }
 
 Eigen::AlignedBox3f RenderableSingleRenderOp::GetWorldAABB() const
@@ -44,7 +44,7 @@ CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 
 void RenderableSingleRenderOp::SetTexture(const ITexturePtr& texture)
 {
-	mMaterial.GetTextures()[0] = texture;
+	mMaterial.GetTextures().AddOrSet(texture, 0);
 }
 
 bool RenderableSingleRenderOp::IsLoaded() const

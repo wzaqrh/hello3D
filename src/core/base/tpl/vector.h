@@ -71,6 +71,8 @@ public:
 	bool IsEmpty() const { return mElements.empty(); }
 	size_t Count() const { return mElements.size(); }
 
+	value_type AtOrNull(size_t pos) const { return pos < mElements.size() ? mElements[pos] : nullptr; }
+
 	reference At(size_t pos) { return mElements[pos]; }
 	const_reference At(size_t pos) const { return mElements[pos]; }
 	reference operator[](size_t pos) { return mElements[pos]; }

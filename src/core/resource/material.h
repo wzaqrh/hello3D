@@ -76,6 +76,7 @@ public:
 	MaterialInstance() {}
 	MaterialInstance(const MaterialPtr& material, const TextureVector& textures, const GpuParametersPtr& gpuParamters, const MaterialLoadParam& loadParam);
 	MaterialInstance Clone(Launch launchMode, ResourceManager& resMng) const;
+	MaterialInstance ShallowClone() const;
 	CoTask<bool> Reload(Launch launchMode, ResourceManager& resMng);
 
 	/********** about keywords **********/

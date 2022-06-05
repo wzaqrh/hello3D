@@ -5,7 +5,7 @@
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
-		<UseTexture>txGlobal</UseTexture>
+		<UseTexture>tGrpForward</UseTexture>
 		
 		<Topology Condition="POINT_MODE==1">1</Topology>
 		<Topology Condition="LINE_MODE==1">2</Topology>

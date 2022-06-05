@@ -21,17 +21,20 @@ namespace mir {
 
 enum PipeLineTextureSlot 
 {
-	kPipeTextureSceneImage = 6,
-	kPipeTextureLightMap = 6,
-	kPipeTextureGDepth = 7,
-	kPipeTextureShadowMap = 8,
-	kPipeTextureDiffuseEnv = 9,
-	kPipeTextureSpecEnv = 10,
-	kPipeTextureLUT = 11,
-	kPipeTextureGBufferPos = 12,
-	kPipeTextureGBufferNormal = 13,
-	kPipeTextureGBufferAlbedo = 14,
-	kPipeTextureGBufferEmissive = 15
+	kPipeTextureGDepth = 0,
+	kPipeTextureGBufferPos = 1,
+	kPipeTextureGBufferNormal = 2,
+	kPipeTextureGBufferAlbedo = 3,
+	kPipeTextureGBufferEmissive = 4,
+
+	kPipeTextureSceneImage = 8,
+	kPipeTextureLightMap = 8,
+
+	kPipeTextureShadowMap = 12,
+	
+	kPipeTextureDiffuseEnv = 13,
+	kPipeTextureSpecEnv = 14,
+	kPipeTextureLUT = 15,
 };
 
 #define kDepthFormat kFormatD24UNormS8UInt//kFormatD24UNormS8UInt
@@ -169,6 +172,8 @@ public:
 		if (!mCastShadowOps.IsEmpty()) {
 			RenderOperation op = mCastShadowOps[0];
 			op.WorldTransform = Eigen::Matrix4f::Identity();
+			op.Material = op.Material.ShallowClone();
+			op.Material.GetTextures().Clear();
 			mGBufferSprite->GenRenderOperation(mDefferedOps);
 			for (auto& dop : mDefferedOps) {
 				dop.Material = op.Material;

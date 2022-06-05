@@ -5,7 +5,7 @@
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
-		<UseTexture>txPostProcess</UseTexture>
+		<UseTexture>tGrpPostProc</UseTexture>
 		<Uniform Name="cbBloom" Slot="3" ShareMode="PerMaterial">
 			<Element Name="_SceneImage_TexelSize" Type="float4"></Element>
 			<Element Name="BloomThresholdIntensity" Type="float4" Default="0.25,0.25,0.25,0.8"></Element>
@@ -14,6 +14,10 @@
 			<Element Name="LensColors" Type="float4" Count="4" Default="0.4,0.4,0.8,0.75, 0.4,0.8,0.8,0.75, 0.8,0.4,0.8,0.75, 0.8,0.4,0.0,0.75"></Element>
 		</Uniform>
 
+		<Texture>
+			<Element Slot="9" Filter="MinMagMipLinear">OrgSceneImage</Element>
+		</Texture>
+		
 		<FileName>Bloom</FileName>
 		<VertexEntry>VS</VertexEntry>
 	</PROGRAM>
@@ -32,7 +36,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSDownSample</PixelEntry>
 			</PROGRAM>
-			<UseGrab>DownSample2{bind_slot:6}</UseGrab>
+			<UseGrab>DownSample2{bind_slot:8}</UseGrab>
 			<GrabPass>DownSample4{size:0.25}</GrabPass>
 		</Pass>
 		<Pass>
@@ -40,7 +44,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSAvgBlur</PixelEntry>
 			</PROGRAM>
-			<UseGrab>DownSample4{bind_slot:6}</UseGrab>
+			<UseGrab>DownSample4{bind_slot:8}</UseGrab>
 			<GrabPass>ABlur4{size:0.25}</GrabPass>
 		</Pass>
 		<!-- threshold : 1 pass -->
@@ -49,7 +53,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSColorThreshold</PixelEntry>
 			</PROGRAM>
-			<UseGrab>ABlur4{bind_slot:6}</UseGrab>
+			<UseGrab>ABlur4{bind_slot:8}</UseGrab>
 			<GrabPass>Threshold4{size:0.25}</GrabPass>
 		</Pass>
 		<!-- blur : 3 pass -->
@@ -58,7 +62,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSBlurX</PixelEntry>
 			</PROGRAM>
-			<UseGrab>Threshold4{bind_slot:6}</UseGrab>
+			<UseGrab>Threshold4{bind_slot:8}</UseGrab>
 			<GrabPass>GBlurX4{size:0.25}</GrabPass>
 		</Pass>
 		<Pass>
@@ -66,7 +70,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSBlurY</PixelEntry>
 			</PROGRAM>
-			<UseGrab>GBlurX4{bind_slot:6}</UseGrab>
+			<UseGrab>GBlurX4{bind_slot:8}</UseGrab>
 			<GrabPass>GBlurY4{size:0.25}</GrabPass>
 		</Pass>
 		<!-- sampling up : 3 pass -->
@@ -75,7 +79,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSAvgBlur</PixelEntry>
 			</PROGRAM>
-			<UseGrab>GBlurY4{bind_slot:6}</UseGrab>
+			<UseGrab>GBlurY4{bind_slot:8}</UseGrab>
 			<GrabPass>ABlurY4_1{size:0.5}</GrabPass>
 		</Pass>
 		<!-- blend : 1 pass -->
@@ -84,7 +88,7 @@
 			<PROGRAM> 
 				<PixelEntry>PSLensThreshold</PixelEntry>
 			</PROGRAM>
-			<UseGrab>ABlurY4_1{bind_slot:6}</UseGrab>
+			<UseGrab>ABlurY4_1{bind_slot:8}</UseGrab>
 			<GrabPass>LensThreshold4{size:0.25}</GrabPass>
 		</Pass>
 		<Pass>
@@ -92,8 +96,8 @@
 			<PROGRAM> 
 				<PixelEntry>PSBlendAdd</PixelEntry>
 			</PROGRAM>
-			<UseGrab>_SceneImage{bind_slot:14}</UseGrab>
-			<UseGrab>ABlurY4_1{bind_slot:6}</UseGrab>
+			<UseGrab>_SceneImage{bind_slot:9}</UseGrab>
+			<UseGrab>ABlurY4_1{bind_slot:8}</UseGrab>
 		</Pass>
 	</SubShader>
 </Shader>

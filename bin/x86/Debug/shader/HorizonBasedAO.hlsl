@@ -12,6 +12,8 @@
 #define USE_GNORMAL 1
 #endif
 
+MIR_DECLARE_TEX2D(PrePassOutput, 9);
+
 cbuffer cbHBAo : register(b3)
 {
 	float4 DepthParam;//f/(fn), (n-f)/(fn)
@@ -151,7 +153,7 @@ float4 PSBlurX(PixelInput input) : SV_Target
 	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
 	blurIn.resolution = FrameBufferSize;
 	blurIn.depthParam = DepthParam;
-	return BilateralBlurX(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(_GBufferAlbedo));
+	return BilateralBlurX(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(PrePassOutput));
 }
 
 float4 PSBlurY(PixelInput input) : SV_Target
@@ -160,6 +162,6 @@ float4 PSBlurY(PixelInput input) : SV_Target
 	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
 	blurIn.resolution = FrameBufferSize;
 	blurIn.depthParam = DepthParam;
-	float4 finalColor = BilateralBlurY(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(_GBufferAlbedo));
+	float4 finalColor = BilateralBlurY(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(PrePassOutput));
 	return finalColor * MIR_SAMPLE_TEX2D(_SceneImage, input.texUV);
 }

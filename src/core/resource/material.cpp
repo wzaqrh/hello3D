@@ -99,6 +99,11 @@ MaterialInstance MaterialInstance::Clone(Launch launchMode, ResourceManager& res
 	return cloneMtl->CreateInstance(launchMode, resMng);
 }
 
+MaterialInstance MaterialInstance::ShallowClone() const
+{
+	return MaterialInstance(mSelf->Material, mSelf->Textures, mSelf->GpuParameters, mSelf->LoadParam);
+}
+
 CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng)
 {
 	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);

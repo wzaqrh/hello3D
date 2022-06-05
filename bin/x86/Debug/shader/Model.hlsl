@@ -13,6 +13,7 @@ MIR_DECLARE_TEX2D(txMetallic, 2);
 MIR_DECLARE_TEX2D(txRoughness, 3);
 MIR_DECLARE_TEX2D(txAmbientOcclusion, 4);
 MIR_DECLARE_TEX2D(txEmissive, 5);
+MIR_DECLARE_TEX2D(PrePassOutput, 9);
 
 //#define HAS_ATTRIBUTE_NORMAL 1 
 //#define HAS_ATTRIBUTE_TANGENT 1 
@@ -336,7 +337,7 @@ inline float4 BlurVSMFunction(VSMBlurInput input, bool bVertical)
 	float4 output = (float4) 0.0f;
     
 	for (int i = 0; i < fFilterWidth; ++i)
-		output += MIR_SAMPLE_TEX2D(_GBufferAlbedo, float2(fTexStart + fTexelOffset * i));
+		output += MIR_SAMPLE_TEX2D(PrePassOutput, float2(fTexStart + fTexelOffset * i));
     
 	return output / fFilterWidth;
 }
@@ -421,6 +422,7 @@ PSPrepassBaseOutput PSPrepassBase(PSPrepassBaseInput input)
 }
 
 /************ PrepassFinal && PrepassFinalAdd ************/
+#if LIGHTMODE == LIGHTMODE_PREPASS_FINAL || LIGHTMODE == LIGHTMODE_PREPASS_FINAL_ADD
 struct PSPrepassFinalInput
 {
     float4 Pos : SV_POSITION;
@@ -466,3 +468,4 @@ float4 PSPrepassFinalAdd(PSPrepassFinalInput input) : SV_Target0
 {
 	return PSPrepassFinal_(input, true);	
 }
+#endif
