@@ -45,7 +45,7 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v, bool isAdd
 #elif LIGHTING_MODE == LIGHTING_GLTF
 	GltfLightInput gli = GetGlftInput(i, l, n, v);
 	if (!isAdditive) fcolor += GltfLightBase(gli, i, l, n, v);
-	fcolor += GltfLightAdditive(gli, i, l, n, v);
+	fcolor = GltfLightAdditive(gli, i, fcolor, l, n, v);
 #endif
 
 #if TONEMAP_MODE && !DEBUG_CHANNEL

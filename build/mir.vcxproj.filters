@@ -637,5 +637,8 @@
     <None Include="..\bin\x86\Debug\shader\Deferred.Shader">
       <Filter>shader\shader</Filter>
     </None>
+    <None Include="..\bin\x86\Debug\shader\CommonConstants.cginc">
+      <Filter>shader\inc</Filter>
+    </None>
   </ItemGroup>
 </Project>

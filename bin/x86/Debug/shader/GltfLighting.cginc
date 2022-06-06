@@ -77,10 +77,12 @@ GltfLightInput GetGlftInput(LightingInput i, float3 l, float3 n, float3 v)
     return gli;
 }
 
-float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 l, float3 n, float3 v)
+float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 fcolor, float3 l, float3 n, float3 v)
 {    
     float3 diffuse_color = 0.0;
     float3 specular_color = 0.0;
+    float3 transmission_color = 0.0;
+    float4 sheen_color_as = float4(0.0, 0.0, 0.0, 1.0);
 #if USE_PUNCTUAL   
     float3 diffuse = LambertDiffuse(gli.diff);
     
@@ -93,36 +95,51 @@ float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 l, float3 n
     float ks = gli.specular_weight;
 	diffuse_color  = kd * diffuse * LightColor.rgb * gli.nl;
 	specular_color = ks * specular * LightColor.rgb * gli.nl;
+    
+    #if ENABLE_TRANSMISSION
+        // Transmission BTDF
+        float3 transmissionRay = GetVolumeTransmissionRay(n, v, gli.thickness, gli.ior, World);
+        l -= transmissionRay;
+        l = normalize(l);
+
+        float transmissionRougness = ApplyIorToRoughness(gli.roughness, gli.ior);
+        float3 l_mirror = normalize(l + 2.0 * n * dot(-l, n));     // Mirror light reflection vector on surface
+        float3 h_mirror = normalize(l_mirror + v);            // Halfway vector between transmission light vector and v
+        float nh_mirror = saturate(dot(n, h_mirror));
+        float vh_mirror = saturate(dot(v, h_mirror));
+        float nl_mirror = saturate(dot(n, l_mirror));
+    
+        float D_mirror = GGXTRDistribution(nh_mirror, transmissionRougness);
+        float V_mirror = SmithJointGGXFilamentVisibility(nl_mirror, gli.nv, transmissionRougness);
+        float3 F_mirror = SchlickFresnel(gli.f0, gli.f90, vh_mirror);
+        transmission_color = i.albedo.rgb * D_mirror * V_mirror * (1.0 - F_mirror) * LightColor.rgb;     
+    #endif     
+    
+    #if ENABLE_SHEEN
+        float sheenPerceptualRoughness = max(i.sheen_color_roughness.w, 0.000001); //clamp (0,1]
+        float sheenRoughness = sheenPerceptualRoughness * sheenPerceptualRoughness;
+    
+        float sheenDistribution = CharlieDistribution(sheenRoughness, gli.nh);
+        float sheenVisibility = SheenVisibility(gli.nl, gli.nv, sheenRoughness);
+        sheen_color_as.rgb = i.sheen_color_roughness.rgb * sheenDistribution * sheenVisibility * LightColor.rgb * gli.nl;
+        
+        float sheen_metallic = max(max(i.sheen_color_roughness.r, i.sheen_color_roughness.g), i.sheen_color_roughness.b) ;
+        float sheen_brdf_nv = MIR_SAMPLE_TEX2D(_LUT, float2(gli.nv, i.sheen_color_roughness.w)).w;
+        float sheen_brdf_nl = MIR_SAMPLE_TEX2D(_LUT, float2(gli.nl, i.sheen_color_roughness.w)).w;
+        sheen_color_as.a = min(1.0 - sheen_metallic * sheen_brdf_nv, 1.0 - sheen_metallic * sheen_brdf_nl);
+    #endif
 #endif
 
-    float3 transmission_color = 0.0;
- #if USE_PUNCTUAL && ENABLE_TRANSMISSION
-     // Transmission BTDF
-     float3 transmissionRay = GetVolumeTransmissionRay(n, v, gli.thickness, gli.ior, World);
-     l -= transmissionRay;
-     l = normalize(l);
-
-     float transmissionRougness = ApplyIorToRoughness(gli.roughness, gli.ior);
-     float3 l_mirror = normalize(l + 2.0 * n * dot(-l, n));     // Mirror light reflection vector on surface
-     float3 h_mirror = normalize(l_mirror + v);            // Halfway vector between transmission light vector and v
-     float nh_mirror = saturate(dot(n, h_mirror));
-     float vh_mirror = saturate(dot(v, h_mirror));
-     float nl_mirror = saturate(dot(n, l_mirror));
-     
-     float D_mirror = GGXTRDistribution(nh_mirror, transmissionRougness);
-     float V_mirror = SmithJointGGXFilamentVisibility(nl_mirror, gli.nv, transmissionRougness);
-     float3 F_mirror = SchlickFresnel(gli.f0, gli.f90, vh_mirror);
-     transmission_color = i.albedo.rgb * D_mirror * V_mirror * (1.0 - F_mirror) * LightColor.rgb;     
- #endif  
-    
-    float3 fcolor = float3(0, 0, 0);
  #if ENABLE_TRANSMISSION   
     fcolor += lerp(diffuse_color, transmission_color * i.transmission_factor, i.transmission_factor);
  #else
     fcolor += diffuse_color;
  #endif
-    fcolor += specular_color;    
-
+    fcolor += specular_color;
+#if ENABLE_SHEEN    
+    fcolor = fcolor * sheen_color_as.a + sheen_color_as.rgb;
+ #endif
+    
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_DIFFUSE
 	fcolor = kd * diffuse;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR

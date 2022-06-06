@@ -34,14 +34,14 @@ float3 UnityLightAdditive(LightingInput i, float3 l, float3 n, float3 v)
     float3 fd_disney = DisneyDiffuse(nv, nl, lh, i.percertual_roughness, i.albedo.rgb);
     float reflectivity = lerp(DielectricSpec.r, 1, i.metallic);
     float kd = 1.0f - reflectivity;
-	float3 diffuse_color = MIR_PI * kd * LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
+	float3 diffuse_color = C_PI * kd * LightColor.rgb * fd_disney * nl; //π，kd，Li，fd_disney，nl
 	
     //D, V
     float roughness = max(i.percertual_roughness * i.percertual_roughness, 0.002);
     float D = GGXTRDistribution(nh, roughness);
     float V = SmithJointGGXVisibility(nl, nv, roughness);
     
-    float specularTerm = V * D * MIR_PI;
+    float specularTerm = V * D * C_PI;
 	#if COLORSPACE == COLORSPACE_GAMMA
         specularTerm = sqrt(max(1e-4h, specularTerm));
 	#endif

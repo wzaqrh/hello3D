@@ -125,11 +125,11 @@ float4 PSAO(PixelInput IN) : SV_Target
 	float3 dPdv = min_diff(P, Pt, Pb) * (FrameBufferSize.y * FrameBufferSize.z);
 
 	float2 noise2 = rand2dTo2d(IN.texUV);
-	float dangle = 2.0 * MIR_PI / NumStepDirContrast.y * noise2.x;
+	float dangle = 2.0 * C_PI / NumStepDirContrast.y * noise2.x;
 	float3 rand = float3(cos(dangle), sin(dangle), noise2.y);//(cos(alpha),sin(alpha),jitter)
 	
 	float ao = 0;
-	float alpha = 2.0 * MIR_PI / NumStepDirContrast.y;
+	float alpha = 2.0 * C_PI / NumStepDirContrast.y;
 	for (float d = 0; d < NumStepDirContrast.y; d++)
 	{
 		float angle = alpha * d;

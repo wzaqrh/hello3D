@@ -2,6 +2,17 @@
 #define COMMON_FUNCTION_H
 #include "HLSLSupport.cginc"
 #include "Macros.cginc"
+#include "CommonConstants.cginc"
+
+inline float3 SafeNormalize(float3 inVec)
+{
+	float dp3 = max(0.001f, dot(inVec, inVec));
+	return inVec * rsqrt(dp3);
+}
+inline float Pow5(float x)
+{
+	return x * x * x * x * x;
+}
 
 inline float2 GetUV(float2 uv, float4 uvTransform) 
 {

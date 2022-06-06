@@ -1,8 +1,9 @@
 #ifndef IBL_H
 #define IBL_H
+#include "Macros.cginc"
 #include "Standard.cginc"
 #include "ToneMapping.cginc"
-#include "Macros.cginc"
+#include "CommonFunction.cginc"
 
 float3 GetEnvDiffuseIrradiance(float3 n)
 {
@@ -40,7 +41,7 @@ inline IBLInput GetIBLInput(float3 n, float3 v, float nv, float perceptualRoughn
     IBLInput ibl_i;
     float3 smoothness = 1.0 - perceptualRoughness;
     float3 Fr = max(smoothness, f0) - f0;
-    float3 k_S = f0 + Fr * pow(1.0 - nv, 5.0);
+    float3 k_S = f0 + Fr * Pow5(1.0 - nv);
     ibl_i.FssEss = specularWeight * k_S * f_ab.x + f_ab.y; // <--- GGX / specular light contribution (scale it down if the specularWeight is low)
     ibl_i.reflUVW = normalize(reflect(-v, n));
     return ibl_i;
