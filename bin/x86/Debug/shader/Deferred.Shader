@@ -10,6 +10,7 @@
 		<Macros>			
 			<ENABLE_TRANSMISSION>1</ENABLE_TRANSMISSION>
 			<ENABLE_SHEEN>1</ENABLE_SHEEN>
+			<ENABLE_CLEARCOAT>1</ENABLE_CLEARCOAT>
 		</Macros>
 		<FileName>Model</FileName>
 		<VertexEntry>VS</VertexEntry>

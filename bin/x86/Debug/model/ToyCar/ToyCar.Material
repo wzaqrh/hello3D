@@ -14,6 +14,9 @@
 		<ENABLE_EMISSIVE_MAP>1</ENABLE_EMISSIVE_MAP>
 		<EMISSIVE_MAP_SRGB>1</EMISSIVE_MAP_SRGB>
 		
+		<ENABLE_CLEARCOAT_MAP>1</ENABLE_CLEARCOAT_MAP>
+		<CLEARCOAT_MAP_SRGB>1</CLEARCOAT_MAP_SRGB>
+		
 		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
 	</Macros>
 	<Properties>
@@ -23,5 +26,8 @@
 		
 		<txEmissive GenMipmap="false">ToyCar_emissive.png</txEmissive>
 		<EmissiveFactor>1,1,1,0</EmissiveFactor>
+		
+		<txClearCoat GenMipmap="false">ToyCar_clearcoat.png</txClearCoat>
+		<ClearCoatRoughness>1,1,1,0</ClearCoatRoughness>
 	</Properties>
 </Material>

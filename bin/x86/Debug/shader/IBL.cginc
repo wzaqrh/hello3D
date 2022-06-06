@@ -28,7 +28,7 @@ float3 GetEnvSheenIrradiance(float3 reflUVW, float sheenPerceptualRoughness)
 #if RIGHT_HANDNESS_RESOURCE
 	reflUVW.z = -reflUVW.z;
 #endif
-    return MIR_SAMPLE_TEXCUBE_LOD(_EnvSheenMap, reflUVW, lod);
+    return MIR_SAMPLE_TEXCUBE_LOD(_EnvSheenMap, reflUVW, lod).rgb;
 }
 
 struct IBLInput 
@@ -93,7 +93,7 @@ float3 GetIBLRadianceCharlie(IBLInput i, float nv, float4 sheenColorRoughness)
 
     float3 irradiance = GetEnvSheenIrradiance(i.reflUVW, sheenColorRoughness.w);
     float3 fcolor = sheenColorRoughness.rgb * irradiance * brdf;
-#if DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LUT
     fcolor = brdf;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LUT_UV
     fcolor = float3(lut_uv, 0.0);

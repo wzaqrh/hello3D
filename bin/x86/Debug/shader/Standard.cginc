@@ -27,6 +27,7 @@ MIR_DECLARE_TEX2D(_LUT, 15);//rg(ggx), b(charlie), a(sheen)
 	MIR_DECLARE_TEX2D(_GBufferAlbedo, 3);
 	MIR_DECLARE_TEX2D(_GBufferEmissive, 4);
 	MIR_DECLARE_TEX2D(_GBufferSheen, 5);
+	MIR_DECLARE_TEX2D(_GBufferClearCoat, 6);
 #endif
 
 struct vbSurface

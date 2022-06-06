@@ -17,6 +17,7 @@ struct LightingInput
 	float3 world_pos;
 	float percertual_roughness;
 	float4 sheen_color_roughness;
+	float4 clearcoat_color_roughness;
 	float metallic;
 	float2 uv;
 #if DEBUG_CHANNEL

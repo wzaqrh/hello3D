@@ -16,10 +16,12 @@
 			<Element Name="MetallicTransUV"         Type="float4" Default="0,0,1,1"></Element>
 			<Element Name="EmissiveTransUV"         Type="float4" Default="0,0,1,1"></Element>
 			<Element Name="SheenTransUV"			Type="float4" Default="0,0,1,1"></Element>
+			<Element Name="ClearCoatTransUV"		Type="float4" Default="0,0,1,1"></Element>
 			
 			<Element Name="AlbedoFactor"            Type="float4" Default="1,1,1,1"></Element>
 			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
 			<Element Name="SheenColorRoughness"     Type="float4" Default="0,0,0,0"></Element>
+			<Element Name="ClearCoatRoughness"      Type="float4" Default="0,0,0,0"></Element>
 			<Element Name="NormalScale"             Type="float"  Default="1"></Element>
 			<Element Name="AoStrength"				Type="float"  Default="1"></Element>
 			<Element Name="RoughnessFactor"         Type="float"  Default="1"></Element>
@@ -34,6 +36,7 @@
 			<Element Slot="4" Address="Wrap">txAmbientOcclusion</Element>
 			<Element Slot="5" Address="Wrap">txEmissive</Element>
 			<Element Slot="6" Address="Wrap">txSheen</Element>
+			<Element Slot="7" Address="Wrap">txClearCoat</Element>
 		</Texture>
 		<Macros>			
 			<ENABLE_ALBEDO_MAP>0</ENABLE_ALBEDO_MAP>

@@ -141,21 +141,21 @@ float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 fcolor, flo
  #endif
     
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_DIFFUSE
-	fcolor = kd * diffuse;
+	fcolor += kd * diffuse;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR
-	fcolor = ks * specular;
+	fcolor += ks * specular;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_D
-	fcolor = D;
+	fcolor += D;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_V
-	fcolor = V;
+	fcolor += V;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_F
-	fcolor = F;
+	fcolor += F;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
-	fcolor = diffuse_color + specular_color;
+	fcolor += diffuse_color + specular_color;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_TRANSMISSION_VOLUME
-    fcolor = transmission_color * i.transmission_factor; 
+    fcolor += transmission_color * i.transmission_factor; 
 #elif DEBUG_CHANNEL
-    fcolor = 0.0;
+    
 #endif
     return fcolor;
 }
@@ -170,12 +170,17 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
     float3 ibl_diff = 0.0;
     float3 ibl_spec = 0.0;
     float3 ibl_sheen = 0.0;
+    float3 ibl_clearcoat = 0.0;
 #if USE_IBL
     IBLInput ibl_i = GetIBLInput(n, v, gli.nv, i.percertual_roughness, f_ab, gli.f0, gli.specular_weight);
     ibl_diff = GetIBLRadianceLambertian(ibl_i, n, f_ab, gli.f0, gli.diff, gli.specular_weight);
     ibl_spec = GetIBLRadianceGGX(ibl_i, i.percertual_roughness, gli.specular_weight);
     #if ENABLE_SHEEN
         ibl_sheen = GetIBLRadianceCharlie(ibl_i, gli.nv, i.sheen_color_roughness);
+    #endif
+    #if ENABLE_CLEARCOAT
+        ibl_i = GetIBLInput(n, v, gli.nv, i.clearcoat_color_roughness.w, f_ab, gli.f0, gli.specular_weight);
+        ibl_clearcoat = GetIBLRadianceGGX(ibl_i, i.clearcoat_color_roughness.w, gli.specular_weight);
     #endif
 #endif
 
@@ -211,6 +216,11 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
     fcolor += ibl_sheen * i.ao;
 	fcolor += i.emissive.rgb;
     
+#if ENABLE_CLEARCOAT
+    float3 clearcoat_fresnel = SchlickFresnel(gli.f0, gli.f90, gli.nv);
+    fcolor = fcolor * (1.0 - i.clearcoat_color_roughness.rgb * clearcoat_fresnel) + ibl_clearcoat/*color+ibl*/ * i.clearcoat_color_roughness.rgb * i.ao;
+#endif
+    
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BASECOLOR
     fcolor = i.albedo.rgb;   
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_LUT
@@ -240,12 +250,37 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
     fcolor = gli.atten_color_distance.xyz;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_ATTENUATION_DISTANCE_SEPC_WEIGHT
     fcolor = float3(gli.atten_color_distance.w * 0.05, gli.specular_weight * 0.05, 0);
-#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LUT_UV || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LOD || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_IRRADIANCE
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LUT || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LUT_UV || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_LOD || DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_IBL_IRRADIANCE
     fcolor = ibl_sheen;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_COLOR
     fcolor = i.sheen_color_roughness.rgb;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_SHEEN_ROUGHNESS_SCALING
     fcolor = float3(i.sheen_color_roughness.a, 1.0, 1.0);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_CLEARCOAT
+    fcolor = ibl_clearcoat * i.clearcoat_color_roughness.rgb * i.ao;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_CLEARCOAT_F0
+    #if ENABLE_CLEARCOAT
+        fcolor = gli.f0;
+    #else
+        fcolor = 0.0;
+    #endif
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_CLEARCOAT_F90
+    #if ENABLE_CLEARCOAT
+        fcolor = gli.f90;
+    #else
+        fcolor = 0.0;
+    #endif
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_CLEARCOAT_FACTOR
+    fcolor = i.clearcoat_color_roughness.rgb;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_CLEARCOAT_ROUGHNESS
+    fcolor = i.clearcoat_color_roughness.w;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_CLEARCOAT_FRESNEL
+    #if ENABLE_CLEARCOAT
+        //fcolor = clearcoat_fresnel;
+        fcolor = SchlickFresnel(gli.f0, gli.f90, saturate(dot(normalize(i.normal_basis * 2.0 - 1.0), v)));
+    #else
+        fcolor = 0.0;
+    #endif
 #elif DEBUG_CHANNEL
     fcolor = 0.0;
 #endif

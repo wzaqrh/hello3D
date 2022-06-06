@@ -59,6 +59,7 @@
 			<Element Slot="3" Filter="MinMagMipLinear">_GBufferAlbedo</Element>
 			<Element Slot="4" Filter="MinMagMipLinear">_GBufferEmissive</Element>
 			<Element Slot="5" Filter="MinMagMipLinear">_GBufferSheen</Element>
+			<Element Slot="6" Filter="MinMagMipLinear">_GBufferClearCoat</Element>
 		</Texture>
 		<Texture Name="tGrpLightMap">
 			<Element Slot="8" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_LightMap</Element>

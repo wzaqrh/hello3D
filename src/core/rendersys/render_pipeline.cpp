@@ -27,6 +27,7 @@ enum PipeLineTextureSlot
 	kPipeTextureGBufferAlbedo = 3,
 	kPipeTextureGBufferEmissive = 4,
 	kPipeTextureGBufferSheen = 5,
+	kPipeTextureGBufferClearCoat = 6,
 
 	kPipeTextureSceneImage = 8,
 	kPipeTextureLightMap = 8,
@@ -300,6 +301,7 @@ public:
 			auto tex_galbedo = mStatesBlock.LockTexture(kPipeTextureGBufferAlbedo, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferAlbedo-1));
 			auto tex_gemissive = mStatesBlock.LockTexture(kPipeTextureGBufferEmissive, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferEmissive-1));
 			auto tex_gsheen = mStatesBlock.LockTexture(kPipeTextureGBufferSheen, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferSheen-1));
+			auto tex_gclearcoat = mStatesBlock.LockTexture(kPipeTextureGBufferClearCoat, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferClearCoat-1));
 
 			RenderLight(*mPerFrame.SetLight(light), MakePerLight(light), IF_AND_OR(light == mFirstLight, LIGHTMODE_PREPASS_FINAL, LIGHTMODE_PREPASS_FINAL_ADD), mDefferedOps);
 		}
@@ -575,6 +577,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 			kFormatR8G8B8A8UNorm,//Albedo 
 			kFormatR8G8B8A8UNorm,//Emissive 
 			kFormatR8G8B8A8UNorm,//Sheen
+			kFormatR8G8B8A8UNorm,//ClearCoat
 			kDepthFormat));
 	DEBUG_SET_PRIV_DATA(mGBuffer, "render_pipeline.gbuffer");//Pos, Normal, Albedo, Emissive
 

@@ -207,6 +207,7 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 				{
 				case FIC_RGB: baseFormat = kRBF_RGB; break;
 				case FIC_RGBALPHA: baseFormat = kRBF_RGBA; break;
+				case FIC_MINISBLACK: baseFormat = kRBF_R; break;
 				default: BOOST_ASSERT(false); break;
 				}
 
@@ -220,6 +221,9 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 					}
 					else if (bpp == 32) {
 						dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_RGBA || baseFormat == kRBF_RGB); baseFormat = kRBF_RGBA;
+					}
+					else if (bpp == 8) {
+						dataType = kRDT_UNorm; bitsPerChannel = 8; BOOST_ASSERT(baseFormat == kRBF_R);
 					}
 					else {
 						BOOST_ASSERT(FALSE);
@@ -241,8 +245,9 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 			
 			if (isPngJpgOrBmp) {
 			#if !defined FREEIMAGE_BIGENDIAN
-				if (fi.getImageType() == FIT_BITMAP) 
+				if (fi.getImageType() == FIT_BITMAP && fi.getBitsPerPixel() == 32) {
 					SwapRedBlue32(fi);
+				}
 			#endif
 				fi.flipVertical();
 			}
