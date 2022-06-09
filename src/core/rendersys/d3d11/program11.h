@@ -1,6 +1,8 @@
 #pragma once
 #include <windows.h>
 #include <d3d11.h>
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
 #include "core/base/math.h"
 #include "core/rendersys/d3d11/predeclare.h"
 #include "core/rendersys/program.h"
@@ -14,11 +16,11 @@ public:
 	VertexShader11(IBlobDataPtr pBlob) :mBlob(pBlob) {}
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 
-	ID3D11VertexShader*& GetShader11() { return mShader; }
+	ComPtr<ID3D11VertexShader>& GetShader11() { return mShader; }
 public:
-	ID3D11VertexShader* mShader = nullptr;
+	ComPtr<ID3D11VertexShader> mShader = nullptr;
 	IBlobDataPtr mBlob;
-	ID3DBlob* mErrBlob = nullptr;
+	ComPtr<ID3DBlob> mErrBlob = nullptr;
 };
 
 class PixelShader11 : public ImplementResource<IPixelShader>
@@ -28,11 +30,11 @@ public:
 	PixelShader11(IBlobDataPtr pBlob) :mBlob(pBlob) {}
 	IBlobDataPtr GetBlob() const override { return mBlob; }
 
-	ID3D11PixelShader*& GetShader11() { return mShader; }
+	ComPtr<ID3D11PixelShader>& GetShader11() { return mShader; }
 public:
-	ID3D11PixelShader* mShader = nullptr;
+	ComPtr<ID3D11PixelShader> mShader = nullptr;
 	IBlobDataPtr mBlob;
-	ID3DBlob* mErrBlob = nullptr;
+	ComPtr<ID3DBlob> mErrBlob = nullptr;
 };
 
 class Program11 : public ImplementResource<IProgram>

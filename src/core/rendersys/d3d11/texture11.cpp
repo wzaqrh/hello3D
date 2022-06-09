@@ -4,7 +4,6 @@
 
 namespace mir {
 
-/********** Texture11 **********/
 Texture11::Texture11()
 {
 	mAutoGenMipmap = false;
@@ -18,6 +17,9 @@ Texture11::Texture11()
 	mSRV = nullptr;
 	mRTV = nullptr;
 	mDSV = nullptr;
+}
+Texture11::~Texture11()
+{
 }
 
 void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap, bool bindRTorDS)
@@ -37,17 +39,17 @@ void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int 
 	mDSV = nullptr;
 }
 
-void Texture11::Init(ID3D11Texture2D* tex2d)
+void Texture11::Init(ComPtr<ID3D11Texture2D>&& tex2d)
 {
 	D3D11_TEXTURE2D_DESC desc;
 	tex2d->GetDesc(&desc);
 
 	this->Init(static_cast<ResourceFormat>(desc.Format), static_cast<HWMemoryUsage>(desc.Usage), desc.Width, desc.Height, 1, desc.MipLevels, desc.BindFlags & D3D11_BIND_RENDER_TARGET);
 
-	mTex2D = tex2d;
+	mTex2D = std::move(tex2d);
 }
 
-ID3D11Texture2D* Texture11::InitTex(ID3D11Device* device, const D3D11_SUBRESOURCE_DATA datas[])
+const ComPtr<ID3D11Texture2D>& Texture11::InitTex(const ComPtr<ID3D11Device>& device, const D3D11_SUBRESOURCE_DATA datas[])
 {
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = mSize.x();
@@ -90,7 +92,7 @@ ID3D11Texture2D* Texture11::InitTex(ID3D11Device* device, const D3D11_SUBRESOURC
 	return mTex2D;
 }
 
-ID3D11ShaderResourceView* Texture11::InitSRV(ID3D11Device* device)
+const ComPtr<ID3D11ShaderResourceView>& Texture11::InitSRV(const ComPtr<ID3D11Device>& device)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
@@ -99,31 +101,31 @@ ID3D11ShaderResourceView* Texture11::InitSRV(ID3D11Device* device)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = mAutoGenMipmap ? -1 : mMipCount;
 	mSRV = nullptr;
-	if (CheckHR(device->CreateShaderResourceView(mTex2D, &srvDesc, &mSRV))) 
+	if (CheckHR(device->CreateShaderResourceView(mTex2D.Get(), &srvDesc, &mSRV))) 
 		return nullptr;
 	return mSRV;
 }
 
-ID3D11RenderTargetView* Texture11::InitRTV(ID3D11Device* device)
+const ComPtr<ID3D11RenderTargetView>& Texture11::InitRTV(const ComPtr<ID3D11Device>& device)
 {
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
 	
-	if (CheckHR(device->CreateRenderTargetView(mTex2D, &rtvDesc, &mRTV))) 
+	if (CheckHR(device->CreateRenderTargetView(mTex2D.Get(), &rtvDesc, &mRTV))) 
 		return nullptr;
 	return mRTV;
 }
 
-ID3D11DepthStencilView* Texture11::InitDSV(ID3D11Device* device)
+const ComPtr<ID3D11DepthStencilView>& Texture11::InitDSV(const ComPtr<ID3D11Device>& device)
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 	
-	if (CheckHR(device->CreateDepthStencilView(mTex2D, &dsvDesc, &mDSV))) 
+	if (CheckHR(device->CreateDepthStencilView(mTex2D.Get(), &dsvDesc, &mDSV))) 
 		return nullptr;
 	return mDSV;
 }
@@ -131,11 +133,8 @@ ID3D11DepthStencilView* Texture11::InitDSV(ID3D11Device* device)
 void Texture11::OnLoaded()
 {
 	if (mSRV != nullptr) {
-		ID3D11Texture2D* pTexture;
-		mSRV->GetResource((ID3D11Resource**)&pTexture);
-
 		D3D11_TEXTURE2D_DESC desc;
-		pTexture->GetDesc(&desc);
+		mTex2D->GetDesc(&desc);
 		mRealSize = Eigen::Vector2i(desc.Width, desc.Height);
 	}
 }

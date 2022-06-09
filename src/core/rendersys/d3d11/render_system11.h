@@ -1,6 +1,8 @@
 #pragma once
 #include <windows.h>
 #include <d3d11.h>
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/d3d11/predeclare.h"
 
@@ -57,8 +59,7 @@ public:
 	void SetFillMode(FillMode fillMode) override;
 	void SetDepthBias(const DepthBias& bias) override;
 
-	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
-		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
+	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) override;
 	void GenerateMips(ITexturePtr texture) override;
@@ -78,14 +79,13 @@ private:
 	bool IsCurrentInMainThread() const;
 private:
 	HWND mHWnd = NULL;
-	D3D_FEATURE_LEVEL mFeatureLevel = D3D_FEATURE_LEVEL_11_0;
-	ID3D11Device* mDevice = NULL;
-	ID3D11DeviceContext* mDeviceContext = NULL;
-	IDXGISwapChain* mSwapChain = NULL;
+	ComPtr<ID3D11Device> mDevice = nullptr;
+	ComPtr<ID3D11DeviceContext> mDeviceContext = nullptr;
+	ComPtr<IDXGISwapChain> mSwapChain = nullptr;
 	
-	std::map<DepthState, ID3D11DepthStencilState*> mDxDSStates;
-	std::map<BlendState, ID3D11BlendState*> mDxBlendStates;
-	std::map<RasterizerState, ID3D11RasterizerState*> mDxRasterStates;
+	std::map<DepthState, ComPtr<ID3D11DepthStencilState>> mDxDSStates;
+	std::map<BlendState, ComPtr<ID3D11BlendState>> mDxBlendStates;
+	std::map<RasterizerState, ComPtr<ID3D11RasterizerState>> mDxRasterStates;
 	FrameBuffer11Ptr mBackFrameBuffer, mCurFrameBuffer;
 
 	std::thread::id mMainThreadId;

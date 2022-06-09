@@ -23,12 +23,43 @@
 namespace mir {
 
 #define MakePtr CreateInstance
-#define PtrRaw(T) T.get()
 
 RenderSystem11::RenderSystem11()
 {}
 RenderSystem11::~RenderSystem11()
-{}
+{
+	DEBUG_LOG_VERVOSE("renderSys11.destrcutor");
+	Dispose();
+}
+void RenderSystem11::Dispose()
+{
+	if (mDeviceContext) {
+		DEBUG_LOG_VERVOSE("renderSys11.Dispose");
+		mSwapChain = nullptr;
+		mDxDSStates.clear();
+		mDxBlendStates.clear();
+		mDxRasterStates.clear();
+		mBackFrameBuffer = nullptr;
+		mCurFrameBuffer = nullptr;
+	#if defined MIR_D3D11_DEBUG
+		mDeviceContext->Flush();
+		mDeviceContext = nullptr;
+
+		ID3D11Debug* pDebug;
+		mDevice->QueryInterface(IID_ID3D11Debug, (VOID**)(&pDebug));
+		if (pDebug) {
+			DEBUG_LOG_WARN("RenderSystem11.Dispose ReportLiveDeviceObjects Begin\n");
+			pDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+			pDebug->Release();
+			DEBUG_LOG_WARN("RenderSystem11.Dispose ReportLiveDeviceObjects End\n");
+		}
+		mDevice = nullptr;
+	#else
+		mDeviceContext = nullptr;
+		mDevice = nullptr;
+	#endif
+	}
+}
 
 bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 {
@@ -64,21 +95,22 @@ bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 	sd.Windowed = TRUE;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
+	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
 	for (size_t i = 0; i < driverTypes.size(); i++) {
 		if (SUCCEEDED(D3D11CreateDeviceAndSwapChain(NULL, driverTypes[i], NULL, createDeviceFlags,
 			featureLevels.data(), featureLevels.size(), D3D11_SDK_VERSION, &sd,
-			&mSwapChain, &mDevice, &mFeatureLevel, &mDeviceContext)))
+			&mSwapChain, &mDevice, &featureLevel, &mDeviceContext)))
 			return true;
 	}
 	return false;
 }
 bool RenderSystem11::_FetchBackFrameBufferColor(int width, int height)
 {
-	ID3D11Texture2D* pTexture = NULL;
+	ComPtr<ID3D11Texture2D> pTexture = nullptr;
 	if (CheckHR(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pTexture))) return false;
 
 	Texture11Ptr texture = CreateInstance<Texture11>();
-	texture->Init(pTexture);
+	texture->Init(std::move(pTexture));
 	if (!texture->InitRTV(mDevice)) return false;
 
 	mBackFrameBuffer = CreateInstance<FrameBuffer11>();
@@ -143,9 +175,6 @@ bool RenderSystem11::IsCurrentInMainThread() const
 }
 void RenderSystem11::UpdateFrame(float dt)
 {}
-void RenderSystem11::Dispose()
-{}
-
 void RenderSystem11::SetViewPort(int x, int y, int width, int height)
 {
 	D3D11_VIEWPORT vp;
@@ -233,7 +262,7 @@ void RenderSystem11::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFr
 	Texture11Ptr texDst = std::static_pointer_cast<Texture11>(IF_AND_OR(dstAttachment >= 0, fbDst->GetAttachColorTexture(dstAttachment), fbDst->GetAttachZStencilTexture()));
 	Texture11Ptr texSrc = std::static_pointer_cast<Texture11>(IF_AND_OR(srcAttachment >= 0, fbSrc->GetAttachColorTexture(srcAttachment), fbSrc->GetAttachZStencilTexture()));
 
-	mDeviceContext->CopySubresourceRegion(texDst->AsTex2D(), 0, 0, 0, 0, texSrc->AsTex2D(), 0, nullptr);
+	mDeviceContext->CopySubresourceRegion(texDst->AsTex2D().Get(), 0, 0, 0, 0, texSrc->AsTex2D().Get(), 0, nullptr);
 }
 void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 {
@@ -290,7 +319,7 @@ void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(layout)->GetLayout11());
+	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(layout)->GetLayout11().Get());
 }
 
 IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, const Data& data)
@@ -313,7 +342,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 	shaderFlags |= D3DCOMPILE_DEBUG;
 #endif
 
-	ID3DBlob* blobError = nullptr;
+	ComPtr<ID3DBlob> blobError = nullptr;
 	HRESULT hr = D3DCompile(data.Bytes, data.Size, 
 		IF_AND_NULL(!compile.SourcePath.empty(), compile.SourcePath.c_str()),
 		IF_AND_NULL(!shaderMacros.empty(), &shaderMacros[0]), 
@@ -321,7 +350,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 		compile.EntryPoint.c_str(), compile.ShaderModel.c_str(),
 		shaderFlags, 0,
 		&blob->mBlob, &blobError);
-	if (debug::CheckCompileFailed(hr, blobError)) return nullptr;
+	if (debug::CheckCompileFailed(hr, blobError.Get())) return nullptr;
 
 	return blob;
 }
@@ -374,16 +403,16 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 		}
 	}
 	
-	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mVertex, GetShader11()), "vs");
-	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mPixel, GetShader11()), "ps");
+	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mVertex, GetShader11().Get()), "vs");
+	DEBUG_RES_ADD_DEVICE(program, NULLABLE(program->mPixel, GetShader11().Get()), "ps");
 	return program;
 }
 void RenderSystem11::SetProgram(IProgramPtr program)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	mDeviceContext->VSSetShader(NULLABLE(std::static_pointer_cast<VertexShader11>(program->GetVertex()), GetShader11()), NULL, 0);
-	mDeviceContext->PSSetShader(NULLABLE(std::static_pointer_cast<PixelShader11>(program->GetPixel()), GetShader11()), NULL, 0);
+	mDeviceContext->VSSetShader(NULLABLE(std::static_pointer_cast<VertexShader11>(program->GetVertex()), GetShader11().Get()), NULL, 0);
+	mDeviceContext->PSSetShader(NULLABLE(std::static_pointer_cast<PixelShader11>(program->GetPixel()), GetShader11().Get()), NULL, 0);
 }
 
 IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data)
@@ -408,11 +437,11 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, 
 	D3D11_SUBRESOURCE_DATA InitData = {};
 	InitData.pSysMem = data.Bytes;
 
-	ID3D11Buffer* pVertexBuffer = nullptr;
+	ComPtr<ID3D11Buffer> pVertexBuffer = nullptr;
 	if (CheckHR(mDevice->CreateBuffer(&bd, data.Bytes ? &InitData : nullptr, &pVertexBuffer))) return nullptr;
 
 	VertexBuffer11Ptr vbuffer = std::static_pointer_cast<VertexBuffer11>(res);
-	vbuffer->Init(pVertexBuffer, data.Size, usage, stride, offset);
+	vbuffer->Init(std::move(pVertexBuffer), data.Size, usage, stride, offset);
 	return vbuffer;
 }
 void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count)
@@ -425,7 +454,7 @@ void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertex
 		uint32_t stride = vertexBuffer->GetStride();
 		uint32_t offset = vertexBuffer->GetOffset();
 		mDeviceContext->IASetVertexBuffers(slot, count, 
-			&std::static_pointer_cast<VertexBuffer11>(vertexBuffer)->GetBuffer11(), &stride, &offset);
+			std::static_pointer_cast<VertexBuffer11>(vertexBuffer)->GetBuffer11().GetAddressOf(), &stride, &offset);
 	}
 	else {
 		std::vector<uint32_t> strides(count), offsets(count);
@@ -434,7 +463,7 @@ void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertex
 			auto vertexBuffer = vertexBuffers[i];
 			strides[i] = vertexBuffer->GetStride();
 			offsets[i] = vertexBuffer->GetOffset();
-			buffer11s[i] = std::static_pointer_cast<VertexBuffer11>(vertexBuffer)->GetBuffer11();
+			buffer11s[i] = std::static_pointer_cast<VertexBuffer11>(vertexBuffer)->GetBuffer11().Get();
 		}
 		mDeviceContext->IASetVertexBuffers(slot, count, &buffer11s[0], &strides[0], &offsets[0]);
 	}
@@ -462,11 +491,11 @@ IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, ResourceFormat
 	D3D11_SUBRESOURCE_DATA InitData = {};
 	InitData.pSysMem = data.Bytes;
 	
-	ID3D11Buffer* pIndexBuffer = nullptr;
+	ComPtr<ID3D11Buffer> pIndexBuffer = nullptr;
 	if (CheckHR(mDevice->CreateBuffer(&bd, data.Bytes ? &InitData : nullptr, &pIndexBuffer))) return nullptr;
 
 	IndexBuffer11Ptr ibuffer = std::static_pointer_cast<IndexBuffer11>(res);
-	ibuffer->Init(pIndexBuffer, data.Size, format, usage);
+	ibuffer->Init(std::move(pIndexBuffer), data.Size, format, usage);
 	return ibuffer;
 }
 void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
@@ -475,7 +504,7 @@ void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 
 	if (indexBuffer) {
 		mDeviceContext->IASetIndexBuffer(
-			std::static_pointer_cast<IndexBuffer11>(indexBuffer)->GetBuffer11(),
+			std::static_pointer_cast<IndexBuffer11>(indexBuffer)->GetBuffer11().Get(),
 			static_cast<DXGI_FORMAT>(indexBuffer->GetFormat()),
 			0);
 	}
@@ -507,11 +536,11 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 	D3D11_SUBRESOURCE_DATA initData = {};
 	initData.pSysMem = data.Bytes;
 
-	ID3D11Buffer* pConstantBuffer = nullptr;
+	ComPtr<ID3D11Buffer> pConstantBuffer = nullptr;
 	if (CheckHR(mDevice->CreateBuffer(&cbDesc, data.Bytes ? &initData : nullptr, &pConstantBuffer))) return nullptr;
 	
 	ContantBuffer11Ptr cbuffer = std::static_pointer_cast<ContantBuffer11>(res);
-	cbuffer->Init(pConstantBuffer, CreateInstance<ConstBufferDecl>(cbDecl), usage);
+	cbuffer->Init(std::move(pConstantBuffer), CreateInstance<ConstBufferDecl>(cbDecl), usage);
 	return cbuffer;
 }
 void RenderSystem11::SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program)
@@ -520,7 +549,7 @@ void RenderSystem11::SetConstBuffers(size_t slot, const IContantBufferPtr buffer
 
 	std::vector<ID3D11Buffer*> passConstBuffers(count);
 	for (size_t i = 0; i < count; ++i)
-		passConstBuffers[i] = buffers[i] ? std::static_pointer_cast<ContantBuffer11>(buffers[i])->GetBuffer11() : nullptr;
+		passConstBuffers[i] = NULLABLE(std::static_pointer_cast<ContantBuffer11>(buffers[i]), GetBuffer11().Get());
 	mDeviceContext->VSSetConstantBuffers(slot, count, &passConstBuffers[0]);
 	mDeviceContext->PSSetConstantBuffers(slot, count, &passConstBuffers[0]);
 }
@@ -535,25 +564,25 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 	case kHWBufferConstant: {
 		ContantBuffer11Ptr cbuffer11 = std::static_pointer_cast<ContantBuffer11>(buffer);
 		if (cbuffer11->GetUsage() == kHWUsageDefault) {
-			mDeviceContext->UpdateSubresource(cbuffer11->GetBuffer11(), 0, NULL, data.Bytes, 0, 0);
+			mDeviceContext->UpdateSubresource(cbuffer11->GetBuffer11().Get(), 0, NULL, data.Bytes, 0, 0);
 		}
 		else {
-			if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
+			if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11().Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
 			memcpy(mapData.pData, data.Bytes, data.Size);
-			mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+			mDeviceContext->Unmap(cbuffer11->GetBuffer11().Get(), 0);
 		}
 	}break;
 	case kHWBufferVertex: {
 		VertexBuffer11Ptr cbuffer11 = std::static_pointer_cast<VertexBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11().Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
 		memcpy(mapData.pData, data.Bytes, std::min<int>(buffer->GetBufferSize(), data.Size));
-		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11().Get(), 0);
 	}break;
 	case kHWBufferIndex: {
 		IndexBuffer11Ptr cbuffer11 = std::static_pointer_cast<IndexBuffer11>(buffer);
-		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
+		if (CheckHR(mDeviceContext->Map(cbuffer11->GetBuffer11().Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))) return false;
 		memcpy(mapData.pData, data.Bytes, std::min<int>(buffer->GetBufferSize(), data.Size));
-		mDeviceContext->Unmap(cbuffer11->GetBuffer11(), 0);										
+		mDeviceContext->Unmap(cbuffer11->GetBuffer11().Get(), 0);	
 	}break;
 	default:
 		break;
@@ -598,24 +627,24 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		return nullptr; 
 
 	if (texture->IsAutoGenMipmap()) {
-		mDeviceContext->UpdateSubresource(texture->AsTex2D(), 0, nullptr, datas[0].Bytes, datas[0].Size, imageSize);
-		mDeviceContext->GenerateMips(texture->AsSRV());
+		mDeviceContext->UpdateSubresource(texture->AsTex2D().Get(), 0, nullptr, datas[0].Bytes, datas[0].Size, imageSize);
+		mDeviceContext->GenerateMips(texture->AsSRV().Get());
 	}
 
-	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV(), "");
+	DEBUG_RES_ADD_DEVICE(texture, texture->AsSRV().Get(), "");
 	return texture;
 }
 void RenderSystem11::GenerateMips(ITexturePtr res)
 {
 	BOOST_ASSERT(res);
 	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
-	mDeviceContext->GenerateMips(texture->AsSRV());
+	mDeviceContext->GenerateMips(texture->AsSRV().Get());
 }
 static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(const ITexturePtr textures[], size_t count) {
 	std::vector<ID3D11ShaderResourceView*> views(count);
 	for (int i = 0; i < views.size(); ++i) {
 		auto iTex = std::static_pointer_cast<Texture11>(textures[i]);
-		if (iTex != nullptr) views[i] = iTex->AsSRV();
+		if (iTex != nullptr) views[i] = iTex->AsSRV().Get();
 	}
 	return views;
 }
@@ -649,12 +678,12 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc
 	sampDesc.MinLOD = FLT_MIN;
 	sampDesc.MaxLOD = FLT_MAX;
 
-	ID3D11SamplerState* pSampler = nullptr;
+	ComPtr<ID3D11SamplerState> pSampler = nullptr;
 	if (CheckHR(mDevice->CreateSamplerState(&sampDesc, &pSampler)))
 		return nullptr;
 
 	SamplerState11Ptr sampler = std::static_pointer_cast<SamplerState11>(res);
-	sampler->Init(pSampler);
+	sampler->Init(std::move(pSampler));
 #if defined MIR_RESOURCE_DEBUG
 	sampler->mDesc = desc;
 #endif
@@ -667,15 +696,15 @@ void RenderSystem11::SetSamplers(size_t slot, const ISamplerStatePtr samplers[],
 
 	std::vector<ID3D11SamplerState*> passSamplers(count);
 	for (size_t i = 0; i < count; ++i)
-		passSamplers[i] = samplers[i] ? std::static_pointer_cast<SamplerState11>(samplers[i])->GetSampler11() : nullptr;
-	mDeviceContext->PSSetSamplers(0, passSamplers.size(), !passSamplers.empty() ? &passSamplers[0] : nullptr);
+		passSamplers[i] = NULLABLE(std::static_pointer_cast<SamplerState11>(samplers[i]), GetSampler11().Get());
+	mDeviceContext->PSSetSamplers(0, passSamplers.size(), IF_AND_NULL(!passSamplers.empty(), &passSamplers[0]));
 }
 
 bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	ID3D11BlendState* pBlendState;
+	ComPtr<ID3D11BlendState> pBlendState;
 	auto iter = mDxBlendStates.find(blendFunc);
 	if (iter != mDxBlendStates.end()) {
 		pBlendState = iter->second;
@@ -696,7 +725,7 @@ bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 	}
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	mDeviceContext->OMSetBlendState(pBlendState, blendFactor, 0xffffffff);
+	mDeviceContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
 	return true;
 }
 void RenderSystem11::SetBlendState(const BlendState& blendFunc)
@@ -713,7 +742,7 @@ bool RenderSystem11::_SetDepthState(const DepthState& depthState)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	ID3D11DepthStencilState* pDSState;
+	ComPtr<ID3D11DepthStencilState> pDSState;
 	auto iter = mDxDSStates.find(depthState);
 	if (iter != mDxDSStates.end()) {
 		pDSState = iter->second;
@@ -729,7 +758,7 @@ bool RenderSystem11::_SetDepthState(const DepthState& depthState)
 		mDxDSStates.insert(std::make_pair(depthState, pDSState));
 	}
 
-	mDeviceContext->OMSetDepthStencilState(pDSState, 1);
+	mDeviceContext->OMSetDepthStencilState(pDSState.Get(), 1);
 	return true;
 }
 void RenderSystem11::SetDepthState(const DepthState& depthState)
@@ -744,7 +773,7 @@ bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
 {
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	ID3D11RasterizerState* pRasterizerState;
+	ComPtr<ID3D11RasterizerState> pRasterizerState;
 	auto iter = mDxRasterStates.find(rasterState);
 	if (iter != mDxRasterStates.end()) {
 		pRasterizerState = iter->second;
@@ -762,7 +791,7 @@ bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
 		mDxRasterStates.insert(std::make_pair(rasterState, pRasterizerState));
 	}
 
-	mDeviceContext->RSSetState(pRasterizerState);
+	mDeviceContext->RSSetState(pRasterizerState.Get());
 	if (rasterState.Scissor.Rects.size()) {
 		std::vector<D3D11_RECT> rects(rasterState.Scissor.Rects.size());
 		for (size_t i = 0; i < rects.size(); ++i) {

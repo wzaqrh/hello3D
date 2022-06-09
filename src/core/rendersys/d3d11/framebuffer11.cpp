@@ -1,6 +1,7 @@
 #include "core/rendersys/d3d11/framebuffer11.h"
 #include "core/base/debug.h"
 #include "core/base/d3d.h"
+#include "core/base/macros.h"
 
 namespace mir {
 
@@ -18,23 +19,27 @@ void FrameBuffer11::SetAttachColor(size_t slot, IFrameBufferAttachmentPtr attach
 	}
 }
 
+void FrameBuffer11::SetAttachZStencil(IFrameBufferAttachmentPtr attach) { 
+	mAttachZStencil = std::static_pointer_cast<FrameBufferAttach11>(attach); 
+}
+
 std::vector<ID3D11RenderTargetView*> FrameBuffer11::AsRTVs() const {
 	std::vector<ID3D11RenderTargetView*> vec;
 	for (size_t i = 0; i < mAttachColors.size(); ++i)
-		vec.push_back(mAttachColors[i]->AsRTV());
+		vec.push_back(mAttachColors[i]->AsRTV().Get());
 	return vec;
 }
 
 std::vector<ID3D11ShaderResourceView*> FrameBuffer11::AsSRVs() const {
 	std::vector<ID3D11ShaderResourceView*> vec;
 	for (size_t i = 0; i < mAttachColors.size(); ++i)
-		vec.push_back(mAttachColors[i]->AsSRV());
+		vec.push_back(mAttachColors[i]->AsSRV().Get());
 	if (mAttachZStencil) 
-		vec.push_back(mAttachZStencil->AsSRV());
+		vec.push_back(mAttachZStencil->AsSRV().Get());
 	return vec;
 }
 
-static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen::Vector3i& size, ResourceFormat format)
+static Texture11Ptr _CreateColorAttachTexture(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector3i& size, ResourceFormat format)
 {
 	constexpr size_t faceCount = 1;
 
@@ -47,12 +52,12 @@ static Texture11Ptr _CreateColorAttachTexture(ID3D11Device* pDevice, const Eigen
 	texture->SetLoaded();
 	return texture;
 }
-FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateColorAttachment(ID3D11Device* pDevice, const Eigen::Vector3i& size, ResourceFormat format)
+FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateColorAttachment(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector3i& size, ResourceFormat format)
 {
 	return (format != kFormatUnknown) ?  CreateInstance<FrameBufferAttachByTexture11>(_CreateColorAttachTexture(pDevice, size, format)) : nullptr;
 }
 
-static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+static Texture11Ptr _CreateZStencilAttachTexture(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(format)));
 	BOOST_ASSERT(format == kFormatD24UNormS8UInt
@@ -71,7 +76,7 @@ static Texture11Ptr _CreateZStencilAttachTexture(ID3D11Device* pDevice, const Ei
 	texture->SetLoaded();
 	return texture;
 }
-FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateZStencilAttachment(ID3D11Device* pDevice, const Eigen::Vector2i& size, ResourceFormat format)
+FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateZStencilAttachment(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
 	return (format != kFormatUnknown) ? CreateInstance<FrameBufferAttachByTexture11>(_CreateZStencilAttachTexture(pDevice, size, format)) : nullptr;
 }

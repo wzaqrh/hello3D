@@ -2,8 +2,8 @@
 
 namespace mir {
 
-BlobData11::BlobData11(ID3DBlob* pBlob)
-	:mBlob(pBlob)
+BlobData11::BlobData11(ComPtr<ID3DBlob>&& pBlob)
+:mBlob(std::move(pBlob))
 {}
 
 const char* BlobData11::GetBytes() const
