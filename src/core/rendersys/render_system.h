@@ -104,12 +104,15 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void SetDepthBias(const DepthBias& bias) = 0;
 	virtual const DepthBias& GetDepthBias() const = 0;
 
+	virtual void SetScissorState(const ScissorState& scissor) = 0;
+	virtual const ScissorState& GetScissorState() const = 0;
+
 	/***** about draw *****/
 	virtual void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) = 0;
 	virtual void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) = 0;
 
 	virtual bool BeginScene() = 0;
-	virtual void EndScene() = 0;
+	virtual void EndScene(BOOL vsync) = 0;
 };
 
 struct MIR_CORE_API RenderSystem : public IRenderSystem
@@ -123,6 +126,7 @@ public:
 	CullMode GetCullMode() const override { return mCurRasterState.CullMode; }
 	FillMode GetFillMode() const override { return mCurRasterState.FillMode; }
 	const DepthBias& GetDepthBias() const override { return mCurRasterState.DepthBias; }
+	const ScissorState& GetScissorState() const override { return mCurRasterState.Scissor; }
 protected:
 	Eigen::Vector2i mScreenSize;
 	BlendState mCurBlendState;

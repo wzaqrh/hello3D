@@ -8,6 +8,7 @@ namespace mir {
 
 class RenderSystem11 : public RenderSystem
 {
+	friend class GuiCanvas;
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderSystem11();
@@ -50,6 +51,7 @@ public:
 
 	void SetBlendState(const BlendState& blendFunc) override;
 	void SetDepthState(const DepthState& depthState) override;
+	void SetScissorState(const ScissorState& scissor) override;
 
 	void SetCullMode(CullMode cullMode) override;
 	void SetFillMode(FillMode fillMode) override;
@@ -65,7 +67,7 @@ public:
 	void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
 
 	bool BeginScene() override;
-	void EndScene() override;
+	void EndScene(BOOL vsync) override;
 private:
 	bool _CreateDeviceAndSwapChain(int width, int height);
 	bool _FetchBackFrameBufferColor(int width, int height);

@@ -35,6 +35,7 @@
 #endif
 #pragma comment(lib, "assimp.lib")
 
+#if defined _WINDLL
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -52,4 +53,4 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	}
 	return TRUE;
 }
-
+#endif

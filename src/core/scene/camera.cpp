@@ -48,6 +48,11 @@ void Camera::SetReverseZ(bool reverseZ)
 	mProjSignal();
 }
 
+void Camera::SetBackgroundColor(const Eigen::Vector4f& color)
+{
+	mBackgroundColor = color;
+}
+
 void Camera::SetOrthographicSize(float size)
 {
 	mOrthoSize = size;

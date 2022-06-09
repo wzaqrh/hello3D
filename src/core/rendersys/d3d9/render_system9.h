@@ -72,7 +72,7 @@ public:
 	void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
 
 	bool BeginScene() override;
-	void EndScene() override;
+	void EndScene(BOOL vsync) override;
 private:
 	IDirect3DVertexDeclaration9* _CreateInputLayout(Program9* pProgram, const std::vector<D3DVERTEXELEMENT9>& descArr);
 private:

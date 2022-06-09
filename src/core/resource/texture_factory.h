@@ -4,6 +4,7 @@
 #include "core/base/math.h"
 #include "core/base/cppcoro.h"
 #include "core/base/launch.h"
+#include "core/base/data.h"
 #include "core/base/tpl/atomic_map.h"
 #include "core/base/declare_macros.h"
 #include "core/rendersys/predeclare.h"
@@ -19,7 +20,9 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	TextureFactory(ResourceManager& resMng);
 
-	CoTask<bool> CreateTextureByFile(ITexturePtr& texture, Launch launchMode, std::string filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
+	CoTask<bool> CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[]);
+	CoTask<bool> CreateTextureByFile(ITexturePtr& texture, Launch lchMode, std::string filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;
+	DECLARE_COTASK_FUNCTIONS(ITexturePtr, CreateTextureByData, ThreadSafe);
 	DECLARE_COTASK_FUNCTIONS(ITexturePtr, CreateTextureByFile, ThreadSafe);
 private:
 	CoTask<bool> _LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe;

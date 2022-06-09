@@ -16,6 +16,15 @@ void ExecuteTaskSync(cppcoro::io_service& ioService, const CoTask<bool>& task) {
 	cppcoro::sync_wait(cppcoro::when_all_ready(scopedTask(ioService, task), processEvent(ioService)));
 	ioService.reset();
 }
+
+void ExecuteTaskSync(cppcoro::io_service& ioService, const CoTask<void>& task)
+{
+	ExecuteTaskSync(ioService, [&task]()->CoTask<bool> {
+		CoAwait task;
+		CoReturn true;
+	}());
+}
+
 #endif
 
 }

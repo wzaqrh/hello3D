@@ -52,11 +52,11 @@ namespace coroutine {
 #if !defined MIR_CPPCORO_DISABLED
 
 void MIR_CORE_API ExecuteTaskSync(cppcoro::io_service& ioService, const CoTask<bool>& task);
-
+void MIR_CORE_API ExecuteTaskSync(cppcoro::io_service& ioService, const CoTask<void>& task);
 #else
 
 inline void ExecuteTaskSync(cppcoro::io_service& ioService, const DummyTask<bool>& task) {}
-
+inline void ExecuteTaskSync(cppcoro::io_service& ioService, const DummyTask<void>& task) {}
 #endif
 }
 }

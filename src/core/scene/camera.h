@@ -37,6 +37,7 @@ public:
 	void SetAspect(float aspect);
 	void SetFov(float fov);
 	void SetReverseZ(bool reverseZ);
+	void SetBackgroundColor(const Eigen::Vector4f& color);
 	
 	void SetCullingMask(unsigned mask) { mCameraMask = mask; }
 	void SetDepth(unsigned depth) { mDepth = depth; }
@@ -51,6 +52,7 @@ public:
 	unsigned GetCullingMask() const { return mCameraMask; }
 	unsigned GetDepth() const { return mDepth; }
 	RenderingPath GetRenderingPath() const { return mRenderPath; }
+	const Eigen::Vector4f& GetBackgroundColor() const { return mBackgroundColor; }
 
 	void SetSkyBox(const rend::SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const rend::PostProcessPtr& postEffect);
@@ -91,6 +93,7 @@ private:
 	float mFov = 60;
 	Eigen::Vector2f mClipPlane = Eigen::Vector2f(0.3f, 1000);//near, far
 	bool mReverseZ = false;
+	Eigen::Vector4f mBackgroundColor = Eigen::Vector4f::Zero();
 
 	mutable Eigen::Matrix4f mView, mProjection, mWorldView;
 	mutable DefferedConnctedSignal mProjSignal;

@@ -12,7 +12,6 @@
 #include "core/resource/device_res_factory.h"
 
 namespace mir {
-DECLARE_STRUCT(ThreadPool);
 
 class MIR_CORE_API ResourceManager : boost::noncopyable
 {
@@ -40,6 +39,7 @@ public:
 
 #define TRANSMIT_MEMFAC_TASK_FUNCTION(FAC, RETURN_TYPE, FUNC_NAME) DECLARE_COTASK_FUNCTIONS(RETURN_TYPE, FUNC_NAME, ThreadSafe)\
 	TemplateArgs CoTask<bool> FUNC_NAME(T &&...args) ThreadSafe { return FAC->FUNC_NAME(std::forward<T>(args)...); }
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mTextureFac, ITexturePtr, CreateTextureByData, ThreadSafe);
 	TRANSMIT_MEMFAC_TASK_FUNCTION(mTextureFac, ITexturePtr, CreateTextureByFile, ThreadSafe);
 	TRANSMIT_MEMFAC_TASK_FUNCTION(mProgramFac, IProgramPtr, CreateProgram, ThreadSafe);
 	TRANSMIT_MEMFAC_TASK_FUNCTION(mMaterialFac, res::MaterialInstance, CreateMaterial, ThreadSafe);

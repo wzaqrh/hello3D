@@ -18,6 +18,14 @@ TextureFactory::TextureFactory(ResourceManager& resMng)
 {
 }
 
+CoTask<bool> TextureFactory::CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[])
+{
+	CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+	texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
+	texture->SetLoaded(mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(w_h_mip_face[0], w_h_mip_face[1], 0, w_h_mip_face[3]), w_h_mip_face[2], datas) != nullptr);
+	CoReturn true;
+}
+
 template <class T> void INPLACESWAP(T& a, T& b) { a ^= b; b ^= a; a ^= b; }
 static BOOL SwapRedBlue32(FIBITMAP* dib) 
 {

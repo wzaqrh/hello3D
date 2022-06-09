@@ -50,12 +50,13 @@ bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 	};
 
 	DXGI_SWAP_CHAIN_DESC sd = {};
-	sd.BufferCount = 1;
+	sd.BufferCount = 2;
 	sd.BufferDesc.Width = width;
 	sd.BufferDesc.Height = height;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.OutputWindow = mHWnd;
 	sd.SampleDesc.Count = 1;
@@ -313,8 +314,10 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 #endif
 
 	ID3DBlob* blobError = nullptr;
-	HRESULT hr = D3DCompile(data.Bytes, data.Size, compile.SourcePath.c_str(),
-		shaderMacros.empty() ? nullptr : &shaderMacros[0], D3D_COMPILE_STANDARD_FILE_INCLUDE,
+	HRESULT hr = D3DCompile(data.Bytes, data.Size, 
+		IF_AND_NULL(!compile.SourcePath.empty(), compile.SourcePath.c_str()),
+		IF_AND_NULL(!shaderMacros.empty(), &shaderMacros[0]), 
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		compile.EntryPoint.c_str(), compile.ShaderModel.c_str(),
 		shaderFlags, 0,
 		&blob->mBlob, &blobError);
@@ -684,7 +687,7 @@ bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 		blendDesc.RenderTarget[0].DestBlend = static_cast<D3D11_BLEND>(blendFunc.Dst);
 		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 		if (CheckHR(mDevice->CreateBlendState(&blendDesc, &pBlendState)))
@@ -752,12 +755,27 @@ bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
 		desc.CullMode = static_cast<D3D11_CULL_MODE>(rasterState.CullMode);
 		desc.SlopeScaledDepthBias = rasterState.DepthBias.Bias;
 		desc.DepthBias = rasterState.DepthBias.SlopeScaledBias;
-		if (CheckHR(mDevice->CreateRasterizerState(&desc, &pRasterizerState))) 
+		desc.DepthClipEnable = FALSE;
+		desc.ScissorEnable = rasterState.Scissor.ScissorEnable;
+		if (CheckHR(mDevice->CreateRasterizerState(&desc, &pRasterizerState)))
 			return false;
 		mDxRasterStates.insert(std::make_pair(rasterState, pRasterizerState));
 	}
 
 	mDeviceContext->RSSetState(pRasterizerState);
+	if (rasterState.Scissor.Rects.size()) {
+		std::vector<D3D11_RECT> rects(rasterState.Scissor.Rects.size());
+		for (size_t i = 0; i < rects.size(); ++i) {
+			rects[i].left = rasterState.Scissor.Rects[i].x();
+			rects[i].top = rasterState.Scissor.Rects[i].y();
+			rects[i].right = rasterState.Scissor.Rects[i].z();
+			rects[i].bottom = rasterState.Scissor.Rects[i].w();
+		}
+		mDeviceContext->RSSetScissorRects(rasterState.Scissor.Rects.size(), &rects[0]);
+	}
+	else {
+		mDeviceContext->RSSetScissorRects(0, nullptr);
+	}
 	return true;
 }
 void RenderSystem11::SetCullMode(CullMode cullMode)
@@ -781,6 +799,13 @@ void RenderSystem11::SetDepthBias(const DepthBias& bias)
 		_SetRasterizerState(mCurRasterState);
 	}
 }
+void RenderSystem11::SetScissorState(const ScissorState& scissor)
+{
+	if (mCurRasterState.Scissor != scissor) {
+		mCurRasterState.Scissor = scissor;
+		_SetRasterizerState(mCurRasterState);
+	}
+}
 
 void RenderSystem11::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	BOOST_ASSERT(IsCurrentInMainThread());
@@ -800,9 +825,9 @@ bool RenderSystem11::BeginScene()
 {
 	return true;
 }
-void RenderSystem11::EndScene()
+void RenderSystem11::EndScene(BOOL vsync)
 {
-	mSwapChain->Present(0, 0);
+	mSwapChain->Present(vsync, 0);
 }
 
 }
