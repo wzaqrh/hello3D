@@ -14,9 +14,10 @@ using namespace mir::scene;
 
 namespace mir {
 
-SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, const Configure& cfg)
+SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, GuiManagerPtr guiMng, const Configure& cfg)
 	: mResMng(resMng)
 	, mRendFac(rendFac)
+	, mGuiMng(guiMng)
 {
 	mLightFac = CreateInstance<LightFactory>();
 	mCameraFac = CreateInstance<CameraFactory>(resMng);
@@ -44,6 +45,13 @@ SceneNodePtr SceneManager::AddNode()
 	return node;
 }
 
+gui::GuiCanvasPtr SceneManager::CreateGuiCanvasNode()
+{
+	if (mGuiMng->GetCanvas()->GetNode() == nullptr) 
+		AddRendAsNode(mGuiMng->GetCanvas());
+	return mGuiMng->GetCanvas();
+}
+
 RenderablePtr SceneManager::AddRendAsNode(RenderablePtr rend)
 {
 	BOOST_ASSERT(rend);
@@ -54,6 +62,8 @@ RenderablePtr SceneManager::AddRendAsNode(RenderablePtr rend)
 
 CoTask<void> SceneManager::UpdateFrame(float dt)
 {
+	mGuiMng->UpdateFrame(dt);
+
 	Eigen::AlignedBox3f aabb = this->GetWorldAABB();
 	for (auto& node : mNodes) {
 		if (RenderablePtr rend = node->GetRenderable()) 

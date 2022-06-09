@@ -23,24 +23,28 @@ public:
 	Eigen::Vector2i WinSize() const;
 	inline const Configure& Config() const { return mConfigure; }
 	inline const RenderSystemPtr& RenderSys() const { return mRenderSys; }
-	inline const ResourceManagerPtr& ResourceMng() const { return mResourceMng; }
+	inline const ResourceManagerPtr& ResourceMng() const { return mResMng; }
 	inline const RenderPipelinePtr& RenderPipe() const { return mRenderPipe; }
 	inline const RenderableFactoryPtr& RenderableFac() const { return mRenderableFac; }
 	inline const SceneManagerPtr& SceneMng() const { return mSceneMng; }
-	inline const scene::LightFactoryPtr& LightFac() const;
-	inline const scene::CameraFactoryPtr& CameraFac() const;
-	inline const SceneNodeFactoryPtr& NodeFac() const;
+	const scene::LightFactoryPtr& LightFac() const;
+	const scene::CameraFactoryPtr& CameraFac() const;
+	const SceneNodeFactoryPtr& NodeFac() const;
+	inline const GuiManagerPtr& GuiMng() const { return mGuiMng; }
 	void ExecuteTaskSync(const CoTask<bool>& task);
+	void ExecuteTaskSync(const CoTask<void>& task);
 	void ProcessPendingEvent();
+	CoTask<void> ScheduleTaskAfter(std::chrono::microseconds time);
 private:
-	Launch mLaunchMode;
+	Launch mLchMode;
 	Configure mConfigure;
 	RenderSystemPtr mRenderSys;
 	std::shared_ptr<cppcoro::io_service> mIoService;
-	ResourceManagerPtr mResourceMng;
+	ResourceManagerPtr mResMng;
 	RenderPipelinePtr mRenderPipe;
 	RenderableFactoryPtr mRenderableFac;
 	SceneManagerPtr mSceneMng;
+	GuiManagerPtr mGuiMng;
 };
 
 }

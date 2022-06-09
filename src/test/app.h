@@ -19,6 +19,7 @@ public:
 	void SetMir(mir::Mir* ctx);
 	void SetPPU(float ppu);
 protected:
+	mir::GuiManagerPtr mGuiMng;
 	mir::SceneManagerPtr mScneMng;
 	mir::RenderableFactoryPtr mRendFac;
 	mir::ResourceManagerPtr mResMng;

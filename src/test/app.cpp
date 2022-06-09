@@ -146,32 +146,48 @@ int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 		if (! CoAwait this->InitContext(hInstance, hWnd))
 			CoReturn false;
 
+		bool quitFlag = false;
 		auto initScene = this->InitScene();
-		auto procMsg = [this,&initScene,&time]()->CoTask<bool> {
-			MSG msg = { 0 };
-			while (WM_QUIT != msg.message) {
-				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
+		auto processMsg = [this, &quitFlag]()->CoTask<bool> 
+		{
+			while (!quitFlag) 
+			{
+				MSG msg;
+				while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+					if (msg.message == WM_QUIT)
+						quitFlag = true;
+				}
+				if (quitFlag)
+					break;
+
+				CoAwait mContext->ScheduleTaskAfter(std::chrono::microseconds(1));
+			}
+			CoReturn true;
+		};
+		auto renderScene = [this,&initScene,&time,&quitFlag]()->CoTask<bool>
+		{
+			while (!quitFlag) 
+			{
+				if (initScene.is_ready()) {
+					time = nullptr;
+					CoAwait this->Render();
 				}
 				else {
-					if (initScene.is_ready()) {
-						time = nullptr;
-						CoAwait this->Render();
-					}
-					else
-						mContext->ProcessPendingEvent();
+					mContext->ProcessPendingEvent();
 				}
+
+				CoAwait mContext->ScheduleTaskAfter(std::chrono::microseconds(1));
 			}
-			CoReturn msg.wParam == 0;
-		}();
-		CoAwait WhenAllReady(initScene, procMsg);
+		};
+		CoAwait WhenAllReady(initScene, renderScene(), processMsg());
 
 		this->CleanUp();
 		CoReturn true;
 	};
 	mContext->ExecuteTaskSync(mainLoop());
-
 	return 0;
 }
 
@@ -217,6 +233,7 @@ IApp* CreateApp(std::string name)
 
 void MirManager::SetMir(mir::Mir* ctx)
 {
+	mGuiMng = ctx->GuiMng();
 	mScneMng = ctx->SceneMng();
 	mRendFac = ctx->RenderableFac();
 	mResMng = ctx->ResourceMng();

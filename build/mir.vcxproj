@@ -55,6 +55,10 @@
     <ClInclude Include="..\src\core\base\tpl\traits.h" />
     <ClInclude Include="..\src\core\base\tpl\vector.h" />
     <ClInclude Include="..\src\core\base\uniform_struct.h" />
+    <ClInclude Include="..\src\core\gui\gui_canvas.h" />
+    <ClInclude Include="..\src\core\gui\gui_manager.h" />
+    <ClInclude Include="..\src\core\gui\imgui_impl_win32.h" />
+    <ClInclude Include="..\src\core\gui\predeclare.h" />
     <ClInclude Include="..\src\core\mir.h" />
     <ClInclude Include="..\src\core\mir_config.h" />
     <ClInclude Include="..\src\core\mir_config_macros.h" />
@@ -124,7 +128,12 @@
     <ClInclude Include="..\src\core\scene\scene_manager.h" />
     <ClInclude Include="..\src\core\scene\scene_node.h" />
     <ClInclude Include="..\src\core\scene\transform.h" />
-    <ClInclude Include="..\src\test\unit_test\unit_test.h" />
+    <ClInclude Include="..\src\imgui\imconfig.h" />
+    <ClInclude Include="..\src\imgui\imgui.h" />
+    <ClInclude Include="..\src\imgui\imgui_internal.h" />
+    <ClInclude Include="..\src\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\src\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\src\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\attribute_struct.cpp" />
@@ -133,6 +142,9 @@
     <ClCompile Include="..\src\core\base\debug.cpp" />
     <ClCompile Include="..\src\core\base\input.cpp" />
     <ClCompile Include="..\src\core\dllmain.cpp" />
+    <ClCompile Include="..\src\core\gui\gui_canvas.cpp" />
+    <ClCompile Include="..\src\core\gui\gui_manager.cpp" />
+    <ClCompile Include="..\src\core\gui\imgui_impl_win32.cpp" />
     <ClCompile Include="..\src\core\mir.cpp" />
     <ClCompile Include="..\src\core\mir_config.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp" />
@@ -171,21 +183,11 @@
     <ClCompile Include="..\src\core\scene\scene_manager.cpp" />
     <ClCompile Include="..\src\core\scene\scene_node.cpp" />
     <ClCompile Include="..\src\core\scene\transform.cpp" />
-    <ClCompile Include="..\src\test\unit_test\main.cpp" />
-    <ClCompile Include="..\src\test\unit_test\test_atomic.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTest|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTest|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\test_camera_light.cpp" />
-    <ClCompile Include="..\src\test\unit_test\test_cppcoro.cpp" />
-    <ClCompile Include="..\src\test\unit_test\test_eigen.cpp" />
-    <ClCompile Include="..\src\test\unit_test\unit_test.cpp" />
+    <ClCompile Include="..\src\imgui\imgui.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\model\armadillo\defaultMaterial.Material" />
@@ -207,7 +209,7 @@
     <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
     <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />
     <None Include="..\bin\x86\Debug\shader\IBL.cginc" />
-    <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader" />
+    <None Include="..\bin\x86\Debug\shader\ImGui.Shader" />
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
     <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
     <None Include="..\bin\x86\Debug\shader\LightingInput.cginc" />
@@ -253,6 +255,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\x86\Debug\shader\Bloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\x86\Debug\shader\ImGui.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

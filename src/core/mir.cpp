@@ -1,7 +1,7 @@
 #include "core/mir.h"
 #include "core/base/debug.h"
 #include "core/rendersys/d3d11/render_system11.h"
-#include "core/rendersys/d3d9/render_system9.h"
+//#include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/material_factory.h"
@@ -14,14 +14,15 @@
 namespace mir {
 
 Mir::Mir(Launch launchMode)
-	:mLaunchMode(launchMode)
+	:mLchMode(launchMode)
 {
 	mIoService = CreateInstance<cppcoro::io_service>(8);
 }
 Mir::~Mir()
 {}
 
-CoTask<bool> Mir::Initialize(HWND hWnd) {
+CoTask<bool> Mir::Initialize(HWND hWnd) 
+{
 	TIME_PROFILE("Mir.Initialize");
 #if 0
 	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<TRenderSystem9>());
@@ -33,24 +34,28 @@ CoTask<bool> Mir::Initialize(HWND hWnd) {
 		CoReturn false;
 	}
 
-	mResourceMng = CreateInstance<ResourceManager>(*mRenderSys, mIoService);
+	mResMng = CreateInstance<ResourceManager>(*mRenderSys, mIoService);
 	
-	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResourceMng, mConfigure);
-	CoAwait mRenderPipe->Initialize(*mResourceMng);
-	//mRenderPipe->SetBackColor(Eigen::Vector4f(0.1f, 0.1f, 0.1f, 0.0f));
-	mRenderableFac = CreateInstance<RenderableFactory>(*mResourceMng, mLaunchMode);
+	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResMng, mConfigure);
+	CoAwait mRenderPipe->Initialize(mLchMode, *mResMng);
+	
+	mRenderableFac = CreateInstance<RenderableFactory>(*mResMng, mLchMode);
+	
+	mGuiMng = CreateInstance<GuiManager>(hWnd);
+	CoAwait mGuiMng->Initialize(mLchMode, *mResMng); 
 
-	mSceneMng = CreateInstance<SceneManager>(*mResourceMng, mRenderableFac, mConfigure);
+	mSceneMng = CreateInstance<SceneManager>(*mResMng, mRenderableFac, mGuiMng, mConfigure);
 	CoReturn true;
 }
 
-void Mir::Dispose() {
+void Mir::Dispose() 
+{
 	if (mRenderSys) {
 		mRenderableFac = nullptr;
 		mSceneMng = nullptr;
 		
-		mResourceMng->Dispose();
-		mResourceMng = nullptr;
+		mResMng->Dispose();
+		mResMng = nullptr;
 
 		mRenderSys->Dispose();
 		mRenderSys = nullptr;
@@ -60,7 +65,7 @@ void Mir::Dispose() {
 CoTask<void> Mir::Update(float dt)
 {
 	mRenderSys->UpdateFrame(dt);
-	CoAwait mResourceMng->UpdateFrame(dt);
+	CoAwait mResMng->UpdateFrame(dt);
 	CoAwait mSceneMng->UpdateFrame(dt);
 }
 
@@ -97,10 +102,19 @@ void Mir::ExecuteTaskSync(const CoTask<bool>& task)
 {
 	coroutine::ExecuteTaskSync(*mIoService, task);
 }
+void Mir::ExecuteTaskSync(const CoTask<void>& task)
+{
+	coroutine::ExecuteTaskSync(*mIoService, task);
+}
 
 void Mir::ProcessPendingEvent()
 {
 	mIoService->process_pending_events();
+}
+
+CoTask<void> Mir::ScheduleTaskAfter(std::chrono::microseconds time)
+{
+	CoAwait mIoService->schedule_after(time);
 }
 
 }

@@ -55,7 +55,7 @@ public:
 
 	bool IsCurrentInAsyncService() const;
 	CoTask<void> SwitchToLaunchService(Launch launchMode);
-	CoTask<void> WaitResComplete(IResourcePtr res, int interval = 50);
+	CoTask<void> WaitResComplete(IResourcePtr res, std::chrono::microseconds interval = std::chrono::microseconds(1));
 private:
 	RenderSystem& mRenderSys;
 	res::DeviceResFactoryPtr mDeviceResFac;

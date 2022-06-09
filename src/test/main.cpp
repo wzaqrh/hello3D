@@ -72,6 +72,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		WINDOW_WIDTH = 1520;
 		WINDOW_HEIGHT = 937;
 	}
+	else if (appName == "test_imgui") {
+		WINDOW_WIDTH = 1200;
+		WINDOW_HEIGHT = 800;
+	}
 	else {
 		WINDOW_WIDTH = 800;
 		WINDOW_HEIGHT = 600;
@@ -167,6 +171,9 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, const char* name, HWND* pH
 //--------------------------------------------------------------------------------------
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (mir::GuiManager_WndProcHandler(hWnd, message, wParam, lParam))
+		return true;
+
 	PAINTSTRUCT ps;
 	HDC hdc;
 

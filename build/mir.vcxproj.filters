@@ -154,9 +154,6 @@
     <ClInclude Include="..\src\core\renderable\cube.h">
       <Filter>src\core\renderable</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\test\unit_test\unit_test.h">
-      <Filter>src\unit_test</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\attribute_struct.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
@@ -271,6 +268,36 @@
     <ClInclude Include="..\src\core\resource\texture_factory.h">
       <Filter>src\core\resource\texture</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\imgui\imconfig.h">
+      <Filter>src\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imgui\imgui.h">
+      <Filter>src\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imgui\imgui_internal.h">
+      <Filter>src\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imgui\imstb_rectpack.h">
+      <Filter>src\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imgui\imstb_textedit.h">
+      <Filter>src\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imgui\imstb_truetype.h">
+      <Filter>src\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gui\gui_canvas.h">
+      <Filter>src\core\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gui\gui_manager.h">
+      <Filter>src\core\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gui\imgui_impl_win32.h">
+      <Filter>src\core\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gui\predeclare.h">
+      <Filter>src\core\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -302,12 +329,6 @@
     </ClCompile>
     <ClCompile Include="..\src\core\dllmain.cpp">
       <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\test_eigen.cpp">
-      <Filter>src\unit_test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\main.cpp">
-      <Filter>src\unit_test</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\base\debug.cpp">
       <Filter>src\core\base</Filter>
@@ -357,17 +378,8 @@
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
       <Filter>src\core\rendersys\d3d11</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\test_atomic.cpp">
-      <Filter>src\unit_test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\test_camera_light.cpp">
-      <Filter>src\unit_test</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\renderable\cube.cpp">
       <Filter>src\core\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\unit_test.cpp">
-      <Filter>src\unit_test</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\base\attribute_struct.cpp">
       <Filter>src\core\base</Filter>
@@ -386,9 +398,6 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\hardware_buffer.cpp">
       <Filter>src\core\rendersys\interface</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\unit_test\test_cppcoro.cpp">
-      <Filter>src\unit_test</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\base\cppcoro.cpp">
       <Filter>src\core\base</Filter>
@@ -423,6 +432,30 @@
     <ClCompile Include="..\src\core\resource\texture_factory.cpp">
       <Filter>src\core\resource\texture</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_demo.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_draw.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_tables.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_widgets.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gui\gui_canvas.cpp">
+      <Filter>src\core\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gui\gui_manager.cpp">
+      <Filter>src\core\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gui\imgui_impl_win32.cpp">
+      <Filter>src\core\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -445,9 +478,6 @@
     </Filter>
     <Filter Include="src\core\renderable\label">
       <UniqueIdentifier>{4f2df5f0-039c-4b83-928b-29bddbdb363f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\unit_test">
-      <UniqueIdentifier>{cdd69705-991f-47e3-93a0-c38a5203813a}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\resource">
       <UniqueIdentifier>{592d5934-05b7-456b-80e9-a9d5d35573f6}</UniqueIdentifier>
@@ -482,9 +512,6 @@
     <Filter Include="shader\material\toycar">
       <UniqueIdentifier>{bb2b7cbe-16de-4568-a37a-68fc56ffc39b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\core\rendersys\d3d9">
-      <UniqueIdentifier>{e4916313-dfc0-4750-b236-05357dbc0c7c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core\rendersys\base">
       <UniqueIdentifier>{7c715055-6b6a-4abb-bd68-4c2ee860558c}</UniqueIdentifier>
     </Filter>
@@ -496,6 +523,12 @@
     </Filter>
     <Filter Include="shader\shader">
       <UniqueIdentifier>{6f414ffc-5b9b-49f3-afdc-ed9633ada937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\imgui">
+      <UniqueIdentifier>{207c1a10-ea06-4ff4-9662-e670d909fbf4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\gui">
+      <UniqueIdentifier>{0351dce9-e6d3-4bb0-92cc-880096f2870c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -545,9 +578,6 @@
       <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\Model.Shader">
-      <Filter>shader\shader</Filter>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\LayerColor-Cube.Shader">
       <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\x86\Debug\shader\LayerColor.Shader">
@@ -639,6 +669,12 @@
     </None>
     <None Include="..\bin\x86\Debug\shader\CommonConstants.cginc">
       <Filter>shader\inc</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\ImGui.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\bin\x86\Debug\shader\ImGui.Shader">
+      <Filter>shader\shader</Filter>
     </None>
   </ItemGroup>
 </Project>

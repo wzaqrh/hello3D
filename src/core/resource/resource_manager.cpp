@@ -71,13 +71,12 @@ CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 #endif
 	CoReturnVoid;
 }
-CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, int interval)
+CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, std::chrono::microseconds interval)
 {
 #if !defined MIR_CPPCORO_DISABLED
 	bool asyncMode = IsCurrentInAsyncService();
 	while (!res->IsLoadComplete()) {
-		using namespace std::literals::chrono_literals;
-		CoAwait mIoService->schedule_after(50ms);
+		CoAwait mIoService->schedule_after(interval);
 	}
 	if (asyncMode) {
 		CoAwait mThreadPool->schedule();

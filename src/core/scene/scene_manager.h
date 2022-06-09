@@ -3,8 +3,7 @@
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/base/deffered_signal.h"
-//#include "core/scene/camera.h"
-//#include "core/scene/light.h"
+#include "core/gui/gui_manager.h"
 
 namespace mir {
 
@@ -12,7 +11,7 @@ class MIR_CORE_API SceneManager : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, const Configure& cfg);
+	SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, GuiManagerPtr guiMng, const Configure& cfg);
 	void SetPixelPerUnit(float ppu);
 
 	SceneNodePtr AddNode();
@@ -34,6 +33,8 @@ public:
 		return light;
 	}
 
+	gui::GuiCanvasPtr CreateGuiCanvasNode();
+
 	template<typename RendClass> std::shared_ptr<RendClass> AddRendAsNode(std::shared_ptr<RendClass> rend) { AddRendAsNode(std::static_pointer_cast<Renderable>(rend)); return std::static_pointer_cast<RendClass>(rend); }
 	RenderablePtr AddRendAsNode(RenderablePtr rend);
 public:
@@ -45,9 +46,12 @@ public:
 	const std::vector<scene::LightPtr>& GetLights() const;
 	scene::LightPtr GetDefLight() const { return GetLights().size() ? GetLights()[0] : nullptr; }
 
+	gui::GuiCanvasPtr GetGuiCanvas() const { return mGuiMng->GetCanvas(); }
+
 	const scene::CameraFactoryPtr& GetCameraFac() const { return mCameraFac; }
 	const scene::LightFactoryPtr& GetLightFac() const { return mLightFac; }
 	const SceneNodeFactoryPtr& GetNodeFac() const { return mNodeFac; }
+	const GuiManagerPtr& GetGuiMng() const { return mGuiMng; }
 public:
 	CoTask<void> UpdateFrame(float dt);
 	void GetRenderables(RenderableCollection& rends);
@@ -58,6 +62,7 @@ private:
 	scene::CameraFactoryPtr mCameraFac;
 	SceneNodeFactoryPtr mNodeFac;
 	RenderableFactoryPtr mRendFac;
+	GuiManagerPtr mGuiMng;
 
 	std::vector<SceneNodePtr> mNodes;
 	DefferedSignal mNodesSignal;
