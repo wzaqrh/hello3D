@@ -21,8 +21,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "thirdparty", "thirdparty", "{9653A185-8D3C-4ABB-830E-65AB04D6E7C6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "build\samples\imgui\imgui.vcxproj", "{1C626CC1-EDF4-44F2-B5EF-3A75223ECD26}"
+	ProjectSection(ProjectDependencies) = postProject
+		{06EDC280-1187-4614-A248-E640C095FA6B} = {06EDC280-1187-4614-A248-E640C095FA6B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cmp_gltf_sample_viewer", "build\samples\cmp_gltf_sample_viewer\cmp_gltf_sample_viewer.vcxproj", "{2DA1B1EC-8E25-4972-B65B-642052890821}"
+	ProjectSection(ProjectDependencies) = postProject
+		{06EDC280-1187-4614-A248-E640C095FA6B} = {06EDC280-1187-4614-A248-E640C095FA6B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

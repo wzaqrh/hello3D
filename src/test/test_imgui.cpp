@@ -24,7 +24,7 @@ CoTask<bool> TestImGui::OnInitScene()
 	auto canvas = mScneMng->CreateGuiCanvasNode();
 	auto camera = mScneMng->CreateCameraNode(kCameraPerspective);
 
-	auto cmd = [&]() 
+	auto cmd = [&]()->CoTask<void> 
 	{
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 		if (mShowDemoWindow)
@@ -64,6 +64,7 @@ CoTask<bool> TestImGui::OnInitScene()
 		}
 
 		camera->SetBackgroundColor(mClearColor);
+		CoReturn;
 	};
 	mGuiMng->AddCommand(cmd);
 

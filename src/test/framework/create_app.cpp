@@ -19,6 +19,8 @@ void RegisterApp(const char* name, std::function<IApp* ()> appCls) {
 
 IApp* CreateApp(std::string name)
 {
+	if (name.empty()) name = GetCurrentAppName();
+	
 	auto entry = RegAppClasses()[name];
 	assert(entry);
 	IApp* gApp = entry();

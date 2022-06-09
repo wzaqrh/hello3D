@@ -15,5 +15,5 @@ template<class T> struct AppRegister
 };
 
 std::string& GetCurrentAppName();
-IApp* CreateApp(std::string name);
+IApp* CreateApp(std::string name = "");
 IApp* CreateAppByCommandLineOrCommandFile();

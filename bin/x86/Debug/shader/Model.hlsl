@@ -506,7 +506,15 @@ float4 PSPrepassFinal_(PSPrepassFinalInput input, bool additive)
 	li.sheen_color_roughness = MIR_SAMPLE_TEX2D(_GBufferSheen, input.Tex);//sheenColor(RGB), sheenRoughness(A)
 	li.clearcoat_color_roughness = MIR_SAMPLE_TEX2D(_GBufferClearCoat, input.Tex);
 	
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_GBUFFER_POS
+	return worldPosition;
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GBUFFER_NORMAL
+	return float4(worldNormal.xyz * 0.5 + 0.5, worldNormal.w);
+#elif DEBUG_CHANNEL == DEBUG_CHANNEL_GBUFFER_ALBEDO
+	return albedo;
+#else
 	return Lighting(li, toLight, worldNormal.xyz, toEye, additive);
+#endif
 }
 float4 PSPrepassFinal(PSPrepassFinalInput input) : SV_Target0
 {
