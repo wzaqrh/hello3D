@@ -44,12 +44,20 @@ enum PipeLineTextureSlot
 struct cbPerFrameBuilder 
 {
 	cbPerFrameBuilder& SetSkybox(const rend::SkyBoxPtr& skybox) {
-		auto shc = IF_AND_OR(skybox, skybox->GetSphericalHarmonicsConstants(), rend::SphericalHarmonicsConstants());
-		mCBuffer.SHC0C1 = shc.C0C1;
-		mCBuffer.SHC2 = shc.C2;
-		mCBuffer.SHC2_2 = shc.C2_2;
-		mCBuffer.EnvSpecColorMip.w() = NULLABLE_MEM(skybox->GetTexture(), GetMipmapCount(), 1);
-		mCBuffer.EnvSheenColorMip.w() = NULLABLE_MEM(skybox->GetSheenMap(), GetMipmapCount(), 1);
+		if (skybox) {
+			auto shc = IF_AND_OR(skybox, skybox->GetSphericalHarmonicsConstants(), rend::SphericalHarmonicsConstants());
+			mCBuffer.SHC0C1 = shc.C0C1;
+			mCBuffer.SHC2 = shc.C2;
+			mCBuffer.SHC2_2 = shc.C2_2;
+			mCBuffer.EnvSpecColorMip.w() = NULLABLE_MEM(skybox->GetTexture(), GetMipmapCount(), 1);
+			mCBuffer.EnvSheenColorMip.w() = NULLABLE_MEM(skybox->GetSheenMap(), GetMipmapCount(), 1);
+		}
+		else {
+			mCBuffer.SHC2 = mCBuffer.SHC0C1 = Eigen::Matrix4f::Zero();
+			mCBuffer.SHC2_2 = Eigen::Vector4f::Zero();
+			mCBuffer.EnvSpecColorMip.w() = 1;
+			mCBuffer.EnvSheenColorMip.w() = 1;
+		}
 		return *this;
 	}
 	cbPerFrameBuilder& SetCamera(const scene::Camera& camera) {
@@ -203,7 +211,7 @@ public:
 public:
 	void Clear() 
 	{
-		mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
+		mRenderSys.ClearFrameBuffer(mStatesBlock.CurrentFrameBuffer(), Camera.GetBackgroundColor(), mPerFrame.GetZFar(), 0);
 	}
 	void RenderCastShadow()
 	{
@@ -347,7 +355,7 @@ public:
 		depth_state(DepthState::MakeFor3D(false));
 		blend_state(BlendState::MakeAlphaNonPremultiplied());
 
-		RenderLight(*mPerFrame, nullptr, LIGHTMODE_OVERLAY, mOpsByRT[RENDER_TYPE_OVERLAY]);
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRT[RENDER_TYPE_OVERLAY]);
 	}
 	void RenderPostProcess(const IFrameBufferPtr& fbInput)
 	{
@@ -441,6 +449,8 @@ private:
 	}
 	void RenderOp(const RenderOperation& op, int lightMode)
 	{
+		if (op.Scissor) mRenderSys.SetScissorState(op.Scissor.value());
+
 		mTempGrabDic.clear();
 		res::TechniquePtr tech = op.Material->GetShader()->CurTech();
 		std::vector<res::PassPtr> passes = tech->GetPassesByLightMode(lightMode);
@@ -495,6 +505,8 @@ private:
 				mPerFrame.SetFrameBuffer(mStatesBlock.CurrentFrameBuffer());
 			}
 		}
+	
+		if (op.Scissor) mRenderSys.SetScissorState(ScissorState::MakeDisable());
 	}
 	void RenderPass(const res::PassPtr& pass, const RenderOperation& op)
 	{
@@ -585,13 +597,13 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
 }
 
-CoTask<bool> RenderPipeline::Initialize(ResourceManager& resMng)
+CoTask<bool> RenderPipeline::Initialize(Launch lchMode, ResourceManager& resMng)
 {
 	MaterialLoadParam loadParam(MAT_DEFFERED);
 	res::MaterialInstance material;
-	CoAwait resMng.CreateMaterial(material, __LaunchAsync__, loadParam);
+	CoAwait resMng.CreateMaterial(material, lchMode, loadParam);
 
-	mGBufferSprite = CreateInstance<rend::Sprite>(__LaunchAsync__, resMng, material);
+	mGBufferSprite = CreateInstance<rend::Sprite>(lchMode, resMng, material);
 	CoReturn true;
 }
 
@@ -602,7 +614,7 @@ void RenderPipeline::SetBackColor(Eigen::Vector4f color)
 
 void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
-	if (lights.empty()) return;
+	//if (lights.empty()) return;
 
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
@@ -620,7 +632,7 @@ void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, cons
 
 void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
-	if (lights.empty()) return;
+	//if (lights.empty()) return;
 
 	if (camera.GetPostProcessInput())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
@@ -653,7 +665,7 @@ bool RenderPipeline::BeginFrame()
 }
 void RenderPipeline::EndFrame()
 {
-	mRenderSys.EndScene();
+	mRenderSys.EndScene(TRUE);
 	mFbsBank->ReturnAllTemp();
 }
 

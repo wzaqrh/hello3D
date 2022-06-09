@@ -145,6 +145,7 @@ public:
 	std::optional<FillMode> Fill;
 	std::optional<CullMode> Cull;
 	std::optional<DepthBias> DepthBias;
+	std::optional<ScissorState> Scissor;
 
 	AttributeNodeVector Attrs;
 	UniformNodeVector Uniforms;

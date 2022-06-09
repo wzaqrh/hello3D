@@ -25,6 +25,7 @@ public:
 	std::optional<FillMode> Fill;
 	std::optional<CullMode> Cull;
 	std::optional<DepthBias> DepthBias;
+	std::optional<ScissorState> Scissor;
 
 	struct GrabOutput {
 		operator bool() const { return !Name.empty(); }

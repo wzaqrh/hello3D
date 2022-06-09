@@ -360,6 +360,26 @@ private:
 				progNode.Depth = DepthState::Make(compFunc, zWriteMask, depthEnable);
 			}
 
+			ScissorState scissor = ScissorState::MakeDisable();
+			std::string strScissorEnable = nodeProgram.get<std::string>("ScissorEnable", "");
+			for (auto& it : boost::make_iterator_range(nodeProgram.equal_range("ScissorRect"))) {
+				std::vector<std::string> strs;
+				SplitString(strs, it.second.data(), ",");
+				if (strs.size() >= 4) {
+					scissor.Rects.emplace_back(Eigen::Vector4i(std::stoi(strs[0]), std::stoi(strs[1]), std::stoi(strs[2]), std::stoi(strs[3])));
+				}
+			}
+			if (!strScissorEnable.empty() || scissor.Rects.size() > 0) {
+				static std::vector<std::tuple<std::string, std::string, int>> boolPatterns = {
+					{"", "True", TRUE},
+					{"", "true", TRUE},
+					{"", "False", FALSE},
+					{"", "false", FALSE},
+				};
+				scissor.ScissorEnable = GetNodeAttribute<bool>(strScissorEnable, (scissor.Rects.size() > 0), boolPatterns);
+				progNode.Scissor = std::move(scissor);
+			}
+
 			static std::vector<std::tuple<std::string, std::string, int>> fillPatterns = {
 				{"", "WireFrame", kFillWireFrame},
 				{"", "Solid", kFillSolid},
@@ -789,7 +809,6 @@ private:
 					{"", "PrepassFinal", LIGHTMODE_PREPASS_FINAL},
 					{"", "PrepassFinalAdd", LIGHTMODE_PREPASS_FINAL_ADD},
 					{"", "PostProcess", LIGHTMODE_POSTPROCESS},
-					{"", "Overlay", LIGHTMODE_OVERLAY},
 				};
 				std::string lightModeStr = node_pass.get<std::string>("LightMode", "ForwardBase");
 				pprop.LightMode = GetNodeAttribute<int>(lightModeStr, LIGHTMODE_FORWARD_BASE, lightModePatterns);
@@ -816,6 +835,7 @@ private:
 				pprop.Fill = passProg.Fill;
 				pprop.Cull = passProg.Cull;
 				pprop.DepthBias = passProg.DepthBias;
+				pprop.Scissor = passProg.Scissor;
 				pprop.Relate2Parameter = passProg.Relate2Parameter;
 
 				GrabString grabStr;

@@ -24,6 +24,7 @@ public:
 	short IndexPos = 0, IndexCount = 0, IndexBase = 0;
 	bool CastShadow;//setup by pipeline
 	Eigen::Matrix4f WorldTransform = Eigen::Matrix4f::Identity();
+	std::optional<ScissorState> Scissor;
 };
 
 class RenderOperationQueue 

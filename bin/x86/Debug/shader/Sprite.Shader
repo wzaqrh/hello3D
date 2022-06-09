@@ -15,8 +15,8 @@
 	</PROGRAM>
 	
 	<SubShader>
+		<RenderType>Overlay</RenderType>
 		<Pass>
-			<RenderType>Overlay</RenderType>
 			<LightMode>ForwardBase</LightMode>
 			<PROGRAM> 
 				<Macros>

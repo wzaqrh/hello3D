@@ -38,6 +38,7 @@ public:
 	const std::optional<FillMode>& GetFill() const { return mProperty->Fill; }
 	const std::optional<CullMode>& GetCull() const { return mProperty->Cull; }
 	const std::optional<DepthBias>& GetDepthBias() const { return mProperty->DepthBias; }
+	const std::optional<ScissorState>& GetScissor() const { return mProperty->Scissor; }
 private:
 	IInputLayoutPtr mInputLayout;
 	IProgramPtr mProgram;

@@ -4,7 +4,7 @@
 #include "core/base/cppcoro.h"
 #include "core/base/stl.h"
 #include "core/base/math.h"
-//#include "core/base/base_type.h"
+#include "core/base/launch.h"
 
 namespace mir {
 
@@ -16,7 +16,7 @@ class MIR_CORE_API RenderPipeline : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Configure& cfg);
-	CoTask<bool> Initialize(ResourceManager& resMng);
+	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng);
 	void SetBackColor(Eigen::Vector4f color);
 	bool BeginFrame();
 	void EndFrame();
