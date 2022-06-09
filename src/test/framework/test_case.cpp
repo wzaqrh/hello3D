@@ -1,5 +1,5 @@
 #include <boost/math/constants/constants.hpp>
-#include "test/test_case.h"
+#include "test/framework/test_case.h"
 #include "core/scene/transform.h"
 #include "core/renderable/assimp_model.h"
 #include "core/renderable/sprite.h"

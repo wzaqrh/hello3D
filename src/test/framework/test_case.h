@@ -1,4 +1,6 @@
 #pragma once
+#include "test/framework/app.h"
+#include "test/framework/create_app.h"
 #include "core/mir.h"
 #include "core/resource/material_name.h"
 #include "core/renderable/assimp_model.h"

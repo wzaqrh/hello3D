@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\test\app.cpp" />
+    <ClCompile Include="..\src\test\framework\app.cpp" />
+    <ClCompile Include="..\src\test\framework\create_app.cpp" />
+    <ClCompile Include="..\src\test\framework\test_case.cpp" />
+    <ClCompile Include="..\src\test\framework\window.cpp" />
     <ClCompile Include="..\src\test\main.cpp" />
     <ClCompile Include="..\src\test\test_bloom.cpp" />
-    <ClCompile Include="..\src\test\test_case.cpp" />
     <ClCompile Include="..\src\test\test_cube.cpp" />
     <ClCompile Include="..\src\test\test_gltf.cpp" />
     <ClCompile Include="..\src\test\test_imgui.cpp" />
@@ -33,8 +35,10 @@
     <ClCompile Include="..\src\test\test_unity.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\test\app.h" />
-    <ClInclude Include="..\src\test\test_case.h" />
+    <ClInclude Include="..\src\test\framework\app.h" />
+    <ClInclude Include="..\src\test\framework\create_app.h" />
+    <ClInclude Include="..\src\test\framework\test_case.h" />
+    <ClInclude Include="..\src\test\framework\window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C953C70C-F0B8-495E-963C-BBCEF595D07A}</ProjectGuid>

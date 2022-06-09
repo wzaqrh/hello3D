@@ -16,6 +16,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "thirdparty\assimp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FreeImagePlus", "thirdparty\FreeImage\Wrapper\FreeImagePlus\FreeImagePlus.2017.vcxproj", "{94F36908-A4E2-4533-939D-64FF6EADA5A1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{1934C53F-7890-4364-9D7C-9FD90BA09309}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "thirdparty", "thirdparty", "{9653A185-8D3C-4ABB-830E-65AB04D6E7C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -131,6 +135,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{82E2BD05-5E0B-4E41-B42E-A527AF780058} = {9653A185-8D3C-4ABB-830E-65AB04D6E7C6}
+		{1467F5D3-A249-3445-AD4D-690B4B975060} = {9653A185-8D3C-4ABB-830E-65AB04D6E7C6}
+		{94F36908-A4E2-4533-939D-64FF6EADA5A1} = {9653A185-8D3C-4ABB-830E-65AB04D6E7C6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1E19D0F3-E243-4677-A56F-3834E4A76F1D}

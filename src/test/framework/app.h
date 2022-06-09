@@ -60,19 +60,3 @@ public:
 	std::string mName;
 	HWND mHnd;
 };
-
-
-IApp* CreateApp(std::string name);
-void RegisterApp(const char* name, std::function<IApp*()> appCls);
-std::string& GetCurrentAppName();
-
-template<class T> struct AppRegister {
-	AppRegister(const char* name) {
-		RegisterApp(name, [name]()->IApp* {
-			T* app = new T;
-			app->mName = name;
-			return app;
-		});
-	}
-};
-

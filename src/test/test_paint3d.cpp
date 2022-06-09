@@ -1,5 +1,4 @@
-#include "test/test_case.h"
-#include "test/app.h"
+#include "test/framework/test_case.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/paint3d.h"
 

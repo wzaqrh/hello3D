@@ -16,9 +16,6 @@
     <ClCompile Include="..\src\test\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\test\app.cpp">
-      <Filter>Source Files\framework</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\test\test_bloom.cpp">
       <Filter>Source Files\test_cases</Filter>
     </ClCompile>
@@ -46,15 +43,30 @@
     <ClCompile Include="..\src\test\test_imgui.cpp">
       <Filter>Source Files\test_cases</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\test\test_case.cpp">
+    <ClCompile Include="..\src\test\framework\app.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\framework\create_app.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\framework\test_case.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test\framework\window.cpp">
       <Filter>Source Files\framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\test\app.h">
+    <ClInclude Include="..\src\test\framework\app.h">
       <Filter>Source Files\framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\test\test_case.h">
+    <ClInclude Include="..\src\test\framework\create_app.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\test\framework\test_case.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\test\framework\window.h">
       <Filter>Source Files\framework</Filter>
     </ClInclude>
   </ItemGroup>

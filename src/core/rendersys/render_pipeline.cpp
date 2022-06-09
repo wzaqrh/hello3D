@@ -15,7 +15,6 @@
 #include "core/scene/scene_manager.h"
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
-#include "test/unit_test/unit_test.h"
 
 namespace mir {
 

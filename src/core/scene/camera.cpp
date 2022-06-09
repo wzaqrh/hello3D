@@ -5,7 +5,6 @@
 #include "core/scene/camera.h"
 #include "core/base/debug.h"
 #include "core/base/math.h"
-#include "test/unit_test/unit_test.h"
 
 namespace mir {
 namespace scene {

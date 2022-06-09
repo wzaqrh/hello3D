@@ -1,5 +1,4 @@
-#include "test/test_case.h"
-#include "test/app.h"
+#include "test/framework/test_case.h"
 #include "core/renderable/skybox.h"
 #include "core/renderable/cube.h"
 

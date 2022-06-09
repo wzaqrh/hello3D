@@ -1,12 +1,20 @@
 #include <boost/algorithm/clamp.hpp>
 #include <boost/filesystem.hpp>
-#include "test/app.h"
-#include "test/test_case.h"
+#include "test/framework/app.h"
+#include "test/framework/test_case.h"
 #include "core/base/input.h"
 #include "core/scene/transform.h"
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
 #include "core/scene/scene_manager.h"
+
+#pragma comment(lib, "mir.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "cppcorod.lib")
+#else
+#pragma comment(lib, "cppcoro.lib")
+#endif
+#pragma comment(lib, "winmm.lib")
 
 using namespace mir;
 
@@ -205,32 +213,8 @@ void App::SetCaseSecondIndex(int secondIndex)
 }
 
 /************************************************************************/
-/* RegAppClasses */
+/* MirManager */
 /************************************************************************/
-std::string& GetCurrentAppName() {
-	static std::string gCurrentAppName;
-	return gCurrentAppName;
-}
-
-typedef std::map<std::string, std::function<IApp*()>> AppCreatorByName;
-AppCreatorByName& RegAppClasses() {
-	static AppCreatorByName gRegAppClasses;
-	return gRegAppClasses;
-}
-void RegisterApp(const char* name, std::function<IApp*()> appCls) {
-	GetCurrentAppName() = name;
-	RegAppClasses()[name] = appCls;
-}
-
-IApp* CreateApp(std::string name)
-{
-	auto entry = RegAppClasses()[name];
-	assert(entry);
-	IApp* gApp = entry();
-	gApp->Create();
-	return gApp;
-}
-
 void MirManager::SetMir(mir::Mir* ctx)
 {
 	mGuiMng = ctx->GuiMng();
