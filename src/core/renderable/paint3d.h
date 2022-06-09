@@ -18,7 +18,8 @@ public:
 public:
 	TransformPtr GetTransform() const { return GetComponent<Transform>(); }
 	void GenRenderOperation(RenderOperationQueue& ops) override;
-	virtual Eigen::AlignedBox3f GetWorldAABB() const { return Eigen::AlignedBox3f(); }
+	Eigen::AlignedBox3f GetWorldAABB() const override { return Eigen::AlignedBox3f(); }
+	void GetMaterials(std::vector<res::MaterialInstance>& mtls) const override;
 protected:
 	ResourceManager& mResMng;
 	const Launch mLaunchMode;

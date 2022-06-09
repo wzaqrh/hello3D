@@ -117,7 +117,8 @@ void MaterialInstance::UpdateKeyword(const std::string& macroName, int value /*=
 }
 CoTask<bool> MaterialInstance::CommitKeywords(Launch launchMode, ResourceManager& resMng)
 {
-	*this = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	*mSelf = *mtl.mSelf;
 	CoReturn true;
 }
 

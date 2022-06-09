@@ -58,20 +58,21 @@ void GuiManager::ClearCommands()
 	mCmds.clear();
 }
 
-void GuiManager::AddCommand(std::function<void()> cmd)
+void GuiManager::AddCommand(std::function<CoTask<void>()> cmd)
 {
 	mCmds.push_back(cmd);
 }
 
-void GuiManager::UpdateFrame(float dt)
+CoTask<void> GuiManager::UpdateFrame(float dt)
 {
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
 	for (auto& cmd : mCmds)
-		cmd();
+		CoAwait cmd();
 
 	ImGui::Render();
+	CoReturn;
 }
 
 }

@@ -175,8 +175,16 @@ void VisitNode(const res::AiNodePtr& curNode, const AiAnimeTree& animeTree, std:
 	}
 }
 
+void AssimpModel::GetMaterials(std::vector<res::MaterialInstance>& mtls) const
+{
+	for (auto& mesh : mAiScene->GetMeshes()) {
+		mtls.push_back(mesh->GetMaterial());
+	}
+}
+
 CoTask<void> AssimpModel::UpdateFrame(float dt)
 {
+	COROUTINE_VARIABLES_1(dt);
 	CoAwait Super::UpdateFrame(dt);
 	BOOST_ASSERT(mAiScene->IsLoaded());
 	if (mAiScene == nullptr || !mAiScene->IsLoaded()) CoReturn;

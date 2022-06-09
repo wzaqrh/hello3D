@@ -45,6 +45,11 @@ void Paint3DBase::GenRenderOperation(RenderOperationQueue& ops)
 	ops.AddOP(op);
 }
 
+void Paint3DBase::GetMaterials(std::vector<res::MaterialInstance>& mtls) const
+{
+	mtls.push_back(mMaterial);
+}
+
 void Paint3DBase::Clear()
 {
 	mIndexPos = 0;

@@ -62,7 +62,7 @@ RenderablePtr SceneManager::AddRendAsNode(RenderablePtr rend)
 
 CoTask<void> SceneManager::UpdateFrame(float dt)
 {
-	mGuiMng->UpdateFrame(dt);
+	CoAwait mGuiMng->UpdateFrame(dt);
 
 	Eigen::AlignedBox3f aabb = this->GetWorldAABB();
 	for (auto& node : mNodes) {

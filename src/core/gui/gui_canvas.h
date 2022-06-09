@@ -18,6 +18,7 @@ public:
 	CoTask<void> UpdateFrame(float dt) override;
 	void GenRenderOperation(RenderOperationQueue& ops) override;
 	Eigen::AlignedBox3f GetWorldAABB() const override;
+	void GetMaterials(std::vector<res::MaterialInstance>& mtls) const override;
 private:
 	void DoNewFrame();
 	void DoSetupRenderState(ImDrawData* draw_data);

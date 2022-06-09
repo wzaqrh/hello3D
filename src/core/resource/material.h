@@ -131,7 +131,7 @@ public:
 	void FlushGpuParameters(RenderSystem& renderSys);
 	void WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data);
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
-private:
+public:
 	void UpdateKeyword(const std::string& macroName, int value = TRUE);
 	CoTask<bool> CommitKeywords(Launch launchMode, ResourceManager& resMng);
 private:

@@ -84,5 +84,10 @@ RenderOperation* RenderableSingleRenderOp::MakeRenderOperation(RenderOperationQu
 	return &ops.Back();
 }
 
+void RenderableSingleRenderOp::GetMaterials(std::vector<res::MaterialInstance>& mtls) const
+{
+	mtls.push_back(mMaterial);
+}
+
 }
 }

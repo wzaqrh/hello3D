@@ -25,10 +25,13 @@ struct MIR_CORE_API Configure : boost::noncopyable {
 	void SetColorSpace(int colorSpace) { _COLORSPACE = colorSpace; }
 	int GetColorSpace() const { return _COLORSPACE; }
 	bool IsGammaSpace() const;
+
+	void SetDebugChannel(int debugChannel);
 public:
 	int _SHADOW_MODE;
 	int _REVERSE_Z;
 	int _COLORSPACE;
+	int _DEBUG_CHANNEL;
 };
 
 }

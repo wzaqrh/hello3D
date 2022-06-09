@@ -606,6 +606,11 @@ CoTask<bool> RenderPipeline::Initialize(Launch lchMode, ResourceManager& resMng)
 	CoReturn true;
 }
 
+void RenderPipeline::GetDefferedMaterial(res::MaterialInstance& mtl) const
+{
+	mtl = mGBufferSprite->GetMaterial();
+}
+
 void RenderPipeline::SetBackColor(Eigen::Vector4f color)
 {
 	mBackgndColor = color;

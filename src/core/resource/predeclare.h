@@ -17,6 +17,7 @@ DECLARE_CLASS(Pass);
 DECLARE_CLASS(Technique);
 DECLARE_CLASS(Shader);
 DECLARE_CLASS(Material);
+class MaterialInstance;
 DECLARE_CLASS(MaterialFactory);
 DECLARE_CLASS(ProgramFactory);
 DECLARE_CLASS(TextureFactory);

@@ -184,5 +184,10 @@ Eigen::AlignedBox3f GuiCanvas::GetWorldAABB() const
 	return Eigen::AlignedBox3f();
 }
 
+void GuiCanvas::GetMaterials(std::vector<res::MaterialInstance>& mtls) const
+{
+	mtls.push_back(mRop.Material);
+}
+
 }
 }

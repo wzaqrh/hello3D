@@ -21,6 +21,8 @@ public:
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderableCollection& rends, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights);
+
+	void GetDefferedMaterial(res::MaterialInstance& mtl) const;
 private:
 	void RenderCameraForward(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights);
 	void RenderCameraDeffered(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights);

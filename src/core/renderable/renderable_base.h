@@ -24,6 +24,7 @@ public:
 	virtual Eigen::AlignedBox3f GetWorldAABB() const override;
 	CoTask<void> UpdateFrame(float dt) override;
 	void GenRenderOperation(RenderOperationQueue& ops) override;
+	void GetMaterials(std::vector<res::MaterialInstance>& mtls) const override;
 protected:
 	virtual bool IsMaterialEnabled() const { return true; }
 	bool IsLoaded() const;

@@ -8,6 +8,7 @@ Configure::Configure()
 	_SHADOW_MODE = SHADOW_MODE;
 	_REVERSE_Z = REVERSE_Z;
 	_COLORSPACE = COLORSPACE;
+	_DEBUG_CHANNEL = DEBUG_CHANNEL;
 }
 
 bool Configure::IsShadowVSM() const 
@@ -18,6 +19,11 @@ bool Configure::IsShadowVSM() const
 bool Configure::IsGammaSpace() const
 {
 	return _COLORSPACE == COLORSPACE_GAMMA;
+}
+
+void Configure::SetDebugChannel(int debugChannel)
+{
+	_DEBUG_CHANNEL = debugChannel;
 }
 
 }

@@ -55,6 +55,8 @@ public:
 public:
 	CoTask<void> UpdateFrame(float dt);
 	void GetRenderables(RenderableCollection& rends);
+
+
 private:
 	ResourceManager& mResMng;
 

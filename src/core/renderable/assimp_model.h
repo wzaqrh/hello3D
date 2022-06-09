@@ -64,6 +64,7 @@ public:
 
 	CoTask<void> UpdateFrame(float dt) override;
 	void GenRenderOperation(RenderOperationQueue& opList) override;
+	void GetMaterials(std::vector<res::MaterialInstance>& mtls) const override;
 private:
 	const std::vector<Eigen::Matrix4f>& GetBoneMatrices(const res::AiNodePtr& node, const res::AssimpMeshPtr& mesh);
 	void DoDraw(const res::AiNodePtr& node, RenderOperationQueue& opList);

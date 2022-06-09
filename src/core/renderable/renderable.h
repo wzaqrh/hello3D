@@ -91,6 +91,7 @@ interface MIR_CORE_API Renderable : public Component
 	virtual CoTask<void> UpdateFrame(float dt) { CoReturn; }
 	virtual void GenRenderOperation(RenderOperationQueue& ops) = 0;
 	virtual Eigen::AlignedBox3f GetWorldAABB() const = 0;
+	virtual void GetMaterials(std::vector<res::MaterialInstance>& mtls) const {}
 
 	void SetCastShadow(bool castShadow) { mCastShadow = castShadow; }
 	bool IsCastShadow() const { return mCastShadow; }
