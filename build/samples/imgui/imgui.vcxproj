@@ -19,31 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\test\framework\app.cpp" />
-    <ClCompile Include="..\src\test\framework\create_app.cpp" />
-    <ClCompile Include="..\src\test\framework\test_case.cpp" />
-    <ClCompile Include="..\src\test\framework\window.cpp" />
-    <ClCompile Include="..\src\test\main.cpp" />
-    <ClCompile Include="..\src\test\test_bloom.cpp" />
-    <ClCompile Include="..\src\test\test_cube.cpp" />
-    <ClCompile Include="..\src\test\test_gltf.cpp" />
-    <ClCompile Include="..\src\test\test_imgui.cpp" />
-    <ClCompile Include="..\src\test\test_paint3d.cpp" />
-    <ClCompile Include="..\src\test\test_shadow_map.cpp" />
-    <ClCompile Include="..\src\test\test_sprite.cpp" />
-    <ClCompile Include="..\src\test\test_ssao.cpp" />
-    <ClCompile Include="..\src\test\test_unity.cpp" />
+    <ClCompile Include="..\..\..\src\test\framework\app.cpp" />
+    <ClCompile Include="..\..\..\src\test\framework\create_app.cpp" />
+    <ClCompile Include="..\..\..\src\test\framework\test_case.cpp" />
+    <ClCompile Include="..\..\..\src\test\framework\window.cpp" />
+    <ClCompile Include="..\..\..\src\test\test_imgui.cpp" />
+    <ClCompile Include="imgui.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\test\framework\app.h" />
-    <ClInclude Include="..\src\test\framework\create_app.h" />
-    <ClInclude Include="..\src\test\framework\test_case.h" />
-    <ClInclude Include="..\src\test\framework\window.h" />
+    <ClInclude Include="..\..\..\src\test\framework\app.h" />
+    <ClInclude Include="..\..\..\src\test\framework\create_app.h" />
+    <ClInclude Include="..\..\..\src\test\framework\test_case.h" />
+    <ClInclude Include="..\..\..\src\test\framework\window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C953C70C-F0B8-495E-963C-BBCEF595D07A}</ProjectGuid>
+    <ProjectGuid>{1c626cc1-edf4-44f2-b5ef-3a75223ecd26}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>test</RootNamespace>
+    <RootNamespace>imgui</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
