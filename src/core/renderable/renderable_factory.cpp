@@ -29,6 +29,19 @@ RenderableFactory::RenderableFactory(ResourceManager& resMng, Launch launchMode)
 	mFontCache = CreateInstance<FontCache>(mResMng);
 }
 
+RenderableFactory::~RenderableFactory()
+{
+	DEBUG_LOG_MEMLEAK("rendFac.destrcutor");
+	Dispose();
+}
+void RenderableFactory::Dispose()
+{
+	if (mFontCache) {
+		DEBUG_LOG_MEMLEAK("rendFac.dispose");
+		mFontCache = nullptr;
+	}
+}
+
 CoTask<bool> RenderableFactory::CreatePaint3D(rend::Paint3DPtr& paint)
 {
 	res::MaterialInstance matLine;

@@ -13,6 +13,8 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	typedef const std::string& string_cref;
 	RenderableFactory(ResourceManager& resMng, Launch launchMode);
+	~RenderableFactory();
+	void Dispose();
 	CoTask<bool> CreateSkybox(rend::SkyBoxPtr& rend, std::vector<std::string> filenames/*spec,diff,lut,sheen*/, MaterialLoadParam loadParam = "");
 	CoTask<bool> CreateSprite(rend::SpritePtr& rend, std::string imagePath = "", MaterialLoadParam loadParam = "");
 	CoTask<bool> CreateMesh(rend::MeshPtr& rend, int vertCount = 1024, int indexCount = 1024, MaterialLoadParam loadParam = "");

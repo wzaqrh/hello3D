@@ -17,6 +17,7 @@ class AiResourceFactory {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	AiResourceFactory(ResourceManager& resMng);
+	~AiResourceFactory();
 
 	CoTask<bool> CreateAiScene(AiScenePtr& aiScene, Launch launchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp = "") ThreadSafe;
 	DECLARE_COTASK_FUNCTIONS(res::AiScenePtr, CreateAiScene, ThreadSafe);

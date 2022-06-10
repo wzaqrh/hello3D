@@ -5,6 +5,14 @@
 #include "core/resource/resource_manager.h"
 
 namespace mir {
+#if defined MIR_MEMLEAK_DEBUG
+Renderable::Renderable() { 
+	DEBUG_MEM_ALLOC_TAG(rend);
+}
+Renderable::~Renderable() { 
+	DEBUG_MEM_DEALLOC_TAG(rend);
+}
+#endif
 namespace rend {
 
 RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& matInst)

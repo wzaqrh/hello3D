@@ -28,13 +28,13 @@ RenderSystem11::RenderSystem11()
 {}
 RenderSystem11::~RenderSystem11()
 {
-	DEBUG_LOG_VERVOSE("renderSys11.destrcutor");
+	DEBUG_LOG_MEMLEAK("rendSys11.destrcutor");
 	Dispose();
 }
 void RenderSystem11::Dispose()
 {
 	if (mDeviceContext) {
-		DEBUG_LOG_VERVOSE("renderSys11.Dispose");
+		DEBUG_LOG_MEMLEAK("rendSys11.dispose");
 		mSwapChain = nullptr;
 		mDxDSStates.clear();
 		mDxBlendStates.clear();

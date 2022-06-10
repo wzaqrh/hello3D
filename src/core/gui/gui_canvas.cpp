@@ -37,8 +37,7 @@ CoTask<bool> GuiCanvas::Init()
 		ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 		mFontTex = CoAwait mResMng.CreateTextureByDataT(mLchMode, kFormatR8G8B8A8UNorm, Eigen::Vector4i(width, height, 1, 1), &Data::Make(pixels, width * 4));
 
-		ITexturePtr* ppTex = new ITexturePtr(this->mFontTex);
-		ImGui::GetIO().Fonts->SetTexID((ImTextureID)ppTex);
+		ImGui::GetIO().Fonts->SetTexID((ImTextureID)mFontTex.get());
 	}
 	CoReturn true;
 }
@@ -158,8 +157,8 @@ CoTask<void> GuiCanvas::UpdateFrame(float dt)
 					continue;
 
 				// Bind texture, Draw
-				ITexturePtr ppTex = *(ITexturePtr*)pcmd->GetTexID();
-				mRop.Material.GetTextures().AddOrSet(ppTex, 0);
+				BOOST_ASSERT((ITexture*)pcmd->GetTexID() == mFontTex.get());
+				mRop.Material.GetTextures().AddOrSet(mFontTex, 0);
 				mRop.Scissor = ScissorState::Make((LONG)clip_min.x, (LONG)clip_min.y, (LONG)clip_max.x, (LONG)clip_max.y);
 				mRop.IndexCount = pcmd->ElemCount;
 				mRop.IndexPos = pcmd->IdxOffset + global_idx_offset;

@@ -30,7 +30,15 @@ App::App()
 }
 App::~App()
 {
-	delete mContext;
+	CleanUp();
+}
+void App::CleanUp()
+{
+	if (mContext) {
+		mContext->Dispose();
+		mContext = nullptr;
+		ResetMir();
+	}
 }
 void App::Create()
 {
@@ -141,11 +149,6 @@ CoTask<void> App::Render()
 	CoAwait mContext->Render();
 }
 
-void App::CleanUp()
-{
-	mContext->Dispose();
-}
-
 int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 {
 	auto mainLoop = [&]()->CoTask<bool> {
@@ -196,6 +199,8 @@ int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 		CoReturn true;
 	};
 	mContext->ExecuteTaskSync(mainLoop());
+	
+	delete this;
 	return 0;
 }
 
@@ -227,6 +232,14 @@ void MirManager::SetMir(mir::Mir* ctx)
 
 	float aspect = 1.0 * size.x() / size.y();
 	mCamWinHSize = Eigen::Vector3f(aspect * 5, 5, 0);
+}
+
+void MirManager::ResetMir()
+{
+	mGuiMng = nullptr;
+	mScneMng = nullptr;
+	mRendFac = nullptr;
+	mResMng = nullptr;
 }
 
 void MirManager::SetPPU(float ppu)

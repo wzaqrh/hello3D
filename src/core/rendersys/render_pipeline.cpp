@@ -595,7 +595,6 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	//mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(IF_AND_OR(mCfg.IsGammaSpace(), kFormatR8G8B8A8UNorm, kFormatR16G16B16A16UNorm), kDepthFormat));
 	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
 }
-
 CoTask<bool> RenderPipeline::Initialize(Launch lchMode, ResourceManager& resMng)
 {
 	MaterialLoadParam loadParam(MAT_DEFFERED);
@@ -606,14 +605,26 @@ CoTask<bool> RenderPipeline::Initialize(Launch lchMode, ResourceManager& resMng)
 	CoReturn true;
 }
 
+RenderPipeline::~RenderPipeline()
+{
+	DEBUG_LOG_MEMLEAK("rendPipe.destrcutor");
+	Dispose();
+}
+void RenderPipeline::Dispose()
+{
+	if (mGBufferSprite) {
+		DEBUG_LOG_MEMLEAK("rendPipe.dispose");
+		mStatesBlockPtr = nullptr;
+		mFbsBank = nullptr;
+		mShadowMap = nullptr;
+		mGBuffer = nullptr;
+		mGBufferSprite = nullptr;
+	}
+}
+
 void RenderPipeline::GetDefferedMaterial(res::MaterialInstance& mtl) const
 {
 	mtl = mGBufferSprite->GetMaterial();
-}
-
-void RenderPipeline::SetBackColor(Eigen::Vector4f color)
-{
-	mBackgndColor = color;
 }
 
 void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)

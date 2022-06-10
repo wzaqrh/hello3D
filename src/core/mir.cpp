@@ -1,5 +1,6 @@
 #include "core/mir.h"
 #include "core/base/debug.h"
+#include "core/base/macros.h"
 #include "core/rendersys/d3d11/render_system11.h"
 //#include "core/rendersys/d3d9/render_system9.h"
 #include "core/rendersys/render_system.h"
@@ -18,9 +19,6 @@ Mir::Mir(Launch launchMode)
 {
 	mIoService = CreateInstance<cppcoro::io_service>(8);
 }
-Mir::~Mir()
-{}
-
 CoTask<bool> Mir::Initialize(HWND hWnd) 
 {
 	TIME_PROFILE("Mir.Initialize");
@@ -48,17 +46,19 @@ CoTask<bool> Mir::Initialize(HWND hWnd)
 	CoReturn true;
 }
 
+Mir::~Mir()
+{
+	Dispose();
+}
 void Mir::Dispose() 
 {
 	if (mRenderSys) {
-		mRenderableFac = nullptr;
-		mSceneMng = nullptr;
-		
-		mResMng->Dispose();
-		mResMng = nullptr;
-
-		mRenderSys->Dispose();
-		mRenderSys = nullptr;
+		SAFE_DISPOSE_NULL(mRenderableFac);
+		SAFE_DISPOSE_NULL(mSceneMng);
+		SAFE_DISPOSE_NULL(mRenderPipe);
+		SAFE_DISPOSE_NULL(mGuiMng);
+		SAFE_DISPOSE_NULL(mResMng);
+		SAFE_DISPOSE_NULL(mRenderSys);
 	}
 }
 

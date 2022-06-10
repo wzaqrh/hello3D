@@ -29,6 +29,30 @@ SceneManager::SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac
 	mNodesSignal.Connect(mLightsSlot);
 }
 
+SceneManager::~SceneManager()
+{
+	DEBUG_LOG_MEMLEAK("sceneMng.destrcutor");
+	Dispose();
+}
+void SceneManager::Dispose()
+{
+	if (mLightFac) {
+		DEBUG_LOG_MEMLEAK("sceneMng.Dispose");
+		mLightFac = nullptr;
+		mCameraFac = nullptr;
+		mNodeFac = nullptr;
+		mRendFac = nullptr;
+		mGuiMng = nullptr;
+
+		mNodes.clear();
+		mLights.clear();
+		mCameras.clear();
+	#if MIR_GRAPHICS_DEBUG
+		mDebugPaint = nullptr;
+	#endif
+	}
+}
+
 void SceneManager::SetPixelPerUnit(float ppu)
 {
 	mCameraFac->SetPixelPerUnit(ppu);

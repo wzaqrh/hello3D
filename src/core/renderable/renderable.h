@@ -88,6 +88,10 @@ private:
 
 interface MIR_CORE_API Renderable : public Component
 {
+#if defined MIR_MEMLEAK_DEBUG
+	Renderable();
+	~Renderable();
+#endif
 	virtual CoTask<void> UpdateFrame(float dt) { CoReturn; }
 	virtual void GenRenderOperation(RenderOperationQueue& ops) = 0;
 	virtual Eigen::AlignedBox3f GetWorldAABB() const = 0;

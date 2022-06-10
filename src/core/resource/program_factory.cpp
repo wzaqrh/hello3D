@@ -18,6 +18,10 @@ ProgramFactory::ProgramFactory(ResourceManager& resMng)
 , mRenderSys(resMng.RenderSys())
 {
 }
+ProgramFactory::~ProgramFactory()
+{
+	DEBUG_LOG_MEMLEAK("progFac.destrcutor");
+}
 
 inline boost::filesystem::path MakeShaderSourcePath(const std::string& name)
 {

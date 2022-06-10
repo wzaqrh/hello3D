@@ -11,6 +11,11 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
+	void CleanUp() override {
+		mModel = nullptr;
+		mMtls.clear();
+		mDeferredMtl.Reset();
+	}
 private:
 	CoTask<void> UpdateDeferredMtlKeywords(std::string keyword, int value) {
 		if (mMtls.empty()) {

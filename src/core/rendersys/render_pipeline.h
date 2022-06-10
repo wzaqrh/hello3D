@@ -16,8 +16,9 @@ class MIR_CORE_API RenderPipeline : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Configure& cfg);
+	~RenderPipeline();
+	void Dispose();
 	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng);
-	void SetBackColor(Eigen::Vector4f color);
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderableCollection& rends, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights);
@@ -34,7 +35,6 @@ private:
 	FrameBufferBankPtr mFbsBank;
 	IFrameBufferPtr mShadowMap, mGBuffer;
 	rend::SpritePtr mGBufferSprite;
-	Eigen::Vector4f mBackgndColor = Eigen::Vector4f::Zero();;
 };
 
 }

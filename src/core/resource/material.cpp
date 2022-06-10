@@ -1,4 +1,5 @@
 #include "core/base/macros.h"
+#include "core/base/debug.h"
 #include "core/rendersys/program.h"
 #include "core/rendersys/input_layout.h"
 #include "core/rendersys/hardware_buffer.h"
@@ -56,7 +57,7 @@ std::vector<PassPtr> Technique::GetPassesByLightMode(int lightMode)
 	return std::move(result);
 }
 
-/********** Material **********/
+/********** Shader **********/
 bool Shader::Validate() const
 {
 	for (auto& tech : mElements)
@@ -66,6 +67,14 @@ bool Shader::Validate() const
 }
 
 /********** Material **********/
+#if defined MIR_MEMLEAK_DEBUG
+Material::Material() {
+	DEBUG_MEM_ALLOC_TAG(mtl);
+}
+Material::~Material() {
+	DEBUG_MEM_DEALLOC_TAG(mtl);
+}
+#endif
 MaterialInstance Material::CreateInstance(Launch launchMode, ResourceManager& resMng) const
 {
 	GpuParametersPtr newParametrs = mGpuParametersByShareType[kCbSharePerInstance]->Clone(launchMode, resMng);
@@ -102,6 +111,10 @@ MaterialInstance MaterialInstance::Clone(Launch launchMode, ResourceManager& res
 MaterialInstance MaterialInstance::ShallowClone() const
 {
 	return MaterialInstance(mSelf->Material, mSelf->Textures, mSelf->GpuParameters, mSelf->LoadParam);
+}
+void MaterialInstance::Reset()
+{
+	mSelf = nullptr;
 }
 
 CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng)

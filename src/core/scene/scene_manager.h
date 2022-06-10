@@ -12,6 +12,9 @@ class MIR_CORE_API SceneManager : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	SceneManager(ResourceManager& resMng, RenderableFactoryPtr rendFac, GuiManagerPtr guiMng, const Configure& cfg);
+	~SceneManager();
+	void Dispose();
+
 	void SetPixelPerUnit(float ppu);
 
 	SceneNodePtr AddNode();
@@ -55,8 +58,6 @@ public:
 public:
 	CoTask<void> UpdateFrame(float dt);
 	void GetRenderables(RenderableCollection& rends);
-
-
 private:
 	ResourceManager& mResMng;
 

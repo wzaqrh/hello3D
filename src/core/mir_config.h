@@ -10,6 +10,7 @@
 #define MIR_MATERIAL_HOTLOAD 1
 #define MIR_GRAPHICS_DEBUG 1
 //#define MIR_CPPCORO_DISABLED
+#define MIR_MEMLEAK_DEBUG
 
 namespace mir {
 

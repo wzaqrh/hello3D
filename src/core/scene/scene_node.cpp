@@ -1,15 +1,23 @@
+#include "core/base/debug.h"
 #include "core/scene/scene_node.h"
 #include "core/scene/transform.h"
-#include "core/renderable/renderable.h"
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
+#include "core/renderable/renderable.h"
 
 namespace mir {
 
 #define SAFE_CALL(V, FUNC) if (V) V->FUNC
 
 SceneNode::SceneNode()
-{}
+{
+	DEBUG_MEM_ALLOC_TAG(scene_node);
+}
+
+SceneNode::~SceneNode()
+{
+	DEBUG_MEM_DEALLOC_TAG(scene_node);
+}
 
 void SceneNode::SetTransform(const TransformPtr& transform)
 {

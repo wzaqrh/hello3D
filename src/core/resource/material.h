@@ -79,6 +79,7 @@ public:
 	MaterialInstance Clone(Launch launchMode, ResourceManager& resMng) const;
 	MaterialInstance ShallowClone() const;
 	CoTask<bool> Reload(Launch launchMode, ResourceManager& resMng);
+	void Reset();
 
 	/********** about keywords **********/
 	struct KeywordOperator {
@@ -95,6 +96,8 @@ public:
 		bool mOwn, mFlush;
 	};
 	KeywordOperator OperateKeywords(Launch lchMode, ResourceManager& resMng) { return KeywordOperator(*this, lchMode, resMng); }
+	void UpdateKeyword(const std::string& macroName, int value = TRUE);
+	CoTask<bool> CommitKeywords(Launch launchMode, ResourceManager& resMng);
 
 	/********** about material **********/
 	const MaterialPtr& GetMaterial() const { return mSelf ? mSelf->Material : nullptr; }
@@ -131,9 +134,6 @@ public:
 	void FlushGpuParameters(RenderSystem& renderSys);
 	void WriteToCb(RenderSystem& renderSys, const std::string& cbName, Data data);
 	std::vector<IContantBufferPtr> GetConstBuffers() const;
-public:
-	void UpdateKeyword(const std::string& macroName, int value = TRUE);
-	CoTask<bool> CommitKeywords(Launch launchMode, ResourceManager& resMng);
 private:
 	struct SharedBlock {
 		SharedBlock(const MaterialPtr& material, const TextureVector& textures, const GpuParametersPtr& gpuParamters, const MaterialLoadParam& loadParam)
@@ -150,7 +150,10 @@ class MIR_CORE_API Material : public std::enable_shared_from_this<Material>, pub
 {
 	friend class MaterialFactory;
 public:
-	Material() {}
+#if defined MIR_MEMLEAK_DEBUG
+	Material();
+	~Material();
+#endif
 	MaterialInstance CreateInstance(Launch launchMode, ResourceManager& resMng) const;
 	MaterialPtr Clone(Launch launchMode, ResourceManager& resMng) const;
 	bool IsOutOfDate() const { return mProperty->DependSrc.CheckOutOfDate(); }

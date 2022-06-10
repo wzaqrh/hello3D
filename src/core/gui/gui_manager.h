@@ -11,6 +11,7 @@ public:
 	GuiManager(void* hwnd);
 	~GuiManager();
 	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng);
+	void Dispose();
 
 	void ClearCommands();
 	void AddCommand(std::function<CoTask<void>()> cmd);

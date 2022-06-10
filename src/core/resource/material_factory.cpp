@@ -19,6 +19,11 @@ MaterialFactory::MaterialFactory(ResourceManager& mResMng)
 	mFrameGpuParameters = CreateInstance<GpuParameters>();
 }
 
+MaterialFactory::~MaterialFactory()
+{
+	DEBUG_LOG_MEMLEAK("mtlFac.destrcutor");
+}
+
 const GpuParametersPtr& MaterialFactory::GetFrameGpuParameters() const 
 { 
 	tpl::AutoLock lck(mMaterialCache._GetLock());

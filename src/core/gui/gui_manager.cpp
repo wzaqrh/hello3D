@@ -1,9 +1,15 @@
+#include "core/base/debug.h"
 #include "core/gui/imgui_impl_win32.h"
 #include "core/gui/gui_manager.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace mir {
+
+LRESULT GuiManager_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
+}
 
 GuiManager::GuiManager(void* hwnd)
 {
@@ -42,15 +48,19 @@ CoTask<bool> GuiManager::Initialize(Launch lchMode, ResourceManager& resMng)
 	CoReturn true;
 }
 
-LRESULT GuiManager_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
-}
-
 GuiManager::~GuiManager()
 {
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+	DEBUG_LOG_MEMLEAK("guiMng.destrcutor");
+	Dispose();
+}
+void GuiManager::Dispose()
+{
+	if (mCanvas) {
+		DEBUG_LOG_MEMLEAK("guiMng.dispose");
+		mCanvas = nullptr;
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+	}
 }
 
 void GuiManager::ClearCommands()

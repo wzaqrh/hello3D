@@ -17,9 +17,11 @@ Texture11::Texture11()
 	mSRV = nullptr;
 	mRTV = nullptr;
 	mDSV = nullptr;
+	DEBUG_MEM_ALLOC_TAG(tex11);
 }
 Texture11::~Texture11()
 {
+	DEBUG_MEM_DEALLOC_TAG(tex11);
 }
 
 void Texture11::Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap, bool bindRTorDS)

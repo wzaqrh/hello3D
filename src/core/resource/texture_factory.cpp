@@ -17,6 +17,10 @@ TextureFactory::TextureFactory(ResourceManager& resMng)
 , mRenderSys(resMng.RenderSys())
 {
 }
+TextureFactory::~TextureFactory()
+{
+	DEBUG_LOG_MEMLEAK("texFac.destrcutor");
+}
 
 CoTask<bool> TextureFactory::CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[])
 {

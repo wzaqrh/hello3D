@@ -18,6 +18,7 @@ class MIR_CORE_API ProgramFactory : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	ProgramFactory(ResourceManager& resMng);
+	~ProgramFactory();
 
 	CoTask<bool> CreateProgram(IProgramPtr& program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
 	DECLARE_COTASK_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe);

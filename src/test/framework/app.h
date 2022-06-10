@@ -17,6 +17,7 @@ class MirManager
 {
 public:
 	void SetMir(mir::Mir* ctx);
+	void ResetMir();
 	void SetPPU(float ppu);
 protected:
 	mir::GuiManagerPtr mGuiMng;
@@ -31,7 +32,7 @@ class App : public IApp, public MirManager
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 	App();
-	~App();
+	virtual ~App();
 public:
 	void Create() override final;
 	void SetCaseIndex(int caseIndex) override final;
@@ -42,7 +43,7 @@ private:
 	CoTask<bool> InitContext(HINSTANCE hInstance, HWND hWnd);
 	CoTask<bool> InitScene();
 	CoTask<void> Render();
-	void CleanUp();
+	virtual void CleanUp();
 protected:
 	virtual CoTask<bool> OnInitScene() { CoReturn true; };
 	virtual void OnInitLight();

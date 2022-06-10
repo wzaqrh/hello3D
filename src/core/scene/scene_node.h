@@ -9,6 +9,7 @@ namespace mir {
 class MIR_CORE_API SceneNode : public std::enable_shared_from_this<SceneNode>, boost::noncopyable {
 public:
 	SceneNode();
+	~SceneNode();
 	void SetTransform(const TransformPtr& transform);
 	void SetRenderable(const RenderablePtr& rend);
 	void SetLight(const scene::LightPtr& light);

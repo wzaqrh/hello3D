@@ -28,26 +28,26 @@ ResourceManager::ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcor
 	TIME_PROFILE((boost::format("resMng.main_tid %1%") % mMainThreadId).str());
 
 	constexpr int CThreadPoolNumber = 8;
-#if defined USE_OIIO
 	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber);
 	mIoService = ioService;
-#else
-	mThreadPool = CreateInstance<cppcoro::static_thread_pool>(CThreadPoolNumber, ilInit, ilShutDown);
-	mIoService = ioService;
-	ilInit();
-#endif	
 }
 ResourceManager::~ResourceManager()
 {
+	DEBUG_LOG_MEMLEAK("resMng.destrcutor");
 	Dispose();
 }
 void ResourceManager::Dispose() ThreadSafe
 {
 	if (mThreadPool) {
+		DEBUG_LOG_MEMLEAK("resMng.Dispose");
+		mDeviceResFac = nullptr;
+		mTextureFac = nullptr;
+		mProgramFac = nullptr;
+		mMaterialFac = nullptr;
+		mAiResFac = nullptr;
+
+		mIoService = nullptr;
 		mThreadPool = nullptr;
-	#if !defined USE_OIIO
-		ilShutDown();
-	#endif
 	}
 }
 

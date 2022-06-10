@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <d3d9.h>
+#include <boost/format.hpp>
 #include "core/mir_export.h"
 #include "core/predeclare.h"
 #include "core/mir_config.h"
@@ -116,4 +117,14 @@ void Log(const D3DCAPS9& caps);
 #define COROUTINE_VARIABLES_5(a1, a2, a3, a4, a5)
 #define COROUTINE_VARIABLES_6(a1, a2, a3, a4, a5, a6)
 #define COROUTINE_VARIABLES_7(a1, a2, a3, a4, a5, a6, a7)
+#endif
+
+#if defined MIR_MEMLEAK_DEBUG
+#define DEBUG_LOG_MEMLEAK(MSG1) DEBUG_LOG_VERVOSE(MSG1)
+#define DEBUG_MEM_ALLOC_TAG(CLASSNAME) { static int CLASSNAME##allocCount = 0; DEBUG_LOG_VERVOSE((boost::format(#CLASSNAME ".alloc %d") %++CLASSNAME##allocCount).str()); }
+#define DEBUG_MEM_DEALLOC_TAG(CLASSNAME) { static int CLASSNAME##allocCount = 0; DEBUG_LOG_VERVOSE((boost::format(#CLASSNAME ".dealloc %d") %++CLASSNAME##allocCount).str()); }
+#else
+#define DEBUG_LOG_MEMLEAK(MSG1)
+#define DEBUG_MEM_ALLOC_TAG(CLASSNAME)
+#define DEBUG_MEM_DEALLOC_TAG(CLASSNAME)
 #endif

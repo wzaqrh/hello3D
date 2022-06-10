@@ -19,6 +19,7 @@ class MIR_CORE_API TextureFactory : boost::noncopyable
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	TextureFactory(ResourceManager& resMng);
+	~TextureFactory();
 
 	CoTask<bool> CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[]);
 	CoTask<bool> CreateTextureByFile(ITexturePtr& texture, Launch lchMode, std::string filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe;

@@ -11,7 +11,13 @@ namespace scene {
 
 Camera::Camera(ResourceManager& resMng)
 : mResMng(resMng)
-{}
+{
+	DEBUG_MEM_ALLOC_TAG(camera); 
+}
+Camera::~Camera()
+{
+	DEBUG_MEM_DEALLOC_TAG(camera);
+}
 
 void Camera::PostSetComponent()
 {

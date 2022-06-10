@@ -29,6 +29,7 @@ class MIR_CORE_API Camera : public Component
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Camera(ResourceManager& resMng);
+	~Camera();
 
 	void SetLookAt(const Eigen::Vector3f& eye, const Eigen::Vector3f& at);
 	void SetForward(const Eigen::Vector3f& forward);

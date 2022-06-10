@@ -501,6 +501,10 @@ AiResourceFactory::AiResourceFactory(ResourceManager& resMng)
 : mResMng(resMng)
 {
 }
+AiResourceFactory::~AiResourceFactory()
+{
+	DEBUG_LOG_MEMLEAK("aiResFac.destrcutor");
+}
 
 CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe
 {

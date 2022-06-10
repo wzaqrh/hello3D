@@ -63,7 +63,6 @@ private:
 	res::ProgramFactoryPtr mProgramFac;
 	res::MaterialFactoryPtr mMaterialFac;
 	res::AiResourceFactoryPtr mAiResFac;
-	
 
 	std::shared_ptr<cppcoro::static_thread_pool> mThreadPool;
 	std::shared_ptr<cppcoro::io_service> mIoService;
