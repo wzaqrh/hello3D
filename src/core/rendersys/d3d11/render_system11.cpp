@@ -290,7 +290,7 @@ void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgram, const std::vector<LayoutInputElement>& descArr)
 {
 	//BOOST_ASSERT(IsCurrentInMainThread());
-	BOOST_ASSERT(res && AsRes(pProgram)->IsLoaded());
+	BOOST_ASSERT(res && pProgram->IsLoaded());
 
 	InputLayout11Ptr ret = std::static_pointer_cast<InputLayout11>(res);
 	ret->mInputDescs.resize(descArr.size());

@@ -11,7 +11,6 @@
 #include <thread>
 #include <vector>
 #include <mutex>
-#include <functional>
 #include <experimental/coroutine>
 
 namespace cppcoro
@@ -28,9 +27,7 @@ namespace cppcoro
 		///
 		/// \param threadCount
 		/// The number of threads in the pool that will be used to execute work.
-		explicit static_thread_pool(std::uint32_t threadCount,
-			std::function<void()> onThreadStart = nullptr,
-			std::function<void()> onThreadFinish = nullptr);
+		explicit static_thread_pool(std::uint32_t threadCount);
 
 		~static_thread_pool();
 
@@ -112,6 +109,7 @@ namespace cppcoro
 
 		//alignas(std::hardware_destructive_interference_size)
 		std::atomic<std::uint32_t> m_sleepingThreadCount;
+
 	};
 }
 

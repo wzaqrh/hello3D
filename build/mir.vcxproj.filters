@@ -327,9 +327,6 @@
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\dllmain.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\base\debug.cpp">
       <Filter>src\core\base</Filter>
     </ClCompile>
@@ -455,6 +452,9 @@
     </ClCompile>
     <ClCompile Include="..\src\core\gui\imgui_impl_win32.cpp">
       <Filter>src\core\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\dllmain.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

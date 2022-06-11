@@ -37,12 +37,13 @@ void MIR_CORE_API SetDebugPrivData(IResourcePtr res, const std::string& privData
 void MIR_CORE_API SetDebugResourcePath(IResourcePtr res, const std::string& resPath);
 void MIR_CORE_API SetDebugCallStack(IResourcePtr res, const std::string& callstack);
 
-#define LOG_LEVEL_VERVOSE 0
-#define LOG_LEVEL_DEBUG	1
-#define LOG_LEVEL_INFO 2
-#define LOG_LEVEL_WARN 3
-#define LOG_LEVEL_ERROR 4
-#define LOG_LEVEL_NEVER 5
+#define LOG_LEVEL_CALLSTK 0
+#define LOG_LEVEL_VERVOSE 1
+#define LOG_LEVEL_DEBUG	2
+#define LOG_LEVEL_INFO 3
+#define LOG_LEVEL_WARN 4
+#define LOG_LEVEL_ERROR 5
+#define LOG_LEVEL_NEVER 6
 void Log(const std::string& msg, int level = LOG_LEVEL_VERVOSE);
 void Log(const D3DCAPS9& caps);
 
@@ -53,6 +54,7 @@ void Log(const D3DCAPS9& caps);
 
 #if defined MIR_LOG_LEVEL && MIR_LOG_LEVEL < LOG_LEVEL_NEVER
 #define DEBUG_LOG(MSG1, LV)			mir::debug::Log(MSG1, LV)
+#define DEBUG_LOG_CALLSTK(MSG1)		DEBUG_LOG(std::string("callstack: ") + MSG1, LOG_LEVEL_CALLSTK)
 #define DEBUG_LOG_VERVOSE(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_VERVOSE)
 #define DEBUG_LOG_DEBUG(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_DEBUG)
 #define DEBUG_LOG_INFO(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_INFO)
@@ -60,6 +62,7 @@ void Log(const D3DCAPS9& caps);
 #define DEBUG_LOG_ERROR(MSG1)		DEBUG_LOG(MSG1, LOG_LEVEL_ERROR)
 #else
 #define DEBUG_LOG(MSG1, LV)	
+#define DEBUG_LOG_CALLSTK(MSG1)
 #define DEBUG_LOG_VERVOSE(MSG1)	
 #define DEBUG_LOG_DEBUG(MSG1)
 #define DEBUG_LOG_INFO(MSG1)
@@ -90,7 +93,7 @@ void Log(const D3DCAPS9& caps);
 #define DEBUG_SET_CALL(A, CALL)
 #else
 #define DEBUG_RES_ADD_DEVICE(A, DEVICE, DEVNAME)
-#define SET_DEBUG_NAME(A, NAME)		
+#define DEBUG_SET_PRIV_DATA(A, NAME)		
 #define DEBUG_SET_RES_PATH(A, PATH) 
 #define DEBUG_SET_CALL(A, CALL)		
 #endif

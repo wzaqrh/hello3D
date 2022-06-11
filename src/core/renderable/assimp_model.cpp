@@ -190,10 +190,12 @@ CoTask<void> AssimpModel::UpdateFrame(float dt)
 	if (mAiScene == nullptr || !mAiScene->IsLoaded()) CoReturn;
 
 #if MIR_MATERIAL_HOTLOAD
-	for (auto& mesh : mAiScene->GetMeshes()) {
-		auto material = mesh->GetMaterial();
-		if (material->IsOutOfDate()) {
-			CoAwait material.Reload(mLaunchMode, mResMng);
+	if (mResMng.FrameCount % 30 == 0) {
+		for (auto& mesh : mAiScene->GetMeshes()) {
+			auto material = mesh->GetMaterial();
+			if (material->IsOutOfDate()) {
+				CoAwait material.Reload(mLaunchMode, mResMng);
+			}
 		}
 	}
 #endif

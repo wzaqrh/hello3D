@@ -56,6 +56,10 @@ public:
 	bool IsCurrentInAsyncService() const;
 	CoTask<void> SwitchToLaunchService(Launch launchMode);
 	CoTask<void> WaitResComplete(IResourcePtr res, std::chrono::microseconds interval = std::chrono::microseconds(1));
+#if MIR_MATERIAL_HOTLOAD
+public:
+	int FrameCount = 0;
+#endif
 private:
 	RenderSystem& mRenderSys;
 	res::DeviceResFactoryPtr mDeviceResFac;

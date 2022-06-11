@@ -100,7 +100,7 @@ public:
 	CoTask<bool> CommitKeywords(Launch launchMode, ResourceManager& resMng);
 
 	/********** about material **********/
-	const MaterialPtr& GetMaterial() const { return mSelf ? mSelf->Material : nullptr; }
+	const MaterialPtr& GetMaterial() const { return mSelf->Material; }
 	const MaterialPtr& operator->() const { return GetMaterial(); };
 	operator bool() const { return mSelf && mSelf->Material != nullptr; }
 

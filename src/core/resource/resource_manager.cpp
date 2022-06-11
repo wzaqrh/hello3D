@@ -16,7 +16,7 @@
 namespace mir {
 
 ResourceManager::ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcoro::io_service> ioService)
-: mRenderSys(renderSys)
+	: mRenderSys(renderSys)
 {
 	mMaterialFac = CreateInstance<res::MaterialFactory>(*this);
 	mProgramFac = CreateInstance<res::ProgramFactory>(*this);
@@ -57,6 +57,7 @@ bool ResourceManager::IsCurrentInAsyncService() const
 }
 CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 {
+	DEBUG_LOG_DEBUG((boost::format("resMng.SwitchToLaunchService lchMode=%d curIsAsync=%d") %launchMode %IsCurrentInAsyncService()).str());
 #if !defined MIR_CPPCORO_DISABLED
 	if (launchMode == LaunchAsync) {
 		//if (! IsCurrentInAsyncService())
@@ -66,13 +67,14 @@ CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 	else {
 		if (IsCurrentInAsyncService())
 			CoAwait mIoService->schedule();
-		BOOST_ASSERT(! IsCurrentInAsyncService());
+		BOOST_ASSERT(!IsCurrentInAsyncService());
 	}
 #endif
 	CoReturnVoid;
 }
 CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, std::chrono::microseconds interval)
 {
+	DEBUG_LOG_DEBUG(boost::format("resMng.WaitResComplete").str());
 #if !defined MIR_CPPCORO_DISABLED
 	bool asyncMode = IsCurrentInAsyncService();
 	while (!res->IsLoadComplete()) {
@@ -90,9 +92,10 @@ CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, std::chrono::mic
 CoTask<void> ResourceManager::UpdateFrame(float dt) ThreadSafe
 {
 #if MIR_MATERIAL_HOTLOAD
-	if (mMaterialFac->PurgeOutOfDates()) {
+	FrameCount++;
+	if ((FrameCount % 30 == 0) && mMaterialFac->PurgeOutOfDates()) {
 		mProgramFac->PurgeAll();
-	}	 
+	}
 #endif
 	CoReturn;
 }

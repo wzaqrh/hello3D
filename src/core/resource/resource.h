@@ -4,13 +4,12 @@
 #include "core/mir_config.h"
 #include "core/mir_export.h"
 #include "core/base/stl.h"
-#if defined MIR_RESOURCE_DEBUG
 #include "core/base/launch.h"
-#endif
 #include "core/rendersys/predeclare.h"
 
 namespace mir {
 
+#if defined MIR_RESOURCE_DEBUG
 struct ResourceDebugInfo : boost::noncopyable {
 public:
 	const std::string& GetDebugInfo() {
@@ -27,6 +26,7 @@ public:
 	std::vector<std::pair<void*,std::string>> _DeviceChilds;
 	std::string _PrivData, _ResourcePath, _DebugInfo, _CallStack;
 };
+#endif
 
 enum ResourceState {
 	kResourceStateNone,
@@ -86,5 +86,3 @@ private:
 };
 
 }
-
-#define AsRes(A) A
