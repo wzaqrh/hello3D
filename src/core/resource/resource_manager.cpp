@@ -15,11 +15,11 @@
 
 namespace mir {
 
-ResourceManager::ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcoro::io_service> ioService)
-	: mRenderSys(renderSys)
+ResourceManager::ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcoro::io_service> ioService, const std::string& shaderDir)
+: mRenderSys(renderSys)
 {
-	mMaterialFac = CreateInstance<res::MaterialFactory>(*this);
-	mProgramFac = CreateInstance<res::ProgramFactory>(*this);
+	mMaterialFac = CreateInstance<res::MaterialFactory>(*this, shaderDir);
+	mProgramFac = CreateInstance<res::ProgramFactory>(*this, shaderDir);
 	mTextureFac = CreateInstance<res::TextureFactory>(*this);
 	mAiResFac = CreateInstance<res::AiResourceFactory>(*this);
 	mDeviceResFac = CreateInstance<res::DeviceResFactory>(mRenderSys);

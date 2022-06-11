@@ -50,8 +50,14 @@
     <ClInclude Include="..\src\core\predeclare.h" />
     <ClInclude Include="..\src\core\renderable\assimp_model.h" />
     <ClInclude Include="..\src\core\renderable\cube.h" />
-    <ClInclude Include="..\src\core\renderable\font.h" />
-    <ClInclude Include="..\src\core\renderable\label.h" />
+    <ClInclude Include="..\src\core\renderable\font.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\renderable\label.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\src\core\renderable\mesh.h" />
     <ClInclude Include="..\src\core\renderable\paint3d.h" />
     <ClInclude Include="..\src\core\renderable\post_process.h" />
@@ -133,8 +139,14 @@
     <ClCompile Include="..\src\core\mir_config.cpp" />
     <ClCompile Include="..\src\core\renderable\assimp_model.cpp" />
     <ClCompile Include="..\src\core\renderable\cube.cpp" />
-    <ClCompile Include="..\src\core\renderable\font.cpp" />
-    <ClCompile Include="..\src\core\renderable\label.cpp" />
+    <ClCompile Include="..\src\core\renderable\font.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\renderable\label.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\core\renderable\mesh.cpp" />
     <ClCompile Include="..\src\core\renderable\paint3d.cpp" />
     <ClCompile Include="..\src\core\renderable\post_process.cpp" />
@@ -273,7 +285,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -295,38 +307,40 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)include;$(SolutionDir)include\freetype2\freetype;$(SolutionDir)include\freetype2;$(SolutionDir)src</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86;$(SolutionDir)lib\x86</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86;$(SolutionDir)lib\$(Platform)</LibraryPath>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
-    <OutDir>$(SolutionDir)bin\x86\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)include;$(SolutionDir)include\freetype2\freetype;$(SolutionDir)include\freetype2;$(SolutionDir)src</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(SolutionDir)lib\x64;</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(SolutionDir)lib\$(Platform)</LibraryPath>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
-    <OutDir>$(SolutionDir)bin\x64\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)include;$(SolutionDir)include\freetype2\freetype;$(SolutionDir)include\freetype2;$(SolutionDir)src</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86;$(SolutionDir)lib\x86;</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86;$(SolutionDir)lib\$(Platform)</LibraryPath>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
-    <OutDir>$(SolutionDir)bin\x86\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)include;$(SolutionDir)include\freetype2\freetype;$(SolutionDir)include\freetype2;$(SolutionDir)src</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(SolutionDir)lib\x64;</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(SolutionDir)lib\$(Platform)</LibraryPath>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
-    <OutDir>$(SolutionDir)bin\x64\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -336,15 +350,16 @@
       <OpenMPSupport>false</OpenMPSupport>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -358,13 +373,14 @@
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)lib\x86\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(TargetName).lib</ImportLibrary>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
+      <Command>Copy  "$(SolutionDir)bin\work\shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -380,12 +396,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -399,13 +418,14 @@
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)lib\x64\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(TargetName).lib</ImportLibrary>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
+      <Command>Copy  "$(SolutionDir)bin\work\shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -421,13 +441,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -443,13 +464,13 @@
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)lib\x86\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(TargetName).lib</ImportLibrary>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
+      <Command>Copy  "$(SolutionDir)bin\work\shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -466,11 +487,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -486,13 +510,13 @@
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)lib\x64\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(TargetName).lib</ImportLibrary>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
-      <Command>Copy  "$(OutDir)shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
+      <Command>Copy  "$(SolutionDir)bin\work\shader\Macros.cginc" "$(SolutionDir)src\core\mir_config_macros.h"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

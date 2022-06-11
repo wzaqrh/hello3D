@@ -251,7 +251,7 @@ class MaterialNodeManager;
 class MaterialAssetManager : boost::noncopyable
 {
 public:
-	MaterialAssetManager();
+	MaterialAssetManager(const std::string& shaderDir);
 	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe;
 	bool GetMaterialNode(const MaterialLoadParam& loadParam, MaterialNode& materialNode) ThreadSafe;
 	bool PurgeOutOfDates() ThreadSafe;

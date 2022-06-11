@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/noncopyable.hpp>
+#include <boost/filesystem.hpp>
 #include "core/base/stl.h"
 #include "core/base/math.h"
 #include "core/base/cppcoro.h"
@@ -17,7 +18,7 @@ class MIR_CORE_API ProgramFactory : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	ProgramFactory(ResourceManager& resMng);
+	ProgramFactory(ResourceManager& resMng, const std::string& shaderDir);
 	~ProgramFactory();
 
 	CoTask<bool> CreateProgram(IProgramPtr& program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
@@ -26,9 +27,12 @@ public:
 	void PurgeAll() ThreadSafe;
 private:
 	CoTask<bool> _LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
+	boost::filesystem::path MakeShaderSourcePath(const std::string& name) const ThreadSafe;
+	boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) const ThreadSafe;
 private:
 	ResourceManager& mResMng;
 	RenderSystem& mRenderSys;
+	std::string mShaderDir;
 	struct ProgramKey {
 		std::string name;
 		ShaderCompileDesc vertexSCD, pixelSCD;

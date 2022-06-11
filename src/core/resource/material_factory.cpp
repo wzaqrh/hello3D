@@ -12,10 +12,10 @@
 namespace mir {
 namespace res {
 
-MaterialFactory::MaterialFactory(ResourceManager& mResMng)
-	:mResMng(mResMng)
+MaterialFactory::MaterialFactory(ResourceManager& mResMng, const std::string& shaderDir)
+: mResMng(mResMng)
 {
-	mMatAssetMng = CreateInstance<mat_asset::MaterialAssetManager>();
+	mMatAssetMng = CreateInstance<mat_asset::MaterialAssetManager>(shaderDir);
 	mFrameGpuParameters = CreateInstance<GpuParameters>();
 }
 

@@ -1,0 +1,15 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<RenderType>Transparent</RenderType>
+	<Macros>
+		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
+		<ENABLE_TRANSMISSION>1</ENABLE_TRANSMISSION>
+	</Macros>
+	<Properties>
+		<MetallicFactor>0</MetallicFactor>
+		<AlbedoFactor>0.3,0.8,0.3,1</AlbedoFactor>
+		<RoughnessFactor>0</RoughnessFactor>
+		<EmissiveFactor>0,0,0,0</EmissiveFactor>
+		<TransmissionFactor>1</TransmissionFactor>
+	</Properties>
+</Material>

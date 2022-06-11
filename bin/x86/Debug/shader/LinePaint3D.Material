@@ -1,8 +1,0 @@
-<Material>
-	<UseShader>Paint3D</UseShader>
-	<Macros>
-		<LINE_MODE>1</LINE_MODE>
-	</Macros>
-	<Properties>
-	</Properties>
-</Material>

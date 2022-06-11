@@ -17,7 +17,7 @@ class MIR_CORE_API ResourceManager : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcoro::io_service> ioService);
+	ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcoro::io_service> ioService, const std::string& shaderDir);
 	~ResourceManager();
 	void Dispose() ThreadSafe;
 	CoTask<void> UpdateFrame(float dt) ThreadSafe;

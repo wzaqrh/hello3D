@@ -27,7 +27,7 @@ class ShaderNodeManager
 {
 	friend class MaterialNodeManager;
 public:
-	ShaderNodeManager() {}
+	ShaderNodeManager(const std::string& shaderDir) { mIncludeFiles.mShaderDir = shaderDir; }
 	bool GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe {
 		bool result = GetShaderVariantNode(loadParam, shaderNode);
 		BOOST_ASSERT(shaderNode[0].Program.Topo != kPrimTopologyUnkown);
@@ -49,6 +49,7 @@ public:
 		}
 		return false;
 	}
+	const std::string& GetShaderDir() const { return mIncludeFiles.mShaderDir; }
 private:
 	struct Visitor {
 		int GetMacroValue(const ProgramNode& progNode, const std::string& key) const {
@@ -129,7 +130,7 @@ private:
 			mDic.clear();
 		}
 		void GetFileDependecies(const std::string& shadername, MaterialProperty::SourceFilesDependency& cgincs) {
-			boost_filesystem::path filepath = boost_filesystem::system_complete("shader/" + shadername + ".hlsl");
+			boost_filesystem::path filepath = boost_filesystem::system_complete(mShaderDir + shadername + ".hlsl");
 			const auto& incs = GetFileIncludes(filepath);
 			for (const auto& it : incs)
 				cgincs.AddShader(it);
@@ -152,7 +153,7 @@ private:
 						std::smatch exp_match;
 						if (std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
 							std::string incname = exp_match[1].str();
-							boost_filesystem::path incpath = boost_filesystem::system_complete("shader/" + incname);
+							boost_filesystem::path incpath = boost_filesystem::system_complete(mShaderDir + incname);
 							const auto& incincs = GetFileIncludes(incpath);
 							for (const auto& it : incincs)
 								includes.insert(it);
@@ -166,6 +167,7 @@ private:
 			}
 			return find_iter->second;
 		}
+		std::string mShaderDir;
 		std::map<std::string, std::set<MaterialProperty::SingleFileDependency>> mDic;
 	};
 
@@ -221,9 +223,9 @@ private:
 		return find_iter->second;
 	}
 
-	static bool ParseMacrosFile(const std::string& macroName, ConstVisitorRef vis) {
+	bool ParseMacrosFile(const std::string& macroName, ConstVisitorRef vis) const {
 		bool result = false;
-		boost_filesystem::path path = boost_filesystem::system_complete("shader/" + macroName + ".cginc");
+		boost_filesystem::path path = boost_filesystem::system_complete(mIncludeFiles.mShaderDir + macroName + ".cginc");
 		if (boost::filesystem::is_regular_file(path)) {
 			std::ifstream fs;
 			fs.open(path.string(), std::ios::in);
@@ -247,7 +249,7 @@ private:
 		boost::split(strArr, str, boost::is_any_of(strAny), boost::token_compress_on);
 		if (strArr.back().empty()) strArr.pop_back();
 	}
-	static void ParseProgram(const boost_property_tree::ptree& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) {//no_override
+	void ParseProgram(const boost_property_tree::ptree& nodeProgram, ConstVisitorRef vis, ProgramNode& progNode) const {//no_override
 		if (!vis.CheckCondition(progNode, nodeProgram))
 			return;
 
@@ -909,10 +911,10 @@ private:
 		}
 	}
 	
-	static bool GetShaderAssetPath(const MaterialLoadParam& loadParam, std::string& filepath, time_t& fileTime) {
+	bool GetShaderAssetPath(const MaterialLoadParam& loadParam, std::string& filepath, time_t& fileTime) const {
 		boost_filesystem::path path(loadParam.ShaderVariantName);
 		if (path.has_extension()) path = boost_filesystem::system_complete(path); 
-		else path = boost_filesystem::system_complete("shader/" + loadParam.ShaderVariantName + ".Shader");
+		else path = boost_filesystem::system_complete(mIncludeFiles.mShaderDir + loadParam.ShaderVariantName + ".Shader");
 		
 		bool exits = boost_filesystem::exists(path);
 		filepath = path.string();
@@ -1046,10 +1048,10 @@ private:
 	}
 
 	void BuildMaterialNode(MaterialNode& materialNode) {}
-	static bool GetMaterialAssetPath(const MaterialLoadParam& loadParam, std::string& filepath, time_t& fileTime) {
+	bool GetMaterialAssetPath(const MaterialLoadParam& loadParam, std::string& filepath, time_t& fileTime) const {
 		boost_filesystem::path path(loadParam.ShaderVariantName);
 		if (path.has_extension()) path = boost_filesystem::system_complete(path);
-		else path = boost_filesystem::system_complete("shader/" + loadParam.ShaderVariantName + ".Material");
+		else path = boost_filesystem::system_complete(mShaderMng->GetShaderDir() + loadParam.ShaderVariantName + ".Material");
 		
 		bool exits = boost_filesystem::exists(path);
 		filepath = path.string();
@@ -1086,9 +1088,9 @@ private:
 };
 
 /********** MaterialAssetManager **********/
-MaterialAssetManager::MaterialAssetManager()
+MaterialAssetManager::MaterialAssetManager(const std::string& shaderDir)
 {
-	mShaderNodeMng = CreateInstance<ShaderNodeManager>();
+	mShaderNodeMng = CreateInstance<ShaderNodeManager>(shaderDir);
 	mMaterialNodeMng = CreateInstance<MaterialNodeManager>(mShaderNodeMng);
 }
 bool MaterialAssetManager::GetShaderNode(const MaterialLoadParam& loadParam, ShaderNode& shaderNode) ThreadSafe

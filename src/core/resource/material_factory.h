@@ -20,7 +20,7 @@ class MIR_CORE_API MaterialFactory : boost::noncopyable
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	MaterialFactory(ResourceManager& resMng);
+	MaterialFactory(ResourceManager& resMng, const std::string& shaderDir);
 	~MaterialFactory();
 
 	CoTask<bool> CreateShader(ShaderPtr& shader, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe;

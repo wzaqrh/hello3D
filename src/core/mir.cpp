@@ -19,9 +19,14 @@ Mir::Mir(Launch launchMode)
 {
 	mIoService = CreateInstance<cppcoro::io_service>(8);
 }
-CoTask<bool> Mir::Initialize(HWND hWnd) 
+CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir) 
 {
 	TIME_PROFILE("Mir.Initialize");
+	
+	mWorkDirectory = workDir;
+	if (mWorkDirectory.back() != '/') 
+		mWorkDirectory.push_back('/');
+
 #if 0
 	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<TRenderSystem9>());
 #else
@@ -31,9 +36,9 @@ CoTask<bool> Mir::Initialize(HWND hWnd)
 		mRenderSys->Dispose();
 		CoReturn false;
 	}
-
-	mResMng = CreateInstance<ResourceManager>(*mRenderSys, mIoService);
 	
+	mResMng = CreateInstance<ResourceManager>(*mRenderSys, mIoService, mWorkDirectory + "shader/");
+
 	mRenderPipe = CreateInstance<RenderPipeline>(*mRenderSys, *mResMng, mConfigure);
 	CoAwait mRenderPipe->Initialize(mLchMode, *mResMng);
 	

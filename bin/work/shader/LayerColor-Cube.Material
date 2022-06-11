@@ -1,0 +1,9 @@
+<Material>
+	<UseShader>LayerColor</UseShader>
+	<PROGRAM> 
+		<Macros>
+			<DEBUG_SHADOW_MAP>0</DEBUG_SHADOW_MAP>
+			<ENABLE_SHADOW_MAP>1</ENABLE_SHADOW_MAP>
+		</Macros>
+	</PROGRAM>
+</Material>

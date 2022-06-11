@@ -8,6 +8,12 @@ namespace test1 {
 
 namespace res {
 
+static std::string sMediaDirectory;
+
+void SetMediaDirectory(const std::string& dir) {
+	sMediaDirectory = dir;
+}
+
 std::vector<std::string> Sky(std::string name) {
 	std::vector<std::string> vec = {
 		"specular.dds",
@@ -16,13 +22,13 @@ std::vector<std::string> Sky(std::string name) {
 		"sheen.dds"
 	};
 	for (auto& img : vec) {
-		img = "model/env/" + name + "/" + img;
+		img = sMediaDirectory + "env/" + name + "/" + img;
 	}
 	return vec;
 }
 
 std::string Image(std::string name) {
-	return "model/" + name;
+	return sMediaDirectory + name;
 }
 void SetPos(mir::rend::SpritePtr sprite, Eigen::Vector3f pos, Eigen::Vector3f size, Eigen::Vector3f anchor) {
 	sprite->SetPosition(pos);
@@ -53,15 +59,11 @@ void model::Init(const std::string& name)
 {
 	mName = name;
 
-	mPath = "model/gltf/2.0/" + name + "/glTF/" + name + ".gltf";
-	FILE* fd = fopen(mPath.c_str(), "rb");
-	if (!IsFileExits(mPath)) {
-		std::string exts[] = { ".obj", ".gltf", ".fbx" };
-		for (auto ext : exts) {
-			mPath = "model/" + name + "/" + name + ext;
-			if (IsFileExits(mPath))
-				break;
-		}
+	std::string exts[] = { ".obj", ".gltf", ".fbx" };
+	for (auto ext : exts) {
+		mPath = sMediaDirectory + name + "/" + name + ext;
+		if (IsFileExits(mPath))
+			break;
 	}
 
 	float s = 1;

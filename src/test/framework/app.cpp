@@ -8,10 +8,11 @@
 #include "core/scene/light.h"
 #include "core/scene/scene_manager.h"
 
-#pragma comment(lib, "mir.lib")
 #ifdef _DEBUG
+#pragma comment(lib, "mird.lib")
 #pragma comment(lib, "cppcorod.lib")
 #else
+#pragma comment(lib, "mir.lib")
 #pragma comment(lib, "cppcoro.lib")
 #endif
 #pragma comment(lib, "winmm.lib")
@@ -47,12 +48,18 @@ void App::Create()
 }
 CoTask<bool> App::InitContext(HINSTANCE hInstance, HWND hWnd)
 {
+	boost::filesystem::path workPath = boost::filesystem::system_complete("../work/");
+	if (!boost::filesystem::is_directory(workPath)) CoReturn false;
+
+	test1::res::SetMediaDirectory(workPath.string() + "media/");
+
 	mHnd = hWnd;
-	if (! CoAwait mContext->Initialize(mHnd)) {
+	if (! CoAwait mContext->Initialize(mHnd, workPath.string())) {
 		mContext->Dispose();
 		CoReturn false;
 	}
 	SetMir(mContext);
+
 	mInput = new mir::input::D3DInput(hInstance, hWnd, mContext->WinSize().x(), mContext->WinSize().y());
 	mTimer = new mir::debug::Timer;
 	CoReturn true;

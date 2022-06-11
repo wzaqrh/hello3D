@@ -13,9 +13,10 @@
 namespace mir {
 namespace res {
 
-ProgramFactory::ProgramFactory(ResourceManager& resMng)
+ProgramFactory::ProgramFactory(ResourceManager& resMng, const std::string& shaderDir)
 : mResMng(resMng)
 , mRenderSys(resMng.RenderSys())
+, mShaderDir(shaderDir)
 {
 }
 ProgramFactory::~ProgramFactory()
@@ -23,18 +24,18 @@ ProgramFactory::~ProgramFactory()
 	DEBUG_LOG_MEMLEAK("progFac.destrcutor");
 }
 
-inline boost::filesystem::path MakeShaderSourcePath(const std::string& name)
+boost::filesystem::path ProgramFactory::MakeShaderSourcePath(const std::string& name) const
 {
-	std::string filepath = "shader/" + name + ".hlsl";
+	std::string filepath = mShaderDir + name + ".hlsl";
 	return boost::filesystem::system_complete(filepath);
 }
-static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform)
+boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) const
 {
 	std::string asmName = name;
 	asmName += "_" + desc.EntryPoint;
 	asmName += " " + desc.ShaderModel;
 
-	boost::filesystem::create_directories("shader/asm/" + platform);
+	boost::filesystem::create_directories(mShaderDir + "asm/" + platform);
 #if 0
 	for (const auto& macro : desc.Macros)
 		asmName += " (" + macro.Name + "=" + macro.Definition + ")";
@@ -50,7 +51,7 @@ static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 		loopCount++;
 		size_t macrosHash = std::hash<std::string>()(macrosStr + boost::lexical_cast<std::string>(loopCount));
 		macrosHashStr = boost::lexical_cast<std::string>(macrosHash);
-		std::string macrosHashFilename = ("shader/asm/" + platform + "/") + asmName + " " + macrosHashStr + ".txt";
+		std::string macrosHashFilename = (mShaderDir + "asm/" + platform + "/") + asmName + " " + macrosHashStr + ".txt";
 		FILE* fhash = fopen(macrosHashFilename.c_str(), "rb");
 		if (fhash) {
 			std::string rdMacrosStr;
@@ -82,7 +83,7 @@ static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 
 	time_t cgincs_time = 0;
 	{
-		boost::filesystem::directory_iterator diter("shader/"), dend;
+		boost::filesystem::directory_iterator diter(mShaderDir), dend;
 		for (; diter != dend; ++diter) {
 			if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".cginc") {
 				time_t htime = boost::filesystem::last_write_time((*diter).path());
@@ -100,7 +101,7 @@ static boost::filesystem::path MakeShaderAsmPath(const std::string& name, const 
 	asmName += fmt.str();
 #endif
 	asmName += ".cso";
-	std::string filepath = "shader/asm/" + platform + "/" + asmName;
+	std::string filepath = mShaderDir + "asm/" + platform + "/" + asmName;
 	return boost::filesystem::system_complete(filepath);
 }
 CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe

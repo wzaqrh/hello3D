@@ -17,6 +17,8 @@ namespace test1 {
 
 namespace res {
 
+void SetMediaDirectory(const std::string& dir);
+
 std::vector<std::string> Sky(std::string name = "footprint_court");
 
 std::string Image(std::string name);

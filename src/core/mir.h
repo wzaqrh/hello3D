@@ -14,7 +14,7 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Mir(Launch launchMode);
 	~Mir();
-	CoTask<bool> Initialize(HWND hWnd);
+	CoTask<bool> Initialize(HWND hWnd, std::string workDir);
 	void Dispose();
 
 	CoTask<void> Update(float dt);
@@ -40,6 +40,7 @@ private:
 	Configure mConfigure;
 	RenderSystemPtr mRenderSys;
 	std::shared_ptr<cppcoro::io_service> mIoService;
+	std::string mWorkDirectory;
 	ResourceManagerPtr mResMng;
 	RenderPipelinePtr mRenderPipe;
 	RenderableFactoryPtr mRenderableFac;

@@ -1,0 +1,24 @@
+<Material>
+	<UseShader>Model</UseShader>
+	<Macros>
+		<ENABLE_EMISSIVE_MAP>0</ENABLE_EMISSIVE_MAP>
+		<EMISSIVE_MAP_SRGB>1</EMISSIVE_MAP_SRGB>
+		
+		<ENABLE_ALBEDO_MAP>1</ENABLE_ALBEDO_MAP>
+		<ALBEDO_MAP_SRGB>1</ALBEDO_MAP_SRGB>
+		
+		<ENABLE_NORMAL_MAP>1</ENABLE_NORMAL_MAP>
+		<HAS_ATTRIBUTE_TANGENT>1</HAS_ATTRIBUTE_TANGENT>
+		
+		<ENABLE_AO_MAP>0</ENABLE_AO_MAP>
+		<ENABLE_AO_ROUGHNESS_METALLIC_MAP>0</ENABLE_AO_ROUGHNESS_METALLIC_MAP>
+		
+		<FLIP_UV0_Y>0</FLIP_UV0_Y>
+	</Macros>
+	<Properties>
+		<txAlbedo>textures/DefaultMaterial_baseColor.png</txAlbedo>
+		<txNormal>textures/DefaultMaterial_normal.png</txNormal>
+		<txAmbientOcclusion>textures/DefaultMaterial_metallicRoughness.png</txAmbientOcclusion>
+		<EmissiveFactor>0,0,0,0</EmissiveFactor>
+	</Properties>
+</Material>
