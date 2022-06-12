@@ -28,7 +28,9 @@ public:
 private:
 	CoTask<bool> _LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
 	boost::filesystem::path MakeShaderSourcePath(const std::string& name) const ThreadSafe;
-	boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) const ThreadSafe;
+	boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform, time_t& time, std::string& serializeStr) const ThreadSafe;
+	bool ReadShaderAsm(const boost::filesystem::path& asmPath, std::vector<char>& bin, time_t time, const std::string& serializeStr) const ThreadSafe;
+	void WriteShaderAsm(const boost::filesystem::path& asmPath, const char* pByte, size_t size, time_t time, const std::string& serializeStr) const ThreadSafe;
 private:
 	ResourceManager& mResMng;
 	RenderSystem& mRenderSys;

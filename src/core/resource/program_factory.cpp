@@ -6,9 +6,12 @@
 #include "core/base/macros.h"
 #include "core/base/data.h"
 #include "core/base/input.h"
+#include "core/base/md5.h"
 #include "core/rendersys/blob.h"
 #include "core/resource/program_factory.h"
 #include "core/resource/resource_manager.h"
+
+//#define MIR_SHADER_CACHE
 
 namespace mir {
 namespace res {
@@ -24,62 +27,56 @@ ProgramFactory::~ProgramFactory()
 	DEBUG_LOG_MEMLEAK("progFac.destrcutor");
 }
 
+struct ShaderCompileDescHelper {
+public:
+	ShaderCompileDescHelper(const ShaderCompileDesc& scd, const std::string& src): mSCD(scd), mSource(src) {}
+	const std::string& GetSerializeString() {
+		if (mSerializeString.empty()) {
+			std::string& ss = mSerializeString;
+			ss = "src:" + mSource;
+			ss += ";entry:" + mSCD.EntryPoint;
+			ss += ";sm:" + mSCD.ShaderModel;
+			for (const auto& m : mSCD.Macros) {
+				ss += ";" + m.Name + ":" + m.Definition;
+			}
+		}
+		return mSerializeString;
+	}
+	void GetMd5(uint8_t digest[16]) {
+		const std::string& ss = GetSerializeString();
+		md5((const uint8_t*)ss.c_str(), ss.length(), digest);
+	}
+	std::string GetMd5String() {
+		uint32_t digest[4];
+		GetMd5((uint8_t*)digest);
+		return (boost::format("%x%x%x%x") %digest[0] %digest[1] %digest[2] %digest[3]).str();
+	}
+public:
+	std::string mSerializeString;
+	const ShaderCompileDesc& mSCD;
+	const std::string& mSource;
+};
+
 boost::filesystem::path ProgramFactory::MakeShaderSourcePath(const std::string& name) const
 {
 	std::string filepath = mShaderDir + name + ".hlsl";
 	return boost::filesystem::system_complete(filepath);
 }
-boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform) const
+boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform, time_t& time, std::string& serializeStr) const
 {
-	std::string asmName = name;
-	asmName += "_" + desc.EntryPoint;
-	asmName += " " + desc.ShaderModel;
+	std::string asmDir = mShaderDir + "asm_" + platform + "/";
+	boost::filesystem::create_directories(asmDir);
 
-	boost::filesystem::create_directories(mShaderDir + "asm/" + platform);
-#if 0
-	for (const auto& macro : desc.Macros)
-		asmName += " (" + macro.Name + "=" + macro.Definition + ")";
-#else
-	std::string macrosStr = "";
-	for (const auto& macro : desc.Macros)
-		macrosStr += " (" + macro.Name + "=" + macro.Definition + ")";
+	ShaderCompileDescHelper scdHelper(desc, name);
+	std::string md5Str = scdHelper.GetMd5String();
+	std::string asmFilePath = asmDir + md5Str + ".ntasm";
 
-	std::string macrosHashStr;
-	bool hashMatch = false;
-	int loopCount = 0;
-	do {
-		loopCount++;
-		size_t macrosHash = std::hash<std::string>()(macrosStr + boost::lexical_cast<std::string>(loopCount));
-		macrosHashStr = boost::lexical_cast<std::string>(macrosHash);
-		std::string macrosHashFilename = (mShaderDir + "asm/" + platform + "/") + asmName + " " + macrosHashStr + ".txt";
-		FILE* fhash = fopen(macrosHashFilename.c_str(), "rb");
-		if (fhash) {
-			std::string rdMacrosStr;
-			char buf[2048];
-			while (int rd = fread(buf, 1, 2047, fhash)) {
-				buf[rd] = 0;
-				rdMacrosStr += buf;
-			}
-			fclose(fhash);
+	serializeStr = scdHelper.GetSerializeString();
 
-			if (rdMacrosStr == macrosStr) {
-				hashMatch = true;
-			}
-		}
-		else {
-			fhash = fopen(macrosHashFilename.c_str(), "wb");
-			fwrite(macrosStr.c_str(), 1, macrosStr.size(), fhash);
-			fclose(fhash);
-
-			hashMatch = true;
-		}
-	} while (!hashMatch);
-	asmName += " " + macrosHashStr;
-#endif
-
-#if defined MIR_RESOURCE_DEBUG
+	time = 0;
+#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
 	auto sourcePath = MakeShaderSourcePath(name);
-	time_t time = boost::filesystem::last_write_time(sourcePath);
+	time = boost::filesystem::last_write_time(sourcePath);
 
 	time_t cgincs_time = 0;
 	{
@@ -92,18 +89,51 @@ boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& nam
 		}
 	}
 	time = std::max(time, cgincs_time);
-
-	tm lwt;
-	gmtime_s(&lwt, &time);
-	boost::format fmt(" [%d-%d-%d %d.%d.%d]");
-	fmt% lwt.tm_year% lwt.tm_mon% lwt.tm_mday;
-	fmt% lwt.tm_hour% lwt.tm_min% lwt.tm_sec;
-	asmName += fmt.str();
 #endif
-	asmName += ".cso";
-	std::string filepath = mShaderDir + "asm/" + platform + "/" + asmName;
-	return boost::filesystem::system_complete(filepath);
+
+	return boost::filesystem::system_complete(asmFilePath);
 }
+#define NTASM_NAME_LEN (1024-64)
+#define NTASM_TIME_SIZE (64)
+void ProgramFactory::WriteShaderAsm(const boost::filesystem::path& asmPath, const char* pByte, size_t size, time_t time, const std::string& serializeStr) const ThreadSafe
+{
+	std::vector<char> bin(pByte, pByte + size);
+	
+	size_t position = bin.size();
+	bin.resize(position + NTASM_NAME_LEN);
+	BOOST_ASSERT(serializeStr.length() < NTASM_NAME_LEN);
+	strcpy(&bin[position], serializeStr.c_str());
+
+	position = bin.size();
+	bin.resize(position + NTASM_TIME_SIZE);
+	std::string timeStr = boost::lexical_cast<std::string>(time);
+	BOOST_ASSERT(timeStr.length() < NTASM_TIME_SIZE);
+	strcpy(&bin[position], timeStr.c_str());
+
+	input::WriteFile(asmPath.string().c_str(), "wb", &bin[0], bin.size());
+}
+bool ProgramFactory::ReadShaderAsm(const boost::filesystem::path& asmPath, std::vector<char>& bin, time_t time, const std::string& serializeStr) const
+{
+	bin.clear();
+	if (boost::filesystem::exists(asmPath)) {
+		bin = input::ReadFile(asmPath.string().c_str(), "rb");
+		if (bin.size() >= NTASM_NAME_LEN + NTASM_TIME_SIZE) {
+			size_t position = bin.size() - NTASM_NAME_LEN - NTASM_TIME_SIZE;
+			std::string fileSeriStr(bin.begin() + position, bin.begin() + position + NTASM_NAME_LEN);
+			if (strcmp(fileSeriStr.c_str(), serializeStr.c_str()) == 0) {
+				position += NTASM_NAME_LEN;
+				std::string fileTimeStr(bin.begin() + position, bin.begin() + position + NTASM_TIME_SIZE);
+				time_t fileTime = std::stoi(fileTimeStr);
+				if (fileTime >= time) {
+					bin.resize(bin.size() - NTASM_NAME_LEN - NTASM_TIME_SIZE);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
 {
 	program->SetLoading();
@@ -120,34 +150,42 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 
 	IBlobDataPtr blobVS, blobPS;
 	if (!vertexSCD.EntryPoint.empty()) {
-		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD, mRenderSys.GetPlatform());
-		if (boost::filesystem::exists(vsAsmPath)) {
-			blobVS = CreateInstance<BlobDataBytes>(input::ReadFile(vsAsmPath.string().c_str(), "rb"));
+		time_t time;
+		std::string serializeStr;
+		std::vector<char> bin;
+		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD, mRenderSys.GetPlatform(), time, serializeStr);
+		if (ReadShaderAsm(vsAsmPath, bin, time, serializeStr)) {
+			blobVS = CreateInstance<BlobDataBytes>(std::move(bin));
 		}
 		else {
 			vertexSCD.SourcePath = MakeShaderSourcePath(name).string();
-			std::vector<char> bytes = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
-			if (!bytes.empty()) {
-				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bytes));
-			#if defined MIR_RESOURCE_DEBUG
-				input::WriteFile(vsAsmPath.string().c_str(), "wb", blobVS->GetBytes(), blobVS->GetSize());
+			bin = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
+			BOOST_ASSERT(!bin.empty());
+			if (!bin.empty()) {
+				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bin));
+			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
+				WriteShaderAsm(vsAsmPath, blobVS->GetBytes(), blobVS->GetSize(), time, serializeStr);
 			#endif
 			}
 		}
 	}
 
 	if (!pixelSCD.EntryPoint.empty()) {
-		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD, mRenderSys.GetPlatform());
-		if (boost::filesystem::exists(psAsmPath)) {
-			blobPS = CreateInstance<BlobDataBytes>(input::ReadFile(psAsmPath.string().c_str(), "rb"));
+		time_t time;
+		std::string serializeStr;
+		std::vector<char> bin;
+		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD, mRenderSys.GetPlatform(), time, serializeStr);
+		if (ReadShaderAsm(psAsmPath, bin, time, serializeStr)) {
+			blobPS = CreateInstance<BlobDataBytes>(std::move(bin));
 		}
 		else {
 			pixelSCD.SourcePath = MakeShaderSourcePath(name).string();
-			std::vector<char> bytes = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
-			if (!bytes.empty()) {
-				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bytes));
-			#if defined MIR_RESOURCE_DEBUG
-				BOOST_ASSERT(input::WriteFile(psAsmPath.string().c_str(), "wb", blobPS->GetBytes(), blobPS->GetSize()));
+			bin = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
+			BOOST_ASSERT(!bin.empty());
+			if (!bin.empty()) {
+				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bin));
+			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
+				WriteShaderAsm(psAsmPath, blobPS->GetBytes(), blobPS->GetSize(), time, serializeStr);
 			#endif
 			}
 		}

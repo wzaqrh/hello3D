@@ -31,6 +31,7 @@
     <ClInclude Include="..\src\core\base\macros.h" />
     <ClInclude Include="..\src\core\base\material_load_param.h" />
     <ClInclude Include="..\src\core\base\math.h" />
+    <ClInclude Include="..\src\core\base\md5.h" />
     <ClInclude Include="..\src\core\base\predeclare.h" />
     <ClInclude Include="..\src\core\base\stl.h" />
     <ClInclude Include="..\src\core\base\thread.h" />
@@ -53,9 +54,13 @@
     <ClInclude Include="..\src\core\renderable\font.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\src\core\renderable\label.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\src\core\renderable\mesh.h" />
@@ -131,6 +136,7 @@
     <ClCompile Include="..\src\core\base\d3d.cpp" />
     <ClCompile Include="..\src\core\base\debug.cpp" />
     <ClCompile Include="..\src\core\base\input.cpp" />
+    <ClCompile Include="..\src\core\base\md5.c" />
     <ClCompile Include="..\src\core\dllmain.cpp" />
     <ClCompile Include="..\src\core\gui\gui_canvas.cpp" />
     <ClCompile Include="..\src\core\gui\gui_manager.cpp" />
@@ -142,9 +148,13 @@
     <ClCompile Include="..\src\core\renderable\font.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\label.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\mesh.cpp" />
@@ -186,76 +196,76 @@
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\x86\Debug\model\armadillo\defaultMaterial.Material" />
-    <None Include="..\bin\x86\Debug\model\buddha\material_0.Material" />
-    <None Include="..\bin\x86\Debug\model\dragon\DefaultMaterial.Material" />
-    <None Include="..\bin\x86\Debug\model\floor\defaultobject.Material" />
-    <None Include="..\bin\x86\Debug\model\Spaceship\RetopoGroup2.Material" />
-    <None Include="..\bin\x86\Debug\model\ToyCar\Fabric.Material" />
-    <None Include="..\bin\x86\Debug\model\ToyCar\Glass.Material" />
-    <None Include="..\bin\x86\Debug\model\ToyCar\ToyCar.Material" />
-    <None Include="..\bin\x86\Debug\shader\BilateralBlur.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Bloom.Shader" />
-    <None Include="..\bin\x86\Debug\shader\BoxBlur.Shader" />
-    <None Include="..\bin\x86\Debug\shader\BRDFCommonFunction.cginc" />
-    <None Include="..\bin\x86\Debug\shader\CommonConstants.cginc" />
-    <None Include="..\bin\x86\Debug\shader\CommonFunction.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Deferred.Shader" />
-    <None Include="..\bin\x86\Debug\shader\GltfLighting.cginc" />
-    <None Include="..\bin\x86\Debug\shader\HLSLSupport.cginc" />
-    <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.Shader" />
-    <None Include="..\bin\x86\Debug\shader\IBL.cginc" />
-    <None Include="..\bin\x86\Debug\shader\ImGui.Shader" />
-    <None Include="..\bin\x86\Debug\shader\LayerColor.Shader" />
-    <None Include="..\bin\x86\Debug\shader\Lighting.cginc" />
-    <None Include="..\bin\x86\Debug\shader\LightingInput.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Macros.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Model.Shader" />
-    <None Include="..\bin\x86\Debug\shader\PercentageCloserSoftShadow.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Poisson.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Shadow.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Skeleton.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Skeleton.Shader" />
-    <None Include="..\bin\x86\Debug\shader\Skybox-Deprecate.Shader" />
-    <None Include="..\bin\x86\Debug\shader\Skybox.Shader" />
-    <None Include="..\bin\x86\Debug\shader\SphericalHarmonics.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Sprite.Shader" />
-    <None Include="..\bin\x86\Debug\shader\Standard.cginc" />
-    <None Include="..\bin\x86\Debug\shader\Standard.Shader" />
-    <None Include="..\bin\x86\Debug\shader\ToneMapping.cginc" />
-    <None Include="..\bin\x86\Debug\shader\UnityLighting.cginc" />
-    <None Include="..\bin\x86\Debug\shader\VarianceShadow.cginc" />
-    <None Include="..\bin\x86\Debug\shader\WhiteNoise.cginc" />
+    <None Include="..\bin\work\media\armadillo\defaultMaterial.Material" />
+    <None Include="..\bin\work\media\buddha\material_0.Material" />
+    <None Include="..\bin\work\media\dragon\DefaultMaterial.Material" />
+    <None Include="..\bin\work\media\floor\defaultobject.Material" />
+    <None Include="..\bin\work\media\Spaceship\RetopoGroup2.Material" />
+    <None Include="..\bin\work\media\ToyCar\Fabric.Material" />
+    <None Include="..\bin\work\media\ToyCar\Glass.Material" />
+    <None Include="..\bin\work\media\ToyCar\ToyCar.Material" />
+    <None Include="..\bin\work\shader\BilateralBlur.cginc" />
+    <None Include="..\bin\work\shader\Bloom.Shader" />
+    <None Include="..\bin\work\shader\BoxBlur.Shader" />
+    <None Include="..\bin\work\shader\BRDFCommonFunction.cginc" />
+    <None Include="..\bin\work\shader\CommonConstants.cginc" />
+    <None Include="..\bin\work\shader\CommonFunction.cginc" />
+    <None Include="..\bin\work\shader\Deferred.Shader" />
+    <None Include="..\bin\work\shader\GltfLighting.cginc" />
+    <None Include="..\bin\work\shader\HLSLSupport.cginc" />
+    <None Include="..\bin\work\shader\HorizonBasedAO.Shader" />
+    <None Include="..\bin\work\shader\IBL.cginc" />
+    <None Include="..\bin\work\shader\ImGui.Shader" />
+    <None Include="..\bin\work\shader\LayerColor.Shader" />
+    <None Include="..\bin\work\shader\Lighting.cginc" />
+    <None Include="..\bin\work\shader\LightingInput.cginc" />
+    <None Include="..\bin\work\shader\Macros.cginc" />
+    <None Include="..\bin\work\shader\Model.Shader" />
+    <None Include="..\bin\work\shader\PercentageCloserSoftShadow.cginc" />
+    <None Include="..\bin\work\shader\Poisson.cginc" />
+    <None Include="..\bin\work\shader\Shadow.cginc" />
+    <None Include="..\bin\work\shader\Skeleton.cginc" />
+    <None Include="..\bin\work\shader\Skeleton.Shader" />
+    <None Include="..\bin\work\shader\Skybox-Deprecate.Shader" />
+    <None Include="..\bin\work\shader\Skybox.Shader" />
+    <None Include="..\bin\work\shader\SphericalHarmonics.cginc" />
+    <None Include="..\bin\work\shader\Sprite.Shader" />
+    <None Include="..\bin\work\shader\Standard.cginc" />
+    <None Include="..\bin\work\shader\Standard.Shader" />
+    <None Include="..\bin\work\shader\ToneMapping.cginc" />
+    <None Include="..\bin\work\shader\UnityLighting.cginc" />
+    <None Include="..\bin\work\shader\VarianceShadow.cginc" />
+    <None Include="..\bin\work\shader\WhiteNoise.cginc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\LayerColor.hlsl">
+    <None Include="..\bin\work\shader\LayerColor.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\bin\x86\Debug\shader\Model.hlsl">
+    <None Include="..\bin\work\shader\Model.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\bin\x86\Debug\shader\Skybox.hlsl">
+    <None Include="..\bin\work\shader\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\bin\x86\Debug\shader\Sprite.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\BoxBlur.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\bin\x86\Debug\shader\HorizonBasedAO.hlsl">
+    <None Include="..\bin\work\shader\Sprite.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\Bloom.hlsl">
+    <None Include="..\bin\work\shader\BoxBlur.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\bin\work\shader\HorizonBasedAO.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\x86\Debug\shader\ImGui.hlsl">
+    <None Include="..\bin\work\shader\Bloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\work\shader\ImGui.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -141,15 +141,35 @@ float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 fcolor, flo
  #endif
     
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_DIFFUSE
-	fcolor += kd * diffuse;
+    #if USE_PUNCTUAL
+	    fcolor += kd * diffuse;
+    #else
+        fcolor = 0.0;
+    #endif
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR
-	fcolor += ks * specular;
+	#if USE_PUNCTUAL
+        fcolor += ks * specular;
+    #else
+        fcolor = 0.0;
+    #endif
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_D
-	fcolor += D;
+    #if USE_PUNCTUAL
+	    fcolor += D;
+    #else
+        fcolor = 0.0;
+    #endif
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_V
-	fcolor += V;
+    #if USE_PUNCTUAL
+	    fcolor += V;
+    #else
+        fcolor = 0.0;
+    #endif        
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_BRDF_SPECULAR_F
-	fcolor += F;
+    #if USE_PUNCTUAL
+	    fcolor += F;
+    #else
+        fcolor = 0.0;
+    #endif       
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_METTALIC_ROUGHNESS 
 	fcolor += diffuse_color + specular_color;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_TRANSMISSION_VOLUME

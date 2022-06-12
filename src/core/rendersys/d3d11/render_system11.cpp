@@ -340,6 +340,8 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(MIR_D3D11_DEBUG)
 	shaderFlags |= D3DCOMPILE_DEBUG;
+#else
+	shaderFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL2;
 #endif
 
 	ComPtr<ID3DBlob> blobError = nullptr;
