@@ -5,6 +5,7 @@
 #include "UnityLighting.cginc"
 #include "GltfLighting.cginc"
 #include "LightingInput.cginc"
+#include "Shadow.cginc"
 
 inline float CalcLightAtten(float lengthSq, float3 toLight, bool spotLight) {
 	float atten = 1.0 / (1.0 + lengthSq * unity_LightAtten.z);
@@ -27,15 +28,31 @@ inline float3 BlinnPhongLightAdditive(LightingInput i, float3 l, float3 n, float
 	float nl = max(0, dot(n, l));
 	float nh = max(0, dot(n, h));
 	//diffuse
-    float3 color = LightColor.rgb * i.albedo.rgb * (1.0 - i.metallic) * nl;
+    float3 color = i.light_color.rgb * i.albedo.rgb * (1.0 - i.metallic) * nl;
 	//specular
-	color += LightColor.rgb * i.metallic * pow(nh, (1.0 - i.percertual_roughness) * 128.0);
+	color += i.light_color.rgb * i.metallic * pow(nh, (1.0 - i.percertual_roughness) * 128.0);
 	return color;
 }
 
 inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v, bool isAdditive) 
 {
 	float3 fcolor = 0.0;
+	
+#if ENABLE_SHADOW_MAP
+	if (!isAdditive && any(i.light_color)) {
+		float4 lightViewPos = mul(LightView, float4(i.world_pos, 1.0));
+		float4 lightNdc = mul(LightProjection, lightViewPos);
+		#if ENABLE_SHADOW_MAP_BIAS
+			float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
+			posLight.z -= bias * posLight.w;
+		#endif
+		i.light_color.rgb *= CalcShadowFactor(lightNdc.xyz / lightNdc.w, lightViewPos.xyz);
+	}
+#endif
+#if DEBUG_CHANNEL == DEBUG_CHANNEL_SHADOW
+	return i.light_color;
+#endif
+	
 #if LIGHTING_MODE == LIGHTING_BLINN_PHONG
 	if (!isAdditive) fcolor += BlinnPhongLightBase();
 	fcolor += BlinnPhongLightAdditive(i, l, n, v);
@@ -50,25 +67,6 @@ inline float4 Lighting(LightingInput i, float3 l, float3 n, float3 v, bool isAdd
 
 #if TONEMAP_MODE && !DEBUG_CHANNEL
 	fcolor = toneMap(fcolor, CameraPositionExposure.w);
-#endif
-
-#if 0
-	#if ENABLE_SHADOW_MAP
-		//float depth = length(LightPosition.xyz - input.WorldPos.xyz * LightPosition.w);
-		//finalColor.rgb *= CalcShadowFactor(input.PosLight.xyz / input.PosLight.w, input.ViewPosLight.xyz);
-	#endif
-
-	#if ENABLE_SHADOW_MAP
-		if (!isAdditive && any(LightColor)) {
-			float4 viewPosLight = mul(LightView, worldPosition);
-			float4 posLight = mul(LightProjection, viewPosLight);
-			#if ENABLE_SHADOW_MAP_BIAS
-				float bias = max(0.001 * (1.0 - dot(normal.xyz, toLight)), 1e-5);
-				posLight.z -= bias * posLight.w;
-			#endif
-			output.Color.rgb *= CalcShadowFactor(posLight.xyz / posLight.w, viewPosLight.xyz);
-		}
-	#endif
 #endif
 	
 #if DEBUG_CHANNEL == DEBUG_CHANNEL_OCCLUSION

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\test\framework\app.cpp" />
     <ClCompile Include="..\src\test\framework\create_app.cpp" />
+    <ClCompile Include="..\src\test\framework\gui.cpp" />
     <ClCompile Include="..\src\test\framework\test_case.cpp" />
     <ClCompile Include="..\src\test\framework\window.cpp" />
     <ClCompile Include="..\src\test\main.cpp" />
@@ -37,6 +38,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\test\framework\app.h" />
     <ClInclude Include="..\src\test\framework\create_app.h" />
+    <ClInclude Include="..\src\test\framework\gui.h" />
     <ClInclude Include="..\src\test\framework\test_case.h" />
     <ClInclude Include="..\src\test\framework\window.h" />
   </ItemGroup>
@@ -95,28 +97,30 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(IncludePath);$(SolutionDir)src;$(SolutionDir)include</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\test\</IntDir>
+    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <LibraryPath>$(LibraryPath);$(SolutionDir)lib\$(Platform)</LibraryPath>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)src;$(SolutionDir)include</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\test\</IntDir>
+    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <LibraryPath>$(LibraryPath);$(SolutionDir)lib\$(Platform)</LibraryPath>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(IncludePath);$(SolutionDir)src;$(SolutionDir)include</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\test\</IntDir>
+    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <LibraryPath>$(LibraryPath);$(SolutionDir)lib\$(Platform)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)src;$(SolutionDir)include</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\test\</IntDir>
+    <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <LibraryPath>$(LibraryPath);$(SolutionDir)lib\$(Platform)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -55,6 +55,9 @@
     <ClCompile Include="..\src\test\framework\window.cpp">
       <Filter>Source Files\framework</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\test\framework\gui.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\test\framework\app.h">
@@ -67,6 +70,9 @@
       <Filter>Source Files\framework</Filter>
     </ClInclude>
     <ClInclude Include="..\src\test\framework\window.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\test\framework\gui.h">
       <Filter>Source Files\framework</Filter>
     </ClInclude>
   </ItemGroup>

@@ -200,7 +200,6 @@
     <None Include="..\bin\work\media\buddha\material_0.Material" />
     <None Include="..\bin\work\media\dragon\DefaultMaterial.Material" />
     <None Include="..\bin\work\media\floor\defaultobject.Material" />
-    <None Include="..\bin\work\media\Spaceship\RetopoGroup2.Material" />
     <None Include="..\bin\work\media\ToyCar\Fabric.Material" />
     <None Include="..\bin\work\media\ToyCar\Glass.Material" />
     <None Include="..\bin\work\media\ToyCar\ToyCar.Material" />
@@ -219,7 +218,9 @@
     <None Include="..\bin\work\shader\LayerColor.Shader" />
     <None Include="..\bin\work\shader\Lighting.cginc" />
     <None Include="..\bin\work\shader\LightingInput.cginc" />
-    <None Include="..\bin\work\shader\Macros.cginc" />
+    <Media Include="..\bin\work\shader\Macros.cginc">
+      <FileType>Document</FileType>
+    </Media>
     <None Include="..\bin\work\shader\Model.Shader" />
     <None Include="..\bin\work\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\work\shader\Poisson.cginc" />

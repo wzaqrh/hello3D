@@ -43,6 +43,7 @@
 		</Uniform>
 		
 		<Texture Name="tGrpShadowMap">
+			<Element Slot="10" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap">_ShadowMapTex</Element>
 			<Element Slot="11" CompFunc="Less" AddressU="Border" AddressV="Border" AddressW="Wrap" >_ShadowMap</Element>
 			<Element Slot="11" Filter="MinMagMipLinear" AddressU="Clamp" AddressV="Clamp" AddressW="Wrap" Condition="SHADOW_MODE==5">_ShadowMap</Element>
 		</Texture>

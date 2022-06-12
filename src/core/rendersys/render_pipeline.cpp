@@ -220,10 +220,10 @@ public:
 		auto blend_state = mStatesBlock.LockBlend();
 
 		auto shadow_clr_color = IF_AND_OR(mCfg.IsShadowVSM(), Eigen::Vector4f(1e4, 1e8, 0, 0), Eigen::Vector4f::Zero());
-		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, mPerFrame.GetZFar(), 0);
+		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, 1.0, 0);
 		fb_shadow_map.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-		depth_state(DepthState::Make(mPerFrame.GetZFunc(kCompareLess), kDepthWriteMaskAll));
+		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 		blend_state(BlendState::MakeDisable());
 
 		RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER, mCastShadowOps);

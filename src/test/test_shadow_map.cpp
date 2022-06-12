@@ -1,6 +1,8 @@
 #include "test/framework/test_case.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/cube.h"
+#include "core/mir_config_macros.h"
+#include "core/rendersys/render_pipeline.h"
 
 using namespace mir;
 using namespace mir::rend;
@@ -11,31 +13,31 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
+	void CleanUp() override {
+		mGuiDebugChannel.Dispose();
+	}
 private:
-	AssimpModelPtr mModel;
+	GuiDebugWindow mGuiDebugChannel;
 };
-
-inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
-	MaterialLoadParamBuilder mlpb(MAT_MODEL);
-	mlpb["PBR_MODE"] = 2;
-	return mlpb;
-}
 
 CoTask<bool> TestShadowMap::OnInitScene()
 {
 	//SetPPU(1);
-	TIME_PROFILE("testSSAO.OnInitScene");
+	TIME_PROFILE("TestShadowMap.OnInitScene");
 
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(45.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
-	bool isShadowVSM = mContext->Config().IsShadowVSM();
+	mGuiDebugChannel.Init(mContext);
 
+	AssimpModelPtr mModel;
 	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0:
 	case 1: {
+		bool isShadowVSM = mContext->Config().IsShadowVSM();
+
 		if (mCaseIndex == 1) {
 			camera->SetLookAt(Eigen::Vector3f(0, 5, -5), Eigen::Vector3f::Zero());
 
@@ -54,14 +56,12 @@ CoTask<bool> TestShadowMap::OnInitScene()
 		}
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
-		skyMat["CubeMapIsRightHandness"] = TRUE;
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), skyMat));
 
-		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
-		modelMat["CubeMapIsRightHandness"] = TRUE;
-
+		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 	#if 1
 		auto floor = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mGuiDebugChannel.AddModel(floor);
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
 
@@ -74,6 +74,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 
 	#if 1
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mGuiDebugChannel.AddModel(mModel);
 		if (mCaseIndex == 1) {
 			mTransform = CoAwait model.Init("buddha", mModel);
 			mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
@@ -86,12 +87,12 @@ CoTask<bool> TestShadowMap::OnInitScene()
 			else mTransform->SetScale(Eigen::Vector3f(0.005, 0.005, 0.005));
 		}
 	#endif
-
-		camera->SetRenderingPath((mir::RenderingPath)mCaseSecondIndex);
 	}break;
 	default:
 		break;
 	}
+
+	mGuiDebugChannel.AddAllCmds();
 	CoReturn true;
 }
 

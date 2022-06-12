@@ -10,6 +10,7 @@
 
 struct LightingInput
 {
+	float4 light_color;
 	float3 albedo; 
 	float ao;
 	float3 emissive;

@@ -236,6 +236,7 @@ PixelInput VS(vbSurface surf, vbWeightedSkin skin)
     return output;
 }
 
+#if LIGHTMODE == LIGHTMODE_FORWARD_BASE || LIGHTMODE == LIGHTMODE_FORWARD_ADD
 float4 PS_(PixelInput input, bool additive)
 {
     SETUP_NORMAL(normal, input.Tex, input.WorldPos, normalize(input.Tangent.xyz), normalize(input.Bitangent.xyz), normalize(input.Normal.xyz));
@@ -243,6 +244,7 @@ float4 PS_(PixelInput input, bool additive)
 	float3 toEye = normalize(input.ToEye);
 	
 	LightingInput li;
+	li.light_color = LightColor;
 	li.albedo = input.Color.rgb * GetAlbedo(input.Tex);
 	float4 armt = GetAoRoughnessMetallicTransmission(input.Tex);
 	li.ao = armt.x;
@@ -286,10 +288,7 @@ float4 PS_(PixelInput input, bool additive)
 		li.bitangent_basis = MakeDummyColor(toEye);
 	#endif
 	li.window_pos = input.Pos.xyz;
-#endif	
-	
-	//return float4(li.clearcoat_color_roughness.rgb, 1.0);
-
+#endif
 	return Lighting(li, toLight, normal, toEye, additive);	
 }
 float4 PS(PixelInput input) : SV_Target
@@ -300,6 +299,7 @@ float4 PSAdd(PixelInput input) : SV_Target
 {	
 	return PS_(input, true);
 }
+#endif
 
 /************ ShadowCaster ************/
 struct PSShadowCasterInput 
@@ -484,6 +484,7 @@ PSPrepassFinalInput VSPrepassFinal(vbSurface input)
 float4 PSPrepassFinal_(PSPrepassFinalInput input, bool additive)
 {
 	LightingInput li = (LightingInput)0;
+	li.light_color = LightColor;
 	
 	float4 worldPosition = MIR_SAMPLE_TEX2D(_GBufferPos, input.Tex);//worldPos(RGB), roughness(A)
 	li.world_pos = worldPosition.xyz * 2.0 - 1.0;

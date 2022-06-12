@@ -93,8 +93,8 @@ float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 fcolor, flo
     
     float3 kd = 1.0 - gli.specular_weight * F;
     float ks = gli.specular_weight;
-	diffuse_color  = kd * diffuse * LightColor.rgb * gli.nl;
-	specular_color = ks * specular * LightColor.rgb * gli.nl;
+	diffuse_color  = kd * diffuse * i.light_color.rgb * gli.nl;
+	specular_color = ks * specular * i.light_color.rgb * gli.nl;
     
     #if ENABLE_TRANSMISSION
         // Transmission BTDF
@@ -112,7 +112,7 @@ float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 fcolor, flo
         float D_mirror = GGXTRDistribution(nh_mirror, transmissionRougness);
         float V_mirror = SmithJointGGXFilamentVisibility(nl_mirror, gli.nv, transmissionRougness);
         float3 F_mirror = SchlickFresnel(gli.f0, gli.f90, vh_mirror);
-        transmission_color = i.albedo.rgb * D_mirror * V_mirror * (1.0 - F_mirror) * LightColor.rgb;     
+        transmission_color = i.albedo.rgb * D_mirror * V_mirror * (1.0 - F_mirror) * i.light_color.rgb;     
     #endif     
     
     #if ENABLE_SHEEN
@@ -121,7 +121,7 @@ float3 GltfLightAdditive(GltfLightInput gli, LightingInput i, float3 fcolor, flo
     
         float sheenDistribution = CharlieDistribution(sheenRoughness, gli.nh);
         float sheenVisibility = SheenVisibility(gli.nl, gli.nv, sheenRoughness);
-        sheen_color_as.rgb = i.sheen_color_roughness.rgb * sheenDistribution * sheenVisibility * LightColor.rgb * gli.nl;
+        sheen_color_as.rgb = i.sheen_color_roughness.rgb * sheenDistribution * sheenVisibility * i.light_color.rgb * gli.nl;
         
         float sheen_metallic = max(max(i.sheen_color_roughness.r, i.sheen_color_roughness.g), i.sheen_color_roughness.b) ;
         float sheen_brdf_nv = MIR_SAMPLE_TEX2D(_LUT, float2(gli.nv, i.sheen_color_roughness.w)).w;

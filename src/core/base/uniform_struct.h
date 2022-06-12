@@ -39,7 +39,7 @@ struct UNIFORM_ALIGN cbPerLight
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 public:
 	Eigen::Vector4f LightPosition = Eigen::Vector4f::Zero();//world space
-	Eigen::Vector4f LightColor = Eigen::Vector4f::Zero();
+	Eigen::Vector4f LightColor = Eigen::Vector4f::Ones();
 	Eigen::Vector4f unity_LightAtten = Eigen::Vector4f::Zero();//x(cutoff), y(1/(1-cutoff)), z(atten^2)
 	Eigen::Vector4f unity_SpotDirection = Eigen::Vector4f::Zero();
 	Eigen::Vector4f LightRadiusUVNearFar = Eigen::Vector4f(0.0001f, 0.0001f, 0.3f, 1000.0f);

@@ -646,9 +646,6 @@
     <None Include="..\bin\work\media\floor\defaultobject.Material">
       <Filter>shader\material</Filter>
     </None>
-    <None Include="..\bin\work\media\Spaceship\RetopoGroup2.Material">
-      <Filter>shader\material</Filter>
-    </None>
     <None Include="..\bin\work\media\ToyCar\Fabric.Material">
       <Filter>shader\material\toycar</Filter>
     </None>
@@ -667,9 +664,6 @@
     <None Include="..\bin\work\shader\LightingInput.cginc">
       <Filter>shader\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\Macros.cginc">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\bin\work\shader\Deferred.Shader">
       <Filter>shader\shader</Filter>
     </None>
@@ -682,5 +676,10 @@
     <None Include="..\bin\work\shader\ImGui.Shader">
       <Filter>shader\shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\bin\work\shader\Macros.cginc">
+      <Filter>shader</Filter>
+    </Media>
   </ItemGroup>
 </Project>
