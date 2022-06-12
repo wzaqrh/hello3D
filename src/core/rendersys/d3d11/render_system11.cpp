@@ -244,6 +244,7 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 }
 void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f& color, float depth, uint8_t stencil)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.ClearFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	FrameBuffer11Ptr fb11 = fb ? std::static_pointer_cast<FrameBuffer11>(fb) : mCurFrameBuffer;
@@ -256,6 +257,9 @@ void RenderSystem11::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f&
 }
 void RenderSystem11::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.CopyFrameBuffer");
+	BOOST_ASSERT(IsCurrentInMainThread());
+
 	FrameBuffer11Ptr fbDst = IF_AND_OR(dst, std::static_pointer_cast<FrameBuffer11>(dst), mBackFrameBuffer);
 	FrameBuffer11Ptr fbSrc = IF_AND_OR(src, std::static_pointer_cast<FrameBuffer11>(src), mBackFrameBuffer);
 
@@ -266,6 +270,7 @@ void RenderSystem11::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFr
 }
 void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	ID3D11ShaderResourceView* TextureNull = nullptr;
@@ -317,6 +322,7 @@ IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgra
 }
 void RenderSystem11::SetVertexLayout(IInputLayoutPtr layout) 
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetVertexLayout");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	mDeviceContext->IASetInputLayout(std::static_pointer_cast<InputLayout11>(layout)->GetLayout11().Get());
@@ -411,6 +417,7 @@ IProgramPtr RenderSystem11::LoadProgram(IResourcePtr res, const std::vector<ISha
 }
 void RenderSystem11::SetProgram(IProgramPtr program)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetProgram");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	mDeviceContext->VSSetShader(NULLABLE(std::static_pointer_cast<VertexShader11>(program->GetVertex()), GetShader11().Get()), NULL, 0);
@@ -448,6 +455,7 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, 
 }
 void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetVertexBuffers");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(count >= 1);
 
@@ -502,6 +510,7 @@ IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, ResourceFormat
 }
 void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetIndexBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	if (indexBuffer) {
@@ -547,6 +556,7 @@ IContantBufferPtr RenderSystem11::LoadConstBuffer(IResourcePtr res, const ConstB
 }
 void RenderSystem11::SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetConstBuffers");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	std::vector<ID3D11Buffer*> passConstBuffers(count);
@@ -558,6 +568,7 @@ void RenderSystem11::SetConstBuffers(size_t slot, const IContantBufferPtr buffer
 
 bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.UpdateBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(buffer);
 
@@ -594,6 +605,7 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 
 ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data datas[])
 {
+	DEBUG_LOG_CALLSTK("renderSys11.LoadTexture");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
@@ -638,7 +650,10 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 }
 void RenderSystem11::GenerateMips(ITexturePtr res)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.GenerateMips");
+	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
+
 	Texture11Ptr texture = std::static_pointer_cast<Texture11>(res);
 	mDeviceContext->GenerateMips(texture->AsSRV().Get());
 }
@@ -652,6 +667,7 @@ static inline std::vector<ID3D11ShaderResourceView*> GetTextureViews11(const ITe
 }
 void RenderSystem11::SetTextures(size_t slot, const ITexturePtr textures[], size_t count)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetTextures");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	std::vector<ID3D11ShaderResourceView*> texViews = GetTextureViews11(textures, count);
@@ -693,6 +709,7 @@ ISamplerStatePtr RenderSystem11::LoadSampler(IResourcePtr res, const SamplerDesc
 }
 void RenderSystem11::SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetSamplers");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(count >= 0);
 
@@ -704,6 +721,7 @@ void RenderSystem11::SetSamplers(size_t slot, const ISamplerStatePtr samplers[],
 
 bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 {
+	DEBUG_LOG_CALLSTK("renderSys11._SetBlendState");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	ComPtr<ID3D11BlendState> pBlendState;
@@ -732,6 +750,7 @@ bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 }
 void RenderSystem11::SetBlendState(const BlendState& blendFunc)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetBlendState");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	if (mCurBlendState != blendFunc) {
@@ -742,6 +761,7 @@ void RenderSystem11::SetBlendState(const BlendState& blendFunc)
 
 bool RenderSystem11::_SetDepthState(const DepthState& depthState)
 {
+	DEBUG_LOG_CALLSTK("renderSys11._SetDepthState");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	ComPtr<ID3D11DepthStencilState> pDSState;
@@ -773,6 +793,7 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 
 bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
 {
+	DEBUG_LOG_CALLSTK("renderSys11._SetRasterizerState");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	ComPtr<ID3D11RasterizerState> pRasterizerState;

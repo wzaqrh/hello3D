@@ -57,8 +57,9 @@ bool ResourceManager::IsCurrentInAsyncService() const
 }
 CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 {
-	DEBUG_LOG_DEBUG((boost::format("resMng.SwitchToLaunchService lchMode=%d curIsAsync=%d") %launchMode %IsCurrentInAsyncService()).str());
 #if !defined MIR_CPPCORO_DISABLED
+	DEBUG_LOG_CALLSTK((boost::format("resMng.SwitchToLaunchService lchMode=%d curIsAsync=%d") %launchMode %IsCurrentInAsyncService()).str());
+
 	if (launchMode == LaunchAsync) {
 		//if (! IsCurrentInAsyncService())
 		CoAwait mThreadPool->schedule();
@@ -74,8 +75,9 @@ CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 }
 CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, std::chrono::microseconds interval)
 {
-	DEBUG_LOG_DEBUG(boost::format("resMng.WaitResComplete").str());
 #if !defined MIR_CPPCORO_DISABLED
+	DEBUG_LOG_CALLSTK(boost::format("resMng.WaitResComplete").str());
+
 	bool asyncMode = IsCurrentInAsyncService();
 	while (!res->IsLoadComplete()) {
 		CoAwait mIoService->schedule_after(interval);
@@ -92,6 +94,7 @@ CoTask<void> ResourceManager::WaitResComplete(IResourcePtr res, std::chrono::mic
 CoTask<void> ResourceManager::UpdateFrame(float dt) ThreadSafe
 {
 #if MIR_MATERIAL_HOTLOAD
+	DEBUG_LOG_CALLSTK("resMng.UpdateFrame");
 	FrameCount++;
 	if ((FrameCount % 30 == 0) && mMaterialFac->PurgeOutOfDates()) {
 		mProgramFac->PurgeAll();

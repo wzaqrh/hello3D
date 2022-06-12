@@ -61,7 +61,7 @@ private:
 	};
 private:
 	ResourceManager& mResMng;
-	Launch mLaunchMode;
+	Launch mLchMode;
 	FontCachePtr mFontCache;
 };
 

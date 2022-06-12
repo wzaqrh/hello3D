@@ -19,10 +19,10 @@ public:
 	AiResourceFactory(ResourceManager& resMng);
 	~AiResourceFactory();
 
-	CoTask<bool> CreateAiScene(AiScenePtr& aiScene, Launch launchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp = "") ThreadSafe;
-	DECLARE_COTASK_FUNCTIONS(res::AiScenePtr, CreateAiScene, ThreadSafe);
+	CoTask<bool> CreateAiScene(AiScenePtr& aiScene, Launch launchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp = "") ThreadSafe ThreadMaySwitch;
+	DECLARE_COTASK_FUNCTIONS(res::AiScenePtr, CreateAiScene, ThreadSafe ThreadMaySwitch);
 private:
-	CoTask<bool> DoCreateAiScene(AiScenePtr& aiScene, Launch launchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe;
+	CoTask<bool> DoCreateAiScene(AiScenePtr& aiScene, Launch launchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe ThreadMaySwitch;
 private:
 	ResourceManager& mResMng;
 	struct AiResourceKey {

@@ -13,7 +13,7 @@ class GuiCanvas : public Renderable
 public:
 	GuiCanvas(Launch lchMode, ResourceManager& resMng);
 	~GuiCanvas();
-	CoTask<bool> Init();
+	CoTask<bool> Init() ThreadMaySwitch;
 
 	CoTask<void> UpdateFrame(float dt) override;
 	void GenRenderOperation(RenderOperationQueue& ops) override;

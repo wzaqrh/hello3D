@@ -134,10 +134,10 @@ bool ProgramFactory::ReadShaderAsm(const boost::filesystem::path& asmPath, std::
 	return false;
 }
 
-CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe ThreadMaySwitch
 {
-	program->SetLoading();
-	CoAwait mResMng.SwitchToLaunchService(lchMode);
+	program->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
+	DEBUG_LOG_CALLSTK("progFac._LoadProgram");
 	COROUTINE_VARIABLES_5(program, lchMode, name, vertexSCD, pixelSCD);
 
 #if defined MIR_TIME_DEBUG || defined MIR_RESOURCE_DEBUG
@@ -205,9 +205,8 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 	CoReturn program->IsLoaded();
 }
 
-CoTask<bool> ProgramFactory::CreateProgram(IProgramPtr& program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe
+CoTask<bool> ProgramFactory::CreateProgram(IProgramPtr& program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe ThreadMaySwitch
 {
-	//CoAwait SwitchToLaunchService(lchMode);
 	COROUTINE_VARIABLES_4(lchMode, name, vertexSCD, pixelSCD);
 
 	ProgramKey key{ std::move(name), std::move(vertexSCD), std::move(pixelSCD) };
@@ -223,7 +222,7 @@ CoTask<bool> ProgramFactory::CreateProgram(IProgramPtr& program, Launch lchMode,
 		DEBUG_SET_CALL(program, lchMode);
 		resNeedLoad = true;
 		return program;
-		});
+	});
 	if (resNeedLoad) {
 		CoAwait this->_LoadProgram(program, lchMode, std::move(key.name), std::move(key.vertexSCD), std::move(key.pixelSCD));
 	}

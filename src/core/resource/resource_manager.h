@@ -37,14 +37,14 @@ public:
 	TRANSMIT_MEMFAC_FUNCTION(mDeviceResFac, bool, LoadRawTextureData, ThreadSafe);
 	TRANSMIT_MEMFAC_FUNCTION(mDeviceResFac,IFrameBufferPtr, CreateFrameBuffer, ThreadSafe);
 
-#define TRANSMIT_MEMFAC_TASK_FUNCTION(FAC, RETURN_TYPE, FUNC_NAME) DECLARE_COTASK_FUNCTIONS(RETURN_TYPE, FUNC_NAME, ThreadSafe)\
+#define TRANSMIT_MEMFAC_TASK_FUNCTION(FAC, RETURN_TYPE, FUNC_NAME) DECLARE_COTASK_FUNCTIONS(RETURN_TYPE, FUNC_NAME)\
 	TemplateArgs CoTask<bool> FUNC_NAME(T &&...args) ThreadSafe { return FAC->FUNC_NAME(std::forward<T>(args)...); }
-	TRANSMIT_MEMFAC_TASK_FUNCTION(mTextureFac, ITexturePtr, CreateTextureByData, ThreadSafe);
-	TRANSMIT_MEMFAC_TASK_FUNCTION(mTextureFac, ITexturePtr, CreateTextureByFile, ThreadSafe);
-	TRANSMIT_MEMFAC_TASK_FUNCTION(mProgramFac, IProgramPtr, CreateProgram, ThreadSafe);
-	TRANSMIT_MEMFAC_TASK_FUNCTION(mMaterialFac, res::MaterialInstance, CreateMaterial, ThreadSafe);
-	TRANSMIT_MEMFAC_TASK_FUNCTION(mMaterialFac, res::ShaderPtr, CreateShader, ThreadSafe);
-	TRANSMIT_MEMFAC_TASK_FUNCTION(mAiResFac, res::AiScenePtr, CreateAiScene, ThreadSafe);
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mTextureFac, ITexturePtr, CreateTextureByData, ThreadSafe ThreadMaySwitch);
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mTextureFac, ITexturePtr, CreateTextureByFile, ThreadSafe ThreadMaySwitch);
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mProgramFac, IProgramPtr, CreateProgram, ThreadSafe ThreadMaySwitch);
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mMaterialFac, res::MaterialInstance, CreateMaterial, ThreadSafe ThreadMaySwitch);
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mMaterialFac, res::ShaderPtr, CreateShader, ThreadSafe ThreadMaySwitch);
+	TRANSMIT_MEMFAC_TASK_FUNCTION(mAiResFac, res::AiScenePtr, CreateAiScene, ThreadSafe ThreadMaySwitch);
 public:
 	RenderSystem& RenderSys() { return mRenderSys; }
 	res::MaterialFactory& GetMtlFac() { return *mMaterialFac; }
@@ -54,7 +54,7 @@ public:
 	res::DeviceResFactory& GetDeviceResFac() { return *mDeviceResFac; }
 
 	bool IsCurrentInAsyncService() const;
-	CoTask<void> SwitchToLaunchService(Launch launchMode);
+	CoTask<void> SwitchToLaunchService(Launch launchMode) ThreadMaySwitch;
 	CoTask<void> WaitResComplete(IResourcePtr res, std::chrono::microseconds interval = std::chrono::microseconds(1));
 #if MIR_MATERIAL_HOTLOAD
 public:

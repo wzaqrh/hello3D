@@ -30,10 +30,9 @@ const GpuParametersPtr& MaterialFactory::GetFrameGpuParameters() const
 	return mFrameGpuParameters; 
 }
 
-CoTask<bool> MaterialFactory::DoCreateShaderByShaderNode(ShaderPtr shader, Launch lchMode, mat_asset::ShaderNode shaderNode) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateShaderByShaderNode(ShaderPtr shader, Launch lchMode, mat_asset::ShaderNode shaderNode) ThreadSafe ThreadMaySwitch
 {
 	DEBUG_LOG_CALLSTK("mtlFac.DoCreateShaderByShaderNode");
-	//shader->SetLoading(); CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 	COROUTINE_VARIABLES_3(lchMode, shaderNode, shader);
 	std::vector<CoTask<bool>> tasks;
 
@@ -82,10 +81,9 @@ CoTask<bool> MaterialFactory::DoCreateShaderByShaderNode(ShaderPtr shader, Launc
 	shader->SetLoaded();
 	CoReturn shader->IsLoaded();
 }
-CoTask<bool> MaterialFactory::CreateShader(ShaderPtr& shader, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe 
+CoTask<bool> MaterialFactory::CreateShader(ShaderPtr& shader, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch
 {
 	DEBUG_LOG_CALLSTK("mtlFac.CreateShader");
-	//CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
 	COROUTINE_VARIABLES_3(lchMode, loadParam, shader);
 
 	shader = IF_OR(shader, CreateInstance<Shader>());
@@ -118,10 +116,9 @@ GpuParameters::Element MaterialFactory::DoCreateGpuParameterElement(Launch lchMo
 	
 	return result;
 }
-CoTask<bool> MaterialFactory::DoCreateMaterialByMtlNode(MaterialPtr material, Launch lchMode, mat_asset::MaterialNode materialNode) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateMaterialByMtlNode(MaterialPtr material, Launch lchMode, mat_asset::MaterialNode materialNode) ThreadSafe ThreadMaySwitch
 {
 	DEBUG_LOG_CALLSTK("mtlFac.DoCreateMaterialByMtlNode");
-	//material->SetLoading(); CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 	COROUTINE_VARIABLES_3(lchMode, materialNode, material);
 
 	std::vector<CoTask<bool>> tasks;
@@ -190,11 +187,8 @@ CoTask<bool> MaterialFactory::DoCreateMaterialByMtlNode(MaterialPtr material, La
 	material->SetLoaded(material->mShader->IsLoaded());
 	CoReturn material->IsLoaded();
 }
-CoTask<bool> MaterialFactory::DoCreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe
+CoTask<bool> MaterialFactory::DoCreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch
 {
-	DEBUG_LOG_CALLSTK("mtlFac.DoCreateMaterial");
-	//CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
-
 	material = IF_OR(material, CreateInstance<Material>());
 	mat_asset::MaterialNode materialNode;
 	if (mMatAssetMng->GetMaterialNode(loadParam, materialNode)) {
@@ -206,11 +200,10 @@ CoTask<bool> MaterialFactory::DoCreateMaterial(MaterialPtr& material, Launch lch
 	}
 	CoReturn material->IsLoaded();
 }
-CoTask<bool> MaterialFactory::CreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe
+CoTask<bool> MaterialFactory::CreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch
 {
 	DEBUG_LOG_CALLSTK("mtlFac.CreateMaterial1");
 	COROUTINE_VARIABLES_3(material, lchMode, loadParam);
-	//CoAwait SwitchToLaunchService(loadParam);
 
 	bool resNeedLoad = false;
 	material = mMaterialCache.GetOrAdd(loadParam, [&]() {
@@ -228,7 +221,7 @@ CoTask<bool> MaterialFactory::CreateMaterial(MaterialPtr& material, Launch lchMo
 	}
 	CoReturn material->IsLoaded();
 }
-CoTask<bool> MaterialFactory::CreateMaterial(res::MaterialInstance& mtlInst, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe
+CoTask<bool> MaterialFactory::CreateMaterial(res::MaterialInstance& mtlInst, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch
 {
 	DEBUG_LOG_CALLSTK("mtlFac.CreateMaterial");
 	MaterialPtr material;

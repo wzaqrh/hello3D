@@ -5,6 +5,7 @@
 #include "core/base/stl.h"
 #include "core/base/math.h"
 #include "core/base/launch.h"
+#include "core/base/declare_macros.h"
 
 namespace mir {
 
@@ -18,7 +19,7 @@ public:
 	RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng, const Configure& cfg);
 	~RenderPipeline();
 	void Dispose();
-	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng);
+	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng) ThreadMaySwitch;
 	bool BeginFrame();
 	void EndFrame();
 	void Render(const RenderableCollection& rends, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights);

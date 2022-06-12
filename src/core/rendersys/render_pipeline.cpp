@@ -595,7 +595,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	//mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(IF_AND_OR(mCfg.IsGammaSpace(), kFormatR8G8B8A8UNorm, kFormatR16G16B16A16UNorm), kDepthFormat));
 	mFbsBank = CreateInstance<FrameBufferBank>(resMng, fbSize, MakeResFormats(kFormatR8G8B8A8UNorm, kDepthFormat));
 }
-CoTask<bool> RenderPipeline::Initialize(Launch lchMode, ResourceManager& resMng)
+CoTask<bool> RenderPipeline::Initialize(Launch lchMode, ResourceManager& resMng) ThreadMaySwitch
 {
 	MaterialLoadParam loadParam(MAT_DEFFERED);
 	res::MaterialInstance material;

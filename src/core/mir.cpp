@@ -48,6 +48,8 @@ CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir)
 	CoAwait mGuiMng->Initialize(mLchMode, *mResMng); 
 
 	mSceneMng = CreateInstance<SceneManager>(*mResMng, mRenderableFac, mGuiMng, mConfigure);
+
+	CoAwait mResMng->SwitchToLaunchService(__LaunchSync__);
 	CoReturn true;
 }
 
@@ -69,6 +71,8 @@ void Mir::Dispose()
 
 CoTask<void> Mir::Update(float dt)
 {
+	DEBUG_LOG_CALLSTK("mir.UpdateFrame");
+
 	mRenderSys->UpdateFrame(dt);
 	CoAwait mResMng->UpdateFrame(dt);
 	CoAwait mSceneMng->UpdateFrame(dt);
@@ -76,6 +80,8 @@ CoTask<void> Mir::Update(float dt)
 
 CoTask<void> Mir::Render()
 {
+	DEBUG_LOG_CALLSTK("mir.Render");
+
 	if (mRenderPipe->BeginFrame()) {
 		RenderableCollection rends;
 		mSceneMng->GetRenderables(rends);

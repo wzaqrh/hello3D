@@ -10,7 +10,7 @@ class MIR_CORE_API GuiManager : boost::noncopyable
 public:
 	GuiManager(void* hwnd);
 	~GuiManager();
-	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng);
+	CoTask<bool> Initialize(Launch lchMode, ResourceManager& resMng) ThreadMaySwitch;
 	void Dispose();
 
 	void ClearCommands();

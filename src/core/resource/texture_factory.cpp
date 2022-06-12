@@ -22,9 +22,11 @@ TextureFactory::~TextureFactory()
 	DEBUG_LOG_MEMLEAK("texFac.destrcutor");
 }
 
-CoTask<bool> TextureFactory::CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[])
+CoTask<bool> TextureFactory::CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[]) ThreadSafe ThreadMaySwitch
 {
 	CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+	DEBUG_LOG_CALLSTK("texFac.CreateTextureByData");
+	
 	texture = std::static_pointer_cast<ITexture>(this->mRenderSys.CreateResource(kDeviceResourceTexture));
 	texture->SetLoaded(mRenderSys.LoadTexture(texture, format, Eigen::Vector4i(w_h_mip_face[0], w_h_mip_face[1], 0, w_h_mip_face[3]), w_h_mip_face[2], datas) != nullptr);
 	CoReturn true;
@@ -55,9 +57,10 @@ static BOOL SwapRedBlue32(FIBITMAP* dib)
 
 	return TRUE;
 }
-CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string imgFullPath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string imgFullPath, ResourceFormat format, bool autoGenMipmap) ThreadSafe ThreadMaySwitch
 {
 	texture->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
+	DEBUG_LOG_CALLSTK("texFac._LoadTextureByFile");
 	COROUTINE_VARIABLES_5(texture, lchMode, imgFullPath, format, autoGenMipmap);
 	TIME_PROFILE((boost::format("\t\tresMng._LoadTextureByFile (%1% %2% %3%)") %imgFullPath %format %autoGenMipmap).str());
 
@@ -282,9 +285,9 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 	CoReturn texture->IsLoaded();
 }
 
-CoTask<bool> TextureFactory::CreateTextureByFile(ITexturePtr& texture, Launch lchMode, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe
+CoTask<bool> TextureFactory::CreateTextureByFile(ITexturePtr& texture, Launch lchMode, std::string filepath, ResourceFormat format, bool autoGenMipmap) ThreadSafe ThreadMaySwitch
 {
-	//CoAwait SwitchToLaunchService(lchMode);
+	DEBUG_LOG_CALLSTK("texFac.CreateTextureByFile");
 	COROUTINE_VARIABLES_4(lchMode, filepath, format, autoGenMipmap);
 
 	boost::filesystem::path fullpath = boost::filesystem::system_complete(filepath);

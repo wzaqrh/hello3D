@@ -1,6 +1,6 @@
 # 
 mtllib pavimento.mtl
-usemtl pavimento
+usemtl defaultobject
 v 7.002753 7.675976 0.054927
 v 6.977299 7.844732 0.058545
 v 6.916306 7.755346 0.046948

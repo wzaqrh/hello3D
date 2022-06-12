@@ -41,7 +41,7 @@ GuiManager::GuiManager(void* hwnd)
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
 }
-CoTask<bool> GuiManager::Initialize(Launch lchMode, ResourceManager& resMng)
+CoTask<bool> GuiManager::Initialize(Launch lchMode, ResourceManager& resMng) ThreadMaySwitch
 {
 	mCanvas = CreateInstance<gui::GuiCanvas>(lchMode, resMng);
 	CoAwait mCanvas->Init();
@@ -75,6 +75,8 @@ void GuiManager::AddCommand(std::function<CoTask<void>()> cmd)
 
 CoTask<void> GuiManager::UpdateFrame(float dt)
 {
+	DEBUG_LOG_CALLSTK("guiMng.UpdateFrame");
+
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 

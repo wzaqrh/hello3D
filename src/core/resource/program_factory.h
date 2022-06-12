@@ -21,12 +21,12 @@ public:
 	ProgramFactory(ResourceManager& resMng, const std::string& shaderDir);
 	~ProgramFactory();
 
-	CoTask<bool> CreateProgram(IProgramPtr& program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
-	DECLARE_COTASK_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe);
+	CoTask<bool> CreateProgram(IProgramPtr& program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe ThreadMaySwitch;
+	DECLARE_COTASK_FUNCTIONS(IProgramPtr, CreateProgram, ThreadSafe ThreadMaySwitch);
 
 	void PurgeAll() ThreadSafe;
 private:
-	CoTask<bool> _LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe;
+	CoTask<bool> _LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe ThreadMaySwitch;
 	boost::filesystem::path MakeShaderSourcePath(const std::string& name) const ThreadSafe;
 	boost::filesystem::path MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform, time_t& time, std::string& serializeStr) const ThreadSafe;
 	bool ReadShaderAsm(const boost::filesystem::path& asmPath, std::vector<char>& bin, time_t time, const std::string& serializeStr) const ThreadSafe;

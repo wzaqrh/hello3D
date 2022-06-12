@@ -16,9 +16,6 @@
 		<FLIP_UV0_Y>0</FLIP_UV0_Y>
 	</Macros>
 	<Properties>
-		<txAlbedo>textures/pavimento_baseColor.png</txAlbedo>
-		<txAmbientOcclusion>textures/pavimento_metallicRoughness.png</txAmbientOcclusion>
-		<txNormal>textures/pavimento_normal.png</txNormal>
 		<AoStrength>0</AoStrength>
 		<RoughnessFactor>0.9</RoughnessFactor>
 		<MetallicFactor>0</MetallicFactor>

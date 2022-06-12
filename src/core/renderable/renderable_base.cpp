@@ -41,10 +41,13 @@ Eigen::AlignedBox3f RenderableSingleRenderOp::GetWorldAABB() const
 CoTask<void> RenderableSingleRenderOp::UpdateFrame(float dt)
 {
 #if MIR_MATERIAL_HOTLOAD
+	DEBUG_LOG_CALLSTK("rendSROP.UpdateFrame");
+
 	if ((mResMng.FrameCount % 30 == 0) && mMaterial && mMaterial->IsOutOfDate()) {
 		auto mainTex = mMaterial.GetTextures().AtOrNull(0);
 		CoAwait mMaterial.Reload(mLaunchMode, mResMng);
 		mMaterial.GetTextures().AddOrSet(mainTex, 0);
+		CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 	}
 #endif
 	CoReturn;

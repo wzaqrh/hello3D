@@ -64,7 +64,7 @@ IApp* CreateAppByCommandLineOrCommandFile()
 		if (argc > 2) caseIndex = atoi(ConvertLPWSTRToLPSTR(argv[2]));
 	}
 	else {
-		FILE* fd = fopen("test_cmdline.txt", "r");
+		FILE* fd = fopen("../work/test_cmdline.txt", "r");
 		if (fd) {
 			bool scanf_eof = false;
 			do {

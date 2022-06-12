@@ -117,9 +117,11 @@ void MaterialInstance::Reset()
 	mSelf = nullptr;
 }
 
-CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng)
+CoTask<bool> MaterialInstance::Reload(Launch launchMode, ResourceManager& resMng) ThreadMaySwitch
 {
 	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+
 	*mSelf = *mtl.mSelf;
 	CoReturn true;
 }
@@ -131,6 +133,8 @@ void MaterialInstance::UpdateKeyword(const std::string& macroName, int value /*=
 CoTask<bool> MaterialInstance::CommitKeywords(Launch launchMode, ResourceManager& resMng)
 {
 	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
+	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
+
 	*mSelf = *mtl.mSelf;
 	CoReturn true;
 }

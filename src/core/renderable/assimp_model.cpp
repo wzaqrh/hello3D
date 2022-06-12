@@ -125,8 +125,11 @@ public:
 /********** AssimpModel **********/
 CoTask<bool> AssimpModel::LoadModel(std::string assetPath, std::string redirectResource)
 {
-	if (!CoAwait mResMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource), mLoadParam)) 
+	if (!CoAwait mResMng.CreateAiScene(mAiScene, mLaunchMode, std::move(assetPath), std::move(redirectResource), mLoadParam)) {
+		CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 		CoReturn false;
+	}
+	CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 
 	COROUTINE_VARIABLES_2(assetPath, redirectResource);
 	mAABB = mAiScene->GetAABB();
@@ -184,6 +187,8 @@ void AssimpModel::GetMaterials(std::vector<res::MaterialInstance>& mtls) const
 
 CoTask<void> AssimpModel::UpdateFrame(float dt)
 {
+	DEBUG_LOG_CALLSTK("model.UpdateFrame");
+
 	COROUTINE_VARIABLES_1(dt);
 	CoAwait Super::UpdateFrame(dt);
 	BOOST_ASSERT(mAiScene->IsLoaded());
@@ -197,6 +202,7 @@ CoTask<void> AssimpModel::UpdateFrame(float dt)
 				CoAwait material.Reload(mLaunchMode, mResMng);
 			}
 		}
+		CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 	}
 #endif
 

@@ -1,4 +1,5 @@
 #include "imgui_impl_win32.h"
+#include "core/base/debug.h"
 #include "core/gui/gui_canvas.h"
 #include "core/resource/material.h"
 #include "core/resource/material_factory.h"
@@ -17,7 +18,7 @@ GuiCanvas::GuiCanvas(Launch lchMode, ResourceManager& resMng)
 	: mLchMode(lchMode)
 	, mResMng(resMng)
 {}
-CoTask<bool> GuiCanvas::Init()
+CoTask<bool> GuiCanvas::Init() ThreadMaySwitch
 {
 	ImGuiIO& io = ImGui::GetIO();
 	IM_ASSERT(io.BackendRendererUserData == NULL && "Already initialized a renderer backend!");
@@ -36,6 +37,7 @@ CoTask<bool> GuiCanvas::Init()
 		int width, height;
 		ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 		mFontTex = CoAwait mResMng.CreateTextureByDataT(mLchMode, kFormatR8G8B8A8UNorm, Eigen::Vector4i(width, height, 1, 1), &Data::Make(pixels, width * 4));
+		CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 
 		ImGui::GetIO().Fonts->SetTexID((ImTextureID)mFontTex.get());
 	}
@@ -60,6 +62,7 @@ void GuiCanvas::DoSetupRenderState(ImDrawData* draw_data)
 }
 CoTask<void> GuiCanvas::UpdateFrame(float dt)
 {
+	DEBUG_LOG_CALLSTK("guiCanvas.UpdateFrame");
 	mOps.clear();
 
 	this->DoNewFrame();

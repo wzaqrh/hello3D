@@ -23,24 +23,24 @@ public:
 	MaterialFactory(ResourceManager& resMng, const std::string& shaderDir);
 	~MaterialFactory();
 
-	CoTask<bool> CreateShader(ShaderPtr& shader, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe;
-	CoTask<bool> CreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe;
-	CoTask<bool> CreateMaterial(res::MaterialInstance& mtlInst, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe;
-	DECLARE_COTASK_FUNCTIONS(ShaderPtr, CreateShader, ThreadSafe);
-	DECLARE_COTASK_FUNCTIONS(MaterialPtr, CreateMaterial, ThreadSafe);
+	CoTask<bool> CreateShader(ShaderPtr& shader, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch;
+	CoTask<bool> CreateMaterial(MaterialPtr& material, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch;
+	CoTask<bool> CreateMaterial(res::MaterialInstance& mtlInst, Launch lchMode, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch;
+	DECLARE_COTASK_FUNCTIONS(ShaderPtr, CreateShader, ThreadSafe ThreadMaySwitch);
+	DECLARE_COTASK_FUNCTIONS(MaterialPtr, CreateMaterial, ThreadSafe ThreadMaySwitch);
 
 	bool PurgeOutOfDates() ThreadSafe;
 	void PurgeAll() ThreadSafe;
 
-	ShaderPtr CloneShader(Launch launch, const Shader& material) ThreadSafe;
-	TechniquePtr CloneTechnique(Launch launch, const Technique& technique) ThreadSafe;
-	PassPtr ClonePass(Launch launch, const Pass& pass) ThreadSafe;
+	ShaderPtr CloneShader(Launch launch, const Shader& material) ThreadSafe ThreadMaySwitch;
+	TechniquePtr CloneTechnique(Launch launch, const Technique& technique) ThreadSafe ThreadMaySwitch;
+	PassPtr ClonePass(Launch launch, const Pass& pass) ThreadSafe ThreadMaySwitch;
 public:
 	const GpuParametersPtr& GetFrameGpuParameters() const ThreadSafe;
 private:
-	CoTask<bool> DoCreateShaderByShaderNode(ShaderPtr shader, Launch launchMode, mat_asset::ShaderNode shaderNode) ThreadSafe;
-	CoTask<bool> DoCreateMaterialByMtlNode(MaterialPtr material, Launch launchMode, mat_asset::MaterialNode materialNode) ThreadSafe;
-	CoTask<bool> DoCreateMaterial(MaterialPtr& material, Launch launch, MaterialLoadParam loadParam) ThreadSafe;
+	CoTask<bool> DoCreateShaderByShaderNode(ShaderPtr shader, Launch launchMode, mat_asset::ShaderNode shaderNode) ThreadSafe ThreadMaySwitch;
+	CoTask<bool> DoCreateMaterialByMtlNode(MaterialPtr material, Launch launchMode, mat_asset::MaterialNode materialNode) ThreadSafe ThreadMaySwitch;
+	CoTask<bool> DoCreateMaterial(MaterialPtr& material, Launch launch, MaterialLoadParam loadParam) ThreadSafe ThreadMaySwitch;
 	GpuParameters::Element DoCreateGpuParameterElement(Launch launchMode, const UniformParameters& parameters) ThreadSafe;
 private:
 	ResourceManager& mResMng;

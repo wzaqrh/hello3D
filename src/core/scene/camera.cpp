@@ -77,6 +77,8 @@ void Camera::SetForward(const Eigen::Vector3f& forward)
 
 CoTask<void> Camera::UpdateFrame(float dt)
 {
+	DEBUG_LOG_CALLSTK("camera.UpdateFrame");
+
 	for (auto& effect : mPostProcessEffects)
 		CoAwait effect->UpdateFrame(dt);
 #if MIR_MATERIAL_HOTLOAD

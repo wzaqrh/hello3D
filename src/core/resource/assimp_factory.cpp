@@ -29,6 +29,8 @@
 #define VEC_ASSIGN1(DST, SRC, SIZE) static_assert(sizeof(DST) == SIZE); memcpy(DST.data(), &SRC, SIZE)
 #define VEC_ASSIGN2(DST, SRC, SIZE) memcpy(DST.data(), &SRC, sizeof(SRC))
 
+//#define ENABLE_STANDALONE_OBJ_LOADER 1
+
 namespace mir {
 namespace res {
 
@@ -81,7 +83,7 @@ public:
 
 	TemplateArgs CoTask<bool> Execute(T &&...args) {
 		mAsset.SetLoading();
-		CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
+		CoAwait mResMng.SwitchToLaunchService(mLaunchMode);
 
 		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
 		return mAsset.IsLoaded();
@@ -295,6 +297,7 @@ private:
 };
 typedef std::shared_ptr<AiSceneLoader> AiSceneLoaderPtr;
 
+#if ENABLE_STANDALONE_OBJ_LOADER
 /********** ObjLoader **********/
 class AiSceneObjLoader {
 public:
@@ -302,14 +305,14 @@ public:
 	: mLaunchMode(lchMode), mResMng(resMng), mLoadParam(loadParam), mAsset(*asset), mResult(asset)
 	{}
 
-	TemplateArgs CoTask<bool> Execute(T &&...args) {
+	TemplateArgs CoTask<bool> Execute(T &&...args) ThreadMaySwitch {
 		mAsset.SetLoading();
-		CoAwait mResMng.SwitchToLaunchService(__LaunchAsync__);
+		CoAwait mResMng.SwitchToLaunchService(mLaunchMode);
 
 		mAsset.SetLoaded(ExecuteLoadRawData(std::forward<T>(args)...) && CoAwait ExecuteSetupData());
 		return mAsset.IsLoaded();
 	}
-	TemplateArgs CoTask<bool> operator()(T &&...args) {
+	TemplateArgs CoTask<bool> operator()(T &&...args) ThreadMaySwitch {
 		return CoAwait Execute(std::forward<T>(args)...);
 	}
 private:
@@ -495,6 +498,7 @@ private:
 	ObjNode mObjNode;
 };
 typedef std::shared_ptr<AiSceneObjLoader> AiSceneObjLoaderPtr;
+#endif
 
 /********** AiAssetManager **********/
 AiResourceFactory::AiResourceFactory(ResourceManager& resMng)
@@ -506,26 +510,28 @@ AiResourceFactory::~AiResourceFactory()
 	DEBUG_LOG_MEMLEAK("aiResFac.destrcutor");
 }
 
-CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe
+CoTask<bool> AiResourceFactory::DoCreateAiScene(AiScenePtr& scene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe ThreadMaySwitch
 {
-	//CoAwait mResourceMng.SwitchToLaunchService(lchMode)
 	COROUTINE_VARIABLES_4(lchMode, scene, assetPath, redirectRes);
-	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") % assetPath % redirectRes).str());
+	TIME_PROFILE((boost::format("\taiResFac.CreateAiScene (%1% %2%)") %assetPath %redirectRes).str());
 
 	scene = IF_OR(scene, CreateInstance<AiScene>());
-	if (boost::filesystem::path(assetPath).extension() != ".obj") {
-		auto loader = CreateInstance<AiSceneLoader>(lchMode, mResMng, mlp, scene);
+#if ENABLE_STANDALONE_OBJ_LOADER
+	if (boost::filesystem::path(assetPath).extension() == ".obj") {
+		auto loader = CreateInstance<AiSceneObjLoader>(lchMode, mResMng, mlp, scene);
 		CoAwait loader->Execute(assetPath, redirectRes);
 	}
-	else {
-		auto loader = CreateInstance<AiSceneObjLoader>(lchMode, mResMng, mlp, scene);
+	else 
+#endif
+	{
+		auto loader = CreateInstance<AiSceneLoader>(lchMode, mResMng, mlp, scene);
 		CoAwait loader->Execute(assetPath, redirectRes);
 	}
 	CoReturn scene->IsLoaded();
 }
-CoTask<bool> AiResourceFactory::CreateAiScene(AiScenePtr& aiScene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe
+CoTask<bool> AiResourceFactory::CreateAiScene(AiScenePtr& aiScene, Launch lchMode, std::string assetPath, std::string redirectRes, MaterialLoadParam mlp) ThreadSafe ThreadMaySwitch
 {
-	//CoAwait SwitchToLaunchService(lchMode);
+	DEBUG_LOG_CALLSTK("aiResFac.CreateAiScene");
 	COROUTINE_VARIABLES_3(lchMode, assetPath, redirectRes);
 
 	AiResourceKey key{ assetPath, redirectRes, mlp };

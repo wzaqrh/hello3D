@@ -2,6 +2,7 @@
 #include "core/base/cppcoro.h"
 
 #define interface struct
+#define ThreadMaySwitch
 #define ThreadSafe
 #define TemplateArgs template <typename... T>
 #define TemplateT template <typename T>
