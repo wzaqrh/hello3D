@@ -71,6 +71,7 @@ public:
 	Eigen::Vector3f ProjectPoint(const Eigen::Vector3f& worldpos) const;//world -> ndc
 	Eigen::Vector4f ProjectPoint(const Eigen::Vector4f& worldpos) const;
 	math::Frustum GetFrustum() const;
+	Eigen::Vector2f GetLinearDepthParam() const;
 public:
 	CoTask<void> UpdateFrame(float dt);
 	void PostSetComponent() override;

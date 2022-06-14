@@ -1,16 +1,16 @@
 #pragma once
 #include <boost/noncopyable.hpp>
 #include "core/mir_export.h"
-#define MIR_TEST
+
 #define MIR_D3D11_DEBUG
 #define MIR_RESOURCE_DEBUG
 #define MIR_TIME_DEBUG
-#define MIR_LOG_LEVEL 0
+#define MIR_LOG_LEVEL 1
 #define MIR_COROUTINE_DEBUG 
 #define MIR_MATERIAL_HOTLOAD 1
 #define MIR_GRAPHICS_DEBUG 1
 //#define MIR_CPPCORO_DISABLED
-#define MIR_MEMLEAK_DEBUG
+//#define MIR_MEMLEAK_DEBUG
 
 namespace mir {
 

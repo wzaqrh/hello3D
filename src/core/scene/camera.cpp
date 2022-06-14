@@ -221,6 +221,17 @@ math::Frustum Camera::GetFrustum() const
 	return ft;
 }
 
+Eigen::Vector2f Camera::GetLinearDepthParam() const
+{
+	const float& fov = mFov;
+	const float& aspect = mAspect;
+	const float& n = mClipPlane.x();
+	const float& f = mClipPlane.y();
+
+	if (mReverseZ) return Eigen::Vector2f(1 / f, (f - n) / (f * n));
+	else return Eigen::Vector2f(1 / n, (n - f) / (f * n));
+}
+
 /********** components **********/
 void Camera::SetSkyBox(const rend::SkyBoxPtr& skybox)
 {

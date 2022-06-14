@@ -5,7 +5,7 @@
 		<UseAttribute>vbSurface</UseAttribute>
 		<UseUniform>cbPerFrame</UseUniform>
 		<UseUniform>cbPerLight</UseUniform>
-		<UseTexture>tGrpForward</UseTexture>
+		<UseTexture>tGrpPostProc</UseTexture>
 		<Uniform Name="cbHBAo" Slot="3" ShareMode="PerMaterial">
 			<Element Name="DepthParam" Type="float4" Default="3.33333,3.33233"></Element> 
 			<Element Name="FocalLen" Type="float4" Default="1.0,1.0,1.0,1.0"></Element>

@@ -135,13 +135,14 @@ CoTask<mir::rend::PostProcessPtr> PostProcessFactory::CreateSSAO(const scene::Ca
 {
 	float fov = camera.GetFov();
 	float aspect = camera.GetAspect();
-	const Eigen::Vector2f& nf = camera.GetClippingPlane(); float n = nf.x(), f = nf.y();
+	Eigen::Vector2f nf = camera.GetClippingPlane(); float n = nf.x(), f = nf.y();
+	Eigen::Vector2f dp = camera.GetLinearDepthParam();
 	MaterialLoadParamBuilder param = MAT_SSAO;
 	auto filter = CoAwait mRendFac->CreatePostProcessEffectT(param);
 
 	float invFocalLenY = tan(fov * 0.5f);
 	float invFocalLenX = invFocalLenY / aspect;
-	filter->GetMaterial().SetProperty("DepthParam", Eigen::Vector4f(1/n, (n-f)/(f*n), 0, 0));
+	filter->GetMaterial().SetProperty("DepthParam", Eigen::Vector4f(dp[0], dp[1], 0, 0));
 	filter->GetMaterial().SetProperty("FocalLen", Eigen::Vector4f(1.0f / invFocalLenX, 1.0f / invFocalLenY, invFocalLenX, invFocalLenY));
 	filter->GetMaterial().SetProperty("AttenTanBias", Eigen::Vector4f(1.0, tanf(30.0f / 180 * boost::math::constants::pi<float>()), 0.0, 0.0));
 	CoReturn filter;

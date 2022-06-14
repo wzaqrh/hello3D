@@ -379,14 +379,14 @@ public:
 			fb_temp_output.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 			
 			auto tex_scene_img = mStatesBlock.LockTexture(kPipeTextureSceneImage, IF_AND_OR(i == 0, scene_image->GetAttachColorTexture(0), tempOutputs[i - 1]->GetAttachColorTexture(0)));
-			auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
 			
-			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(0));
-			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(1));
+			auto tex_gdepth = mStatesBlock.LockTexture(kPipeTextureGDepth, mGBuffer->GetAttachZStencilTexture());
+			auto tex_gpos = mStatesBlock.LockTexture(kPipeTextureGBufferPos, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferPos-1));
+			auto tex_gnormal = mStatesBlock.LockTexture(kPipeTextureGBufferNormal, mGBuffer->GetAttachColorTexture(kPipeTextureGBufferNormal-1));
 
 			RenderOperationQueue ops;
 			effects[i]->GenRenderOperation(ops);
-			RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, ops);
+			RenderLight(*mPerFrame, nullptr, LIGHTMODE_POSTPROCESS, ops);
 		}
 	}
 private:

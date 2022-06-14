@@ -11,18 +11,7 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
-private:
-	AssimpModelPtr mModel;
 };
-/*mCaseIndex
-0: 
-*/
-
-inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
-	MaterialLoadParamBuilder mlpb(MAT_MODEL);
-	mlpb["PBR_MODE"] = 2;
-	return mlpb;
-}
 
 CoTask<bool> TestSSAO::OnInitScene()
 {
@@ -32,41 +21,43 @@ CoTask<bool> TestSSAO::OnInitScene()
 	camera->SetFov(40.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
+	AssimpModelPtr mModel;
 	test1::res::model model;
 	switch (mCaseIndex) {
-	case 0: {
-		camera->SetLookAt(Eigen::Vector3f(0, 2, -1), Eigen::Vector3f::Zero());
+	case 0:
+	case 1:{
+		camera->SetLookAt(Eigen::Vector3f(0, 1.5, -1.5), Eigen::Vector3f::Zero());
 
 		auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 		dir_light->SetDirection(Eigen::Vector3f(-0.498, 0.71, -0.498));
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
-		skyMat["CubeMapIsRightHandness"] = TRUE;
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), skyMat));
 
-		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
-		modelMat["CubeMapIsRightHandness"] = TRUE;
+		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		mTransform = CoAwait model.Init("dragon", mModel);
-		mTransform->SetScale(Eigen::Vector3f(0.005, 0.005, 0.005));
+		mTransform->SetScale(Eigen::Vector3f(0.007, 0.007, 0.007));
 
 		auto floor = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
 		floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));
 
-		auto effect = SSAOBuilder(CoAwait PostProcessFactory(mRendFac).CreateSSAO(*camera))
-			.SetRadius(0.35)
-			.SetAngleBias(30)
-			.SetAttenuation(1.0f)
-			.SetStepNum(8)
-			.SetDirNum(16)
-			.SetContrast(1.25)
-			.SetBlurRadius(7)
-			.SetSharpness(16)
-			.Build();
-		camera->AddPostProcessEffect(effect);
-		camera->SetRenderingPath(mir::kRenderPathDeffered);
+		if (mCaseIndex == 0) {
+			auto effect = SSAOBuilder(CoAwait PostProcessFactory(mRendFac).CreateSSAO(*camera))
+				.SetRadius(0.35)
+				.SetAngleBias(30)
+				.SetDirNum(16)
+				.SetStepNum(8)
+				.SetAttenuation(1.0f)
+				.SetContrast(1.25)
+				.SetSharpness(16)
+				.SetBlurRadius(7)
+				.Build();
+			camera->AddPostProcessEffect(effect);
+			camera->SetRenderingPath(mir::kRenderPathDeffered);
+		}
 	}break;
 	default:
 		break;

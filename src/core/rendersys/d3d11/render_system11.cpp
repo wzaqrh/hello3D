@@ -273,9 +273,6 @@ void RenderSystem11::SetFrameBuffer(IFrameBufferPtr fb)
 	DEBUG_LOG_CALLSTK("renderSys11.SetFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	ID3D11ShaderResourceView* TextureNull = nullptr;
-	mDeviceContext->PSSetShaderResources(0, 1, &TextureNull);
-
 	auto prevFbSize = mCurFrameBuffer->GetSize();
 
 	auto fb11 = std::static_pointer_cast<FrameBuffer11>(fb);

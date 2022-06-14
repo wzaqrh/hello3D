@@ -7,6 +7,7 @@
 #include "ToneMapping.cginc"
 #include "IBL.cginc"
 
+#if ENABLE_TRANSMISSION
 float3 GetVolumeTransmissionRay(float3 n, float3 v, float thickness, float ior, matrix world)
 {
     float3 refractionVector = refract(-v, n, 1.0 / ior);// Direction of refracted light.
@@ -33,10 +34,11 @@ float3 ApplyVolumeAttenuation(float3 radiance, float transmissionDistance, float
 
 float3 GetTransmissionSample(float2 fragCoord, float roughness, float ior)
 {
-    float framebufferLod = ApplyIorToRoughness(roughness, ior) * (LightMapSizeMip.z - 1);
+    float framebufferLod = ApplyIorToRoughness(roughness, ior) * (LightMapSizeMip.z - 1);  
     float3 transmittedLight = MIR_SAMPLE_TEX2D_LEVEL(_LightMap, fragCoord.xy, framebufferLod).rgb;
     return sRGBToLinear(transmittedLight);
 }
+#endif
 
 struct GltfLightInput
 {

@@ -8,6 +8,7 @@
 #include "SphericalHarmonics.cginc"
 #include "ToneMapping.cginc"
 
+#if ENABLE_LIGHT_MAP
 float3 GetLightMap(float2 uv) 
 {
     float4 color = MIR_SAMPLE_TEX2D(_LightMap, GetUV(uv, LightMapUV));
@@ -17,6 +18,7 @@ float3 GetLightMap(float2 uv)
     return color.rgb;
 #endif    
 }
+#endif
 
 float3 UnityLightAdditive(LightingInput i, float3 l, float3 n, float3 v)
 {
@@ -98,7 +100,7 @@ float3 UnityLightBase(LightingInput i, float3 l, float3 n, float3 v)
     float kd = 1.0f - reflectivity;
     
     //env diffuse color
-#if ENABLE_LIGHT_MAP  
+#if ENABLE_LIGHT_MAP
     float3 sh_diffuse_color = kd * i.albedo.rgb * GetLightMap(i.uv);
 #else
     float3 sh = GetSphericalHarmonics012(float4(n, 1.0), SHC0C1, SHC2, SHC2_2);
