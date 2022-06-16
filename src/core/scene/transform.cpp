@@ -156,7 +156,7 @@ void Transform::SetEulerAngles(const Eigen::Vector3f& euler)
 
 void Transform::LookAt(const Eigen::Vector3f& at)
 {
-	auto forward = at - GetPosition();
+	Eigen::Vector3f forward = at - GetPosition();
 	this->SetRotation(Eigen::Quaternionf::FromTwoVectors(math::vec::Forward(), forward));
 	mForwardLength = forward.norm();
 	mSignal();

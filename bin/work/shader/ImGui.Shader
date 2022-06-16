@@ -29,7 +29,7 @@
 	</PROGRAM>
 	
 	<SubShader>
-		<RenderType>Overlay</RenderType>
+		<RenderType>UI</RenderType>
 		<Pass>
 			<LightMode>ForwardBase</LightMode>
 			<PROGRAM>

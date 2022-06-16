@@ -245,6 +245,35 @@ void Camera::AddPostProcessEffect(const rend::PostProcessPtr& postEffect)
 
 	mPostProcessEffects.push_back(postEffect);
 }
+
+void Camera::RemovePostProcessEffect(const rend::PostProcessPtr& postEffect)
+{
+	mPostProcessEffects.erase(std::remove(mPostProcessEffects.begin(), mPostProcessEffects.end(), postEffect), mPostProcessEffects.end());
+}
+
+void Camera::RemoveAllPostProcessEffects()
+{
+	mPostProcessEffects.clear();
+}
+
+std::vector<mir::rend::PostProcessPtr> Camera::GetPostProcessEffects() const
+{
+	std::vector<mir::rend::PostProcessPtr> effects;
+	for (const auto& eff : mPostProcessEffects) {
+		if (eff->IsEnabled()) {
+			effects.push_back(eff);
+		}
+	}
+	return effects;
+}
+
+bool Camera::HasPostProcessEffect() const
+{
+	return std::find_if(mPostProcessEffects.begin(), mPostProcessEffects.end(), [](const rend::PostProcessPtr& pp) {
+		return pp->IsEnabled();
+	}) != mPostProcessEffects.end();
+}
+
 IFrameBufferPtr Camera::FetchOutput2PostProcess(std::vector<ResourceFormat> formats)
 {
 	if (mPostProcessInput == nullptr) {

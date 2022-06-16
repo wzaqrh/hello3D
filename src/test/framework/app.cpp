@@ -88,7 +88,7 @@ CoTask<void> App::Render()
 
 	//rotate camera
 	auto camera0 = mScneMng->GetDefCamera();
-	if (camera0 && mControlCamera)
+	if (camera0 && mControlCamera && !mGuiMng->WantCaptureMouse())
 	{
 		TransformPtr camera0Tranform = camera0->GetTransform();
 		if (!mCameraInitInvLengthForward.any()) {
@@ -116,7 +116,7 @@ CoTask<void> App::Render()
 		camera0->SetLookAt(mCameraInitLookAt + curInvForward * forwardLength, mCameraInitLookAt);
 	}
 
-	if (mTransform)
+	if (mTransform && !mGuiMng->WantCaptureMouse())
 	{
 		Eigen::Vector2f m = mInput->GetMouseMiddleLocation();
 		float mx = m.x();
@@ -134,22 +134,28 @@ CoTask<void> App::Render()
 	//rotate target
 	if (mTransform)
 	{
-		Eigen::Vector2f m = mInput->GetMouseLeftLocation();
-		float mx = 3.14 * -m.x();
-		float my = 3.14 * -m.y();
-		(fabs(mx) > fabs(my)) ? my = 0 : mx = 0;
+		if (!mGuiMng->WantCaptureMouse()) 
+		{
+			Eigen::Vector2f m = mInput->GetMouseLeftLocation();
+			float mx = 3.14 * -m.x();
+			float my = 3.14 * -m.y();
+			(fabs(mx) > fabs(my)) ? my = 0 : mx = 0;
 
-		auto quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
-			* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
-			* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY()) 
-			* mTransform->GetRotation();
-		mTransform->SetRotation(quat);
-
-		if (mInput->IsKeyPressed(DIK_UPARROW)) {
-			mTransform->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(0, 0, 5));
+			auto quat = Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ())
+				* Eigen::AngleAxisf(my, Eigen::Vector3f::UnitX())
+				* Eigen::AngleAxisf(mx, Eigen::Vector3f::UnitY())
+				* mTransform->GetRotation();
+			mTransform->SetRotation(quat);
 		}
-		else if (mInput->IsKeyPressed(DIK_DOWNARROW)) {
-			mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0, 0, 5));
+
+		if (!mGuiMng->WantCaptureKeyboard()) 
+		{
+			if (mInput->IsKeyPressed(DIK_UPARROW)) {
+				mTransform->SetPosition(mTransform->GetPosition() + Eigen::Vector3f(0, 0, 5));
+			}
+			else if (mInput->IsKeyPressed(DIK_DOWNARROW)) {
+				mTransform->SetPosition(mTransform->GetPosition() - Eigen::Vector3f(0, 0, 5));
+			}
 		}
 	}
 	CoAwait mContext->Update(mTimer->mDeltaTime);

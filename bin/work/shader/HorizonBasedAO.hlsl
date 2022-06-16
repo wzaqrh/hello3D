@@ -12,6 +12,12 @@
 #define USE_GNORMAL 1
 #endif
 
+#define DEBUG_SSAO_CHANNEL_AO 1
+#define DEBUG_SSAO_CHANNEL_BLUR 2
+#if !defined DEBUG_SSAO_CHANNEL
+#define DEBUG_SSAO_CHANNEL 0
+#endif
+
 MIR_DECLARE_TEX2D(PrePassOutput, 9);
 
 cbuffer cbHBAo : register(b3)
@@ -153,7 +159,12 @@ float4 PSBlurX(PixelInput input) : SV_Target
 	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
 	blurIn.resolution = FrameBufferSize;
 	blurIn.depthParam = DepthParam;
+	
+#if DEBUG_SSAO_CHANNEL == DEBUG_SSAO_CHANNEL_AO
+	return MIR_SAMPLE_TEX2D(PrePassOutput, input.texUV);
+#else
 	return BilateralBlurX(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(PrePassOutput));
+#endif
 }
 
 float4 PSBlurY(PixelInput input) : SV_Target
@@ -162,6 +173,14 @@ float4 PSBlurY(PixelInput input) : SV_Target
 	blurIn.blurRadiusFallOffSharp = BlurRadiusFallOffSharp;
 	blurIn.resolution = FrameBufferSize;
 	blurIn.depthParam = DepthParam;
-	float4 finalColor = BilateralBlurY(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(PrePassOutput));
-	return finalColor * MIR_SAMPLE_TEX2D(_SceneImage, input.texUV);
+	float4 finalColor;
+#if DEBUG_SSAO_CHANNEL == DEBUG_SSAO_CHANNEL_AO
+	finalColor = MIR_SAMPLE_TEX2D(PrePassOutput, input.texUV);
+#elif DEBUG_SSAO_CHANNEL == DEBUG_SSAO_CHANNEL_BLUR
+	finalColor = BilateralBlurY(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(PrePassOutput));
+#else
+	finalColor = BilateralBlurY(input.texUV, blurIn, MIR_PASS_TEX2D(_GDepth), MIR_PASS_TEX2D(PrePassOutput));
+	finalColor *= MIR_SAMPLE_TEX2D(_SceneImage, input.texUV);
+#endif
+	return finalColor;
 }

@@ -87,4 +87,16 @@ CoTask<void> GuiManager::UpdateFrame(float dt)
 	CoReturn;
 }
 
+bool GuiManager::WantCaptureMouse() const
+{
+	ImGuiIO& io = ImGui::GetIO();
+	return io.WantCaptureMouse;
+}
+
+bool GuiManager::WantCaptureKeyboard() const
+{
+	ImGuiIO& io = ImGui::GetIO();
+	return io.WantCaptureKeyboard;
+}
+
 }

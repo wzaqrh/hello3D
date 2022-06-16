@@ -769,12 +769,14 @@ private:
 		std::map<std::string, std::vector<float>> Dic;
 		std::vector<std::string> TmpStrKeyValues, TmpStrTokens;
 	};
-	static bool ParseRenderType(const boost_property_tree::ptree& node, int& renderType, std::string& renderTypeStr) {
+	static bool ParseRenderType(const boost_property_tree::ptree& node, int& renderType, std::string& renderTypeStr)
+	{
 		static std::vector<std::tuple<std::string, std::string, int>> renderTypePatterns = {
 			{"", "Background", RENDER_TYPE_BACKGROUND},
 			{"", "Geometry", RENDER_TYPE_GEOMETRY},
 			{"", "Transparent", RENDER_TYPE_TRANSPARENT},
 			{"", "Overlay", RENDER_TYPE_OVERLAY},
+			{"", "UI", RENDER_TYPE_UI},
 		};
 		renderTypeStr = node.get<std::string>("RenderType", renderTypeStr);
 		if (!renderTypeStr.empty()) {

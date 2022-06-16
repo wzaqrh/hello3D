@@ -27,6 +27,10 @@ class MIR_CORE_API PostProcess : public RenderableSingleRenderOp
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	PostProcess(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& material);
+	void SetEnabled(bool enable);
+	bool IsEnabled() const { return mEnabled; }
+private:
+	bool mEnabled = true;
 };
 
 class MIR_CORE_API PostProcessFactory {

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{19CFA14B-D0B8-43E9-8261-5D2672AC196C}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\framework">
+      <UniqueIdentifier>{98A1C637-04F7-4572-9772-B3E2650AF72C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\test\framework\app.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\test\framework\create_app.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\test\framework\test_case.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\test\framework\window.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\test\test_ssao.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\test\framework\gui.cpp">
+      <Filter>Source Files\framework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\test\framework\app.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\test\framework\create_app.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\test\framework\test_case.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\test\framework\window.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\test\framework\gui.h">
+      <Filter>Source Files\framework</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

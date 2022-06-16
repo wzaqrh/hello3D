@@ -57,14 +57,17 @@ public:
 
 	void SetSkyBox(const rend::SkyBoxPtr& skybox);
 	void AddPostProcessEffect(const rend::PostProcessPtr& postEffect);
+	void RemovePostProcessEffect(const rend::PostProcessPtr& postEffect);
+	void RemoveAllPostProcessEffects();
 	IFrameBufferPtr FetchOutput2PostProcess(std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(float scale = 1, std::vector<ResourceFormat> formats = { kFormatR8G8B8A8UNorm,kFormatD24UNormS8UInt });
 	IFrameBufferPtr SetOutput(IFrameBufferPtr output);
 
 	const rend::SkyBoxPtr& GetSkyBox() const { return mSkyBox; }
-	const std::vector<rend::PostProcessPtr>& GetPostProcessEffects() const { return mPostProcessEffects; }
+	std::vector<rend::PostProcessPtr> GetPostProcessEffects() const;
 	const IFrameBufferPtr& GetPostProcessInput() const { return mPostProcessInput; }
 	const IFrameBufferPtr& GetOutput() const { return mOutput; }
+	bool HasPostProcessEffect() const;
 	
 	const Eigen::Matrix4f& GetView() const;
 	const Eigen::Matrix4f& GetProjection() const;

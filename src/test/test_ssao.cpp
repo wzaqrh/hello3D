@@ -11,6 +11,11 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
+	void CleanUp() override {
+		mGuiDebugChannel.Dispose();
+	}
+private:
+	GuiDebugWindow mGuiDebugChannel;
 };
 
 CoTask<bool> TestSSAO::OnInitScene()
@@ -20,6 +25,8 @@ CoTask<bool> TestSSAO::OnInitScene()
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(40.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
+
+	mGuiDebugChannel.Init(mContext);
 
 	AssimpModelPtr mModel;
 	test1::res::model model;
@@ -36,10 +43,12 @@ CoTask<bool> TestSSAO::OnInitScene()
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mGuiDebugChannel.AddModel(mModel);
 		mTransform = CoAwait model.Init("dragon", mModel);
 		mTransform->SetScale(Eigen::Vector3f(0.007, 0.007, 0.007));
 
 		auto floor = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mGuiDebugChannel.AddModel(floor);
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
 		floorModel->SetScale(Eigen::Vector3f(0.1, 0.1, 0.1));
@@ -57,11 +66,16 @@ CoTask<bool> TestSSAO::OnInitScene()
 				.Build();
 			camera->AddPostProcessEffect(effect);
 			camera->SetRenderingPath(mir::kRenderPathDeffered);
+
+			mGuiDebugChannel.AddPostProcessEffect(effect);
 		}
 	}break;
 	default:
 		break;
 	}
+
+	mGuiDebugChannel.AddSSAOCmd();
+
 	CoReturn true;
 }
 

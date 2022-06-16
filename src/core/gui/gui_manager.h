@@ -18,6 +18,8 @@ public:
 	CoTask<void> UpdateFrame(float dt);
 
 	gui::GuiCanvasPtr GetCanvas() const { return mCanvas; }
+	bool WantCaptureMouse() const;
+	bool WantCaptureKeyboard() const;
 private:
 	gui::GuiCanvasPtr mCanvas;
 	std::vector<std::function<CoTask<void>()>> mCmds;

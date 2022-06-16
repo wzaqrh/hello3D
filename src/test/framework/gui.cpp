@@ -2,10 +2,12 @@
 #include "core/mir_config_macros.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/renderable/assimp_model.h"
+#include "core/renderable/post_process.h"
 #include "core/scene/light.h"
 #include "core/scene/camera.h"
 #include "core/scene/transform.h"
 #include "core/scene/scene_manager.h"
+
 using namespace mir;
 using namespace mir::rend;
 
@@ -17,6 +19,11 @@ void GuiDebugWindow::Init(mir::Mir* ctx)
 void GuiDebugWindow::AddModel(const mir::rend::AssimpModelPtr& model)
 {
 	mModels.push_back(model);
+}
+
+void GuiDebugWindow::AddPostProcessEffect(const mir::rend::PostProcessPtr& effect)
+{
+	mEffects.push_back(effect);
 }
 
 void GuiDebugWindow::Dispose()
@@ -56,6 +63,23 @@ CoTask<void> GuiDebugWindow::UpdateMtlsKeywords(std::string keyword, int value)
 	CoReturn;
 }
 
+CoTask<void> GuiDebugWindow::UpdateEffectMtlsKeywords(std::string keyword, int value)
+{
+	COROUTINE_VARIABLES_2(keyword, value);
+
+	if (mEffectMtls.empty()) {
+		for (auto& m : mEffects) {
+			m->GetMaterials(mEffectMtls);
+		}
+	}
+
+	for (auto& mtl : mEffectMtls) {
+		mtl.UpdateKeyword(keyword, value);
+		CoAwait mtl.CommitKeywords(__LaunchAsync__, *mContext->ResourceMng());
+	}
+	CoReturn;
+}
+
 void GuiDebugWindow::AddAllCmds() 
 {
 	AddRenderingPathSWCmd();
@@ -71,12 +95,17 @@ void GuiDebugWindow::AddRenderingPathSWCmd()
 	auto canvas = sceneMng->CreateGuiCanvasNode();
 	auto cmd = [=]()->CoTask<void>
 	{
+		//const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+		//ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+
+		//ImGui::Begin("rendering path");
 		ImGui::Text("current rendering-path: %s", (mRenderingPath == kRenderPathForward ? "forward" : "deferred"));
 		ImGui::SameLine();
 		if (ImGui::Button("switch")) {
 			mRenderingPath = (mRenderingPath + 1) % 2;
 			camera->SetRenderingPath((RenderingPath)mRenderingPath);
 		}
+		//ImGui::End();
 		CoReturn;
 	};
 	guiMng->AddCommand(cmd);
@@ -90,9 +119,11 @@ void GuiDebugWindow::AddIBLPunctualSWCmd()
 	auto cmd = [=]()->CoTask<void>
 	{
 		if (mRenderingPath == kRenderPathForward) {
+			//ImGui::Begin("ibl && punctual");
 		#define MACRO_CHECK_BOX(LABEL, VAR) if (ImGui::Checkbox(LABEL, &_##VAR)) CoAwait UpdateMtlsKeywords(#VAR, _##VAR);
 			MACRO_CHECK_BOX("enable IBL", USE_IBL);
 			MACRO_CHECK_BOX("enable Punctual", USE_PUNCTUAL);
+			//ImGui::End();
 		}
 		CoReturn;
 	};
@@ -106,6 +137,7 @@ void GuiDebugWindow::AddDebugChannelCmd()
 	auto canvas = sceneMng->CreateGuiCanvasNode();
 	auto cmd = [=]()->CoTask<void>
 	{
+		//ImGui::Begin("debug channel");
 		if (mRenderingPath == kRenderPathForward) {
 			const char* items[] = {
 				"none", "shadow", "uv0", "uv1", "normal texture", "geometry normal",
@@ -144,8 +176,57 @@ void GuiDebugWindow::AddDebugChannelCmd()
 		}
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		//ImGui::End();
 		CoReturn;
 	};
 	guiMng->AddCommand(cmd);
 }
 
+void GuiDebugWindow::AddSSAOCmd()
+{
+	AddPostProcessCmd();
+
+	auto sceneMng = mContext->SceneMng();
+	auto guiMng = mContext->GuiMng();
+
+	auto canvas = sceneMng->CreateGuiCanvasNode();
+	auto cmd = [=]()->CoTask<void>
+	{
+		const char* items[] = {
+			"none", "debug_ssao", "debug_ssao_blur"
+		};
+
+		int item_macros[] = {
+			0, 1, 2
+		};
+
+		if (ImGui::ListBox("debug aaso", &_DEBUG_SSAO_CHANNEL, items, IM_ARRAYSIZE(items), 8)) {
+			int debug_channel = item_macros[_DEBUG_SSAO_CHANNEL];
+			CoAwait UpdateEffectMtlsKeywords("DEBUG_SSAO_CHANNEL", debug_channel);
+		}
+		CoReturn;
+	};
+	guiMng->AddCommand(cmd);
+}
+
+void GuiDebugWindow::AddPostProcessCmd()
+{
+	auto sceneMng = mContext->SceneMng();
+	auto guiMng = mContext->GuiMng();
+
+	auto canvas = sceneMng->CreateGuiCanvasNode();
+	auto cmd = [=]()->CoTask<void>
+	{
+		ImGui::Text("enable post effect: %s", (mEnablePostProcEffects ? "true" : "false"));
+		ImGui::SameLine();
+		if (ImGui::Button("switch")) {
+			mEnablePostProcEffects = (mEnablePostProcEffects + 1) % 2;
+			
+			for (auto& eff : mEffects) {
+				eff->SetEnabled(mEnablePostProcEffects);
+			}
+		}
+		CoReturn;
+	};
+	guiMng->AddCommand(cmd);
+}

@@ -356,6 +356,16 @@ public:
 
 		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRT[RENDER_TYPE_OVERLAY]);
 	}
+	void RenderUI()
+	{
+		auto depth_state = mStatesBlock.LockDepth();
+		auto blend_state = mStatesBlock.LockBlend();
+
+		depth_state(DepthState::MakeFor3D(false));
+		blend_state(BlendState::MakeAlphaNonPremultiplied());
+
+		RenderLight(*mPerFrame, nullptr, LIGHTMODE_FORWARD_BASE, mOpsByRT[RENDER_TYPE_UI]);
+	}
 	void RenderPostProcess(const IFrameBufferPtr& fbInput)
 	{
 		auto blend_state = mStatesBlock.LockBlend();
@@ -365,7 +375,7 @@ public:
 		depth_state(DepthState::MakeFor3D(false));
 
 		auto scene_image = Camera.GetPostProcessInput();
-		auto& effects = Camera.GetPostProcessEffects();
+		auto effects = Camera.GetPostProcessEffects();
 		std::vector<IFrameBufferPtr> tempOutputs(effects.size());
 		for (size_t i = 0; i < tempOutputs.size() - 1; ++i)
 			tempOutputs[i] = mFbBank->Borrow();
@@ -629,38 +639,38 @@ void RenderPipeline::GetDefferedMaterial(res::MaterialInstance& mtl) const
 
 void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
-	//if (lights.empty()) return;
-
-	if (camera.GetPostProcessInput())
+	if (camera.HasPostProcessEffect())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
 	CameraRender render(*this, rends, camera, lights);
 	render.Clear();
 	render.RenderForwardPath();
 
-	if (camera.GetPostProcessInput()) {
+	if (camera.HasPostProcessEffect()) {
 		mStatesBlock.FrameBuffer.Pop();
 
 		render.RenderPostProcess(camera.GetPostProcessInput());
 	}
+
+	render.RenderUI();
 }
 
 void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
-	//if (lights.empty()) return;
-
-	if (camera.GetPostProcessInput())
+	if (camera.HasPostProcessEffect())
 		mStatesBlock.FrameBuffer.Push(camera.GetPostProcessInput());
 
 	CameraRender render(*this, rends, camera, lights);
 	render.Clear();
 	render.RenderDefferedPath();
 
-	if (camera.GetPostProcessInput()) {
+	if (camera.HasPostProcessEffect()) {
 		mStatesBlock.FrameBuffer.Pop();
 
 		render.RenderPostProcess(camera.GetPostProcessInput());
 	}
+
+	render.RenderUI();
 }
 
 void RenderPipeline::Render(const RenderableCollection& rends, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights)

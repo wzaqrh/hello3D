@@ -135,7 +135,8 @@ CoTask<bool> MaterialInstance::CommitKeywords(Launch launchMode, ResourceManager
 	auto mtl = CoAwait resMng.CreateMaterialT(launchMode, mSelf->LoadParam);
 	CoAwait resMng.SwitchToLaunchService(__LaunchSync__);
 
-	*mSelf = *mtl.mSelf;
+	mSelf->Material = mtl.mSelf->Material;
+	mSelf->LoadParam = mtl.mSelf->LoadParam;
 	CoReturn true;
 }
 
