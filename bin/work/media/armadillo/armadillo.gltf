@@ -134,7 +134,7 @@
   "materials": [
     {
       "doubleSided": true,
-      "name": "DefaultMaterial",
+      "name": "defaultMaterial",
       "normalTexture": {
         "index": 2
       },

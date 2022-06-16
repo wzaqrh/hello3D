@@ -8,7 +8,7 @@
 		<UseTexture>tGrpPostProc</UseTexture>
 		<Uniform Name="cbBloom" Slot="3" ShareMode="PerMaterial">
 			<Element Name="_SceneImage_TexelSize" Type="float4"></Element>
-			<Element Name="BloomThresholdIntensity" Type="float4" Default="0.25,0.25,0.25,0.8"></Element>
+			<Element Name="BloomThresholdIntensity" Type="float4" Default="0.5,0.5,0.5,0.5"></Element>
 			<Element Name="LensFlareThesholdIntensity" Type="float4" Default="0.1,0.1,0.1,0.2"></Element>
 			<Element Name="BlurIterationSpread" Type="float4" Default="2.5,0,0,0"></Element>
 			<Element Name="LensColors" Type="float4" Count="4" Default="0.4,0.4,0.8,0.75, 0.4,0.8,0.8,0.75, 0.8,0.4,0.8,0.75, 0.8,0.4,0.0,0.75"></Element>
@@ -23,16 +23,17 @@
 	</PROGRAM>
 	
 	<SubShader>
+		<RenderType>Overlay</RenderType>
 		<!-- sampling down : 3 pass -->
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSDownSample</PixelEntry>
 			</PROGRAM>
 			<GrabPass>DownSample2{size:0.5}</GrabPass>
 		</Pass>
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSDownSample</PixelEntry>
 			</PROGRAM>
@@ -40,7 +41,7 @@
 			<GrabPass>DownSample4{size:0.25}</GrabPass>
 		</Pass>
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSAvgBlur</PixelEntry>
 			</PROGRAM>
@@ -49,7 +50,7 @@
 		</Pass>
 		<!-- threshold : 1 pass -->
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSColorThreshold</PixelEntry>
 			</PROGRAM>
@@ -58,7 +59,7 @@
 		</Pass>
 		<!-- blur : 3 pass -->
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSBlurX</PixelEntry>
 			</PROGRAM>
@@ -66,7 +67,7 @@
 			<GrabPass>GBlurX4{size:0.25}</GrabPass>
 		</Pass>
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSBlurY</PixelEntry>
 			</PROGRAM>
@@ -75,7 +76,7 @@
 		</Pass>
 		<!-- sampling up : 3 pass -->
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSAvgBlur</PixelEntry>
 			</PROGRAM>
@@ -83,16 +84,16 @@
 			<GrabPass>ABlurY4_1{size:0.5}</GrabPass>
 		</Pass>
 		<!-- blend : 1 pass -->
-		<Pass>
-			<Tags> <LightMode>PostProcess1</LightMode> </Tags>
+		<Pass1>
+			<LightMode>PostProcess1</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSLensThreshold</PixelEntry>
 			</PROGRAM>
 			<UseGrab>ABlurY4_1{bind_slot:8}</UseGrab>
 			<GrabPass>LensThreshold4{size:0.25}</GrabPass>
-		</Pass>
+		</Pass1>
 		<Pass>
-			<Tags> <LightMode>PostProcess</LightMode> </Tags>
+			<LightMode>PostProcess</LightMode>
 			<PROGRAM> 
 				<PixelEntry>PSBlendAdd</PixelEntry>
 			</PROGRAM>

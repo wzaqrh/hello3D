@@ -19,7 +19,7 @@
 			<Element Name="ClearCoatTransUV"		Type="float4" Default="0,0,1,1"></Element>
 			
 			<Element Name="AlbedoFactor"            Type="float4" Default="1,1,1,1"></Element>
-			<Element Name="EmissiveFactor"          Type="float4" Default="1,1,1,1"></Element>
+			<Element Name="EmissiveFactor"          Type="float4" Default="0,0,0,0"></Element>
 			<Element Name="SheenColorRoughness"     Type="float4" Default="0,0,0,0"></Element>
 			<Element Name="ClearCoatRoughness"      Type="float4" Default="0,0,0,0"></Element>
 			<Element Name="NormalScale"             Type="float"  Default="1"></Element>

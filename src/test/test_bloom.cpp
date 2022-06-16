@@ -12,33 +12,33 @@ protected:
 	CoTask<bool> OnInitScene() override;
 	void OnInitLight() override {}
 	void OnInitCamera() override {}
+	void CleanUp() override {
+		mGuiDebugChannel.Dispose();
+	}
 private:
-	AssimpModelPtr mModel;
+	GuiDebugWindow mGuiDebugChannel;
 };
-
-inline MaterialLoadParamBuilder GetMatName(int secondIndex) {
-	MaterialLoadParamBuilder mlpb(MAT_MODEL);
-	mlpb["PBR_MODE"] = 2;
-	return mlpb;
-}
 
 CoTask<bool> TestBloom::OnInitScene()
 {
 	//SetPPU(1);
-	TIME_PROFILE("testSSAO.OnInitScene");
+	TIME_PROFILE("testBloom.OnInitScene");
 
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(45.0);
 	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
-	bool isShadowVSM = mContext->Config().IsShadowVSM();
-
+	mGuiDebugChannel.Init(mContext);
+	
+	AssimpModelPtr mModel;
 	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0:
 	case 1: {
-		if (mCaseIndex == 1) {
-			camera->SetLookAt(Eigen::Vector3f(0, 5, -5), Eigen::Vector3f::Zero());
+		bool isShadowVSM = mContext->Config().IsShadowVSM();
+
+		if (mCaseIndex == 0) {
+			camera->SetLookAt(Eigen::Vector3f(0, 10, -10), Eigen::Vector3f::Zero());
 
 			auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 			dir_light->SetLightRadius(1.0);
@@ -55,14 +55,12 @@ CoTask<bool> TestBloom::OnInitScene()
 		}
 
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
-		skyMat["CubeMapIsRightHandness"] = TRUE;
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), skyMat));
 
-		MaterialLoadParamBuilder modelMat = GetMatName(mCaseSecondIndex);
-		modelMat["CubeMapIsRightHandness"] = TRUE;
-
+		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 	#if 1
 		auto floor = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+		mGuiDebugChannel.AddModel(floor);
 		auto floorModel = CoAwait model.Init("floor", floor);
 		floorModel->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
 
@@ -75,10 +73,11 @@ CoTask<bool> TestBloom::OnInitScene()
 
 	#if 1
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
-		if (mCaseIndex == 1) {
+		mGuiDebugChannel.AddModel(mModel);
+		if (mCaseIndex == 0) {
 			mTransform = CoAwait model.Init("buddha", mModel);
+			mTransform->SetPosition(Eigen::Vector3f(0, 2, 0));
 			mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
-			//mTransform->SetPosition(Eigen::Vector3f(0, 2, 0));
 
 			if (isShadowVSM) mTransform->SetScale(Eigen::Vector3f(5, 5, 5));
 		}
@@ -89,14 +88,17 @@ CoTask<bool> TestBloom::OnInitScene()
 		}
 	#endif
 
-		camera->SetRenderingPath((mir::RenderingPath)mCaseSecondIndex);
-
 		auto effect = CoAwait PostProcessFactory(mRendFac).CreateBloom();
 		camera->AddPostProcessEffect(effect);
+		camera->SetRenderingPath(kRenderPathDeffered);
+		mGuiDebugChannel.AddPostProcessEffect(effect);
 	}break;
 	default:
 		break;
 	}
+
+	mGuiDebugChannel.AddPostProcessCmd();
+	mGuiDebugChannel.AddAllCmds();
 	CoReturn true;
 }
 

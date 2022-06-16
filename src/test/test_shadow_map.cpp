@@ -27,7 +27,6 @@ CoTask<bool> TestShadowMap::OnInitScene()
 
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(45.0);
-	camera->SetRenderingPath((RenderingPath)mCaseSecondIndex);
 
 	mGuiDebugChannel.Init(mContext);
 
@@ -38,8 +37,8 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	case 1: {
 		bool isShadowVSM = mContext->Config().IsShadowVSM();
 
-		if (mCaseIndex == 1) {
-			camera->SetLookAt(Eigen::Vector3f(0, 5, -5), Eigen::Vector3f::Zero());
+		if (mCaseIndex == 0) {
+			camera->SetLookAt(Eigen::Vector3f(0, 10, -10), Eigen::Vector3f::Zero());
 
 			auto dir_light = mScneMng->CreateLightNode<DirectLight>();
 			dir_light->SetLightRadius(1.0);
@@ -75,8 +74,9 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	#if 1
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
 		mGuiDebugChannel.AddModel(mModel);
-		if (mCaseIndex == 1) {
+		if (mCaseIndex == 0) {
 			mTransform = CoAwait model.Init("buddha", mModel);
+			mTransform->SetPosition(Eigen::Vector3f(0, 2, 0));
 			mTransform->SetEulerAngles(Eigen::Vector3f(0, 3.14, 0));
 
 			if (isShadowVSM) mTransform->SetScale(Eigen::Vector3f(5, 5, 5));

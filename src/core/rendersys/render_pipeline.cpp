@@ -593,7 +593,7 @@ RenderPipeline::RenderPipeline(RenderSystem& renderSys, ResourceManager& resMng,
 	DEBUG_SET_PRIV_DATA(mShadowMap, "render_pipeline.shadow_map");
 
 	mGBuffer = resMng.CreateFrameBuffer(__LaunchSync__, fbSize, 
-		MakeResFormats(kFormatR16G16B16A16UNorm,//Pos 
+		MakeResFormats(kFormatR16G16B16A16Float,//Pos 
 			kFormatR16G16B16A16UNorm,//Normal 
 			kFormatR8G8B8A8UNorm,//Albedo 
 			kFormatR8G8B8A8UNorm,//Emissive 

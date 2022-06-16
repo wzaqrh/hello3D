@@ -494,7 +494,7 @@
   ],
   "meshes": [
     {
-      "name": "Object_0",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -508,7 +508,7 @@
       ]
     },
     {
-      "name": "Object_1",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -522,7 +522,7 @@
       ]
     },
     {
-      "name": "Object_2",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -536,7 +536,7 @@
       ]
     },
     {
-      "name": "Object_3",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -550,7 +550,7 @@
       ]
     },
     {
-      "name": "Object_4",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -564,7 +564,7 @@
       ]
     },
     {
-      "name": "Object_5",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -578,7 +578,7 @@
       ]
     },
     {
-      "name": "Object_6",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -592,7 +592,7 @@
       ]
     },
     {
-      "name": "Object_7",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -606,7 +606,7 @@
       ]
     },
     {
-      "name": "Object_8",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -620,7 +620,7 @@
       ]
     },
     {
-      "name": "Object_9",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {
@@ -634,7 +634,7 @@
       ]
     },
     {
-      "name": "Object_10",
+      "name": "material_0",
       "primitives": [
         {
           "attributes": {

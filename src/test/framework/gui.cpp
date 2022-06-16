@@ -162,11 +162,11 @@ void GuiDebugWindow::AddDebugChannelCmd()
 		}
 		else {
 			const char* items[] = {
-				"none", "gbuffer-pos", "gbuffer-normal", "gbuffer-albedo"
+				"none", "gbuffer-pos", "gbuffer-normal", "gbuffer-albedo", "shadow"
 			};
 
 			int item_macros[] = {
-				DEBUG_CHANNEL_NONE, DEBUG_CHANNEL_GBUFFER_POS, DEBUG_CHANNEL_GBUFFER_NORMAL, DEBUG_CHANNEL_GBUFFER_ALBEDO
+				DEBUG_CHANNEL_NONE, DEBUG_CHANNEL_GBUFFER_POS, DEBUG_CHANNEL_GBUFFER_NORMAL, DEBUG_CHANNEL_GBUFFER_ALBEDO, DEBUG_CHANNEL_SHADOW
 			};
 
 			if (ImGui::ListBox("debug channel", &_DEBUG_CHANNEL, items, IM_ARRAYSIZE(items), 8)) {
