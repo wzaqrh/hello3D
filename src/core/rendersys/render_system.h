@@ -15,6 +15,7 @@ namespace mir {
 enum DeviceResourceType {
 	kDeviceResourceInputLayout,
 	kDeviceResourceProgram,
+	kDeviceResourceVertexArray,
 	kDeviceResourceVertexBuffer,
 	kDeviceResourceIndexBuffer,
 	kDeviceResourceContantBuffer,
@@ -47,10 +48,12 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
 	virtual void CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment) {}
 
-	virtual IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data) = 0;
+	virtual void SetVertexArray(IVertexArrayPtr vao) = 0;
+
+	virtual IIndexBufferPtr LoadIndexBuffer(IResourcePtr res, IVertexArrayPtr vao, ResourceFormat format, const Data& data) = 0;
 	virtual void SetIndexBuffer(IIndexBufferPtr indexBuffer) = 0;
 
-	virtual IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data) = 0;
+	virtual IVertexBufferPtr LoadVertexBuffer(IResourcePtr res, IVertexArrayPtr vao, int stride, int offset, const Data& data) = 0;
 	virtual void SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count) = 0;
 	void SetVertexBuffers(const std::vector<IVertexBufferPtr>& vertexBuffers, size_t slot = 0) { 
 		SetVertexBuffers(slot, &vertexBuffers[0], vertexBuffers.size()); 

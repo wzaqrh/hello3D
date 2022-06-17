@@ -54,6 +54,7 @@ private:
 	vbSkeletonVector mSkeletonVertexs;
 	std::vector<uint32_t> mIndices;
 	
+	IVertexArrayPtr mVao;
 	IVertexBufferPtr mVBOSurface, mVBOSkeleton;
 	IIndexBufferPtr mIndexBuffer;
 	res::MaterialInstance mMaterial;

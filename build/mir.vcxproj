@@ -94,6 +94,39 @@
     <ClInclude Include="..\src\core\rendersys\frame_buffer_bank.h" />
     <ClInclude Include="..\src\core\rendersys\hardware_buffer.h" />
     <ClInclude Include="..\src\core\rendersys\input_layout.h" />
+    <ClInclude Include="..\src\core\rendersys\ogl\blob_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\framebuffer_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\hardware_buffer_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\input_layout_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\ogl_bind.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\ogl_caps.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\ogl_utils.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\predeclare.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\program_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\render_system_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\texture_ogl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\predeclare.h" />
     <ClInclude Include="..\src\core\rendersys\program.h" />
     <ClInclude Include="..\src\core\rendersys\render_pipeline.h" />
@@ -174,6 +207,33 @@
     <ClCompile Include="..\src\core\rendersys\d3d11\texture11.cpp" />
     <ClCompile Include="..\src\core\rendersys\frame_buffer_bank.cpp" />
     <ClCompile Include="..\src\core\rendersys\hardware_buffer.cpp" />
+    <ClCompile Include="..\src\core\rendersys\ogl\blob_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\framebuffer_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\hardware_buffer_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\input_layout_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\ogl_caps.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\ogl_utils.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\program_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\render_system_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\texture_ogl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp" />
     <ClCompile Include="..\src\core\resource\assimp_factory.cpp" />
     <ClCompile Include="..\src\core\resource\assimp_mesh.cpp" />
@@ -189,6 +249,7 @@
     <ClCompile Include="..\src\core\scene\scene_manager.cpp" />
     <ClCompile Include="..\src\core\scene\scene_node.cpp" />
     <ClCompile Include="..\src\core\scene\transform.cpp" />
+    <ClCompile Include="..\src\glad\glad.c" />
     <ClCompile Include="..\src\imgui\imgui.cpp" />
     <ClCompile Include="..\src\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\src\imgui\imgui_draw.cpp" />
@@ -365,7 +426,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;_ENABLE_EXTENDED_ALIGNED_STORAGE;MIR_CORE_SOURCE;_GLFW_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

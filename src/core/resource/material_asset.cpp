@@ -263,10 +263,12 @@ private:
 		auto& vertexScd = progNode.VertexSCD;
 		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
 		vertexScd.EntryPoint = nodeProgram.get<std::string>("VertexEntry", vertexScd.EntryPoint);
+		vertexScd.ShaderType = kShaderVertex;
 
 		auto& pixelScd = progNode.PixelSCD;
 		pixelScd.SourcePath = vertexScd.SourcePath;
 		pixelScd.EntryPoint = nodeProgram.get<std::string>("PixelEntry", pixelScd.EntryPoint);
+		vertexScd.ShaderType = kShaderPixel;
 
 		auto find_macros = nodeProgram.find("Macros");
 		if (find_macros != nodeProgram.not_found()) {

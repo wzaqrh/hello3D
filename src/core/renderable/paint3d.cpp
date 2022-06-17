@@ -9,9 +9,8 @@ namespace rend {
 /********** Paint3DBase **********/
 const Eigen::Vector2f UV_ZERO = Eigen::Vector2f::Zero();
 
-Paint3DBase::Paint3DBase(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matLine)
-	: mLaunchMode(launchMode)
-	, mResMng(resMng)
+Paint3DBase::Paint3DBase(Launch lchMode, ResourceManager& resMng, const res::MaterialInstance& matLine)
+	: mResMng(resMng)
 	, mMaterial(matLine)
 {
 	mColor = -1;
@@ -21,8 +20,8 @@ Paint3DBase::Paint3DBase(Launch launchMode, ResourceManager& resMng, const res::
 	mIndices.resize(1024);
 	mVertexs.resize(1024);
 
-	mIndexBuffer = resMng.CreateIndexBuffer(__launchMode__, kFormatR16UInt, Data::MakeSize(mIndices));
-	mVertexBuffer = resMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(mVertexs));
+	mIndexBuffer = resMng.CreateIndexBuffer(lchMode, mVao, kFormatR16UInt, Data::MakeSize(mIndices));
+	mVertexBuffer = resMng.CreateVertexBuffer(lchMode, mVao, sizeof(vbSurface), 0, Data::MakeSize(mVertexs));
 }
 
 void Paint3DBase::GenRenderOperation(RenderOperationQueue& ops)
@@ -73,7 +72,7 @@ void Paint3DBase::SetColor(const Eigen::Vector4f& color)
 
 /********** LinePaint3D **********/
 LinePaint3D::LinePaint3D(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matLine)
-	: Super(launchMode, resMng, matLine)
+: Super(launchMode, resMng, matLine)
 {}
 
 void LinePaint3D::DrawLine(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1)
@@ -139,7 +138,7 @@ void LinePaint3D::DrawAABBEdge(const Eigen::AlignedBox3f& aabb)
 
 /********** Cube **********/
 Paint3D::Paint3D(Launch launchMode, ResourceManager& resMng, const res::MaterialInstance& matTri, const res::MaterialInstance& matLine)
-	: Super(launchMode, resMng, matTri)
+: Super(launchMode, resMng, matTri)
 {
 	mLinePaint = CreateInstance<LinePaint3D>(launchMode, resMng, matLine);
 }

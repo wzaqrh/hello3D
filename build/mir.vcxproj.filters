@@ -52,13 +52,7 @@
     <ClInclude Include="..\src\core\base\math.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\base\debug.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\base\input.h">
-      <Filter>src\core\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\base\d3d.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\base\declare_macros.h">
@@ -122,28 +116,28 @@
       <Filter>src\core\rendersys\interface</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\program11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\texture11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\blob11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\framebuffer11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\hardware_buffer11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\input_layout11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\predeclare.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\render_system11.h">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\resource\material_name.h">
       <Filter>src\core\resource\material</Filter>
@@ -301,6 +295,45 @@
     <ClInclude Include="..\src\core\base\md5.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\blob_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\framebuffer_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\hardware_buffer_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\input_layout_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\predeclare.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\program_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\render_system_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\texture_ogl.h">
+      <Filter>src\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\d3d.h">
+      <Filter>src\d3d11\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\base\debug.h">
+      <Filter>src\core\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\ogl_bind.h">
+      <Filter>src\ogl\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\ogl_utils.h">
+      <Filter>src\ogl\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\ogl\ogl_caps.h">
+      <Filter>src\ogl\utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\renderable\mesh.cpp">
@@ -330,13 +363,7 @@
     <ClCompile Include="..\src\core\rendersys\render_pipeline.cpp">
       <Filter>src\core\rendersys</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\base\debug.cpp">
-      <Filter>src\core\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\base\input.cpp">
-      <Filter>src\core\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\core\base\d3d.cpp">
       <Filter>src\core\base</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\resource\resource_manager.cpp">
@@ -358,25 +385,25 @@
       <Filter>src\core\scene</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\blob11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\input_layout11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\program11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\hardware_buffer11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\texture11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\framebuffer11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\render_system11.cpp">
-      <Filter>src\core\rendersys\d3d11</Filter>
+      <Filter>src\d3d11</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\renderable\cube.cpp">
       <Filter>src\core\renderable</Filter>
@@ -462,6 +489,42 @@
     <ClCompile Include="..\src\core\base\md5.c">
       <Filter>src\core\base</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\blob_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\framebuffer_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\hardware_buffer_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\input_layout_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\program_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\render_system_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\texture_ogl.cpp">
+      <Filter>src\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\base\d3d.cpp">
+      <Filter>src\d3d11\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glad\glad.c">
+      <Filter>src\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\base\debug.cpp">
+      <Filter>src\core\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\ogl_utils.cpp">
+      <Filter>src\ogl\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\ogl\ogl_caps.cpp">
+      <Filter>src\ogl\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -478,9 +541,6 @@
     </Filter>
     <Filter Include="src\core\rendersys">
       <UniqueIdentifier>{993128c3-5fee-4bc0-affc-ad669474108b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\core\rendersys\d3d11">
-      <UniqueIdentifier>{f250c8ce-8ba6-4cb0-9e90-5df274b393e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\renderable\label">
       <UniqueIdentifier>{4f2df5f0-039c-4b83-928b-29bddbdb363f}</UniqueIdentifier>
@@ -535,6 +595,21 @@
     </Filter>
     <Filter Include="src\core\gui">
       <UniqueIdentifier>{0351dce9-e6d3-4bb0-92cc-880096f2870c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\glad">
+      <UniqueIdentifier>{ee8ae5c2-d261-49af-a4f7-2fdf39bc7e21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ogl">
+      <UniqueIdentifier>{73edf17d-4b54-4a4a-96ee-6148f5e5ed83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\d3d11">
+      <UniqueIdentifier>{f250c8ce-8ba6-4cb0-9e90-5df274b393e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\d3d11\utility">
+      <UniqueIdentifier>{6eb44b6e-9da6-43a0-9c5c-b9e44fbfc4bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ogl\utility">
+      <UniqueIdentifier>{1897f425-bf18-4cd5-9f5f-3b98400ab2a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

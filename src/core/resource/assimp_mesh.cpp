@@ -9,15 +9,17 @@ namespace res {
 AssimpMesh::AssimpMesh()
 {}
 
-void AssimpMesh::Build(Launch launchMode, ResourceManager& resourceMng)
+void AssimpMesh::Build(Launch launchMode, ResourceManager& resMng)
 {
-	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(mIndices));
+	mVao = resMng.CreateVertexArray(launchMode);
+
+	mIndexBuffer = resMng.CreateIndexBuffer(__launchMode__, mVao, kFormatR32UInt, Data::Make(mIndices));
 	DEBUG_SET_PRIV_DATA(mIndexBuffer, "assimp_mesh.index");
 
-	mVBOSurface = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::Make(mSurfVertexs));
+	mVBOSurface = resMng.CreateVertexBuffer(__launchMode__, mVao, sizeof(vbSurface), 0, Data::Make(mSurfVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.surface");
 
-	mVBOSkeleton = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
+	mVBOSkeleton = resMng.CreateVertexBuffer(__launchMode__, mVao, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.skeleton");
 }
 

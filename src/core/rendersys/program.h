@@ -10,6 +10,7 @@ struct ShaderCompileMacro {
 struct ShaderCompileDesc {
 	std::vector<ShaderCompileMacro> Macros;
 	std::string EntryPoint, ShaderModel, SourcePath;
+	int ShaderType;
 };
 inline bool operator==(const ShaderCompileMacro& l, const ShaderCompileMacro& r) {
 	return l.Name == r.Name

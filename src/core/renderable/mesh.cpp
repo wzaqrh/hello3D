@@ -10,10 +10,10 @@ Mesh::Mesh(Launch launchMode, ResourceManager& resMng, const res::MaterialInstan
 	:Super(launchMode, resMng, material)
 {
 	mIndices.resize(indexCount);
-	mIndexBuffer = mResMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(mIndices));
+	mIndexBuffer = mResMng.CreateIndexBuffer(mLaunchMode, mVao, kFormatR32UInt, Data::Make(mIndices));
 
 	mVertices.resize(vertCount);
-	mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
+	mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, mVao, sizeof(vbSurface), 0, Data::MakeSize(mVertices));
 	
 	mSubMeshs.resize(1);
 }

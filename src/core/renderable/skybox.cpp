@@ -19,7 +19,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const res::Mater
 		Vertexs[1].Pos = Eigen::Vector3f(fLowW, fHighH, 1.0f);
 		Vertexs[2].Pos = Eigen::Vector3f(fHighW, fLowH, 1.0f);
 		Vertexs[3].Pos = Eigen::Vector3f(fHighW, fHighH, 1.0f);
-		mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
+		mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, mVao, sizeof(SkyboxVertex), 0, Data::Make(Vertexs));
 	}
 	else {
 		SkyboxVertex Vertexs[36];
@@ -78,7 +78,7 @@ SkyBox::SkyBox(Launch launchMode, ResourceManager& resourceMng, const res::Mater
 
 		std::vector<SkyboxVertex> vec(Vertexs + 0, Vertexs + 36);
 		//face = 3; vec.assign(Vertexs + face * 6, Vertexs + (face + 1) * 6);
-		mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(SkyboxVertex), 0, Data::Make(vec));
+		mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, mVao, sizeof(SkyboxVertex), 0, Data::Make(vec));
 	}
 
 

@@ -53,13 +53,13 @@ void PostProcessVertexQuad::SetZ(float z)
 constexpr uint32_t CIndices[] = {
 	0, 1, 2, 0, 2, 3
 };
-PostProcess::PostProcess(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
-	: Super(launchMode, resourceMng, material)
+PostProcess::PostProcess(Launch lchMode, ResourceManager& resMng, const res::MaterialInstance& material)
+: Super(lchMode, resMng, material)
 {
-	mIndexBuffer = resourceMng.CreateIndexBuffer(launchMode, kFormatR32UInt, Data::Make(CIndices));
+	mIndexBuffer = resMng.CreateIndexBuffer(lchMode, mVao, kFormatR32UInt, Data::Make(CIndices));
 	
 	PostProcessVertexQuad quad(-1, -1, 2, 2);
-	mVertexBuffer = resourceMng.CreateVertexBuffer(launchMode, sizeof(PostProcessVertex), 0, Data::Make(quad));
+	mVertexBuffer = resMng.CreateVertexBuffer(lchMode, mVao, sizeof(PostProcessVertex), 0, Data::Make(quad));
 }
 
 void PostProcess::SetEnabled(bool enable)

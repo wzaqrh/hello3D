@@ -194,6 +194,8 @@ IResourcePtr RenderSystem11::CreateResource(DeviceResourceType deviceResType)
 		return MakePtr<InputLayout11>();
 	case mir::kDeviceResourceProgram:
 		return MakePtr<Program11>();
+	case mir::kDeviceResourceVertexArray:
+		return MakePtr<VertexArray11>();
 	case mir::kDeviceResourceVertexBuffer:
 		return MakePtr<VertexBuffer11>();
 	case mir::kDeviceResourceIndexBuffer:
@@ -421,7 +423,7 @@ void RenderSystem11::SetProgram(IProgramPtr program)
 	mDeviceContext->PSSetShader(NULLABLE(std::static_pointer_cast<PixelShader11>(program->GetPixel()), GetShader11().Get()), NULL, 0);
 }
 
-IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, int stride, int offset, const Data& data)
+IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, IVertexArrayPtr vao, int stride, int offset, const Data& data)
 {
 	//BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
@@ -476,7 +478,7 @@ void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertex
 	}
 }
 
-IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, ResourceFormat format, const Data& data)
+IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, IVertexArrayPtr vao, ResourceFormat format, const Data& data)
 {
 	//BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);

@@ -6,8 +6,8 @@ namespace mir {
 namespace rend {
 
 /********** TSprite **********/
-Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
-	: Super(launchMode, resourceMng, material)
+Sprite::Sprite(Launch lchMode, ResourceManager& resMng, const res::MaterialInstance& material)
+	: Super(lchMode, resMng, material)
 	, mQuad(Eigen::Vector2f::Zero(), Eigen::Vector2f::Zero())
 	, mQuadDirty(true)
 	, mColor(Eigen::Vector4f::Ones())
@@ -15,8 +15,8 @@ Sprite::Sprite(Launch launchMode, ResourceManager& resourceMng, const res::Mater
 	, mPosition(Eigen::Vector3f::Zero())
 	, mAnchor(Eigen::Vector3f::Zero())
 {
-	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(vbSurfaceQuad::GetIndices()));
-	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad)));
+	mIndexBuffer = resMng.CreateIndexBuffer(lchMode, mVao, kFormatR32UInt, Data::Make(vbSurfaceQuad::GetIndices()));
+	mVertexBuffer = resMng.CreateVertexBuffer(lchMode, mVao, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad)));
 
 	mQuad.FlipY();
 }

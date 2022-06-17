@@ -19,7 +19,9 @@ RenderableSingleRenderOp::RenderableSingleRenderOp(Launch launchMode, ResourceMa
 	: mResMng(resourceMng)
 	, mLaunchMode(launchMode)
 	, mMaterial(matInst)
-{}
+{
+	mVao = mResMng.CreateVertexArray(mLaunchMode);
+}
 
 ITexturePtr RenderableSingleRenderOp::GetTexture() const 
 {

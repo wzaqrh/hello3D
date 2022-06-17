@@ -7,15 +7,15 @@ namespace mir {
 namespace rend {
 
 /********** Cube **********/
-Cube::Cube(Launch launchMode, ResourceManager& resourceMng, const res::MaterialInstance& material)
-	: Super(launchMode, resourceMng, material)
+Cube::Cube(Launch lchMode, ResourceManager& resMng, const res::MaterialInstance& material)
+	: Super(lchMode, resMng, material)
 	, mVertexDirty(true)
 	, mHalfSize(Eigen::Vector3f::Ones())
 	, mPosition(Eigen::Vector3f::Zero())
 	, mColor(Eigen::Vector4f::Ones())
 {
-	mIndexBuffer = resourceMng.CreateIndexBuffer(__launchMode__, kFormatR32UInt, Data::Make(vbSurfaceCube::GetIndices()));
-	mVertexBuffer = resourceMng.CreateVertexBuffer(__launchMode__, sizeof(vbSurface), 0, Data::MakeSize(sizeof(mVertexData)));
+	mIndexBuffer = resMng.CreateIndexBuffer(lchMode, mVao, kFormatR32UInt, Data::Make(vbSurfaceCube::GetIndices()));
+	mVertexBuffer = resMng.CreateVertexBuffer(lchMode, mVao, sizeof(vbSurface), 0, Data::MakeSize(sizeof(mVertexData)));
 }
 
 void Cube::SetPosition(const Eigen::Vector3f& center)

@@ -27,6 +27,7 @@ public:
 	int WinHeight() const { return WinSize().y(); }
 
 #define TRANSMIT_MEMFAC_FUNCTION(FAC, RETURN_TYPE, FUNC_NAME) TemplateArgs RETURN_TYPE FUNC_NAME(T &&...args) ThreadSafe { return FAC->FUNC_NAME(std::forward<T>(args)...); }
+	TRANSMIT_MEMFAC_FUNCTION(mDeviceResFac, IVertexArrayPtr, CreateVertexArray, ThreadSafe);
 	TRANSMIT_MEMFAC_FUNCTION(mDeviceResFac, IIndexBufferPtr, CreateIndexBuffer, ThreadSafe);
 	TRANSMIT_MEMFAC_FUNCTION(mDeviceResFac, IVertexBufferPtr, CreateVertexBuffer, ThreadSafe); 
 	TRANSMIT_MEMFAC_FUNCTION(mDeviceResFac, IContantBufferPtr, CreateConstBuffer, ThreadSafe); 

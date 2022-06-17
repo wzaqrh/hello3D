@@ -21,6 +21,8 @@
 #pragma comment(lib, "dxerr.lib")
 #pragma comment(lib, "dxguid.lib")
 
+#pragma comment(lib, "glfw3.lib")
+
 #ifdef _DEBUG
 #pragma comment(lib, "cppcorod.lib")
 #pragma comment(lib, "FreeImagePlusd.lib")

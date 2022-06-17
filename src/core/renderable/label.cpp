@@ -28,8 +28,8 @@ Label::Label(Launch launchMode, ResourceManager& resourceMng, const res::Materia
 	: Super(launchMode, resourceMng, material)
 {
 	mFont = font;
-	mIndexBuffer = mResMng.CreateIndexBuffer(mLaunchMode, kFormatR32UInt, Data::Make(sIndiceData.Indices));
-	mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
+	mIndexBuffer = mResMng.CreateIndexBuffer(mLaunchMode, mVao, kFormatR32UInt, Data::Make(sIndiceData.Indices));
+	mVertexBuffer = mResMng.CreateVertexBuffer(mLaunchMode, mVao, sizeof(vbSurface), 0, Data::MakeSize(sizeof(vbSurfaceQuad) * CMaxStringLength));
 }
 
 void Label::GenRenderOperation(RenderOperationQueue& opList)

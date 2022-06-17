@@ -25,6 +25,7 @@ private:
 private:
 	Launch mLchMode;
 	ResourceManager& mResMng;
+	IVertexArrayPtr mVao;
 	RenderOperation mRop;
 	ITexturePtr mFontTex;
 private:

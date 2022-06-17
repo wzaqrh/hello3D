@@ -20,6 +20,11 @@ public:
 	HWMemoryUsage Usage;
 };
 
+class VertexArray11 : public ImplementResource<IVertexArray>
+{
+
+};
+
 class VertexBuffer11 : public ImplementResource<IVertexBuffer>
 {
 public:

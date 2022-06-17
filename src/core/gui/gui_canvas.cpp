@@ -70,19 +70,24 @@ CoTask<void> GuiCanvas::UpdateFrame(float dt)
 	ImDrawData* draw_data = ImGui::GetDrawData();
 	if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f) CoReturn;
 
+	if (mVao == nullptr)
+	{
+		mVao = mResMng.CreateVertexArray(mLchMode);
+	}
+
 	if (mRop.VertexBuffers.empty() || this->mVertexBufferSize < draw_data->TotalVtxCount)
 	{
 		this->mVertexBufferSize = draw_data->TotalVtxCount + 5000;
 
 		mRop.VertexBuffers.resize(1);
-		mRop.VertexBuffers[0] = mResMng.CreateVertexBuffer(mLchMode, sizeof(ImDrawVert), 0, Data::Make(nullptr, this->mVertexBufferSize * sizeof(ImDrawVert)));
+		mRop.VertexBuffers[0] = mResMng.CreateVertexBuffer(mLchMode, mVao, sizeof(ImDrawVert), 0, Data::Make(nullptr, this->mVertexBufferSize * sizeof(ImDrawVert)));
 	}
 
-	if (!mRop.IndexBuffer || this->mIndexBufferSize < draw_data->TotalIdxCount)
+	if (mRop.IndexBuffer == nullptr || this->mIndexBufferSize < draw_data->TotalIdxCount)
 	{
 		this->mIndexBufferSize = draw_data->TotalIdxCount + 10000;
 
-		mRop.IndexBuffer = mResMng.CreateIndexBuffer(mLchMode, sizeof(ImDrawIdx) == 2 ? kFormatR16UInt : kFormatR32UInt, Data::Make(nullptr, this->mIndexBufferSize * sizeof(ImDrawIdx)));
+		mRop.IndexBuffer = mResMng.CreateIndexBuffer(mLchMode, mVao, sizeof(ImDrawIdx) == 2 ? kFormatR16UInt : kFormatR32UInt, Data::Make(nullptr, this->mIndexBufferSize * sizeof(ImDrawIdx)));
 	}
 
 	{

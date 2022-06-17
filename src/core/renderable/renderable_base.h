@@ -33,6 +33,7 @@ protected:
 	ResourceManager& mResMng;
 	const Launch mLaunchMode;
 	res::MaterialInstance mMaterial;
+	IVertexArrayPtr mVao;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 	Eigen::AlignedBox3f mAABB;

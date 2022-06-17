@@ -22,8 +22,8 @@ public:
 	void GetMaterials(std::vector<res::MaterialInstance>& mtls) const override;
 protected:
 	ResourceManager& mResMng;
-	const Launch mLaunchMode;
 	res::MaterialInstance mMaterial;
+	IVertexArrayPtr mVao;
 	IVertexBufferPtr mVertexBuffer;
 	IIndexBufferPtr mIndexBuffer;
 protected:

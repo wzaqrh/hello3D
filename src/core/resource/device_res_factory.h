@@ -20,6 +20,11 @@ class MIR_CORE_API DeviceResFactory : boost::noncopyable
 public:
 	DeviceResFactory(RenderSystem& renderSys) :mRenderSys(renderSys) {}
 
+	TemplateArgs IVertexArrayPtr CreateVertexArray(Launch launchMode, T &&...args) ThreadSafe {
+		auto res = mRenderSys.CreateResource(kDeviceResourceVertexArray); ResSetLaunch;
+		res->SetLoaded();
+		return std::static_pointer_cast<IVertexArray>(res);
+	}
 	TemplateArgs IIndexBufferPtr CreateIndexBuffer(Launch launchMode, T &&...args) ThreadSafe {
 		auto res = mRenderSys.CreateResource(kDeviceResourceIndexBuffer); ResSetLaunch;
 		mRenderSys.LoadIndexBuffer(res, std::forward<T>(args)...);

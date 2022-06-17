@@ -62,8 +62,13 @@ template <> struct tpl::has_function_name<CbDeclElement> : public std::true_type
 
 struct ConstBufferDecl : public tpl::Vector<CbDeclElement> { size_t BufferSize = 0; };
 
+interface IVertexArray : public IResource {
+
+};
+
 interface IHardwareBuffer : public IResource
 {
+	virtual IVertexArrayPtr GetVAO() const { return nullptr; }
 	virtual HardwareBufferType GetType() const = 0;
 	virtual int GetBufferSize() const = 0;
 	virtual HWMemoryUsage GetUsage() const = 0;
