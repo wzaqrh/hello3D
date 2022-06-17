@@ -22,7 +22,6 @@ public:
 
 class VertexArray11 : public ImplementResource<IVertexArray>
 {
-
 };
 
 class VertexBuffer11 : public ImplementResource<IVertexBuffer>
@@ -30,8 +29,9 @@ class VertexBuffer11 : public ImplementResource<IVertexBuffer>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	VertexBuffer11() :Stride(0), Offset(0) {}
-	void Init(ComPtr<ID3D11Buffer>&& buffer, int bufferSize, HWMemoryUsage usage, int stride, int offset);
+	void Init(ComPtr<ID3D11Buffer>&& buffer, IVertexArrayPtr vao, int bufferSize, HWMemoryUsage usage, int stride, int offset);
 public:
+	IVertexArrayPtr GetVAO() const override { return Vao; }
 	HWMemoryUsage GetUsage() const override { return hd.Usage; }
 	int GetBufferSize() const override { return hd.BufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferVertex; }
@@ -43,6 +43,7 @@ public:
 public:
 	unsigned int Stride, Offset;
 	HardwareBuffer hd;
+	IVertexArrayPtr Vao;
 };
 
 class IndexBuffer11 : public ImplementResource<IIndexBuffer>
@@ -50,8 +51,9 @@ class IndexBuffer11 : public ImplementResource<IIndexBuffer>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	IndexBuffer11() :Format(kFormatUnknown) {}
-	void Init(ComPtr<ID3D11Buffer>&& buffer, int bufferSize, ResourceFormat format, HWMemoryUsage usage);
+	void Init(ComPtr<ID3D11Buffer>&& buffer, IVertexArrayPtr vao, int bufferSize, ResourceFormat format, HWMemoryUsage usage);
 public:
+	IVertexArrayPtr GetVAO() const override { return Vao; }
 	HWMemoryUsage GetUsage() const override { return hd.Usage; }
 	int GetBufferSize() const override { return hd.BufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferIndex; }
@@ -63,6 +65,7 @@ public:
 public:
 	ResourceFormat Format;
 	HardwareBuffer hd;
+	IVertexArrayPtr Vao;
 };
 
 class ContantBuffer11 : public ImplementResource<IContantBuffer>

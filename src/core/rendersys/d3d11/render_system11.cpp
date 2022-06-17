@@ -6,7 +6,7 @@
 #include <dxerr.h>
 #include <d3dcompiler.h>
 #include "core/mir_config.h"
-#include "core/base/d3d.h"
+#include "core/rendersys/d3d11/d3d_utils.h"
 #include "core/base/debug.h"
 #include "core/base/input.h"
 #include "core/base/macros.h"
@@ -227,7 +227,7 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
 	framebuffer->SetSize(size.head<2>());
-	int colorCount = IF_AND_OR(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(formats.back())) || formats.back() == kFormatUnknown, formats.size() - 1, formats.size());
+	int colorCount = IF_AND_OR(IsDepthStencil(formats.back()) || formats.back() == kFormatUnknown, formats.size() - 1, formats.size());
 	for (size_t i = 0; i < colorCount; ++i)
 		framebuffer->SetAttachColor(i, FrameBufferAttachFactory::CreateColorAttachment(mDevice, size, formats[i]));
 	if (colorCount != formats.size())
@@ -313,8 +313,7 @@ IInputLayoutPtr RenderSystem11::LoadLayout(IResourcePtr res, IProgramPtr pProgra
 
 	Program11Ptr program11 = std::static_pointer_cast<Program11>(pProgram);
 	auto programBlob = program11->mVertex->GetBlob();
-	if (CheckHR(mDevice->CreateInputLayout(&ret->mInputDescs[0], ret->mInputDescs.size(),
-		programBlob->GetBytes(), programBlob->GetSize(), &ret->mLayout))) 
+	if (CheckHR(mDevice->CreateInputLayout(&ret->mInputDescs[0], ret->mInputDescs.size(), programBlob->GetBytes(), programBlob->GetSize(), &ret->mLayout))) 
 		return nullptr;
 
 	return ret;
@@ -357,7 +356,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 		compile.EntryPoint.c_str(), compile.ShaderModel.c_str(),
 		shaderFlags, 0,
 		&blob->mBlob, &blobError);
-	if (debug::CheckCompileFailed(hr, blobError.Get())) return nullptr;
+	if (d3d::CheckCompileFailed(hr, blobError.Get())) return nullptr;
 
 	return blob;
 }
@@ -374,15 +373,13 @@ IShaderPtr RenderSystem11::CreateShader(int type, IBlobDataPtr data)
 	switch (type) {
 	case kShaderVertex: {
 		VertexShader11Ptr ret = MakePtr<VertexShader11>(data);
-		if (debug::CheckCompileFailed(
-			mDevice->CreateVertexShader(data->GetBytes(), data->GetSize(), NULL, &ret->mShader), data))
+		if (d3d::CheckCompileFailed(mDevice->CreateVertexShader(data->GetBytes(), data->GetSize(), NULL, &ret->mShader), data))
 			return nullptr;		
 		return ret;
 	}break;
 	case kShaderPixel: {
 		PixelShader11Ptr ret = MakePtr<PixelShader11>(data);
-		if (debug::CheckCompileFailed(
-			mDevice->CreatePixelShader(data->GetBytes(), data->GetSize(), NULL, &ret->mShader), data)) 
+		if (d3d::CheckCompileFailed(mDevice->CreatePixelShader(data->GetBytes(), data->GetSize(), NULL, &ret->mShader), data)) 
 			return nullptr;
 		return ret;
 	}break;
@@ -426,7 +423,7 @@ void RenderSystem11::SetProgram(IProgramPtr program)
 IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, IVertexArrayPtr vao, int stride, int offset, const Data& data)
 {
 	//BOOST_ASSERT(IsCurrentInMainThread());
-	BOOST_ASSERT(res);
+	BOOST_ASSERT(res && vao);
 
 	HWMemoryUsage usage = data.Bytes ? kHWUsageImmutable : kHWUsageDynamic;
 
@@ -449,7 +446,7 @@ IVertexBufferPtr RenderSystem11::LoadVertexBuffer(IResourcePtr res, IVertexArray
 	if (CheckHR(mDevice->CreateBuffer(&bd, data.Bytes ? &InitData : nullptr, &pVertexBuffer))) return nullptr;
 
 	VertexBuffer11Ptr vbuffer = std::static_pointer_cast<VertexBuffer11>(res);
-	vbuffer->Init(std::move(pVertexBuffer), data.Size, usage, stride, offset);
+	vbuffer->Init(std::move(pVertexBuffer), vao, data.Size, usage, stride, offset);
 	return vbuffer;
 }
 void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count)
@@ -481,7 +478,7 @@ void RenderSystem11::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertex
 IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, IVertexArrayPtr vao, ResourceFormat format, const Data& data)
 {
 	//BOOST_ASSERT(IsCurrentInMainThread());
-	BOOST_ASSERT(res);
+	BOOST_ASSERT(res && vao);
 
 	HWMemoryUsage usage = data.Bytes ? kHWUsageImmutable : kHWUsageDynamic;
 
@@ -504,7 +501,7 @@ IIndexBufferPtr RenderSystem11::LoadIndexBuffer(IResourcePtr res, IVertexArrayPt
 	if (CheckHR(mDevice->CreateBuffer(&bd, data.Bytes ? &InitData : nullptr, &pIndexBuffer))) return nullptr;
 
 	IndexBuffer11Ptr ibuffer = std::static_pointer_cast<IndexBuffer11>(res);
-	ibuffer->Init(std::move(pIndexBuffer), data.Size, format, usage);
+	ibuffer->Init(std::move(pIndexBuffer), vao, data.Size, format, usage);
 	return ibuffer;
 }
 void RenderSystem11::SetIndexBuffer(IIndexBufferPtr indexBuffer)
@@ -629,7 +626,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 			const Data& data = datas[index];
 			D3D11_SUBRESOURCE_DATA& res_data = initDatas[index];
 			res_data.pSysMem = data.Bytes;
-			res_data.SysMemPitch = data.Size ? data.Size : d3d::BytePerPixel(static_cast<DXGI_FORMAT>(format)) * (size.x() >> mip);//Line width in bytes
+			res_data.SysMemPitch = data.Size ? data.Size : BytePerPixel(format) * (size.x() >> mip);//Line width in bytes
 			res_data.SysMemSlicePitch = imageSize; //only used for 3d textures
 		}
 	}
@@ -720,9 +717,6 @@ void RenderSystem11::SetSamplers(size_t slot, const ISamplerStatePtr samplers[],
 
 bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 {
-	DEBUG_LOG_CALLSTK("renderSys11._SetBlendState");
-	BOOST_ASSERT(IsCurrentInMainThread());
-
 	ComPtr<ID3D11BlendState> pBlendState;
 	auto iter = mDxBlendStates.find(blendFunc);
 	if (iter != mDxBlendStates.end()) {
@@ -730,7 +724,7 @@ bool RenderSystem11::_SetBlendState(const BlendState& blendFunc)
 	}
 	else {
 		D3D11_BLEND_DESC blendDesc = { 0 };
-		blendDesc.RenderTarget[0].BlendEnable = true;
+		blendDesc.RenderTarget[0].BlendEnable = (blendFunc.Src != kBlendOne) || (blendFunc.Dst != kBlendZero);
 		blendDesc.RenderTarget[0].SrcBlend = static_cast<D3D11_BLEND>(blendFunc.Src);
 		blendDesc.RenderTarget[0].DestBlend = static_cast<D3D11_BLEND>(blendFunc.Dst);
 		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
@@ -760,9 +754,6 @@ void RenderSystem11::SetBlendState(const BlendState& blendFunc)
 
 bool RenderSystem11::_SetDepthState(const DepthState& depthState)
 {
-	DEBUG_LOG_CALLSTK("renderSys11._SetDepthState");
-	BOOST_ASSERT(IsCurrentInMainThread());
-
 	ComPtr<ID3D11DepthStencilState> pDSState;
 	auto iter = mDxDSStates.find(depthState);
 	if (iter != mDxDSStates.end()) {
@@ -784,6 +775,9 @@ bool RenderSystem11::_SetDepthState(const DepthState& depthState)
 }
 void RenderSystem11::SetDepthState(const DepthState& depthState)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetDepthState");
+	BOOST_ASSERT(IsCurrentInMainThread());
+
 	if (mCurDepthState != depthState) {
 		mCurDepthState = depthState;
 		_SetDepthState(mCurDepthState);
@@ -792,9 +786,6 @@ void RenderSystem11::SetDepthState(const DepthState& depthState)
 
 bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
 {
-	DEBUG_LOG_CALLSTK("renderSys11._SetRasterizerState");
-	BOOST_ASSERT(IsCurrentInMainThread());
-
 	ComPtr<ID3D11RasterizerState> pRasterizerState;
 	auto iter = mDxRasterStates.find(rasterState);
 	if (iter != mDxRasterStates.end()) {
@@ -814,23 +805,20 @@ bool RenderSystem11::_SetRasterizerState(const RasterizerState& rasterState)
 	}
 
 	mDeviceContext->RSSetState(pRasterizerState.Get());
-	if (rasterState.Scissor.Rects.size()) {
-		std::vector<D3D11_RECT> rects(rasterState.Scissor.Rects.size());
-		for (size_t i = 0; i < rects.size(); ++i) {
-			rects[i].left = rasterState.Scissor.Rects[i].x();
-			rects[i].top = rasterState.Scissor.Rects[i].y();
-			rects[i].right = rasterState.Scissor.Rects[i].z();
-			rects[i].bottom = rasterState.Scissor.Rects[i].w();
-		}
-		mDeviceContext->RSSetScissorRects(rasterState.Scissor.Rects.size(), &rects[0]);
-	}
-	else {
-		mDeviceContext->RSSetScissorRects(0, nullptr);
-	}
+
+	D3D11_RECT rect;
+	rect.left = rasterState.Scissor.Rect.x();
+	rect.top = rasterState.Scissor.Rect.y();
+	rect.right = rasterState.Scissor.Rect.z();
+	rect.bottom = rasterState.Scissor.Rect.w();
+	mDeviceContext->RSSetScissorRects(1, &rect);
 	return true;
 }
 void RenderSystem11::SetCullMode(CullMode cullMode)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetCullMode");
+	BOOST_ASSERT(IsCurrentInMainThread());
+
 	if (mCurRasterState.CullMode != cullMode) {
 		mCurRasterState.CullMode = cullMode;
 		_SetRasterizerState(mCurRasterState);
@@ -838,6 +826,9 @@ void RenderSystem11::SetCullMode(CullMode cullMode)
 }
 void RenderSystem11::SetFillMode(FillMode fillMode)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetFillMode");
+	BOOST_ASSERT(IsCurrentInMainThread());
+
 	if (mCurRasterState.FillMode != fillMode) {
 		mCurRasterState.FillMode = fillMode;
 		_SetRasterizerState(mCurRasterState);
@@ -845,6 +836,9 @@ void RenderSystem11::SetFillMode(FillMode fillMode)
 }
 void RenderSystem11::SetDepthBias(const DepthBias& bias)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetDepthBias");
+	BOOST_ASSERT(IsCurrentInMainThread());
+
 	if (mCurRasterState.DepthBias != bias) {
 		mCurRasterState.DepthBias = bias;
 		_SetRasterizerState(mCurRasterState);
@@ -852,6 +846,9 @@ void RenderSystem11::SetDepthBias(const DepthBias& bias)
 }
 void RenderSystem11::SetScissorState(const ScissorState& scissor)
 {
+	DEBUG_LOG_CALLSTK("renderSys11.SetScissorState");
+	BOOST_ASSERT(IsCurrentInMainThread());
+
 	if (mCurRasterState.Scissor != scissor) {
 		mCurRasterState.Scissor = scissor;
 		_SetRasterizerState(mCurRasterState);

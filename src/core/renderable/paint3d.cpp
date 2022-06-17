@@ -20,6 +20,7 @@ Paint3DBase::Paint3DBase(Launch lchMode, ResourceManager& resMng, const res::Mat
 	mIndices.resize(1024);
 	mVertexs.resize(1024);
 
+	mVao = mResMng.CreateVertexArray(lchMode);
 	mIndexBuffer = resMng.CreateIndexBuffer(lchMode, mVao, kFormatR16UInt, Data::MakeSize(mIndices));
 	mVertexBuffer = resMng.CreateVertexBuffer(lchMode, mVao, sizeof(vbSurface), 0, Data::MakeSize(mVertexs));
 }

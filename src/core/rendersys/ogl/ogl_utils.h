@@ -1,6 +1,9 @@
 #pragma once
 #include <windows.h>
 #include <glad/glad.h>
+#include <gli/gl.hpp>
+#include <gli/dx.hpp>
+#include "core/mir_config.h"
 #include "core/rendersys/base/res_format.h"
 #include "core/rendersys/base/blend_state.h"
 #include "core/rendersys/base/compare_func.h"
@@ -10,10 +13,16 @@
 namespace mir {
 namespace ogl {
 
-GLenum GetGLFormat(ResourceFormat fmt);
-GLenum GetGLType(ResourceFormat fmt);
-bool IsNormalized(ResourceFormat fmt);
-size_t GetChannelCount(ResourceFormat fmt);
+struct GLFormatInfo {
+	gli::gl::internal_format InternalFormat;
+	gli::gl::external_format ExternalFormat;
+	gli::gl::type_format InternalType;
+	size_t ChannelCount;
+	bool IsNormalized;
+	bool IsCompressed;
+	bool IsSRgb;
+};
+GLFormatInfo GetGlFormatInfo(ResourceFormat fmt);
 
 std::tuple<GLenum, GLenum, GLenum> GetGLSamplerFilterMode(SamplerFilterMode sfmode);
 GLenum GetGlSamplerAddressMode(AddressMode addressMode);
@@ -22,11 +31,23 @@ GLenum GetGlCompFunc(CompareFunc compFunc);
 GLenum GetGlBlendFunc(BlendFunc func);
 GLenum GetGlBlendOp();
 
-GLenum GetShaderType(int type);
+GLenum GetGLShaderType(int type);
+
+GLenum GetGLTopologyType(PrimitiveTopology topo);
 
 GLenum GLCheckError(const char* file, int line);
-#define GL_CHECK_ERROR() GLCheckError(__FILE__, __LINE__)
 
-GLenum GetTopologyType(PrimitiveTopology topo);
+bool ValidateProgram(GLuint proId);
+bool CheckProgramCompileStatus(GLuint shaderId);
+bool CheckProgramLinkStatus(GLuint proId);
+
 }
 }
+
+#if defined MIR_D3D11_DEBUG
+#define GL_CHECK_ERROR()  mir::ogl::GLCheckError(__FILE__, __LINE__)
+#define CheckHR(Sentense) Sentense; GL_CHECK_ERROR()
+#else
+#define GL_CHECK_ERROR()
+#define CheckHR(Sentense) Sentense
+#endif

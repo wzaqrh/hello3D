@@ -62,8 +62,8 @@ CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 
 	if (launchMode == LaunchAsync) {
 		//if (! IsCurrentInAsyncService())
-		CoAwait mThreadPool->schedule();
-		BOOST_ASSERT(IsCurrentInAsyncService());
+		//CoAwait mThreadPool->schedule();
+		//BOOST_ASSERT(IsCurrentInAsyncService());
 	}
 	else {
 		if (IsCurrentInAsyncService())

@@ -11,7 +11,6 @@
 #include "core/base/tpl/atomic_map.h"
 #include "core/base/tpl/vector.h"
 #include "core/base/macros.h"
-#include "core/base/d3d.h"
 #include "core/resource/material_name.h"
 #include "core/resource/material_asset.h"
 
@@ -263,12 +262,10 @@ private:
 		auto& vertexScd = progNode.VertexSCD;
 		vertexScd.SourcePath = nodeProgram.get<std::string>("FileName", vertexScd.SourcePath);
 		vertexScd.EntryPoint = nodeProgram.get<std::string>("VertexEntry", vertexScd.EntryPoint);
-		vertexScd.ShaderType = kShaderVertex;
 
 		auto& pixelScd = progNode.PixelSCD;
 		pixelScd.SourcePath = vertexScd.SourcePath;
 		pixelScd.EntryPoint = nodeProgram.get<std::string>("PixelEntry", pixelScd.EntryPoint);
-		vertexScd.ShaderType = kShaderPixel;
 
 		auto find_macros = nodeProgram.find("Macros");
 		if (find_macros != nodeProgram.not_found()) {
@@ -370,17 +367,17 @@ private:
 				std::vector<std::string> strs;
 				SplitString(strs, it.second.data(), ",");
 				if (strs.size() >= 4) {
-					scissor.Rects.emplace_back(Eigen::Vector4i(std::stoi(strs[0]), std::stoi(strs[1]), std::stoi(strs[2]), std::stoi(strs[3])));
+					scissor.Rect = Eigen::Vector4i(std::stoi(strs[0]), std::stoi(strs[1]), std::stoi(strs[2]), std::stoi(strs[3]));
 				}
 			}
-			if (!strScissorEnable.empty() || scissor.Rects.size() > 0) {
+			if (!strScissorEnable.empty() || scissor.Rect.any()) {
 				static std::vector<std::tuple<std::string, std::string, int>> boolPatterns = {
 					{"", "True", TRUE},
 					{"", "true", TRUE},
 					{"", "False", FALSE},
 					{"", "false", FALSE},
 				};
-				scissor.ScissorEnable = GetNodeAttribute<bool>(strScissorEnable, (scissor.Rects.size() > 0), boolPatterns);
+				scissor.ScissorEnable = GetNodeAttribute<bool>(strScissorEnable, (scissor.Rect.any()), boolPatterns);
 				progNode.Scissor = std::move(scissor);
 			}
 
@@ -522,7 +519,7 @@ private:
 					kLayoutInputPerVertexData,
 					0
 				};
-				byteOffset = layoutJ.AlignedByteOffset + d3d::BytePerPixel(static_cast<DXGI_FORMAT>(layoutJ.Format));
+				byteOffset = layoutJ.AlignedByteOffset + BytePerPixel(layoutJ.Format);
 				++j;
 			}
 
@@ -828,7 +825,11 @@ private:
 
 				pass.Program = categNode.Program;
 				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
+				pass.Program.VertexSCD.AddMacro<true>(ShaderCompileMacro{ "SHADER_STAGE", boost::lexical_cast<std::string>(SHADER_STAGE_VERTEX) });
+				pass.Program.VertexSCD.ShaderType = kShaderVertex;
 				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "LIGHTMODE", boost::lexical_cast<std::string>(pprop.LightMode) });
+				pass.Program.PixelSCD.AddMacro<true>(ShaderCompileMacro{ "SHADER_STAGE", boost::lexical_cast<std::string>(SHADER_STAGE_PIXEL) });
+				pass.Program.PixelSCD.ShaderType = kShaderPixel;
 				int pindex = 0;
 				for (auto& it : boost::make_iterator_range(node_pass.equal_range("PROGRAM"))) {
 					ParseProgram(it.second, vis, pass.Program);

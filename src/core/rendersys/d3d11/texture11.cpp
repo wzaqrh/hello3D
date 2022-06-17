@@ -1,6 +1,6 @@
 #include "core/rendersys/d3d11/texture11.h"
 #include "core/base/debug.h"
-#include "core/base/d3d.h"
+#include "core/rendersys/d3d11/d3d_utils.h"
 
 namespace mir {
 
@@ -59,7 +59,7 @@ const ComPtr<ID3D11Texture2D>& Texture11::InitTex(const ComPtr<ID3D11Device>& de
 	desc.MipLevels = mAutoGenMipmap ? 0 : mMipCount;
 	desc.ArraySize = mFaceCount;
 	desc.Format = static_cast<DXGI_FORMAT>(mFormat);
-	desc.Format = d3d::IsDepthStencil(desc.Format) ? d3d::MakeTypeless(desc.Format) : desc.Format;
+	desc.Format = IsDepthStencil(mFormat) ? static_cast<DXGI_FORMAT>(MakeTypeless(mFormat)) : desc.Format;
 	desc.SampleDesc.Count = 1;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	if (mUsage == kHWUsageDefault) {
@@ -82,7 +82,7 @@ const ComPtr<ID3D11Texture2D>& Texture11::InitTex(const ComPtr<ID3D11Device>& de
 		desc.MiscFlags = 0;
 	}
 	if (mBindRTOrDS) {
-		desc.BindFlags |= d3d::IsDepthStencil(desc.Format) ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
+		desc.BindFlags |= IsDepthStencil(mFormat) ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
 	}
 
 	if (CheckHR(device->CreateTexture2D(&desc, datas, &mTex2D)))
@@ -98,7 +98,7 @@ const ComPtr<ID3D11ShaderResourceView>& Texture11::InitSRV(const ComPtr<ID3D11De
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = static_cast<DXGI_FORMAT>(mFormat);
-	srvDesc.Format = d3d::IsDepthStencil(srvDesc.Format) ? d3d::MakeTypeless1(srvDesc.Format) : srvDesc.Format;
+	srvDesc.Format = IsDepthStencil(mFormat) ? static_cast<DXGI_FORMAT>(MakeTypeless1(mFormat)) : srvDesc.Format;
 	srvDesc.ViewDimension = (mFaceCount > 1) ? D3D11_SRV_DIMENSION_TEXTURECUBE : D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = mAutoGenMipmap ? -1 : mMipCount;

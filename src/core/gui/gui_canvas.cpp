@@ -30,7 +30,7 @@ CoTask<bool> GuiCanvas::Init() ThreadMaySwitch
 
 	BOOST_ASSERT(!mRop.Material);
 	MaterialLoadParam mlp = "ImGui";
-	mRop.Material = CoAwait mResMng.CreateMaterialT(__LaunchAsync__, mlp);
+	mRop.Material = CoAwait mResMng.CreateMaterialT(__LaunchSync__, mlp);
 
 	{
 		unsigned char* pixels;
@@ -74,7 +74,6 @@ CoTask<void> GuiCanvas::UpdateFrame(float dt)
 	{
 		mVao = mResMng.CreateVertexArray(mLchMode);
 	}
-
 	if (mRop.VertexBuffers.empty() || this->mVertexBufferSize < draw_data->TotalVtxCount)
 	{
 		this->mVertexBufferSize = draw_data->TotalVtxCount + 5000;
@@ -156,7 +155,7 @@ CoTask<void> GuiCanvas::UpdateFrame(float dt)
 					pcmd->UserCallback(cmd_list, pcmd);
 			}
 			else
-			#endif
+		#endif
 			{
 				// Project scissor/clipping rectangles into framebuffer space
 				ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x, pcmd->ClipRect.y - clip_off.y);

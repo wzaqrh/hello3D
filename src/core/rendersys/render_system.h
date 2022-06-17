@@ -8,6 +8,7 @@
 #include "core/rendersys/hardware_buffer.h"
 #include "core/rendersys/program.h"
 #include "core/rendersys/sampler.h"
+#include "core/rendersys/texture.h"
 #include "core/rendersys/input_layout.h"
 
 namespace mir {
@@ -23,6 +24,19 @@ enum DeviceResourceType {
 	kDeviceResourceFrameBuffer,
 	kDeviceResourceSamplerState
 };
+struct DeviceResourceTraits {
+	template <typename T> struct ClassToType {};
+	template <> struct ClassToType<IInputLayout>  : public std::integral_constant<DeviceResourceType, kDeviceResourceInputLayout> {};
+	template <> struct ClassToType<IProgram>	  : public std::integral_constant<DeviceResourceType, kDeviceResourceProgram> {};
+	template <> struct ClassToType<IVertexArray>  : public std::integral_constant<DeviceResourceType, kDeviceResourceVertexArray> {};
+	template <> struct ClassToType<IVertexBuffer> : public std::integral_constant<DeviceResourceType, kDeviceResourceVertexBuffer> {};
+	template <> struct ClassToType<IIndexBuffer>  : public std::integral_constant<DeviceResourceType, kDeviceResourceIndexBuffer> {};
+	template <> struct ClassToType<IContantBuffer>	: public std::integral_constant<DeviceResourceType, kDeviceResourceContantBuffer> {};
+	template <> struct ClassToType<ITexture>		: public std::integral_constant<DeviceResourceType, kDeviceResourceTexture> {};
+	template <> struct ClassToType<IFrameBuffer>	: public std::integral_constant<DeviceResourceType, kDeviceResourceFrameBuffer> {};
+	template <> struct ClassToType<ISamplerState>	: public std::integral_constant<DeviceResourceType, kDeviceResourceSamplerState> {};
+	TemplateT static constexpr DeviceResourceType DetectType() { return ClassToType<T>::value; }
+};
 
 interface MIR_CORE_API IRenderSystem : boost::noncopyable 
 {
@@ -37,6 +51,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	
 	/***** about resource *****/
 	virtual IResourcePtr CreateResource(DeviceResourceType deviceResType) = 0;
+	template<class T> std::shared_ptr<T> CreateRes() { return std::static_pointer_cast<T>(CreateResource(DeviceResourceTraits::DetectType<T>())); }
 
 	//last formats is zstencil attachment
 	virtual IFrameBufferPtr GetBackFrameBuffer() = 0;
@@ -82,10 +97,21 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 
 	virtual ISamplerStatePtr LoadSampler(IResourcePtr res, const SamplerDesc& samplerDesc) = 0;
 	virtual void SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count) = 0;
+	void SetSamplers(const std::vector<ISamplerStatePtr>& samplers, size_t slot = 0) {
+		SetSamplers(slot, !samplers.empty() ? &samplers[0] : nullptr, samplers.size());
+	}
+	void SetSampler(ISamplerStatePtr sampler, size_t slot = 0) {
+		SetSamplers(slot, &sampler, 1);
+	}
 
 	virtual ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) = 0;
 	virtual void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) = 0;
-	void SetTexture(size_t slot, ITexturePtr texture) { SetTextures(slot, &texture, 1); }
+	void SetTextures(const std::vector<ITexturePtr> textures, size_t slot) {
+		SetTextures(slot, !textures.empty() ? &textures[0] : nullptr, textures.size());
+	}
+	void SetTexture(size_t slot, ITexturePtr texture) { 
+		SetTextures(slot, &texture, 1); 
+	}
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
 	virtual void GenerateMips(ITexturePtr texture) {}
 

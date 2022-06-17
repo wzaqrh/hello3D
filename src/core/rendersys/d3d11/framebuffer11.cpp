@@ -1,6 +1,6 @@
 #include "core/rendersys/d3d11/framebuffer11.h"
+#include "core/rendersys/d3d11/d3d_utils.h"
 #include "core/base/debug.h"
-#include "core/base/d3d.h"
 #include "core/base/macros.h"
 
 namespace mir {
@@ -59,7 +59,7 @@ FrameBufferAttachByTexture11Ptr FrameBufferAttachFactory::CreateColorAttachment(
 
 static Texture11Ptr _CreateZStencilAttachTexture(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector2i& size, ResourceFormat format)
 {
-	BOOST_ASSERT(d3d::IsDepthStencil(static_cast<DXGI_FORMAT>(format)));
+	BOOST_ASSERT(IsDepthStencil(format));
 	BOOST_ASSERT(format == kFormatD24UNormS8UInt
 		|| format == kFormatD32Float
 		|| format == kFormatD16UNorm);

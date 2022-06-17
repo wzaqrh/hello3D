@@ -46,6 +46,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ssao", "build\samples\ssao\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bloom", "build\samples\bloom\bloom.vcxproj", "{062A3654-6152-4BF1-81AC-9C0CE0995669}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gli", "build\gli\gli\gli.vcxproj", "{A8222BCB-AE40-4884-A11C-FD6C3B43B031}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -134,6 +136,14 @@ Global
 		{062A3654-6152-4BF1-81AC-9C0CE0995669}.Release|Win32.Build.0 = Release|Win32
 		{062A3654-6152-4BF1-81AC-9C0CE0995669}.Release|x64.ActiveCfg = Release|x64
 		{062A3654-6152-4BF1-81AC-9C0CE0995669}.Release|x64.Build.0 = Release|x64
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Debug|Win32.Build.0 = Debug|Win32
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Debug|x64.ActiveCfg = Debug|x64
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Debug|x64.Build.0 = Debug|x64
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Release|Win32.ActiveCfg = Release|Win32
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Release|Win32.Build.0 = Release|Win32
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Release|x64.ActiveCfg = Release|x64
+		{A8222BCB-AE40-4884-A11C-FD6C3B43B031}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

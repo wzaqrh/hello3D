@@ -1,14 +1,10 @@
 <Shader Name="ImGui">
-	<Include>Standard</Include>
-	
 	<PROGRAM>
 		<Attribute Name="vbImGui">
 			<Element SemanticName="POSITION" Format="rg32f"></Element>
 			<Element SemanticName="TEXCOORD" Format="rg32f"></Element>
 			<Element SemanticName="COLOR" 	 Format="rgba8un"></Element>
 		</Attribute>
-		<UseUniform>cbPerFrame</UseUniform>
-		<UseUniform>cbPerLight</UseUniform>
 		<Uniform Name="cbImGui" Slot="3" ShareMode="PerInstance">
 			<Element Name="ProjectionMatrix" Type="matrix" Count="0" Offset="0" Default="1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1"></Element>
 		</Uniform>
@@ -19,13 +15,13 @@
 		<FileName>ImGui</FileName>
 		<VertexEntry>VS</VertexEntry>
 		
-		<Topology>TriangleList</Topology>
-		<BlendFunc>Src_A,One_Minus_SrcA</BlendFunc>
-		<FillMode>Solid</FillMode>
-		<CullMode>None</CullMode>
-		<DepthEnable>False</DepthEnable>
-		<DepthFunc>LessEqual</DepthFunc>
-		<DepthWriteMask>All</DepthWriteMask>		
+		<Topology1>TriangleList</Topology1>
+		<BlendFunc1>Src_A,One_Minus_SrcA</BlendFunc1>
+		<FillMode1>Solid</FillMode1>
+		<CullMode1>None</CullMode1>
+		<DepthEnable1>False</DepthEnable1>
+		<DepthFunc1>LessEqual</DepthFunc1>
+		<DepthWriteMask1>All</DepthWriteMask1>		
 	</PROGRAM>
 	
 	<SubShader>

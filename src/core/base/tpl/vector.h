@@ -88,6 +88,8 @@ public:
 	reference First() { return mElements[0]; }
 	reference Last() { return mElements.back(); }
 
+	const std::vector<value_type>& ToVector() const { return mElements; }
+
 	std::pair<const_iterator, const_iterator> Range(size_t first, size_t last = -1) const {
 		return std::make_pair(mElements.begin() + first, last < mElements.size() ? mElements.begin() + last : mElements.end());
 	}

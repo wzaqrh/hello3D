@@ -34,7 +34,7 @@ private:
 private:
 	ResourceManager& mResMng;
 	RenderSystem& mRenderSys;
-	std::string mShaderDir;
+	std::string mShaderDir, mShaderExt;
 	struct ProgramKey {
 		std::string name;
 		ShaderCompileDesc vertexSCD, pixelSCD;

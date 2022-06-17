@@ -4,7 +4,7 @@
 
 namespace mir {
 
-void FrameBufferOGL::SetAttachColor(size_t slot, FrameBufferAttachOGLPtr attach) {
+void FrameBufferOGL::SetAttachColor(size_t slot, IFrameBufferAttachmentPtr attach) {
 	if (attach) {
 		if (mAttachColors.size() < slot + 1)
 			mAttachColors.resize(slot + 1);
@@ -16,6 +16,10 @@ void FrameBufferOGL::SetAttachColor(size_t slot, FrameBufferAttachOGLPtr attach)
 				mAttachColors.pop_back();
 		}
 	}
+}
+
+void FrameBufferOGL::SetAttachZStencil(IFrameBufferAttachmentPtr attach) {
+	mAttachZStencil = attach;
 }
 
 }

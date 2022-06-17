@@ -23,6 +23,7 @@ public:
 		return _ResourcePath;
 	}
 public:
+	IRenderSystem* _RenderSys = nullptr;
 	std::vector<std::pair<void*,std::string>> _DeviceChilds;
 	std::string _PrivData, _ResourcePath, _DebugInfo, _CallStack;
 };

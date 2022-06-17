@@ -68,7 +68,6 @@ interface IVertexArray : public IResource {
 
 interface IHardwareBuffer : public IResource
 {
-	virtual IVertexArrayPtr GetVAO() const { return nullptr; }
 	virtual HardwareBufferType GetType() const = 0;
 	virtual int GetBufferSize() const = 0;
 	virtual HWMemoryUsage GetUsage() const = 0;
@@ -76,6 +75,7 @@ interface IHardwareBuffer : public IResource
 
 interface IVertexBuffer : public IHardwareBuffer
 {
+	virtual IVertexArrayPtr GetVAO() const = 0;
 	virtual int GetStride() const = 0;
 	virtual int GetOffset() const = 0;
 	int GetCount() const { return GetBufferSize() / GetStride(); }
@@ -83,6 +83,7 @@ interface IVertexBuffer : public IHardwareBuffer
 
 interface IIndexBuffer : public IHardwareBuffer
 {
+	virtual IVertexArrayPtr GetVAO() const = 0;
 	virtual int GetWidth() const = 0;
 	virtual ResourceFormat GetFormat() const = 0;
 	int GetCount() const { return GetBufferSize() / GetWidth(); }

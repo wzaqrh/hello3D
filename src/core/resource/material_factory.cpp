@@ -1,6 +1,5 @@
 #include <unordered_map>
 #include <boost/format.hpp>
-#include "core/base/d3d.h"
 #include "core/base/macros.h"
 #include "core/base/debug.h"
 #include "core/resource/resource_manager.h"

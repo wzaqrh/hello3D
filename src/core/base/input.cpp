@@ -2,6 +2,8 @@
 #include "core/base/input.h"
 #include "core/base/debug.h"
 
+#define CheckHR(HR) FAILED(HR)
+
 namespace mir {
 namespace input {
 

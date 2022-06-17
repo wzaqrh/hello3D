@@ -2,7 +2,7 @@
 #include "core/base/debug.h"
 #include "core/base/macros.h"
 #include "core/rendersys/d3d11/render_system11.h"
-//#include "core/rendersys/d3d9/render_system9.h"
+#include "core/rendersys/ogl/render_system_ogl.h"
 #include "core/rendersys/render_system.h"
 #include "core/rendersys/render_pipeline.h"
 #include "core/resource/material_factory.h"
@@ -27,8 +27,9 @@ CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir)
 	if (mWorkDirectory.back() != '/') 
 		mWorkDirectory.push_back('/');
 
-#if 0
-	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<TRenderSystem9>());
+#if 1
+	::CoInitialize(0);
+	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystemOGL>());
 #else
 	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystem11>());
 #endif
@@ -66,6 +67,7 @@ void Mir::Dispose()
 		SAFE_DISPOSE_NULL(mGuiMng);
 		SAFE_DISPOSE_NULL(mResMng);
 		SAFE_DISPOSE_NULL(mRenderSys);
+		::CoUninitialize();
 	}
 }
 

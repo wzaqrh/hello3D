@@ -1,4 +1,7 @@
 #include "core/rendersys/base/res_format.h"
+#include <gli/gli.hpp>
+#include <Windows.h>
+#include <d3d11.h>
 
 namespace mir {
 
@@ -159,4 +162,175 @@ ResourceFormat MakeResFormat(ResourceBaseFormat baseFormat, ResourceDataType dat
 	return gResFmtInfoQuery.FindResFormat(baseFormat, dataType, bitsPerChannel, isSRGB);
 }
 
+size_t BitsPerPixel(ResourceFormat fmt)
+{
+	gli::dx::dxgi_format_dds dxgiFmt = (gli::dx::dxgi_format_dds)fmt;
+	static gli::dx dx1;
+	gli::format gliFmt = dx1.find(gli::dx::D3DFMT_DX10, gli::dx::dxgiFormat(dxgiFmt));
+
+	auto block_size = gli::block_size(gliFmt);
+	auto block_ext = gli::block_extent(gliFmt);
+
+	BOOST_ASSERT(block_size * 8 % (block_ext.x * block_ext.y) == 0);
+	return block_size * 8 / (block_ext.x * block_ext.y);
+}
+
+size_t BytePerPixel(ResourceFormat fmt)
+{
+	return BitsPerPixel(fmt) / 8;
+}
+
+bool IsDepthStencil(ResourceFormat fmt)
+{
+	switch (static_cast<int>(fmt)) {
+	case kFormatR32G8X24Typeless://typeless
+	case kFormatR32FloatX8X24Typeless://typeless
+	case kFormatX32TypelessG8X24UInt://typeless
+	case kFormatD32FloatS8X24UInt:
+		return true;
+	case kFormatD32Float:
+	case kFormatD16UNorm:
+		return true;
+	case kFormatR24G8Typeless://typeless
+	case kFormatR24UNormX8Typeless://typeless
+	case kFormatX24Typeless_G8UInt://typeless
+	case kFormatD24UNormS8UInt:
+		return true;
+	default:
+		return false;
+	}
+}
+
+DXGI_FORMAT MakeTypeless1(DXGI_FORMAT fmt)
+{
+	switch (static_cast<int>(fmt)) {
+	case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	default:
+		return fmt;
+	}
+}
+DXGI_FORMAT MakeTypeless(DXGI_FORMAT fmt)
+{
+	switch (static_cast<int>(fmt)) {
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
+	case DXGI_FORMAT_R32G32B32A32_UINT:
+	case DXGI_FORMAT_R32G32B32A32_SINT:
+		return DXGI_FORMAT_R32G32B32A32_TYPELESS;
+
+	case DXGI_FORMAT_R32G32B32_FLOAT:
+	case DXGI_FORMAT_R32G32B32_UINT:
+	case DXGI_FORMAT_R32G32B32_SINT:
+		return DXGI_FORMAT_R32G32B32_TYPELESS;
+
+	case DXGI_FORMAT_R16G16B16A16_FLOAT:
+	case DXGI_FORMAT_R16G16B16A16_UNORM:
+	case DXGI_FORMAT_R16G16B16A16_UINT:
+	case DXGI_FORMAT_R16G16B16A16_SNORM:
+	case DXGI_FORMAT_R16G16B16A16_SINT:
+		return DXGI_FORMAT_R16G16B16A16_TYPELESS;
+
+	case DXGI_FORMAT_R32G32_FLOAT:
+	case DXGI_FORMAT_R32G32_UINT:
+	case DXGI_FORMAT_R32G32_SINT:
+		return DXGI_FORMAT_R32G32_TYPELESS;
+
+	case DXGI_FORMAT_R10G10B10A2_UNORM:
+	case DXGI_FORMAT_R10G10B10A2_UINT:
+		//case XBOX_DXGI_FORMAT_R10G10B10_7E3_A2_FLOAT:
+		//case XBOX_DXGI_FORMAT_R10G10B10_6E4_A2_FLOAT:
+		//case XBOX_DXGI_FORMAT_R10G10B10_SNORM_A2_UNORM:
+		return DXGI_FORMAT_R10G10B10A2_TYPELESS;
+
+	case DXGI_FORMAT_R8G8B8A8_UNORM:
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+	case DXGI_FORMAT_R8G8B8A8_UINT:
+	case DXGI_FORMAT_R8G8B8A8_SNORM:
+	case DXGI_FORMAT_R8G8B8A8_SINT:
+		return DXGI_FORMAT_R8G8B8A8_TYPELESS;
+
+	case DXGI_FORMAT_R16G16_FLOAT:
+	case DXGI_FORMAT_R16G16_UNORM:
+	case DXGI_FORMAT_R16G16_UINT:
+	case DXGI_FORMAT_R16G16_SNORM:
+	case DXGI_FORMAT_R16G16_SINT:
+		return DXGI_FORMAT_R16G16_TYPELESS;
+
+	case DXGI_FORMAT_D32_FLOAT:
+	case DXGI_FORMAT_R32_FLOAT:
+	case DXGI_FORMAT_R32_UINT:
+	case DXGI_FORMAT_R32_SINT:
+		return DXGI_FORMAT_R32_TYPELESS;
+
+	case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		return DXGI_FORMAT_R24G8_TYPELESS;
+
+	case DXGI_FORMAT_R8G8_UNORM:
+	case DXGI_FORMAT_R8G8_UINT:
+	case DXGI_FORMAT_R8G8_SNORM:
+	case DXGI_FORMAT_R8G8_SINT:
+		return DXGI_FORMAT_R8G8_TYPELESS;
+
+	case DXGI_FORMAT_R16_FLOAT:
+	case DXGI_FORMAT_D16_UNORM:
+	case DXGI_FORMAT_R16_UNORM:
+	case DXGI_FORMAT_R16_UINT:
+	case DXGI_FORMAT_R16_SNORM:
+	case DXGI_FORMAT_R16_SINT:
+		return DXGI_FORMAT_R16_TYPELESS;
+
+	case DXGI_FORMAT_R8_UNORM:
+	case DXGI_FORMAT_R8_UINT:
+	case DXGI_FORMAT_R8_SNORM:
+	case DXGI_FORMAT_R8_SINT:
+		//case XBOX_DXGI_FORMAT_R4G4_UNORM:
+		return DXGI_FORMAT_R8_TYPELESS;
+
+	case DXGI_FORMAT_BC1_UNORM:
+	case DXGI_FORMAT_BC1_UNORM_SRGB:
+		return DXGI_FORMAT_BC1_TYPELESS;
+
+	case DXGI_FORMAT_BC2_UNORM:
+	case DXGI_FORMAT_BC2_UNORM_SRGB:
+		return DXGI_FORMAT_BC2_TYPELESS;
+
+	case DXGI_FORMAT_BC3_UNORM:
+	case DXGI_FORMAT_BC3_UNORM_SRGB:
+		return DXGI_FORMAT_BC3_TYPELESS;
+
+	case DXGI_FORMAT_BC4_UNORM:
+	case DXGI_FORMAT_BC4_SNORM:
+		return DXGI_FORMAT_BC4_TYPELESS;
+
+	case DXGI_FORMAT_BC5_UNORM:
+	case DXGI_FORMAT_BC5_SNORM:
+		return DXGI_FORMAT_BC5_TYPELESS;
+
+	case DXGI_FORMAT_B8G8R8A8_UNORM:
+	case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+		return DXGI_FORMAT_B8G8R8A8_TYPELESS;
+
+	case DXGI_FORMAT_B8G8R8X8_UNORM:
+	case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+		return DXGI_FORMAT_B8G8R8X8_TYPELESS;
+
+	case DXGI_FORMAT_BC6H_UF16:
+	case DXGI_FORMAT_BC6H_SF16:
+		return DXGI_FORMAT_BC6H_TYPELESS;
+
+	case DXGI_FORMAT_BC7_UNORM:
+	case DXGI_FORMAT_BC7_UNORM_SRGB:
+		return DXGI_FORMAT_BC7_TYPELESS;
+
+	default:
+		return fmt;
+	}
+}
+
+ResourceFormat MakeTypeless1(ResourceFormat fmt) {
+	return (ResourceFormat)MakeTypeless1((DXGI_FORMAT)fmt);
+}
+ResourceFormat MakeTypeless(ResourceFormat fmt) {
+	return (ResourceFormat)MakeTypeless((DXGI_FORMAT)fmt);
+}
 }

@@ -13,6 +13,7 @@ struct DepthState
 {
 	constexpr static DepthState MakeFor2D() { return DepthState{ kCompareLess, kDepthWriteMaskZero, false }; }
 	constexpr static DepthState MakeFor3D(bool depthEnable = true) { return DepthState{ kCompareLess, kDepthWriteMaskAll, depthEnable }; }
+	constexpr static DepthState MakeDisable() { return DepthState{ kCompareLess, kDepthWriteMaskAll, false }; }
 	constexpr static DepthState Make(CompareFunc cmp, DepthWriteMask mask, bool enable = true) { return DepthState{ cmp, mask, enable }; }
 	bool operator<(const DepthState& r) const {
 		if (DepthEnable != r.DepthEnable) return DepthEnable < r.DepthEnable;

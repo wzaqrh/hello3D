@@ -19,8 +19,10 @@ namespace res {
 ProgramFactory::ProgramFactory(ResourceManager& resMng, const std::string& shaderDir)
 : mResMng(resMng)
 , mRenderSys(resMng.RenderSys())
-, mShaderDir(shaderDir)
 {
+	bool isOgl = mRenderSys.GetPlatform() == "ogl";
+	mShaderDir = shaderDir + IF_AND_OR(isOgl, mRenderSys.GetPlatform() + "/", "");
+	mShaderExt = IF_AND_OR(isOgl, ".glsl", ".hlsl");
 }
 ProgramFactory::~ProgramFactory()
 {
@@ -59,7 +61,7 @@ public:
 
 boost::filesystem::path ProgramFactory::MakeShaderSourcePath(const std::string& name) const
 {
-	std::string filepath = mShaderDir + name + ".hlsl";
+	std::string filepath = mShaderDir + name + mShaderExt;
 	return boost::filesystem::system_complete(filepath);
 }
 boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform, time_t& time, std::string& serializeStr) const
@@ -76,19 +78,22 @@ boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& nam
 	time = 0;
 #if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
 	auto sourcePath = MakeShaderSourcePath(name);
-	time = boost::filesystem::last_write_time(sourcePath);
-
-	time_t cgincs_time = 0;
+	if (boost::filesystem::exists(sourcePath))
 	{
-		boost::filesystem::directory_iterator diter(mShaderDir), dend;
-		for (; diter != dend; ++diter) {
-			if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".cginc") {
-				time_t htime = boost::filesystem::last_write_time((*diter).path());
-				cgincs_time = std::max(cgincs_time, htime);
+		time = boost::filesystem::last_write_time(sourcePath);
+
+		time_t cgincs_time = 0;
+		{
+			boost::filesystem::directory_iterator diter(mShaderDir), dend;
+			for (; diter != dend; ++diter) {
+				if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".cginc") {
+					time_t htime = boost::filesystem::last_write_time((*diter).path());
+					cgincs_time = std::max(cgincs_time, htime);
+				}
 			}
 		}
+		time = std::max(time, cgincs_time);
 	}
-	time = std::max(time, cgincs_time);
 #endif
 
 	return boost::filesystem::system_complete(asmFilePath);
@@ -164,7 +169,7 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			if (!bin.empty()) {
 				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
-				WriteShaderAsm(vsAsmPath, blobVS->GetBytes(), blobVS->GetSize(), time, serializeStr);
+				if (blobVS->GetBytes()) WriteShaderAsm(vsAsmPath, blobVS->GetBytes(), blobVS->GetSize(), time, serializeStr);
 			#endif
 			}
 		}
@@ -185,7 +190,7 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			if (!bin.empty()) {
 				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
-				WriteShaderAsm(psAsmPath, blobPS->GetBytes(), blobPS->GetSize(), time, serializeStr);
+				if (blobPS->GetBytes()) WriteShaderAsm(psAsmPath, blobPS->GetBytes(), blobPS->GetSize(), time, serializeStr);
 			#endif
 			}
 		}

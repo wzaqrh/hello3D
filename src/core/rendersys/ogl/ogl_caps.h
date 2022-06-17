@@ -18,7 +18,6 @@ struct OglCaps
 		COMPATIBILITY = 0x00000002,
 		ES = 0x00000004
 	};
-
 private:
 	bool check(GLint MajorVersionRequire, GLint MinorVersionRequire);
 
@@ -31,6 +30,12 @@ private:
 			CONTEXT_FLAGS(0),
 			NUM_EXTENSIONS(0)
 		{}
+		static int MakeVersion(GLint major, GLint minor) { return major * 100 + minor * 10; }
+		int GetVersion() const { return MakeVersion(MAJOR_VERSION, MINOR_VERSION); }
+		bool checkVersion(GLint MajorVersionRequire, GLint MinorVersionRequire) const {
+			return GetVersion() >= MakeVersion(MajorVersionRequire, MinorVersionRequire);
+		}
+	public:
 		Profile PROFILE;
 		GLint MINOR_VERSION;
 		GLint MAJOR_VERSION;
@@ -62,7 +67,6 @@ private:
 		bool GLSL440Core;
 		bool GLSL440Comp;
 	} VersionData;
-
 	void initVersion();
 
 	struct Extensions
@@ -271,7 +275,6 @@ private:
 		bool INTEL_fragment_shader_ordering;
 		bool INTEL_performance_query;
 	} ExtensionData;
-
 	void initExtensions();
 
 	struct Debug
@@ -281,7 +284,6 @@ private:
 		GLint MAX_LABEL_LENGTH;
 		GLint MAX_SERVER_WAIT_TIMEOUT;
 	} DebugData;
-
 	void initDebug();
 
 	struct Limits
@@ -394,7 +396,6 @@ private:
 		GLint NUM_SHADER_BINARY_FORMATS;
 		GLint SHADER_BINARY_FORMATS;
 	} LimitsData;
-
 	void initLimits();
 
 	struct Values
@@ -439,7 +440,6 @@ private:
 
 		GLint TEXTURE_BUFFER_OFFSET_ALIGNMENT;
 	} ValuesData;
-
 	void initValues();
 
 	struct Formats
@@ -522,13 +522,10 @@ private:
 		bool PALETTE8_RGB5_A1_OES;
 		bool ETC1_RGB8_OES;
 	} FormatsData;
-
 #	ifndef GL_ETC1_RGB8_OES
 #		define GL_ETC1_RGB8_OES	0x8D64
 #	endif
-
 	void initFormats();
-
 public:
 	OglCaps(Profile const& Profile);
 

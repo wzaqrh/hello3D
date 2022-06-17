@@ -2,13 +2,15 @@
 #include <windows.h>
 #include <glad/glad.h>
 #include <GL/GL.h>
+#include "core/rendersys/ogl/predeclare.h"
 #include "core/rendersys/hardware_buffer.h"
 
 namespace mir {
 
 class VertexArrayOGL : public ImplementResource<IVertexArray> {
 public:
-	VertexArrayOGL(GLuint id) :mId(id) {}
+	VertexArrayOGL() {}
+	void Init(GLuint id) { mId = id; }
 	GLuint GetId() const { return mId; }
 private:
 	GLuint mId = 0;
@@ -28,6 +30,7 @@ public:
 		mOffset = offset;
 	}
 public:
+	IVertexArrayPtr GetVAO() const override { return mVao; }
 	HWMemoryUsage GetUsage() const override { return mUsage; }
 	int GetBufferSize() const override { return mBufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferVertex; }
@@ -57,6 +60,7 @@ public:
 		mFormat = format;
 	}
 public:
+	IVertexArrayPtr GetVAO() const override { return mVao; }
 	HWMemoryUsage GetUsage() const override { return mUsage; }
 	int GetBufferSize() const override { return mBufferSize; }
 	HardwareBufferType GetType() const override { return kHWBufferIndex; }

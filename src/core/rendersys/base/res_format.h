@@ -149,4 +149,10 @@ enum ResourceFormat
 
 ResourceFormat MakeResFormat(ResourceBaseFormat baseFormat, ResourceDataType dataType, int bitsPerChannel, bool isSRGB);
 
+size_t BitsPerPixel(ResourceFormat fmt);
+size_t BytePerPixel(ResourceFormat fmt);
+bool IsDepthStencil(ResourceFormat fmt);
+ResourceFormat MakeTypeless1(ResourceFormat fmt);
+ResourceFormat MakeTypeless(ResourceFormat fmt);
+
 }
