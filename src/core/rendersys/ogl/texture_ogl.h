@@ -3,12 +3,13 @@
 #include <glad/glad.h>
 #include <GL/GL.h>
 #include "core/mir_config.h"
+#include "core/base/data.h"
 #include "core/rendersys/sampler.h"
 #include "core/rendersys/texture.h"
 
 namespace mir {
 
-class SamplerStateOGL : public ImplementResource<ISamplerState> 
+class SamplerStateOGL : public ImplementResource<ISamplerState>
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
@@ -23,8 +24,11 @@ class TextureOGL : public ImplementResource<ITexture>
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	TextureOGL();
-	void Init(GLuint id, ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
-
+	~TextureOGL();
+	void Dispose();
+	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
+	void InitTex(const Data datas[]);
+	void AutoGenMipmap();
 	void OnLoaded() override;
 public:
 	GLuint GetId() const { return mId; }
@@ -36,7 +40,7 @@ public:
 	int GetFaceCount() const override { return mFaceCount; }
 	bool IsAutoGenMipmap() const override { return mAutoGenMipmap; }
 private:
-	GLuint mId;
+	GLuint mId, mTarget;
 	bool mAutoGenMipmap;
 	int mFaceCount, mMipCount;
 	Eigen::Vector2i mSize, mRealSize;

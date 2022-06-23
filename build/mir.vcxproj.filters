@@ -593,9 +593,6 @@
     <Filter Include="shader">
       <UniqueIdentifier>{850b275f-17d8-48d5-a3e4-9553376a3584}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shader\inc">
-      <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shader\material">
       <UniqueIdentifier>{62b4cbdb-7b95-4418-9119-659c6154c15f}</UniqueIdentifier>
     </Filter>
@@ -638,37 +635,37 @@
     <Filter Include="src\core\rendersys\ogl\utility">
       <UniqueIdentifier>{1897f425-bf18-4cd5-9f5f-3b98400ab2a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\hlsl">
+      <UniqueIdentifier>{e9b51c42-0051-405f-bf33-73b335f1527f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\hlsl\inc">
+      <UniqueIdentifier>{7e02c58b-69ca-4fd5-873a-60f3d8721574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\glsl">
+      <UniqueIdentifier>{1e62c662-0bae-40e2-9c37-71524f34365e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\glsl\inc">
+      <UniqueIdentifier>{9fab2c16-ba73-4590-8a93-e38bf5e4a824}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\work\shader\LayerColor.hlsl">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="..\bin\work\shader\Model.hlsl">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="..\bin\work\shader\Skybox.hlsl">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="..\bin\work\shader\Sprite.hlsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\bin\work\shader\HLSLSupport.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Lighting.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Skeleton.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Standard.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\IBL.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\ToneMapping.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Standard.Shader">
       <Filter>shader\shader</Filter>
@@ -694,47 +691,38 @@
     <None Include="..\bin\work\shader\BoxBlur.Shader">
       <Filter>shader\shader</Filter>
     </None>
-    <None Include="..\bin\work\shader\BoxBlur.hlsl">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="..\bin\work\shader\HorizonBasedAO.hlsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\bin\work\shader\HorizonBasedAO.Shader">
       <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\work\shader\WhiteNoise.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\CommonFunction.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\BilateralBlur.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\PercentageCloserSoftShadow.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Shadow.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Poisson.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\VarianceShadow.cginc">
-      <Filter>shader\inc</Filter>
-    </None>
-    <None Include="..\bin\work\shader\Bloom.hlsl">
-      <Filter>shader</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\UnityLighting.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\BRDFCommonFunction.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\GltfLighting.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\media\armadillo\defaultMaterial.Material">
       <Filter>shader\material</Filter>
@@ -758,30 +746,69 @@
       <Filter>shader\material\toycar</Filter>
     </None>
     <None Include="..\bin\work\shader\SphericalHarmonics.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Bloom.Shader">
       <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\work\shader\LightingInput.cginc">
-      <Filter>shader\inc</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Deferred.Shader">
       <Filter>shader\shader</Filter>
     </None>
     <None Include="..\bin\work\shader\CommonConstants.cginc">
-      <Filter>shader\inc</Filter>
-    </None>
-    <None Include="..\bin\work\shader\ImGui.hlsl">
-      <Filter>shader</Filter>
+      <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\ImGui.Shader">
       <Filter>shader\shader</Filter>
     </None>
+    <None Include="..\bin\work\shader\Bloom.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\BoxBlur.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\HorizonBasedAO.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ImGui.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\LayerColor.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\Model.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\Skybox.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\Sprite.hlsl">
+      <Filter>shader\hlsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl\ImGui.glsl">
+      <Filter>shader\glsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl\GLSLSupport.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl\Standard.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl\Macros.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl\Skeleton.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl\Sprite.glsl">
+      <Filter>shader\glsl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\bin\work\shader\Macros.cginc">
-      <Filter>shader</Filter>
+      <Filter>shader\hlsl</Filter>
     </Media>
   </ItemGroup>
 </Project>

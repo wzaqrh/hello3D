@@ -2,6 +2,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include <regex>
 #include "core/base/debug.h"
 #include "core/base/macros.h"
 #include "core/base/data.h"
@@ -29,7 +30,14 @@ ProgramFactory::~ProgramFactory()
 	DEBUG_LOG_MEMLEAK("progFac.destrcutor");
 }
 
-struct ShaderCompileDescHelper {
+boost::filesystem::path ProgramFactory::MakeShaderSourcePath(const std::string& name) const
+{
+	std::string filepath = mShaderDir + name + mShaderExt;
+	return boost::filesystem::system_complete(filepath);
+}
+
+struct ShaderCompileDescHelper 
+{
 public:
 	ShaderCompileDescHelper(const ShaderCompileDesc& scd, const std::string& src): mSCD(scd), mSource(src) {}
 	const std::string& GetSerializeString() {
@@ -58,12 +66,6 @@ public:
 	const ShaderCompileDesc& mSCD;
 	const std::string& mSource;
 };
-
-boost::filesystem::path ProgramFactory::MakeShaderSourcePath(const std::string& name) const
-{
-	std::string filepath = mShaderDir + name + mShaderExt;
-	return boost::filesystem::system_complete(filepath);
-}
 boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform, time_t& time, std::string& serializeStr) const
 {
 	std::string asmDir = mShaderDir + "asm_" + platform + "/";
@@ -139,6 +141,51 @@ bool ProgramFactory::ReadShaderAsm(const boost::filesystem::path& asmPath, std::
 	return false;
 }
 
+struct ShaderIncludePreprocessor {
+public:
+	ShaderIncludePreprocessor(const std::string& shaderDir) :mShaderDir(shaderDir) {}
+	std::string operator()(const std::string& src) {
+		Parse(src);
+		return std::move(mResult);
+	}
+	std::vector<char> operator()(const std::vector<char>& bin) {
+		std::string src(bin.begin(), bin.end());
+		Parse(src);
+		return std::vector<char>(mResult.begin(), mResult.end());
+	}
+private:
+	void Parse(const std::string& src) {
+		std::stringstream ss;
+		ss << src;
+		std::string line;
+		const std::regex exp_regex("#include\\s+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
+		//const std::regex exp_regex("#include\\s+.*\\r");
+		while (ss.peek() != EOF) {
+			std::getline(ss, line);
+			std::smatch exp_match;
+			if (std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
+				std::string incname = exp_match[1].str();
+				if (mVisits.find(incname) == mVisits.end()) {
+					mVisits.insert(incname);
+
+					boost::filesystem::path incpath = boost::filesystem::system_complete(mShaderDir + incname);
+					std::vector<char> bin = input::ReadFile(incpath.string().c_str(), "rb");
+					BOOST_ASSERT(!bin.empty());
+					std::string incstr(&bin[0], bin.size());
+					Parse(incstr);
+				}
+			}
+			else {
+				mResult += line + "\n";
+			}
+		}
+	}
+private:
+	const std::string& mShaderDir;
+	std::string mResult;
+	std::unordered_set<std::string> mVisits;
+};
+
 CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe ThreadMaySwitch
 {
 	program->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
@@ -167,6 +214,8 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			bin = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
 			BOOST_ASSERT(!bin.empty());
 			if (!bin.empty()) {
+				bin = ShaderIncludePreprocessor(mShaderDir)(bin);
+
 				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
 				if (blobVS->GetBytes()) WriteShaderAsm(vsAsmPath, blobVS->GetBytes(), blobVS->GetSize(), time, serializeStr);
@@ -188,6 +237,8 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			bin = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
 			BOOST_ASSERT(!bin.empty());
 			if (!bin.empty()) {
+				bin = ShaderIncludePreprocessor(mShaderDir)(bin);
+
 				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
 				if (blobPS->GetBytes()) WriteShaderAsm(psAsmPath, blobPS->GetBytes(), blobPS->GetSize(), time, serializeStr);

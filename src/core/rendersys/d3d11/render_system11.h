@@ -24,7 +24,7 @@ public:
 public:
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IFrameBufferPtr GetBackFrameBuffer() override;
+	IFrameBufferPtr GetBackFrameBuffer();
 	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats) override;
 	void SetFrameBuffer(IFrameBufferPtr rendTarget) override;
 	void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;

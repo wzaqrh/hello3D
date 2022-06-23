@@ -128,14 +128,12 @@ bool RenderSystemOGL::Initialize(HWND hWnd, RECT vp)
 		MessageBoxA(NULL, "Require opengl 4.60", "opengl version too low", MB_OK);
 		return false;
 	}
-	mCurrentVbos.resize(mCaps->Values.MAX_VERTEX_ATTRIB_BINDINGS);
+	mCurVbos.resize(mCaps->Values.MAX_VERTEX_ATTRIB_BINDINGS);
 
 #if defined MIR_D3D11_DEBUG
 	//glEnable(GL_DEBUG_OUTPUT);
 	//glDebugMessageCallback(glDebugOutput, 0);
 #endif
-
-	SetFrameBuffer(nullptr);
 
 	glDisable(GL_PRIMITIVE_RESTART);
 	_SetRasterizerState(mCurRasterState = RasterizerState{ kFillSolid, kCullBack });
@@ -147,6 +145,8 @@ bool RenderSystemOGL::Initialize(HWND hWnd, RECT vp)
 	mScreenSize.x() = vp.right - vp.left;
 	mScreenSize.y() = vp.bottom - vp.top;
 	SetViewPort(vp.left, vp.top, mScreenSize.x(), mScreenSize.y());
+
+	SetFrameBuffer(nullptr);
 
 	draw_call_flag = draw_call_flag__;
 	return true;
@@ -205,145 +205,67 @@ IResourcePtr RenderSystemOGL::CreateResource(DeviceResourceType deviceResType)
 }
 
 /********** Framebuffer **********/
-IFrameBufferPtr RenderSystemOGL::GetBackFrameBuffer()
-{
-	return mBackFrameBuffer;
-}
-static TextureOGLPtr _CreateColorAttachTexture(const Eigen::Vector2i& size, ResourceFormat format)
-{
-	constexpr bool autoGen = false;
-	constexpr size_t mipCount = 1;
-
-	TextureOGLPtr texture = CreateInstance<TextureOGL>();
-	GLuint texId = 0;
-	CheckHR(glGenTextures(1, &texId));
-	texture->Init(texId, format, kHWUsageDefault, size.x(), size.y(), 1, mipCount);
-
-	constexpr GLenum glTarget = GL_TEXTURE_2D;
-	CheckHR(glBindTexture(glTarget, texId));
-	{
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_BASE_LEVEL, 0));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MAX_LEVEL, mipCount));
-
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-
-		CheckHR(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x(), size.y(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
-	}
-	CheckHR(glBindTexture(glTarget, 0));
-
-	texture->SetLoaded();
-	return texture;
-}
-static TextureOGLPtr _CreateZStencilAttachTexture(const Eigen::Vector2i& size, ResourceFormat format)
-{
-	BOOST_ASSERT(IsDepthStencil(format));
-	BOOST_ASSERT(format == kFormatD24UNormS8UInt
-		|| format == kFormatD32Float
-		|| format == kFormatD16UNorm);
-
-	constexpr bool autoGen = false;
-	constexpr size_t mipCount = 1;
-
-	const ResourceFormat dsvFmt = static_cast<ResourceFormat>(format);
-	const ResourceFormat texFmt = (format == kFormatD24UNormS8UInt) ? kFormatR24G8Typeless : dsvFmt;
-	const ResourceFormat srvFmt = (format == kFormatD24UNormS8UInt) ? kFormatR24UNormX8Typeless : dsvFmt;
-
-	TextureOGLPtr texture = CreateInstance<TextureOGL>();
-	GLuint texId = 0;
-	CheckHR(glGenTextures(1, &texId));
-	texture->Init(texId, format, kHWUsageDefault, size.x(), size.y(), 1, mipCount);
-
-	constexpr GLenum glTarget = GL_TEXTURE_2D;
-	CheckHR(glBindTexture(glTarget, texId));
-	{
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_BASE_LEVEL, 0));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MAX_LEVEL, mipCount));
-
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-		CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-
-		CheckHR(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x(), size.y(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
-	}
-	CheckHR(glBindTexture(glTarget, 0));
-
-	texture->SetLoaded();
-	return texture;
-}
-static FrameBufferAttachOGLPtr _CreateFrameBufferAttachColor(const Eigen::Vector2i& size, ResourceFormat format)
-{
-	auto texture = _CreateColorAttachTexture(size, format);
-	return format == kFormatUnknown ? nullptr : CreateInstance<FrameBufferAttachOGL>(texture);
-}
-static FrameBufferAttachOGLPtr _CreateFrameBufferAttachZStencil(const Eigen::Vector2i& size, ResourceFormat format)
-{
-	auto texture = _CreateZStencilAttachTexture(size, format);
-	return format == kFormatUnknown ? nullptr : CreateInstance<FrameBufferAttachOGL>(texture);
-}
 IFrameBufferPtr RenderSystemOGL::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats)
 {
+	draw_call();
 	//BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 	BOOST_ASSERT(formats.size() >= 1);
-	BOOST_ASSERT(IsDepthStencil(formats.back()) || formats.back() == kFormatUnknown);
 
-	GLuint fbId = 0;
-	CheckHR(glGenFramebuffers(1, &fbId));
-	BindFrameBuffer bindFrambuffer(GL_FRAMEBUFFER, fbId);
+	FrameBufferOGLPtr fbo = std::static_pointer_cast<FrameBufferOGL>(res);
+	fbo->Init(size.head<2>());
+	BindFrameBuffer bindFrambuffer(GL_FRAMEBUFFER, fbo->GetId());
 
-	FrameBufferOGLPtr framebuffer = std::static_pointer_cast<FrameBufferOGL>(res);
-	framebuffer->Init(fbId, size.head<2>());
-	for (size_t i = 0; i + 1 < formats.size(); ++i) {
-		auto attachI = _CreateFrameBufferAttachColor(size.head<2>(), formats[i]);
-		framebuffer->SetAttachColor(i, attachI);
-		CheckHR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, std::static_pointer_cast<TextureOGL>(attachI->AsTexture())->GetId(), 0));
-	}
-	auto attachZS = _CreateFrameBufferAttachZStencil(size.head<2>(), formats.size() >= 2 ? formats.back() : kFormatUnknown);
-	framebuffer->SetAttachZStencil(attachZS);
-	CheckHR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, std::static_pointer_cast<TextureOGL>(attachZS->AsTexture())->GetId(), 0));
+	int colorCount = IF_AND_OR(IsDepthStencil(formats.back()) || formats.back() == kFormatUnknown, formats.size() - 1, formats.size());
+	for (size_t i = 0; i < colorCount; ++i)
+		fbo->SetAttachColor(i, FrameBufferAttachOGLFactory::CreateColorAttachment(size, formats[i]));
+	if (colorCount != formats.size())
+		fbo->SetAttachZStencil(FrameBufferAttachOGLFactory::CreateZStencilAttachment(size.head<2>(), formats.back()));
 
-	draw_call();
-
-	return framebuffer;
+	BOOST_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+	return fbo;
 }
 void RenderSystemOGL::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f& color, float depth, uint8_t stencil)
 {
+	draw_call();
 	BOOST_ASSERT(IsCurrentInMainThread());
 	
 	if (mCurRasterState.Scissor.ScissorEnable) CheckHR(glDisable(GL_SCISSOR_TEST));
 
 	FrameBufferOGLPtr fbo = std::static_pointer_cast<FrameBufferOGL>(fb);
-	CheckHR(glClearNamedFramebufferfv(NULLABLE_MEM(fbo, GetId(), 0), GL_COLOR, 0, (GLfloat*)&color));
-	CheckHR(glClearNamedFramebufferfi(0, GL_DEPTH_STENCIL, 0, depth, stencil));
+	if (fbo) {
+		GLuint fbId = fbo->GetId();
+		CheckHR(glClearNamedFramebufferfv(fbId, GL_COLOR, 0, (GLfloat*)&color));
+		if (auto texDS = fbo->GetAttachZStencilTexture()) {
+			if (texDS->GetFormat() == kFormatD24UNormS8UInt) {
+				CheckHR(glClearNamedFramebufferfi(fbId, GL_DEPTH_STENCIL, 0, depth, stencil));
+			}
+			else {
+				CheckHR(glClearNamedFramebufferfv(fbId, GL_DEPTH, 0, &depth));
+			}
+		}
+	}
+	else {
+		GLuint fbid = 0;
+		CheckHR(glClearNamedFramebufferfv(fbid, GL_COLOR, 0, (GLfloat*)&color));
+		CheckHR(glClearNamedFramebufferfi(fbid, GL_DEPTH_STENCIL, 0, depth, stencil));
+	}
 
 	if (mCurRasterState.Scissor.ScissorEnable) CheckHR(glEnable(GL_SCISSOR_TEST));
-
-	draw_call();
 }
 void RenderSystemOGL::SetFrameBuffer(IFrameBufferPtr fb)
 {
+	draw_call();
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	if (mCurFrameBuffer != fb) {
-		auto prevFbSize = NULLABLE_MEM(mCurFrameBuffer, GetSize(), Eigen::Vector2i::Zero());
+		auto newFbSize = NULLABLE_MEM(fb, GetSize(), mScreenSize);
+		auto curFbSize = NULLABLE_MEM(mCurFrameBuffer, GetSize(), mScreenSize);
+		if (curFbSize != newFbSize) SetViewPort(0, 0, newFbSize.x(), newFbSize.y());
 
-		mCurFrameBuffer = IF_OR(std::static_pointer_cast<FrameBufferOGL>(fb), mBackFrameBuffer);
-
-		if (mCurFrameBuffer->GetSize() != prevFbSize) {
-			auto fbsize = mCurFrameBuffer->GetSize();
-			SetViewPort(0, 0, fbsize.x(), fbsize.y());
-		}
-
-		CheckHR(glBindFramebuffer(GL_FRAMEBUFFER, mCurFrameBuffer->GetId()));
+		mCurFrameBuffer = std::static_pointer_cast<FrameBufferOGL>(fb);
+		CheckHR(glBindFramebuffer(GL_FRAMEBUFFER, NULLABLE_MEM(mCurFrameBuffer, GetId(), 0)));
 	}
-
-	draw_call();
 }
 
 /********** Program **********/
@@ -363,7 +285,7 @@ void RenderSystemOGL::SetVertexLayout(IInputLayoutPtr res)
 	draw_call();
 
 	BOOST_ASSERT(IsCurrentInMainThread());
-	BOOST_ASSERT(mCurrentVao != nullptr);
+	BOOST_ASSERT(mCurVao != nullptr);
 	InputLayoutOGLPtr layout = std::static_pointer_cast<InputLayoutOGL>(res);
 
 	const auto& elements = layout->GetLayoutElements();
@@ -492,8 +414,8 @@ void RenderSystemOGL::SetVertexArray(IVertexArrayPtr vao)
 {
 	draw_call();
 
-	mCurrentVao = std::static_pointer_cast<VertexArrayOGL>(vao);
-	CheckHR(glBindVertexArray(NULLABLE_MEM(mCurrentVao, GetId(), 0)));
+	mCurVao = std::static_pointer_cast<VertexArrayOGL>(vao);
+	CheckHR(glBindVertexArray(NULLABLE_MEM(mCurVao, GetId(), 0)));
 }
 
 IVertexBufferPtr RenderSystemOGL::LoadVertexBuffer(IResourcePtr res, IVertexArrayPtr ivao, int stride, int offset, const Data& data)
@@ -527,10 +449,10 @@ void RenderSystemOGL::SetVertexBuffers(size_t slot, const IVertexBufferPtr verte
 	for (size_t i = 0; i < count; ++i) {
 		VertexBufferOGLPtr vbo = std::static_pointer_cast<VertexBufferOGL>(vertexBuffers[i]);
 		if (vbo) {
-			BOOST_ASSERT(mCurrentVao == vbo->GetVAO());
+			BOOST_ASSERT(mCurVao == vbo->GetVAO());
 			CheckHR(glBindVertexBuffer(slot, vbo->GetId(), vbo->GetOffset(), vbo->GetStride()));
 		}
-		mCurrentVbos[slot + i] = vbo;
+		mCurVbos[slot + i] = vbo;
 	}
 }
 
@@ -564,7 +486,7 @@ void RenderSystemOGL::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 
 	if (indexBuffer) {
 		IndexBufferOGLPtr vio = std::static_pointer_cast<IndexBufferOGL>(indexBuffer);
-		BOOST_ASSERT(mCurrentVao == vio->GetVAO());
+		BOOST_ASSERT(mCurVao == vio->GetVAO());
 		CheckHR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vio->GetId()));
 	}
 }
@@ -672,69 +594,17 @@ bool RenderSystemOGL::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 ITexturePtr RenderSystemOGL::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data datas[])
 {
 	draw_call();
-
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
-	GLuint texId = 0;
-	CheckHR(glGenTextures(1, &texId));
-
-	Data defaultData = Data{};
+	static Data defaultData = Data::MakeNull();
 	datas = datas ? datas : &defaultData;
 	const HWMemoryUsage usage = datas[0].Bytes ? kHWUsageDefault : kHWUsageDynamic;
 
 	TextureOGLPtr texture = std::static_pointer_cast<TextureOGL>(res);
-	texture->Init(texId, format, usage, size.x(), size.y(), size.w(), mipCount);
-
-	mipCount = texture->GetMipmapCount();
-	const bool autoGen = texture->IsAutoGenMipmap();
-	const size_t faceCount = texture->GetFaceCount();
-	constexpr int imageSize = 0;//only used for 3d textures
-	BOOST_ASSERT_IF_THEN(faceCount > 1, datas[0].Bytes);
-	BOOST_ASSERT_IF_THEN(autoGen, datas[0].Bytes && faceCount == 1);
-
-	GLenum glTarget = IF_AND_OR(faceCount > 1, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_2D);
-	CheckHR(glBindTexture(glTarget, texId));
-
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_BASE_LEVEL, 0));
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MAX_LEVEL, mipCount));
-
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-	CheckHR(glTexParameteri(glTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-
-	CheckHR(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
-
-	auto glFmt = ogl::GetGlFormatInfo(format);
-	unsigned texWidth = texture->GetWidth(), texHeight = texture->GetHeight();
-	CheckHR(glTexStorage2D(IF_AND_OR(faceCount > 1, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_2D), mipCount, glFmt.InternalFormat, texWidth, texHeight));
-
-	for (size_t mip = 0; mip < mipCount; ++mip) {
-		for (size_t face = 0; face < faceCount; ++face) {
-			size_t index = face * mipCount + mip;
-			const Data& data = datas[index];
-
-			//size_t SysMemPitch = data.Size ? data.Size : d3d::BytePerPixel(desc.Format) * (texWidth >> mip);//Line width in bytes
-			if (glFmt.IsCompressed) {
-				CheckHR(glCompressedTexSubImage2D(IF_AND_OR(faceCount > 1, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, GL_TEXTURE_2D),
-					mip, 0, 0, texWidth >> mip, texHeight >> mip, glFmt.ExternalFormat, data.Size, data.Bytes));
-			}
-			else {
-				CheckHR(glTexSubImage2D(IF_AND_OR(faceCount > 1, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, GL_TEXTURE_2D),
-					mip, 0, 0, texWidth >> mip, texHeight >> mip, glFmt.ExternalFormat, glFmt.InternalType, data.Bytes));
-			}
-		}
-	}
-
-	if (autoGen) {
-		for (size_t face = 0; face < faceCount; ++face) {
-			CheckHR(glGenerateMipmap(IF_AND_OR(faceCount > 1, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, GL_TEXTURE_2D)));
-		}
-	}
-	CheckHR(glBindTexture(glTarget, 0));
+	texture->Init(format, usage, size.x(), size.y(), size.w(), mipCount);
+	texture->InitTex(datas);
+	texture->AutoGenMipmap();
 	return texture;
 }
 void RenderSystemOGL::SetTextures(size_t slot, const ITexturePtr textures[], size_t count)
@@ -742,7 +612,6 @@ void RenderSystemOGL::SetTextures(size_t slot, const ITexturePtr textures[], siz
 	draw_call();
 
 	BOOST_ASSERT(IsCurrentInMainThread());
-	BOOST_ASSERT(textures && count > 0);
 
 	for (size_t i = 0; i < count; ++i) {
 		TextureOGLPtr tex = std::static_pointer_cast<TextureOGL>(textures[i]);

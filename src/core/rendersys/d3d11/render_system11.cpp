@@ -115,7 +115,7 @@ bool RenderSystem11::_FetchBackFrameBufferColor(int width, int height)
 
 	mBackFrameBuffer = CreateInstance<FrameBuffer11>();
 	mBackFrameBuffer->SetSize(Eigen::Vector2i(width, height));
-	mBackFrameBuffer->SetAttachColor(0, CreateInstance<FrameBufferAttachByTexture11>(texture));
+	mBackFrameBuffer->SetAttachColor(0, CreateInstance<FrameBuffer11Attach>(texture));
 	mCurFrameBuffer = mBackFrameBuffer;
 	return true;
 }
@@ -129,7 +129,7 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 	if (!texture->InitTex(mDevice)) return nullptr;
 	if (!texture->InitDSV(mDevice)) return nullptr;
 
-	mBackFrameBuffer->SetAttachZStencil(CreateInstance<FrameBufferAttachByTexture11>(texture));
+	mBackFrameBuffer->SetAttachZStencil(CreateInstance<FrameBuffer11Attach>(texture));
 	
 #if defined MIR_RESOURCE_DEBUG
 	int idx = 0;
@@ -227,11 +227,12 @@ IFrameBufferPtr RenderSystem11::LoadFrameBuffer(IResourcePtr res, const Eigen::V
 
 	FrameBuffer11Ptr framebuffer = std::static_pointer_cast<FrameBuffer11>(res);
 	framebuffer->SetSize(size.head<2>());
+
 	int colorCount = IF_AND_OR(IsDepthStencil(formats.back()) || formats.back() == kFormatUnknown, formats.size() - 1, formats.size());
 	for (size_t i = 0; i < colorCount; ++i)
-		framebuffer->SetAttachColor(i, FrameBufferAttachFactory::CreateColorAttachment(mDevice, size, formats[i]));
+		framebuffer->SetAttachColor(i, FrameBuffer11AttachFactory::CreateColorAttachment(mDevice, size, formats[i]));
 	if (colorCount != formats.size())
-		framebuffer->SetAttachZStencil(FrameBufferAttachFactory::CreateZStencilAttachment(mDevice, size.head<2>(), formats.back()));
+		framebuffer->SetAttachZStencil(FrameBuffer11AttachFactory::CreateZStencilAttachment(mDevice, size.head<2>(), formats.back()));
 
 #if defined MIR_RESOURCE_DEBUG
 	int idx = 0;

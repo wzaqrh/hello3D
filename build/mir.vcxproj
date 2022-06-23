@@ -311,6 +311,12 @@
       <FileType>Document</FileType>
     </Media>
     <None Include="..\bin\work\shader\Model.Shader" />
+    <None Include="..\bin\work\shader\ogl\GLSLSupport.glinc" />
+    <None Include="..\bin\work\shader\ogl\ImGui.glsl" />
+    <None Include="..\bin\work\shader\ogl\Macros.glinc" />
+    <None Include="..\bin\work\shader\ogl\Skeleton.glinc" />
+    <None Include="..\bin\work\shader\ogl\Sprite.glsl" />
+    <None Include="..\bin\work\shader\ogl\Standard.glinc" />
     <None Include="..\bin\work\shader\PercentageCloserSoftShadow.cginc" />
     <None Include="..\bin\work\shader\Poisson.cginc" />
     <None Include="..\bin\work\shader\Shadow.cginc" />

@@ -346,6 +346,7 @@ bool CheckProgramCompileStatus(GLuint shaderId)
 		std::vector<char> errorLog(logLength);
 		glGetShaderInfoLog(shaderId, logLength, NULL, &errorLog[0]);
 		DEBUG_LOG_ERROR((boost::format("%s\n") % &errorLog[0]).str().c_str());
+		compileState = GL_FALSE;
 	}
 	return compileState;
 }

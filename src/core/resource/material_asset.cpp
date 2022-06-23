@@ -146,7 +146,7 @@ private:
 					std::ifstream fs;
 					fs.open(pathstr, std::ios::in);
 					std::string line;
-					const std::regex exp_regex("#include\\s+\"([a-zA-Z0-9_\\.]+)\".*");
+					const std::regex exp_regex("#include\\s+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
 					while (fs.peek() != EOF) {
 						std::getline(fs, line);
 						std::smatch exp_match;

@@ -24,7 +24,6 @@ public:
 public:
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
-	IFrameBufferPtr GetBackFrameBuffer() override;
 	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats) override;
 	void SetFrameBuffer(IFrameBufferPtr rendTarget) override;
 	void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
@@ -81,13 +80,13 @@ private:
 	void _SetRasterizerState(const RasterizerState& rasterState);
 private:
 	std::shared_ptr<OglCaps> mCaps;
-	HWND mHWnd = NULL;
-	HGLRC mOglCtx = NULL;
-	FrameBufferOGLPtr mBackFrameBuffer, mCurFrameBuffer;
+	HWND mHWnd = nullptr;
+	HGLRC mOglCtx = nullptr;
+	FrameBufferOGLPtr mCurFrameBuffer;
 	std::thread::id mMainThreadId;
 private:
-	std::vector<VertexBufferOGLPtr> mCurrentVbos;
-	VertexArrayOGLPtr mCurrentVao;
+	std::vector<VertexBufferOGLPtr> mCurVbos;
+	VertexArrayOGLPtr mCurVao;
 	Eigen::Vector4i mCurViewPort = Eigen::Vector4i::Zero();
 };
 

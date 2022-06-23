@@ -1,0 +1,26 @@
+#ifndef GLSL_SUPPORT_H
+#define GLSL_SUPPORT_H
+#include "Macros.glinc"
+
+#define float2 vec2
+#define float3 vec3
+#define float4 vec4
+#define uint2 uvec2
+#define uint3 uvec3
+#define uint4 uvec4
+#define float2x2 mat2
+#define float3x3 mat3
+#define matrix mat4
+
+#define MIR_DECLARE_VS_IN(type, name, slot)  layout (location = slot) in  type name
+#define MIR_DECLARE_VS_OUT(type, name, slot) layout (location = slot) out type name
+#define MIR_DECLARE_PS_IN(type,  name, slot) layout (location = slot) in  type name
+#define MIR_DECLARE_PS_OUT(type, name, slot) layout (location = slot) out type name
+
+#define MIR_DECLARE_TEX2D(tex, slot) layout(binding = slot) uniform sampler2D tex
+#define MIR_SAMPLE_TEX2D(tex, coord) texture(tex, coord)
+
+#define MIR_DECLARE_TEXCUBE(tex,slot) layout(binding = slot) uniform samplerCube tex
+
+
+#endif // HLSL_SUPPORT_INCLUDED

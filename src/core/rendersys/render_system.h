@@ -54,7 +54,6 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	template<class T> std::shared_ptr<T> CreateRes() { return std::static_pointer_cast<T>(CreateResource(DeviceResourceTraits::DetectType<T>())); }
 
 	//last formats is zstencil attachment
-	virtual IFrameBufferPtr GetBackFrameBuffer() = 0;
 	virtual IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats) = 0;
 	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, ResourceFormat attach0Format) {
 		return LoadFrameBuffer(res, size, std::vector<ResourceFormat>{attach0Format});

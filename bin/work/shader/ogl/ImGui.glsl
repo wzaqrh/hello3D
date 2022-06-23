@@ -1,31 +1,37 @@
-#if SHADER_STAGE == 0
-layout (location = 0) in vec2 Position;
-layout (location = 1) in vec2 UV;
-layout (location = 2) in vec4 Color;
+#include "Standard.glinc"
 
-out vec2 Frag_UV;
-out vec4 Frag_Color;
-
-layout (binding = 3, std140) uniform cbImGui 
-{ 
-	mat4 ProjectionMatrix; 
+struct PixelInput
+{
+	float4 Color;
+	float2 Tex;
 };
 
-void main()
-{
-    Frag_UV = UV;
-    Frag_Color = Color;
-    gl_Position = ProjectionMatrix * vec4(Position.xy, 0, 1);
-}
+#if SHADER_STAGE == 0
+	MIR_DECLARE_VS_IN(float2, iPos, 0);
+	MIR_DECLARE_VS_IN(float2, iTex, 1);
+	MIR_DECLARE_VS_IN(float4, iColor, 2);
+	
+	MIR_DECLARE_VS_OUT(PixelInput, o, 0);
+
+	layout (binding = 3, std140) uniform cbImGui 
+	{ 
+		mat4 ProjectionMatrix; 
+	};
+
+	void main()
+	{
+		o.Tex = iTex;
+		o.Color = iColor;
+		gl_Position = ProjectionMatrix * float4(iPos.xy, 0, 1);
+	}
 #else
-in vec2 Frag_UV;
-in vec4 Frag_Color;
+	MIR_DECLARE_PS_IN(PixelInput, i, 0);
+	MIR_DECLARE_PS_OUT(float4, oColor, 0);
 
-layout (binding = 0) uniform sampler2D Texture;
-layout (location = 0) out vec4 Out_Color;
+	MIR_DECLARE_TEX2D(_MainTex, 0);
 
-void main()
-{
-    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
-}
+	void main()
+	{
+		oColor = i.Color * MIR_SAMPLE_TEX2D(_MainTex, i.Tex);
+	}
 #endif

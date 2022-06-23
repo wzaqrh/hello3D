@@ -1,0 +1,29 @@
+#ifndef SKELETON_H
+#define SKELETON_H
+#include "GLSLSupport.glinc"
+#include "Macros.glinc"
+
+#define DECLARE_VB_WEIGHTED_SKIN(slot) \
+	MIR_DECLARE_VERTEX_IN_MEMBER(float3 Normal, slot + 0);\
+	MIR_DECLARE_VERTEX_IN_MEMBER(float4 Tangent, slot + 1);\
+	MIR_DECLARE_VERTEX_IN_MEMBER(float3 BiTangent, slot + 2);\
+	MIR_DECLARE_VERTEX_IN_MEMBER(float4 BlendWeights, slot + 3);\
+	MIR_DECLARE_VERTEX_IN_MEMBER(uint4  BlendIndices, slot + 4);
+
+#define MAX_MATRICES 56
+MIR_DECLARE_CBUFFER_BEGIN(cbWeightedSkin, 2)
+	matrix Model;
+	matrix Models[MAX_MATRICES];
+MIR_DECLARE_CBUFFER_END
+
+float4 Skinning(float4 iBlendWeights, uint4 iBlendIndices, float4 iPos)
+{
+    float4 Pos = float4(0.0,0.0,0.0,1.0); 	
+	Pos.xyz += (Models[iBlendIndices.x] * iPos).xyz * iBlendWeights.x;
+	Pos.xyz += (Models[iBlendIndices.y] * iPos).xyz * iBlendWeights.y;
+	Pos.xyz += (Models[iBlendIndices.z] * iPos).xyz * iBlendWeights.z;
+	Pos.xyz += (Models[iBlendIndices.w] * iPos).xyz * iBlendWeights.w;
+	Pos.xyz += iPos.xyz * max(0.0, 1.0 - dot(iBlendWeights, float4(1.0, 1.0, 1.0, 1.0)));
+	return Pos;
+}
+#endif

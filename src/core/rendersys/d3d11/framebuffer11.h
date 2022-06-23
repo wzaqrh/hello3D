@@ -10,33 +10,25 @@ using Microsoft::WRL::ComPtr;
 
 namespace mir {
 
-interface FrameBufferAttach11: public IFrameBufferAttachment
-{
-	virtual const ComPtr<ID3D11RenderTargetView>& AsRTV() = 0;
-	virtual const ComPtr<ID3D11DepthStencilView>& AsDSV() = 0;
-	virtual const ComPtr<ID3D11ShaderResourceView>& AsSRV() = 0;
-}; 
-typedef std::shared_ptr<FrameBufferAttach11> FrameBufferAttach11Ptr;
-
-class FrameBufferAttachByTexture11 : public FrameBufferAttach11
+class FrameBuffer11Attach : public IFrameBufferAttachment
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	FrameBufferAttachByTexture11(Texture11Ptr texture) :mTexture(texture) {}
+	FrameBuffer11Attach(Texture11Ptr texture) :mTexture(texture) {}
 	ITexturePtr AsTexture() const override { return mTexture; }
-	const ComPtr<ID3D11RenderTargetView>& AsRTV() override { return mTexture->AsRTV(); }
-	const ComPtr<ID3D11DepthStencilView>& AsDSV() override { return mTexture->AsDSV(); }
-	const ComPtr<ID3D11ShaderResourceView>& AsSRV() override { return mTexture->AsSRV(); }
+	const ComPtr<ID3D11RenderTargetView>& AsRTV() { return mTexture->AsRTV(); }
+	const ComPtr<ID3D11DepthStencilView>& AsDSV() { return mTexture->AsDSV(); }
+	const ComPtr<ID3D11ShaderResourceView>& AsSRV() { return mTexture->AsSRV(); }
 private:
 	Texture11Ptr mTexture;
 };
-typedef std::shared_ptr<FrameBufferAttachByTexture11> FrameBufferAttachByTexture11Ptr;
+typedef std::shared_ptr<FrameBuffer11Attach> FrameBuffer11AttachPtr;
 
-class FrameBufferAttachFactory 
+class FrameBuffer11AttachFactory 
 {
 public:
-	static FrameBufferAttachByTexture11Ptr CreateColorAttachment(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector3i& size, ResourceFormat format);
-	static FrameBufferAttachByTexture11Ptr CreateZStencilAttachment(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector2i& size, ResourceFormat format);
+	static FrameBuffer11AttachPtr CreateColorAttachment(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector3i& size, ResourceFormat format);
+	static FrameBuffer11AttachPtr CreateZStencilAttachment(const ComPtr<ID3D11Device>& pDevice, const Eigen::Vector2i& size, ResourceFormat format);
 };
 
 class FrameBuffer11 : public ImplementResource<IFrameBuffer>
@@ -56,8 +48,8 @@ public:
 	std::vector<ID3D11RenderTargetView*> AsRTVs() const;
 	ID3D11DepthStencilView* AsDSV() const { return mAttachZStencil ? mAttachZStencil->AsDSV().Get() : nullptr; }
 private:
-	std::vector<FrameBufferAttach11Ptr> mAttachColors;
-	FrameBufferAttach11Ptr mAttachZStencil;
+	std::vector<FrameBuffer11AttachPtr> mAttachColors;
+	FrameBuffer11AttachPtr mAttachZStencil;
 	Eigen::Vector2i mSize;
 };
 

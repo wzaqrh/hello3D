@@ -8,25 +8,31 @@
 
 namespace mir {
 
-class FrameBufferAttachOGL : public IFrameBufferAttachment
+class FrameBufferOGLAttach : public IFrameBufferAttachment
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	FrameBufferAttachOGL(TextureOGLPtr texture) :mTexture(texture) {}
+	FrameBufferOGLAttach(TextureOGLPtr texture) :mTexture(texture) {}
 	ITexturePtr AsTexture() const override { return mTexture; }
 private:
 	TextureOGLPtr mTexture;
 };
-typedef std::shared_ptr<FrameBufferAttachOGL> FrameBufferAttachOGLPtr;
+typedef std::shared_ptr<FrameBufferOGLAttach> FrameBufferOGLAttachPtr;
+
+class FrameBufferAttachOGLFactory
+{
+public:
+	static FrameBufferOGLAttachPtr CreateColorAttachment(const Eigen::Vector3i& size, ResourceFormat format);
+	static FrameBufferOGLAttachPtr CreateZStencilAttachment(const Eigen::Vector2i& size, ResourceFormat format);
+};
 
 class FrameBufferOGL : public ImplementResource<IFrameBuffer>
 {
 public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
-	void Init(GLuint id, Eigen::Vector2i size) { 
-		mId = id; 
-		mSize = size;
-	}
+	~FrameBufferOGL();
+	void Dispose();
+	void Init(Eigen::Vector2i size);
 	void SetAttachColor(size_t slot, IFrameBufferAttachmentPtr attach) override;
 	void SetAttachZStencil(IFrameBufferAttachmentPtr attach) override;
 public:
@@ -37,9 +43,9 @@ public:
 	IFrameBufferAttachmentPtr GetAttachZStencil() const override { return mAttachZStencil; }
 private:
 	GLuint mId = 0;
+	Eigen::Vector2i mSize;
 	std::vector<IFrameBufferAttachmentPtr> mAttachColors;
 	IFrameBufferAttachmentPtr mAttachZStencil;
-	Eigen::Vector2i mSize;
 };
 
 }

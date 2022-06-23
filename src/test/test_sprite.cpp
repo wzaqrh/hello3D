@@ -49,7 +49,7 @@ CoTask<bool> TestSprite::OnInitScene()
 			"rgba16f-mip.dds",//8
 			"rgba8un-mip.ktx",//9
 		};
-		std::string img = "model/image/formats/" + filenames[mCaseSecondIndex];
+		std::string img = test1::res::Image("image/formats/" + filenames[mCaseSecondIndex]);
 		mSprite->SetTexture(CoAwait mResMng->CreateTextureByFileT(async, img));
 		test1::res::SetPos(mSprite, -mCamWinHSize, mCamWinHSize * 2);
 	}break;

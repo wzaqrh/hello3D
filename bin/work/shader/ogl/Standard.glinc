@@ -1,0 +1,75 @@
+#ifndef STANDARD_H
+#define STANDARD_H
+#include "GLSLSupport.glinc"
+#include "Macros.glinc"
+
+#if LIGHTMODE == LIGHTMODE_POSTPROCESS
+	MIR_DECLARE_TEX2D(_SceneImage, 8);
+#else
+	MIR_DECLARE_TEX2D(_LightMap, 8);
+#endif
+
+#if SHADOW_MODE == SHADOW_VSM
+	MIR_DECLARE_TEX2D(_ShadowMap, 11);
+	MIR_DECLARE_TEX2D(_ShadowMapTex, 10);
+#else
+	MIR_DECLARE_SHADOWMAP(_ShadowMap, 11);
+	MIR_DECLARE_TEX2D(_ShadowMapTex, 10);
+#endif
+
+MIR_DECLARE_TEXCUBE(_EnvSheenMap, 12);
+MIR_DECLARE_TEXCUBE(_EnvDiffuseMap, 13);
+MIR_DECLARE_TEXCUBE(_EnvSpecMap, 14);
+MIR_DECLARE_TEX2D(_LUT, 15);//rg(ggx), b(charlie), a(sheen)
+
+#if LIGHTMODE == LIGHTMODE_PREPASS_FINAL || LIGHTMODE == LIGHTMODE_PREPASS_FINAL_ADD || LIGHTMODE == LIGHTMODE_POSTPROCESS
+	MIR_DECLARE_TEX2D(_GDepth, 0);
+	MIR_DECLARE_TEX2D(_GBufferPos, 1);
+	MIR_DECLARE_TEX2D(_GBufferNormal, 2);
+	MIR_DECLARE_TEX2D(_GBufferAlbedo, 3);
+	MIR_DECLARE_TEX2D(_GBufferEmissive, 4);
+	MIR_DECLARE_TEX2D(_GBufferSheen, 5);
+	MIR_DECLARE_TEX2D(_GBufferClearCoat, 6);
+#endif
+
+#define MIR_DECLARE_VS_IN_Surface(name, slot) \
+	layout(location = slot + 0) in float3 name##Pos;\
+	layout(location = slot + 1) in float4 name##Color;\
+	layout(location = slot + 2) in float2 name##Tex;
+
+layout (binding = 1, std140) uniform cbPerLight {
+	float4 LightPosition;
+	float4 LightColor;
+	float4 unity_LightAtten;
+	float4 unity_SpotDirection;
+	float4 LightRadiusUVNearFar;
+	float4 LightDepthParam;
+	bool IsSpotLight;
+};
+
+layout (binding = 0, std140) uniform cbPerFrame {
+	matrix World;
+	matrix View;
+	matrix Projection;
+	matrix ViewInv;
+	matrix ProjectionInv;
+
+	matrix LightView;
+	matrix LightProjection;
+	
+	float4 CameraPositionExposure;
+	
+	matrix SHC0C1;
+	matrix SHC2;
+	float4 SHC2_2;
+	float4 EnvDiffuseColor;
+	float4 EnvSpecColorMip;
+	float4 EnvSheenColorMip;
+	float4 LightMapUV;
+	float4 LightMapSizeMip;
+	
+	float4 FrameBufferSize;
+	float4 ShadowMapSize;
+};
+
+#endif
