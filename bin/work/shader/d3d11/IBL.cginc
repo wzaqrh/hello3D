@@ -81,7 +81,7 @@ float3 GetIBLRadianceGGX(IBLInput i, float perceptualRoughness, float specularWe
     #endif	
 	fcolor = reflUVW * 0.5 + 0.5;
 #elif DEBUG_CHANNEL == DEBUG_CHANNEL_IBL_SPECULAR_PREFILTER_ENV
-	fcolor = specularLight;
+	fcolor = irradiance;
 #endif
 	return fcolor;
 }

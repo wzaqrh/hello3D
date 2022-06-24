@@ -48,11 +48,12 @@ void FrameBufferOGL::SetAttachZStencil(IFrameBufferAttachmentPtr attach)
 static TextureOGLPtr _CreateColorAttachTexture(const Eigen::Vector3i& size, ResourceFormat format)
 {
 	constexpr bool autoGen = false;
-	constexpr size_t mipCount = 1, faceCount = 1;
+	constexpr size_t faceCount = 1;
 
 	TextureOGLPtr texture = CreateInstance<TextureOGL>();
-	texture->Init(format, kHWUsageDefault, size.x(), size.y(), faceCount, mipCount);
+	texture->Init(format, kHWUsageDefault, size.x(), size.y(), faceCount, size.z());
 	texture->InitTex(nullptr);
+	texture->AutoGenMipmap();
 	texture->SetLoaded();
 	return texture;
 }

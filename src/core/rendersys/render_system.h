@@ -46,7 +46,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	virtual void Dispose() = 0;
 	
 	/***** query *****/
-	virtual std::string GetPlatform() const = 0;
+	virtual Platform GetPlatform() const = 0;
 	virtual Eigen::Vector2i WinSize() const = 0;
 	
 	/***** about resource *****/
@@ -60,7 +60,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 	}
 	virtual void SetFrameBuffer(IFrameBufferPtr rendTarget) = 0;
 	virtual void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float Depth, uint8_t Stencil) = 0;
-	virtual void CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment) {}
+	virtual void CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment) = 0;
 
 	virtual void SetVertexArray(IVertexArrayPtr vao) = 0;
 
@@ -103,7 +103,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 		SetSamplers(slot, &sampler, 1);
 	}
 
-	virtual ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) = 0;
+	virtual ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data2 datas[]) = 0;
 	virtual void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) = 0;
 	void SetTextures(const std::vector<ITexturePtr> textures, size_t slot) {
 		SetTextures(slot, !textures.empty() ? &textures[0] : nullptr, textures.size());
@@ -112,7 +112,7 @@ interface MIR_CORE_API IRenderSystem : boost::noncopyable
 		SetTextures(slot, &texture, 1); 
 	}
 	virtual bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) = 0;
-	virtual void GenerateMips(ITexturePtr texture) {}
+	virtual void GenerateMips(ITexturePtr texture) = 0;
 
 	/***** about state *****/
 	virtual void SetViewPort(int x, int y, int w, int h) = 0;

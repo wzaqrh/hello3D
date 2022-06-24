@@ -31,6 +31,7 @@ enum PipeLineTextureSlot
 	kPipeTextureSceneImage = 8,
 	kPipeTextureLightMap = 8,
 
+	kPipeTextureShadowMapTex = 10,
 	kPipeTextureShadowMap = 11,
 	kPipeTextureEnvSheen = 12,
 	kPipeTextureEnvDiffuse = 13,
@@ -223,18 +224,21 @@ public:
 		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, 1.0, 0);
 		fb_shadow_map.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-		depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
-		blend_state(BlendState::MakeDisable());
-
-		RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER, mCastShadowOps);
-
-		if (mCfg.IsShadowVSM() && !mDefferedOps.IsEmpty())
+		if (!mCastShadowOps.IsEmpty()) 
 		{
-			mGrabDic["_ShadowMap"] = mShadowMap;
-			depth_state(DepthState::MakeFor3D(false));
+			depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
+			blend_state(BlendState::MakeDisable());
 
-			RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER_POSTPROCESS, mDefferedOps);
-			mRenderSys.GenerateMips(mShadowMap->GetAttachColorTexture(0));
+			RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER, mCastShadowOps);
+
+			if (mCfg.IsShadowVSM() && !mDefferedOps.IsEmpty())
+			{
+				mGrabDic["_ShadowMap"] = mShadowMap;
+				depth_state(DepthState::MakeFor3D(false));
+
+				RenderLight(*mPerFrame.SetLight(mMainLight), MakePerLight(mMainLight), LIGHTMODE_SHADOW_CASTER_POSTPROCESS, mDefferedOps);
+				mRenderSys.GenerateMips(mShadowMap->GetAttachColorTexture(0));
+			}
 		}
 	}
 	void RenderForward()
@@ -244,6 +248,7 @@ public:
 
 		auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
 		auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
+		auto tex_shadow_map_tex = mStatesBlock.LockTexture(kPipeTextureShadowMapTex, attach_shadow_map);
 		
 		auto tex_env_sheen = mStatesBlock.LockTexture(kPipeTextureEnvSheen, NULLABLE(Camera.GetSkyBox(), GetSheenMap()));
 		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureEnvDiffuse, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -296,6 +301,7 @@ public:
 
 			auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
 			auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
+			auto tex_shadow_map_tex = mStatesBlock.LockTexture(kPipeTextureShadowMapTex, attach_shadow_map);
 
 			auto tex_env_sheen = mStatesBlock.LockTexture(kPipeTextureEnvSheen, NULLABLE(Camera.GetSkyBox(), GetSheenMap()));
 			auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureEnvDiffuse, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -323,6 +329,7 @@ public:
 
 		auto attach_shadow_map = IF_AND_OR(mCfg.IsShadowVSM(), mShadowMap->GetAttachColorTexture(0), mShadowMap->GetAttachZStencilTexture());
 		auto tex_shadow_map = mStatesBlock.LockTexture(kPipeTextureShadowMap, attach_shadow_map);
+		auto tex_shadow_map_tex = mStatesBlock.LockTexture(kPipeTextureShadowMapTex, attach_shadow_map);
 
 		auto tex_env_sheen = mStatesBlock.LockTexture(kPipeTextureEnvSheen, NULLABLE(Camera.GetSkyBox(), GetSheenMap()));
 		auto tex_env_diffuse = mStatesBlock.LockTexture(kPipeTextureEnvDiffuse, NULLABLE(Camera.GetSkyBox(), GetDiffuseEnvMap()));
@@ -491,7 +498,7 @@ private:
 					passFb = mFbBank->Borrow(passOut.Formats, passOut.Size);
 					mTempGrabDic[passOut.Name] = passFb;
 				}
-				mStatesBlock.FrameBuffer.Push(passFb);
+				mStatesBlock.FrameBuffer.Push(passFb, Eigen::Vector4f::Zero(), mPerFrame.GetZFar(), 0);
 				mPerFrame.SetFrameBuffer(mStatesBlock.CurrentFrameBuffer());
 			}
 			const auto& passIn = pass->GetGrabIn();
@@ -652,7 +659,7 @@ void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, cons
 		render.RenderPostProcess(camera.GetPostProcessInput());
 	}
 
-	render.RenderUI();
+	//render.RenderUI();
 }
 
 void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)

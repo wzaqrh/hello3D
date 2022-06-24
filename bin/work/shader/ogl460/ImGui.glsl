@@ -6,7 +6,7 @@ struct PixelInput
 	float2 Tex;
 };
 
-#if SHADER_STAGE == 0
+#if SHADER_STAGE == SHADER_STAGE_VERTEX
 	MIR_DECLARE_VS_IN(float2, iPos, 0);
 	MIR_DECLARE_VS_IN(float2, iTex, 1);
 	MIR_DECLARE_VS_IN(float4, iColor, 2);
@@ -18,7 +18,7 @@ struct PixelInput
 		mat4 ProjectionMatrix; 
 	};
 
-	void main()
+	void StageEntry_VS()
 	{
 		o.Tex = iTex;
 		o.Color = iColor;
@@ -30,7 +30,7 @@ struct PixelInput
 
 	MIR_DECLARE_TEX2D(_MainTex, 0);
 
-	void main()
+	void StageEntry_PS()
 	{
 		oColor = i.Color * MIR_SAMPLE_TEX2D(_MainTex, i.Tex);
 	}

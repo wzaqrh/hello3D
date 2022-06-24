@@ -19,14 +19,14 @@ public:
 	void UpdateFrame(float dt) override;
 	void Dispose() override;
 	void SetViewPort(int x, int y, int w, int h) override;
-	std::string GetPlatform() const override { return "ogl"; }
-	int GetGLVersion() const;
+	Platform GetPlatform() const override;
 public:
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
 	IFrameBufferPtr LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats) override;
 	void SetFrameBuffer(IFrameBufferPtr rendTarget) override;
 	void ClearFrameBuffer(IFrameBufferPtr rendTarget, const Eigen::Vector4f& color, float depth, uint8_t stencil) override;
+	void CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment) override;
 
 	void SetVertexArray(IVertexArrayPtr vao) override;
 
@@ -58,10 +58,10 @@ public:
 	void SetDepthBias(const DepthBias& bias) override;
 	void SetScissorState(const ScissorState& scissor) override;
 
-	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, 
-		const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
+	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data2 datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) override;
+	void GenerateMips(ITexturePtr texture) override;
 
 	void DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
 	void DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) override;
@@ -86,6 +86,7 @@ private:
 	std::thread::id mMainThreadId;
 private:
 	std::vector<VertexBufferOGLPtr> mCurVbos;
+	IndexBufferOGLPtr mCurVio;
 	VertexArrayOGLPtr mCurVao;
 	Eigen::Vector4i mCurViewPort = Eigen::Vector4i::Zero();
 };

@@ -28,6 +28,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		WINDOW_HEIGHT = 600;
 	}
 
+	WINDOW_WIDTH = 800;
+	WINDOW_HEIGHT = 600;
+
 	HWND handle;
 	if (FAILED(InitWindow(hInstance, nCmdShow, AppDraw->GetName().c_str(), WINDOW_WIDTH, WINDOW_HEIGHT, &handle)))
 		return 0;
@@ -44,10 +47,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			SetWindowPos(handle, HWND_NOTOPMOST, 471 - topleft.x, 32 + 94 - topleft.y, 0, 0, SWP_NOSIZE);
 		}
 	#if defined _DEBUG
-		RECT rect;
+		/*RECT rect;
 		GetClientRect(handle, &rect);
 		BOOST_ASSERT(rect.right - rect.left == WINDOW_WIDTH);
-		BOOST_ASSERT(rect.bottom - rect.top == WINDOW_HEIGHT);
+		BOOST_ASSERT(rect.bottom - rect.top == WINDOW_HEIGHT);*/
 	#endif
 	}
 

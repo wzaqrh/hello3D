@@ -26,6 +26,11 @@ namespace mir {
 
 RenderSystem11::RenderSystem11()
 {}
+Platform RenderSystem11::GetPlatform() const 
+{
+	return Platform{ kPlatformDirectx, 11 };
+}
+
 RenderSystem11::~RenderSystem11()
 {
 	DEBUG_LOG_MEMLEAK("rendSys11.destrcutor");
@@ -600,13 +605,13 @@ bool RenderSystem11::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 	return true;
 }
 
-ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data datas[])
+ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data2 datas[])
 {
 	DEBUG_LOG_CALLSTK("renderSys11.LoadTexture");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
-	Data defaultData = Data{};
+	Data2 defaultData = Data2{};
 	datas = datas ? datas : &defaultData;
 	const HWMemoryUsage usage = datas[0].Bytes ? kHWUsageDefault : kHWUsageDynamic;
 
@@ -624,10 +629,10 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 	for (size_t face = 0; face < faceCount; ++face) {
 		for (size_t mip = 0; mip < mipCount; ++mip) {
 			size_t index = face * mipCount + mip;
-			const Data& data = datas[index];
+			const Data2& data = datas[index];
 			D3D11_SUBRESOURCE_DATA& res_data = initDatas[index];
 			res_data.pSysMem = data.Bytes;
-			res_data.SysMemPitch = data.Size ? data.Size : BytePerPixel(format) * (size.x() >> mip);//Line width in bytes
+			res_data.SysMemPitch = data.Stride ? data.Stride : BytePerPixel(format) * (size.x() >> mip);//Line width in bytes
 			res_data.SysMemSlicePitch = imageSize; //only used for 3d textures
 		}
 	}
@@ -638,7 +643,7 @@ ITexturePtr RenderSystem11::LoadTexture(IResourcePtr res, ResourceFormat format,
 		return nullptr; 
 
 	if (texture->IsAutoGenMipmap()) {
-		mDeviceContext->UpdateSubresource(texture->AsTex2D().Get(), 0, nullptr, datas[0].Bytes, datas[0].Size, imageSize);
+		mDeviceContext->UpdateSubresource(texture->AsTex2D().Get(), 0, nullptr, datas[0].Bytes, datas[0].Stride, imageSize);
 		mDeviceContext->GenerateMips(texture->AsSRV().Get());
 	}
 

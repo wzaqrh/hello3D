@@ -71,7 +71,7 @@
 			<LightMode>ShadowCaster</LightMode>
 			<PROGRAM>
 				<VertexEntry>VSShadowCaster</VertexEntry> 
-				<PixelEntry_1>PSShadowCasterDebug</PixelEntry_1>
+				<PixelEntry>PSShadowCasterDebug</PixelEntry>
 			</PROGRAM>
 			<PROGRAM Condition="SHADOW_MODE==5"> 
 				<VertexEntry>VSGenerateVSM</VertexEntry> 

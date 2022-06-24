@@ -47,7 +47,7 @@
 		
 		<Pass>
 			<LightMode>PrepassFinal</LightMode>
-			<PROGRAM> 
+			<PROGRAM>
 				<UseTexture>tGrpPrepassFinal</UseTexture>
 				<VertexEntry>VSPrepassFinal</VertexEntry> 
 				<PixelEntry>PSPrepassFinal</PixelEntry>

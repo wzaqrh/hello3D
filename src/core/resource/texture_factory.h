@@ -21,7 +21,7 @@ public:
 	TextureFactory(ResourceManager& resMng);
 	~TextureFactory();
 
-	CoTask<bool> CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[]) ThreadSafe ThreadMaySwitch;
+	CoTask<bool> CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data2 datas[]) ThreadSafe ThreadMaySwitch;
 	CoTask<bool> CreateTextureByFile(ITexturePtr& texture, Launch lchMode, std::string filepath, ResourceFormat format = kFormatUnknown, bool autoGenMipmap = false) ThreadSafe ThreadMaySwitch;
 	DECLARE_COTASK_FUNCTIONS(ITexturePtr, CreateTextureByData, ThreadSafe ThreadMaySwitch);
 	DECLARE_COTASK_FUNCTIONS(ITexturePtr, CreateTextureByFile, ThreadSafe ThreadMaySwitch);

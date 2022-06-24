@@ -1,0 +1,58 @@
+#ifndef BILATERAL_BLUR_H
+#define BILATERAL_BLUR_H
+#include "CommonFunction.glinc"
+#if SHADER_STAGE == SHADER_STAGE_PIXEL
+
+struct BilateralBlurInput
+{
+	float4 blurRadiusFallOffSharp; //g_BlurRadius, g_BlurFalloff, g_Sharpness
+	float4 resolution;// w, h, 1/w, 1/h
+	float4 depthParam;// f/(f*n), (f-n)/(f*n)
+};
+
+inline float BlurFunction(float2 uv, float r, float center_c, float center_d, inout float w_total,
+					      BilateralBlurInput i, MIR_ARGS_TEX2D(tDepth), MIR_ARGS_TEX2D(tSource))
+{
+	float c = MIR_SAMPLE_TEX2D(tSource, uv).r;
+	float d = fetch_eye_z(uv, i.depthParam.xy, MIR_PASS_TEX2D(tDepth));
+
+	float ddiff = d - center_d;
+	float w = exp(-r * r * i.blurRadiusFallOffSharp.y - ddiff * ddiff * i.blurRadiusFallOffSharp.z);
+	w_total += w;
+
+	return w * c;
+}
+
+inline float4 BilateralBlurX(float2 tex, BilateralBlurInput i, MIR_ARGS_TEX2D(tDepth), MIR_ARGS_TEX2D(tSource))
+{
+	float b = 0.0;
+	float w_total = 0.0;
+	float center_c = MIR_SAMPLE_TEX2D(tSource, tex).r;
+	float center_d = fetch_eye_z(tex, i.depthParam.xy, MIR_PASS_TEX2D(tDepth));
+    
+	for (float r = -i.blurRadiusFallOffSharp.x; r <= i.blurRadiusFallOffSharp.x; ++r)
+	{
+		float2 uv = tex.xy + float2(r * i.resolution.z, 0);
+		b += BlurFunction(uv, r, center_c, center_d, w_total, i, MIR_PASS_TEX2D(tDepth), MIR_PASS_TEX2D(tSource));
+	}
+	return b / w_total;
+	//return MIR_SAMPLE_TEX2D(tSource, tex);
+}
+
+inline float4 BilateralBlurY(float2 tex, BilateralBlurInput i, MIR_ARGS_TEX2D(tDepth), MIR_ARGS_TEX2D(tSource))
+{
+	float b = 0.0;
+	float w_total = 0.0;
+	float center_c = MIR_SAMPLE_TEX2D(tSource, tex).r;
+	float center_d = fetch_eye_z(tex, i.depthParam.xy, MIR_PASS_TEX2D(tDepth));
+    
+	for (float r = -i.blurRadiusFallOffSharp.x; r <= i.blurRadiusFallOffSharp.x; ++r)
+	{
+		float2 uv = tex.xy + float2(0, r * i.resolution.w);
+		b += BlurFunction(uv, r, center_c, center_d, w_total, i, MIR_PASS_TEX2D(tDepth), MIR_PASS_TEX2D(tSource));
+	}
+	return b / w_total;
+}
+
+#endif
+#endif

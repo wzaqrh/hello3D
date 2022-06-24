@@ -146,7 +146,7 @@ private:
 					std::ifstream fs;
 					fs.open(pathstr, std::ios::in);
 					std::string line;
-					const std::regex exp_regex("#include\\s+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
+					static const std::regex exp_regex("#include[\\s\\t]+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
 					while (fs.peek() != EOF) {
 						std::getline(fs, line);
 						std::smatch exp_match;
@@ -224,7 +224,9 @@ private:
 
 	bool ParseMacrosFile(const std::string& macroName, ConstVisitorRef vis) const {
 		bool result = false;
-		boost_filesystem::path path = boost_filesystem::system_complete(mIncludeFiles.mShaderDir + macroName + ".cginc");
+		boost_filesystem::path path = boost_filesystem::system_complete(
+			mIncludeFiles.mShaderDir + macroName + ".cginc");
+		BOOST_ASSERT(boost::filesystem::is_regular_file(path));
 		if (boost::filesystem::is_regular_file(path)) {
 			std::ifstream fs;
 			fs.open(path.string(), std::ios::in);

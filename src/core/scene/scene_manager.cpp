@@ -102,12 +102,12 @@ CoTask<void> SceneManager::UpdateFrame(float dt)
 	}
 
 #if MIR_GRAPHICS_DEBUG
-	if (mDebugPaint == nullptr) 
+	/*if (mDebugPaint == nullptr)
 		mDebugPaint = CoAwait mRendFac->CreatePaint3DT();
 	COROUTINE_VARIABLES;
 	mDebugPaint->SetColor(0xFF00FF00);
 	mDebugPaint->Clear();
-	mDebugPaint->DrawAABBEdge(aabb);
+	mDebugPaint->DrawAABBEdge(aabb);*/
 #endif
 }
 

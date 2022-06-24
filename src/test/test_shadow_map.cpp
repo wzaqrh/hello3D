@@ -20,6 +20,8 @@ private:
 	GuiDebugWindow mGuiDebugChannel;
 };
 
+#define DEBUG_GL 1
+
 CoTask<bool> TestShadowMap::OnInitScene()
 {
 	//SetPPU(1);
@@ -28,14 +30,16 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(45.0);
 
+#if !DEBUG_GL
 	mGuiDebugChannel.Init(mContext);
+#endif
 
 	AssimpModelPtr mModel;
 	test1::res::model model;
 	switch (mCaseIndex) {
 	case 0:
 	case 1: {
-		bool isShadowVSM = mContext->Config().IsShadowVSM();
+		bool isShadowVSM = true;// mContext->Config().IsShadowVSM();
 
 		if (mCaseIndex == 0) {
 			camera->SetLookAt(Eigen::Vector3f(0, 10, -10), Eigen::Vector3f::Zero());
@@ -53,9 +57,10 @@ CoTask<bool> TestShadowMap::OnInitScene()
 			if (isShadowVSM) dir_light->SetLookAt(Eigen::Vector3f(0.5f, 1.0f, -1.0f) * 20, Eigen::Vector3f::Zero());
 			else dir_light->SetLookAt(Eigen::Vector3f(3.57088f, 6.989f, -9.19698f), Eigen::Vector3f::Zero());
 		}
-
+	#if 1
 		MaterialLoadParamBuilder skyMat = MAT_SKYBOX;
 		camera->SetSkyBox(CoAwait mRendFac->CreateSkyboxT(test1::res::Sky(), skyMat));
+	#endif
 
 		MaterialLoadParamBuilder modelMat = MAT_MODEL;
 	#if 1
@@ -73,7 +78,9 @@ CoTask<bool> TestShadowMap::OnInitScene()
 
 	#if 1
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+	#if !DEBUG_GL
 		mGuiDebugChannel.AddModel(mModel);
+	#endif
 		if (mCaseIndex == 0) {
 			mTransform = CoAwait model.Init("buddha", mModel);
 			mTransform->SetPosition(Eigen::Vector3f(0, 2, 0));
@@ -91,8 +98,9 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	default:
 		break;
 	}
-
+#if !DEBUG_GL
 	mGuiDebugChannel.AddAllCmds();
+#endif
 	CoReturn true;
 }
 

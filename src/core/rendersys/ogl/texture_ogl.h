@@ -27,7 +27,7 @@ public:
 	~TextureOGL();
 	void Dispose();
 	void Init(ResourceFormat format, HWMemoryUsage usage, int width, int height, int faceCount, int mipmap);
-	void InitTex(const Data datas[]);
+	void InitTex(const Data2 datas[]);
 	void AutoGenMipmap();
 	void OnLoaded() override;
 public:

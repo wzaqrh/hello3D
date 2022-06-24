@@ -153,6 +153,10 @@
 	#define REVERSE_Z 1
 #endif
 
+#if !defined UV_STARTS_AT_TOP
+	#define UV_STARTS_AT_TOP 1
+#endif
+
 #if !defined ENABLE_CORRCET_TANGENT_BASIS
 	#define ENABLE_CORRCET_TANGENT_BASIS 1
 #endif

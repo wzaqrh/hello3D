@@ -23,16 +23,16 @@ float CalcShadowFactor(float3 lightNdc, float3 lightViewPos)
 	pcfIn.lightDepthParam = LightDepthParam;
 	float2 dz_duv = DepthGradient(lightNdc.xy, lightNdc.z);
 	//float2 dz_duv = float2(0.0, 0.0);
-	return PCFShadow(lightNdc.xy, lightNdc.z, dz_duv, lightViewPos.z, pcfIn, MIR_PASS_SHADOWMAP(_ShadowMap), sampler_ShadowMap);
+	return PCFShadow(lightNdc.xy, lightNdc.z, dz_duv, lightViewPos.z, pcfIn, MIR_PASS_SHADOWMAP(_ShadowMap), MIR_PASS_TEX2D(_ShadowMapTex));
 #elif SHADOW_MODE == SHADOW_PCSS
 	PCFShadowInput pcfIn;
 	pcfIn.lightRadiusUVNearFar = LightRadiusUVNearFar;
 	pcfIn.lightDepthParam = LightDepthParam;
 	float2 dz_duv = DepthGradient(lightNdc.xy, lightNdc.z);
 	//float2 dz_duv = float2(0.0, 0.0);
-	return PCSSShadow(lightNdc.xy, lightNdc.z, dz_duv, lightViewPos.z, pcfIn, MIR_PASS_SHADOWMAP(_ShadowMap), sampler_ShadowMapTex);
+	return PCSSShadow(lightNdc.xy, lightNdc.z, dz_duv, lightViewPos.z, pcfIn, MIR_PASS_SHADOWMAP(_ShadowMap), MIR_PASS_TEX2D(_ShadowMapTex));
 #elif SHADOW_MODE == SHADOW_VSM
-	return VSMShadow(lightNdc.xy, length(lightViewPos), MIR_PASS_TEX2D(_ShadowMap));
+	return VSMShadow(lightNdc.xy, length(lightViewPos), MIR_PASS_TEX2D(_ShadowMapTex));
 #else
 	return 1.0;
 #endif

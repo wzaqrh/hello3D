@@ -38,8 +38,8 @@ GLenum GetGLTopologyType(PrimitiveTopology topo);
 GLenum GLCheckError(const char* file, int line);
 
 bool ValidateProgram(GLuint proId);
-bool CheckProgramCompileStatus(GLuint shaderId);
-bool CheckProgramLinkStatus(GLuint proId);
+bool CheckProgramCompileStatus(GLuint shaderId, std::string* pErrMsg);
+bool CheckProgramLinkStatus(GLuint proId, std::string* pErrMsg);
 
 }
 }

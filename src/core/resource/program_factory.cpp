@@ -21,9 +21,9 @@ ProgramFactory::ProgramFactory(ResourceManager& resMng, const std::string& shade
 : mResMng(resMng)
 , mRenderSys(resMng.RenderSys())
 {
-	bool isOgl = mRenderSys.GetPlatform() == "ogl";
-	mShaderDir = shaderDir + IF_AND_OR(isOgl, mRenderSys.GetPlatform() + "/", "");
-	mShaderExt = IF_AND_OR(isOgl, ".glsl", ".hlsl");
+	mPlatformName = mRenderSys.GetPlatform().Name();
+	mShaderDir = shaderDir + mPlatformName + "/";
+	mShaderExt = mRenderSys.GetPlatform().ShaderExtension();
 }
 ProgramFactory::~ProgramFactory()
 {
@@ -88,7 +88,7 @@ boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& nam
 		{
 			boost::filesystem::directory_iterator diter(mShaderDir), dend;
 			for (; diter != dend; ++diter) {
-				if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == ".cginc") {
+				if (boost::filesystem::is_regular_file(*diter) && (*diter).path().extension() == mShaderExt) {
 					time_t htime = boost::filesystem::last_write_time((*diter).path());
 					cgincs_time = std::max(cgincs_time, htime);
 				}
@@ -98,6 +98,7 @@ boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& nam
 	}
 #endif
 
+	asmFilePath = "";
 	return boost::filesystem::system_complete(asmFilePath);
 }
 #define NTASM_NAME_LEN (1024-64)
@@ -141,29 +142,51 @@ bool ProgramFactory::ReadShaderAsm(const boost::filesystem::path& asmPath, std::
 	return false;
 }
 
-struct ShaderIncludePreprocessor {
+struct ShaderPreprocessor {
 public:
-	ShaderIncludePreprocessor(const std::string& shaderDir) :mShaderDir(shaderDir) {}
-	std::string operator()(const std::string& src) {
-		Parse(src);
-		return std::move(mResult);
-	}
-	std::vector<char> operator()(const std::vector<char>& bin) {
+	ShaderPreprocessor(const std::string& shaderDir) :mShaderDir(shaderDir) {}
+	std::vector<char> operator()(const std::vector<char>& bin, const std::string& vsOrPsEntry) {
+		//TIME_PROFILE("include preprocess");
 		std::string src(bin.begin(), bin.end());
-		Parse(src);
+		src = ReplaceEntry(src, vsOrPsEntry);
+		ProcessInclude(src);
 		return std::vector<char>(mResult.begin(), mResult.end());
 	}
 private:
-	void Parse(const std::string& src) {
+	std::string ReplaceEntry(const std::string& src, const std::string& vsOrPsEntry) {
+		//TIME_PROFILE("include preprocess: replace entry");
+		std::string result;
+
 		std::stringstream ss;
 		ss << src;
 		std::string line;
-		const std::regex exp_regex("#include\\s+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
-		//const std::regex exp_regex("#include\\s+.*\\r");
+		const std::regex vps_regex("[\\s\\t]+void[\\s\\t]+StageEntry_" + vsOrPsEntry + ".*\\r?\\n?");
+		BOOL flag = 0;
 		while (ss.peek() != EOF) {
 			std::getline(ss, line);
 			std::smatch exp_match;
-			if (std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
+			if (line.size() > 10 && (line[0] == ' ' || line[0] == '\t')) {
+				if (std::regex_match(line, exp_match, vps_regex)) {
+					boost::replace_first(line, "StageEntry_" + vsOrPsEntry, "main");
+					flag = TRUE;
+				}
+			}
+			result += line;
+			result.push_back('\n');
+		}
+		BOOST_ASSERT(flag);
+		return std::move(result);
+	}
+	void ProcessInclude(const std::string& src) {
+		std::stringstream ss;
+		ss << src;
+		std::string line;
+		static const std::regex exp_regex("#include[\\s\\t]+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
+		while (ss.peek() != EOF) {
+			std::getline(ss, line);
+			std::smatch exp_match;
+			if (line.size() > 10 && line[0] == '#' && line[1] == 'i'
+				&& std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
 				std::string incname = exp_match[1].str();
 				if (mVisits.find(incname) == mVisits.end()) {
 					mVisits.insert(incname);
@@ -172,11 +195,12 @@ private:
 					std::vector<char> bin = input::ReadFile(incpath.string().c_str(), "rb");
 					BOOST_ASSERT(!bin.empty());
 					std::string incstr(&bin[0], bin.size());
-					Parse(incstr);
+					ProcessInclude(incstr);
 				}
 			}
 			else {
-				mResult += line + "\n";
+				mResult += line;
+				mResult.push_back('\n');
 			}
 		}
 	}
@@ -205,7 +229,7 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 		time_t time;
 		std::string serializeStr;
 		std::vector<char> bin;
-		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD, mRenderSys.GetPlatform(), time, serializeStr);
+		boost::filesystem::path vsAsmPath = MakeShaderAsmPath(name, vertexSCD, mPlatformName, time, serializeStr);
 		if (ReadShaderAsm(vsAsmPath, bin, time, serializeStr)) {
 			blobVS = CreateInstance<BlobDataBytes>(std::move(bin));
 		}
@@ -214,7 +238,9 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			bin = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
 			BOOST_ASSERT(!bin.empty());
 			if (!bin.empty()) {
-				bin = ShaderIncludePreprocessor(mShaderDir)(bin);
+				if (mRenderSys.GetPlatform().Type == kPlatformOpengl) {
+					bin = ShaderPreprocessor(mShaderDir)(bin, vertexSCD.EntryPoint);
+				}
 
 				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
@@ -228,7 +254,7 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 		time_t time;
 		std::string serializeStr;
 		std::vector<char> bin;
-		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD, mRenderSys.GetPlatform(), time, serializeStr);
+		boost::filesystem::path psAsmPath = MakeShaderAsmPath(name, pixelSCD, mPlatformName, time, serializeStr);
 		if (ReadShaderAsm(psAsmPath, bin, time, serializeStr)) {
 			blobPS = CreateInstance<BlobDataBytes>(std::move(bin));
 		}
@@ -237,7 +263,9 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			bin = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
 			BOOST_ASSERT(!bin.empty());
 			if (!bin.empty()) {
-				bin = ShaderIncludePreprocessor(mShaderDir)(bin);
+				if (mRenderSys.GetPlatform().Type == kPlatformOpengl) {
+					bin = ShaderPreprocessor(mShaderDir)(bin, pixelSCD.EntryPoint);
+				}
 
 				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE

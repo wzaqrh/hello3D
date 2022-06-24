@@ -22,7 +22,7 @@ TextureFactory::~TextureFactory()
 	DEBUG_LOG_MEMLEAK("texFac.destrcutor");
 }
 
-CoTask<bool> TextureFactory::CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data datas[]) ThreadSafe ThreadMaySwitch
+CoTask<bool> TextureFactory::CreateTextureByData(ITexturePtr& texture, Launch lchMode, ResourceFormat format, Eigen::Vector4i w_h_mip_face, const Data2 datas[]) ThreadSafe ThreadMaySwitch
 {
 	CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 	DEBUG_LOG_CALLSTK("texFac.CreateTextureByData");
@@ -68,7 +68,7 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 	int mipCount = 0;
 	int width = 0;
 	int height = 0;
-	std::vector<Data> vecData;
+	std::vector<Data2> vecData;
 
 	boost::filesystem::path path = imgFullPath;
 	static std::string gliPatterns[] = { ".dds", ".ktx", ".ktx2" };
@@ -96,7 +96,7 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 					auto extent = tex.extent(level);
 					BOOST_ASSERT(tex.size(level) == block_size * FLOOR_DIV(extent.x, block_ext.x) * FLOOR_DIV(extent.y, block_ext.y));
 					int pitch = block_size * FLOOR_DIV(extent.x, block_ext.x);
-					vecData.push_back(Data::Make(tex.data(layer0, face, level), pitch));
+					vecData.push_back(Data2::Make(tex.data(layer0, face, level), pitch * FLOOR_DIV(extent.y, block_ext.y), pitch));
 				}
 			}
 
@@ -267,7 +267,7 @@ CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchM
 				fi.flipVertical();
 			}
 			const int stride = fi.getScanWidth();
-			vecData.push_back(Data::Make(fi.accessPixels(), stride));
+			vecData.push_back(Data2::Make(fi.accessPixels(), stride * height, stride));
 			
 			faceCount = 1;
 			mipCount = 1;

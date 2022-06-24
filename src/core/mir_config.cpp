@@ -13,7 +13,7 @@ Configure::Configure()
 
 bool Configure::IsShadowVSM() const 
 { 
-	return _SHADOW_MODE == SHADOW_VSM; 
+	return _SHADOW_MODE == SHADOW_VSM;
 }
 
 bool Configure::IsGammaSpace() const

@@ -12,6 +12,10 @@
 #include "core/scene/camera.h"
 #include "core/scene/light.h"
 
+#define USE_RENDER_SYS_OGL 0
+
+int IsOgl = false;
+
 namespace mir {
 
 Mir::Mir(Launch launchMode)
@@ -27,12 +31,20 @@ CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir)
 	if (mWorkDirectory.back() != '/') 
 		mWorkDirectory.push_back('/');
 
-#if 1
-	::CoInitialize(0);
-	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystemOGL>());
-#else
-	mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystem11>());
-#endif
+	FILE* fd = fopen("D:\\isogl.txt", "r");
+	if (fd) {
+		fscanf(fd, "%d", &IsOgl);
+		fclose(fd);
+	}
+
+	if (IsOgl) {
+		::CoInitialize(0);
+		mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystemOGL>());
+	}
+	else {
+		mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystem11>());
+	}
+
 	if (FAILED(mRenderSys->Initialize(hWnd))) {
 		mRenderSys->Dispose();
 		CoReturn false;
@@ -67,7 +79,9 @@ void Mir::Dispose()
 		SAFE_DISPOSE_NULL(mGuiMng);
 		SAFE_DISPOSE_NULL(mResMng);
 		SAFE_DISPOSE_NULL(mRenderSys);
-		::CoUninitialize();
+		if (IsOgl) {
+			::CoUninitialize();
+		}
 	}
 }
 

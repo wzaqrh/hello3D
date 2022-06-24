@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <d3d9.h>
 #include "core/base/debug.h"
+#include "core/base/input.h"
 #include "core/rendersys/ogl/ogl_utils.h"
 #include "core/rendersys/program.h"
 
@@ -165,7 +166,7 @@ GLenum GetGlSamplerAddressMode(AddressMode addressMode)
 	switch (addressMode)
 	{
 	case kAddressWrap:
-		glAddrMode = GL_MIRRORED_REPEAT;
+		glAddrMode = GL_REPEAT;
 		break;
 	case kAddressMirror:
 		glAddrMode = GL_MIRRORED_REPEAT;
@@ -292,7 +293,6 @@ GLenum GetGLTopologyType(PrimitiveTopology topo)
 
 GLenum GLCheckError(const char* file, int line)
 {
-	glDisable(GL_DEBUG_OUTPUT);
 	GLenum errorCode;
 	while ((errorCode = glGetError()) != GL_NO_ERROR)
 	{
@@ -309,9 +309,8 @@ GLenum GLCheckError(const char* file, int line)
 		}
 		//std::cout << error << " | " << file << " (" << line << ")" << std::endl;
 		DEBUG_LOG_ERROR((boost::format("%s: %s(%d)") % error % file % line).str().c_str());
-		errorCode = 0;
+		MessageBoxA(NULL, (boost::format("%s: %s(%d)") % error % file % line).str().c_str(), "opengl failed", MB_OK);
 	}
-	glEnable(GL_DEBUG_OUTPUT);
 	return errorCode;
 }
 
@@ -331,11 +330,12 @@ bool ValidateProgram(GLuint proId)
 		std::vector<char> errorLog(logLength);
 		glGetProgramInfoLog(proId, logLength, NULL, &errorLog[0]);
 		DEBUG_LOG_ERROR((boost::format("%s\n") % &errorLog[0]).str().c_str());
+		MessageBoxA(NULL, (boost::format("%s\n") % &errorLog[0]).str().c_str(), "opengl validate program failed", MB_OK);
 	}
 	return validateRes == GL_TRUE;
 }
 
-bool CheckProgramCompileStatus(GLuint shaderId)
+bool CheckProgramCompileStatus(GLuint shaderId, std::string* pErrMsg)
 {
 	GLint compileState = GL_FALSE;
 	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &compileState);
@@ -345,13 +345,15 @@ bool CheckProgramCompileStatus(GLuint shaderId)
 
 		std::vector<char> errorLog(logLength);
 		glGetShaderInfoLog(shaderId, logLength, NULL, &errorLog[0]);
-		DEBUG_LOG_ERROR((boost::format("%s\n") % &errorLog[0]).str().c_str());
-		compileState = GL_FALSE;
+		std::string errMsg = (boost::format("%s\n") % &errorLog[0]).str();
+		if (pErrMsg) *pErrMsg = errMsg;
+
+		DEBUG_LOG_ERROR(errMsg.c_str());
 	}
 	return compileState;
 }
 
-bool CheckProgramLinkStatus(GLuint progId)
+bool CheckProgramLinkStatus(GLuint progId, std::string* pErrMsg)
 {
 	GLint linkStatus = GL_FALSE;
 	glGetProgramiv(progId, GL_LINK_STATUS, &linkStatus);
@@ -361,7 +363,10 @@ bool CheckProgramLinkStatus(GLuint progId)
 
 		std::vector<char> errorLog(logLength);
 		glGetProgramInfoLog(progId, logLength, NULL, &errorLog[0]);
-		DEBUG_LOG_ERROR((boost::format("%s\n") % &errorLog[0]).str().c_str());
+		std::string errMsg = (boost::format("%s\n") % &errorLog[0]).str();
+		if (pErrMsg) *pErrMsg = errMsg;
+
+		DEBUG_LOG_ERROR(errMsg.c_str());
 	}
 	return linkStatus;
 }

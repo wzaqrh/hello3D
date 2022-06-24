@@ -229,7 +229,7 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
 	constexpr int mipCount = 1, faceCount = 1;
 
-	bd->FontTexture = bd->Ctx->ResourceMng()->CreateTextureByDataS(LaunchSync, kFormatR8G8B8A8UNorm, Eigen::Vector4i(width, height, mipCount, faceCount), &Data::Make(pixels, 0));
+	bd->FontTexture = bd->Ctx->ResourceMng()->CreateTextureByDataS(LaunchSync, kFormatR8G8B8A8UNorm, Eigen::Vector4i(width, height, mipCount, faceCount), &Data2::Make(pixels, height * width * 4, width * 4));
 	io.Fonts->SetTexID((ImTextureID)bd->FontTexture.get());
 
 	bd->Rop.Material.GetTextures().AddOrSet(bd->FontTexture, 0);

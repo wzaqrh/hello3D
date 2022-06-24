@@ -220,9 +220,6 @@
     <ClInclude Include="..\src\core\base\deffered_signal.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\mir_config_macros.h">
-      <Filter>src\core\config</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\base\blend_state.h">
       <Filter>src\core\rendersys\base</Filter>
     </ClInclude>
@@ -345,6 +342,12 @@
     </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\d3d_utils.h">
       <Filter>src\core\rendersys\d3d11\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\mir_config_macros.h">
+      <Filter>shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\rendersys\base\platform.h">
+      <Filter>src\core\rendersys\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -549,6 +552,9 @@
     <ClCompile Include="..\src\core\rendersys\d3d11\d3d_utils.cpp">
       <Filter>src\core\rendersys\d3d11\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\rendersys\base\platform.cpp">
+      <Filter>src\core\rendersys\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -649,22 +655,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\work\shader\HLSLSupport.cginc">
+    <None Include="..\bin\work\shader\d3d11\HLSLSupport.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\Lighting.cginc">
+    <None Include="..\bin\work\shader\d3d11\Lighting.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\Skeleton.cginc">
+    <None Include="..\bin\work\shader\d3d11\Skeleton.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\Standard.cginc">
+    <None Include="..\bin\work\shader\d3d11\Standard.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\IBL.cginc">
+    <None Include="..\bin\work\shader\d3d11\IBL.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\ToneMapping.cginc">
+    <None Include="..\bin\work\shader\d3d11\ToneMapping.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Standard.Shader">
@@ -694,34 +700,34 @@
     <None Include="..\bin\work\shader\HorizonBasedAO.Shader">
       <Filter>shader\shader</Filter>
     </None>
-    <None Include="..\bin\work\shader\WhiteNoise.cginc">
+    <None Include="..\bin\work\shader\d3d11\WhiteNoise.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\CommonFunction.cginc">
+    <None Include="..\bin\work\shader\d3d11\CommonFunction.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\BilateralBlur.cginc">
+    <None Include="..\bin\work\shader\d3d11\BilateralBlur.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\PercentageCloserSoftShadow.cginc">
+    <None Include="..\bin\work\shader\d3d11\PercentageCloserSoftShadow.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\Shadow.cginc">
+    <None Include="..\bin\work\shader\d3d11\Shadow.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\Poisson.cginc">
+    <None Include="..\bin\work\shader\d3d11\Poisson.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\VarianceShadow.cginc">
+    <None Include="..\bin\work\shader\d3d11\VarianceShadow.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\UnityLighting.cginc">
+    <None Include="..\bin\work\shader\d3d11\UnityLighting.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\BRDFCommonFunction.cginc">
+    <None Include="..\bin\work\shader\d3d11\BRDFCommonFunction.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\GltfLighting.cginc">
+    <None Include="..\bin\work\shader\d3d11\GltfLighting.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\media\armadillo\defaultMaterial.Material">
@@ -745,19 +751,19 @@
     <None Include="..\bin\work\media\ToyCar\ToyCar.Material">
       <Filter>shader\material\toycar</Filter>
     </None>
-    <None Include="..\bin\work\shader\SphericalHarmonics.cginc">
+    <None Include="..\bin\work\shader\d3d11\SphericalHarmonics.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Bloom.Shader">
       <Filter>shader\shader</Filter>
     </None>
-    <None Include="..\bin\work\shader\LightingInput.cginc">
+    <None Include="..\bin\work\shader\d3d11\LightingInput.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\Deferred.Shader">
       <Filter>shader\shader</Filter>
     </None>
-    <None Include="..\bin\work\shader\CommonConstants.cginc">
+    <None Include="..\bin\work\shader\d3d11\CommonConstants.cginc">
       <Filter>shader\hlsl\inc</Filter>
     </None>
     <None Include="..\bin\work\shader\ImGui.Shader">
@@ -787,28 +793,80 @@
     <None Include="..\bin\work\shader\Sprite.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\ogl\ImGui.glsl">
+    <None Include="..\bin\work\shader\ogl460\ImGui.glsl">
       <Filter>shader\glsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\ogl\GLSLSupport.glinc">
+    <None Include="..\bin\work\shader\ogl460\GLSLSupport.glinc">
       <Filter>shader\glsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\ogl\Standard.glinc">
+    <None Include="..\bin\work\shader\ogl460\Standard.glinc">
       <Filter>shader\glsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\ogl\Macros.glinc">
+    <None Include="..\bin\work\shader\ogl460\Skeleton.glinc">
       <Filter>shader\glsl\inc</Filter>
     </None>
-    <None Include="..\bin\work\shader\ogl\Skeleton.glinc">
-      <Filter>shader\glsl\inc</Filter>
-    </None>
-    <None Include="..\bin\work\shader\ogl\Sprite.glsl">
+    <None Include="..\bin\work\shader\ogl460\Sprite.glsl">
       <Filter>shader\glsl</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="..\bin\work\shader\Macros.cginc">
-      <Filter>shader\hlsl</Filter>
-    </Media>
+    <None Include="..\bin\work\shader\ogl460\LayerColor.glsl">
+      <Filter>shader\glsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\CommonConstants.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\CommonFunction.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\BRDFCommonFunction.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\ToneMapping.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\IBL.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\GltfLighting.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\LightingInput.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\BilateralBlur.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\WhiteNoise.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Poisson.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\PercentageCloserSoftShadow.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\VarianceShadow.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Shadow.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\SphericalHarmonics.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\UnityLighting.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Lighting.glinc">
+      <Filter>shader\glsl\inc</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Model.glsl">
+      <Filter>shader\glsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Skybox.glsl">
+      <Filter>shader\glsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Macros.glinc">
+      <Filter>shader\glsl</Filter>
+    </None>
   </ItemGroup>
 </Project>

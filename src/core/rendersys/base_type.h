@@ -1,4 +1,5 @@
 #pragma once
+#include "core/rendersys/base/platform.h"
 #include "core/rendersys/base/blend_state.h"
 #include "core/rendersys/base/depth_state.h"
 #include "core/rendersys/base/rasterizer_state.h"

@@ -1,0 +1,47 @@
+#ifndef GLSL_SUPPORT_H
+#define GLSL_SUPPORT_H
+#include "Macros.glinc"
+
+#define float2 vec2
+#define float3 vec3
+#define float4 vec4
+#define uint2 uvec2
+#define uint3 uvec3
+#define uint4 uvec4
+#define float2x2 mat2
+#define float3x3 mat3
+#define matrix mat4
+
+#define inline
+#define frac(x) fract(x)
+#define ddx(x) dFdx(x)
+#define ddy(y) dFdy(y)
+#define rsqrt(x) inversesqrt(x)
+#define saturate(x) clamp(x, 0.0, 1.0)
+#define saturate2(x) clamp(x, float2(0.0), float2(1.0))
+#define saturate3(x) clamp(x, float3(0.0), float3(1.0))
+#define lerp(x, y, s) mix(x, y, s)
+
+#define MIR_DECLARE_VS_IN(type, name, slot)  layout (location = slot) in  type name
+#define MIR_DECLARE_VS_OUT(type, name, slot) layout (location = slot) out type name
+#define MIR_DECLARE_PS_IN(type,  name, slot) layout (location = slot) in  type name
+#define MIR_DECLARE_PS_OUT(type, name, slot) layout (location = slot) out type name
+
+#define MIR_DECLARE_TEX2D(tex, slot) layout(binding = slot) uniform sampler2D tex
+#define MIR_ARGS_TEX2D(tex) sampler2D tex
+#define MIR_PASS_TEX2D(tex) tex
+#define MIR_SAMPLE_TEX2D(tex, coord) texture(tex, coord)
+#define MIR_SAMPLE_TEX2D_LEVEL(tex, coord, level) textureLod(tex, coord, level)
+
+#define MIR_DECLARE_TEXCUBE(tex, slot) layout(binding = slot) uniform samplerCube tex
+#define MIR_ARGS_TEXCUBE(tex) samplerCube tex
+#define MIR_PASS_TEXCUBE(tex) tex
+#define MIR_SAMPLE_TEXCUBE(tex, coord) texture(tex, coord)
+#define MIR_SAMPLE_TEXCUBE_LOD(tex, coord, lod) textureLod(tex, coord, lod)
+
+#define MIR_DECLARE_SHADOWMAP(tex, slot) layout(binding = slot) uniform sampler2DShadow tex
+#define MIR_ARGS_SHADOWMAP(tex) sampler2DShadow tex
+#define MIR_PASS_SHADOWMAP(tex) tex
+#define MIR_SAMPLE_SHADOW(tex, coord) texture(tex, coord.xyz)
+
+#endif // HLSL_SUPPORT_INCLUDED

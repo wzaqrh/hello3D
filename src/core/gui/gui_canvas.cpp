@@ -36,7 +36,7 @@ CoTask<bool> GuiCanvas::Init() ThreadMaySwitch
 		unsigned char* pixels;
 		int width, height;
 		ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-		mFontTex = CoAwait mResMng.CreateTextureByDataT(mLchMode, kFormatR8G8B8A8UNorm, Eigen::Vector4i(width, height, 1, 1), &Data::Make(pixels, width * 4));
+		mFontTex = CoAwait mResMng.CreateTextureByDataT(mLchMode, kFormatR8G8B8A8UNorm, Eigen::Vector4i(width, height, 1, 1), &Data2::Make(pixels, height * width * 4, width * 4));
 		CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
 
 		ImGui::GetIO().Fonts->SetTexID((ImTextureID)mFontTex.get());

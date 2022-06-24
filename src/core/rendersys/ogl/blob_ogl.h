@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <glad/glad.h>
 #include <GL/GL.h>
+#include "core/mir_config.h"
 #include "core/base/data.h"
 #include "core/rendersys/blob.h"
 
@@ -14,8 +15,11 @@ public:
 	size_t GetSize() const override;
 	GLuint GetId() const { return mId; }
 public:
-	Data mBlob;
 	GLuint mId = 0;
+	Data mBlob;
+#if defined MIR_D3D11_DEBUG
+	std::string mSource;
+#endif
 };
 
 }

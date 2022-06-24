@@ -141,7 +141,7 @@ CoTask<bool> RenderableFactory::CreateCube(rend::CubePtr& cube, Eigen::Vector3f 
 	cube->SetHalfSize(halfsize);
 	cube->SetColor(bgra);
 #if MIR_GRAPHICS_DEBUG
-	CoAwait CreatePaint3D(cube->mDebugPaint);
+	//CoAwait CreatePaint3D(cube->mDebugPaint);
 #endif
 
 	CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);

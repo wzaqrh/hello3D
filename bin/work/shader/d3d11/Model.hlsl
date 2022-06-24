@@ -290,6 +290,8 @@ float4 PS_(PixelInput input, bool additive)
 	li.window_pos = input.Pos.xyz;
 #endif
 	return Lighting(li, toLight, normal, toEye, additive);	
+	//return float4(GetAlbedo(input.Tex), 1.0);
+	//return float4(input.Tex, 0.0, 1.0);
 }
 float4 PS(PixelInput input) : SV_Target
 {	

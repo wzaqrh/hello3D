@@ -20,7 +20,7 @@ public:
 	void UpdateFrame(float dt) override;
 	void Dispose() override;
 	void SetViewPort(int x, int y, int w, int h) override;
-	std::string GetPlatform() const override { return "d3d11"; }
+	Platform GetPlatform() const override;
 public:
 	IResourcePtr CreateResource(DeviceResourceType deviceResType) override;
 
@@ -61,7 +61,7 @@ public:
 	void SetFillMode(FillMode fillMode) override;
 	void SetDepthBias(const DepthBias& bias) override;
 
-	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data datas[]) override;
+	ITexturePtr LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& w_h_step_face, int mipmap, const Data2 datas[]) override;
 	bool LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep) override;
 	void SetTextures(size_t slot, const ITexturePtr textures[], size_t count) override;
 	void GenerateMips(ITexturePtr texture) override;

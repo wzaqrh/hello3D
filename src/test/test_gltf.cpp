@@ -21,7 +21,7 @@ private:
 CoTask<bool> TestGLTF::OnInitScene()
 {
 	TIME_PROFILE("testGLTF.OnInitScene");
-
+#if 1
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 
@@ -69,6 +69,33 @@ CoTask<bool> TestGLTF::OnInitScene()
 	mGuiDebugChannel.Init(mContext);
 	mGuiDebugChannel.AddModel(mModel);
 	mGuiDebugChannel.AddAllCmds();
+#else
+	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
+	camera->SetLookAt(Eigen::Vector3f(0, 0, -1), Eigen::Vector3f::Zero());
+
+	auto dir_light = mScneMng->CreateLightNode<DirectLight>();
+	dir_light->SetLookAt(Eigen::Vector3f(0, 0, -1), Eigen::Vector3f::Zero());
+
+	MaterialLoadParamBuilder modelMat = MAT_MODEL;
+	AssimpModelPtr mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
+
+	#define USE_BUDDHA 1
+	#if !USE_BUDDHA
+		std::string filename = "BoxTextured";
+		mTransform = CoAwait test1::res::model().Init(filename, mModel);
+
+		float scale = 0.3;
+		mTransform->SetScale(Eigen::Vector3f(scale, scale, scale));
+		mTransform->SetPosition(Eigen::Vector3f(0, 0.3, 0));
+	#else
+		std::string filename = "buddha";
+		mTransform = CoAwait test1::res::model().Init(filename, mModel);
+
+		float scale = 0.8;
+		mTransform->SetScale(Eigen::Vector3f(scale, scale, scale));
+		mTransform->SetEulerAngles(Eigen::Vector3f(3.14 * 0.5, 0, 0));
+	#endif
+#endif
 	CoReturn true;
 }
 

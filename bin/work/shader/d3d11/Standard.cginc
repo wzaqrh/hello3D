@@ -9,13 +9,8 @@
 	MIR_DECLARE_TEX2D(_LightMap, 8);
 #endif
 
-#if SHADOW_MODE == SHADOW_VSM
-	MIR_DECLARE_TEX2D(_ShadowMap, 11);
-	MIR_DECLARE_TEX2D(_ShadowMapTex, 10);
-#else
-	MIR_DECLARE_SHADOWMAP(_ShadowMap, 11);
-	MIR_DECLARE_TEX2D(_ShadowMapTex, 10);
-#endif
+MIR_DECLARE_TEX2D(_ShadowMapTex, 10);
+MIR_DECLARE_SHADOWMAP(_ShadowMap, 11);
 
 MIR_DECLARE_TEXCUBE(_EnvSheenMap, 12);
 MIR_DECLARE_TEXCUBE(_EnvDiffuseMap, 13);

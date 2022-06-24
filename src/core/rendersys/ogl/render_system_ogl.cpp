@@ -34,6 +34,11 @@ void draw_call() {
 RenderSystemOGL::RenderSystemOGL()
 {}
 
+Platform RenderSystemOGL::GetPlatform() const 
+{
+	return Platform{ kPlatformOpengl, 460 };
+}
+
 #if defined MIR_D3D11_DEBUG
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
 {
@@ -135,7 +140,9 @@ bool RenderSystemOGL::Initialize(HWND hWnd, RECT vp)
 	//glDebugMessageCallback(glDebugOutput, 0);
 #endif
 
-	glDisable(GL_PRIMITIVE_RESTART);
+	CheckHR(glProvokingVertex(GL_FIRST_VERTEX_CONVENTION));
+	CheckHR(glDepthRange(0.0f, 1.0f));
+	CheckHR(glDisable(GL_PRIMITIVE_RESTART));
 	_SetRasterizerState(mCurRasterState = RasterizerState{ kFillSolid, kCullBack });
 	_SetDepthState(mCurDepthState = DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll, false));
 	_SetBlendState(mCurBlendState = BlendState::MakeAlphaNonPremultiplied());
@@ -165,11 +172,6 @@ bool RenderSystemOGL::IsCurrentInMainThread() const
 }
 void RenderSystemOGL::UpdateFrame(float dt)
 {}
-
-int RenderSystemOGL::GetGLVersion() const
-{
-	return mCaps->Version.GetVersion();
-}
 
 IResourcePtr RenderSystemOGL::CreateResource(DeviceResourceType deviceResType)
 {
@@ -228,9 +230,11 @@ IFrameBufferPtr RenderSystemOGL::LoadFrameBuffer(IResourcePtr res, const Eigen::
 void RenderSystemOGL::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f& color, float depth, uint8_t stencil)
 {
 	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOGL.ClearFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	
 	if (mCurRasterState.Scissor.ScissorEnable) CheckHR(glDisable(GL_SCISSOR_TEST));
+	if (!mCurDepthState.WriteMask) CheckHR(glDepthMask(GL_TRUE));
 
 	FrameBufferOGLPtr fbo = std::static_pointer_cast<FrameBufferOGL>(fb);
 	if (fbo) {
@@ -252,7 +256,34 @@ void RenderSystemOGL::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f
 	}
 
 	if (mCurRasterState.Scissor.ScissorEnable) CheckHR(glEnable(GL_SCISSOR_TEST));
+	if (!mCurDepthState.WriteMask) CheckHR(glDepthMask(GL_FALSE));
 }
+void RenderSystemOGL::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment)
+{
+	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOGL.CopyFrameBuffer");
+	BOOST_ASSERT(IsCurrentInMainThread());
+	BOOST_ASSERT((dstAttachment >= 0) == (srcAttachment >= 0));
+
+	FrameBufferOGLPtr srcFb = std::static_pointer_cast<FrameBufferOGL>(src);
+	FrameBufferOGLPtr dstFb = std::static_pointer_cast<FrameBufferOGL>(dst);
+	GLuint srcFbId = NULLABLE_MEM(srcFb, GetId(), 0);
+	GLuint dstFbId = NULLABLE_MEM(dstFb, GetId(), 0);
+	Eigen::Vector2i srcSize = NULLABLE_MEM(srcFb, GetSize(), mScreenSize);
+	Eigen::Vector2i dstSize = NULLABLE_MEM(dstFb, GetSize(), mScreenSize);
+
+	if (srcAttachment >= 0) {
+		CheckHR(glNamedFramebufferReadBuffer(srcFbId, IF_AND_OR(srcFbId, GL_COLOR_ATTACHMENT0 + srcAttachment, GL_BACK)));
+		CheckHR(glNamedFramebufferDrawBuffer(dstFbId, IF_AND_OR(dstFbId, GL_COLOR_ATTACHMENT0 + dstAttachment, GL_BACK)));
+		CheckHR(glBlitNamedFramebuffer(srcFbId, dstFbId, 0, 0, srcSize.x(), srcSize.y(), 0, 0, dstSize.x(), dstSize.y(), GL_COLOR_BUFFER_BIT, GL_NEAREST));
+	}
+	else {
+		CheckHR(glBlitNamedFramebuffer(srcFbId, dstFbId, 0, 0, srcSize.x(), srcSize.y(), 0, 0, dstSize.x(), dstSize.y(), GL_DEPTH_BUFFER_BIT, GL_NEAREST));
+		auto format = srcFb ? srcFb->GetAttachZStencilTexture()->GetFormat() : dstFb->GetAttachZStencilTexture()->GetFormat();
+		if (format == kFormatD24UNormS8UInt) CheckHR(glBlitNamedFramebuffer(srcFbId, dstFbId, 0, 0, srcSize.x(), srcSize.y(), 0, 0, dstSize.x(), dstSize.y(), GL_STENCIL_BUFFER_BIT, GL_NEAREST));
+	}
+}
+
 void RenderSystemOGL::SetFrameBuffer(IFrameBufferPtr fb)
 {
 	draw_call();
@@ -316,16 +347,26 @@ IBlobDataPtr RenderSystemOGL::CompileShader(const ShaderCompileDesc& compile, co
 				source += "#define " + cdm.Name + " " + cdm.Definition + "\n";
 			}
 		}
+		source += "#define UV_STARTS_AT_TOP 0\n";
 		source += std::string((const char*)data.Bytes, data.Size);
 	}
-	const char* sources[] = { source.c_str() };
 #if defined MIR_D3D11_DEBUG
-	DEBUG_LOG_VERVOSE((boost::format("renderSysOgl.CompileShader type=%d src=\n%s") %compile.ShaderType %source).str());
+	blob->mSource = source;
 #endif
+	const char* sources[] = { source.c_str() };
 	CheckHR(glShaderSource(shaderId, 1, sources, NULL));
 
 	CheckHR(glCompileShader(shaderId));
-	if (!ogl::CheckProgramCompileStatus(shaderId)) return nullptr;
+#if defined MIR_D3D11_DEBUG
+	std::string errMsg;
+	if (!ogl::CheckProgramCompileStatus(shaderId, &errMsg)) {
+		input::WriteFile("compile.txt", "wb", source.c_str(), source.length());
+		MessageBoxA(NULL, errMsg.c_str(), "opengl compile failed", MB_OK);
+		return nullptr;
+	}
+#else
+	if (!ogl::CheckProgramCompileStatus(shaderId, source)) return nullptr;
+#endif
 
 	return blob;
 }
@@ -377,7 +418,23 @@ IProgramPtr RenderSystemOGL::LoadProgram(IResourcePtr res, const std::vector<ISh
 	}
 
 	CheckHR(glLinkProgram(proId));
+#if defined MIR_D3D11_DEBUG
+	std::string errMsg;
+	if (!ogl::CheckProgramLinkStatus(proId, &errMsg)) {
+		if (auto vertex = program->GetVertex()) {
+			const std::string& srcVS = std::static_pointer_cast<BlobDataOGL>(vertex->GetBlob())->mSource;
+			input::WriteFile("linkVS.txt", "wb", srcVS.c_str(), srcVS.length());
+		}
+		if (auto pixel = program->GetPixel()) {
+			const std::string& srcPS = std::static_pointer_cast<BlobDataOGL>(pixel->GetBlob())->mSource;
+			input::WriteFile("linkPS.txt", "wb", srcPS.c_str(), srcPS.length());
+		}
+		MessageBoxA(NULL, errMsg.c_str(), "opengl link error", MB_OK);
+		return nullptr;
+	}
+#else
 	if (!ogl::CheckProgramLinkStatus(proId)) return nullptr;
+#endif
 
 	for (auto& iter : shaders) {
 		switch (iter->GetType()) {
@@ -400,7 +457,6 @@ IProgramPtr RenderSystemOGL::LoadProgram(IResourcePtr res, const std::vector<ISh
 void RenderSystemOGL::SetProgram(IProgramPtr program)
 {
 	draw_call();
-
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	auto prog = std::static_pointer_cast<ProgramOGL>(program);
@@ -446,14 +502,20 @@ void RenderSystemOGL::SetVertexBuffers(size_t slot, const IVertexBufferPtr verte
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(count >= 1);
 
+	std::vector<GLuint> vbos(count);
+	std::vector<GLintptr> offsets(count);
+	std::vector<GLsizei> strides(count);
 	for (size_t i = 0; i < count; ++i) {
-		VertexBufferOGLPtr vbo = std::static_pointer_cast<VertexBufferOGL>(vertexBuffers[i]);
+		mCurVbos[slot + i] = std::static_pointer_cast<VertexBufferOGL>(vertexBuffers[i]);
+		auto& vbo = mCurVbos[slot + i];
 		if (vbo) {
 			BOOST_ASSERT(mCurVao == vbo->GetVAO());
-			CheckHR(glBindVertexBuffer(slot, vbo->GetId(), vbo->GetOffset(), vbo->GetStride()));
+			vbos[i] = vbo->GetId();
+			offsets[i] = vbo->GetOffset();
+			strides[i] = vbo->GetStride();
 		}
-		mCurVbos[slot + i] = vbo;
 	}
+	CheckHR(glBindVertexBuffers(slot, count, &vbos[0], &offsets[0], &strides[0]));
 }
 
 IIndexBufferPtr RenderSystemOGL::LoadIndexBuffer(IResourcePtr res, IVertexArrayPtr ivao, ResourceFormat format, const Data& data)
@@ -472,7 +534,6 @@ IIndexBufferPtr RenderSystemOGL::LoadIndexBuffer(IResourcePtr res, IVertexArrayP
 	{
 		CheckHR(glGenBuffers(1, &vioId));
 		BindVioScope bindVio(vioId);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vioId);
 		CheckHR(glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, data.Size, data.Bytes, IF_AND_OR(usage == kHWUsageDynamic, GL_MAP_WRITE_BIT, 0)));
 	}
 	vio->Init(std::static_pointer_cast<VertexArrayOGL>(vao), vioId, data.Size, format, usage);
@@ -484,10 +545,10 @@ void RenderSystemOGL::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 
 	BOOST_ASSERT(IsCurrentInMainThread());
 
-	if (indexBuffer) {
-		IndexBufferOGLPtr vio = std::static_pointer_cast<IndexBufferOGL>(indexBuffer);
-		BOOST_ASSERT(mCurVao == vio->GetVAO());
-		CheckHR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vio->GetId()));
+	mCurVio = std::static_pointer_cast<IndexBufferOGL>(indexBuffer);
+	if (mCurVio) {
+		BOOST_ASSERT(mCurVao == mCurVio->GetVAO());
+		CheckHR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurVio->GetId()));
 	}
 }
 
@@ -591,21 +652,31 @@ bool RenderSystemOGL::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 }
 
 /********** Texture **********/
-ITexturePtr RenderSystemOGL::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data datas[])
+ITexturePtr RenderSystemOGL::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data2 datas[])
 {
 	draw_call();
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
-	static Data defaultData = Data::MakeNull();
+	static Data2 defaultData = Data2::MakeNull();
 	datas = datas ? datas : &defaultData;
 	const HWMemoryUsage usage = datas[0].Bytes ? kHWUsageDefault : kHWUsageDynamic;
 
 	TextureOGLPtr texture = std::static_pointer_cast<TextureOGL>(res);
 	texture->Init(format, usage, size.x(), size.y(), size.w(), mipCount);
+	BOOST_ASSERT_IF_THEN(texture->GetFaceCount() > 1, datas[0].Bytes);
+	BOOST_ASSERT_IF_THEN(texture->IsAutoGenMipmap(), datas[0].Bytes && texture->GetFaceCount() == 1);
 	texture->InitTex(datas);
 	texture->AutoGenMipmap();
 	return texture;
+}
+void RenderSystemOGL::GenerateMips(ITexturePtr texture)
+{
+	draw_call();
+	BOOST_ASSERT(IsCurrentInMainThread());
+	BOOST_ASSERT(texture);
+
+	std::static_pointer_cast<TextureOGL>(texture)->AutoGenMipmap();
 }
 void RenderSystemOGL::SetTextures(size_t slot, const ITexturePtr textures[], size_t count)
 {
@@ -618,6 +689,7 @@ void RenderSystemOGL::SetTextures(size_t slot, const ITexturePtr textures[], siz
 		CheckHR(glBindTextureUnit(slot + i, NULLABLE_MEM(tex, GetId(), 0)));
 	}
 }
+
 bool RenderSystemOGL::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
 {
 	return true;
@@ -656,9 +728,8 @@ ISamplerStatePtr RenderSystemOGL::LoadSampler(IResourcePtr res, const SamplerDes
 void RenderSystemOGL::SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count)
 {
 	draw_call();
-
+	
 	BOOST_ASSERT(IsCurrentInMainThread());
-	BOOST_ASSERT(samplers && count >= 0);
 
 	for (size_t i = 0; i < count; ++i) {
 		SamplerStateOGLPtr sampler = std::static_pointer_cast<SamplerStateOGL>(samplers[i]);
@@ -671,7 +742,6 @@ void RenderSystemOGL::_SetViewPort(const Eigen::Vector4i& newVp)
 {
 	draw_call();
 
-	CheckHR(glDepthRange(0.0f, 1.0f));
 	CheckHR(glViewport(newVp[0], newVp[1], newVp[2], newVp[3]));
 }
 void RenderSystemOGL::SetViewPort(int x, int y, int width, int height)
@@ -713,12 +783,12 @@ void RenderSystemOGL::_SetDepthState(const DepthState& depthState)
 
 	if (depthState.DepthEnable) {
 		CheckHR(glEnable(GL_DEPTH_TEST));
-		CheckHR(glDepthMask(depthState.WriteMask));
 		CheckHR(glDepthFunc(ogl::GetGlCompFunc(depthState.CmpFunc)));
 	}
 	else {
 		CheckHR(glDisable(GL_DEPTH_TEST));
 	}
+	CheckHR(glDepthMask(depthState.WriteMask));
 	CheckHR(glDisable(GL_STENCIL_TEST));
 }
 void RenderSystemOGL::SetDepthState(const DepthState& depthState)
@@ -827,12 +897,14 @@ void RenderSystemOGL::_SetRasterizerState(const RasterizerState& rs)
 /********** Draw **********/
 void RenderSystemOGL::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.DrawPrimitive");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	CheckHR(glDrawArrays(ogl::GetGLTopologyType(topo), 0, op.VertexBuffers[0]->GetCount()));
 }
 void RenderSystemOGL::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
 	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.DrawIndexedPrimitive");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	int indexCount = IF_OR(op.IndexCount, op.IndexBuffer->GetBufferSize() / op.IndexBuffer->GetWidth());
