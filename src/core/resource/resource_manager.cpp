@@ -11,8 +11,6 @@
 #include "core/resource/material_factory.h"
 #include "core/resource/assimp_factory.h"
 
-#define USE_OIIO
-
 namespace mir {
 
 ResourceManager::ResourceManager(RenderSystem& renderSys, std::shared_ptr<cppcoro::io_service> ioService, const std::string& shaderDir)
@@ -58,12 +56,13 @@ bool ResourceManager::IsCurrentInAsyncService() const
 CoTask<void> ResourceManager::SwitchToLaunchService(Launch launchMode)
 {
 #if !defined MIR_CPPCORO_DISABLED
+	COROUTINE_VARIABLES_1(launchMode);
 	DEBUG_LOG_CALLSTK((boost::format("resMng.SwitchToLaunchService lchMode=%d curIsAsync=%d") %launchMode %IsCurrentInAsyncService()).str());
 
 	if (launchMode == LaunchAsync) {
-		//if (! IsCurrentInAsyncService())
-		//CoAwait mThreadPool->schedule();
-		//BOOST_ASSERT(IsCurrentInAsyncService());
+		if (! IsCurrentInAsyncService())
+			CoAwait mThreadPool->schedule();
+		BOOST_ASSERT(IsCurrentInAsyncService());
 	}
 	else {
 		if (IsCurrentInAsyncService())

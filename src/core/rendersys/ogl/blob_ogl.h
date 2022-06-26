@@ -10,16 +10,12 @@ namespace mir {
 
 class BlobDataOGL : public IBlobData {
 public:
-	BlobDataOGL(GLuint id);
+	BlobDataOGL();
 	const char* GetBytes() const override;
 	size_t GetSize() const override;
-	GLuint GetId() const { return mId; }
 public:
-	GLuint mId = 0;
-	Data mBlob;
-#if defined MIR_D3D11_DEBUG
+	std::vector<char> mBinary;
 	std::string mSource;
-#endif
 };
 
 }

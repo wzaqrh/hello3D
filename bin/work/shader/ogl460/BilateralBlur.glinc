@@ -35,7 +35,7 @@ inline float4 BilateralBlurX(float2 tex, BilateralBlurInput i, MIR_ARGS_TEX2D(tD
 		float2 uv = tex.xy + float2(r * i.resolution.z, 0);
 		b += BlurFunction(uv, r, center_c, center_d, w_total, i, MIR_PASS_TEX2D(tDepth), MIR_PASS_TEX2D(tSource));
 	}
-	return b / w_total;
+	return float4(b / w_total);
 	//return MIR_SAMPLE_TEX2D(tSource, tex);
 }
 
@@ -51,7 +51,7 @@ inline float4 BilateralBlurY(float2 tex, BilateralBlurInput i, MIR_ARGS_TEX2D(tD
 		float2 uv = tex.xy + float2(0, r * i.resolution.w);
 		b += BlurFunction(uv, r, center_c, center_d, w_total, i, MIR_PASS_TEX2D(tDepth), MIR_PASS_TEX2D(tSource));
 	}
-	return b / w_total;
+	return float4(b / w_total);
 }
 
 #endif

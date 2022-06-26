@@ -281,7 +281,8 @@ private:
 		#endif
 		}
 
-		mesh.Build(mLaunchMode, mResMng);
+		if (mResMng.SupportMTResCreation()) mesh.Build(mLaunchMode, mResMng);
+		else tasks.push_back(mesh.BuildSync(mResMng));
 		return meshPtr;
 	}
 private:

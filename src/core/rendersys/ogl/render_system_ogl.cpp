@@ -2,10 +2,12 @@
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lambda/if.hpp>
+#include <regex>
 #include "core/mir_config.h"
 #include "core/base/debug.h"
 #include "core/base/input.h"
 #include "core/base/macros.h"
+#include "core/base/md5.h"
 #include "core/rendersys/ogl/render_system_ogl.h"
 #include "core/rendersys/ogl/blob_ogl.h"
 #include "core/rendersys/ogl/program_ogl.h"
@@ -18,22 +20,13 @@
 #include "core/resource/material_factory.h"
 #include "core/renderable/renderable.h"
 
-int draw_call_flag = 0;
+#define BOOST_ASSERT_(X) BOOST_ASSERT(X)
+//#define USE_VULKAN_COMPILER 1
 
 namespace mir {
 
-void draw_call() {
-	if (draw_call_flag) {
-		draw_call_flag = draw_call_flag;
-	}
-	int p = 0;
-	++p;
-	++p;
-}
-
 RenderSystemOGL::RenderSystemOGL()
 {}
-
 Platform RenderSystemOGL::GetPlatform() const 
 {
 	return Platform{ kPlatformOpengl, 460 };
@@ -88,11 +81,8 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
 }
 #endif
 //https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
-bool RenderSystemOGL::Initialize(HWND hWnd, RECT vp)
+bool RenderSystemOGL::Initialize(HWND hWnd, Eigen::Vector4i viewport)
 {
-	int draw_call_flag__ = draw_call_flag;
-	draw_call_flag = 0;
-
 	mMainThreadId = std::this_thread::get_id();
 	mHWnd = hWnd;
 
@@ -140,30 +130,32 @@ bool RenderSystemOGL::Initialize(HWND hWnd, RECT vp)
 	//glDebugMessageCallback(glDebugOutput, 0);
 #endif
 
-	CheckHR(glProvokingVertex(GL_FIRST_VERTEX_CONVENTION));
-	CheckHR(glDepthRange(0.0f, 1.0f));
-	CheckHR(glDisable(GL_PRIMITIVE_RESTART));
-	_SetRasterizerState(mCurRasterState = RasterizerState{ kFillSolid, kCullBack });
-	_SetDepthState(mCurDepthState = DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll, false));
-	_SetBlendState(mCurBlendState = BlendState::MakeAlphaNonPremultiplied());
-
-	if (vp.right == 0 || vp.bottom == 0)
-		GetClientRect(mHWnd, &vp);
-	mScreenSize.x() = vp.right - vp.left;
-	mScreenSize.y() = vp.bottom - vp.top;
-	SetViewPort(vp.left, vp.top, mScreenSize.x(), mScreenSize.y());
+	if (!viewport.any()) GetClientRect(mHWnd, (RECT*)&viewport);
+	mScreenSize = viewport.tail<2>() - viewport.head<2>();
+	_SetViewPort(mCurViewPort = viewport);
 
 	SetFrameBuffer(nullptr);
 
-	draw_call_flag = draw_call_flag__;
+	CheckHR(glProvokingVertex(GL_FIRST_VERTEX_CONVENTION));
+	CheckHR(glDepthRange(0.0f, 1.0f));
+	CheckHR(glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE));
+	CheckHR(glDisable(GL_PRIMITIVE_RESTART));
+	_SetRasterizerState(mCurRasterState = RasterizerState::MakeDefault());
+	_SetDepthState(mCurDepthState = DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll, true));
+	_SetBlendState(mCurBlendState = BlendState::MakeAlphaNonPremultiplied());
 	return true;
 }
 
 RenderSystemOGL::~RenderSystemOGL()
-{}
+{
+	Dispose();
+}
 void RenderSystemOGL::Dispose()
 {
-	wglDeleteContext(mOglCtx);
+	if (mOglCtx) {
+		wglDeleteContext(mOglCtx);
+		mOglCtx = NULL;
+	}
 }
 
 bool RenderSystemOGL::IsCurrentInMainThread() const
@@ -209,8 +201,8 @@ IResourcePtr RenderSystemOGL::CreateResource(DeviceResourceType deviceResType)
 /********** Framebuffer **********/
 IFrameBufferPtr RenderSystemOGL::LoadFrameBuffer(IResourcePtr res, const Eigen::Vector3i& size, const std::vector<ResourceFormat>& formats)
 {
-	draw_call();
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadFrameBuffer");
+	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 	BOOST_ASSERT(formats.size() >= 1);
 
@@ -219,17 +211,24 @@ IFrameBufferPtr RenderSystemOGL::LoadFrameBuffer(IResourcePtr res, const Eigen::
 	BindFrameBuffer bindFrambuffer(GL_FRAMEBUFFER, fbo->GetId());
 
 	int colorCount = IF_AND_OR(IsDepthStencil(formats.back()) || formats.back() == kFormatUnknown, formats.size() - 1, formats.size());
-	for (size_t i = 0; i < colorCount; ++i)
+	std::vector<GLenum> buffers(colorCount);
+	for (size_t i = 0; i < colorCount; ++i) {
 		fbo->SetAttachColor(i, FrameBufferAttachOGLFactory::CreateColorAttachment(size, formats[i]));
-	if (colorCount != formats.size())
+		buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+	}
+	
+	if (colorCount != formats.size()) {
 		fbo->SetAttachZStencil(FrameBufferAttachOGLFactory::CreateZStencilAttachment(size.head<2>(), formats.back()));
+	}
+	
+	if (buffers.empty()) buffers.push_back(GL_NONE);
+	CheckHR(glDrawBuffers(colorCount, &buffers[0]));
 
 	BOOST_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	return fbo;
 }
 void RenderSystemOGL::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f& color, float depth, uint8_t stencil)
 {
-	draw_call();
 	DEBUG_LOG_CALLSTK("renderSysOGL.ClearFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	
@@ -260,7 +259,6 @@ void RenderSystemOGL::ClearFrameBuffer(IFrameBufferPtr fb, const Eigen::Vector4f
 }
 void RenderSystemOGL::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IFrameBufferPtr src, int srcAttachment)
 {
-	draw_call();
 	DEBUG_LOG_CALLSTK("renderSysOGL.CopyFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT((dstAttachment >= 0) == (srcAttachment >= 0));
@@ -286,7 +284,7 @@ void RenderSystemOGL::CopyFrameBuffer(IFrameBufferPtr dst, int dstAttachment, IF
 
 void RenderSystemOGL::SetFrameBuffer(IFrameBufferPtr fb)
 {
-	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetFrameBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	if (mCurFrameBuffer != fb) {
@@ -302,9 +300,8 @@ void RenderSystemOGL::SetFrameBuffer(IFrameBufferPtr fb)
 /********** Program **********/
 IInputLayoutPtr RenderSystemOGL::LoadLayout(IResourcePtr res, IProgramPtr program, const std::vector<LayoutInputElement>& descArr)
 {
-	draw_call();
-
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadLayout");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
 	InputLayoutOGLPtr layout = std::static_pointer_cast<InputLayoutOGL>(res);
@@ -313,8 +310,7 @@ IInputLayoutPtr RenderSystemOGL::LoadLayout(IResourcePtr res, IProgramPtr progra
 }
 void RenderSystemOGL::SetVertexLayout(IInputLayoutPtr res)
 {
-	draw_call();
-
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetVertexLayout");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(mCurVao != nullptr);
 	InputLayoutOGLPtr layout = std::static_pointer_cast<InputLayoutOGL>(res);
@@ -330,70 +326,175 @@ void RenderSystemOGL::SetVertexLayout(IInputLayoutPtr res)
 	}
 }
 
-IBlobDataPtr RenderSystemOGL::CompileShader(const ShaderCompileDesc& compile, const Data& data)
-{
-	draw_call();
-	//BOOST_ASSERT(IsCurrentInMainThread());
+struct ShaderPreprocessor {
+public:
+	ShaderPreprocessor(const std::string& shaderDir) :mShaderDir(shaderDir) {}
+	std::string operator()(const std::string& bin, const std::string& vsOrPsEntry) {
+		//TIME_PROFILE("include preprocess");
+		std::string src = ReplaceEntry(bin, vsOrPsEntry);
+		ProcessInclude(src);
+		return std::move(mResult);
+	}
+	std::vector<char> operator()(const std::vector<char>& bin, const std::string& vsOrPsEntry) {
+		//TIME_PROFILE("include preprocess");
+		std::string src(bin.begin(), bin.end());
+		src = ReplaceEntry(src, vsOrPsEntry);
+		ProcessInclude(src);
+		return std::vector<char>(mResult.begin(), mResult.end());
+	}
+private:
+	std::string ReplaceEntry(const std::string& src, const std::string& vsOrPsEntry) {
+		//TIME_PROFILE("include preprocess: replace entry");
+		std::string result;
 
-	GLuint shaderId = CheckHR(glCreateShader(ogl::GetGLShaderType((ShaderType)compile.ShaderType)));
-	BlobDataOGLPtr blob = CreateInstance<BlobDataOGL>(shaderId);
-	blob->mBlob = Data::MakeNull();
+		std::stringstream ss;
+		ss << src;
+		std::string line;
+		const std::regex vps_regex("[\\s\\t]+void[\\s\\t]+StageEntry_" + vsOrPsEntry + ".*\\r?\\n?");
+		BOOL flag = 0;
+		while (ss.peek() != EOF) {
+			std::getline(ss, line);
+			std::smatch exp_match;
+			if (line.size() > 10 && (line[0] == ' ' || line[0] == '\t')) {
+				if (std::regex_match(line, exp_match, vps_regex)) {
+					boost::replace_first(line, "StageEntry_" + vsOrPsEntry, "main");
+					flag = TRUE;
+				}
+			}
+			result += line;
+			result.push_back('\n');
+		}
+		BOOST_ASSERT(flag);
+		return std::move(result);
+	}
+	void ProcessInclude(const std::string& src) {
+		std::stringstream ss;
+		ss << src;
+		std::string line;
+		static const std::regex exp_regex("#include[\\s\\t]+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
+		while (ss.peek() != EOF) {
+			std::getline(ss, line);
+			std::smatch exp_match;
+			if (line.size() > 10 && line[0] == '#' && line[1] == 'i'
+				&& std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
+				std::string incname = exp_match[1].str();
+				if (mVisits.find(incname) == mVisits.end()) {
+					mVisits.insert(incname);
 
-	std::string source = "#version 460 core\n";
-	{
-		if (!compile.Macros.empty()) {
-			for (size_t i = 0; i < compile.Macros.size(); ++i) {
-				const auto& cdm = compile.Macros[i];
-				source += "#define " + cdm.Name + " " + cdm.Definition + "\n";
+					boost::filesystem::path incpath = boost::filesystem::system_complete(mShaderDir + incname);
+					std::vector<char> bin = input::ReadFile(incpath.string().c_str(), "rb");
+					BOOST_ASSERT(!bin.empty());
+					std::string incstr(&bin[0], bin.size());
+					ProcessInclude(incstr);
+				}
+			}
+			else {
+				mResult += line;
+				mResult.push_back('\n');
 			}
 		}
-		source += "#define UV_STARTS_AT_TOP 0\n";
-		source += std::string((const char*)data.Bytes, data.Size);
 	}
-#if defined MIR_D3D11_DEBUG
-	blob->mSource = source;
-#endif
-	const char* sources[] = { source.c_str() };
-	CheckHR(glShaderSource(shaderId, 1, sources, NULL));
+private:
+	const std::string& mShaderDir;
+	std::string mResult;
+	std::unordered_set<std::string> mVisits;
+};
 
-	CheckHR(glCompileShader(shaderId));
-#if defined MIR_D3D11_DEBUG
-	std::string errMsg;
-	if (!ogl::CheckProgramCompileStatus(shaderId, &errMsg)) {
-		input::WriteFile("compile.txt", "wb", source.c_str(), source.length());
-		MessageBoxA(NULL, errMsg.c_str(), "opengl compile failed", MB_OK);
+IBlobDataPtr RenderSystemOGL::CompileShader(const ShaderCompileDesc& compile, const Data& data)
+{
+	BOOST_ASSERT_(IsCurrentInMainThread());
+
+	BlobDataOGLPtr blob = CreateInstance<BlobDataOGL>();
+
+	blob->mSource = "#version 460 core\n";
+	if (!compile.Macros.empty()) {
+		for (size_t i = 0; i < compile.Macros.size(); ++i) {
+			const auto& cdm = compile.Macros[i];
+			blob->mSource += "#define " + cdm.Name + " " + cdm.Definition + "\n";
+		}
+	}
+	blob->mSource += std::string((const char*)data.Bytes, data.Size);
+
+	//preprocess include && entry
+	boost::filesystem::path srcPath = compile.SourcePath;
+	srcPath.remove_filename();
+	std::string shaderDir = srcPath.string();
+	if (shaderDir.back() != '/') shaderDir.push_back('/');
+	blob->mSource = ShaderPreprocessor(shaderDir)(blob->mSource, compile.EntryPoint);
+
+#if USE_VULKAN_COMPILER
+	std::string temp_dir = "temp_spirv/";
+	if (! boost::filesystem::is_directory(temp_dir)) {
+		boost::filesystem::create_directories(temp_dir);
+	}
+
+	uint32_t digest[4];
+	md5((const uint8_t*)blob->mSource.c_str(), blob->mSource.length(), (uint8_t*)digest);
+	std::string filename = (boost::format("%s%x%x%x%x") %temp_dir %digest[0] %digest[1] %digest[2] %digest[3]).str();
+	std::string targetname = filename;
+	filename += IF_AND_OR(compile.ShaderType == kShaderVertex, ".glv", ".glf");
+	targetname += IF_AND_OR(compile.ShaderType == kShaderVertex, ".spv", ".spf");
+	input::WriteFile(filename.c_str(), "wb", blob->mSource.c_str(), blob->mSource.length());
+
+	//ShellExecuteA(mHWnd, "glslc.exe", filename.c_str(), (" -o " + targetname).c_str(), "", SW_HIDE);
+	std::string command = (boost::format("glslangValidator.exe -G -S %s %s -o %s") %IF_AND_OR(compile.ShaderType == kShaderVertex, "vert", "frag") %filename %targetname).str();
+	int cmdRet = system(command.c_str());
+	BOOST_ASSERT(!(cmdRet == 0 && GetLastError() == ENOENT));
+	if (cmdRet < 0) {
+		MessageBoxA(NULL, command.c_str(), "system command failed", MB_OK);
 		return nullptr;
 	}
-#else
-	if (!ogl::CheckProgramCompileStatus(shaderId, source)) return nullptr;
+	blob->mBinary = input::ReadFile(targetname.c_str(), "rb");
+	BOOST_ASSERT(! blob->mBinary.empty());
 #endif
-
 	return blob;
 }
 IShaderPtr RenderSystemOGL::CreateShader(int type, IBlobDataPtr data)
 {
-	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.CreateShader");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	GLuint shaderId = CheckHR(glCreateShader(ogl::GetGLShaderType((ShaderType)type)));
+	auto blob = std::static_pointer_cast<BlobDataOGL>(data);
+#if !USE_VULKAN_COMPILER
+	const char* sources[] = { blob->mSource.c_str() };
+	CheckHR(glShaderSource(shaderId, 1, sources, NULL));
+	CheckHR(glCompileShader(shaderId));
+#else
+	BOOST_ASSERT(blob->GetBytes());
+	CheckHR(glShaderBinary(1, &shaderId, GL_SHADER_BINARY_FORMAT_SPIR_V, blob->GetBytes(), blob->GetSize()));
+	CheckHR(glSpecializeShader(shaderId, "main", 0, nullptr, nullptr));
+#endif
+
+#if defined MIR_D3D11_DEBUG
+	std::string errMsg;
+	if (!ogl::CheckProgramCompileStatus(shaderId, &errMsg)) {
+		input::WriteFile("compile.txt", "wb", blob->mSource.c_str(), blob->mSource.length());
+		MessageBoxA(NULL, errMsg.c_str(), "opengl compile failed", MB_OK);
+		return nullptr;
+	}
+#else
+	if (!ogl::CheckProgramCompileStatus(shaderId, nullptr)) return nullptr;
+#endif
 
 	IShaderPtr shader;
 	switch (type) {
 	case kShaderVertex: {
-		shader = CreateInstance<VertexShaderOGL>(data, std::static_pointer_cast<BlobDataOGL>(data)->GetId());
+		shader = CreateInstance<VertexShaderOGL>(data, shaderId);
 	}break;
 	case kShaderPixel: {
-		shader = CreateInstance<PixelShaderOGL>(data, std::static_pointer_cast<BlobDataOGL>(data)->GetId());
+		shader = CreateInstance<PixelShaderOGL>(data, shaderId);
 	}break;
 	default:
+		BOOST_ASSERT(FALSE);
 		break;
 	}
 	return shader;
 }
 IProgramPtr RenderSystemOGL::LoadProgram(IResourcePtr res, const std::vector<IShaderPtr>& shaders)
 {
-	draw_call();
-
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadProgram");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
 	ProgramOGLPtr program = std::static_pointer_cast<ProgramOGL>(res);
@@ -456,7 +557,7 @@ IProgramPtr RenderSystemOGL::LoadProgram(IResourcePtr res, const std::vector<ISh
 
 void RenderSystemOGL::SetProgram(IProgramPtr program)
 {
-	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetProgram");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	auto prog = std::static_pointer_cast<ProgramOGL>(program);
@@ -468,7 +569,8 @@ void RenderSystemOGL::SetProgram(IProgramPtr program)
 /********** Hardware Buffer **********/
 void RenderSystemOGL::SetVertexArray(IVertexArrayPtr vao)
 {
-	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetVertexArray");
+	BOOST_ASSERT(IsCurrentInMainThread());
 
 	mCurVao = std::static_pointer_cast<VertexArrayOGL>(vao);
 	CheckHR(glBindVertexArray(NULLABLE_MEM(mCurVao, GetId(), 0)));
@@ -476,9 +578,8 @@ void RenderSystemOGL::SetVertexArray(IVertexArrayPtr vao)
 
 IVertexBufferPtr RenderSystemOGL::LoadVertexBuffer(IResourcePtr res, IVertexArrayPtr ivao, int stride, int offset, const Data& data)
 {
-	draw_call();
-
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadVertexBuffer");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 	BOOST_ASSERT(res && ivao);
 
 	HWMemoryUsage usage = data.Bytes ? kHWUsageImmutable : kHWUsageDynamic;
@@ -497,8 +598,7 @@ IVertexBufferPtr RenderSystemOGL::LoadVertexBuffer(IResourcePtr res, IVertexArra
 }
 void RenderSystemOGL::SetVertexBuffers(size_t slot, const IVertexBufferPtr vertexBuffers[], size_t count)
 {
-	draw_call();
-
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetVertexBuffers");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(count >= 1);
 
@@ -520,9 +620,8 @@ void RenderSystemOGL::SetVertexBuffers(size_t slot, const IVertexBufferPtr verte
 
 IIndexBufferPtr RenderSystemOGL::LoadIndexBuffer(IResourcePtr res, IVertexArrayPtr ivao, ResourceFormat format, const Data& data)
 {
-	draw_call();
-
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadIndexBuffer");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 	BOOST_ASSERT(res && ivao);
 
 	HWMemoryUsage usage = data.Bytes ? kHWUsageImmutable : kHWUsageDynamic;
@@ -541,8 +640,7 @@ IIndexBufferPtr RenderSystemOGL::LoadIndexBuffer(IResourcePtr res, IVertexArrayP
 }
 void RenderSystemOGL::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 {
-	draw_call();
-
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetIndexBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	mCurVio = std::static_pointer_cast<IndexBufferOGL>(indexBuffer);
@@ -554,13 +652,13 @@ void RenderSystemOGL::SetIndexBuffer(IIndexBufferPtr indexBuffer)
 
 IContantBufferPtr RenderSystemOGL::LoadConstBuffer(IResourcePtr res, const ConstBufferDecl& cbDecl, HWMemoryUsage usage, const Data& data)
 {
-	draw_call();
-
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadConstBuffer");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
 	ContantBufferOGLPtr ubo = std::static_pointer_cast<ContantBufferOGL>(res);
 	GLuint uboId = 0;
+	GL_CHECK_ERROR();
 	CheckHR(glGenBuffers(1, &uboId));
 	BindUboScope bindUbo(uboId);
 	{
@@ -585,8 +683,7 @@ IContantBufferPtr RenderSystemOGL::LoadConstBuffer(IResourcePtr res, const Const
 }
 void RenderSystemOGL::SetConstBuffers(size_t slot, const IContantBufferPtr buffers[], size_t count, IProgramPtr program)
 {
-	draw_call();
-
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetConstBuffers");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(count > 0);
 
@@ -608,8 +705,7 @@ void RenderSystemOGL::SetConstBuffers(size_t slot, const IContantBufferPtr buffe
 
 bool RenderSystemOGL::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 {
-	draw_call();
-
+	DEBUG_LOG_CALLSTK("renderSysOgl.UpdateBuffer");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(buffer);
 
@@ -654,7 +750,7 @@ bool RenderSystemOGL::UpdateBuffer(IHardwareBufferPtr buffer, const Data& data)
 /********** Texture **********/
 ITexturePtr RenderSystemOGL::LoadTexture(IResourcePtr res, ResourceFormat format, const Eigen::Vector4i& size/*w_h_step_face*/, int mipCount, const Data2 datas[])
 {
-	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadTexture");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
@@ -670,9 +766,13 @@ ITexturePtr RenderSystemOGL::LoadTexture(IResourcePtr res, ResourceFormat format
 	texture->AutoGenMipmap();
 	return texture;
 }
+bool RenderSystemOGL::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
+{
+	return true;
+}
 void RenderSystemOGL::GenerateMips(ITexturePtr texture)
 {
-	draw_call();
+	DEBUG_LOG_CALLSTK("renderSysOgl.GenerateMips");
 	BOOST_ASSERT(IsCurrentInMainThread());
 	BOOST_ASSERT(texture);
 
@@ -680,8 +780,7 @@ void RenderSystemOGL::GenerateMips(ITexturePtr texture)
 }
 void RenderSystemOGL::SetTextures(size_t slot, const ITexturePtr textures[], size_t count)
 {
-	draw_call();
-
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetTextures");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	for (size_t i = 0; i < count; ++i) {
@@ -690,16 +789,10 @@ void RenderSystemOGL::SetTextures(size_t slot, const ITexturePtr textures[], siz
 	}
 }
 
-bool RenderSystemOGL::LoadRawTextureData(ITexturePtr texture, char* data, int dataSize, int dataStep)
-{
-	return true;
-}
-
 ISamplerStatePtr RenderSystemOGL::LoadSampler(IResourcePtr res, const SamplerDesc& desc)
 {
-	draw_call();
-
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	DEBUG_LOG_CALLSTK("renderSysOgl.LoadSampler");
+	BOOST_ASSERT_(IsCurrentInMainThread());
 	BOOST_ASSERT(res);
 
 	SamplerStateOGLPtr sampler = std::static_pointer_cast<SamplerStateOGL>(res);
@@ -727,8 +820,7 @@ ISamplerStatePtr RenderSystemOGL::LoadSampler(IResourcePtr res, const SamplerDes
 }
 void RenderSystemOGL::SetSamplers(size_t slot, const ISamplerStatePtr samplers[], size_t count)
 {
-	draw_call();
-	
+	DEBUG_LOG_CALLSTK("renderSysOgl.SetSamplers");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	for (size_t i = 0; i < count; ++i) {
@@ -740,14 +832,12 @@ void RenderSystemOGL::SetSamplers(size_t slot, const ISamplerStatePtr samplers[]
 /********** State **********/
 void RenderSystemOGL::_SetViewPort(const Eigen::Vector4i& newVp)
 {
-	draw_call();
-
 	CheckHR(glViewport(newVp[0], newVp[1], newVp[2], newVp[3]));
 }
 void RenderSystemOGL::SetViewPort(int x, int y, int width, int height)
 {
 	DEBUG_LOG_CALLSTK("renderSysOgl.SetViewPort");
-	//BOOST_ASSERT(IsCurrentInMainThread());
+	BOOST_ASSERT(IsCurrentInMainThread());
 
 	Eigen::Vector4i newVP(x, y, width, height);
 	if (mCurViewPort != newVP) {
@@ -758,8 +848,6 @@ void RenderSystemOGL::SetViewPort(int x, int y, int width, int height)
 
 void RenderSystemOGL::_SetBlendState(const BlendState& blendFunc)
 {
-	draw_call();
-
 	if ((blendFunc.Src != kBlendOne) || (blendFunc.Dst != kBlendZero)) { CheckHR(glEnable(GL_BLEND)); }
 	else { CheckHR(glDisable(GL_BLEND)); }
 
@@ -779,8 +867,6 @@ void RenderSystemOGL::SetBlendState(const BlendState& blendFunc)
 
 void RenderSystemOGL::_SetDepthState(const DepthState& depthState)
 {
-	draw_call();
-
 	if (depthState.DepthEnable) {
 		CheckHR(glEnable(GL_DEPTH_TEST));
 		CheckHR(glDepthFunc(ogl::GetGlCompFunc(depthState.CmpFunc)));
@@ -804,8 +890,6 @@ void RenderSystemOGL::SetDepthState(const DepthState& depthState)
 
 void RenderSystemOGL::_SetCullMode(CullMode cullMode)
 {
-	draw_call();
-
 	switch (cullMode) {
 	case kCullBack: CheckHR(glCullFace(GL_BACK)); if (mCurRasterState.CullMode == kCullNone) CheckHR(glEnable(GL_CULL_FACE)); break;
 	case kCullFront: CheckHR(glCullFace(GL_FRONT)); if (mCurRasterState.CullMode == kCullNone) CheckHR(glEnable(GL_CULL_FACE)); break;
@@ -826,8 +910,6 @@ void RenderSystemOGL::SetCullMode(CullMode cullMode)
 
 void RenderSystemOGL::_SetFillMode(FillMode fillMode)
 {
-	draw_call();
-
 	switch (fillMode) {
 	case kFillWireFrame: CheckHR(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)); break;
 	case kFillSolid: CheckHR(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)); break;
@@ -862,16 +944,14 @@ void RenderSystemOGL::SetDepthBias(const DepthBias& bias)
 
 void RenderSystemOGL::_SetScissorState(const ScissorState& scissor)
 {
-	draw_call();
-
 	if (mCurRasterState.Scissor.ScissorEnable != scissor.ScissorEnable) {
 		if (scissor.ScissorEnable) { CheckHR(glEnable(GL_SCISSOR_TEST)); }
 		else { CheckHR(glDisable(GL_SCISSOR_TEST)); }
 	}
 
 	const auto& rct = scissor.Rect;
+	OutputDebugStringA((boost::format("glScissor(%d,%d,%d,%d)") %rct[0] %(mCurViewPort[3] - rct[3]) %(rct[2] - rct[0]) %(rct[3] - rct[1])).str().c_str());
 	CheckHR(glScissor(rct[0], mCurViewPort[3] - rct[3], rct[2] - rct[0], rct[3] - rct[1]));
-	CheckHR(glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE));
 }
 void RenderSystemOGL::SetScissorState(const ScissorState& scissor)
 {
@@ -886,8 +966,6 @@ void RenderSystemOGL::SetScissorState(const ScissorState& scissor)
 
 void RenderSystemOGL::_SetRasterizerState(const RasterizerState& rs)
 {
-	draw_call();
-
 	_SetCullMode(rs.CullMode);
 	_SetFillMode(rs.FillMode);
 	_SetDepthBias(rs.DepthBias);
@@ -896,14 +974,12 @@ void RenderSystemOGL::_SetRasterizerState(const RasterizerState& rs)
 
 /********** Draw **********/
 void RenderSystemOGL::DrawPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
-	draw_call();
 	DEBUG_LOG_CALLSTK("renderSysOgl.DrawPrimitive");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
 	CheckHR(glDrawArrays(ogl::GetGLTopologyType(topo), 0, op.VertexBuffers[0]->GetCount()));
 }
 void RenderSystemOGL::DrawIndexedPrimitive(const RenderOperation& op, PrimitiveTopology topo) {
-	draw_call();
 	DEBUG_LOG_CALLSTK("renderSysOgl.DrawIndexedPrimitive");
 	BOOST_ASSERT(IsCurrentInMainThread());
 
@@ -918,7 +994,7 @@ bool RenderSystemOGL::BeginScene()
 }
 void RenderSystemOGL::EndScene(BOOL vsync)
 {
-	draw_call();
+	BOOST_ASSERT(IsCurrentInMainThread());
 
 	HDC hdc = GetDC(mHWnd);
 	SwapBuffers(hdc);

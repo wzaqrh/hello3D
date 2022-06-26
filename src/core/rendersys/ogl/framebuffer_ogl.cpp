@@ -28,7 +28,7 @@ void FrameBufferOGL::SetAttachColor(size_t slot, IFrameBufferAttachmentPtr attac
 		if (mAttachColors.size() < slot + 1)
 			mAttachColors.resize(slot + 1);
 		mAttachColors[slot] = attach;
-		CheckHR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,  std::static_pointer_cast<TextureOGL>(attach->AsTexture())->GetId(), 0));
+		CheckHR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + slot, GL_TEXTURE_2D,  std::static_pointer_cast<TextureOGL>(attach->AsTexture())->GetId(), 0));
 	}
 	else {
 		if (slot == mAttachColors.size() - 1) {

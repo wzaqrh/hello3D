@@ -11,7 +11,7 @@ AssimpMesh::AssimpMesh()
 
 void AssimpMesh::Build(Launch launchMode, ResourceManager& resMng)
 {
-	mVao = resMng.CreateVertexArray(launchMode);
+	mVao = resMng.CreateVertexArray(__launchMode__);
 
 	mIndexBuffer = resMng.CreateIndexBuffer(__launchMode__, mVao, kFormatR32UInt, Data::Make(mIndices));
 	DEBUG_SET_PRIV_DATA(mIndexBuffer, "assimp_mesh.index");
@@ -21,6 +21,13 @@ void AssimpMesh::Build(Launch launchMode, ResourceManager& resMng)
 
 	mVBOSkeleton = resMng.CreateVertexBuffer(__launchMode__, mVao, sizeof(vbSkeleton), 0, Data::Make(mSkeletonVertexs));
 	DEBUG_SET_PRIV_DATA(mVBOSurface, "assimp_mesh.skeleton");
+}
+
+CoTask<bool> AssimpMesh::BuildSync(ResourceManager& resMng)
+{
+	CoAwait resMng.SwitchToLaunchService(LaunchSync);
+	Build(LaunchSync, resMng);
+	CoReturn true;
 }
 
 bool AssimpMesh::IsLoaded() const

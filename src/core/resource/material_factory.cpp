@@ -33,6 +33,7 @@ CoTask<bool> MaterialFactory::DoCreateShaderByShaderNode(ShaderPtr shader, Launc
 {
 	DEBUG_LOG_CALLSTK("mtlFac.DoCreateShaderByShaderNode");
 	COROUTINE_VARIABLES_3(lchMode, shaderNode, shader);
+	if (! mResMng.SupportMTResCreation()) CoAwait mResMng.SwitchToLaunchService(LaunchSync);
 	std::vector<CoTask<bool>> tasks;
 
 	for (const auto& categNode : shaderNode) {
@@ -224,7 +225,11 @@ CoTask<bool> MaterialFactory::CreateMaterial(res::MaterialInstance& mtlInst, Lau
 {
 	DEBUG_LOG_CALLSTK("mtlFac.CreateMaterial");
 	MaterialPtr material;
+
+	if (!mResMng.SupportMTResCreation()) CoAwait mResMng.SwitchToLaunchService(LaunchSync);
 	CoAwait CreateMaterial(material, lchMode, loadParam);
+	BOOST_ASSERT(material->IsLoaded());
+	
 	mtlInst = material->CreateInstance(lchMode, mResMng);
 	CoReturn mtlInst->IsLoaded();
 }

@@ -328,18 +328,6 @@
     <ClInclude Include="..\src\core\rendersys\ogl\ogl_caps.h">
       <Filter>src\core\rendersys\ogl\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\imgui_main\imgui_impl_glfw.h">
-      <Filter>src\imgui_opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\imgui_main\imgui_impl_opengl3.h">
-      <Filter>src\imgui_opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\imgui_main\imgui_impl_opengl3_loader.h">
-      <Filter>src\imgui_opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\test\framework\window.h">
-      <Filter>src\imgui_opengl</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\rendersys\d3d11\d3d_utils.h">
       <Filter>src\core\rendersys\d3d11\utility</Filter>
     </ClInclude>
@@ -534,20 +522,8 @@
     <ClCompile Include="..\src\core\rendersys\ogl\ogl_caps.cpp">
       <Filter>src\core\rendersys\ogl\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\imgui_main\imgui_impl_glfw.cpp">
-      <Filter>src\imgui_opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\imgui_main\imgui_impl_opengl3.cpp">
-      <Filter>src\imgui_opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\imgui_main\main.cpp">
-      <Filter>src\imgui_opengl</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\dllmain.cpp">
       <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\test\framework\window.cpp">
-      <Filter>src\imgui_opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\d3d_utils.cpp">
       <Filter>src\core\rendersys\d3d11\utility</Filter>
@@ -631,9 +607,6 @@
     </Filter>
     <Filter Include="src\core\rendersys\d3d11\utility">
       <UniqueIdentifier>{6eb44b6e-9da6-43a0-9c5c-b9e44fbfc4bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\imgui_opengl">
-      <UniqueIdentifier>{ce9ebc2c-3387-4eab-b14f-c632a3b9f0d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\rendersys\ogl">
       <UniqueIdentifier>{73edf17d-4b54-4a4a-96ee-6148f5e5ed83}</UniqueIdentifier>
@@ -769,28 +742,28 @@
     <None Include="..\bin\work\shader\ImGui.Shader">
       <Filter>shader\shader</Filter>
     </None>
-    <None Include="..\bin\work\shader\Bloom.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Bloom.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\BoxBlur.hlsl">
+    <None Include="..\bin\work\shader\d3d11\BoxBlur.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\HorizonBasedAO.hlsl">
+    <None Include="..\bin\work\shader\d3d11\HorizonBasedAO.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\ImGui.hlsl">
+    <None Include="..\bin\work\shader\d3d11\ImGui.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\LayerColor.hlsl">
+    <None Include="..\bin\work\shader\d3d11\LayerColor.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\Model.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Model.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\Skybox.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Skybox.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
-    <None Include="..\bin\work\shader\Sprite.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Sprite.hlsl">
       <Filter>shader\hlsl</Filter>
     </None>
     <None Include="..\bin\work\shader\ogl460\ImGui.glsl">
@@ -866,6 +839,12 @@
       <Filter>shader\glsl</Filter>
     </None>
     <None Include="..\bin\work\shader\ogl460\Macros.glinc">
+      <Filter>shader\glsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\HorizonBasedAO.glsl">
+      <Filter>shader\glsl</Filter>
+    </None>
+    <None Include="..\bin\work\shader\ogl460\Bloom.glsl">
       <Filter>shader\glsl</Filter>
     </None>
   </ItemGroup>

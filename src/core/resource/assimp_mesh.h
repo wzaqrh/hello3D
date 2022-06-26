@@ -31,7 +31,8 @@ class MIR_CORE_API AssimpMesh
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 public:
 	AssimpMesh();
-	void Build(Launch launchMode, ResourceManager& resourceMng);
+	void Build(Launch launchMode, ResourceManager& resMng);
+	CoTask<bool> BuildSync(ResourceManager& resMng);
 public:
 	bool HasBones() const { return mHasBones; }
 	int GetMeshIndex() const { return mSceneMeshIndex; }

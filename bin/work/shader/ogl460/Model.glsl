@@ -244,14 +244,8 @@ struct PixelInput
 	MIR_DECLARE_PS_IN(PixelInput, i, 0);
 	MIR_DECLARE_PS_OUT(vec4, oColor, 0);
 
-	void PS_()
+	void PS_(bool additive)
 	{
-	#if LIGHTMODE == LIGHTMODE_FORWARD_BASE
-		bool additive = false;
-	#else
-		bool additive = true;
-	#endif
-
 		SETUP_NORMAL(normal, i.Tex, i.WorldPos, normalize(i.Tangent.xyz), normalize(i.Bitangent.xyz), normalize(i.Normal.xyz));
 		float3 toLight = normalize(i.ToLight);
 		float3 toEye = normalize(i.ToEye);
@@ -305,10 +299,10 @@ struct PixelInput
 		oColor = Lighting(li, toLight, normal, toEye, additive);
 	}
 	void StageEntry_PS() {
-		PS_();
+		PS_(false);
 	}
 	void StageEntry_PSAdd() {
-	   PS_();
+	   PS_(true);
 	}
 #endif
 #endif
@@ -377,7 +371,11 @@ struct VSMBlurInput
 	{
 		gl_Position = float4(iPos, 1.0);
 		o.Color = iColor;
+	#if UV_STARTS_AT_TOP
+		o.texUV = iTex;
+	#else
 		o.texUV = float2(iTex.x, 1.0 - iTex.y);
+	#endif
 	}
 #else
 	inline float BoxFilterStart(float fWidth)  //Assumes filter is odd
@@ -397,13 +395,9 @@ struct VSMBlurInput
 
 		float2 fTexStart = i.texUV - (fStartOffset * fTexelOffset);
 		oColor = float4(0.0);
-    #if 1
 		for (int i = 0; i < fFilterWidth; ++i)
 			oColor += MIR_SAMPLE_TEX2D(PrePassOutput, float2(fTexStart + fTexelOffset * i));
 		oColor = oColor / fFilterWidth;
-	#else
-		oColor = MIR_SAMPLE_TEX2D(PrePassOutput, i.texUV);
-	#endif
 	}
 	void StageEntry_PSBlurVSMX()
 	{
@@ -462,8 +456,7 @@ struct PSPrepassBaseInput
 	#endif
 	
 		//Pos
-		gl_Position = Projection *  View * worldPos;
-	
+		gl_Position = Projection * View * worldPos;
 		//Tex, Color
 		o.Tex = surfTex;
 		o.Color = surfColor;
@@ -480,9 +473,9 @@ struct PSPrepassBaseInput
 	void StageEntry_PSPrepassBase()
 	{
 		float4 armt = GetAoRoughnessMetallicTransmission(i.Tex);
-		oPos = float4(i.WorldPos * 0.5 + 0.5, armt.y);
+		oPos = float4(i.WorldPos * 0.5 + float3(0.5), armt.y);
 		SETUP_NORMAL(normal, i.Tex, i.WorldPos, normalize(i.Tangent.xyz), normalize(i.Bitangent.xyz), normalize(i.Normal.xyz));
-		oNormal = float4(normal * 0.5 + 0.5, armt.z);
+		oNormal = float4(normal * 0.5 + float3(0.5), armt.z);
 		oAlbedo = float4(i.Color.rgb * GetAlbedo(i.Tex), armt.x);
 		oEmissive = float4(GetEmissive(i.Tex), armt.w);
 		oSheen = GetSheenColorRoughness(i.Tex);
@@ -504,20 +497,18 @@ struct PSPrepassFinalInput
 	void StageEntry_VSPrepassFinal()
 	{
 		gl_Position = float4(iPos, 1.0);
+	#if UV_STARTS_AT_TOP
 		o.Tex = iTex;
+	#else
+		o.Tex = float2(iTex.x, 1.0 - iTex.y);
+	#endif
 	}
 #else
 	MIR_DECLARE_PS_IN(PSPrepassFinalInput, i, 0);
 	MIR_DECLARE_PS_OUT(vec4, oColor, 0);//worldPos(RGB), roughness(A)
 
-	void PSPrepassFinal_()
+	void PSPrepassFinal_(bool additive)
 	{
-	#if LIGHTMODE == LIGHTMODE_FORWARD_BASE
-		bool additive = false;
-	#else
-		bool additive = true;
-	#endif
-
 		LightingInput li;
 		li.light_color = LightColor;
 	
@@ -553,10 +544,10 @@ struct PSPrepassFinalInput
 	#endif
 	}
 	void StageEntry_PSPrepassFinal() {
-		PSPrepassFinal_();
+		PSPrepassFinal_(false);
 	}
     void StageEntry_PSPrepassFinalAdd() {
-	    PSPrepassFinal_();
+	    PSPrepassFinal_(true);
 	}
 #endif
 #endif

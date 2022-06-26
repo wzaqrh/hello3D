@@ -69,7 +69,9 @@ public:
 boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& name, const ShaderCompileDesc& desc, const std::string& platform, time_t& time, std::string& serializeStr) const
 {
 	std::string asmDir = mShaderDir + "asm_" + platform + "/";
-	boost::filesystem::create_directories(asmDir);
+	if (!boost::filesystem::is_directory(asmDir)) {
+		boost::filesystem::create_directories(asmDir);
+	}
 
 	ShaderCompileDescHelper scdHelper(desc, name);
 	std::string md5Str = scdHelper.GetMd5String();
@@ -98,7 +100,6 @@ boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& nam
 	}
 #endif
 
-	asmFilePath = "";
 	return boost::filesystem::system_complete(asmFilePath);
 }
 #define NTASM_NAME_LEN (1024-64)
@@ -142,77 +143,9 @@ bool ProgramFactory::ReadShaderAsm(const boost::filesystem::path& asmPath, std::
 	return false;
 }
 
-struct ShaderPreprocessor {
-public:
-	ShaderPreprocessor(const std::string& shaderDir) :mShaderDir(shaderDir) {}
-	std::vector<char> operator()(const std::vector<char>& bin, const std::string& vsOrPsEntry) {
-		//TIME_PROFILE("include preprocess");
-		std::string src(bin.begin(), bin.end());
-		src = ReplaceEntry(src, vsOrPsEntry);
-		ProcessInclude(src);
-		return std::vector<char>(mResult.begin(), mResult.end());
-	}
-private:
-	std::string ReplaceEntry(const std::string& src, const std::string& vsOrPsEntry) {
-		//TIME_PROFILE("include preprocess: replace entry");
-		std::string result;
-
-		std::stringstream ss;
-		ss << src;
-		std::string line;
-		const std::regex vps_regex("[\\s\\t]+void[\\s\\t]+StageEntry_" + vsOrPsEntry + ".*\\r?\\n?");
-		BOOL flag = 0;
-		while (ss.peek() != EOF) {
-			std::getline(ss, line);
-			std::smatch exp_match;
-			if (line.size() > 10 && (line[0] == ' ' || line[0] == '\t')) {
-				if (std::regex_match(line, exp_match, vps_regex)) {
-					boost::replace_first(line, "StageEntry_" + vsOrPsEntry, "main");
-					flag = TRUE;
-				}
-			}
-			result += line;
-			result.push_back('\n');
-		}
-		BOOST_ASSERT(flag);
-		return std::move(result);
-	}
-	void ProcessInclude(const std::string& src) {
-		std::stringstream ss;
-		ss << src;
-		std::string line;
-		static const std::regex exp_regex("#include[\\s\\t]+\"([\\w\\d_\\.]+)\".*\\r?\\n?");
-		while (ss.peek() != EOF) {
-			std::getline(ss, line);
-			std::smatch exp_match;
-			if (line.size() > 10 && line[0] == '#' && line[1] == 'i'
-				&& std::regex_match(line, exp_match, exp_regex) && exp_match.size() == 2) {
-				std::string incname = exp_match[1].str();
-				if (mVisits.find(incname) == mVisits.end()) {
-					mVisits.insert(incname);
-
-					boost::filesystem::path incpath = boost::filesystem::system_complete(mShaderDir + incname);
-					std::vector<char> bin = input::ReadFile(incpath.string().c_str(), "rb");
-					BOOST_ASSERT(!bin.empty());
-					std::string incstr(&bin[0], bin.size());
-					ProcessInclude(incstr);
-				}
-			}
-			else {
-				mResult += line;
-				mResult.push_back('\n');
-			}
-		}
-	}
-private:
-	const std::string& mShaderDir;
-	std::string mResult;
-	std::unordered_set<std::string> mVisits;
-};
-
 CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, std::string name, ShaderCompileDesc vertexSCD, ShaderCompileDesc pixelSCD) ThreadSafe ThreadMaySwitch
 {
-	program->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
+	program->SetLoading(); CoAwait mResMng.SwitchToLaunchService(IF_AND_OR(mResMng.SupportMTResCreation(), lchMode, LaunchSync));
 	DEBUG_LOG_CALLSTK("progFac._LoadProgram");
 	COROUTINE_VARIABLES_5(program, lchMode, name, vertexSCD, pixelSCD);
 
@@ -223,6 +156,8 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 	msg += ")";
 	TIME_PROFILE(msg);
 #endif
+	vertexSCD.Macros.push_back(ShaderCompileMacro{"PLATFORM", boost::lexical_cast<std::string>(mRenderSys.GetPlatform().Type) });
+	pixelSCD.Macros.push_back(ShaderCompileMacro{"PLATFORM", boost::lexical_cast<std::string>(mRenderSys.GetPlatform().Type) });
 
 	IBlobDataPtr blobVS, blobPS;
 	if (!vertexSCD.EntryPoint.empty()) {
@@ -238,10 +173,6 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			bin = input::ReadFile(vertexSCD.SourcePath.c_str(), "rb");
 			BOOST_ASSERT(!bin.empty());
 			if (!bin.empty()) {
-				if (mRenderSys.GetPlatform().Type == kPlatformOpengl) {
-					bin = ShaderPreprocessor(mShaderDir)(bin, vertexSCD.EntryPoint);
-				}
-
 				blobVS = this->mRenderSys.CompileShader(vertexSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
 				if (blobVS->GetBytes()) WriteShaderAsm(vsAsmPath, blobVS->GetBytes(), blobVS->GetSize(), time, serializeStr);
@@ -263,10 +194,6 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 			bin = input::ReadFile(pixelSCD.SourcePath.c_str(), "rb");
 			BOOST_ASSERT(!bin.empty());
 			if (!bin.empty()) {
-				if (mRenderSys.GetPlatform().Type == kPlatformOpengl) {
-					bin = ShaderPreprocessor(mShaderDir)(bin, pixelSCD.EntryPoint);
-				}
-
 				blobPS = this->mRenderSys.CompileShader(pixelSCD, Data::Make(bin));
 			#if defined MIR_RESOURCE_DEBUG || defined MIR_SHADER_CACHE
 				if (blobPS->GetBytes()) WriteShaderAsm(psAsmPath, blobPS->GetBytes(), blobPS->GetSize(), time, serializeStr);
@@ -275,7 +202,7 @@ CoTask<bool> ProgramFactory::_LoadProgram(IProgramPtr program, Launch lchMode, s
 		}
 	}
 
-	CoAwait mResMng.SwitchToLaunchService(__LaunchSync__);
+	//CoAwait mResMng.SwitchToLaunchService(LaunchSync);
 	auto loadProgram = [blobVS, blobPS, this](IProgramPtr program)->IProgramPtr {
 		std::vector<IShaderPtr> shaders;
 		if (blobVS) shaders.push_back(this->mRenderSys.CreateShader(kShaderVertex, blobVS));

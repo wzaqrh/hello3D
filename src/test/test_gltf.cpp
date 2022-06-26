@@ -1,5 +1,4 @@
 #include "test/framework/test_case.h"
-#include "core/mir_config_macros.h"
 #include "core/rendersys/render_pipeline.h"
 
 using namespace mir;
@@ -23,6 +22,7 @@ CoTask<bool> TestGLTF::OnInitScene()
 	TIME_PROFILE("testGLTF.OnInitScene");
 #if 1
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
+	camera->SetRenderingPath(RenderingPath(mCaseSecondIndex));
 	camera->SetFov(0.9 * boost::math::constants::radian<float>());
 
 	AssimpModelPtr mModel;

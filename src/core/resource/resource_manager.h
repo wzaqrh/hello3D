@@ -22,6 +22,8 @@ public:
 	void Dispose() ThreadSafe;
 	CoTask<void> UpdateFrame(float dt) ThreadSafe;
 public:
+	Platform GetPlatform() const { return mRenderSys.GetPlatform(); }
+	bool SupportMTResCreation() const { return mRenderSys.GetPlatform().SupportMTResCreation(); }
 	Eigen::Vector2i WinSize() const { return mRenderSys.WinSize(); }
 	int WinWidth() const { return WinSize().x(); }
 	int WinHeight() const { return WinSize().y(); }

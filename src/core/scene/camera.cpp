@@ -100,8 +100,14 @@ void Camera::RecalculateProjection() const
 {
 	switch (mType) {
 	case kCameraPerspective:
-		if (mReverseZ) mProjection = math::cam::MakePerspectiveFovLHReversZ(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
-		else mProjection = math::cam::MakePerspectiveFovLH(mFov, 1.0, mClipPlane[0], mClipPlane[1]);
+		if (mResMng.GetPlatform().IsNDCDepth01()) {
+			if (mReverseZ) mProjection = math::cam::MakePerspectiveFovLHReversZ(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
+			else mProjection = math::cam::MakePerspectiveFovLH(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
+		}
+		else {
+			if (mReverseZ) mProjection = math::cam::MakePerspectiveFovRHReversZ(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
+			else mProjection = math::cam::MakePerspectiveFovRH(mFov, mAspect, mClipPlane[0], mClipPlane[1]);
+		}
 		break;
 	case kCameraOthogonal: {
 	#if defined OTHO_PROJ_CENTER_NOT_ZERO

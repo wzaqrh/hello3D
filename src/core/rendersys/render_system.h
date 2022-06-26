@@ -41,7 +41,7 @@ struct DeviceResourceTraits {
 interface MIR_CORE_API IRenderSystem : boost::noncopyable 
 {
 	virtual ~IRenderSystem() {}
-	virtual bool Initialize(HWND hWnd, RECT vp = { 0,0,0,0 }) = 0;
+	virtual bool Initialize(HWND hWnd, Eigen::Vector4i viewport = Eigen::Vector4i::Zero()) = 0;
 	virtual void UpdateFrame(float dt) = 0;
 	virtual void Dispose() = 0;
 	

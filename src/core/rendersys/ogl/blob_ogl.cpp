@@ -2,18 +2,17 @@
 
 namespace mir {
 
-BlobDataOGL::BlobDataOGL(GLuint id)
-	:mId(id)
+BlobDataOGL::BlobDataOGL()
 {}
 
 const char* BlobDataOGL::GetBytes() const
 {
-	return (char*)mBlob.Bytes;
+	return !mBinary.empty() ? &mBinary[0] : nullptr;
 }
 
 size_t BlobDataOGL::GetSize() const
 {
-	return mBlob.Size;
+	return mBinary.size();
 }
 
 }

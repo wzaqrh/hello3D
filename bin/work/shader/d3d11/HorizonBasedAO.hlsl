@@ -97,7 +97,8 @@ inline float AccumulatedHorizonOcclusion_Quality(float2 deltaUV, float2 uv0, flo
 float4 PSAO(PixelInput IN) : SV_Target
 {
 	float3 P = fetch_eye_pos(IN.texUV, DepthParam, FocalLen, MIR_PASS_TEX2D(_GDepth));
-    
+    return float4(P * 0.1, 1.0);
+	
     // Radius从'相机空间'投影到'切线空间'
     // 乘以0.5是为了改变范围[-1,1]到[0,1] #1/h = g_FocalLen / P.z
 	// step_size表示探索半径
@@ -125,7 +126,8 @@ float4 PSAO(PixelInput IN) : SV_Target
 	float3 N = normalize(cross(Pr - Pl, Pt - Pb));
 	float4 tangentPlane = float4(N, dot(P, N));
 #endif
-    
+    return float4(N * 0.5 + 0.5, 1.0);
+	
 	//切平面的'Screen-aligned basis屏幕坐标系'
 	float3 dPdu = min_diff(P, Pr, Pl);
 	float3 dPdv = min_diff(P, Pt, Pb) * (FrameBufferSize.y * FrameBufferSize.z);
@@ -133,6 +135,7 @@ float4 PSAO(PixelInput IN) : SV_Target
 	float2 noise2 = rand2dTo2d(IN.texUV);
 	float dangle = 2.0 * C_PI / NumStepDirContrast.y * noise2.x;
 	float3 rand = float3(cos(dangle), sin(dangle), noise2.y);//(cos(alpha),sin(alpha),jitter)
+	return float4(rand * 0.5 + 0.5, 1.0);
 	
 	float ao = 0;
 	float alpha = 2.0 * C_PI / NumStepDirContrast.y;

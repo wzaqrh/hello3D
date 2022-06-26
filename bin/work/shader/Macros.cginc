@@ -1,6 +1,12 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#define PLATFORM_DIRECTX 0
+#define PLATFORM_OPENGL 1
+#if !defined PLATFORM
+	#define PLATFORM 0
+#endif
+
 #define DEBUG_CHANNEL_NONE 0
 #define DEBUG_CHANNEL_SHADOW 1
 #define DEBUG_CHANNEL_UV_0 2
@@ -153,10 +159,6 @@
 	#define REVERSE_Z 1
 #endif
 
-#if !defined UV_STARTS_AT_TOP
-	#define UV_STARTS_AT_TOP 1
-#endif
-
 #if !defined ENABLE_CORRCET_TANGENT_BASIS
 	#define ENABLE_CORRCET_TANGENT_BASIS 1
 #endif
@@ -167,6 +169,14 @@
 
 #if !defined HAS_ATTRIBUTE_TANGENT
 	#define HAS_ATTRIBUTE_TANGENT 1
+#endif
+
+#if !defined UV_STARTS_AT_TOP
+	#if PLATFORM == PLATFORM_DIRECTX
+		#define UV_STARTS_AT_TOP 1
+	#else
+		#define UV_STARTS_AT_TOP 0
+	#endif
 #endif
 
 #define LIGHTMODE_UNKOWN 0

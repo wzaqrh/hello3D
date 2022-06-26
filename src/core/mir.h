@@ -4,6 +4,7 @@
 #include "core/base/cppcoro.h"
 #include "core/base/launch.h"
 #include "core/predeclare.h"
+#include "core/rendersys/base/platform.h"
 #include "core/renderable/renderable_factory.h"
 #include "core/scene/scene_manager.h"
 
@@ -14,7 +15,7 @@ public:
 	MIR_MAKE_ALIGNED_OPERATOR_NEW;
 	Mir(Launch launchMode);
 	~Mir();
-	CoTask<bool> Initialize(HWND hWnd, std::string workDir);
+	CoTask<bool> Initialize(HWND hWnd, std::string workDir, PlatformType platform = kPlatformOpengl);
 	void Dispose();
 
 	CoTask<void> Update(float dt);

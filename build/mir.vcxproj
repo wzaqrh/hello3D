@@ -174,10 +174,6 @@
     <ClInclude Include="..\src\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\src\imgui\imstb_textedit.h" />
     <ClInclude Include="..\src\imgui\imstb_truetype.h" />
-    <ClInclude Include="..\src\imgui_main\imgui_impl_glfw.h" />
-    <ClInclude Include="..\src\imgui_main\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\src\imgui_main\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="..\src\test\framework\window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\base\attribute_struct.cpp" />
@@ -281,10 +277,6 @@
     <ClCompile Include="..\src\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="..\src\imgui_main\imgui_impl_glfw.cpp" />
-    <ClCompile Include="..\src\imgui_main\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\src\imgui_main\main.cpp" />
-    <ClCompile Include="..\src\test\framework\window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\work\media\armadillo\defaultMaterial.Material" />
@@ -311,11 +303,13 @@
     <None Include="..\bin\work\shader\d3d11\LightingInput.cginc" />
     <None Include="..\bin\work\shader\Model.Shader" />
     <None Include="..\bin\work\shader\ogl460\BilateralBlur.glinc" />
+    <None Include="..\bin\work\shader\ogl460\Bloom.glsl" />
     <None Include="..\bin\work\shader\ogl460\BRDFCommonFunction.glinc" />
     <None Include="..\bin\work\shader\ogl460\CommonConstants.glinc" />
     <None Include="..\bin\work\shader\ogl460\CommonFunction.glinc" />
     <None Include="..\bin\work\shader\ogl460\GLSLSupport.glinc" />
     <None Include="..\bin\work\shader\ogl460\GltfLighting.glinc" />
+    <None Include="..\bin\work\shader\ogl460\HorizonBasedAO.glsl" />
     <None Include="..\bin\work\shader\ogl460\IBL.glinc" />
     <None Include="..\bin\work\shader\ogl460\ImGui.glsl" />
     <None Include="..\bin\work\shader\ogl460\LayerColor.glsl" />
@@ -352,34 +346,34 @@
     <None Include="..\bin\work\shader\d3d11\WhiteNoise.cginc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\work\shader\LayerColor.hlsl">
+    <None Include="..\bin\work\shader\d3d11\LayerColor.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\bin\work\shader\Model.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Model.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\bin\work\shader\Skybox.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\bin\work\shader\Sprite.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\bin\work\shader\BoxBlur.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\bin\work\shader\HorizonBasedAO.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Sprite.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\work\shader\Bloom.hlsl">
+    <None Include="..\bin\work\shader\d3d11\BoxBlur.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\bin\work\shader\d3d11\HorizonBasedAO.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\work\shader\ImGui.hlsl">
+    <None Include="..\bin\work\shader\d3d11\Bloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\work\shader\d3d11\ImGui.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
@@ -437,7 +431,8 @@
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
     <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>
+    </PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>
@@ -448,7 +443,8 @@
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
     <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>
+    </PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -458,7 +454,8 @@
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86;$(SolutionDir)lib\$(Platform)</LibraryPath>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
     <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>
+    </PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <LinkIncremental>false</LinkIncremental>
@@ -468,7 +465,8 @@
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(SolutionDir)lib\$(Platform)</LibraryPath>
     <IntDir>$(SolutionDir)tmp\$(Platform)\$(Configuration)\mir\</IntDir>
     <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>
+    </PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -23,7 +23,7 @@ Mir::Mir(Launch launchMode)
 {
 	mIoService = CreateInstance<cppcoro::io_service>(8);
 }
-CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir) 
+CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir, PlatformType platform) 
 {
 	TIME_PROFILE("Mir.Initialize");
 	
@@ -31,13 +31,8 @@ CoTask<bool> Mir::Initialize(HWND hWnd, std::string workDir)
 	if (mWorkDirectory.back() != '/') 
 		mWorkDirectory.push_back('/');
 
-	FILE* fd = fopen("D:\\isogl.txt", "r");
-	if (fd) {
-		fscanf(fd, "%d", &IsOgl);
-		fclose(fd);
-	}
 
-	if (IsOgl) {
+	if (platform == kPlatformOpengl) {
 		::CoInitialize(0);
 		mRenderSys = std::static_pointer_cast<RenderSystem>(CreateInstance<RenderSystemOGL>());
 	}
@@ -73,15 +68,14 @@ Mir::~Mir()
 void Mir::Dispose() 
 {
 	if (mRenderSys) {
+		bool isOgl = mRenderSys->GetPlatform().Type;
 		SAFE_DISPOSE_NULL(mRenderableFac);
 		SAFE_DISPOSE_NULL(mSceneMng);
 		SAFE_DISPOSE_NULL(mRenderPipe);
 		SAFE_DISPOSE_NULL(mGuiMng);
 		SAFE_DISPOSE_NULL(mResMng);
 		SAFE_DISPOSE_NULL(mRenderSys);
-		if (IsOgl) {
-			::CoUninitialize();
-		}
+		if (IsOgl) ::CoUninitialize();
 	}
 }
 

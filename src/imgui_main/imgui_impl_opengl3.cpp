@@ -16,8 +16,6 @@
 #include "core/scene/camera.h"
 #include "core/scene/scene_manager.h"
 
-extern int draw_call_flag;
-
 using namespace mir;
 
 #define IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
@@ -63,13 +61,10 @@ bool ImGui_ImplOpenGL3_Init(void* hwnd, int w, int h)
 	io.BackendRendererName = "imgui_impl_opengl3";
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
-	draw_call_flag = 1;
 	bd->Ctx = new Mir(LaunchSync);
 	bd->Ctx->ExecuteTaskSync(bd->Ctx->Initialize((HWND)hwnd, R"(C:/mir/bin/work/)"));
 
 	bd->Ctx->SceneMng()->CreateCameraNode(kCameraPerspective);
-	draw_call_flag = 0;
-
 	return true;
 }
 
@@ -243,13 +238,10 @@ void ImGui_ImplOpenGL3_DestroyFontsTexture()
 
 bool ImGui_ImplOpenGL3_CreateDeviceObjects()
 {
-	draw_call_flag = 1;
 	MaterialLoadParam mlp = "ImGui";
 	bd->Rop.Material = bd->Ctx->ResourceMng()->CreateMaterialS(LaunchSync, mlp);
-	draw_call_flag = 0;
 
 	ImGui_ImplOpenGL3_CreateFontsTexture();
-
 	return true;
 }
 

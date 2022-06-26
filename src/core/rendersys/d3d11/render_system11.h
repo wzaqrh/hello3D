@@ -16,7 +16,7 @@ public:
 	RenderSystem11();
 	~RenderSystem11();
 
-	bool Initialize(HWND hWnd, RECT vp) override;
+	bool Initialize(HWND hWnd, Eigen::Vector4i viewport) override;
 	void UpdateFrame(float dt) override;
 	void Dispose() override;
 	void SetViewPort(int x, int y, int w, int h) override;

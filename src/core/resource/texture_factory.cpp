@@ -60,8 +60,8 @@ static BOOL SwapRedBlue32(FIBITMAP* dib)
 CoTask<bool> TextureFactory::_LoadTextureByFile(ITexturePtr texture, Launch lchMode, std::string imgFullPath, ResourceFormat format, bool autoGenMipmap) ThreadSafe ThreadMaySwitch
 {
 	texture->SetLoading(); CoAwait mResMng.SwitchToLaunchService(lchMode);
-	DEBUG_LOG_CALLSTK("texFac._LoadTextureByFile");
 	COROUTINE_VARIABLES_5(texture, lchMode, imgFullPath, format, autoGenMipmap);
+	DEBUG_LOG_CALLSTK("texFac._LoadTextureByFile");
 	TIME_PROFILE((boost::format("\t\tresMng._LoadTextureByFile (%1% %2% %3%)") %imgFullPath %format %autoGenMipmap).str());
 
 	int faceCount = 0;

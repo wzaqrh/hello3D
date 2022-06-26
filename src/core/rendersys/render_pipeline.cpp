@@ -190,7 +190,7 @@ public:
 		EnsureGeometrySkybox(RENDER_TYPE_TRANSPARENT, LIGHTMODE_FORWARD_BASE, [this]() {
 			RenderForward();
 			RenderSkybox();
-		});
+			});
 		RenderTransparent();
 
 		RenderOverlay();
@@ -224,7 +224,7 @@ public:
 		auto fb_shadow_map = mStatesBlock.LockFrameBuffer(mShadowMap, shadow_clr_color, 1.0, 0);
 		fb_shadow_map.SetCallback(std::bind(&cbPerFrameBuilder::_SetFrameBuffer, mPerFrame, std::placeholders::_1));
 
-		if (!mCastShadowOps.IsEmpty()) 
+		if (!mCastShadowOps.IsEmpty())
 		{
 			depth_state(DepthState::Make(kCompareLess, kDepthWriteMaskAll));
 			blend_state(BlendState::MakeDisable());
@@ -547,13 +547,18 @@ private:
 
 		const auto& relParam = pass->GetRelateToParam();
 		if (relParam.HasTextureSize) {
+			bool flag = false;
 			for (size_t slot = 0; slot < relParam.TextureSizes.size(); ++slot) {
 				auto texture = mStatesBlock.Textures[slot];
 				const std::string& propTexSize = relParam.TextureSizes[slot];
 				if (texture && !propTexSize.empty()) {
 					auto tsize = texture->GetSize();
 					op.WrMaterial().SetProperty(propTexSize, Eigen::Vector4f(tsize.x(), tsize.y(), 1.0f/tsize.x(), 1.0f/tsize.y()));
+					flag = true;
 				}
+			}
+			if (flag) {
+				op.WrMaterial().FlushGpuParameters(mRenderSys);
 			}
 		}
 
@@ -659,9 +664,8 @@ void RenderPipeline::RenderCameraForward(const RenderableCollection& rends, cons
 		render.RenderPostProcess(camera.GetPostProcessInput());
 	}
 
-	//render.RenderUI();
+	render.RenderUI();
 }
-
 void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, const scene::Camera& camera, const std::vector<scene::LightPtr>& lights)
 {
 	if (camera.HasPostProcessEffect())
@@ -679,7 +683,6 @@ void RenderPipeline::RenderCameraDeffered(const RenderableCollection& rends, con
 
 	render.RenderUI();
 }
-
 void RenderPipeline::Render(const RenderableCollection& rends, const std::vector<scene::CameraPtr>& cameras, const std::vector<scene::LightPtr>& lights)
 {
 	for (auto& camera : cameras) 

@@ -145,7 +145,7 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 #endif
 	return true;
 }
-bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
+bool RenderSystem11::Initialize(HWND hWnd, Eigen::Vector4i viewport)
 {
 	mMainThreadId = std::this_thread::get_id();
 
@@ -160,17 +160,16 @@ bool RenderSystem11::Initialize(HWND hWnd, RECT vp)
 	
 	if (!_FetchBackFrameBufferColor(rcWidth, rcHeight)) return false; 
 	if (!_FetchBackBufferZStencil(rcWidth, rcHeight)) return false;
+
+	if (!viewport.any()) GetClientRect(mHWnd, (RECT*)&viewport);
+	mScreenSize = viewport.tail<2>() - viewport.head<2>();
+	SetViewPort(viewport[0], viewport[1], mScreenSize.x(), mScreenSize.y());
+
 	SetFrameBuffer(nullptr);
 
-	if (!_SetRasterizerState(mCurRasterState = RasterizerState{kFillSolid, kCullBack})) return false;
+	if (!_SetRasterizerState(mCurRasterState = RasterizerState::MakeDefault())) return false;
 	if (!_SetDepthState(mCurDepthState = DepthState::Make(kCompareLessEqual, kDepthWriteMaskAll, true))) return false;
 	if (!_SetBlendState(mCurBlendState = BlendState::MakeAlphaPremultiplied())) return false;
-
-	if (vp.right == 0 || vp.bottom == 0) 
-		GetClientRect(mHWnd, &vp);
-	mScreenSize.x() = vp.right - vp.left;
-	mScreenSize.y() = vp.bottom - vp.top;
-	SetViewPort(vp.left, vp.top, mScreenSize.x(), mScreenSize.y());
 	return true;
 }
 

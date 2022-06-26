@@ -1,7 +1,6 @@
 #include "test/framework/test_case.h"
 #include "core/renderable/sprite.h"
 #include "core/renderable/cube.h"
-#include "core/mir_config_macros.h"
 #include "core/rendersys/render_pipeline.h"
 
 using namespace mir;
@@ -20,8 +19,6 @@ private:
 	GuiDebugWindow mGuiDebugChannel;
 };
 
-#define DEBUG_GL 1
-
 CoTask<bool> TestShadowMap::OnInitScene()
 {
 	//SetPPU(1);
@@ -30,9 +27,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	CameraPtr camera = mScneMng->CreateCameraNode(kCameraPerspective);
 	camera->SetFov(45.0);
 
-#if !DEBUG_GL
 	mGuiDebugChannel.Init(mContext);
-#endif
 
 	AssimpModelPtr mModel;
 	test1::res::model model;
@@ -78,9 +73,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 
 	#if 1
 		mModel = mScneMng->AddRendAsNode(CoAwait mRendFac->CreateAssimpModelT(modelMat));
-	#if !DEBUG_GL
 		mGuiDebugChannel.AddModel(mModel);
-	#endif
 		if (mCaseIndex == 0) {
 			mTransform = CoAwait model.Init("buddha", mModel);
 			mTransform->SetPosition(Eigen::Vector3f(0, 2, 0));
@@ -98,9 +91,7 @@ CoTask<bool> TestShadowMap::OnInitScene()
 	default:
 		break;
 	}
-#if !DEBUG_GL
 	mGuiDebugChannel.AddAllCmds();
-#endif
 	CoReturn true;
 }
 

@@ -1,7 +1,11 @@
 #include "mir_config.h"
+#include "core/rendersys/base/platform.h"
 #include "core/mir_config_macros.h"
 
 namespace mir {
+
+static_assert(PLATFORM_DIRECTX == kPlatformDirectx);
+static_assert(PLATFORM_OPENGL == kPlatformOpengl);
 
 Configure::Configure()
 {

@@ -13,8 +13,8 @@ struct PixelInput
 
 	void StageEntry_VS()
 	{
-		matrix WVP = World * View * Projection;
-		gl_Position = float4(iPos,1.0) * WVP;
+		matrix WVP = Projection * View * World;
+		gl_Position = WVP * float4(iPos,1.0);
 		o.Color = iColor;
 		o.Tex = iTex;
 	}

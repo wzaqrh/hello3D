@@ -206,15 +206,19 @@ inline float2 snap_uv_coord(float2 uv, float4 resolution)
 
 float3 uv_to_eye(float2 uv, float eye_z, float2 invFocalLen)
 {
+#if UV_STARTS_AT_TOP
 	uv = (uv * float2(2.0, -2.0) - float2(1.0, -1.0));
+#else
+	uv = uv * 2.0 - float2(1.0);
+#endif
 	return float3(uv * invFocalLen * eye_z, eye_z);
 }
 
 inline float LinearEyeDepth(float d, float2 depthParam)
 {
 #if 0
-#define FARZ 1000.0
-#define NEARZ 0.3
+	#define FARZ 1000.0
+	#define NEARZ 0.3
 	return FARZ * NEARZ / (FARZ - d * (FARZ - NEARZ));
 #else
 	return 1.0 / (depthParam.x + depthParam.y * d);

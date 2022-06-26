@@ -225,7 +225,7 @@ float3 GltfLightBase(GltfLightInput gli, LightingInput i, float3 l, float3 n, fl
     float3 specularColor = gli.f0 * f_ab.x + gli.f90 * f_ab.y;
     ibl_transmission = (float3(1.0) - specularColor) * attenuatedColor * i.albedo.rgb;
     #if DEBUG_CHANNEL == DEBUG_CHANNEL_TRANSMISSION_IBL_VOLUME_REFRACTION_COORDS    
-        ibl_transmission = float3(exitUV.x, 1.0 - exitUV.y, 0.0);
+        ibl_transmission = float3(exitUV.x, exitUV.y, 0.0);
     #elif DEBUG_CHANNEL == DEBUG_CHANNEL_TRANSMISSION_LIGHT
         ibl_transmission = transmittedLight;
     #elif DEBUG_CHANNEL == DEBUG_CHANNEL_TRANSMISSION_IBL_VOLUME_ATTEN_COLOR

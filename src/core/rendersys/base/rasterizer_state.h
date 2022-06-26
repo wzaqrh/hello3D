@@ -52,6 +52,8 @@ inline bool operator!=(const ScissorState& l, const ScissorState& r) { return !(
 
 struct RasterizerState 
 {
+	static RasterizerState Make(FillMode fill, CullMode cull, const DepthBias& bias, const ScissorState& scissor) { return RasterizerState{ fill, cull, bias, scissor }; }
+	static RasterizerState MakeDefault() { return Make(kFillSolid, kCullBack, DepthBias::Make(0,0), ScissorState::MakeDisable()); }
 	bool operator<(const RasterizerState& r) const {
 		if (FillMode != r.FillMode) return FillMode < r.FillMode;
 		if (CullMode != r.CullMode) return CullMode < r.CullMode;
