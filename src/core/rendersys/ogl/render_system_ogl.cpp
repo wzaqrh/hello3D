@@ -22,6 +22,7 @@
 
 #define BOOST_ASSERT_(X) BOOST_ASSERT(X)
 //#define USE_VULKAN_COMPILER 1
+#define ENABLE_SPIRV_BINARY 1
 
 namespace mir {
 
@@ -32,7 +33,7 @@ Platform RenderSystemOGL::GetPlatform() const
 	return Platform{ kPlatformOpengl, 460 };
 }
 
-#if defined MIR_D3D11_DEBUG
+#if defined MIR_RENDERSYS_DEBUG
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
 {
 	// ignore non-significant error/warning codes
@@ -83,6 +84,7 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
 //https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
 bool RenderSystemOGL::Initialize(HWND hWnd, Eigen::Vector4i viewport)
 {
+	TIME_PROFILE("renderSysOGL.Initialize");
 	mMainThreadId = std::this_thread::get_id();
 	mHWnd = hWnd;
 
@@ -114,18 +116,26 @@ bool RenderSystemOGL::Initialize(HWND hWnd, Eigen::Vector4i viewport)
 	}
 
 	if (!gladLoadGL()) {
-		MessageBoxA(NULL, "Failed to initialize GLAD", "", MB_OK);
+		return false;
+	}
+
+	GLint versionMinor = 0, versionMajor = 0;
+	glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+	glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+	if (versionMajor * 100 + versionMinor * 10 < 460) {
+		MessageBoxA(NULL, "require opengl version at least 460", "opengl version too low", MB_OK);
 		return false;
 	}
 
 	mCaps = std::make_shared<OglCaps>(OglCaps::COMPATIBILITY);
-	if (!mCaps->Version.checkVersion(4, 6)) {
-		MessageBoxA(NULL, "Require opengl 4.60", "opengl version too low", MB_OK);
+	mCurVbos.resize(mCaps->Values.MAX_VERTEX_ATTRIB_BINDINGS);
+	if (!mCaps->Formats.COMPRESSED_RGBA_S3TC_DXT3_EXT
+		|| !mCaps->Formats.COMPRESSED_RGBA_S3TC_DXT5_EXT) {
+		MessageBoxA(NULL, "require opengl s3tc-dxt extension", "opengl no s3tc-dxt extension", MB_OK);
 		return false;
 	}
-	mCurVbos.resize(mCaps->Values.MAX_VERTEX_ATTRIB_BINDINGS);
 
-#if defined MIR_D3D11_DEBUG
+#if defined MIR_RENDERSYS_DEBUG
 	//glEnable(GL_DEBUG_OUTPUT);
 	//glDebugMessageCallback(glDebugOutput, 0);
 #endif
@@ -456,17 +466,21 @@ IShaderPtr RenderSystemOGL::CreateShader(int type, IBlobDataPtr data)
 
 	GLuint shaderId = CheckHR(glCreateShader(ogl::GetGLShaderType((ShaderType)type)));
 	auto blob = std::static_pointer_cast<BlobDataOGL>(data);
-#if !USE_VULKAN_COMPILER
-	const char* sources[] = { blob->mSource.c_str() };
-	CheckHR(glShaderSource(shaderId, 1, sources, NULL));
-	CheckHR(glCompileShader(shaderId));
-#else
-	BOOST_ASSERT(blob->GetBytes());
-	CheckHR(glShaderBinary(1, &shaderId, GL_SHADER_BINARY_FORMAT_SPIR_V, blob->GetBytes(), blob->GetSize()));
-	CheckHR(glSpecializeShader(shaderId, "main", 0, nullptr, nullptr));
+#if ENABLE_SPIRV_BINARY
+	if (blob->GetBytes()) {
+		BOOST_ASSERT(blob->GetBytes());
+		CheckHR(glShaderBinary(1, &shaderId, GL_SHADER_BINARY_FORMAT_SPIR_V, blob->GetBytes(), blob->GetSize()));
+		CheckHR(glSpecializeShader(shaderId, "main", 0, nullptr, nullptr));
+	}
+	else
 #endif
+	{
+		const char* sources[] = { blob->mSource.c_str() };
+		CheckHR(glShaderSource(shaderId, 1, sources, NULL));
+		CheckHR(glCompileShader(shaderId));
+	}
 
-#if defined MIR_D3D11_DEBUG
+#if defined MIR_RENDERSYS_DEBUG
 	std::string errMsg;
 	if (!ogl::CheckProgramCompileStatus(shaderId, &errMsg)) {
 		input::WriteFile("compile.txt", "wb", blob->mSource.c_str(), blob->mSource.length());
@@ -519,7 +533,7 @@ IProgramPtr RenderSystemOGL::LoadProgram(IResourcePtr res, const std::vector<ISh
 	}
 
 	CheckHR(glLinkProgram(proId));
-#if defined MIR_D3D11_DEBUG
+#if defined MIR_RENDERSYS_DEBUG
 	std::string errMsg;
 	if (!ogl::CheckProgramLinkStatus(proId, &errMsg)) {
 		if (auto vertex = program->GetVertex()) {
@@ -534,7 +548,7 @@ IProgramPtr RenderSystemOGL::LoadProgram(IResourcePtr res, const std::vector<ISh
 		return nullptr;
 	}
 #else
-	if (!ogl::CheckProgramLinkStatus(proId)) return nullptr;
+	if (!ogl::CheckProgramLinkStatus(proId, nullptr)) return nullptr;
 #endif
 
 	for (auto& iter : shaders) {
@@ -950,7 +964,6 @@ void RenderSystemOGL::_SetScissorState(const ScissorState& scissor)
 	}
 
 	const auto& rct = scissor.Rect;
-	OutputDebugStringA((boost::format("glScissor(%d,%d,%d,%d)") %rct[0] %(mCurViewPort[3] - rct[3]) %(rct[2] - rct[0]) %(rct[3] - rct[1])).str().c_str());
 	CheckHR(glScissor(rct[0], mCurViewPort[3] - rct[3], rct[2] - rct[0], rct[3] - rct[1]));
 }
 void RenderSystemOGL::SetScissorState(const ScissorState& scissor)

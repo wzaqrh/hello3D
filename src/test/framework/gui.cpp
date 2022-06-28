@@ -82,10 +82,37 @@ CoTask<void> GuiDebugWindow::UpdateEffectMtlsKeywords(std::string keyword, int v
 
 void GuiDebugWindow::AddAllCmds() 
 {
+	AddRenderBackendSWCmd();
 	AddRenderingPathSWCmd();
 	AddIBLPunctualSWCmd();
 	AddDebugChannelCmd();
 }
+
+int ReadAppSetting(const std::string& key0, const std::string& key1, int defValue);
+void WriteAppSetting(const std::string& key0, const std::string& key1, int value);
+
+void GuiDebugWindow::AddRenderBackendSWCmd()
+{
+	mIsOpenglBackend = ReadAppSetting("Rendering Backend", "IsOpengl", TRUE);
+
+	auto sceneMng = mContext->SceneMng();
+	auto guiMng = mContext->GuiMng();
+	auto camera = sceneMng->GetDefCamera();
+
+	auto canvas = sceneMng->CreateGuiCanvasNode();
+	auto cmd = [=]()->CoTask<void> {
+		ImGui::Text("current rendering-backend: %s", (mIsOpenglBackend ? "opengl 460" : "directx 11"));
+		ImGui::SameLine();
+		if (ImGui::Button("switch")) {
+			int newBackend = (mIsOpenglBackend + 1) % 2;
+			WriteAppSetting("Rendering Backend", "IsOpengl", newBackend);
+			MessageBoxA(NULL, "rendering-backend will change after program restart", "switch rendering-backend", MB_OK);
+		}
+		CoReturn;
+	};
+	guiMng->AddCommand(cmd);
+}
+
 void GuiDebugWindow::AddRenderingPathSWCmd()
 {
 	auto sceneMng = mContext->SceneMng();
@@ -101,7 +128,7 @@ void GuiDebugWindow::AddRenderingPathSWCmd()
 		//ImGui::Begin("rendering path");
 		ImGui::Text("current rendering-path: %s", (mRenderingPath == kRenderPathForward ? "forward" : "deferred"));
 		ImGui::SameLine();
-		if (ImGui::Button("switch")) {
+		if (ImGui::Button("switch path")) {
 			mRenderingPath = (mRenderingPath + 1) % 2;
 			camera->SetRenderingPath((RenderingPath)mRenderingPath);
 		}
@@ -175,7 +202,7 @@ void GuiDebugWindow::AddDebugChannelCmd()
 			}
 		}
 
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		//ImGui::End();
 		CoReturn;
 	};
@@ -217,9 +244,9 @@ void GuiDebugWindow::AddPostProcessCmd()
 	auto canvas = sceneMng->CreateGuiCanvasNode();
 	auto cmd = [=]()->CoTask<void>
 	{
-		ImGui::Text("enable post effect: %s", (mEnablePostProcEffects ? "true" : "false"));
+		ImGui::Text("post effect enabled: %s", (mEnablePostProcEffects ? "true" : "false"));
 		ImGui::SameLine();
-		if (ImGui::Button("switch")) {
+		if (ImGui::Button("switch ")) {
 			mEnablePostProcEffects = (mEnablePostProcEffects + 1) % 2;
 			
 			for (auto& eff : mEffects) {

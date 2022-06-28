@@ -23,6 +23,23 @@ using namespace mir;
 /* App */
 /************************************************************************/
 
+int ReadAppSetting(const std::string& key0, const std::string& key1, int defValue) {
+	boost::filesystem::path curPath = boost::filesystem::current_path();
+	curPath /= "setting.ini";
+	std::string iniName = curPath.string();
+
+	return GetPrivateProfileIntA(key0.c_str(), key1.c_str(), defValue, iniName.c_str());
+}
+void WriteAppSetting(const std::string& key0, const std::string& key1, int value) {
+	boost::filesystem::path curPath = boost::filesystem::current_path();
+	curPath /= "setting.ini";
+	std::string iniName = curPath.string();
+
+	std::stringstream ss;
+	ss << value;
+	WritePrivateProfileStringA(key0.c_str(), key1.c_str(), ss.str().c_str(), iniName.c_str());
+}
+
 //#define AppLaunchMode __LaunchSync__
 #define AppLaunchMode __LaunchAsync__
 
@@ -48,13 +65,15 @@ void App::Create()
 }
 CoTask<bool> App::InitContext(HINSTANCE hInstance, HWND hWnd)
 {
+	BOOL IsOpenglBackend = ReadAppSetting("Rendering Backend", "IsOpengl", TRUE);
+
 	boost::filesystem::path workPath = boost::filesystem::system_complete("../work/");
 	if (!boost::filesystem::is_directory(workPath)) CoReturn false;
 
 	test1::res::SetMediaDirectory(workPath.string() + "media/");
 
 	mHnd = hWnd;
-	if (! CoAwait mContext->Initialize(mHnd, workPath.string())) {
+	if (! CoAwait mContext->Initialize(mHnd, workPath.string(), IsOpenglBackend ? kPlatformOpengl : kPlatformDirectx)) {
 		mContext->Dispose();
 		CoReturn false;
 	}
@@ -165,7 +184,11 @@ CoTask<void> App::Render()
 int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 {
 	auto mainLoop = [&]()->CoTask<bool> {
+	#if defined MIR_TIME_DEBUG
 		auto time = std::make_shared<mir::debug::TimeProfile>("App.InitScene");
+	#else
+		int time = 0;
+	#endif
 
 		if (! CoAwait this->InitContext(hInstance, hWnd))
 			CoReturn false;
@@ -196,7 +219,9 @@ int App::MainLoop(HINSTANCE hInstance, HWND hWnd)
 			while (!quitFlag) 
 			{
 				if (initScene.is_ready()) {
+				#if defined MIR_TIME_DEBUG
 					time = nullptr;
+				#endif
 					CoAwait this->Render();
 				}
 				else {

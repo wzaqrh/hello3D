@@ -10,6 +10,7 @@
 namespace mir {
 namespace debug {
 
+#if defined MIR_TIME_DEBUG
 /********** TTimeProfile **********/
 TimeProfile::TimeProfile(const std::string& name)
 {
@@ -26,6 +27,7 @@ TimeProfile::~TimeProfile()
 {
 	debug::Log((boost::format("%1% takes %2%ms") %mName.c_str() %(timeGetTime()-mCurTime)).str());
 }
+#endif
 
 /********** Timer **********/
 double Timer::Update()

@@ -97,8 +97,8 @@ CoTask<bool> TestBloom::OnInitScene()
 		break;
 	}
 
+	mGuiDebugChannel.AddRenderBackendSWCmd();
 	mGuiDebugChannel.AddPostProcessCmd();
-	mGuiDebugChannel.AddAllCmds();
 	CoReturn true;
 }
 

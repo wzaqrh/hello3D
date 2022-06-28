@@ -12,7 +12,7 @@
 #include "core/resource/program_factory.h"
 #include "core/resource/resource_manager.h"
 
-//#define MIR_SHADER_CACHE
+#define MIR_SHADER_CACHE
 
 namespace mir {
 namespace res {
@@ -102,8 +102,9 @@ boost::filesystem::path ProgramFactory::MakeShaderAsmPath(const std::string& nam
 
 	return boost::filesystem::system_complete(asmFilePath);
 }
-#define NTASM_NAME_LEN (1024-64)
-#define NTASM_TIME_SIZE (64)
+
+#define NTASM_NAME_LEN (512-16)
+#define NTASM_TIME_SIZE (16)
 void ProgramFactory::WriteShaderAsm(const boost::filesystem::path& asmPath, const char* pByte, size_t size, time_t time, const std::string& serializeStr) const ThreadSafe
 {
 	std::vector<char> bin(pByte, pByte + size);

@@ -8,6 +8,7 @@ public:
 	void AddModel(const mir::rend::AssimpModelPtr& model);
 	void AddPostProcessEffect(const mir::rend::PostProcessPtr& effect);
 	void AddAllCmds();
+	void AddRenderBackendSWCmd();
 	void AddRenderingPathSWCmd();
 	void AddIBLPunctualSWCmd();
 	void AddDebugChannelCmd();
@@ -24,6 +25,8 @@ private:
 	mir::Mir* mContext;
 	std::vector<mir::rend::AssimpModelPtr> mModels;
 	std::vector<mir::rend::PostProcessPtr> mEffects;
+	//AddRenderBackendSWCmd
+	int mIsOpenglBackend = 1;
 	//AddRenderingPathSW
 	int mRenderingPath = 0;
 	//AddIBLPunctualSW

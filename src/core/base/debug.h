@@ -9,6 +9,7 @@
 namespace mir {
 namespace debug {
 	
+#if defined MIR_TIME_DEBUG
 class MIR_CORE_API TimeProfile {
 	std::string mName;
 	unsigned int mCurTime;
@@ -16,6 +17,7 @@ public:
 	TimeProfile(const std::string& name);
 	~TimeProfile();
 };
+#endif
 
 class MIR_CORE_API Timer {
 	double mLastTime = 0.0;

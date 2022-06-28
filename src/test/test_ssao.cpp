@@ -74,6 +74,7 @@ CoTask<bool> TestSSAO::OnInitScene()
 		break;
 	}
 
+	mGuiDebugChannel.AddRenderBackendSWCmd();
 	mGuiDebugChannel.AddSSAOCmd();
 
 	CoReturn true;

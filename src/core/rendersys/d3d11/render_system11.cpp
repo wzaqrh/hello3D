@@ -46,7 +46,7 @@ void RenderSystem11::Dispose()
 		mDxRasterStates.clear();
 		mBackFrameBuffer = nullptr;
 		mCurFrameBuffer = nullptr;
-	#if defined MIR_D3D11_DEBUG
+	#if defined MIR_RENDERSYS_DEBUG
 		mDeviceContext->Flush();
 		mDeviceContext = nullptr;
 
@@ -69,7 +69,7 @@ void RenderSystem11::Dispose()
 bool RenderSystem11::_CreateDeviceAndSwapChain(int width, int height)
 {
 	uint32_t createDeviceFlags = 0;
-#if defined MIR_D3D11_DEBUG
+#if defined MIR_RENDERSYS_DEBUG
 	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -147,8 +147,8 @@ bool RenderSystem11::_FetchBackBufferZStencil(int width, int height)
 }
 bool RenderSystem11::Initialize(HWND hWnd, Eigen::Vector4i viewport)
 {
+	TIME_PROFILE("renderSys11.Initialize");
 	mMainThreadId = std::this_thread::get_id();
-
 	mHWnd = hWnd;
 
 	RECT rc;
@@ -347,7 +347,7 @@ IBlobDataPtr RenderSystem11::CompileShader(const ShaderCompileDesc& compile, con
 	}
 
 	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined(MIR_D3D11_DEBUG)
+#if defined(MIR_RENDERSYS_DEBUG)
 	shaderFlags |= D3DCOMPILE_DEBUG;
 #else
 	shaderFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL2;

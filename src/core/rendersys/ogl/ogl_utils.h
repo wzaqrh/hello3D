@@ -44,7 +44,7 @@ bool CheckProgramLinkStatus(GLuint proId, std::string* pErrMsg);
 }
 }
 
-#if defined MIR_D3D11_DEBUG
+#if defined MIR_RENDERSYS_DEBUG
 #define GL_CHECK_ERROR()  mir::ogl::GLCheckError(__FILE__, __LINE__)
 #define CheckHR(Sentense) Sentense; GL_CHECK_ERROR()
 #else

@@ -522,14 +522,14 @@
     <ClCompile Include="..\src\core\rendersys\ogl\ogl_caps.cpp">
       <Filter>src\core\rendersys\ogl\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\dllmain.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rendersys\d3d11\d3d_utils.cpp">
       <Filter>src\core\rendersys\d3d11\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rendersys\base\platform.cpp">
       <Filter>src\core\rendersys\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\dllmain.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
